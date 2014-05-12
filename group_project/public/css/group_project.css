@@ -1,0 +1,35 @@
+.group-project-xblock-wrapper > nav ul{
+  list-style: none;
+}
+.group-project-xblock-wrapper > nav li{
+  display: inline;
+  padding: 10px;
+}
+
+.activity_section{
+  display: none;
+}
+
+.activity_section:first-of-type{
+  display: block;
+}
+
+.lesson-pager {
+  text-align: center;
+  padding-top: rem-calc(40);
+  padding-bottom: rem-calc(60);
+}
+
+.lesson-pager .page-to{
+  margin: 0 10px;
+  @include font-spec(30);
+  @include square-size(50px);
+  @include drop-shadow($mckinsey-academy-black, 0.2, 3px, 3px, 4px, 0px);
+  border-radius: 50%;
+  display: inline-block;
+  background-color: $mckinsey-academy-alt-blue;
+  color: $pure-white;
+  padding: 10px 8px 8px;
+  &.previous{ padding-right: 12px; }
+  &.next{ padding-left: 10px; }
+}
