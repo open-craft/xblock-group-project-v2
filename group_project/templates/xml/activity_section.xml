@@ -1,0 +1,20 @@
+<section file_links='{{activity_section.file_links_name}}' title='{{activity_section.title}}'>
+  {% if activity_section.content %}
+    <content></content>
+    {% autoescape off %}
+      {{ activity_section.content.text }}
+    {% endautoescape %}
+  {% endif %}
+  {% for question in activity_section.questions %}
+    <question id='{{question.id}}'>
+      <label>
+        {{ question.label }}
+      </label>
+      <answer>
+        {% autoescape off %}
+          {{ question.answer.text }}
+        {% endautoescape %}
+      </answer>
+    </question>
+  {% endfor %}
+</section>

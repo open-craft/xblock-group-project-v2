@@ -9,6 +9,8 @@ import json
 import webob
 from lxml import etree
 from xml.etree import ElementTree as ET
+from pkg_resources import resource_filename
+
 
 from xblock.core import XBlock
 from xblock.fields import Scope, String, Dict, Float
@@ -17,6 +19,8 @@ from xblock.fragment import Fragment
 from StringIO import StringIO
 
 from .utils import render_template, AttrDict, load_resource
+
+from .group_activity import GroupActivity
 
 
 # Globals ###########################################################
@@ -28,7 +32,7 @@ log = logging.getLogger(__name__)
 
 class GroupProjectBlock(XBlock):
     """
-    XBlock providing a video player for videos hosted on Brightcove
+    XBlock providing a group activity project for a group of students to collaborate upon
     """
     display_name = String(
         display_name="Display Name",
@@ -44,17 +48,14 @@ class GroupProjectBlock(XBlock):
         default=1
     )
 
+    default_xml = GroupActivity.import_xml_file(resource_filename(__name__, 'res/default.xml'))
+
     data = String(
-        display_name="Drag and Drop",
+        display_name="",
         help="XML contents to display for this module",
         scope=Scope.content,
-        default=textwrap.dedent("""
-            <group_project schema_version='1'>
-
-
-            </group_project>
-        """
-        ))
+        default=textwrap.dedent(default_xml.export_xml())
+    )
 
     has_score = True
 
