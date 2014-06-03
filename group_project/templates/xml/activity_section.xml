@@ -1,18 +1,19 @@
-<section file_links='{{activity_section.file_links_name}}' title='{{activity_section.title}}'>
-  {% if activity_section.content %}
-    <content></content>
+<section title='{{activity_section.title}}'{% ifnotequal activity_section.file_links_name None %}file_links='{{ activity_section.file_links_name }}'{% endifnotequal %}>
+  {% ifnotequal activity_section.content_html None %}
+    <content>
     {% autoescape off %}
-      {{ activity_section.content.text }}
+      {{ activity_section.content_html }}
     {% endautoescape %}
-  {% endif %}
+    </content>
+  {% endifnotequal %}
   {% for question in activity_section.questions %}
     <question id='{{question.id}}'>
       <label>
-        {{ question.label }}
+        {{ question.label.text }}
       </label>
       <answer>
         {% autoescape off %}
-          {{ question.answer.text }}
+          {{ question.answer_html }}
         {% endautoescape %}
       </answer>
     </question>

@@ -13,17 +13,17 @@
     <document id="marketing_pitch" title="Marketing Pitch" />
     <document id="budget" title="Budget" description="xls budget plan" />
   </submissions>
-  <projectcomponent name="Overview">
+  <projectcomponent name="Overview" id="overview">
     <section title="Section Title"><content>Html Description Blah Blah Blah</content></section>
     <section title="Details"><content>Html Description Blah Blah Blah</content></section>
     <section title="Suggested Schedule"><content>Html Description Blah Blah Blah</content></section>
     <section title="Project Materials" file_links="resources"><content>Html Description Blah Blah Blah</content></section>
   </projectcomponent>
-  <projectcomponent name="Upload" close="submission">
+  <projectcomponent name="Upload" close="submission" id="upload">
     <section title="Team Submission">html Description</section>
     <section title="Current Files" file_links="submissions">html descirpition</section>
   </projectcomponent>
-  <projectcomponent name="Review" open="submission" close="review">
+  <projectcomponent name="Review" open="submission" close="review" id="review">
     <section title="Lorem Ipsum" file_links="grading_criteria">aslkd as</section>
     <peerreview>
       <section title="Evaluate Teammate">
@@ -80,7 +80,7 @@
       </section>
     </submissionreview>
   </projectcomponent>
-  <projectcomponent name="Grade" open="review">
+  <projectcomponent name="Grade" open="review" id="grade">
     <section title="Blah"><content>aisjd saijd</content></section>
     <peerreviewresults>
       <questionresults id="q1">

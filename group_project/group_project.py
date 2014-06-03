@@ -48,13 +48,13 @@ class GroupProjectBlock(XBlock):
         default=1
     )
 
-    default_xml = GroupActivity.import_xml_file(resource_filename(__name__, 'res/default.xml'))
+    group_activity = GroupActivity.import_xml_file(resource_filename(__name__, 'res/default.xml'))
 
     data = String(
         display_name="",
         help="XML contents to display for this module",
         scope=Scope.content,
-        default=textwrap.dedent(default_xml.export_xml())
+        default=textwrap.dedent(group_activity.export_xml)
     )
 
     has_score = True
@@ -64,9 +64,10 @@ class GroupProjectBlock(XBlock):
         Player view, displayed to the student
         """
 
-        xmltree = etree.fromstring(self.data)
+        group_activity = GroupActivity.import_xml_string(self.data)
 
         context = {
+            "group_activity": group_activity,
         }
 
         fragment = Fragment()

@@ -1,11 +1,11 @@
-<projectcomponent close='{{ activity_component.formatted_close_date }}' open='{{ activity_component.formatted_open_date }}' name='{{ activity_component.name }}'>
-  {% for section in activity_component.sections %}
-    {% include 'activity_section.xml' with activity_section=section %}
+<projectcomponent id='{{ activity_component.id }}' name='{{ activity_component.name }}'{% ifnotequal activity_component.close_date_name None %} close='{{ activity_component.close_date_name }}'{% endifnotequal %}{% ifnotequal activity_component.open_date_name None %} open='{{ activity_component.open_date_name }}'{% endifnotequal %}>
+  {% for activity_section in activity_component.sections %}
+    {{ activity_section.export_xml }}
   {% endfor %}
-  {% for section in activity_component.peer_review_sections %}
-    {% include 'activity_section.xml' with activity_section=section %}
+  {% for activity_section in activity_component.peer_review_sections %}
+    {{ activity_section.export_xml }}
   {% endfor %}
-  {% for section in activity_component.other_group_sections %}
-    {% include 'activity_section.xml' with activity_section=section %}
+  {% for activity_section in activity_component.other_group_sections %}
+    {{ activity_section.export_xml }}
   {% endfor %}
 </projectcomponent>

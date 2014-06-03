@@ -74,7 +74,14 @@ class GroupActivitityXmlTest(object):
         sl = ac[1].sections[1]
         test_equal(sl.file_links, sr)
 
-        # activity_components = []
+        test_equal(len(ac[2].peer_review_sections), 2)
+        test_equal(len(ac[2].peer_review_sections[0].questions), 1)
+        test_equal(len(ac[2].peer_review_sections[1].questions), 2)
+
+        test_equal(ac[2].peer_review_sections[0].questions[0].answer_html, '<input placeholder="answer here" type="text" />')
+        #test_equal(ac[2].peer_review_sections[1].questions[0].answer_html, '<input placeholder="answer here" type="text" />')
+
+
 
 if __name__ == "__main__":
 

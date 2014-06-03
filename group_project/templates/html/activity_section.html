@@ -1,0 +1,11 @@
+<h4>{{ activity_section.title }}</h4>
+{% ifnotequal activity_section.content_html None %}
+  {% autoescape off %}
+    {{ activity_section.content_html }}
+  {% endautoescape %}
+{% endifnotequal %}
+{% for activity_question in activity_section.questions %}
+  {% autoescape off %}
+    {{ activity_question.render }}
+  {% endautoescape %}
+{% endfor %}

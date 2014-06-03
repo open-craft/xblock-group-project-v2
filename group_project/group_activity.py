@@ -6,6 +6,19 @@ from pkg_resources import resource_filename
 
 from utils import render_template
 
+def outer_html(node):
+    if node is None:
+        return None
+
+    return ET.tostring(node, 'utf-8', 'html').strip()
+
+def inner_html(node):
+    if node is None:
+        return None
+
+    tag_length = len(node.tag)
+    return outer_html(node)[tag_length+2:-1*(tag_length+3)]
+
 class DottableDict(dict):
     def __init__(self, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)
@@ -17,25 +30,36 @@ class ActivityQuestion(object):
     def __init__(self, doc_tree):
 
         self.id = doc_tree.get("id")
-        self.label = doc_tree.find("./label").text
+        self.label = doc_tree.find("./label")
         self.answer = doc_tree.find("./answer")[0]
 
-    def question_html(self):
-        answer_node = copy.deepcopy(answer)
+    @property
+    def render(self):
+        answer_node = copy.deepcopy(self.answer)
         answer_node.set('name', self.id)
         answer_node.set('id', self.id)
 
-        label_node = copy.deepcopy(label)
+        label_node = copy.deepcopy(self.label)
         label_node.set('for', self.id)
 
+        ans_html = outer_html(answer_node)
+        if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html)-1:
+            ans_html = ans_html[:-1] + ' />'
+
         return "{}{}".format(
-            ET.tostring(answer_node, 'utf-8', 'html'),
-            ET.tostring(label_node, 'utf-8', 'html'),
+            outer_html(label_node),
+            ans_html,
         )
 
+    @property
+    def answer_html(self):
+        html = outer_html(self.answer)
+        if len(self.answer.findall('./*')) < 1 and html.index('>') == len(html)-1:
+            html = html[:-1] + ' />'
+
+        return html
 
 class ActivitySection(object):
-    CONTENT_NAME = 'content'
 
     def __init__(self, doc_tree, activity):
 
@@ -43,7 +67,7 @@ class ActivitySection(object):
         self.questions = []
 
         self.title = doc_tree.get("title")
-        self.content = doc_tree.find("./{}".format(self.CONTENT_NAME))
+        self.content = doc_tree.find("./content")
 
         self.file_link_name = doc_tree.get("file_links")
         if self.file_link_name:
@@ -55,7 +79,21 @@ class ActivitySection(object):
 
     @property
     def content_html(self):
-        return ET.tostring(self.content, 'utf-8', 'html')[len(self.CONTENT_NAME)+2:-1*(len(self.CONTENT_NAME)+3)]
+        return inner_html(self.content)
+
+    @property
+    def export_xml(self):
+        data = {
+            "activity_section": self,
+        }
+        return render_template('/templates/xml/activity_section.xml', data)
+
+    @property
+    def render(self):
+        data = {
+            "activity_section": self,
+        }
+        return render_template('/templates/html/activity_section.html', data)
 
 
 
@@ -72,6 +110,7 @@ class ActivityComponent(object):
         self.close_date_name = None
 
         self.name = doc_tree.get("name")
+        self.id = doc_tree.get("id")
 
         if doc_tree.get("open"):
             self.open_date_name = doc_tree.get("open")
@@ -92,6 +131,14 @@ class ActivityComponent(object):
         # import questions for submission review
         for section in doc_tree.findall("submissionreview/section"):
             self.other_group_sections.append(ActivitySection(section, activity))
+
+    @property
+    def export_xml(self):
+        data = {
+            "activity_component": self,
+        }
+        return render_template('/templates/xml/activity_component.xml', data)
+
 
 class GroupActivity(object):
 
@@ -138,6 +185,7 @@ class GroupActivity(object):
         for component in doc_tree.findall("./projectcomponent"):
             self.activity_components.append(ActivityComponent(component, self))
 
+    @property
     def export_xml(self):
 
         documents = copy.deepcopy(self.resources)
