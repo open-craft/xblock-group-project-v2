@@ -31,7 +31,7 @@
         <hr />
       {% endfor %}
       {% if activity_component.peer_reviews %}
-      <form id="peer_review">
+      <form id="peer_review" action="student_submit_peer_feedback" method="POST">
         <input type="hidden" id="peer_id" name="peer_id" value="" />
       {% for activity_section in activity_component.peer_review_sections %}
         {% autoescape off %}
@@ -43,7 +43,7 @@
       </form>
       {% endif %}
       {% if activity_component.other_group_reviews %}
-      <form id="other_group_review">
+      <form id="other_group_review" action="student_submit_other_group_feedback" method="POST">
         <input type="hidden" id="group_id" name="group_id" value="" />
       <div id="other_submissions"><a href="#">View team project submissions</a></div>
       {% for activity_section in activity_component.other_group_sections %}
@@ -95,7 +95,9 @@
       <i class="fa fa-chevron-right"></i>
     </a>
   </div>
-  <script id="submission_json">{{ group_activity.submission_json }}</script>
+  <script id="submission_json" type="application/json">{{ group_activity.submission_json }}</script>
+  <script id="peer_group" type="application/json">{{ team_members }}</script>
+  <script id="assess_groups" type="application/json">{{ assess_groups }}</script>
 
 </div>
 {% endautoescape %}

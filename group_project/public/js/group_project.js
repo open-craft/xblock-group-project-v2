@@ -1,22 +1,39 @@
-$(function(){
+function GroupProjectBlock(runtime, element) {
 
-  var peers = [
-    {
-      "name": "Andy Parsons",
-      "id": 1,
-      "img": "/static/image/empty_avatar.png"
-    },
-    {
-      "name": "Jennifer Gormley",
-      "id": 2,
-      "img": "/static/image/empty_avatar.png"
-    },
-    {
-      "name": "Vishal Ghandi",
-      "id": 3,
-      "img": "/static/image/empty_avatar.png"
-    }
-  ];
+  $('form').on('submit', function(ev){
+    ev.preventDefault();
+    var form = $(this);
+
+    form.find(':submit').prop('disabled', true);
+    items = form.serializeArray();
+    data = {}
+    $.each(items, function(i,v){
+      data[v.name] = v.value;
+    });
+
+    $.ajax({
+      type: form.attr('method'),
+      url: runtime.handlerUrl(element, form.attr('action')),
+      data: JSON.stringify(data),
+      success: function(data){
+        var msg = 'Thanks for your feedback!';
+        if(data['msg']){
+          msg = data['msg'];
+        }
+        alert(msg);
+      },
+      error: function(data){
+        alert('Sorry, there was an error saving your feedback');
+      },
+      complete: function(data){
+        form.find(':submit').prop('disabled', false);
+      }
+    });
+
+    return false;
+  });
+
+  var peers = JSON.parse($('#peer_group').html());
   var peer_node = function(peer){
     var pn = $('<a class="select_peer" />');
     var pi = $('<img class="avatar" />');
@@ -32,20 +49,7 @@ $(function(){
     $('#peers').append(peer_node(peers[i]));
   }
 
-  var groups = [
-    {
-      "id": 101,
-      "img": "/static/image/empty_avatar.png"
-    },
-    {
-      "id": 102,
-      "img": "/static/image/empty_avatar.png"
-    },
-    {
-      "id": 103,
-      "img": "/static/image/empty_avatar.png"
-    }
-  ];
+  var groups = JSON.parse($('#assess_groups').html());
   var group_node = function(group){
     var gn = $('<a class="select_group" />');
     var gi = $('<img class="avatar" />');
@@ -120,4 +124,5 @@ $(function(){
 
   $('#overview').click();
   $('.view_feedback:first').click();
-});
+
+}

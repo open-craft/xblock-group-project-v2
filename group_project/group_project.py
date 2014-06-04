@@ -11,6 +11,7 @@ from lxml import etree
 from xml.etree import ElementTree as ET
 from pkg_resources import resource_filename
 
+from django.utils.translation import ugettext as _
 
 from xblock.core import XBlock
 from xblock.fields import Scope, String, Dict, Float
@@ -48,9 +49,13 @@ class GroupProjectBlock(XBlock):
         default=1
     )
 
+    item_state = Dict(
+        help="JSON payload for assessment values",
+        scope=Scope.user_state
+    )
+
     with open (resource_filename(__name__, 'res/default.xml'), "r") as default_xml_file:
         default_xml = default_xml_file.read()
-    #group_activity = GroupActivity.import_xml_file()
 
     data = String(
         display_name="",
@@ -67,9 +72,45 @@ class GroupProjectBlock(XBlock):
         """
 
         group_activity = GroupActivity.import_xml_string(self.data)
+        # TODO: Replace with workgroup call to get real workgroup
+        team_members = [
+            {
+                "name": "Andy Parsons",
+                "id": 1,
+                "img": "/image/empty_avatar.png"
+            },
+            {
+                "name": "Jennifer Gormley",
+                "id": 2,
+                "img": "/image/empty_avatar.png"
+            },
+            {
+                "name": "Vishal Ghandi",
+                "id": 3,
+                "img": "/image/empty_avatar.png"
+            }
+        ]
+
+        # TODO: Replace with workgroup call to get assigned workgroups
+        assess_groups = [
+            {
+                "id": 101,
+                "img": "/image/empty_avatar.png"
+            },
+            {
+                "id": 102,
+                "img": "/image/empty_avatar.png"
+            },
+            {
+                "id": 103,
+                "img": "/image/empty_avatar.png"
+            }
+        ]
 
         context = {
             "group_activity": group_activity,
+            "team_members": json.dumps(team_members),
+            "assess_groups": json.dumps(assess_groups),
         }
 
         fragment = Fragment()
@@ -125,4 +166,64 @@ class GroupProjectBlock(XBlock):
 
         return {
             'result': 'success',
+        }
+
+    @XBlock.json_handler
+    def student_submit_peer_feedback(self, submissions, suffix=''):
+        try:
+            peer_id = submissions["peer_id"]
+            del submissions["peer_id"]
+
+            print "Peer Review for {}: {}".format(peer_id, submissions)
+
+            # Then something like this needs to happen
+
+            # user_id = get_user_id_for_this_session() # ???
+            # project_id = get_xblock_id_for_this_session()
+            # api_manager.save_data_for_peer(user_id, peer_id, submissions)
+
+            # or
+
+            # for k,v in iteritems(submissions):
+            #     api_manager.save_data_for_peer(user_id, peer_id, k, v)
+
+        except Exception as e:
+            return {
+                'result': 'error',
+                'message': e.message,
+            }
+
+        return {
+            'result': 'success',
+            'msg': _('Thanks for your feedback'),
+        }
+
+    @XBlock.json_handler
+    def student_submit_other_group_feedback(self, submissions, suffix=''):
+        try:
+            group_id = submissions["group_id"]
+            del submissions["group_id"]
+
+            print "Group Review for {}: {}".format(group_id, submissions)
+
+            # Then something like this needs to happen
+
+            # user_id = get_user_id_for_this_session() # ???
+            # project_id = get_xblock_id_for_this_session()
+            # api_manager.save_data_for_group(user_id, group_id, submissions)
+
+            # or
+
+            # for k,v in iteritems(submissions):
+            #     api_manager.save_data_for_group(user_id, group_id, k, v)
+
+        except Exception as e:
+            return {
+                'result': 'error',
+                'msg': e.message,
+            }
+
+        return {
+            'result': 'success',
+            'msg': _('Thanks for your feedback'),
         }
