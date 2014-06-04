@@ -67,6 +67,7 @@ class GroupActivitityXmlTest(object):
 
         pm = ac[0].sections[3]
         test_equal(pm.file_links, ir)
+        test_equal(pm.file_link_name, "resources")
 
         test_not_equal(ac[0].sections[0].content, None)
         test_equal(ac[0].sections[0].content_html, "<p>Html Description Blah Blah Blah<span>Additional info</span></p>")
@@ -74,7 +75,9 @@ class GroupActivitityXmlTest(object):
         sl = ac[1].sections[1]
         test_equal(sl.file_links, sr)
 
+        test_equal(len(ac[2].sections), 1)
         test_equal(len(ac[2].peer_review_sections), 2)
+        test_equal(len(ac[2].other_group_sections), 2)
         test_equal(len(ac[2].peer_review_sections[0].questions), 1)
         test_equal(len(ac[2].peer_review_sections[1].questions), 2)
 

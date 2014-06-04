@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
-from datetime import date
+from datetime import date, datetime
 import copy
+import json
 from django.template.loader import render_to_string
 from pkg_resources import resource_filename
 
@@ -31,16 +32,71 @@ class ActivityQuestion(object):
 
         self.id = doc_tree.get("id")
         self.label = doc_tree.find("./label")
-        self.answer = doc_tree.find("./answer")[0]
+        answer_node = doc_tree.find("./answer")
+        self.answer = answer_node[0]
+        self.small = (answer_node.get("small", "false") == "true")
 
     @property
     def render(self):
         answer_node = copy.deepcopy(self.answer)
         answer_node.set('name', self.id)
         answer_node.set('id', self.id)
+        answer_class = 'answer'
+        if self.small:
+            answer_class = 'answer side'
+        answer_node.set('class', answer_class)
 
         label_node = copy.deepcopy(self.label)
         label_node.set('for', self.id)
+        label_class = 'prompt'
+        if self.small:
+            label_class = 'prompt side'
+        label_node.set('class', label_class)
+
+        ans_html = outer_html(answer_node)
+        if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html)-1:
+            ans_html = ans_html[:-1] + ' />'
+
+        return "{}{}".format(
+            outer_html(label_node),
+            ans_html,
+        )
+
+    @property
+    def answer_html(self):
+        html = outer_html(self.answer)
+        if len(self.answer.findall('./*')) < 1 and html.index('>') == len(html)-1:
+            html = html[:-1] + ' />'
+
+        return html
+
+
+class ActivityAssessment(object):
+
+    def __init__(self, doc_tree):
+
+        self.id = doc_tree.get("id")
+        self.label = doc_tree.find("./label")
+        answer_node = doc_tree.find("./answer")
+        self.answer = answer_node[0]
+        self.small = (answer_node.get("small", "false") == "true")
+
+    @property
+    def render(self):
+        answer_node = copy.deepcopy(self.answer)
+        answer_node.set('name', self.id)
+        answer_node.set('id', self.id)
+        answer_class = 'answer'
+        if self.small:
+            answer_class = 'answer side'
+        answer_node.set('class', answer_class)
+
+        label_node = copy.deepcopy(self.label)
+        label_node.set('for', self.id)
+        label_class = 'prompt'
+        if self.small:
+            label_class = 'prompt side'
+        label_node.set('class', label_class)
 
         ans_html = outer_html(answer_node)
         if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html)-1:
@@ -65,6 +121,7 @@ class ActivitySection(object):
 
         self.file_links = None
         self.questions = []
+        self.assessments = []
 
         self.title = doc_tree.get("title")
         self.content = doc_tree.find("./content")
@@ -76,6 +133,10 @@ class ActivitySection(object):
         # import any questions
         for question in doc_tree.findall("./question"):
             self.questions.append(ActivityQuestion(question))
+
+        # import any assessments
+        for assessment in doc_tree.findall("./assessment"):
+            self.assessments.append(ActivityAssessment(assessment))
 
     @property
     def content_html(self):
@@ -104,6 +165,8 @@ class ActivityComponent(object):
         self.sections = []
         self.peer_review_sections = []
         self.other_group_sections = []
+        self.peer_assessment_sections = []
+        self.other_group_assessment_sections = []
         self.open_date = None
         self.open_date_name = None
         self.close_date = None
@@ -121,16 +184,61 @@ class ActivityComponent(object):
             self.close_date = activity.milestone_dates[doc_tree.get("close")]
 
         # import sections
-        for section in doc_tree.findall("section"):
+        for section in doc_tree.findall("./section"):
             self.sections.append(ActivitySection(section, activity))
 
         # import questions for peer review
-        for section in doc_tree.findall("peerreview/section"):
+        for section in doc_tree.findall("./peerreview/section"):
             self.peer_review_sections.append(ActivitySection(section, activity))
 
         # import questions for submission review
-        for section in doc_tree.findall("submissionreview/section"):
+        for section in doc_tree.findall("./submissionreview/section"):
             self.other_group_sections.append(ActivitySection(section, activity))
+
+        # import questions for peer review
+        for section in doc_tree.findall("./peerassessment/section"):
+            self.peer_assessment_sections.append(ActivitySection(section, activity))
+
+        # import questions for submission review
+        for section in doc_tree.findall("./submissionassessment/section"):
+            self.other_group_assessment_sections.append(ActivitySection(section, activity))
+
+    @staticmethod
+    def _formatted_date(date_value):
+        return date_value.strftime("%m/%d/%Y")
+
+    @property
+    def peer_reviews(self):
+        return len(self.peer_review_sections) > 0
+
+    @property
+    def other_group_reviews(self):
+        return len(self.other_group_sections) > 0
+
+    @property
+    def peer_assessments(self):
+        return len(self.peer_assessment_sections) > 0
+
+    @property
+    def other_group_assessments(self):
+        return len(self.other_group_assessment_sections) > 0
+
+    @property
+    def formatted_open_date(self):
+        return ActivityComponent._formatted_date(self.open_date)
+
+    @property
+    def formatted_close_date(self):
+        return ActivityComponent._formatted_date(self.close_date)
+
+    @property
+    def is_open(self):
+        return (self.open_date is None) or (self.open_date < datetime.today())
+
+    @property
+    def is_closed(self):
+        return (self.close_date is not None) and (self.close_date < datetime.today())
+
 
     @property
     def export_xml(self):
@@ -157,11 +265,11 @@ class GroupActivity(object):
 
         # import resources
         for document in doc_tree.findall("./resources/document"):
-            document_info = {
+            document_info = DottableDict({
                 "title": document.get("title"),
                 "description": document.get("description"),
                 "location": document.text,
-            }
+            })
             self.resources.append(document_info)
 
             if document.get("grading_criteria") == "true":
@@ -175,11 +283,11 @@ class GroupActivity(object):
 
         # import submission defintions
         for document in doc_tree.findall("./submissions/document"):
-            self.submissions.append({
+            self.submissions.append(DottableDict({
                 "id": document.get("id"),
                 "title": document.get("title"),
                 "description": document.get("description"),
-            })
+            }))
 
         # import project components
         for component in doc_tree.findall("./projectcomponent"):
@@ -204,6 +312,11 @@ class GroupActivity(object):
         }
 
         return render_template('/templates/xml/group_activity.xml', data)
+
+    @property
+    def submission_json(self):
+        submission_dicts = [submission.__dict__ for submission in self.submissions]
+        return json.dumps(submission_dicts)
 
 
     @classmethod

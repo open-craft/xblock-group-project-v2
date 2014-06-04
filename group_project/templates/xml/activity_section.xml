@@ -1,4 +1,4 @@
-<section title='{{activity_section.title}}'{% ifnotequal activity_section.file_links_name None %}file_links='{{ activity_section.file_links_name }}'{% endifnotequal %}>
+<section title='{{activity_section.title}}'{% ifnotequal activity_section.self.file_link_name None %}file_links='{{ activity_section.self.file_link_name }}'{% endifnotequal %}>
   {% ifnotequal activity_section.content_html None %}
     <content>
     {% autoescape off %}
@@ -17,5 +17,17 @@
         {% endautoescape %}
       </answer>
     </question>
+  {% endfor %}
+  {% for assessment in activity_section.assessments %}
+    <assessment id='{{assessment.id}}'>
+      <label>
+        {{ assessment.label.text }}
+      </label>
+      <answer>
+        {% autoescape off %}
+          {{ assessment.answer_html }}
+        {% endautoescape %}
+      </answer>
+    </assessment>
   {% endfor %}
 </section>

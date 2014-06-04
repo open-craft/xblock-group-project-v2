@@ -12,14 +12,78 @@
   </nav>
 
   {% for activity_component in group_activity.activity_components %}
-    <div id="activity_{{ activity_component.id }}" class="activity_section">
-      <h1>{{ activity_component.name }}</h1>
+    <div id="activity_{{ activity_component.id }}" {% if activity_component.is_closed %}class="activity_section data-closed"{% else %}class="activity_section"{% endif %}>
+    {% if activity_component.is_open %}
+      <h1>
+        {{ activity_component.name }}
+        {% if activity_component.close_date %}
+        {% if activity_component.is_closed %}
+          <span class="highlight">closed on {{ activity_component.formatted_close_date }}</span>
+        {% else %}
+          <span class="highlight">due {{ activity_component.formatted_close_date }}</span>
+        {% endif %}
+        {% endif %}
+      </h1>
       {% for activity_section in activity_component.sections %}
         {% autoescape off %}
           {{ activity_section.render }}
         {% endautoescape %}
         <hr />
       {% endfor %}
+      {% if activity_component.peer_reviews %}
+      <form id="peer_review">
+        <input type="hidden" id="peer_id" name="peer_id" value="" />
+      {% for activity_section in activity_component.peer_review_sections %}
+        {% autoescape off %}
+          {{ activity_section.render }}
+        {% endautoescape %}
+        <hr />
+      {% endfor %}
+        <button class="submit">Submit</button>
+      </form>
+      {% endif %}
+      {% if activity_component.other_group_reviews %}
+      <form id="other_group_review">
+        <input type="hidden" id="group_id" name="group_id" value="" />
+      <div id="other_submission"><a href="#">View team submission</a></div>
+      {% for activity_section in activity_component.other_group_sections %}
+        {% autoescape off %}
+          {{ activity_section.render }}
+        {% endautoescape %}
+        <hr />
+      {% endfor %}
+        <button class="submit">Submit</button>
+      </form>
+      {% endif %}
+      {% if activity_component.peer_assessments %}
+      <div id="team_feedback" class="feedback_sections">
+      {% for activity_section in activity_component.peer_assessment_sections %}
+        {% autoescape off %}
+          {{ activity_section.render }}
+        {% endautoescape %}
+        <hr />
+      {% endfor %}
+      </div>
+      {% endif %}
+      {% if activity_component.other_group_assessments %}
+      <div id="cohort_feedback" class="feedback_sections">
+      {% for activity_section in activity_component.other_group_assessment_sections %}
+        {% autoescape off %}
+          {{ activity_section.render }}
+        {% endautoescape %}
+        <hr />
+      {% endfor %}
+      </div>
+      {% endif %}
+    {% else %}
+      <h1>
+        {{ activity_component.name }}
+        {% if activity_component.open_date %}
+          <span class="highlight">opens {{ activity_component.formatted_open_date }}</span>
+        {% endif %}
+      </h1>
+      <div class="error">This stage has not yet been opened</div>
+    {% endif %}
     </div>
   {% endfor %}
 
@@ -37,6 +101,7 @@
       </a>
     </div>
   </div>
+  <script id="submission_json">{{ group_activity.submission_json }}</script>
 
 </div>
 {% endautoescape %}

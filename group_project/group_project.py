@@ -48,13 +48,15 @@ class GroupProjectBlock(XBlock):
         default=1
     )
 
-    group_activity = GroupActivity.import_xml_file(resource_filename(__name__, 'res/default.xml'))
+    with open (resource_filename(__name__, 'res/default.xml'), "r") as default_xml_file:
+        default_xml = default_xml_file.read()
+    #group_activity = GroupActivity.import_xml_file()
 
     data = String(
         display_name="",
         help="XML contents to display for this module",
         scope=Scope.content,
-        default=textwrap.dedent(group_activity.export_xml)
+        default=textwrap.dedent(default_xml)
     )
 
     has_score = True

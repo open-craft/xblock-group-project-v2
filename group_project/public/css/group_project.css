@@ -33,11 +33,11 @@
   margin: 0 10px;
   @include font-spec(30);
   @include square-size(50px);
-  @include drop-shadow($mckinsey-academy-black, 0.2, 3px, 3px, 4px, 0px);
+  @include drop-shadow(#333333, 0.2, 3px, 3px, 4px, 0px);
   border-radius: 50%;
   display: inline-block;
-  background-color: $mckinsey-academy-alt-blue;
-  color: $pure-white;
+  background-color: #3384CA;
+  color: #FFFFFF;
   padding: 10px 8px 8px;
   &.previous{ padding-right: 12px; }
   &.next{ padding-left: 10px; }
@@ -69,7 +69,7 @@
   width: 70%;
   display: inline-block;
   min-height: 70px;
-  padding-top: 10px;  
+  padding-top: 10px;
 }
 
 .answer.side{
@@ -79,4 +79,34 @@
 
 #activity_grade textarea{
   height: 100px;
+}
+
+#peer_review, #other_group_review{
+  display: none;
+}
+
+.highlight{
+  color: #E37222;
+}
+
+#other_submission{
+  float: right;
+}
+
+.avatar{
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  height: 40px;
+  width: 40px;
+  padding: 5px;
+}
+
+.selected .avatar{
+  border: 2px solid #E37222;
+  padding: 3px;
+}
+
+.data-closed button{
+  display: none;
 }
