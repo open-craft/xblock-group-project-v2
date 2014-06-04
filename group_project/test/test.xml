@@ -5,7 +5,7 @@
     <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
   </resources>
   <dates>
-    <milestone name="submission">5/24/2014</milestone>
+    <milestone name="submissions">5/24/2014</milestone>
     <milestone name="review">6/20/2014</milestone>
   </dates>
   <submissions>
@@ -19,11 +19,11 @@
     <section title="Suggested Schedule"><content>Html Description Blah Blah Blah</content></section>
     <section title="Project Materials" file_links="resources"><content>Html Description Blah Blah Blah</content></section>
   </projectcomponent>
-  <projectcomponent name="Upload" close="submission">
+  <projectcomponent name="Upload" close="submissions">
     <section title="Team Submission">html Description</section>
     <section title="Current Files" file_links="submissions">html descirpition</section>
   </projectcomponent>
-  <projectcomponent name="Review" open="submission" close="review">
+  <projectcomponent name="Review" open="submissions" close="review">
     <section title="Lorem Ipsum" file_links="grading_criteria">aslkd as</section>
     <peerreview>
       <section title="Evaluate Teammate">
@@ -52,7 +52,7 @@
         </question>
       </section>
     </peerreview>
-    <submissionreview>
+    <projectreview>
       <section title="Evaluate Teammate">
         <question id="score">
           <label>How about that?</label>
@@ -78,19 +78,19 @@
           </answer>
         </question>
       </section>
-    </submissionreview>
+    </projectreview>
   </projectcomponent>
   <projectcomponent name="Grade" open="review">
     <section title="Blah"><content>aisjd saijd</content></section>
-    <peerreviewresults>
+    <peerassessment>
       <questionresults id="q1">
       </questionresults>
       <questionresults id="q2"></questionresults>
       <questionresults id="q3"></questionresults>
       <questionresults id="q4"></questionresults>
       <questionresults id="score" summary="mean">{{summary}} (','.join({{values}}))</questionresults>
-    </peerreviewresults>
-    <submissionreviewresults>
-    </submissionreviewresults>
+    </peerassessment>
+    <projectassessment>
+    </projectassessment>
   </projectcomponent>
 </group_project>

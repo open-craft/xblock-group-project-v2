@@ -32,7 +32,7 @@ class GroupActivitityXmlTest(object):
     def test_read_from_xml(self):
         grp_act = GroupActivity.import_xml_file('test/test.xml')
 
-        test_equal(grp_act.milestone_dates["submission"], date(2014, 5, 24))
+        test_equal(grp_act.milestone_dates["submissions"], date(2014, 5, 24))
         test_equal(grp_act.milestone_dates["review"], date(2014, 6, 20))
 
         ir = grp_act.resources

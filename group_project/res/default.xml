@@ -5,7 +5,7 @@
     <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
   </resources>
   <dates>
-    <milestone name="submission">5/24/2014</milestone>
+    <milestone name="submissions">5/24/2014</milestone>
     <milestone name="review">6/20/2014</milestone>
   </dates>
   <submissions>
@@ -43,13 +43,13 @@
       </content>
     </section>
   </projectcomponent>
-  <projectcomponent name="Activity 1: Upload" close="submission" id="upload">
+  <projectcomponent name="Activity 1: Upload" close="submissions" id="upload">
     <section title="Team Submission">
       <content>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</content>
     </section>
     <section title="Current Files" file_links="submissions"></section>
   </projectcomponent>
-  <projectcomponent name="Activity 1: Reviews" open="submission" close="review" id="review">
+  <projectcomponent name="Activity 1: Reviews" open="submissions" close="review" id="review">
     <section title="Lorem Ipsum" file_links="grading_criteria">
       <content>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat
@@ -104,8 +104,8 @@
         </question>
       </section>
     </peerreview>
-    <submissionreview>
-      <section title="Evaluate Submission">
+    <projectreview>
+      <section title="Evaluate Project Submissions">
         <question id="other_team_comments">
           <label>Comments</label>
           <answer>
@@ -115,7 +115,7 @@
       </section>
       <section title="Questions">
         <question id="other_team_q1">
-          <label>Did submission lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+          <label>Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
               <option value="-">Grade</option>
@@ -144,7 +144,7 @@
           </answer>
         </question>
         <question id="other_team_q2">
-          <label>Did submission lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+          <label>Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
               <option value="-">Grade</option>
@@ -173,7 +173,7 @@
           </answer>
         </question>
         <question id="other_team_q3">
-          <label>Did submission lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+          <label>Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
               <option value="-">Grade</option>
@@ -202,7 +202,7 @@
           </answer>
         </question>
         <question id="other_team_q4">
-          <label>Did submission lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+          <label>Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
               <option value="-">Grade</option>
@@ -231,7 +231,7 @@
           </answer>
         </question>
       </section>
-    </submissionreview>
+    </projectreview>
   </projectcomponent>
   <projectcomponent name="Activity 1: Grade" open="review" id="grade">
     <section title="Blah">
@@ -281,7 +281,7 @@
         </assessment>
       </section>
     </peerassessment>
-    <submissionassessment>
+    <projectassessment>
       <section title="FEEDBACK">
         <assessment id="assess_other_team_comments">
           <label>General:</label>
@@ -292,7 +292,7 @@
       </section>
       <section>
         <assessment id="assess_other_team_q1" class="grade">
-          <label>Q: Did submission lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+          <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
             <div>
               <span class="highlight">
@@ -304,7 +304,7 @@
           </answer>
         </assessment>
         <assessment id="assess_other_team_q2" class="grade">
-          <label>Q: Did submission lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+          <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
             <div>
               <span class="highlight">
@@ -316,7 +316,7 @@
           </answer>
         </assessment>
         <assessment id="assess_other_team_q3" class="grade">
-          <label>Q: Did submission lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+          <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
             <div>
               <span class="highlight">
@@ -328,7 +328,7 @@
           </answer>
         </assessment>
         <assessment id="assess_other_team_q4" class="grade">
-          <label>Q: Did submission lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+          <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
             <div>
               <span class="highlight">
@@ -353,6 +353,6 @@
           </answer>
         </assessment>
       </section>
-    </submissionassessment>
+    </projectassessment>
   </projectcomponent>
 </group_project>

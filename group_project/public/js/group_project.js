@@ -81,12 +81,12 @@ $(function(){
 
     // Update step makers
     var step_pn = step_map[selected_step];
-    $('#prev, #next').off('click').attr('disabled', 'disabled');
+    $('#prev, #next').off('click').removeAttr('href');
     if(step_pn["prev"]){
-      $('#prev').on('click', function(){$("#" + step_pn["prev"]).click();}).removeAttr('disabled');
+      $('#prev').on('click', function(){$("#" + step_pn["prev"]).click();}).attr('href', '#');
     }
     if(step_pn["next"]){
-      $('#next').on('click', function(){$("#" + step_pn["next"]).click();}).removeAttr('disabled');
+      $('#next').on('click', function(){$("#" + step_pn["next"]).click();}).attr('href', '#');
     }
 
     ev.preventDefault();

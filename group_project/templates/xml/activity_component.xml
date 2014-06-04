@@ -10,10 +10,10 @@
   </peerreview>
   {% endif %}
   {% if activity_component.other_group_reviews %}
-  <submissionreview>
+  <projectreview>
   {% for activity_section in activity_component.other_group_sections %}
     {{ activity_section.export_xml }}
   {% endfor %}
-  </submissionreview>
+  </projectreview>
   {% endif %}
 </projectcomponent>

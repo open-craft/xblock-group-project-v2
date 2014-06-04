@@ -191,16 +191,16 @@ class ActivityComponent(object):
         for section in doc_tree.findall("./peerreview/section"):
             self.peer_review_sections.append(ActivitySection(section, activity))
 
-        # import questions for submission review
-        for section in doc_tree.findall("./submissionreview/section"):
+        # import questions for project review
+        for section in doc_tree.findall("./projectreview/section"):
             self.other_group_sections.append(ActivitySection(section, activity))
 
         # import questions for peer review
         for section in doc_tree.findall("./peerassessment/section"):
             self.peer_assessment_sections.append(ActivitySection(section, activity))
 
-        # import questions for submission review
-        for section in doc_tree.findall("./submissionassessment/section"):
+        # import questions for project review
+        for section in doc_tree.findall("./projectassessment/section"):
             self.other_group_assessment_sections.append(ActivitySection(section, activity))
 
     @staticmethod

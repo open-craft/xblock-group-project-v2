@@ -19,6 +19,6 @@
 {% for file_link in activity_section.file_links %}
   <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}</a></div>
 {% endfor %}
-{% ifequal activity_section.file_link_name "submission" %}
-  <button id="upload_submission">Upload</button>
+{% ifequal activity_section.file_link_name "submissions" %}
+  <button id="upload_submissions">Upload</button>
 {% endifequal %}
