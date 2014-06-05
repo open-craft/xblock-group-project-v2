@@ -1,19 +1,50 @@
 function GroupProjectBlock(runtime, element) {
 
+  var load_data_into_form = function (form_id, data_for_form){
+    var $form = $("#" + form_id);
+    for(data_item in data_for_form){
+      var $form_item = $form.find("#" + data_item);
+      $form_item.val(data_for_form[data_item]);
+    }
+  }
+
+  var _load_data = function (form_id, handler_name, data){
+    $.ajax({
+      url: runtime.handlerUrl(element, handler_name),
+      data: data,
+      dataType: 'json',
+      success: function(data){
+        load_data_into_form(form_id, data);
+      },
+      error: function(data){
+        alert('Error loading feedback');
+      }
+    })
+  }
+
+  var load_data_for_peer = function (peer_id){
+    _load_data('peer_review', 'load_peer_feedback', 'peer_id=' + peer_id);
+  }
+
+  var load_data_for_other_group = function (group_id){
+    _load_data('other_group_review', 'load_other_group_feedback', 'group_id=' + group_id);
+  }
+
+
   $('form').on('submit', function(ev){
     ev.preventDefault();
-    var form = $(this);
+    var $form = $(this);
 
-    form.find(':submit').prop('disabled', true);
-    items = form.serializeArray();
+    $form.find(':submit').prop('disabled', true);
+    items = $form.serializeArray();
     data = {}
     $.each(items, function(i,v){
       data[v.name] = v.value;
     });
 
     $.ajax({
-      type: form.attr('method'),
-      url: runtime.handlerUrl(element, form.attr('action')),
+      type: $form.attr('method'),
+      url: runtime.handlerUrl(element, $form.attr('action')),
       data: JSON.stringify(data),
       success: function(data){
         var msg = 'Thanks for your feedback!';
@@ -26,7 +57,7 @@ function GroupProjectBlock(runtime, element) {
         alert('Sorry, there was an error saving your feedback');
       },
       complete: function(data){
-        form.find(':submit').prop('disabled', false);
+        $form.find(':submit').prop('disabled', false);
       }
     });
 
@@ -112,6 +143,7 @@ function GroupProjectBlock(runtime, element) {
     $('#other_group_review').hide();
     $('#peer_review').show();
     $('#peer_id').attr('value', $(this).data('id'));
+    load_data_for_peer($(this).data('id'));
   });
 
   $('.select_group').on('click', function(ev){
@@ -120,6 +152,7 @@ function GroupProjectBlock(runtime, element) {
     $('#other_group_review').show();
     $('#peer_review').hide();
     $('#group_id').attr('value', $(this).data('id'));
+    load_data_for_other_group('other_group_review', $(this).data('id'));
   });
 
   $('#overview').click();

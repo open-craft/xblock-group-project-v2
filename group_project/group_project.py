@@ -169,7 +169,7 @@ class GroupProjectBlock(XBlock):
         }
 
     @XBlock.json_handler
-    def student_submit_peer_feedback(self, submissions, suffix=''):
+    def submit_peer_feedback(self, submissions, suffix=''):
         try:
             peer_id = submissions["peer_id"]
             del submissions["peer_id"]
@@ -199,7 +199,7 @@ class GroupProjectBlock(XBlock):
         }
 
     @XBlock.json_handler
-    def student_submit_other_group_feedback(self, submissions, suffix=''):
+    def submit_other_group_feedback(self, submissions, suffix=''):
         try:
             group_id = submissions["group_id"]
             del submissions["group_id"]
@@ -227,3 +227,32 @@ class GroupProjectBlock(XBlock):
             'result': 'success',
             'msg': _('Thanks for your feedback'),
         }
+
+    @XBlock.handler
+    def load_peer_feedback(self, request, suffix=''):
+
+        peer_id = request.GET["peer_id"]
+
+        results = {
+            'peer_score': '5',
+            'peer_q1': 'A',
+            'peer_q2': 'BB',
+            'peer_q3': 'CCC',
+        }
+
+        return webob.response.Response(body=json.dumps(results))
+
+    @XBlock.handler
+    def load_other_group_feedback(self, request, suffix=''):
+
+        group_id = request.GET["group_id"]
+
+        results = {}
+        # results = {
+        #     'other_team_comments': 'They Rocked!',
+        #     'other_team_q1': '90',
+        #     'other_team_q2': '95',
+        #     'other_team_q3': '80',
+        # }
+
+        return webob.response.Response(body=json.dumps(results))
