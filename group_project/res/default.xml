@@ -57,9 +57,9 @@
     </section>
     <section>
       <content>
-        <span id="peers"></span>
+        <span class="peers"></span>
         <span style="background-color:grey;height:auto;width:1px;display:inline-block;"></span>
-        <span id="other_groups"></span>
+        <span class="other_groups"></span>
       </content>
     </section>
     <peerreview>
@@ -68,7 +68,7 @@
           <label>Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
-              <option value="-">Grade</option>
+              <option value="">Grade</option>
               <option value="1">1</option>
               <option value="2">2</option>
               <option value="3">3</option>
@@ -118,7 +118,7 @@
           <label>Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
-              <option value="-">Grade</option>
+              <option value="">Grade</option>
               <option value="0">0</option>
               <option value="5">5</option>
               <option value="10">10</option>
@@ -147,7 +147,7 @@
           <label>Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
-              <option value="-">Grade</option>
+              <option value="">Grade</option>
               <option value="0">0</option>
               <option value="5">5</option>
               <option value="10">10</option>
@@ -176,7 +176,7 @@
           <label>Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
-              <option value="-">Grade</option>
+              <option value="">Grade</option>
               <option value="0">0</option>
               <option value="5">5</option>
               <option value="10">10</option>
@@ -205,7 +205,7 @@
           <label>Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
-              <option value="-">Grade</option>
+              <option value="">Grade</option>
               <option value="0">0</option>
               <option value="5">5</option>
               <option value="10">10</option>

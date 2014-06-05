@@ -1,8 +1,10 @@
 function GroupProjectBlock(runtime, element) {
 
   var load_data_into_form = function (form_id, data_for_form){
-    var $form = $("#" + form_id);
+    var $form = $("." + form_id, element);
+    $form.find('.answer').val(null);
     for(data_item in data_for_form){
+      // NOTE: use of ids specified by designer here
       var $form_item = $form.find("#" + data_item);
       $form_item.val(data_for_form[data_item]);
     }
@@ -64,7 +66,7 @@ function GroupProjectBlock(runtime, element) {
     return false;
   });
 
-  var peers = JSON.parse($('#peer_group').html());
+  var peers = JSON.parse($('.peer_group', element).html());
   var peer_node = function(peer){
     var pn = $('<a class="select_peer" />');
     var pi = $('<img class="avatar" />');
@@ -77,10 +79,10 @@ function GroupProjectBlock(runtime, element) {
   }
 
   for(var i=0; i < peers.length; ++i){
-    $('#peers').append(peer_node(peers[i]));
+    $('.peers', element).append(peer_node(peers[i]));
   }
 
-  var groups = JSON.parse($('#assess_groups').html());
+  var groups = JSON.parse($('.assess_groups', element).html());
   var group_node = function(group){
     var gn = $('<a class="select_group" />');
     var gi = $('<img class="avatar" />');
@@ -92,7 +94,7 @@ function GroupProjectBlock(runtime, element) {
   }
 
   for(var i=0; i < groups.length; ++i){
-    $('#other_groups').append(group_node(groups[i]));
+    $('.other_groups', element).append(group_node(groups[i]));
   }
 
 
@@ -112,47 +114,56 @@ function GroupProjectBlock(runtime, element) {
     $(this).addClass('selected');
 
     $('.activity_section').hide();
+
+    // NOTE: use of ids specified by designer here
     $('#activity_' + selected_step).show();
 
     // Update step makers
     var step_pn = step_map[selected_step];
-    $('#prev, #next').off('click').removeAttr('href');
+    $('.page-to.previous, .page-to.next', element).off('click').removeAttr('href');
     if(step_pn["prev"]){
-      $('#prev').on('click', function(){$("#" + step_pn["prev"]).click();}).attr('href', '#');
+      $('.page-to.previous', element).on('click', function(){$("#" + step_pn["prev"]).click();}).attr('href', '#');
     }
     if(step_pn["next"]){
-      $('#next').on('click', function(){$("#" + step_pn["next"]).click();}).attr('href', '#');
+      $('.page-to.next', element).on('click', function(){$("#" + step_pn["next"]).click();}).attr('href', '#');
     }
-
     ev.preventDefault();
+    return false;
   });
 
   $('.view_feedback').on('click', function(ev){
     $('.feedback_sections').hide();
     $('.view_feedback').removeClass('selected');
     var showid = $(this).data('showid');
-    $('#' + showid).show();
+    $('.' + showid, element).show();
     $(this).addClass('selected');
 
     ev.preventDefault();
+    return false;
   });
 
   $('.select_peer').on('click', function(ev){
     $('.select_peer,.select_group').removeClass('selected');
     $(this).addClass('selected');
-    $('#other_group_review').hide();
-    $('#peer_review').show();
-    $('#peer_id').attr('value', $(this).data('id'));
+    $('.other_group_review', element).hide();
+    $('.peer_review', element).show();
+    $('.peer_id', element).attr('value', $(this).data('id'));
     load_data_for_peer($(this).data('id'));
+
+    ev.preventDefault();
+    return false;
   });
 
   $('.select_group').on('click', function(ev){
     $('.select_peer,.select_group').removeClass('selected');
     $(this).addClass('selected');
-    $('#other_group_review').show();
-    $('#peer_review').hide();
-    $('#group_id').attr('value', $(this).data('id'));
+    $('.other_group_review', element).show();
+    $('.peer_review', element).hide();
+    $('.group_id', element).attr('value', $(this).data('id'));
     load_data_for_other_group('other_group_review', $(this).data('id'));
+
+    ev.preventDefault();
+    return false;
   });
 
   $('#overview').click();

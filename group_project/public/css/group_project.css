@@ -18,11 +18,6 @@
   margin-left: 30px;
 }
 
-.group-project-xblock-wrapper #activity_upload ul{
-  list-style: none;
-  margin-left: 0;
-}
-
 .group-project-xblock-wrapper .lesson-pager {
   text-align: center;
   padding-top: rem-calc(40);
@@ -45,10 +40,6 @@
 
 .group-project-xblock-wrapper .revealer.selected{
   color: #dddddd;
-}
-
-.group-project-xblock-wrapper #prev[disabled] div, group-project-xblock-wrapper #next[disabled] div{
-  background-color: #dddddd !important;
 }
 
 .group-project-xblock-wrapper button.submit{
@@ -77,11 +68,7 @@
   float: right;
 }
 
-.group-project-xblock-wrapper #activity_grade textarea{
-  height: 100px;
-}
-
-.group-project-xblock-wrapper #peer_review, #other_group_review{
+.group-project-xblock-wrapper .peer_review, .group-project-xblock-wrapper .other_group_review{
   display: none;
 }
 
@@ -89,7 +76,7 @@
   color: #E37222;
 }
 
-.group-project-xblock-wrapper #other_submissions{
+.group-project-xblock-wrapper .other_submissions{
   float: right;
 }
 

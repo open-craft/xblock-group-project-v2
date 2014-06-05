@@ -31,8 +31,8 @@
         <hr />
       {% endfor %}
       {% if activity_component.peer_reviews %}
-      <form id="peer_review" action="submit_peer_feedback" method="POST">
-        <input type="hidden" id="peer_id" name="peer_id" value="" />
+      <form class="peer_review" action="submit_peer_feedback" method="POST">
+        <input type="hidden" class="peer_id" name="peer_id" value="" />
       {% for activity_section in activity_component.peer_review_sections %}
         {% autoescape off %}
           {{ activity_section.render }}
@@ -43,9 +43,9 @@
       </form>
       {% endif %}
       {% if activity_component.other_group_reviews %}
-      <form id="other_group_review" action="submit_other_group_feedback" method="POST">
-        <input type="hidden" id="group_id" name="group_id" value="" />
-      <div id="other_submissions"><a href="#">View team project submissions</a></div>
+      <form class="other_group_review" action="submit_other_group_feedback" method="POST">
+        <input type="hidden" class="group_id" name="group_id" value="" />
+      <div class="other_submissions"><a href="#">View team project submissions</a></div>
       {% for activity_section in activity_component.other_group_sections %}
         {% autoescape off %}
           {{ activity_section.render }}
@@ -56,7 +56,7 @@
       </form>
       {% endif %}
       {% if activity_component.peer_assessments %}
-      <div id="team_feedback" class="feedback_sections">
+      <div class="feedback_sections team_feedback">
       {% for activity_section in activity_component.peer_assessment_sections %}
         {% autoescape off %}
           {{ activity_section.render }}
@@ -66,7 +66,7 @@
       </div>
       {% endif %}
       {% if activity_component.other_group_assessments %}
-      <div id="cohort_feedback" class="feedback_sections">
+      <div class="feedback_sections cohort_feedback">
       {% for activity_section in activity_component.other_group_assessment_sections %}
         {% autoescape off %}
           {{ activity_section.render }}
@@ -88,16 +88,16 @@
   {% endfor %}
 
   <div class="lesson-pager" style="clear:both;">
-    <a href="#" id="prev" class="page-to previous">
+    <a href="#" class="page-to previous">
       <i class="fa fa-chevron-left"></i>
     </a>
-    <a href="#" id="next" class="page-to next">
+    <a href="#" class="page-to next">
       <i class="fa fa-chevron-right"></i>
     </a>
   </div>
-  <script id="submission_json" type="application/json">{{ group_activity.submission_json }}</script>
-  <script id="peer_group" type="application/json">{{ team_members }}</script>
-  <script id="assess_groups" type="application/json">{{ assess_groups }}</script>
+  <script class="submission_json" type="application/json">{{ group_activity.submission_json }}</script>
+  <script class="peer_group" type="application/json">{{ team_members }}</script>
+  <script class="assess_groups" type="application/json">{{ assess_groups }}</script>
 
 </div>
 {% endautoescape %}
