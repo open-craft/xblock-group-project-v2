@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from datetime import date, datetime
+from datetime import date
 import copy
 import json
 from django.template.loader import render_to_string
@@ -233,11 +233,11 @@ class ActivityComponent(object):
 
     @property
     def is_open(self):
-        return (self.open_date is None) or (self.open_date < datetime.today())
+        return (self.open_date is None) or (self.open_date <= date.today())
 
     @property
     def is_closed(self):
-        return (self.close_date is not None) and (self.close_date < datetime.today())
+        return (self.close_date is not None) and (self.close_date < date.today())
 
 
     @property
