@@ -9,6 +9,9 @@ import json
 import webob
 from lxml import etree
 from xml.etree import ElementTree as ET
+from pkg_resources import resource_filename
+
+from django.utils.translation import ugettext as _
 
 from xblock.core import XBlock
 from xblock.fields import Scope, String, Dict, Float
@@ -17,6 +20,8 @@ from xblock.fragment import Fragment
 from StringIO import StringIO
 
 from .utils import render_template, AttrDict, load_resource
+
+from .group_activity import GroupActivity
 
 
 # Globals ###########################################################
@@ -28,7 +33,7 @@ log = logging.getLogger(__name__)
 
 class GroupProjectBlock(XBlock):
     """
-    XBlock providing a video player for videos hosted on Brightcove
+    XBlock providing a group activity project for a group of students to collaborate upon
     """
     display_name = String(
         display_name="Display Name",
@@ -44,17 +49,20 @@ class GroupProjectBlock(XBlock):
         default=1
     )
 
+    item_state = Dict(
+        help="JSON payload for assessment values",
+        scope=Scope.user_state
+    )
+
+    with open (resource_filename(__name__, 'res/default.xml'), "r") as default_xml_file:
+        default_xml = default_xml_file.read()
+
     data = String(
-        display_name="Drag and Drop",
+        display_name="",
         help="XML contents to display for this module",
         scope=Scope.content,
-        default=textwrap.dedent("""
-            <group_project schema_version='1'>
-
-
-            </group_project>
-        """
-        ))
+        default=textwrap.dedent(default_xml)
+    )
 
     has_score = True
 
@@ -63,9 +71,46 @@ class GroupProjectBlock(XBlock):
         Player view, displayed to the student
         """
 
-        xmltree = etree.fromstring(self.data)
+        group_activity = GroupActivity.import_xml_string(self.data)
+        # TODO: Replace with workgroup call to get real workgroup
+        team_members = [
+            {
+                "name": "Andy Parsons",
+                "id": 1,
+                "img": "/image/empty_avatar.png"
+            },
+            {
+                "name": "Jennifer Gormley",
+                "id": 2,
+                "img": "/image/empty_avatar.png"
+            },
+            {
+                "name": "Vishal Ghandi",
+                "id": 3,
+                "img": "/image/empty_avatar.png"
+            }
+        ]
+
+        # TODO: Replace with workgroup call to get assigned workgroups
+        assess_groups = [
+            {
+                "id": 101,
+                "img": "/image/empty_avatar.png"
+            },
+            {
+                "id": 102,
+                "img": "/image/empty_avatar.png"
+            },
+            {
+                "id": 103,
+                "img": "/image/empty_avatar.png"
+            }
+        ]
 
         context = {
+            "group_activity": group_activity,
+            "team_members": json.dumps(team_members),
+            "assess_groups": json.dumps(assess_groups),
         }
 
         fragment = Fragment()
@@ -122,3 +167,92 @@ class GroupProjectBlock(XBlock):
         return {
             'result': 'success',
         }
+
+    @XBlock.json_handler
+    def submit_peer_feedback(self, submissions, suffix=''):
+        try:
+            peer_id = submissions["peer_id"]
+            del submissions["peer_id"]
+
+            print "Peer Review for {}: {}".format(peer_id, submissions)
+
+            # Then something like this needs to happen
+
+            # user_id = get_user_id_for_this_session() # ???
+            # project_id = get_xblock_id_for_this_session()
+            # api_manager.save_data_for_peer(user_id, peer_id, submissions)
+
+            # or
+
+            # for k,v in iteritems(submissions):
+            #     api_manager.save_data_for_peer(user_id, peer_id, k, v)
+
+        except Exception as e:
+            return {
+                'result': 'error',
+                'message': e.message,
+            }
+
+        return {
+            'result': 'success',
+            'msg': _('Thanks for your feedback'),
+        }
+
+    @XBlock.json_handler
+    def submit_other_group_feedback(self, submissions, suffix=''):
+        try:
+            group_id = submissions["group_id"]
+            del submissions["group_id"]
+
+            print "Group Review for {}: {}".format(group_id, submissions)
+
+            # Then something like this needs to happen
+
+            # user_id = get_user_id_for_this_session() # ???
+            # project_id = get_xblock_id_for_this_session()
+            # api_manager.save_data_for_group(user_id, group_id, submissions)
+
+            # or
+
+            # for k,v in iteritems(submissions):
+            #     api_manager.save_data_for_group(user_id, group_id, k, v)
+
+        except Exception as e:
+            return {
+                'result': 'error',
+                'msg': e.message,
+            }
+
+        return {
+            'result': 'success',
+            'msg': _('Thanks for your feedback'),
+        }
+
+    @XBlock.handler
+    def load_peer_feedback(self, request, suffix=''):
+
+        peer_id = request.GET["peer_id"]
+
+        results = {
+            'peer_score': '5',
+            'peer_q1': 'A',
+            'peer_q2': 'BB',
+            'peer_q3': 'CCC',
+        }
+
+        return webob.response.Response(body=json.dumps(results))
+
+    @XBlock.handler
+    def load_other_group_feedback(self, request, suffix=''):
+
+        group_id = request.GET["group_id"]
+
+        results = {}
+        # results = {
+        #     'other_team_comments': 'They Rocked!',
+        #     'other_team_q1': '90',
+        #     'other_team_q2': '95',
+        #     'other_team_q3': '80',
+        # }
+
+        return webob.response.Response(body=json.dumps(results))

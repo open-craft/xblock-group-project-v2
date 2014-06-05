@@ -1,0 +1,24 @@
+<group_project schema_version='1'>
+  <resources>
+    {% for document in documents %}
+      <document title='{{ document.title }}'{% ifnotequal document.grading_criteria None %} grading_criteria='true'{% endifnotequal %}{% ifnotequal document.description None %} description='{{ document.description }}'{% endifnotequal %}>
+        {{ document.location }}
+      </document>
+    {% endfor %}
+  </resources>
+  <dates>
+    {% for milestone in milestones %}
+      <milestone name='{{ milestone.name }}'>
+        {{ milestone.mmddyy }}
+      </milestone>
+    {% endfor %}
+  </dates>
+  <submissions>
+    {% for document in group_activity.submissions %}
+      <document {% ifnotequal document.description None %}description='{{ document.description }}' {% endifnotequal %}title='{{ document.title }}'></document>
+    {% endfor %}
+  </submissions>
+  {% for activity_component in group_activity.activity_components %}
+    {{ activity_component.export_xml }}
+  {% endfor %}
+</group_project>

@@ -1,0 +1,96 @@
+<group_project schema_version='1'>
+  <resources>
+    <document title="Issue Tree Template">http://download/file.doc</document>
+    <document title="Instructions" description="These are the instructions for this activity" grading_criteria="false">http://download/file.doc</document>
+    <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
+  </resources>
+  <dates>
+    <milestone name="submissions">5/24/2014</milestone>
+    <milestone name="review">6/20/2014</milestone>
+  </dates>
+  <submissions>
+    <document id="issue_tree" title="Issue Tree" />
+    <document id="marketing_pitch" title="Marketing Pitch" />
+    <document id="budget" title="Budget" description="xls budget plan" />
+  </submissions>
+  <projectcomponent name="Overview">
+    <section title="Section Title"><content><p>Html Description Blah Blah Blah<span>Additional info</span></p></content></section>
+    <section title="Details"><content>Html Description Blah Blah Blah</content></section>
+    <section title="Suggested Schedule"><content>Html Description Blah Blah Blah</content></section>
+    <section title="Project Materials" file_links="resources"><content>Html Description Blah Blah Blah</content></section>
+  </projectcomponent>
+  <projectcomponent name="Upload" close="submissions">
+    <section title="Team Submission">html Description</section>
+    <section title="Current Files" file_links="submissions">html descirpition</section>
+  </projectcomponent>
+  <projectcomponent name="Review" open="submissions" close="review">
+    <section title="Lorem Ipsum" file_links="grading_criteria">aslkd as</section>
+    <peerreview>
+      <section title="Evaluate Teammate">
+        <question id="score">
+          <label>How about that?</label>
+          <answer>
+            <input type="text" placeholder="answer here" />
+          </answer>
+        </question>
+      </section>
+      <section title="Questions">
+        <question id="q1">
+          <label>Where they helpful?</label>
+          <answer>
+            <select>
+              <option value="Y">Yes</option>
+              <option value="N">No</option>
+            </select>
+          </answer>
+        </question>
+        <question id="q2">
+          <label>General Comments</label>
+          <answer>
+            <textarea></textarea>
+          </answer>
+        </question>
+      </section>
+    </peerreview>
+    <projectreview>
+      <section title="Evaluate Teammate">
+        <question id="score">
+          <label>How about that?</label>
+          <answer>
+            <input type="text" placeholder="answer here" />
+          </answer>
+        </question>
+      </section>
+      <section title="Questions">
+        <question id="q1">
+          <label>Where they helpful?</label>
+          <answer>
+            <select>
+              <option value="Y">Yes</option>
+              <option value="N">No</option>
+            </select>
+          </answer>
+        </question>
+        <question id="q2">
+          <label>General Comments</label>
+          <answer>
+            <textarea></textarea>
+          </answer>
+        </question>
+      </section>
+    </projectreview>
+  </projectcomponent>
+  <projectcomponent name="Grade" open="review">
+    <section title="Blah"><content>aisjd saijd</content></section>
+    <peerassessment>
+      <questionresults id="q1">
+      </questionresults>
+      <questionresults id="q2"></questionresults>
+      <questionresults id="q3"></questionresults>
+      <questionresults id="q4"></questionresults>
+      <questionresults id="score" summary="mean">{{summary}} (','.join({{values}}))</questionresults>
+    </peerassessment>
+    <projectassessment>
+    </projectassessment>
+  </projectcomponent>
+</group_project>
