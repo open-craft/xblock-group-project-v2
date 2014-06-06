@@ -33,7 +33,7 @@ function GroupProjectBlock(runtime, element) {
   }
 
 
-  $('form').on('submit', function(ev){
+  $('form', element).on('submit', function(ev){
     ev.preventDefault();
     var $form = $(this);
 
