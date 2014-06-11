@@ -22,6 +22,7 @@ from StringIO import StringIO
 from .utils import render_template, AttrDict, load_resource
 
 from .group_activity import GroupActivity
+from .project_api import ProjectAPI
 
 
 # Globals ###########################################################
@@ -66,35 +67,35 @@ class GroupProjectBlock(XBlock):
 
     has_score = True
 
+    _project_api = None
+    @property
+    def project_api(self):
+        if self._project_api is None:
+            self._project_api = ProjectAPI('http://{}'.format(self.xmodule_runtime.HOSTNAME))
+        return self._project_api
+
+    @property
+    def user(self):
+        return self.xmodule_runtime.get_real_user(self.xmodule_runtime.anonymous_student_id)
+
     def student_view(self, context):
         """
         Player view, displayed to the student
         """
 
+        user_id = self.user.id
         group_activity = GroupActivity.import_xml_string(self.data)
-        # TODO: Replace with workgroup call to get real workgroup
-        team_members = [
-            {
-                "name": "Andy Parsons",
-                "id": 1,
-                "img": "/image/empty_avatar.png"
-            },
-            {
-                "name": "Jennifer Gormley",
-                "id": 2,
-                "img": "/image/empty_avatar.png"
-            },
-            {
-                "name": "Vishal Ghandi",
-                "id": 3,
-                "img": "/image/empty_avatar.png"
-            }
-        ]
+
+        workgroup = self.project_api.get_user_workgroup_for_course(
+            user_id,
+            self.xmodule_runtime.course_id
+        )
+        team_members = [tm for tm in workgroup["users"] if user_id != int(tm["id"])]
 
         # TODO: Replace with workgroup call to get assigned workgroups
         assess_groups = [
             {
-                "id": 101,
+                "id": 3,
                 "img": "/image/empty_avatar.png"
             },
             {
@@ -145,13 +146,13 @@ class GroupProjectBlock(XBlock):
 
         if not max_score:
             # empty = default
-            max_score = 1
+            max_score = 100
         else:
             try:
                 # not an integer, then default
                 max_score = int(max_score)
             except:
-                max_score = 1
+                max_score = 100
 
         self.weight = max_score
 
@@ -174,18 +175,18 @@ class GroupProjectBlock(XBlock):
             peer_id = submissions["peer_id"]
             del submissions["peer_id"]
 
-            print "Peer Review for {}: {}".format(peer_id, submissions)
+            group = self.project_api.get_user_workgroup_for_course(
+                self.user.id,
+                self.xmodule_runtime.course_id
+            )
 
             # Then something like this needs to happen
-
-            # user_id = get_user_id_for_this_session() # ???
-            # project_id = get_xblock_id_for_this_session()
-            # api_manager.save_data_for_peer(user_id, peer_id, submissions)
-
-            # or
-
-            # for k,v in iteritems(submissions):
-            #     api_manager.save_data_for_peer(user_id, peer_id, k, v)
+            self.project_api.submit_peer_review_items(
+                self.xmodule_runtime.anonymous_student_id,
+                peer_id,
+                group['id'],
+                submissions
+            )
 
         except Exception as e:
             return {
@@ -204,18 +205,11 @@ class GroupProjectBlock(XBlock):
             group_id = submissions["group_id"]
             del submissions["group_id"]
 
-            print "Group Review for {}: {}".format(group_id, submissions)
-
-            # Then something like this needs to happen
-
-            # user_id = get_user_id_for_this_session() # ???
-            # project_id = get_xblock_id_for_this_session()
-            # api_manager.save_data_for_group(user_id, group_id, submissions)
-
-            # or
-
-            # for k,v in iteritems(submissions):
-            #     api_manager.save_data_for_group(user_id, group_id, k, v)
+            self.project_api.submit_workgroup_review_items(
+                self.xmodule_runtime.anonymous_student_id,
+                group_id,
+                submissions
+            )
 
         except Exception as e:
             return {
@@ -232,13 +226,19 @@ class GroupProjectBlock(XBlock):
     def load_peer_feedback(self, request, suffix=''):
 
         peer_id = request.GET["peer_id"]
+        group = self.project_api.get_user_workgroup_for_course(
+            self.user.id,
+            self.xmodule_runtime.course_id
+        )
 
-        results = {
-            'peer_score': '5',
-            'peer_q1': 'A',
-            'peer_q2': 'BB',
-            'peer_q3': 'CCC',
-        }
+        feedback = self.project_api.get_peer_review_items(
+            self.xmodule_runtime.anonymous_student_id,
+            peer_id,
+            group['id']
+        )
+
+        # pivot the data to show question -> answer
+        results = {pi['question']: pi['answer'] for pi in feedback}
 
         return webob.response.Response(body=json.dumps(results))
 
@@ -247,12 +247,12 @@ class GroupProjectBlock(XBlock):
 
         group_id = request.GET["group_id"]
 
-        results = {}
-        # results = {
-        #     'other_team_comments': 'They Rocked!',
-        #     'other_team_q1': '90',
-        #     'other_team_q2': '95',
-        #     'other_team_q3': '80',
-        # }
+        feedback = self.project_api.get_workgroup_review_items(
+            self.xmodule_runtime.anonymous_student_id,
+            group_id
+        )
+
+        # pivot the data to show question -> answer
+        results = {ri['question']: ri['answer'] for ri in feedback}
 
         return webob.response.Response(body=json.dumps(results))

@@ -16,7 +16,12 @@ function GroupProjectBlock(runtime, element) {
       data: data,
       dataType: 'json',
       success: function(data){
-        load_data_into_form(form_id, data);
+        if(data.result && data.result == "error"){
+          alert(data.message);
+        }
+        else{
+          load_data_into_form(form_id, data);
+        }
       },
       error: function(data){
         alert('Error loading feedback');
@@ -160,7 +165,7 @@ function GroupProjectBlock(runtime, element) {
     $('.other_group_review', element).show();
     $('.peer_review', element).hide();
     $('.group_id', element).attr('value', $(this).data('id'));
-    load_data_for_other_group('other_group_review', $(this).data('id'));
+    load_data_for_other_group($(this).data('id'));
 
     ev.preventDefault();
     return false;
