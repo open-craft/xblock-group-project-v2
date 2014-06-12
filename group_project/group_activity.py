@@ -326,6 +326,32 @@ class GroupActivity(object):
         submission_dicts = [submission.__dict__ for submission in self.submissions]
         return json.dumps(submission_dicts)
 
+    @property
+    def step_map(self):
+        step_map = {}
+        ordered_list = []
+        prev_step = None
+        for ac in self.activity_components:
+            step_map[ac.id] = {
+                "prev": prev_step,
+                "name": ac.name,
+            }
+            if not ac.is_open:
+                step_map[ac.id]["restrict_message"] = "{} closed until {}".format(
+                    ac.name,
+                    ac.formatted_open_date
+                )
+            ordered_list.append(ac.id)
+            prev_step = ac.id
+
+        next_step = None
+        for ac in reversed(self.activity_components):
+            step_map[ac.id]["next"] = next_step
+            next_step = ac.id
+
+        step_map["ordered_list"] = ordered_list
+
+        return json.dumps(step_map)
 
     @classmethod
     def import_xml_file(cls, file_name):
