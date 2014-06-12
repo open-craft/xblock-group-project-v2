@@ -120,7 +120,7 @@ Node to define sections to be associated with specific group review selection
 None
 
 ### Child Nodes
-`section` - _Required - section(s) to display peer review questions_
+`section` - _Required - section(s) to display project review questions_
 
 ## `<peerassessment>`
 Node to define sections to display the feedback that the user has recieved from her/his peers.
