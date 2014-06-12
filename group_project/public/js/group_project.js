@@ -1,5 +1,19 @@
 function GroupProjectBlock(runtime, element) {
 
+  var mean = function(value_array){
+    var sum = 0;
+    var count = value_array.length;
+    if(count < 1){
+      return null;
+    }
+
+    for(var i=0; i<count; ++i){
+      sum += parseFloat(value_array[i]);
+    }
+
+    return sum / count;
+  }
+
   var load_data_into_form = function (form_id, data_for_form){
     var $form = $("." + form_id, element);
     $form.find('.answer').val(null);
@@ -10,17 +24,47 @@ function GroupProjectBlock(runtime, element) {
     }
   }
 
-  var _load_data = function (form_id, handler_name, data){
+  var load_my_feedback_data = function(section_node, data){
+    // Clean existing values
+    $('.answer-value', section_node).empty();
+
+    for(data_item in data){
+      // either a place witin to list it or the outer location
+      var fill_field = $('#list_' + data_item, section_node);
+      if(fill_field.length < 1){
+        fill_field = $('#assess_' + data_item, section_node);
+      }
+      var data_class = fill_field.data('class');
+      for(var i=0; i<data[data_item].length; ++i){
+        var node = $("<div/>");
+        if(data_class && data_class.length > 0){
+          node.addClass(data_class);
+        }
+        node.text(data[data_item][i]);
+        fill_field.append(node);
+      }
+
+      var mean_field = $('#mean_' + data_item, section_node);
+      mean_field.text(mean(data[data_item]));
+    }
+  }
+
+  var _load_data = function (handler_name, args, post_data_fn){
     $.ajax({
       url: runtime.handlerUrl(element, handler_name),
-      data: data,
+      data: args,
       dataType: 'json',
       success: function(data){
         if(data.result && data.result == "error"){
-          alert(data.message);
+          if(data.msg){
+            alert(data.msg);
+          }
+          else{
+            alert('Error loading feedback');
+          }
         }
         else{
-          load_data_into_form(form_id, data);
+          post_data_fn(data);
         }
       },
       error: function(data){
@@ -30,13 +74,12 @@ function GroupProjectBlock(runtime, element) {
   }
 
   var load_data_for_peer = function (peer_id){
-    _load_data('peer_review', 'load_peer_feedback', 'peer_id=' + peer_id);
+    _load_data('load_peer_feedback', 'peer_id=' + peer_id, function(data){load_data_into_form('peer_review', data);});
   }
 
   var load_data_for_other_group = function (group_id){
-    _load_data('other_group_review', 'load_other_group_feedback', 'group_id=' + group_id);
+    _load_data('load_other_group_feedback', 'group_id=' + group_id, function(data){load_data_into_form('other_group_review', data);});
   }
-
 
   $('form', element).on('submit', function(ev){
     ev.preventDefault();
@@ -55,8 +98,8 @@ function GroupProjectBlock(runtime, element) {
       data: JSON.stringify(data),
       success: function(data){
         var msg = 'Thanks for your feedback!';
-        if(data['msg']){
-          msg = data['msg'];
+        if(data.msg){
+          msg = data.msg;
         }
         alert(msg);
       },
@@ -143,6 +186,13 @@ function GroupProjectBlock(runtime, element) {
     $('.' + showid, element).show();
     $(this).addClass('selected');
 
+    if(showid == "cohort_feedback"){
+      _load_data('load_my_group_feedback', null, function(data){load_my_feedback_data($('.cohort_feedback', element), data);});
+    }
+    else{
+      _load_data('load_my_peer_feedback', null, function(data){load_my_feedback_data($('.team_feedback', element), data);});
+    }
+
     ev.preventDefault();
     return false;
   });
@@ -172,6 +222,4 @@ function GroupProjectBlock(runtime, element) {
   });
 
   $('#overview').click();
-  $('.view_feedback:first').click();
-
 }

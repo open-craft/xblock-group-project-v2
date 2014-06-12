@@ -8,8 +8,13 @@ from django.conf import settings
 
 JSON_HEADERS = {
     "Content-Type": "application/json",
-    "X-Edx-Api-Key": settings.EDX_API_KEY,
 }
+
+if settings and hasattr(settings, "EDX_API_KEY"):
+    JSON_HEADERS = {
+        "Content-Type": "application/json",
+        "X-Edx-Api-Key": settings.EDX_API_KEY,
+    }
 
 TIMEOUT = 20
 

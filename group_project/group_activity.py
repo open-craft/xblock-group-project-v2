@@ -28,13 +28,16 @@ class DottableDict(dict):
 
 class ActivityQuestion(object):
 
-    def __init__(self, doc_tree):
+    def __init__(self, doc_tree, activity):
 
         self.id = doc_tree.get("id")
         self.label = doc_tree.find("./label")
         answer_node = doc_tree.find("./answer")
         self.answer = answer_node[0]
         self.small = (answer_node.get("small", "false") == "true")
+
+        if doc_tree.get("grade") == "true":
+            activity.grade_questions.append(self.id)
 
     @property
     def render(self):
@@ -86,10 +89,13 @@ class ActivityAssessment(object):
         answer_node = copy.deepcopy(self.answer)
         answer_node.set('name', self.id)
         answer_node.set('id', self.id)
-        answer_class = 'answer'
+        answer_classes = ['answer']
         if self.small:
-            answer_class = 'answer side'
-        answer_node.set('class', answer_class)
+            answer_classes.append('side')
+        current_class = answer_node.get('class')
+        if current_class:
+            answer_classes.append(current_class)
+        answer_node.set('class', ' '.join(answer_classes))
 
         label_node = copy.deepcopy(self.label)
         label_node.set('for', self.id)
@@ -132,7 +138,7 @@ class ActivitySection(object):
 
         # import any questions
         for question in doc_tree.findall("./question"):
-            self.questions.append(ActivityQuestion(question))
+            self.questions.append(ActivityQuestion(question, activity))
 
         # import any assessments
         for assessment in doc_tree.findall("./assessment"):
@@ -262,6 +268,8 @@ class GroupActivity(object):
         self.activity_components = []
         self.grading_criteria = []
         self.milestone_dates = {}
+
+        self.grade_questions = []
 
         # import resources
         for document in doc_tree.findall("./resources/document"):

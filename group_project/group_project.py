@@ -75,38 +75,69 @@ class GroupProjectBlock(XBlock):
         return self._project_api
 
     @property
-    def user(self):
-        return self.xmodule_runtime.get_real_user(self.xmodule_runtime.anonymous_student_id)
+    def user_id(self):
+        try:
+            return self.xmodule_runtime.get_real_user(self.xmodule_runtime.anonymous_student_id).id
+        except:
+            return None
 
     def student_view(self, context):
         """
         Player view, displayed to the student
         """
-
-        user_id = self.user.id
+        user_id = self.user_id
         group_activity = GroupActivity.import_xml_string(self.data)
+        if user_id:
+            workgroup = self.project_api.get_user_workgroup_for_course(
+                user_id,
+                self.xmodule_runtime.course_id
+            )
+            team_members = [tm for tm in workgroup["users"] if user_id != int(tm["id"])]
 
-        workgroup = self.project_api.get_user_workgroup_for_course(
-            user_id,
-            self.xmodule_runtime.course_id
-        )
-        team_members = [tm for tm in workgroup["users"] if user_id != int(tm["id"])]
-
-        # TODO: Replace with workgroup call to get assigned workgroups
-        assess_groups = [
-            {
-                "id": 3,
-                "img": "/image/empty_avatar.png"
-            },
-            {
-                "id": 102,
-                "img": "/image/empty_avatar.png"
-            },
-            {
-                "id": 103,
-                "img": "/image/empty_avatar.png"
-            }
-        ]
+            # TODO: Replace with workgroup call to get assigned workgroups
+            assess_groups = [
+                {
+                    "id": 3,
+                    "img": "/image/empty_avatar.png"
+                },
+                {
+                    "id": 102,
+                    "img": "/image/empty_avatar.png"
+                },
+                {
+                    "id": 103,
+                    "img": "/image/empty_avatar.png"
+                }
+            ]
+        else:
+            team_members = [
+                {
+                    "id": 1,
+                    "name": "Chris Dodge",
+                },
+                {
+                    "id": 2,
+                    "name": "Matt Drayer",
+                },
+                {
+                    "id": 3,
+                    "name": "Martyn James",
+                },
+            ]
+            assess_groups = [
+                {
+                    "id": 3,
+                    "img": "/image/empty_avatar.png"
+                },
+                {
+                    "id": 102,
+                    "img": "/image/empty_avatar.png"
+                },
+                {
+                    "id": 103,
+                    "img": "/image/empty_avatar.png"
+                }
+            ]
 
         context = {
             "group_activity": group_activity,
@@ -176,7 +207,7 @@ class GroupProjectBlock(XBlock):
             del submissions["peer_id"]
 
             group = self.project_api.get_user_workgroup_for_course(
-                self.user.id,
+                self.user_id,
                 self.xmodule_runtime.course_id
             )
 
@@ -191,7 +222,7 @@ class GroupProjectBlock(XBlock):
         except Exception as e:
             return {
                 'result': 'error',
-                'message': e.message,
+                'msg': e.message,
             }
 
         return {
@@ -227,7 +258,7 @@ class GroupProjectBlock(XBlock):
 
         peer_id = request.GET["peer_id"]
         group = self.project_api.get_user_workgroup_for_course(
-            self.user.id,
+            self.user_id,
             self.xmodule_runtime.course_id
         )
 
@@ -254,5 +285,51 @@ class GroupProjectBlock(XBlock):
 
         # pivot the data to show question -> answer
         results = {ri['question']: ri['answer'] for ri in feedback}
+
+        return webob.response.Response(body=json.dumps(results))
+
+    @XBlock.handler
+    def load_my_peer_feedback(self, request, suffix=''):
+
+        user_id = self.user_id
+        group = self.project_api.get_user_workgroup_for_course(
+            user_id,
+            self.xmodule_runtime.course_id
+        )
+
+        feedback = self.project_api.get_user_peer_review_items(
+            user_id,
+            group['id']
+        )
+
+        results = {}
+        for item in feedback:
+            if item['question'] in results:
+                results[item['question']].append(item['answer'])
+            else:
+                results[item['question']] = [item['answer']]
+
+        return webob.response.Response(body=json.dumps(results))
+
+    @XBlock.handler
+    def load_my_group_feedback(self, request, suffix=''):
+
+        group = self.project_api.get_user_workgroup_for_course(
+            self.user_id,
+            self.xmodule_runtime.course_id
+        )
+
+        feedback = self.project_api.get_workgroup_review_items_for_group(
+            group['id']
+        )
+
+        results = {}
+        for item in feedback:
+            if item['question'] in results:
+                results[item['question']].append(item['answer'])
+            else:
+                results[item['question']] = [item['answer']]
+
+        results["final_grade"] = [self.project_api.get_group_grade(group['id'])]
 
         return webob.response.Response(body=json.dumps(results))

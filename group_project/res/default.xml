@@ -6,7 +6,7 @@
   </resources>
   <dates>
     <milestone name="submissions">5/24/2014</milestone>
-    <milestone name="review">6/20/2014</milestone>
+    <milestone name="review">6/10/2014</milestone>
   </dates>
   <submissions>
     <document id="issue_tree" title="Issue Tree" />
@@ -114,7 +114,7 @@
         </question>
       </section>
       <section title="Questions">
-        <question id="other_team_q1">
+        <question id="other_team_q1" grade="true">
           <label>Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
@@ -143,7 +143,7 @@
             </select>
           </answer>
         </question>
-        <question id="other_team_q2">
+        <question id="other_team_q2" grade="true">
           <label>Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
@@ -172,7 +172,7 @@
             </select>
           </answer>
         </question>
-        <question id="other_team_q3">
+        <question id="other_team_q3" grade="true">
           <label>Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
@@ -201,7 +201,7 @@
             </select>
           </answer>
         </question>
-        <question id="other_team_q4">
+        <question id="other_team_q4" grade="true">
           <label>Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
@@ -241,8 +241,11 @@
     </section>
     <section>
       <content>
-        <a data-showid="team_feedback" class="view_feedback">Team Feedback</a>
-        <a data-showid="cohort_feedback" class="view_feedback">Cohort Feedback</a>
+        <div class="centered">
+          <a data-showid="team_feedback" class="view_feedback">Team Feedback</a>
+          <span>|</span>
+          <a data-showid="cohort_feedback" class="view_feedback">Cohort Feedback</a>
+        </div>
       </content>
     </section>
     <peerassessment>
@@ -250,19 +253,19 @@
         <assessment id="assess_peer_q1">
           <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
-            <div id="list_peer_q1" data-separator="\n"></div>
+            <div id="list_peer_q1" data-class="quote" class="answer-value"></div>
           </answer>
         </assessment>
         <assessment id="assess_peer_q2">
           <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
-            <div id="list_peer_q2" data-separator="\n"></div>
+            <div id="list_peer_q2" data-class="quote" class="answer-value"></div>
           </answer>
         </assessment>
         <assessment id="assess_peer_q3">
           <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
-            <div id="list_peer_q3" data-separator="\n"></div>
+            <div id="list_peer_q3" data-class="quote" class="answer-value"></div>
           </answer>
         </assessment>
       </section>
@@ -271,11 +274,11 @@
           <label></label>
           <answer>
             <div style="float:right;text-align:right;">
-              <div class="highlight">
+              <span class="highlight">
                 <span>AVERAGE OVERALL SCORE:</span>
-                <span id="mean_peer_score"></span>
-              </div>
-              <div id="list_peer_score" class="value" data-separator=", "></div>
+                <span id="mean_peer_score" class="answer-value"></span>
+              </span>
+              (<span id="list_peer_score" data-class="comma" class="answer-value"></span>)
             </div>
           </answer>
         </assessment>
@@ -285,69 +288,69 @@
       <section title="FEEDBACK">
         <assessment id="assess_other_team_comments">
           <label>General:</label>
-          <answer>
-            <div id="list_other_team_comments" data-separator="\n"></div>
+          <answer quote="true">
+            <div data-class="quote" class="answer-value"></div>
           </answer>
         </assessment>
       </section>
       <section>
-        <assessment id="assess_other_team_q1" class="grade">
+        <assessment id="assess_other_team_q1">
           <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
             <div>
               <span class="highlight">
                 <span>GRADE:</span>
-                <span id="mean_other_team_q1"></span>
+                <span id="mean_other_team_q1" class="answer-value"></span>
               </span>
-              <span id="list_other_team_q1" class="value" data-separator=", "></span>
+              (<span id="list_other_team_q1" data-class="comma" class="answer-value"></span>)
             </div>
           </answer>
         </assessment>
-        <assessment id="assess_other_team_q2" class="grade">
+        <assessment id="assess_other_team_q2">
           <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
             <div>
               <span class="highlight">
                 <span>GRADE:</span>
-                <span id="mean_other_team_q2"></span>
+                <span id="mean_other_team_q2" class="answer-value"></span>
               </span>
-              <span id="list_other_team_q2" class="value" data-separator=", "></span>
+              (<span id="list_other_team_q2" data-class="comma" class="answer-value"></span>)
             </div>
           </answer>
         </assessment>
-        <assessment id="assess_other_team_q3" class="grade">
+        <assessment id="assess_other_team_q3">
           <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
             <div>
               <span class="highlight">
                 <span>GRADE:</span>
-                <span id="mean_other_team_q3"></span>
+                <span id="mean_other_team_q3" class="answer-value"></span>
               </span>
-              <span id="list_other_team_q3" class="value" data-separator=", "></span>
+              (<span id="list_other_team_q3" data-class="comma" class="answer-value"></span>)
             </div>
           </answer>
         </assessment>
-        <assessment id="assess_other_team_q4" class="grade">
+        <assessment id="assess_other_team_q4">
           <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
             <div>
               <span class="highlight">
                 <span>GRADE:</span>
-                <span id="mean_other_team_q4"></span>
+                <span id="mean_other_team_q4" class="answer-value"></span>
               </span>
-              <span id="list_other_team_q4" class="value" data-separator=", "></span>
+              (<span id="list_other_team_q4" data-class="comma" class="answer-value"></span>)
             </div>
           </answer>
         </assessment>
       </section>
       <section>
-        <assessment>
+        <assessment id="assess_final_grade">
           <label></label>
           <answer>
             <div style="float:right;text-align:right;">
               <div class="highlight">
                 <span>FINAL ACTIVITY GRADE:</span>
-                <span id="final_grade" data-class="grade"></span>
+                <span id="list_final_grade" class="answer-value" data-class="comma"></span>
               </div>
             </div>
           </answer>

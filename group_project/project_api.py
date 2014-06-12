@@ -112,6 +112,9 @@ class ProjectAPI(object):
         group_peer_items = self.get_peer_review_items_for_group(group_id)
         return [pri for pri in group_peer_items if pri['reviewer'] == reviewer_id and (pri['user'] == peer_id or pri['user'] == int(peer_id))]
 
+    def get_user_peer_review_items(self, user_id, group_id):
+        group_peer_items = self.get_peer_review_items_for_group(group_id)
+        return [pri for pri in group_peer_items if pri['user'] == user_id or pri['user'] == int(user_id)]
 
     def submit_peer_review_items(self, reviewer_id, peer_id, group_id, data):
         # get any data already there
@@ -145,7 +148,6 @@ class ProjectAPI(object):
         group_review_items = self.get_workgroup_review_items_for_group(group_id)
         return [gri for gri in group_review_items if gri['reviewer'] == reviewer_id]
 
-
     def submit_workgroup_review_items(self, reviewer_id, group_id, data):
         # get any data already there
         current_data = {ri['question']: ri for ri in self.get_workgroup_review_items(reviewer_id, group_id)}
@@ -173,6 +175,7 @@ class ProjectAPI(object):
                 }
                 self.create_workgroup_review_assessment(question_data)
 
+
     @api_error_protect
     def get_workgroup_by_id(self, group_id):
         response = GET(
@@ -199,3 +202,9 @@ class ProjectAPI(object):
             )
         )
         return json.loads(response.read())
+
+    @api_error_protect
+    def get_group_grade(self, group_id):
+        print "Faking final grade"
+        # TODO: get final grade from api_call
+        return "80"
