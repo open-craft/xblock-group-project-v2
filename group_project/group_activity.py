@@ -331,7 +331,7 @@ class GroupActivity(object):
         step_map = {}
         ordered_list = []
         prev_step = None
-        default_stage = self.activity_components[0]
+        default_stage = self.activity_components[0].id
         for ac in self.activity_components:
             step_map[ac.id] = {
                 "prev": prev_step,
