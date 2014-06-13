@@ -1,5 +1,19 @@
 function GroupProjectBlock(runtime, element) {
 
+  var mean = function(value_array){
+    var sum = 0;
+    var count = value_array.length;
+    if(count < 1){
+      return null;
+    }
+
+    for(var i=0; i<count; ++i){
+      sum += parseFloat(value_array[i]);
+    }
+
+    return sum / count;
+  }
+
   var load_data_into_form = function (form_id, data_for_form){
     var $form = $("." + form_id, element);
     $form.find('.answer').val(null);
@@ -10,13 +24,48 @@ function GroupProjectBlock(runtime, element) {
     }
   }
 
-  var _load_data = function (form_id, handler_name, data){
+  var load_my_feedback_data = function(section_node, data){
+    // Clean existing values
+    $('.answer-value', section_node).empty();
+
+    for(data_item in data){
+      // either a place witin to list it or the outer location
+      var fill_field = $('#list_' + data_item, section_node);
+      if(fill_field.length < 1){
+        fill_field = $('#assess_' + data_item, section_node);
+      }
+      var data_class = fill_field.data('class');
+      for(var i=0; i<data[data_item].length; ++i){
+        var node = $("<div/>");
+        if(data_class && data_class.length > 0){
+          node.addClass(data_class);
+        }
+        node.text(data[data_item][i]);
+        fill_field.append(node);
+      }
+
+      var mean_field = $('#mean_' + data_item, section_node);
+      mean_field.text(mean(data[data_item]));
+    }
+  }
+
+  var _load_data = function (handler_name, args, post_data_fn){
     $.ajax({
       url: runtime.handlerUrl(element, handler_name),
-      data: data,
+      data: args,
       dataType: 'json',
       success: function(data){
-        load_data_into_form(form_id, data);
+        if(data.result && data.result == "error"){
+          if(data.msg){
+            alert(data.msg);
+          }
+          else{
+            alert('Error loading feedback');
+          }
+        }
+        else{
+          post_data_fn(data);
+        }
       },
       error: function(data){
         alert('Error loading feedback');
@@ -25,15 +74,14 @@ function GroupProjectBlock(runtime, element) {
   }
 
   var load_data_for_peer = function (peer_id){
-    _load_data('peer_review', 'load_peer_feedback', 'peer_id=' + peer_id);
+    _load_data('load_peer_feedback', 'peer_id=' + peer_id, function(data){load_data_into_form('peer_review', data);});
   }
 
   var load_data_for_other_group = function (group_id){
-    _load_data('other_group_review', 'load_other_group_feedback', 'group_id=' + group_id);
+    _load_data('load_other_group_feedback', 'group_id=' + group_id, function(data){load_data_into_form('other_group_review', data);});
   }
 
-
-  $('form').on('submit', function(ev){
+  $('form', element).on('submit', function(ev){
     ev.preventDefault();
     var $form = $(this);
 
@@ -50,8 +98,8 @@ function GroupProjectBlock(runtime, element) {
       data: JSON.stringify(data),
       success: function(data){
         var msg = 'Thanks for your feedback!';
-        if(data['msg']){
-          msg = data['msg'];
+        if(data.msg){
+          msg = data.msg;
         }
         alert(msg);
       },
@@ -98,35 +146,43 @@ function GroupProjectBlock(runtime, element) {
   }
 
 
-  var step_ids = ['overview','upload','review','grade'];
-  var step_map = {};
-  for(var i = 0; i < step_ids.length; ++i){
-    step_map[step_ids[i]] = {
-      "prev": (i == 0 ) ? null : step_ids[i-1],
-      "next": (i == (step_ids.length-1)) ? null : step_ids[i+1]
-    };
-  }
+  var step_map = JSON.parse($('.step_map', element).html());
 
-  $('.revealer').on('click', function(ev){
+  $(document).on('select_stage', function(target, selected_step_id){
     // Hide show correct content
-    var selected_step = $(this).attr('id');
     $('.revealer').removeClass('selected');
     $(this).addClass('selected');
 
     $('.activity_section').hide();
 
     // NOTE: use of ids specified by designer here
-    $('#activity_' + selected_step).show();
+    $('#activity_' + selected_step_id).show();
 
     // Update step makers
-    var step_pn = step_map[selected_step];
-    $('.page-to.previous, .page-to.next', element).off('click').removeAttr('href');
-    if(step_pn["prev"]){
-      $('.page-to.previous', element).on('click', function(){$("#" + step_pn["prev"]).click();}).attr('href', '#');
+    var step_pn = step_map[selected_step_id];
+    $('.page-to.previous, .page-to.next', element).attr('title', '').off('click').removeAttr('href');
+    if(step_pn.prev){
+      var prev = step_map[step_pn.prev];
+      $('.page-to.previous', element)
+        .attr('title', prev.name)
+        .on('click', function(){$("#" + step_pn.prev).click();}).attr('href', '#');
     }
-    if(step_pn["next"]){
-      $('.page-to.next', element).on('click', function(){$("#" + step_pn["next"]).click();}).attr('href', '#');
+    if(step_pn.next){
+      var next_step = step_map[step_pn.next];
+      if(next_step['restrict_message']){
+        $('.page-to.next', element).attr('title', next_step['restrict_message']);
+      }
+      else{
+        $('.page-to.next', element)
+          .attr('title', next_step.name)
+          .on('click', function(){$("#" + step_pn["next"]).click();}).attr('href', '#');
+      }
     }
+  });
+
+  $('.revealer').on('click', function(ev){
+    $(document).trigger('select_stage', $(this).attr('id'));
+
     ev.preventDefault();
     return false;
   });
@@ -137,6 +193,13 @@ function GroupProjectBlock(runtime, element) {
     var showid = $(this).data('showid');
     $('.' + showid, element).show();
     $(this).addClass('selected');
+
+    if(showid == "cohort_feedback"){
+      _load_data('load_my_group_feedback', null, function(data){load_my_feedback_data($('.cohort_feedback', element), data);});
+    }
+    else{
+      _load_data('load_my_peer_feedback', null, function(data){load_my_feedback_data($('.team_feedback', element), data);});
+    }
 
     ev.preventDefault();
     return false;
@@ -160,13 +223,13 @@ function GroupProjectBlock(runtime, element) {
     $('.other_group_review', element).show();
     $('.peer_review', element).hide();
     $('.group_id', element).attr('value', $(this).data('id'));
-    load_data_for_other_group('other_group_review', $(this).data('id'));
+    load_data_for_other_group($(this).data('id'));
 
     ev.preventDefault();
     return false;
   });
 
-  $('#overview').click();
-  $('.view_feedback:first').click();
-
+  // activate the first step
+  $(document).trigger("steps_available", step_map);
+  $(document).trigger("select_stage", step_map["default"]);
 }

@@ -28,13 +28,16 @@ class DottableDict(dict):
 
 class ActivityQuestion(object):
 
-    def __init__(self, doc_tree):
+    def __init__(self, doc_tree, activity):
 
         self.id = doc_tree.get("id")
         self.label = doc_tree.find("./label")
         answer_node = doc_tree.find("./answer")
         self.answer = answer_node[0]
         self.small = (answer_node.get("small", "false") == "true")
+
+        if doc_tree.get("grade") == "true":
+            activity.grade_questions.append(self.id)
 
     @property
     def render(self):
@@ -86,10 +89,13 @@ class ActivityAssessment(object):
         answer_node = copy.deepcopy(self.answer)
         answer_node.set('name', self.id)
         answer_node.set('id', self.id)
-        answer_class = 'answer'
+        answer_classes = ['answer']
         if self.small:
-            answer_class = 'answer side'
-        answer_node.set('class', answer_class)
+            answer_classes.append('side')
+        current_class = answer_node.get('class')
+        if current_class:
+            answer_classes.append(current_class)
+        answer_node.set('class', ' '.join(answer_classes))
 
         label_node = copy.deepcopy(self.label)
         label_node.set('for', self.id)
@@ -132,7 +138,7 @@ class ActivitySection(object):
 
         # import any questions
         for question in doc_tree.findall("./question"):
-            self.questions.append(ActivityQuestion(question))
+            self.questions.append(ActivityQuestion(question, activity))
 
         # import any assessments
         for assessment in doc_tree.findall("./assessment"):
@@ -263,6 +269,8 @@ class GroupActivity(object):
         self.grading_criteria = []
         self.milestone_dates = {}
 
+        self.grade_questions = []
+
         # import resources
         for document in doc_tree.findall("./resources/document"):
             document_info = DottableDict({
@@ -318,6 +326,36 @@ class GroupActivity(object):
         submission_dicts = [submission.__dict__ for submission in self.submissions]
         return json.dumps(submission_dicts)
 
+    @property
+    def step_map(self):
+        step_map = {}
+        ordered_list = []
+        prev_step = None
+        default_stage = self.activity_components[0]
+        for ac in self.activity_components:
+            step_map[ac.id] = {
+                "prev": prev_step,
+                "name": ac.name,
+            }
+            if not ac.is_open:
+                step_map[ac.id]["restrict_message"] = "{} closed until {}".format(
+                    ac.name,
+                    ac.formatted_open_date
+                )
+            ordered_list.append(ac.id)
+            prev_step = ac.id
+            if ac.open_date and ac.open_date < date.today():
+                default_stage = ac.id
+
+        next_step = None
+        for ac in reversed(self.activity_components):
+            step_map[ac.id]["next"] = next_step
+            next_step = ac.id
+
+        step_map["ordered_list"] = ordered_list
+        step_map["default"] = default_stage
+
+        return json.dumps(step_map)
 
     @classmethod
     def import_xml_file(cls, file_name):
