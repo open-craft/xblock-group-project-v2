@@ -147,19 +147,19 @@ function GroupProjectBlock(runtime, element) {
 
 
   var step_map = JSON.parse($('.step_map', element).html());
-  $('.revealer').on('click', function(ev){
+
+  $(document).on('select_stage', function(target, selected_step_id){
     // Hide show correct content
-    var selected_step = $(this).attr('id');
     $('.revealer').removeClass('selected');
     $(this).addClass('selected');
 
     $('.activity_section').hide();
 
     // NOTE: use of ids specified by designer here
-    $('#activity_' + selected_step).show();
+    $('#activity_' + selected_step_id).show();
 
     // Update step makers
-    var step_pn = step_map[selected_step];
+    var step_pn = step_map[selected_step_id];
     $('.page-to.previous, .page-to.next', element).attr('title', '').off('click').removeAttr('href');
     if(step_pn.prev){
       var prev = step_map[step_pn.prev];
@@ -178,6 +178,10 @@ function GroupProjectBlock(runtime, element) {
           .on('click', function(){$("#" + step_pn["next"]).click();}).attr('href', '#');
       }
     }
+  });
+
+  $('.revealer').on('click', function(ev){
+    $(document).trigger('select_stage', $(this).attr('id'));
 
     ev.preventDefault();
     return false;
@@ -226,5 +230,6 @@ function GroupProjectBlock(runtime, element) {
   });
 
   // activate the first step
-  $('#' + step_map["ordered_list"][0]).click();
+  $(document).trigger("steps_available", step_map);
+  $(document).trigger("select_stage", step_map["default"]);
 }

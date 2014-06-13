@@ -331,6 +331,7 @@ class GroupActivity(object):
         step_map = {}
         ordered_list = []
         prev_step = None
+        default_stage = self.activity_components[0]
         for ac in self.activity_components:
             step_map[ac.id] = {
                 "prev": prev_step,
@@ -343,6 +344,8 @@ class GroupActivity(object):
                 )
             ordered_list.append(ac.id)
             prev_step = ac.id
+            if ac.open_date and ac.open_date < date.today():
+                default_stage = ac.id
 
         next_step = None
         for ac in reversed(self.activity_components):
@@ -350,6 +353,7 @@ class GroupActivity(object):
             next_step = ac.id
 
         step_map["ordered_list"] = ordered_list
+        step_map["default"] = default_stage
 
         return json.dumps(step_map)
 
