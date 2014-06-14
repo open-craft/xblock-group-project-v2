@@ -8,6 +8,7 @@ WORKGROUP_API = 'api/workgroups'
 PEER_REVIEW_API = 'api/peer_reviews'
 WORKGROUP_REVIEW_API = 'api/workgroup_reviews'
 USERS_API = 'api/users'
+SUBMISSION_API = 'api/submissions'
 
 class ProjectAPI(object):
 
@@ -208,3 +209,15 @@ class ProjectAPI(object):
         print "Faking final grade"
         # TODO: get final grade from api_call
         return "80"
+
+    @api_error_protect
+    def create_submission(self, submit_hash):
+        response = POST(
+            '{}/{}/'.format(
+                self._api_server_address,
+                SUBMISSION_API
+            ),
+            submit_hash
+        )
+
+        return json.loads(response.read())

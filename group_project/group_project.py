@@ -23,6 +23,7 @@ from .utils import render_template, AttrDict, load_resource
 
 from .group_activity import GroupActivity
 from .project_api import ProjectAPI
+from .upload_file import UploadFile
 
 
 # Globals ###########################################################
@@ -33,6 +34,7 @@ log = logging.getLogger(__name__)
 # Classes ###########################################################
 
 class GroupProjectBlock(XBlock):
+
     """
     XBlock providing a group activity project for a group of students to collaborate upon
     """
@@ -55,7 +57,7 @@ class GroupProjectBlock(XBlock):
         scope=Scope.user_state
     )
 
-    with open (resource_filename(__name__, 'res/default.xml'), "r") as default_xml_file:
+    with open(resource_filename(__name__, 'res/default.xml'), "r") as default_xml_file:
         default_xml = default_xml_file.read()
 
     data = String(
@@ -68,10 +70,12 @@ class GroupProjectBlock(XBlock):
     has_score = True
 
     _project_api = None
+
     @property
     def project_api(self):
         if self._project_api is None:
-            self._project_api = ProjectAPI('http://{}'.format(self.xmodule_runtime.HOSTNAME))
+            self._project_api = ProjectAPI(
+                'http://{}'.format(self.xmodule_runtime.HOSTNAME))
         return self._project_api
 
     @property
@@ -81,6 +85,15 @@ class GroupProjectBlock(XBlock):
         except:
             return None
 
+    @property
+    def workgroup(self):
+        group = self.project_api.get_user_workgroup_for_course(
+            self.user_id,
+            self.xmodule_runtime.course_id
+        )
+
+        return group
+
     def student_view(self, context):
         """
         Player view, displayed to the student
@@ -88,11 +101,8 @@ class GroupProjectBlock(XBlock):
         user_id = self.user_id
         group_activity = GroupActivity.import_xml_string(self.data)
         if user_id:
-            workgroup = self.project_api.get_user_workgroup_for_course(
-                user_id,
-                self.xmodule_runtime.course_id
-            )
-            team_members = [tm for tm in workgroup["users"] if user_id != int(tm["id"])]
+            team_members = [tm for tm in self.workgroup[
+                "users"] if user_id != int(tm["id"])]
 
             # TODO: Replace with workgroup call to get assigned workgroups
             assess_groups = [
@@ -146,7 +156,8 @@ class GroupProjectBlock(XBlock):
         }
 
         fragment = Fragment()
-        fragment.add_content(render_template('/templates/html/group_project.html', context))
+        fragment.add_content(
+            render_template('/templates/html/group_project.html', context))
         fragment.add_css(load_resource('public/css/group_project.css'))
         fragment.add_javascript(load_resource('public/js/group_project.js'))
 
@@ -162,7 +173,8 @@ class GroupProjectBlock(XBlock):
         fragment.add_content(render_template('/templates/html/group_project_edit.html', {
             'self': self,
         }))
-        fragment.add_javascript(load_resource('public/js/group_project_edit.js'))
+        fragment.add_javascript(
+            load_resource('public/js/group_project_edit.js'))
 
         fragment.initialize_js('GroupProjectEditBlock')
 
@@ -206,16 +218,11 @@ class GroupProjectBlock(XBlock):
             peer_id = submissions["peer_id"]
             del submissions["peer_id"]
 
-            group = self.project_api.get_user_workgroup_for_course(
-                self.user_id,
-                self.xmodule_runtime.course_id
-            )
-
             # Then something like this needs to happen
             self.project_api.submit_peer_review_items(
                 self.xmodule_runtime.anonymous_student_id,
                 peer_id,
-                group['id'],
+                self.workgroup['id'],
                 submissions
             )
 
@@ -257,15 +264,10 @@ class GroupProjectBlock(XBlock):
     def load_peer_feedback(self, request, suffix=''):
 
         peer_id = request.GET["peer_id"]
-        group = self.project_api.get_user_workgroup_for_course(
-            self.user_id,
-            self.xmodule_runtime.course_id
-        )
-
         feedback = self.project_api.get_peer_review_items(
             self.xmodule_runtime.anonymous_student_id,
             peer_id,
-            group['id']
+            self.workgroup['id']
         )
 
         # pivot the data to show question -> answer
@@ -292,14 +294,9 @@ class GroupProjectBlock(XBlock):
     def load_my_peer_feedback(self, request, suffix=''):
 
         user_id = self.user_id
-        group = self.project_api.get_user_workgroup_for_course(
-            user_id,
-            self.xmodule_runtime.course_id
-        )
-
         feedback = self.project_api.get_user_peer_review_items(
             user_id,
-            group['id']
+            self.workgroup['id']
         )
 
         results = {}
@@ -314,13 +311,8 @@ class GroupProjectBlock(XBlock):
     @XBlock.handler
     def load_my_group_feedback(self, request, suffix=''):
 
-        group = self.project_api.get_user_workgroup_for_course(
-            self.user_id,
-            self.xmodule_runtime.course_id
-        )
-
         feedback = self.project_api.get_workgroup_review_items_for_group(
-            group['id']
+            self.workgroup['id']
         )
 
         results = {}
@@ -330,6 +322,37 @@ class GroupProjectBlock(XBlock):
             else:
                 results[item['question']] = [item['answer']]
 
-        results["final_grade"] = [self.project_api.get_group_grade(group['id'])]
+        results["final_grade"] = [
+            self.project_api.get_group_grade(group['id'])]
 
         return webob.response.Response(body=json.dumps(results))
+
+    @XBlock.handler
+    def upload_submission(self, request, suffix=''):
+        response_data = {"message": _("File(s) successfully submitted")}
+        try:
+            group_activity = GroupActivity.import_xml_string(self.data)
+
+            context = {
+                "user_id": self.user_id,
+                "group_id": self.workgroup['id'],
+                "project_api": self.project_api
+            }
+
+            upload_files = [UploadFile(request.params[s.id].file, s.id, context)
+                            for s in group_activity.submissions if s.id in request.params]
+
+            # Save the files first
+            for uf in upload_files:
+                uf.save_file()
+
+            # They all got saved... note the submissions
+            for uf in upload_files:
+                uf.submit()
+
+            response_data.update({uf.submission_id : uf.file_url for uf in upload_files})
+
+        except Exception as e:
+            response_data.update({"message": _("Error uploading file(s) - {}").format(e.message)})
+
+        return webob.response.Response(body=json.dumps(response_data))

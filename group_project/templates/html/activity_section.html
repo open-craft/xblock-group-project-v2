@@ -19,6 +19,21 @@
 {% for file_link in activity_section.file_links %}
   <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}</a></div>
 {% endfor %}
-{% ifequal activity_section.file_link_name "submissions" %}
-  <button id="upload_submissions">Upload</button>
-{% endifequal %}
+{% if activity_section.is_upload_available %}
+<form class="uploader">
+  {% for file_link in activity_section.file_links %}
+    <div class="upload_item">
+      <div>{{ file_link.title }}</div>
+      <input class="{{ file_link.id }}_name" placeholder="Browse your computer to upload file..." disabled="disabled" type="text" />
+      <label for="{{ file_link.id }}">
+        <span class="side button tiny rounded {{ file_link.id }}_label">Browse</span>
+      </label>
+      <input style="display:none;" class="file_upload" name="{{ file_link.id }}" id="{{ file_link.id }}" type="file" />
+      {% if file_link.description %}
+        <div class="description">{{ file_link.description }}</div>
+      {% endif %}
+    </div>
+  {% endfor %}
+</form>
+<button id="upload_submissions">Upload</button>
+{% endif %}

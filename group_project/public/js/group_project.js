@@ -81,7 +81,7 @@ function GroupProjectBlock(runtime, element) {
     _load_data('load_other_group_feedback', 'group_id=' + group_id, function(data){load_data_into_form('other_group_review', data);});
   }
 
-  $('form', element).on('submit', function(ev){
+  $('form.peer_review, form.other_group_review', element).on('submit', function(ev){
     ev.preventDefault();
     var $form = $(this);
 
@@ -232,4 +232,28 @@ function GroupProjectBlock(runtime, element) {
   // activate the first step
   $(document).trigger("steps_available", step_map);
   $(document).trigger("select_stage", step_map["default"]);
+
+
+  // Test Uploader code
+  var upload_data = {
+    dataType: 'json',
+    url: runtime.handlerUrl(element, "upload_submission"),
+    add: function(e, data){
+      var target_form = $(e.target);
+      $('.' + data.paramName + '_name', target_form).val(data.files[0].name);
+      $('.' + data.paramName + '_label', target_form).text("Update");
+
+      $('#upload_submissions').one('click', function(ev){
+        alert('submitting ' + data.files[0].name);
+        data.submit();
+      });
+    },
+    done: function(e, data){
+      //x = q;
+      alert(data.result.message);
+    }
+  };
+
+  $('.uploader', element).fileupload(upload_data);
+
 }

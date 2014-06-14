@@ -123,8 +123,9 @@ class ActivityAssessment(object):
 
 class ActivitySection(object):
 
-    def __init__(self, doc_tree, activity):
+    def __init__(self, doc_tree, component, activity):
 
+        self.component = component
         self.file_links = None
         self.questions = []
         self.assessments = []
@@ -162,6 +163,10 @@ class ActivitySection(object):
         }
         return render_template('/templates/html/activity_section.html', data)
 
+    @property
+    def is_upload_available(self):
+        return self.file_link_name == "submissions" and self.component.is_open and not self.component.is_closed
+
 
 
 class ActivityComponent(object):
@@ -191,23 +196,23 @@ class ActivityComponent(object):
 
         # import sections
         for section in doc_tree.findall("./section"):
-            self.sections.append(ActivitySection(section, activity))
+            self.sections.append(ActivitySection(section, self, activity))
 
         # import questions for peer review
         for section in doc_tree.findall("./peerreview/section"):
-            self.peer_review_sections.append(ActivitySection(section, activity))
+            self.peer_review_sections.append(ActivitySection(section, self, activity))
 
         # import questions for project review
         for section in doc_tree.findall("./projectreview/section"):
-            self.other_group_sections.append(ActivitySection(section, activity))
+            self.other_group_sections.append(ActivitySection(section, self, activity))
 
         # import questions for peer review
         for section in doc_tree.findall("./peerassessment/section"):
-            self.peer_assessment_sections.append(ActivitySection(section, activity))
+            self.peer_assessment_sections.append(ActivitySection(section, self, activity))
 
         # import questions for project review
         for section in doc_tree.findall("./projectassessment/section"):
-            self.other_group_assessment_sections.append(ActivitySection(section, activity))
+            self.other_group_assessment_sections.append(ActivitySection(section, self, activity))
 
     @staticmethod
     def _formatted_date(date_value):
