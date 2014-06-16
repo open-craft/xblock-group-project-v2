@@ -76,6 +76,20 @@
 
 .group-project-xblock-wrapper .other_submissions{
   float: right;
+  position:relative;
+  width: 50%;
+  text-align: right;
+}
+
+.group-project-xblock-wrapper .other_submission_links{
+  display: none;
+  border: 1px solid black;
+  position: absolute;
+  bottom: 0;
+  right:0;
+  margin-bottom: 1em;
+  padding: 1em;
+  text-align: center;
 }
 
 .group-project-xblock-wrapper .avatar{

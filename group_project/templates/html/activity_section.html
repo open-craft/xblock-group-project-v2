@@ -36,12 +36,12 @@
       {% endautoescape %}
     {% endif %}
     <form class="uploader">
-      {% for file_link in activity_section.file_links %}
+      {% for file_link in activity_section.upload_links %}
         <div class="upload_item">
           <div>{{ file_link.title }}</div>
-          <input class="{{ file_link.id }}_name" placeholder="Browse your computer to upload file..." disabled="disabled" type="text" />
+          <input class="{{ file_link.id }}_name" placeholder="Browse your computer to upload file..." disabled="disabled" type="text" {% if file_link.location %}value="{{ file_link.location }}"{% endif %}/>
           <label for="{{ file_link.id }}">
-            <span class="side button tiny rounded {{ file_link.id }}_label">Browse</span>
+            <span class="side button tiny rounded {{ file_link.id }}_label">{% if file_link.location %}Update{% else %}Browse{% endif %}</span>
           </label>
           <input style="display:none;" class="file_upload" name="{{ file_link.id }}" id="{{ file_link.id }}" type="file" />
           {% if file_link.description %}

@@ -100,6 +100,9 @@ class GroupProjectBlock(XBlock):
         """
         user_id = self.user_id
         group_activity = GroupActivity.import_xml_string(self.data)
+        group_activity.update_submission_data(
+            self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup["id"])
+        )
         if user_id:
             team_members = [tm for tm in self.workgroup["users"] if user_id != int(tm["id"])]
 
@@ -355,3 +358,15 @@ class GroupProjectBlock(XBlock):
             response_data.update({"message": _("Error uploading file(s) - {}").format(e.message)})
 
         return webob.response.Response(body=json.dumps(response_data))
+
+    @XBlock.handler
+    def other_submission_links(self, request, suffix=''):
+        group_activity = GroupActivity.import_xml_string(self.data)
+        group_id = request.GET["group_id"]
+
+        group_activity.update_submission_data(
+            self.project_api.get_latest_workgroup_submissions_by_id(group_id)
+        )
+        html_output = render_template('/templates/html/other_submission_links.html', {"group_activity": group_activity})
+
+        return webob.response.Response(body=json.dumps({"html":html_output}))

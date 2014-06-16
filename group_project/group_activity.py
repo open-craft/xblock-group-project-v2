@@ -126,35 +126,55 @@ class ActivitySection(object):
     def __init__(self, doc_tree, component, activity):
 
         self.component = component
-        self.file_links = None
         self.questions = []
         self.assessments = []
+        self.activity = activity
 
         self.title = doc_tree.get("title")
         self.content = doc_tree.find("./content")
 
         if self.content:
-            self._replace_date_values(activity)
+            self._replace_date_values()
 
         self.upload_dialog = (doc_tree.get("upload_dialog") == "true")
 
         self.file_link_name = doc_tree.get("file_links")
-        if self.file_link_name:
-            self.file_links = getattr(activity, self.file_link_name, None)
 
         # import any questions
         for question in doc_tree.findall("./question"):
-            self.questions.append(ActivityQuestion(question, activity))
+            self.questions.append(ActivityQuestion(question, self.activity))
 
         # import any assessments
         for assessment in doc_tree.findall("./assessment"):
             self.assessments.append(ActivityAssessment(assessment))
 
-    def _replace_date_values(self, activity):
+    def _replace_date_values(self):
         for date_span in self.content.findall(".//span[@class='milestone']"):
             date_name = date_span.get("data-date")
-            date_value = activity.milestone_dates[date_name]
+            date_value = self.activity.milestone_dates[date_name]
             date_span.text = ActivityComponent._formatted_date(date_value)
+
+    @property
+    def file_links(self):
+        if self.upload_dialog:
+            return None
+
+        file_links = None
+        if self.file_link_name:
+            file_links = getattr(self.activity, self.file_link_name, None)
+
+        return file_links
+
+    @property
+    def upload_links(self):
+        if not self.upload_dialog:
+            return None
+
+        file_links = None
+        if self.file_link_name:
+            file_links = getattr(self.activity, self.file_link_name, None)
+
+        return file_links
 
     @property
     def content_html(self):
@@ -324,6 +344,13 @@ class GroupActivity(object):
         # import project components
         for component in doc_tree.findall("./projectcomponent"):
             self.activity_components.append(ActivityComponent(component, self))
+
+    def update_submission_data(self, submission_map):
+        for submission in self.submissions:
+            if submission["id"] in submission_map:
+                submission["location"] = submission_map[submission["id"]]["document_url"]
+                # TODO: get file_name when updated; for testing purposes use url for now
+                submission["file_name"] = submission_map[submission["id"]]["document_url"]
 
     @property
     def export_xml(self):

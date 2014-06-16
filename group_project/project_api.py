@@ -1,5 +1,6 @@
 ''' API calls with respect group projects'''
 import json
+import datetime
 
 from .json_requests import GET, POST, PUT, DELETE
 from .api_error import api_error_protect
@@ -9,6 +10,16 @@ PEER_REVIEW_API = 'api/peer_reviews'
 WORKGROUP_REVIEW_API = 'api/workgroup_reviews'
 USERS_API = 'api/users'
 SUBMISSION_API = 'api/submissions'
+
+def _build_date_field(json_date_string_value):
+    ''' converts json date string to date object '''
+    try:
+        return datetime.datetime.strptime(
+            json_date_string_value,
+            '%Y-%m-%dT%H:%M:%S.%fZ'
+        )
+    except ValueError:
+        return None
 
 class ProjectAPI(object):
 
@@ -223,3 +234,34 @@ class ProjectAPI(object):
         )
 
         return json.loads(response.read())
+
+    @api_error_protect
+    def get_workgroup_submissions(self, group_id):
+        response = GET(
+            '{}/{}/{}/submissions/'.format(
+                self._api_server_address,
+                WORKGROUP_API,
+                group_id,
+            )
+        )
+
+        return json.loads(response.read())
+
+
+    def get_latest_workgroup_submissions_by_id(self, group_id):
+        submission_list = self.get_workgroup_submissions(group_id)
+
+        submissions_by_id = {}
+        for submission in submission_list:
+            submission_id = submission['document_id']
+            if submission_id in submissions_by_id:
+                last_modified = _build_date_field(submissions_by_id[submission_id]["modified"])
+                this_modified = _build_date_field(submission["modified"])
+                if this_modified > last_modified:
+                    submissions_by_id[submission["document_id"]] = submission
+            else:
+                submissions_by_id[submission["document_id"]] = submission
+
+        return submissions_by_id
+
+

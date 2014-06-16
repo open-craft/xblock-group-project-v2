@@ -223,6 +223,7 @@ function GroupProjectBlock(runtime, element) {
     $('.other_group_review', element).show();
     $('.peer_review', element).hide();
     $('.group_id', element).attr('value', $(this).data('id'));
+    $('.other_submission_links', element).empty().hide();
     load_data_for_other_group($(this).data('id'));
 
     ev.preventDefault();
@@ -268,4 +269,23 @@ function GroupProjectBlock(runtime, element) {
     upload_form.show();
   });
 
+  $('.view_other_submissions', element).on('click', function(){
+    var $flyup = $('.other_submission_links', element);
+    var is_visible = $flyup.is(":visible");
+    $flyup.empty().hide();
+    if(!is_visible){
+      var selected_group_id = $('.select_group.selected').data("id");
+      $.ajax({
+        url: runtime.handlerUrl(element, "other_submission_links"),
+        data: {group_id: selected_group_id},
+        dataType: 'json',
+        success: function(data){
+          $flyup.html(data.html).show();
+        },
+        error: function(data){
+          alert('Error loading links for group!!!');
+        }
+      });
+    }
+  });
 }
