@@ -133,6 +133,11 @@ class ActivitySection(object):
         self.title = doc_tree.get("title")
         self.content = doc_tree.find("./content")
 
+        if self.content:
+            self._replace_date_values(activity)
+
+        self.upload_dialog = (doc_tree.get("upload_dialog") == "true")
+
         self.file_link_name = doc_tree.get("file_links")
         if self.file_link_name:
             self.file_links = getattr(activity, self.file_link_name, None)
@@ -145,9 +150,24 @@ class ActivitySection(object):
         for assessment in doc_tree.findall("./assessment"):
             self.assessments.append(ActivityAssessment(assessment))
 
+    def _replace_date_values(self, activity):
+        for date_span in self.content.findall(".//span[@class='milestone']"):
+            date_name = date_span.get("data-date")
+            date_value = activity.milestone_dates[date_name]
+            date_span.text = ActivityComponent._formatted_date(date_value)
+
     @property
     def content_html(self):
+        if self.upload_dialog:
+            return None
         return inner_html(self.content)
+
+    @property
+    def upload_html(self):
+        if self.upload_dialog:
+            return inner_html(self.content)
+        return None
+
 
     @property
     def export_xml(self):
@@ -165,8 +185,7 @@ class ActivitySection(object):
 
     @property
     def is_upload_available(self):
-        return self.file_link_name == "submissions" and self.component.is_open and not self.component.is_closed
-
+        return self.upload_dialog and self.component.is_open and not self.component.is_closed
 
 
 class ActivityComponent(object):

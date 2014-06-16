@@ -243,8 +243,7 @@ function GroupProjectBlock(runtime, element) {
       $('.' + data.paramName + '_name', target_form).val(data.files[0].name);
       $('.' + data.paramName + '_label', target_form).text("Update");
 
-      $('#upload_submissions').one('click', function(ev){
-        alert('submitting ' + data.files[0].name);
+      $(document).on('perform_uploads', function(ev){
         data.submit();
       });
     },
@@ -255,5 +254,18 @@ function GroupProjectBlock(runtime, element) {
   };
 
   $('.uploader', element).fileupload(upload_data);
+
+  var upload_form = $('.upload_form', element).appendTo($(document.body));
+  $('.cancel_upload', upload_form).on('click', function(){
+    upload_form.hide();
+  })
+  $('.do_upload', upload_form).on('click', function(){
+    $(document).trigger('perform_uploads');
+    upload_form.hide();
+  })
+
+  $('.show_upload_form', element).on('click', function(){
+    upload_form.show();
+  });
 
 }

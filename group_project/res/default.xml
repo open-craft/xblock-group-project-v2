@@ -5,8 +5,8 @@
     <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
   </resources>
   <dates>
-    <milestone name="submissions">5/24/2014</milestone>
-    <milestone name="review">6/10/2014</milestone>
+    <milestone name="submissions">6/17/2014</milestone>
+    <milestone name="review">6/30/2014</milestone>
   </dates>
   <submissions>
     <document id="issue_tree" title="Issue Tree" />
@@ -23,7 +23,7 @@
       <content>
         <ul>
           <li>Type: <b>Issue Tree</b></li>
-          <li>Deadline: <b>06/12/2014</b></li>
+          <li>Deadline: <b><span class="milestone" data-date="submissions"></span></b></li>
           <li>Deliverables: <b>PPT</b></li>
           <li>Grading: <b>Lorem Ipsum</b></li>
         </ul>
@@ -32,7 +32,7 @@
     <section title="Suggested Schedule">
       <content>
         <ul>
-          <li>Activity Deadline: <b>07/12/2014</b></li>
+          <li>Activity Deadline: <b><span class="milestone" data-date="review"></span></b></li>
           <li>Reviews: <b class="highlight">Please complete your reviews within 3 days once they are available for grading.</b></li>
         </ul>
       </content>
@@ -47,7 +47,17 @@
     <section title="Team Submission">
       <content>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</content>
     </section>
-    <section title="Current Files" file_links="submissions"></section>
+    <section title="Current Files" file_links="submissions">
+    </section>
+    <section upload_dialog="true" file_links="submissions">
+      <content>
+        <h1>Upload</h1>
+        <hr />
+        <div>
+          Upload your team submission(s) below. You can continue to upload revisions until the <span class="highlight">upload period closes on <span class="milestone" data-date="submissions"></span>.</span>Only your last uploaded file(s) will be graded. Final text will be written. Placeholder only.
+        </div>
+      </content>
+    </section>
   </projectcomponent>
   <projectcomponent name="Activity 1: Reviews" open="submissions" close="review" id="review">
     <section title="Lorem Ipsum" file_links="grading_criteria">

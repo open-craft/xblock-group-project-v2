@@ -28,7 +28,9 @@
         {% autoescape off %}
           {{ activity_section.render }}
         {% endautoescape %}
+        {% ifequal activity_section.upload_html None %}
         <hr />
+        {% endifequal %}
       {% endfor %}
       {% if activity_component.peer_reviews %}
       <form class="peer_review" action="submit_peer_feedback" method="POST">
