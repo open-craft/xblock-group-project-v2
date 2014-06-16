@@ -101,8 +101,7 @@ class GroupProjectBlock(XBlock):
         user_id = self.user_id
         group_activity = GroupActivity.import_xml_string(self.data)
         if user_id:
-            team_members = [tm for tm in self.workgroup[
-                "users"] if user_id != int(tm["id"])]
+            team_members = [tm for tm in self.workgroup["users"] if user_id != int(tm["id"])]
 
             # TODO: Replace with workgroup call to get assigned workgroups
             assess_groups = [

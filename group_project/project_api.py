@@ -190,19 +190,21 @@ class ProjectAPI(object):
 
     @api_error_protect
     def get_user_workgroup_for_course(self, user_id, course_id):
-        print "Faking call for user {} in course {} - using workgroup 3 for testing purposes".format(user_id, course_id)
-        # TODO: Make actual call when available (MCKIN-1425)
-        return self.get_workgroup_by_id(3)
-
         response = GET(
-            '{}/{}/{}/workgroups/?course_id={}'.format(
+            '{}/{}/{}/workgroups/?course={}'.format(
                 self._api_server_address,
                 USERS_API,
                 user_id,
                 course_id
             )
         )
-        return json.loads(response.read())
+
+        workgroups_list = json.loads(response.read())
+
+        if workgroups_list['count'] < 1:
+            return None
+
+        return self.get_workgroup_by_id(workgroups_list['results'][0]['id'])
 
     @api_error_protect
     def get_group_grade(self, group_id):
