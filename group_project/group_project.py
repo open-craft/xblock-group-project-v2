@@ -367,6 +367,17 @@ class GroupProjectBlock(XBlock):
         group_activity.update_submission_data(
             self.project_api.get_latest_workgroup_submissions_by_id(group_id)
         )
-        html_output = render_template('/templates/html/other_submission_links.html', {"group_activity": group_activity})
+        html_output = render_template('/templates/html/submission_links.html', {"group_activity": group_activity})
+
+        return webob.response.Response(body=json.dumps({"html":html_output}))
+
+    @XBlock.handler
+    def refresh_submission_links(self, request, suffix=''):
+        group_activity = GroupActivity.import_xml_string(self.data)
+
+        group_activity.update_submission_data(
+            self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup['id'])
+        )
+        html_output = render_template('/templates/html/submission_links.html', {"group_activity": group_activity})
 
         return webob.response.Response(body=json.dumps({"html":html_output}))

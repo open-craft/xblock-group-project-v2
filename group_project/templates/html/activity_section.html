@@ -16,11 +16,6 @@
     {{ activity_assessment.render }}
   {% endautoescape %}
 {% endfor %}
-{% for file_link in activity_section.file_links %}
-  {% if file_link.location %}
-    <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }}){% endif %}</a></div>
-  {% endif %}
-{% endfor %}
 {% if activity_section.is_upload_available %}
 <button class="show_upload_form">Upload</button>
 <div class="upload_form">
@@ -47,6 +42,9 @@
           {% if file_link.description %}
             <div class="description">{{ file_link.description }}</div>
           {% endif %}
+          <div class="{{ file_link.id }}_progress_box file-progress-box">
+            <div class="{{ file_link.id }}_progress file-progress"></div>
+          </div>
         </div>
       {% endfor %}
     </form>
@@ -57,4 +55,14 @@
     </div>
   </div>
 </div>
+{% else %}
+{% if activity_section.file_link_name %}
+<div class="group_{{ activity_section.file_link_name }}">
+{% for file_link in activity_section.file_links %}
+  {% if file_link.location %}
+    <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }}){% endif %}</a></div>
+  {% endif %}
+{% endfor %}
+</div>
+{% endif %}
 {% endif %}

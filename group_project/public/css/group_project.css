@@ -215,7 +215,23 @@
   cursor: pointer;
 }
 
+.upload_form .file-progress-box{
+  background-color: transparent;
+  width: 79%;
+  height: 5px;
+  visibility: hidden;
+}
+.upload_form .file-progress-box .file-progress{
+  background-color: #002960;
+  width: 20%;
+  height: 5px;
+}
+.upload_form .file-progress-box .file-progress.complete{
+  background-color: #629B2B;
+}
+
 .group-project-xblock-wrapper .highlight,
 .upload_form .highlight{
   color: #E37222;
 }
+

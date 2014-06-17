@@ -235,7 +235,8 @@ function GroupProjectBlock(runtime, element) {
   $(document).trigger("select_stage", step_map["default"]);
 
 
-  // Test Uploader code
+  var upload_form = $('.upload_form', element).appendTo($(document.body));
+
   var upload_data = {
     dataType: 'json',
     url: runtime.handlerUrl(element, "upload_submission"),
@@ -243,26 +244,56 @@ function GroupProjectBlock(runtime, element) {
       var target_form = $(e.target);
       $('.' + data.paramName + '_name', target_form).val(data.files[0].name);
       $('.' + data.paramName + '_label', target_form).text("Update");
+      $('.' + data.paramName + '_progress', target_form).css({width: '0%'});
+      $('.' + data.paramName + '_progress_box', target_form).css({visibility: 'visible'});
 
       $(document).on('perform_uploads', function(ev){
         data.submit();
       });
     },
+    progress: function(e, data){
+      var target_form = $(e.target);
+      var percentage = parseInt(data.loaded / data.total * 100, 10);
+      $('.' + data.paramName + '_progress', target_form).css('width', percentage + '%');
+    },
     done: function(e, data){
-      //x = q;
-      alert(data.result.message);
+      var target_form = $(e.target);
+      $('.' + data.paramName + '_progress', target_form).css('width', '100%').addClass('complete');
+      setTimeout(function(){
+        $('.' + data.paramName + '_progress_box', target_form).css('visibility', 'hidden');
+        $('.' + data.paramName + '_progress', target_form).removeClass('complete');
+        if($('.file-progress-box:visible').length < 1){
+        }
+      }, 500);
+    },
+    stop: function(e){
+      $('.group_submissions', element).empty();
+      $.ajax({
+        url: runtime.handlerUrl(element, "refresh_submission_links"),
+        dataType: 'json',
+        success: function(data){
+          $('.group_submissions', element).html(data.html);
+        },
+        error: function(data){
+          alert('Error loading links for group!!!');
+        }
+      });
+
+      setTimeout(function(){
+        upload_form.hide();
+        $('.action_buttons a', element).css('cursor', 'pointer').removeAttr('disabled');
+      }, 1000);
     }
   };
 
-  $('.uploader', element).fileupload(upload_data);
+  $('.uploader', upload_form).fileupload(upload_data);
 
-  var upload_form = $('.upload_form', element).appendTo($(document.body));
   $('.cancel_upload', upload_form).on('click', function(){
     upload_form.hide();
   })
   $('.do_upload', upload_form).on('click', function(){
+    $('.action_buttons a', element).css('cursor', 'wait').attr('disabled', 'disabled');
     $(document).trigger('perform_uploads');
-    upload_form.hide();
   })
 
   $('.show_upload_form', element).on('click', function(){
