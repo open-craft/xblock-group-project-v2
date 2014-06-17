@@ -133,7 +133,7 @@ class ActivitySection(object):
         self.title = doc_tree.get("title")
         self.content = doc_tree.find("./content")
 
-        if self.content:
+        if self.content is not None:
             self._replace_date_values()
 
         self.upload_dialog = (doc_tree.get("upload_dialog") == "true")
@@ -349,8 +349,7 @@ class GroupActivity(object):
         for submission in self.submissions:
             if submission["id"] in submission_map:
                 submission["location"] = submission_map[submission["id"]]["document_url"]
-                # TODO: get file_name when updated; for testing purposes use url for now
-                submission["file_name"] = submission_map[submission["id"]]["document_url"]
+                submission["file_name"] = submission_map[submission["id"]]["document_filename"]
 
     @property
     def export_xml(self):

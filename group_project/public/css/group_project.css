@@ -83,7 +83,8 @@
 
 .group-project-xblock-wrapper .other_submission_links{
   display: none;
-  border: 1px solid black;
+  border: 1px solid #cccccc;
+  background-color: #ffffff;
   position: absolute;
   bottom: 0;
   right:0;

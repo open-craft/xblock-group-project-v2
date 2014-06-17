@@ -16,7 +16,7 @@ def _build_date_field(json_date_string_value):
     try:
         return datetime.datetime.strptime(
             json_date_string_value,
-            '%Y-%m-%dT%H:%M:%S.%fZ'
+            '%Y-%m-%dT%H:%M:%SZ'
         )
     except ValueError:
         return None

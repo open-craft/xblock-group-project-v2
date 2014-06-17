@@ -1,9 +1,14 @@
 import mimetypes
+import hashlib
+
+from django.core.files import File
+from django.core.files.storage import default_storage
+
+from django.conf import settings
 
 class UploadFile(object):
 
-    file_name = None
-    file_url = None
+    _sha1_hash = None
 
     def __init__(self, file, submission_id, project_context):#group_id, user_id, project_api)
 
@@ -15,19 +20,47 @@ class UploadFile(object):
         self.user_id = project_context["user_id"]
         self.project_api = project_context["project_api"]
 
-    def save_file(self):
-        # Simple file write to disk
-        file_url = "{}_{}_{}".format(self.group_id, self.user_id, self.file.name)
-        with open(file_url, 'wb') as temp_file:
-            for chunk in self.file.chunks():
-                temp_file.write(chunk)
+    @property
+    def sha1(self):
+        if self._sha1_hash is None:
+            self.file.seek(0)
 
-        self.file_url = file_url
+            hash_sha1 = hashlib.sha1()
+            # Can read chunks from uploaded file
+            for chunk in self.file.chunks():
+                hash_sha1.update(chunk)
+
+            self._sha1_hash = hash_sha1.hexdigest()
+
+            self.file.seek(0)
+
+        return self._sha1_hash
+
+    @property
+    def file_url(self):
+        location = None
+        path = self._file_storage_path()
+
+        try:
+            location = default_storage.url(path)
+        except NotImplementedError:
+            location = "file:///{}/{}".format(settings.BASE_DIR, default_storage.path(path))
+
+        return location
+
+    def _file_storage_path(self):
+        return "workgroup_submissions/{}/{}_{}".format(self.group_id, self.sha1, self.file.name)
+
+    def save_file(self):
+        path = self._file_storage_path()
+        if not default_storage.exists(path):
+            default_storage.save(path, File(self.file))
 
     def submit(self):
         submit_hash = {
             "document_id": self.submission_id,
             "document_url": self.file_url,
+            "document_filename": self.file.name,
             "document_mime_type": self.mimetype,
             "user": self.user_id,
             "workgroup": self.group_id,
