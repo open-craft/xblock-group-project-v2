@@ -98,12 +98,12 @@ class GroupProjectBlock(XBlock):
         """
         Player view, displayed to the student
         """
-        user_id = self.user_id
-        group_activity = GroupActivity.import_xml_string(self.data)
-        group_activity.update_submission_data(
-            self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup["id"])
-        )
-        if user_id:
+        try:
+            user_id = self.user_id
+            group_activity = GroupActivity.import_xml_string(self.data)
+            group_activity.update_submission_data(
+                self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup["id"])
+            )
             team_members = [tm for tm in self.workgroup["users"] if user_id != int(tm["id"])]
 
             # TODO: Replace with workgroup call to get assigned workgroups
@@ -121,7 +121,8 @@ class GroupProjectBlock(XBlock):
                     "img": "/image/empty_avatar.png"
                 }
             ]
-        else:
+        except:
+            # Fake data for studio view
             team_members = [
                 {
                     "id": 1,
@@ -180,10 +181,6 @@ class GroupProjectBlock(XBlock):
         fragment.add_content(render_template('/templates/html/group_project_edit.html', {
             'self': self,
         }))
-
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.ui.widget.js'))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.fileupload.js'))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.iframe-transport.js'))
 
         fragment.add_javascript(
             load_resource('public/js/group_project_edit.js'))
@@ -323,8 +320,9 @@ class GroupProjectBlock(XBlock):
     @XBlock.handler
     def load_my_group_feedback(self, request, suffix=''):
 
+        workgroup_id = self.workgroup['id']
         feedback = self.project_api.get_workgroup_review_items_for_group(
-            self.workgroup['id']
+            workgroup_id
         )
 
         results = {}
@@ -335,7 +333,7 @@ class GroupProjectBlock(XBlock):
                 results[item['question']] = [item['answer']]
 
         results["final_grade"] = [
-            self.project_api.get_group_grade(group['id'])]
+            self.project_api.get_group_grade(workgroup_id)]
 
         return webob.response.Response(body=json.dumps(results))
 

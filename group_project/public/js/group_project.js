@@ -262,8 +262,6 @@ function GroupProjectBlock(runtime, element) {
       setTimeout(function(){
         $('.' + data.paramName + '_progress_box', target_form).css('visibility', 'hidden');
         $('.' + data.paramName + '_progress', target_form).removeClass('complete');
-        if($('.file-progress-box:visible').length < 1){
-        }
       }, 500);
     },
     stop: function(e){
