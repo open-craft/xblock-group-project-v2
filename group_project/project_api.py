@@ -1,5 +1,6 @@
 ''' API calls with respect group projects'''
 import json
+import datetime
 
 from .json_requests import GET, POST, PUT, DELETE
 from .api_error import api_error_protect
@@ -8,6 +9,17 @@ WORKGROUP_API = 'api/workgroups'
 PEER_REVIEW_API = 'api/peer_reviews'
 WORKGROUP_REVIEW_API = 'api/workgroup_reviews'
 USERS_API = 'api/users'
+SUBMISSION_API = 'api/submissions'
+
+def _build_date_field(json_date_string_value):
+    ''' converts json date string to date object '''
+    try:
+        return datetime.datetime.strptime(
+            json_date_string_value,
+            '%Y-%m-%dT%H:%M:%SZ'
+        )
+    except ValueError:
+        return None
 
 class ProjectAPI(object):
 
@@ -189,22 +201,67 @@ class ProjectAPI(object):
 
     @api_error_protect
     def get_user_workgroup_for_course(self, user_id, course_id):
-        print "Faking call for user {} in course {} - using workgroup 3 for testing purposes".format(user_id, course_id)
-        # TODO: Make actual call when available (MCKIN-1425)
-        return self.get_workgroup_by_id(3)
-
         response = GET(
-            '{}/{}/{}/workgroups/?course_id={}'.format(
+            '{}/{}/{}/workgroups/?course={}'.format(
                 self._api_server_address,
                 USERS_API,
                 user_id,
                 course_id
             )
         )
-        return json.loads(response.read())
+
+        workgroups_list = json.loads(response.read())
+
+        if workgroups_list['count'] < 1:
+            return None
+
+        return self.get_workgroup_by_id(workgroups_list['results'][0]['id'])
 
     @api_error_protect
     def get_group_grade(self, group_id):
         print "Faking final grade"
         # TODO: get final grade from api_call
         return "80"
+
+    @api_error_protect
+    def create_submission(self, submit_hash):
+        response = POST(
+            '{}/{}/'.format(
+                self._api_server_address,
+                SUBMISSION_API
+            ),
+            submit_hash
+        )
+
+        return json.loads(response.read())
+
+    @api_error_protect
+    def get_workgroup_submissions(self, group_id):
+        response = GET(
+            '{}/{}/{}/submissions/'.format(
+                self._api_server_address,
+                WORKGROUP_API,
+                group_id,
+            )
+        )
+
+        return json.loads(response.read())
+
+
+    def get_latest_workgroup_submissions_by_id(self, group_id):
+        submission_list = self.get_workgroup_submissions(group_id)
+
+        submissions_by_id = {}
+        for submission in submission_list:
+            submission_id = submission['document_id']
+            if submission_id in submissions_by_id:
+                last_modified = _build_date_field(submissions_by_id[submission_id]["modified"])
+                this_modified = _build_date_field(submission["modified"])
+                if this_modified > last_modified:
+                    submissions_by_id[submission["document_id"]] = submission
+            else:
+                submissions_by_id[submission["document_id"]] = submission
+
+        return submissions_by_id
+
+

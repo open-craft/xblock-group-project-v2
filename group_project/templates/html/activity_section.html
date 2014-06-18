@@ -1,11 +1,11 @@
-{% ifnotequal activity_section.title None %}
+{% if activity_section.title %}
   <h4>{{ activity_section.title }}</h4>
-{% endifnotequal %}
-{% ifnotequal activity_section.content_html None %}
+{% endif %}
+{% if activity_section.content_html %}
   {% autoescape off %}
     {{ activity_section.content_html }}
   {% endautoescape %}
-{% endifnotequal %}
+{% endif %}
 {% for activity_question in activity_section.questions %}
   {% autoescape off %}
     {{ activity_question.render }}
@@ -16,9 +16,53 @@
     {{ activity_assessment.render }}
   {% endautoescape %}
 {% endfor %}
+{% if activity_section.is_upload_available %}
+<button class="show_upload_form">Upload</button>
+<div class="upload_form">
+  <div class="modal-bg"></div>
+  <div class="reveal-modal open">
+    <div class="close-box cancel_upload">
+      <i class="fa fa-times-circle"></i>
+    </div>
+    {% if activity_section.upload_html %}
+      {% autoescape off %}
+        {{ activity_section.upload_html }}
+        <hr />
+      {% endautoescape %}
+    {% endif %}
+    <form class="uploader">
+      {% for file_link in activity_section.upload_links %}
+        <div class="upload_item">
+          <div>{{ file_link.title }}</div>
+          <input class="{{ file_link.id }}_name" placeholder="Browse your computer to upload file..." disabled="disabled" type="text" {% if file_link.file_name %}value="{{ file_link.file_name }}"{% endif %}/>
+          <label for="{{ file_link.id }}">
+            <span class="side button tiny rounded {{ file_link.id }}_label">{% if file_link.location %}Update{% else %}Browse{% endif %}</span>
+          </label>
+          <input style="display:none;" class="file_upload" name="{{ file_link.id }}" id="{{ file_link.id }}" type="file" />
+          {% if file_link.description %}
+            <div class="description">{{ file_link.description }}</div>
+          {% endif %}
+          <div class="{{ file_link.id }}_progress_box file-progress-box">
+            <div class="{{ file_link.id }}_progress file-progress"></div>
+          </div>
+        </div>
+      {% endfor %}
+    </form>
+    <hr />
+    <div class="action_buttons">
+      <a href="#" class="cancel_upload">Cancel</a>
+      <a href="#" class="do_upload button radius small">Upload</a>
+    </div>
+  </div>
+</div>
+{% else %}
+{% if activity_section.file_link_name %}
+<div class="group_{{ activity_section.file_link_name }}">
 {% for file_link in activity_section.file_links %}
-  <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}</a></div>
+  {% if file_link.location %}
+    <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }}){% endif %}</a></div>
+  {% endif %}
 {% endfor %}
-{% ifequal activity_section.file_link_name "submissions" %}
-  <button id="upload_submissions">Upload</button>
-{% endifequal %}
+</div>
+{% endif %}
+{% endif %}

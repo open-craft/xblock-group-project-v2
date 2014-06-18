@@ -123,30 +123,71 @@ class ActivityAssessment(object):
 
 class ActivitySection(object):
 
-    def __init__(self, doc_tree, activity):
+    def __init__(self, doc_tree, component, activity):
 
-        self.file_links = None
+        self.component = component
         self.questions = []
         self.assessments = []
+        self.activity = activity
 
         self.title = doc_tree.get("title")
         self.content = doc_tree.find("./content")
 
+        if self.content is not None:
+            self._replace_date_values()
+
+        self.upload_dialog = (doc_tree.get("upload_dialog") == "true")
+
         self.file_link_name = doc_tree.get("file_links")
-        if self.file_link_name:
-            self.file_links = getattr(activity, self.file_link_name, None)
 
         # import any questions
         for question in doc_tree.findall("./question"):
-            self.questions.append(ActivityQuestion(question, activity))
+            self.questions.append(ActivityQuestion(question, self.activity))
 
         # import any assessments
         for assessment in doc_tree.findall("./assessment"):
             self.assessments.append(ActivityAssessment(assessment))
 
+    def _replace_date_values(self):
+        for date_span in self.content.findall(".//span[@class='milestone']"):
+            date_name = date_span.get("data-date")
+            date_value = self.activity.milestone_dates[date_name]
+            date_span.text = ActivityComponent._formatted_date(date_value)
+
+    @property
+    def file_links(self):
+        if self.upload_dialog:
+            return None
+
+        file_links = None
+        if self.file_link_name:
+            file_links = getattr(self.activity, self.file_link_name, None)
+
+        return file_links
+
+    @property
+    def upload_links(self):
+        if not self.upload_dialog:
+            return None
+
+        file_links = None
+        if self.file_link_name:
+            file_links = getattr(self.activity, self.file_link_name, None)
+
+        return file_links
+
     @property
     def content_html(self):
+        if self.upload_dialog:
+            return None
         return inner_html(self.content)
+
+    @property
+    def upload_html(self):
+        if self.upload_dialog:
+            return inner_html(self.content)
+        return None
+
 
     @property
     def export_xml(self):
@@ -162,6 +203,9 @@ class ActivitySection(object):
         }
         return render_template('/templates/html/activity_section.html', data)
 
+    @property
+    def is_upload_available(self):
+        return self.upload_dialog and self.component.is_open and not self.component.is_closed
 
 
 class ActivityComponent(object):
@@ -191,23 +235,23 @@ class ActivityComponent(object):
 
         # import sections
         for section in doc_tree.findall("./section"):
-            self.sections.append(ActivitySection(section, activity))
+            self.sections.append(ActivitySection(section, self, activity))
 
         # import questions for peer review
         for section in doc_tree.findall("./peerreview/section"):
-            self.peer_review_sections.append(ActivitySection(section, activity))
+            self.peer_review_sections.append(ActivitySection(section, self, activity))
 
         # import questions for project review
         for section in doc_tree.findall("./projectreview/section"):
-            self.other_group_sections.append(ActivitySection(section, activity))
+            self.other_group_sections.append(ActivitySection(section, self, activity))
 
         # import questions for peer review
         for section in doc_tree.findall("./peerassessment/section"):
-            self.peer_assessment_sections.append(ActivitySection(section, activity))
+            self.peer_assessment_sections.append(ActivitySection(section, self, activity))
 
         # import questions for project review
         for section in doc_tree.findall("./projectassessment/section"):
-            self.other_group_assessment_sections.append(ActivitySection(section, activity))
+            self.other_group_assessment_sections.append(ActivitySection(section, self, activity))
 
     @staticmethod
     def _formatted_date(date_value):
@@ -300,6 +344,12 @@ class GroupActivity(object):
         # import project components
         for component in doc_tree.findall("./projectcomponent"):
             self.activity_components.append(ActivityComponent(component, self))
+
+    def update_submission_data(self, submission_map):
+        for submission in self.submissions:
+            if submission["id"] in submission_map:
+                submission["location"] = submission_map[submission["id"]]["document_url"]
+                submission["file_name"] = submission_map[submission["id"]]["document_filename"]
 
     @property
     def export_xml(self):

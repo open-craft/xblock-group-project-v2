@@ -28,7 +28,9 @@
         {% autoescape off %}
           {{ activity_section.render }}
         {% endautoescape %}
+        {% ifequal activity_section.upload_html None %}
         <hr />
+        {% endifequal %}
       {% endfor %}
       {% if activity_component.peer_reviews %}
       <form class="peer_review" action="submit_peer_feedback" method="POST">
@@ -45,7 +47,7 @@
       {% if activity_component.other_group_reviews %}
       <form class="other_group_review" action="submit_other_group_feedback" method="POST">
         <input type="hidden" class="group_id" name="group_id" value="" />
-      <div class="other_submissions"><a href="#">View team project submissions</a></div>
+      <div class="other_submissions"><div class="other_submission_links"></div><a href="#" class="view_other_submissions">View team project submissions</a></div>
       {% for activity_section in activity_component.other_group_sections %}
         {% autoescape off %}
           {{ activity_section.render }}
