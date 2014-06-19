@@ -218,6 +218,17 @@ class ProjectAPI(object):
         return self.get_workgroup_by_id(workgroups_list['results'][0]['id'])
 
     @api_error_protect
+    def get_user_details(self, user_id):
+        response = GET(
+            '{}/{}/{}'.format(
+                self._api_server_address,
+                USERS_API,
+                user_id,
+            )
+        )
+        return json.loads(response.read())
+
+    @api_error_protect
     def get_group_grade(self, group_id):
         print "Faking final grade"
         # TODO: get final grade from api_call

@@ -104,7 +104,7 @@ class GroupProjectBlock(XBlock):
             group_activity.update_submission_data(
                 self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup["id"])
             )
-            team_members = [tm for tm in self.workgroup["users"] if user_id != int(tm["id"])]
+            team_members = [self.project_api.get_user_details(tm["id"]) for tm in self.workgroup["users"] if user_id != int(tm["id"])]
 
             # TODO: Replace with workgroup call to get assigned workgroups
             assess_groups = [

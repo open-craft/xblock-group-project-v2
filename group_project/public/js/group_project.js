@@ -119,7 +119,7 @@ function GroupProjectBlock(runtime, element) {
     var pn = $('<a class="select_peer" />');
     var pi = $('<img class="avatar" />');
     pi.attr('src', peer.img);
-    pn.attr('title', peer.name);
+    pn.attr('title', peer.full_name);
     pn.data('id', peer.id);
     pn.append(pi);
 
