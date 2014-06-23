@@ -1,0 +1,175 @@
+<!doctype html>
+    <!--[if lt IE 7 ]> <html class="lt-ie10"> <![endif]-->
+    <!--[if IE 7 ]>    <html class="lt-ie10"> <![endif]-->
+    <!--[if IE 8 ]>    <html class="lt-ie10"> <![endif]-->
+    <!--[if IE 9 ]>    <html class="lt-ie10"> <![endif]-->
+    <!--[if (gt IE 9)|!(IE)]><!--> <html> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Group Project - builder</title>
+
+        <!-- I'm not sure I need this -->
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+
+        <link rel="stylesheet" href="css/group_project_builder.css">
+        <link rel="stylesheet" href="css/pickadate/classic.css">
+        <link rel="stylesheet" href="css/pickadate/classic.date.css">
+    </head>
+
+    <body>
+        <div class="container">
+            <section class="xblock--group-project">
+                <header class="builder-header">
+                    <h1>Group Project Builder</h1>
+
+                    <ul class="tab-headers">
+                        <li data-tab="general" class="active"><a href="#">General</a></li>
+                        <li data-tab="overview"><a href="#">Overview</a></li>
+                        <li data-tab="upload"><a href="#">Upload</a></li>
+                        <li data-tab="review"><a href="#">Review</a></li>
+                        <li data-tab="grade"><a href="#">Grade</a></li>
+                    </ul>
+                </header>
+
+                <div class="tab" data-tab="general">
+                    <form class="general-form">
+                        <section class="resources">
+                            <header>
+                                <h2>Resources</h2>
+                                </header>
+                            <a href="#" class="add-element" data-add="document"><div class="icon add"></div>Add a Resource</a>
+                        </section>
+
+                        <section class="submissions">
+                            <h2>Submissions</h2>
+                            <a href="#" class="add-element" data-add="document"><div class="icon add"></div>Add a Submission</a>
+                        </section>
+
+                        <section class="dates">
+                            <h2>Dates</h2>
+                            <a href="#" class="add-element" data-add="milestone"><div class="icon add"></div>Add a Date</a>
+                        </section>
+
+                        <footer class="tab-footer">
+                            <button class="btn goto-tab" data-tab="overview">Continue</button>
+                        </footer>
+                    </form>
+                </div>
+
+                <div class="tab hidden" data-tab="overview">
+                    <form class="overview-form">
+                        <section class="attributes">
+                            <label>Name</label>
+                            <input type="text" class="name" />
+                            <label>ID</label>
+                            <input type="text" class="id" />
+                        </section>
+
+                        <footer class="tab-footer">
+                            <p>
+                                Select a child to add to this component
+                                <select class="add-child">
+                                    <option value="false">Select a node</option>
+                                    <option value="section">section</option>
+                                    <option value="peerreview">peer review</option>
+                                    <option value="projectreview">project review</option>
+                                    <option value="peerassessment">peer assessment</option>
+                                    <option value="projectassessment">project assessment</option>
+                                </select>
+                                <button class="btn goto-tab" data-tab="upload">Continue</button>
+                            </p>
+                        </footer>
+                    </form>
+                </div>
+
+                <div class="tab hidden" data-tab="upload">
+                    <form class="upload-form">
+                        <section class="attributes">
+                            <label>Name</label>
+                            <input type="text" class="name" />
+                            <label>ID</label>
+                            <input type="text" class="id" />
+                        </section>
+
+                        <footer class="tab-footer">
+                            <p>
+                                Select a child to add to this component
+                                <select class="add-child">
+                                    <option value="false">Select a node</option>
+                                    <option value="section">section</option>
+                                    <option value="peerreview">peer review</option>
+                                    <option value="projectreview">project review</option>
+                                    <option value="peerassessment">peer assessment</option>
+                                    <option value="projectassessment">project assessment</option>
+                                </select>
+                                <button class="btn goto-tab" data-tab="review">Continue</button>
+                            </p>
+                        </footer>
+                    </form>
+                </div>
+
+                <div class="tab hidden" data-tab="review">
+                    <form class="review-form">
+                        <section class="attributes">
+                            <label>Name</label>
+                            <input type="text" class="name" />
+                            <label>ID</label>
+                            <input type="text" class="id" />
+                        </section>
+
+                        <footer class="tab-footer">
+                            <p>
+                                Select a child to add to this component
+                                <select class="add-child">
+                                    <option value="false">Select a node</option>
+                                    <option value="section">section</option>
+                                    <option value="peerreview">peer review</option>
+                                    <option value="projectreview">project review</option>
+                                    <option value="peerassessment">peer assessment</option>
+                                    <option value="projectassessment">project assessment</option>
+                                </select>
+                                <button class="btn goto-tab" data-tab="grade">Continue</button>
+                            </p>
+                        </footer>
+                    </form>
+                </div>
+
+                <div class="tab hidden" data-tab="grade">
+                    <form class="grade-form">
+                        <section class="attributes">
+                            <label>Name</label>
+                            <input type="text" class="name" />
+                            <label>ID</label>
+                            <input type="text" class="id" />
+                        </section>
+
+                        <footer class="tab-footer">
+                            <p>
+                                Select a child to add to this component
+                                <select class="add-child">
+                                    <option value="false">Select a node</option>
+                                    <option value="section">section</option>
+                                    <option value="peerreview">peer review</option>
+                                    <option value="projectreview">project review</option>
+                                    <option value="peerassessment">peer assessment</option>
+                                    <option value="projectassessment">project assessment</option>
+                                </select>
+                                <button class="btn submit">Submit</button>
+                            </p>
+                        </footer>
+
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <script type="text/javascript" src="js/vendor/jquery-1.11.1.min.js"></script>
+        <script type="text/javascript" src="js/vendor/jquery.html5-placeholder-shim.js"></script>
+        <script type="text/javascript" src="js/vendor/tinymce/tinymce.min.js"></script>
+        <script type="text/javascript" src="js/vendor/tinymce/jquery.tinymce.min.js"></script>
+        <script type="text/javascript" src="js/vendor/lodash.min.js"></script>
+        <script type="text/javascript" src="js/vendor/picker.js"></script>
+        <script type="text/javascript" src="js/vendor/picker.date.js"></script>
+        <script type="text/javascript" src="js/group_project_builder.js"></script>
+    </body>
+</html>
