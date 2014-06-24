@@ -275,4 +275,43 @@ class ProjectAPI(object):
 
         return submissions_by_id
 
+    @api_error_protect
+    def get_review_assignment_groups(self, user_id):
+        response = GET(
+            '{}/{}/{}/groups/?type=reviewassignment'.format(
+                self._api_server_address,
+                USERS_API,
+                user_id
+            )
+        )
+
+        return json.loads(response.read())["groups"]
+
+    @api_error_protect
+    def get_workgroups_for_assignment(self, assignment_id):
+        # TODO: Needs to be optimised
+        response = GET(
+            '{}/{}/'.format(
+                self._api_server_address,
+                WORKGROUP_API,
+            )
+        )
+
+        workgroups = json.loads(response.read())
+        assigned_groups = [w for w in workgroups if assignment_id in [g["id"] for g in w["groups"]]]
+
+        return assigned_groups
+
+    @api_error_protect
+    def get_workgroups_to_review(self, user_id):
+        workgroups = []
+        assignments = self.get_review_assignment_groups(user_id)
+
+        workgroup_assignments = []
+        for assignment in assignments:
+            workgroup_assignments += self.get_workgroups_for_assignment(assignment["id"])
+
+        return workgroup_assignments
+
+
 

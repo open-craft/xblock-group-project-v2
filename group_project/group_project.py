@@ -104,23 +104,10 @@ class GroupProjectBlock(XBlock):
             group_activity.update_submission_data(
                 self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup["id"])
             )
-            team_members = [self.project_api.get_user_details(tm["id"]) for tm in self.workgroup["users"] if user_id != int(tm["id"])]
 
-            # TODO: Replace with workgroup call to get assigned workgroups
-            assess_groups = [
-                {
-                    "id": 3,
-                    "img": "/image/empty_avatar.png"
-                },
-                {
-                    "id": 102,
-                    "img": "/image/empty_avatar.png"
-                },
-                {
-                    "id": 103,
-                    "img": "/image/empty_avatar.png"
-                }
-            ]
+            team_members = [self.project_api.get_user_details(tm["id"]) for tm in self.workgroup["users"] if user_id != int(tm["id"])]
+            assess_groups = self.project_api.get_workgroups_to_review(user_id)
+
         except:
             # Fake data for studio view
             team_members = [
@@ -319,7 +306,6 @@ class GroupProjectBlock(XBlock):
 
     @XBlock.handler
     def load_my_group_feedback(self, request, suffix=''):
-
         workgroup_id = self.workgroup['id']
         feedback = self.project_api.get_workgroup_review_items_for_group(
             workgroup_id

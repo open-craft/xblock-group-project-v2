@@ -28,16 +28,17 @@ class DottableDict(dict):
 
 class ActivityQuestion(object):
 
-    def __init__(self, doc_tree, activity):
+    def __init__(self, doc_tree, section):
 
         self.id = doc_tree.get("id")
         self.label = doc_tree.find("./label")
         answer_node = doc_tree.find("./answer")
         self.answer = answer_node[0]
         self.small = (answer_node.get("small", "false") == "true")
+        self.section = section
 
         if doc_tree.get("grade") == "true":
-            activity.grade_questions.append(self.id)
+            self.section.activity.grade_questions.append(self.id)
 
     @property
     def render(self):
@@ -48,6 +49,9 @@ class ActivityQuestion(object):
         if self.small:
             answer_class = 'answer side'
         answer_node.set('class', answer_class)
+
+        if self.section.component.is_closed:
+            answer_node.set('disabled', 'disabled')
 
         label_node = copy.deepcopy(self.label)
         label_node.set('for', self.id)
@@ -142,7 +146,7 @@ class ActivitySection(object):
 
         # import any questions
         for question in doc_tree.findall("./question"):
-            self.questions.append(ActivityQuestion(question, self.activity))
+            self.questions.append(ActivityQuestion(question, self))
 
         # import any assessments
         for assessment in doc_tree.findall("./assessment"):
