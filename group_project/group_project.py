@@ -98,46 +98,21 @@ class GroupProjectBlock(XBlock):
         """
         Player view, displayed to the student
         """
+        user_id = self.user_id
+        group_activity = GroupActivity.import_xml_string(self.data)
+        group_activity.update_submission_data(
+            self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup["id"])
+        )
+
         try:
-            user_id = self.user_id
-            group_activity = GroupActivity.import_xml_string(self.data)
-            group_activity.update_submission_data(
-                self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup["id"])
-            )
-
             team_members = [self.project_api.get_user_details(tm["id"]) for tm in self.workgroup["users"] if user_id != int(tm["id"])]
-            assess_groups = self.project_api.get_workgroups_to_review(user_id)
-
         except:
-            # Fake data for studio view
-            team_members = [
-                {
-                    "id": 1,
-                    "name": "Chris Dodge",
-                },
-                {
-                    "id": 2,
-                    "name": "Matt Drayer",
-                },
-                {
-                    "id": 3,
-                    "name": "Martyn James",
-                },
-            ]
-            assess_groups = [
-                {
-                    "id": 3,
-                    "img": "/image/empty_avatar.png"
-                },
-                {
-                    "id": 102,
-                    "img": "/image/empty_avatar.png"
-                },
-                {
-                    "id": 103,
-                    "img": "/image/empty_avatar.png"
-                }
-            ]
+            team_members = []
+
+        try:
+            assess_groups = self.project_api.get_workgroups_to_review(user_id)
+        except:
+            assess_groups = []
 
         context = {
             "group_activity": group_activity,
