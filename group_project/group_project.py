@@ -100,9 +100,13 @@ class GroupProjectBlock(XBlock):
         """
         user_id = self.user_id
         group_activity = GroupActivity.import_xml_string(self.data)
-        group_activity.update_submission_data(
-            self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup["id"])
-        )
+
+        try:
+            group_activity.update_submission_data(
+                self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup["id"])
+            )
+        except:
+            pass
 
         try:
             team_members = [self.project_api.get_user_details(tm["id"]) for tm in self.workgroup["users"] if user_id != int(tm["id"])]
