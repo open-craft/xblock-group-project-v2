@@ -247,7 +247,7 @@ function GroupProjectBlock(runtime, element) {
       $('.' + data.paramName + '_progress', target_form).css({width: '0%'});
       $('.' + data.paramName + '_progress_box', target_form).css({visibility: 'visible'});
 
-      $(document).on('perform_uploads', function(ev){
+      $(document).one('perform_uploads', function(ev){
         data.submit();
       });
     },

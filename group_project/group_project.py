@@ -85,14 +85,17 @@ class GroupProjectBlock(XBlock):
         except:
             return None
 
+    _workgroup = None
+
     @property
     def workgroup(self):
-        group = self.project_api.get_user_workgroup_for_course(
-            self.user_id,
-            self.xmodule_runtime.course_id
-        )
+        if self._workgroup is None:
+            self._workgroup = self.project_api.get_user_workgroup_for_course(
+                self.user_id,
+                self.xmodule_runtime.course_id
+            )
 
-        return group
+        return self._workgroup
 
     def student_view(self, context):
         """
@@ -311,7 +314,8 @@ class GroupProjectBlock(XBlock):
             context = {
                 "user_id": self.user_id,
                 "group_id": self.workgroup['id'],
-                "project_api": self.project_api
+                "project_api": self.project_api,
+                "course_id": self.xmodule_runtime.course_id
             }
 
             upload_files = [UploadFile(request.params[s.id].file, s.id, context)

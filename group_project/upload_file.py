@@ -6,6 +6,8 @@ from django.core.files.storage import default_storage
 
 from django.conf import settings
 
+TRACE = True
+
 class UploadFile(object):
 
     _sha1_hash = None
@@ -19,6 +21,7 @@ class UploadFile(object):
         self.group_id = project_context["group_id"]
         self.user_id = project_context["user_id"]
         self.project_api = project_context["project_api"]
+        self.course_id = project_context["course_id"]
 
     @property
     def sha1(self):
@@ -49,12 +52,20 @@ class UploadFile(object):
         return location
 
     def _file_storage_path(self):
-        return "workgroup_submissions/{}/{}_{}".format(self.group_id, self.sha1, self.file.name)
+        course_path = self.course_id.replace('/', '_')
+        file_name = "{}_{}".format(self.sha1, self.file.name)
+        return "workgroup_submissions/{}/{}/{}".format(course_path, self.group_id, file_name)
 
     def save_file(self):
         path = self._file_storage_path()
         if not default_storage.exists(path):
+            if TRACE:
+                print "Storing to {}".format(path)
             default_storage.save(path, File(self.file))
+            if TRACE:
+                print "Successfully stored file to {}".format(path)
+        elif TRACE:
+            print "File already stored at {}".format(path)
 
     def submit(self):
         submit_hash = {
