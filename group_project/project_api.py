@@ -10,6 +10,7 @@ PEER_REVIEW_API = 'api/peer_reviews'
 WORKGROUP_REVIEW_API = 'api/workgroup_reviews'
 USERS_API = 'api/users'
 SUBMISSION_API = 'api/submissions'
+GROUP_API = 'api/groups'
 
 def _build_date_field(json_date_string_value):
     ''' converts json date string to date object '''
@@ -289,18 +290,16 @@ class ProjectAPI(object):
 
     @api_error_protect
     def get_workgroups_for_assignment(self, assignment_id):
-        # TODO: Needs to be optimised
         response = GET(
-            '{}/{}/'.format(
+            '{}/{}/{}/workgroups'.format(
                 self._api_server_address,
-                WORKGROUP_API,
+                GROUP_API,
+                assignment_id
             )
         )
 
         workgroups = json.loads(response.read())
-        assigned_groups = [w for w in workgroups if assignment_id in [g["id"] for g in w["groups"]]]
-
-        return assigned_groups
+        return workgroups["results"]
 
     @api_error_protect
     def get_workgroups_to_review(self, user_id):
