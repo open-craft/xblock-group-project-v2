@@ -11,6 +11,7 @@ from lxml import etree
 from xml.etree import ElementTree as ET
 from pkg_resources import resource_filename
 
+from django.conf import settings
 from django.utils.translation import ugettext as _
 
 from xblock.core import XBlock
@@ -74,8 +75,10 @@ class GroupProjectBlock(XBlock):
     @property
     def project_api(self):
         if self._project_api is None:
-            self._project_api = ProjectAPI(
-                'http://{}'.format(self.xmodule_runtime.HOSTNAME))
+            api_server = "http://127.0.0.1:8000"
+            if hasattr(settings, 'API_LOOPBACK_ADDRESS'):
+                api_server = settings.API_LOOPBACK_ADDRESS
+            self._project_api = ProjectAPI(api_server)
         return self._project_api
 
     @property
