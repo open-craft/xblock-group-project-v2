@@ -1,0 +1,571 @@
+/* apply a natural box layout model to all elements */
+*, *:before, *:after {
+    -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+ }
+
+.xblock--group-project h1,
+.xblock--group-project h2,
+.xblock--group-project h3,
+.xblock--group-project h4,
+.xblock--group-project h5,
+.xblock--group-project h6,
+.xblock--group-project p,
+.xblock--group-project li,
+.xblock--group-project label,
+.xblock--group-project a {
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+
+.xblock--group-project h2 {
+    margin: 0 0 5px;
+    font-weight: 500;
+}
+
+.xblock--group-project h3 {
+    margin: 0 0 5px;
+    font-weight: 500;
+}
+
+.xblock--group-project h4 {
+	margin: 12px 0 2px;
+    font-weight: 500;
+}
+
+.xblock--group-project {
+	width: 770px;
+	margin: 20px auto;
+	padding: 0;
+	background: #fff;
+    border-radius: 50px;
+    -moz-box-shadow: 3px 3px 5px 1px #ccc;
+      -webkit-box-shadow: 3px 3px 5px 1px #ccc;
+        box-shadow: 3px 3px 5px 1px #ccc;
+}
+
+.xblock--group-project .builder-header {
+  content: "";
+  display: table;
+  clear: both;
+  width: 100%;
+  background: #2e83cd;
+  border-radius: 50px 50px 0 0;
+  text-align: center;
+  color: #fff;
+}
+
+
+
+/** Tabs **/
+.xblock--group-project .tab-headers {
+	padding-left: 0;
+	list-style: none;
+}
+
+.xblock--group-project .tab-headers li {
+	float: left;
+	width: 20%;
+	background: #ccc;
+	padding: 10px 0;
+	margin: 0;
+	text-align: center;
+	position: relative;
+    border-top: 1px solid #111;
+    border-bottom: 1px solid #111;
+}
+
+.xblock--group-project .tab-headers li:after {
+	content: '';
+	width: 1px;
+	height: 39px;
+	background: #111;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.xblock--group-project .tab-headers li:first-child:after {
+	width: 0;
+}
+
+.xblock--group-project .tab-headers li:hover {
+	background: #999;
+    cursor: pointer;
+}
+
+.xblock--group-project .tab-headers li.active {
+	background: #fff;
+    border-bottom: 1px solid #fff;
+}
+
+.xblock--group-project .tab-headers li a {
+	text-decoration: none;
+    color: #156ab4;
+}
+
+.xblock--group-project .tab {
+	padding: 10px 10px 0;
+}
+
+.xblock--group-project .tab .placeholder {
+    padding-top: 4px !important;
+    padding-left: 4px !important;
+}
+
+.xblock--group-project .tab-footer {
+    width: 90%;
+    margin-left: 5%;
+    height: 35px;
+}
+
+
+
+/** Attributes **/
+.xblock--group-project .attributes {
+    margin-bottom: 15px;
+    background: #2e83cd;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.xblock--group-project .attributes .name {
+    width: 29%;
+}
+
+.xblock--group-project .attributes .id {
+    width: 12%;
+}
+
+.xblock--group-project .attributes input {
+    border: 1px solid #156AB4;
+}
+
+.xblock--group-project .attributes label {
+    margin: 0 5px;
+    font-size: 0.8em;
+    color: #fff;
+}
+
+
+
+/** Section **/
+.xblock--group-project .section {
+	background: #ddd;
+	padding: 0 5px;
+    margin-bottom: 15px;
+	position: relative;
+    border-radius: 10px;
+}
+
+.xblock--group-project .section[data-node=section] {
+    background: #cd782e;
+    -moz-box-shadow: inset 0 0 20px #b45f15;
+      -webkit-box-shadow: inset 0 0 20px #b45f15;
+        box-shadow: inset 0 0 20px #b45f15;
+}
+
+.xblock--group-project .section[data-node=peerreview],
+.xblock--group-project .section[data-node=projectreview] {
+    background: #cdc82e;
+    -moz-box-shadow: inset 0 0 20px #b4Af15;
+      -webkit-box-shadow: inset 0 0 20px #b4Af15;
+        box-shadow: inset 0 0 20px #b4Af15;
+}
+
+.xblock--group-project .section[data-node=peerassessment],
+.xblock--group-project .section[data-node=projectassessment] {
+    background: #2ecdc8;
+    -moz-box-shadow: inset 0 0 20px #15b4af;
+      -webkit-box-shadow: inset 0 0 20px #15b4af;
+        box-shadow: inset 0 0 20px #15b4af;
+}
+
+.xblock--group-project .section .row {
+	width: calc(100% - 10px);
+	margin-left: 5px;
+}
+
+.xblock--group-project .section label {
+    font-size: 0.8em;
+    margin-right: 5px;
+}
+
+.xblock--group-project .section .title {
+	width: 63%;
+	margin: 0 15px 10px 0;
+}
+
+.xblock--group-project .section textarea {
+	height: 180px;
+	width: 100%;
+}
+
+.xblock--group-project .section-header {
+    padding: 5px 0 0 5px;
+}
+
+.xblock--group-project .section-footer {
+    margin-top: 10px;
+    padding-bottom: 5px;
+}
+
+
+/** Question / Assessment **/
+.xblock--group-project .question,
+.xblock--group-project .assessment {
+	background: #ddd;
+	position: relative;
+    width: calc(100% - 20px);
+    margin: 10px 0 0 4px;
+    padding: 5px 5px 0;
+    border-radius: 5px;
+}
+
+.xblock--group-project .question {
+    border: 1px solid #b4af15;
+    background: #bfb980;
+    background: #b0ac34;
+}
+
+.xblock--group-project .assessment {
+    border: 1px solid #15b4af;
+    background: #28B4B5;
+}
+
+.xblock--group-project .question label,
+.xblock--group-project .assessment label {
+    font-size: 0.8em;
+    margin-right: 5px;
+}
+
+.xblock--group-project .question .id,
+.xblock--group-project .assessment .id {
+    width: 14%;
+    margin-right: 5px;
+    margin-bottom: 10px;
+}
+
+.xblock--group-project .question .label,
+.xblock--group-project .assessment .label {
+	width: 50%;
+	margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.xblock--group-project .question .answer-options,
+.xblock--group-project .assessment .answer-options {
+	margin-left: 2px;
+}
+
+.xblock--group-project .question .answer-options label,
+.xblock--group-project .assessment .answer-options label {
+    display: block;
+}
+
+.xblock--group-project .question .answer-options .add-element,
+.xblock--group-project .assessment .answer-options .add-element {
+	display: inline-block;
+	margin: 0 0 5px 520px;
+}
+
+.xblock--group-project .question .answer-options .add-element .icon,
+.xblock--group-project .assessment .answer-options .add-element .icon {
+	margin-right: 5px;
+}
+
+.xblock--group-project .question .option-wrapper,
+.xblock--group-project .assessment .option-wrapper {
+	position: relative;
+	display: inline;
+	float: left;
+	width: 50%;
+	height: 30px;
+}
+
+.xblock--group-project .question .answer-option,
+.xblock--group-project .assessment .answer-option {
+	width: 91%;
+}
+
+
+
+/** General Form **/
+.xblock--group-project .general-form section {
+    background: #8db2d1;
+    margin-bottom: 20px;
+    border-radius: 20px;
+    padding: 10px;
+    -moz-box-shadow: inset 0 0 20px #7499b8;
+      -webkit-box-shadow: inset 0 0 20px #7499b8;
+        box-shadow: inset 0 0 20px #7499b8;
+}
+
+
+
+/** Document **/
+.xblock--group-project .document {
+    margin: 15px 0 5px;
+    background: #b1cbe0;
+    padding: 10px;
+    border-radius: 5px;
+    position: relative;
+}
+
+.xblock--group-project .document:first-of-type {
+    margin-top: 0;
+}
+
+.xblock--group-project .document label {
+    font-size: 0.8em;
+    margin-right: 5px;
+}
+
+.xblock--group-project .document .row {
+    margin-bottom: 5px;
+}
+
+.xblock--group-project .document .title {
+    width: 40%;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.xblock--group-project .document .url {
+    width: 20%;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.xblock--group-project .document .grading-criteria {
+    margin-right: 14px;
+}
+
+.xblock--group-project .document .description {
+	width: calc(100% - 10px);
+	height: 80px;
+	margin: 5px 0 0;
+}
+
+
+
+/** Milestone **/
+.xblock--group-project .milestone {
+	position: relative;
+    margin: 0 0 5px 10px;
+}
+
+.xblock--group-project .milestone label {
+    font-size: 0.8em;
+    margin-right: 5px;
+}
+
+.xblock--group-project .milestone .name {
+    margin: 0;
+    width: 40%;
+    height: 20px;
+    margin-right: 1%;
+}
+
+.xblock--group-project .milestone .name:disabled {
+    background: #b1cbe0;
+    border-color: #b1cbe0;
+    border-style: solid;
+    cursor: not-allowed;
+}
+
+.xblock--group-project .milestone .picker__input {
+    text-align: right;
+    width: 87px;
+    height: 20px;
+    padding-right: 10px;
+}
+
+.xblock--group-project .milestone .picker__input::-webkit-input-placeholder {
+   text-align: center;
+}
+
+.xblock--group-project .milestone .picker__input:-moz-placeholder { /* Firefox 18- */
+   text-align: center;
+}
+
+.xblock--group-project .milestone .picker__input::-moz-placeholder {  /* Firefox 19+ */
+   text-align: center;
+}
+
+.xblock--group-project .milestone .picker__input:-ms-input-placeholder {
+   text-align: center;
+}
+
+.xblock--group-project .milestone .date-wrapper {
+	width: 200px;
+}
+
+
+
+/** Datepicker **/
+.xblock--group-project .picker {
+	width: 250px;
+	margin-left: 294px;
+}
+
+
+
+/** Icons **/
+.xblock--group-project .icon {
+	width: 14px;
+	height: 14px;
+	border-radius: 7px;
+	background: #2e83cd;
+	position: relative;
+	float: left;
+	margin: 0 5px 0 0;
+}
+
+.xblock--group-project .icon.remove {
+	background: #8b0000;
+}
+
+.xblock--group-project .icon.add:before {
+	content: '';
+	height: 10px;
+	width: 2px;
+	background: #fff;
+	position: relative;
+	display: inline;
+	float: left;
+	top: 2px;
+	left: 6px;
+}
+
+.xblock--group-project .icon.add:after {
+	content: '';
+	height: 2px;
+	width: 10px;
+	background: #fff;
+	position: relative;
+	display: inline;
+	float: left;
+	top: 6px;
+	left: 0;
+}
+
+.xblock--group-project .icon.remove:before {
+	content: '';
+	height: 10px;
+	width: 2px;
+	background: #fff;
+	position: relative;
+	display: inline;
+	float: left;
+	top: 2px;
+	left: 6px;
+	-webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+        transform: rotate(45deg);
+}
+
+.lt-ie10 .xblock--group-project .icon.remove:before {
+    left: 6.5px;
+}
+
+.xblock--group-project .icon.remove:after {
+	content: '';
+	height: 2px;
+	width: 10px;
+	background: #fff;
+	position: relative;
+	display: inline;
+	float: left;
+	top: 6px;
+	left: 0;
+	-webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+        transform: rotate(45deg);
+}
+
+.lt-ie10 .xblock--group-project .icon.remove:after {
+    left: 0.5px;
+}
+
+
+
+/** Button **/
+.xblock--group-project .btn {
+	background: #2e83cd;
+	color: #fff;
+	border: 1px solid #156ab4;
+	border-radius: 6px;
+	padding: 5px 10px;
+	margin: 0;
+    float: right;
+}
+
+.xblock--group-project .btn:hover {
+	opacity: 0.8;
+	cursor: pointer;
+}
+
+.xblock--group-project .btn:focus {
+	outline: none;
+	opacity: 0.5;
+}
+
+.xblock--group-project .add-element {
+	text-decoration: none;
+	color: #2e83cd;
+	margin: 0 20px 0 10px;
+	line-height: 20px;
+    display: inline-block;
+}
+
+.xblock--group-project .add-element .icon {
+	margin: 2px 5px 0 0;
+}
+
+.xblock--group-project .remove-element {
+	display: inline-block;
+}
+
+.xblock--group-project .remove-element .icon {
+	top: 2px;
+	left: 5px;
+}
+
+.xblock--group-project .add-element:hover,
+.xblock--group-project .add-element:hover .icon,
+.xblock--group-project .remove-element:hover,
+.xblock--group-project .remove-element:hover .icon {
+	opacity: 0.7;
+}
+
+.xblock--group-project .document .remove-element,
+.xblock--group-project .question .remove-element,
+.xblock--group-project .section .remove-element {
+	position: absolute;
+	top: 5px;
+	right: 7px;
+}
+
+.xblock--group-project .question .option-wrapper .remove-element,
+.xblock--group-project .assessment .option-wrapper .remove-element {
+	top: 2px;
+    right: 10px;
+}
+
+
+
+/** General Classes **/
+.xblock--group-project .hidden {
+	display: none!important;
+}
+
+
+
+/*** Temp. styles for surrounding area & dev ***/
+body,
+.container {
+	margin: 0;
+	padding: 0;
+	background: #e5ebee;
+}
