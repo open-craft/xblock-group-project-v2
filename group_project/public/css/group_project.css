@@ -157,6 +157,10 @@
   display: none;
 }
 
+.group-project-xblock-wrapper .submissions_message{
+  font-style: italic;
+}
+
 .upload_form{
   display: none;
 }
