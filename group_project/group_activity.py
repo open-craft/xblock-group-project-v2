@@ -411,6 +411,11 @@ class GroupActivity(object):
 
         return json.dumps(step_map)
 
+    @property
+    def has_submissions(self):
+        uploaded_submissions = [s for s in self.submissions if s.location]
+        return len(uploaded_submissions) > 0
+
     @classmethod
     def import_xml_file(cls, file_name):
         doc_tree = ET.parse(file_name).getroot()

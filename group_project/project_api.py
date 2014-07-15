@@ -230,10 +230,38 @@ class ProjectAPI(object):
         return json.loads(response.read())
 
     @api_error_protect
-    def get_group_grade(self, group_id):
-        print "Faking final grade"
-        # TODO: get final grade from api_call
-        return "80"
+    def get_user_grades(self, user_id, course_id):
+        response = GET(
+            '{}/{}/{}/courses/{}/grades'.format(
+                self._api_server_address,
+                USERS_API,
+                user_id,
+                course_id
+            )
+        )
+
+        return json.loads(response.read())
+
+
+    @api_error_protect
+    def set_group_grade(self, group_id, course_id, activity_id, grade_value, max_grade):
+        grade_data = {
+            "course_id": course_id,
+            "content_id": activity_id,
+            "grade": grade_value,
+            "max_grade": max_grade,
+        }
+
+        response = POST(
+            '{}/{}/{}/grades/'.format(
+                self._api_server_address,
+                WORKGROUP_API,
+                group_id
+            ),
+            grade_data
+        )
+
+        return json.loads(response.read())
 
     @api_error_protect
     def create_submission(self, submit_hash):
@@ -312,5 +340,19 @@ class ProjectAPI(object):
 
         return workgroup_assignments
 
+    @api_error_protect
+    def get_workgroup_reviewers(self, group_id):
+        response = GET(
+            '{}/{}/{}/groups'.format(
+                self._api_server_address,
+                WORKGROUP_API,
+                group_id
+            )
+        )
 
+        review_assignment_user_urls = ['{}{}users/'.format(self._api_server_address, ra["url"]) for ra in json.loads(response.read())]
+        reviewers = []
+        for users_url in review_assignment_user_urls:
+            reviewers.extend(json.loads(GET(users_url).read())["users"])
 
+        return reviewers

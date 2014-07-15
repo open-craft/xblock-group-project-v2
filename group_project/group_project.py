@@ -161,6 +161,75 @@ class GroupProjectBlock(XBlock):
 
         return fragment
 
+    def assign_grade_to_group(self, grade_value):
+        self.project_api.set_group_grade(
+            self.workgroup["id"],
+            self.xmodule_runtime.course_id,
+            self.id,
+            grade_value,
+            self.weight
+        )
+
+    def calculate_grade(self, group_id):
+
+        def make_key(question_id, reviewer_id):
+            return "{}:{}".format(question_id, reviewer_id)
+
+        def mean(value_array):
+            numeric_values = [float(v) for v in value_array]
+            return float(sum(numeric_values)/len(numeric_values))
+
+        review_item_data = self.project_api.get_workgroup_review_items_for_group(group_id)
+        review_item_map = {make_key(r['question'], self.xmodule_runtime.get_real_user(r['reviewer']).id) : r['answer'] for r in review_item_data}
+        group_reviewer_ids = [u["id"] for u in self.project_api.get_workgroup_reviewers(group_id)]
+
+        group_activity = GroupActivity.import_xml_string(self.data)
+        user_grades = {}
+        for r_id in group_reviewer_ids:
+            user_grades[r_id] = []
+            for q_id in group_activity.grade_questions:
+                user_value = review_item_map.get(make_key(q_id, r_id), None)
+                if user_value is None:
+                    # TODO: return None here - pass to test
+                    #return None
+                    pass
+                else:
+                    user_grades[r_id].append(user_value)
+
+        # Okay, if we've got here we have a complete set of marks to calculate the grade
+        reviewer_grades = [mean(user_grades[r_id]) for r_id in group_reviewer_ids if len(user_grades[r_id]) > 0]
+        group_grade = mean(reviewer_grades)
+
+        return group_grade
+
+    def get_project_final_grade(self):
+
+        def module_url_name(module_id):
+            return module_id.split('/')[-1]
+
+        module_keys = self.runtime.cached_metadata.keys()
+        if len(module_keys) > 1:
+            chapter_id = module_keys[0]
+            sequential_id = module_keys[1]
+
+            user_course_grades = self.project_api.get_user_grades(
+                self.user_id,
+                self.xmodule_runtime.course_id
+            )
+            courseware_summary = user_course_grades["courseware_summary"]
+            courseware_chapters = [cc for cc in courseware_summary if cc["url_name"] == module_url_name(chapter_id)]
+            if len(courseware_chapters) < 1:
+                return None
+
+            courseware_sections = [cs for cs in courseware_chapters[0]["sections"] if cs["url_name"] == module_url_name(sequential_id)]
+            if len(courseware_sections) < 1:
+                return None
+
+            grade_info = courseware_sections[0]["scores"][0]
+            grade = float(grade_info[0]) / float(grade_info[1])
+            return int(100*grade)
+
+
     @XBlock.json_handler
     def studio_submit(self, submissions, suffix=''):
 
@@ -229,6 +298,10 @@ class GroupProjectBlock(XBlock):
                 group_id,
                 submissions
             )
+
+            grade_value = self.calculate_grade(group_id)
+            if grade_value:
+                self.assign_grade_to_group(grade_value)
 
         except Exception as e:
             return {
@@ -303,8 +376,9 @@ class GroupProjectBlock(XBlock):
             else:
                 results[item['question']] = [item['answer']]
 
-        results["final_grade"] = [
-            self.project_api.get_group_grade(workgroup_id)]
+        final_grade = self.get_project_final_grade()
+        if final_grade:
+            results["final_grade"] = [final_grade]
 
         return webob.response.Response(body=json.dumps(results))
 
