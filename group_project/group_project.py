@@ -296,6 +296,7 @@ class GroupProjectBlock(XBlock):
             self.project_api.submit_workgroup_review_items(
                 self.xmodule_runtime.anonymous_student_id,
                 group_id,
+                self.id,
                 submissions
             )
 
@@ -336,7 +337,8 @@ class GroupProjectBlock(XBlock):
 
         feedback = self.project_api.get_workgroup_review_items(
             self.xmodule_runtime.anonymous_student_id,
-            group_id
+            group_id,
+            self.id
         )
 
         # pivot the data to show question -> answer
@@ -366,7 +368,8 @@ class GroupProjectBlock(XBlock):
     def load_my_group_feedback(self, request, suffix=''):
         workgroup_id = self.workgroup['id']
         feedback = self.project_api.get_workgroup_review_items_for_group(
-            workgroup_id
+            workgroup_id,
+            self.id
         )
 
         results = {}

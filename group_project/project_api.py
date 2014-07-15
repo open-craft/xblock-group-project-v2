@@ -157,13 +157,13 @@ class ProjectAPI(object):
                 }
                 self.create_peer_review_assessment(question_data)
 
-    def get_workgroup_review_items(self, reviewer_id, group_id):
+    def get_workgroup_review_items(self, reviewer_id, group_id, content_id):
         group_review_items = self.get_workgroup_review_items_for_group(group_id)
-        return [gri for gri in group_review_items if gri['reviewer'] == reviewer_id]
+        return [gri for gri in group_review_items if gri['reviewer'] == reviewer_id and gri['content_id'] == content_id]
 
-    def submit_workgroup_review_items(self, reviewer_id, group_id, data):
+    def submit_workgroup_review_items(self, reviewer_id, group_id, content_id, data):
         # get any data already there
-        current_data = {ri['question']: ri for ri in self.get_workgroup_review_items(reviewer_id, group_id)}
+        current_data = {ri['question']: ri for ri in self.get_workgroup_review_items(reviewer_id, group_id, content_id)}
         for k,v in data.iteritems():
             if k in current_data:
                 question_data = current_data[k]
@@ -185,6 +185,7 @@ class ProjectAPI(object):
                     "answer": v,
                     "workgroup": group_id,
                     "reviewer": reviewer_id,
+                    "content_id": content_id,
                 }
                 self.create_workgroup_review_assessment(question_data)
 
