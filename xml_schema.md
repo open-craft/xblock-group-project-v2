@@ -161,6 +161,8 @@ Node to represent a question to be asked of a peer or of anohter groups' project
 ### Attributes
 `id` - _Required - small string stored alongside answer data_
 
+`required` - _Optional - any value other than `true` will render the question as not required (default value is `true`)_
+
 ### Child Nodes
 `label` - _Required - Text (html) for the question being asked_
 

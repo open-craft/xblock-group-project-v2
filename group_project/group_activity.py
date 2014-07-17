@@ -36,6 +36,7 @@ class ActivityQuestion(object):
         self.answer = answer_node[0]
         self.small = (answer_node.get("small", "false") == "true")
         self.section = section
+        self.required = (doc_tree.get("required", "true") == "true")
 
         if doc_tree.get("grade") == "true":
             self.section.activity.grade_questions.append(self.id)
@@ -415,6 +416,11 @@ class GroupActivity(object):
     def has_submissions(self):
         uploaded_submissions = [s for s in self.submissions if s.location]
         return len(uploaded_submissions) > 0
+
+    @property
+    def has_all_submissions(self):
+        uploaded_submissions = [s for s in self.submissions if s.location]
+        return len(uploaded_submissions) == len(self.submissions)
 
     @classmethod
     def import_xml_file(cls, file_name):
