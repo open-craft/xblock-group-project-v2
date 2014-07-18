@@ -11,6 +11,7 @@ WORKGROUP_REVIEW_API = 'api/workgroup_reviews'
 USERS_API = 'api/users'
 SUBMISSION_API = 'api/submissions'
 GROUP_API = 'api/groups'
+COURSES_API = 'api/courses'
 
 def _build_date_field(json_date_string_value):
     ''' converts json date string to date object '''
@@ -357,3 +358,24 @@ class ProjectAPI(object):
             reviewers.extend(json.loads(GET(users_url).read())["users"])
 
         return reviewers
+
+    @api_error_protect
+    def mark_as_complete(self, course_id, content_id, user_id, stage=None):
+        completion_data = {
+            "content_id": content_id,
+            "user_id": user_id,
+        }
+
+        if not stage is None:
+            completion_data["stage"] = stage
+
+        response = POST(
+            '{}/{}/{}/completions/'.format(
+                self._api_server_address,
+                COURSES_API,
+                course_id,
+            ),
+            completion_data
+        )
+
+        return json.loads(response.read())

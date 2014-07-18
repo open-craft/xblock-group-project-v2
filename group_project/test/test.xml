@@ -44,7 +44,7 @@
             </select>
           </answer>
         </question>
-        <question id="q2">
+        <question id="q2" required="false">
           <label>General Comments</label>
           <answer>
             <textarea></textarea>

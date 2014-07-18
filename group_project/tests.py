@@ -82,7 +82,11 @@ class GroupActivitityXmlTest(object):
         test_equal(len(ac[2].peer_review_sections[1].questions), 2)
 
         test_equal(ac[2].peer_review_sections[0].questions[0].answer_html, '<input placeholder="answer here" type="text" />')
-        #test_equal(ac[2].peer_review_sections[1].questions[0].answer_html, '<input placeholder="answer here" type="text" />')
+
+        test_equal(ac[2].peer_review_sections[1].questions[0].id, "q1")
+        test_equal(ac[2].peer_review_sections[1].questions[1].id, "q2")
+        test_equal(ac[2].peer_review_sections[1].questions[0].required, True)
+        test_equal(ac[2].peer_review_sections[1].questions[1].required, False)
 
 
 

@@ -25,6 +25,7 @@ from .utils import render_template, AttrDict, load_resource
 from .group_activity import GroupActivity
 from .project_api import ProjectAPI
 from .upload_file import UploadFile
+from .api_error import ApiError
 
 
 # Globals ###########################################################
@@ -33,6 +34,9 @@ log = logging.getLogger(__name__)
 
 
 # Classes ###########################################################
+
+def make_key(*args):
+    return ":".join([str(a) for a in args])
 
 class GroupProjectBlock(XBlock):
 
@@ -161,9 +165,9 @@ class GroupProjectBlock(XBlock):
 
         return fragment
 
-    def assign_grade_to_group(self, grade_value):
+    def assign_grade_to_group(self, group_id, grade_value):
         self.project_api.set_group_grade(
-            self.workgroup["id"],
+            group_id,
             self.xmodule_runtime.course_id,
             self.id,
             grade_value,
@@ -171,9 +175,6 @@ class GroupProjectBlock(XBlock):
         )
 
     def calculate_grade(self, group_id):
-
-        def make_key(question_id, reviewer_id):
-            return "{}:{}".format(question_id, reviewer_id)
 
         def mean(value_array):
             numeric_values = [float(v) for v in value_array]
@@ -190,9 +191,7 @@ class GroupProjectBlock(XBlock):
             for q_id in group_activity.grade_questions:
                 user_value = review_item_map.get(make_key(q_id, r_id), None)
                 if user_value is None:
-                    # TODO: return None here - pass to test
-                    #return None
-                    pass
+                    return None
                 else:
                     user_grades[r_id].append(user_value)
 
@@ -202,33 +201,74 @@ class GroupProjectBlock(XBlock):
 
         return group_grade
 
-    def get_project_final_grade(self):
-
-        def module_url_name(module_id):
-            return module_id.split('/')[-1]
-
-        module_keys = self.runtime.cached_metadata.keys()
-        if len(module_keys) > 1:
-            chapter_id = module_keys[0]
-            sequential_id = module_keys[1]
-
-            user_course_grades = self.project_api.get_user_grades(
-                self.user_id,
-                self.xmodule_runtime.course_id
+    def mark_complete_stage(self, user_id, stage):
+        try:
+            self.project_api.mark_as_complete(
+                self.xmodule_runtime.course_id,
+                self.id,
+                user_id,
+                stage
             )
-            courseware_summary = user_course_grades["courseware_summary"]
-            courseware_chapters = [cc for cc in courseware_summary if cc["url_name"] == module_url_name(chapter_id)]
-            if len(courseware_chapters) < 1:
-                return None
+        except ApiError as e:
+            # 409 indicates that the completion record already existed
+            # That's ok in this case
+            if e.code != 409:
+                raise
 
-            courseware_sections = [cs for cs in courseware_chapters[0]["sections"] if cs["url_name"] == module_url_name(sequential_id)]
-            if len(courseware_sections) < 1:
-                return None
 
-            grade_info = courseware_sections[0]["scores"][0]
-            grade = float(grade_info[0]) / float(grade_info[1])
-            return int(100*grade)
+    def update_upload_complete(self):
+        for u in self.workgroup["users"]:
+            self.mark_complete_stage(u["id"], "upload")
 
+    def evaluations_complete(self):
+        group_activity = GroupActivity.import_xml_string(self.data)
+        peer_review_components = [c for c in group_activity.activity_components if c.peer_reviews]
+        peer_review_questions = []
+        for prc in peer_review_components:
+            for sec in prc.peer_review_sections:
+                peer_review_questions.extend([q.id for q in sec.questions if q.required])
+
+        group_peer_items = self.project_api.get_peer_review_items_for_group(self.workgroup['id'])
+        my_feedback = {make_key(pri["user"], pri["question"]): pri["answer"] for pri in group_peer_items if pri['reviewer'] == self.xmodule_runtime.anonymous_student_id}
+        my_peers = [u for u in self.workgroup["users"] if u["id"] != self.user_id]
+
+        for peer in my_peers:
+            for q_id in peer_review_questions:
+                k = make_key(peer["id"], q_id)
+                if not k in my_feedback:
+                    return False
+                if my_feedback[k] is None:
+                    return False
+                if my_feedback[k] == '':
+                    return False
+
+        return True
+
+    def grading_complete(self):
+        group_activity = GroupActivity.import_xml_string(self.data)
+        group_review_components = [c for c in group_activity.activity_components if c.other_group_reviews]
+        group_review_questions = []
+        for prc in group_review_components:
+            for sec in prc.other_group_sections:
+                group_review_questions.extend([q.id for q in sec.questions if q.required])
+
+        group_review_items = []
+        assess_groups = self.project_api.get_workgroups_to_review(self.user_id)
+        for assess_group in assess_groups:
+            group_review_items.extend(self.project_api.get_workgroup_review_items_for_group(assess_group["id"]))
+        my_feedback = {make_key(pri["workgroup"], pri["question"]): pri["answer"] for pri in group_review_items if pri['reviewer'] == self.xmodule_runtime.anonymous_student_id}
+
+        for assess_group in assess_groups:
+            for q_id in group_review_questions:
+                k = make_key(assess_group["id"], q_id)
+                if not k in my_feedback:
+                    return False
+                if my_feedback[k] is None:
+                    return False
+                if my_feedback[k] == '':
+                    return False
+
+        return True
 
     @XBlock.json_handler
     def studio_submit(self, submissions, suffix=''):
@@ -276,6 +316,9 @@ class GroupProjectBlock(XBlock):
                 submissions
             )
 
+            if self.evaluations_complete():
+                self.mark_complete_stage(self.user_id, "evaluation")
+
         except Exception as e:
             return {
                 'result': 'error',
@@ -302,7 +345,10 @@ class GroupProjectBlock(XBlock):
 
             grade_value = self.calculate_grade(group_id)
             if grade_value:
-                self.assign_grade_to_group(grade_value)
+                self.assign_grade_to_group(group_id, grade_value)
+
+            if self.grading_complete():
+                self.mark_complete_stage(self.user_id, "grade")
 
         except Exception as e:
             return {
@@ -379,7 +425,7 @@ class GroupProjectBlock(XBlock):
             else:
                 results[item['question']] = [item['answer']]
 
-        final_grade = self.get_project_final_grade()
+        final_grade = self.calculate_grade(workgroup_id)
         if final_grade:
             results["final_grade"] = [final_grade]
 
@@ -410,6 +456,12 @@ class GroupProjectBlock(XBlock):
                 uf.submit()
 
             response_data.update({uf.submission_id : uf.file_url for uf in upload_files})
+
+            group_activity.update_submission_data(
+                self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup['id'])
+            )
+            if group_activity.has_all_submissions:
+                self.update_upload_complete()
 
         except Exception as e:
             response_data.update({"message": _("Error uploading file(s) - {}").format(e.message)})
