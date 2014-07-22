@@ -217,6 +217,8 @@ class ActivityComponent(object):
 
     def __init__(self, doc_tree, activity):
 
+        self.grading_override = activity.grading_override
+
         self.sections = []
         self.peer_review_sections = []
         self.other_group_sections = []
@@ -292,8 +294,13 @@ class ActivityComponent(object):
 
     @property
     def is_closed(self):
-        return (self.close_date is not None) and (self.close_date < date.today())
+        # If this component is being loaded for the purposes of a TA grading,
+        # then we never close the component - in this way a TA can impose any
+        # action necessary even if it has been closed to the group members
+        if self.grading_override:
+            return False
 
+        return (self.close_date is not None) and (self.close_date < date.today())
 
     @property
     def export_xml(self):
@@ -310,7 +317,7 @@ class GroupActivity(object):
         split_string = date_string.split('/')
         return date(int(split_string[2]), int(split_string[0]), int(split_string[1]))
 
-    def __init__(self, doc_tree):
+    def __init__(self, doc_tree, grading_override = False):
 
         self.resources = []
         self.submissions = []
@@ -319,6 +326,7 @@ class GroupActivity(object):
         self.milestone_dates = {}
 
         self.grade_questions = []
+        self.grading_override = grading_override
 
         # import resources
         for document in doc_tree.findall("./resources/document"):
@@ -399,8 +407,13 @@ class GroupActivity(object):
                 )
             ordered_list.append(ac.id)
             prev_step = ac.id
-            if ac.open_date and ac.open_date < date.today():
+
+            if self.grading_override:
+                if len(ac.other_group_sections) > 0:
+                    default_stage = ac.id
+            elif ac.open_date and ac.open_date < date.today():
                 default_stage = ac.id
+
 
         next_step = None
         for ac in reversed(self.activity_components):
@@ -428,7 +441,7 @@ class GroupActivity(object):
         return cls(doc_tree)
 
     @classmethod
-    def import_xml_string(cls, xml):
+    def import_xml_string(cls, xml, grading_override = False):
         doc_tree = ET.fromstring(xml)
-        return cls(doc_tree)
+        return cls(doc_tree, grading_override)
 

@@ -97,19 +97,31 @@ class GroupProjectBlock(XBlock):
     @property
     def workgroup(self):
         if self._workgroup is None:
-            self._workgroup = self.project_api.get_user_workgroup_for_course(
-                self.user_id,
-                self.xmodule_runtime.course_id
-            )
+            user_prefs = self.project_api.get_user_preferences(self.user_id)
+
+            if "TA_REVIEW_WORKGROUP" in user_prefs:
+                self._workgroup = self.project_api.get_workgroup_by_id(user_prefs["TA_REVIEW_WORKGROUP"])
+            else:
+                self._workgroup = self.project_api.get_user_workgroup_for_course(
+                    self.user_id,
+                    self.xmodule_runtime.course_id
+                )
 
         return self._workgroup
+
+    @property
+    def is_group_member(self):
+        return self.user_id in [u["id"] for u in self.workgroup["users"]]
 
     def student_view(self, context):
         """
         Player view, displayed to the student
         """
         user_id = self.user_id
-        group_activity = GroupActivity.import_xml_string(self.data)
+        try:
+            group_activity = GroupActivity.import_xml_string(self.data, not self.is_group_member)
+        except:
+            group_activity = GroupActivity.import_xml_string(self.data)
 
         try:
             group_activity.update_submission_data(
@@ -118,15 +130,22 @@ class GroupProjectBlock(XBlock):
         except:
             pass
 
-        try:
-            team_members = [self.project_api.get_user_details(tm["id"]) for tm in self.workgroup["users"] if user_id != int(tm["id"])]
-        except:
-            team_members = []
+        if self.is_group_member:
+            try:
+                team_members = [self.project_api.get_user_details(tm["id"]) for tm in self.workgroup["users"] if user_id != int(tm["id"])]
+            except:
+                team_members = []
 
-        try:
-            assess_groups = self.project_api.get_workgroups_to_review(user_id)
-        except:
-            assess_groups = []
+            try:
+                assess_groups = self.project_api.get_workgroups_to_review(user_id)
+            except:
+                assess_groups = []
+        else:
+            team_members = []
+            try:
+                assess_groups = [self.workgroup]
+            except:
+                assess_groups = []
 
         context = {
             "group_activity": group_activity,
@@ -184,7 +203,7 @@ class GroupProjectBlock(XBlock):
         review_item_map = {make_key(r['question'], self.xmodule_runtime.get_real_user(r['reviewer']).id) : r['answer'] for r in review_item_data}
         group_reviewer_ids = [u["id"] for u in self.project_api.get_workgroup_reviewers(group_id)]
 
-        group_activity = GroupActivity.import_xml_string(self.data)
+        group_activity = GroupActivity.import_xml_string(self.data, not self.is_group_member)
         user_grades = {}
         for r_id in group_reviewer_ids:
             user_grades[r_id] = []
@@ -197,7 +216,7 @@ class GroupProjectBlock(XBlock):
 
         # Okay, if we've got here we have a complete set of marks to calculate the grade
         reviewer_grades = [mean(user_grades[r_id]) for r_id in group_reviewer_ids if len(user_grades[r_id]) > 0]
-        group_grade = mean(reviewer_grades)
+        group_grade = mean(reviewer_grades) if len(reviewer_grades) > 0 else None
 
         return group_grade
 
@@ -221,7 +240,7 @@ class GroupProjectBlock(XBlock):
             self.mark_complete_stage(u["id"], "upload")
 
     def evaluations_complete(self):
-        group_activity = GroupActivity.import_xml_string(self.data)
+        group_activity = GroupActivity.import_xml_string(self.data, not self.is_group_member)
         peer_review_components = [c for c in group_activity.activity_components if c.peer_reviews]
         peer_review_questions = []
         for prc in peer_review_components:
@@ -245,7 +264,7 @@ class GroupProjectBlock(XBlock):
         return True
 
     def grading_complete(self):
-        group_activity = GroupActivity.import_xml_string(self.data)
+        group_activity = GroupActivity.import_xml_string(self.data, not self.is_group_member)
         group_review_components = [c for c in group_activity.activity_components if c.other_group_reviews]
         group_review_questions = []
         for prc in group_review_components:
@@ -415,7 +434,6 @@ class GroupProjectBlock(XBlock):
         workgroup_id = self.workgroup['id']
         feedback = self.project_api.get_workgroup_review_items_for_group(
             workgroup_id,
-            self.id
         )
 
         results = {}
@@ -435,7 +453,7 @@ class GroupProjectBlock(XBlock):
     def upload_submission(self, request, suffix=''):
         response_data = {"message": _("File(s) successfully submitted")}
         try:
-            group_activity = GroupActivity.import_xml_string(self.data)
+            group_activity = GroupActivity.import_xml_string(self.data, not self.is_group_member)
 
             context = {
                 "user_id": self.user_id,
@@ -470,7 +488,7 @@ class GroupProjectBlock(XBlock):
 
     @XBlock.handler
     def other_submission_links(self, request, suffix=''):
-        group_activity = GroupActivity.import_xml_string(self.data)
+        group_activity = GroupActivity.import_xml_string(self.data, not self.is_group_member)
         group_id = request.GET["group_id"]
 
         group_activity.update_submission_data(
@@ -482,7 +500,7 @@ class GroupProjectBlock(XBlock):
 
     @XBlock.handler
     def refresh_submission_links(self, request, suffix=''):
-        group_activity = GroupActivity.import_xml_string(self.data)
+        group_activity = GroupActivity.import_xml_string(self.data, not self.is_group_member)
 
         group_activity.update_submission_data(
             self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup['id'])
