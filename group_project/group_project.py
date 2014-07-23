@@ -97,15 +97,21 @@ class GroupProjectBlock(XBlock):
     @property
     def workgroup(self):
         if self._workgroup is None:
-            user_prefs = self.project_api.get_user_preferences(self.user_id)
+            try:
+                user_prefs = self.project_api.get_user_preferences(self.user_id)
 
-            if "TA_REVIEW_WORKGROUP" in user_prefs:
-                self._workgroup = self.project_api.get_workgroup_by_id(user_prefs["TA_REVIEW_WORKGROUP"])
-            else:
-                self._workgroup = self.project_api.get_user_workgroup_for_course(
-                    self.user_id,
-                    self.xmodule_runtime.course_id
-                )
+                if "TA_REVIEW_WORKGROUP" in user_prefs:
+                    self._workgroup = self.project_api.get_workgroup_by_id(user_prefs["TA_REVIEW_WORKGROUP"])
+                else:
+                    self._workgroup = self.project_api.get_user_workgroup_for_course(
+                        self.user_id,
+                        self.xmodule_runtime.course_id
+                    )
+            except:
+                self._workgroup = {
+                    "id": "0",
+                    "users": [],
+                }
 
         return self._workgroup
 
@@ -122,10 +128,7 @@ class GroupProjectBlock(XBlock):
         Player view, displayed to the student
         """
         user_id = self.user_id
-        try:
-            group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
-        except:
-            group_activity = GroupActivity.import_xml_string(self.data)
+        group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
 
         try:
             group_activity.update_submission_data(
@@ -146,10 +149,7 @@ class GroupProjectBlock(XBlock):
                 assess_groups = []
         else:
             team_members = []
-            try:
-                assess_groups = [self.workgroup]
-            except:
-                assess_groups = []
+            assess_groups = [self.workgroup]
 
         context = {
             "group_activity": group_activity,
