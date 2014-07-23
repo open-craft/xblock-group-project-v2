@@ -108,7 +108,7 @@
 }
 
 .group-project-xblock-wrapper .data-closed button{
-  display: none;
+  display: none !important;
 }
 
 .group-project-xblock-wrapper label.prompt{
