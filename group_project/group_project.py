@@ -113,13 +113,17 @@ class GroupProjectBlock(XBlock):
     def is_group_member(self):
         return self.user_id in [u["id"] for u in self.workgroup["users"]]
 
+    @property
+    def is_admin_grader(self):
+        return not self.is_group_member
+
     def student_view(self, context):
         """
         Player view, displayed to the student
         """
         user_id = self.user_id
         try:
-            group_activity = GroupActivity.import_xml_string(self.data, not self.is_group_member)
+            group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
         except:
             group_activity = GroupActivity.import_xml_string(self.data)
 
@@ -203,20 +207,41 @@ class GroupProjectBlock(XBlock):
         review_item_map = {make_key(r['question'], self.xmodule_runtime.get_real_user(r['reviewer']).id) : r['answer'] for r in review_item_data}
         group_reviewer_ids = [u["id"] for u in self.project_api.get_workgroup_reviewers(group_id)]
 
-        group_activity = GroupActivity.import_xml_string(self.data, not self.is_group_member)
-        user_grades = {}
-        for r_id in group_reviewer_ids:
-            user_grades[r_id] = []
+        group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+
+        def get_user_grade_value_list(user_id):
+            user_grades = []
             for q_id in group_activity.grade_questions:
-                user_value = review_item_map.get(make_key(q_id, r_id), None)
+                user_value = review_item_map.get(make_key(q_id, user_id), None)
                 if user_value is None:
+                    # if any are incomplete, we consider the whole set to be unusable
                     return None
                 else:
-                    user_grades[r_id].append(user_value)
+                    user_grades.append(user_value)
+
+            return user_grades
+
+        admin_provided_grades = get_user_grade_value_list(self.user_id) if self.is_admin_grader else None
+
+        user_grades = {}
+        if len(group_reviewer_ids) > 0:
+            for r_id in group_reviewer_ids:
+                this_reviewers_grades = get_user_grade_value_list(r_id)
+                if this_reviewers_grades is None:
+                    if admin_provided_grades:
+                        this_reviewers_grades = admin_provided_grades
+                    else:
+                        return None
+                user_grades[r_id] = this_reviewers_grades
+        elif admin_provided_grades:
+            group_reviewer_ids = [self.user_id]
+            user_grades[self.user_id] = admin_provided_grades
+        else:
+            return None
 
         # Okay, if we've got here we have a complete set of marks to calculate the grade
         reviewer_grades = [mean(user_grades[r_id]) for r_id in group_reviewer_ids if len(user_grades[r_id]) > 0]
-        group_grade = mean(reviewer_grades) if len(reviewer_grades) > 0 else None
+        group_grade = round(mean(reviewer_grades)) if len(reviewer_grades) > 0 else None
 
         return group_grade
 
@@ -240,7 +265,7 @@ class GroupProjectBlock(XBlock):
             self.mark_complete_stage(u["id"], "upload")
 
     def evaluations_complete(self):
-        group_activity = GroupActivity.import_xml_string(self.data, not self.is_group_member)
+        group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
         peer_review_components = [c for c in group_activity.activity_components if c.peer_reviews]
         peer_review_questions = []
         for prc in peer_review_components:
@@ -264,7 +289,7 @@ class GroupProjectBlock(XBlock):
         return True
 
     def grading_complete(self):
-        group_activity = GroupActivity.import_xml_string(self.data, not self.is_group_member)
+        group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
         group_review_components = [c for c in group_activity.activity_components if c.other_group_reviews]
         group_review_questions = []
         for prc in group_review_components:
@@ -453,7 +478,7 @@ class GroupProjectBlock(XBlock):
     def upload_submission(self, request, suffix=''):
         response_data = {"message": _("File(s) successfully submitted")}
         try:
-            group_activity = GroupActivity.import_xml_string(self.data, not self.is_group_member)
+            group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
 
             context = {
                 "user_id": self.user_id,
@@ -488,7 +513,7 @@ class GroupProjectBlock(XBlock):
 
     @XBlock.handler
     def other_submission_links(self, request, suffix=''):
-        group_activity = GroupActivity.import_xml_string(self.data, not self.is_group_member)
+        group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
         group_id = request.GET["group_id"]
 
         group_activity.update_submission_data(
@@ -500,7 +525,7 @@ class GroupProjectBlock(XBlock):
 
     @XBlock.handler
     def refresh_submission_links(self, request, suffix=''):
-        group_activity = GroupActivity.import_xml_string(self.data, not self.is_group_member)
+        group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
 
         group_activity.update_submission_data(
             self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup['id'])
