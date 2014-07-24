@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from pkg_resources import resource_filename
 
 from utils import render_template
+from .project_api import _build_date_field
 
 def outer_html(node):
     if node is None:
@@ -169,6 +170,10 @@ class ActivitySection(object):
             file_links = getattr(self.activity, self.file_link_name, None)
 
         return file_links
+
+    @property
+    def has_submissions(self):
+        return len([file_link for file_link in self.file_links if file_link.location]) > 0
 
     @property
     def upload_links(self):
@@ -359,10 +364,17 @@ class GroupActivity(object):
             self.activity_components.append(ActivityComponent(component, self))
 
     def update_submission_data(self, submission_map):
+
+        def formatted_date(iso_date_value):
+            return ActivityComponent._formatted_date(
+                _build_date_field(iso_date_value)
+            )
+
         for submission in self.submissions:
             if submission["id"] in submission_map:
                 submission["location"] = submission_map[submission["id"]]["document_url"]
                 submission["file_name"] = submission_map[submission["id"]]["document_filename"]
+                submission["submission_date"] = formatted_date(submission_map[submission["id"]]["modified"])
 
     @property
     def export_xml(self):

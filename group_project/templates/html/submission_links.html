@@ -1,7 +1,7 @@
 {% if group_activity.has_submissions %}
   {% for file_link in group_activity.submissions %}
     {% if file_link.location %}
-      <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }}){% endif %}</a></div>
+      <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }} - {{ file_link.submission_date }}){% endif %}</a></div>
     {% endif %}
   {% endfor %}
 {% else %}
