@@ -55,16 +55,19 @@ class ActivityQuestion(object):
         if self.section.component.is_closed:
             answer_node.set('disabled', 'disabled')
 
+        ans_html = outer_html(answer_node)
+        if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html)-1:
+            ans_html = ans_html[:-1] + ' />'
+
         label_node = copy.deepcopy(self.label)
+        if len(inner_html(label_node)) < 1:
+            return ans_html
+
         label_node.set('for', self.id)
         label_class = 'prompt'
         if self.small:
             label_class = 'prompt side'
         label_node.set('class', label_class)
-
-        ans_html = outer_html(answer_node)
-        if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html)-1:
-            ans_html = ans_html[:-1] + ' />'
 
         return "{}{}".format(
             outer_html(label_node),
