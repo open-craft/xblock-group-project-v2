@@ -105,7 +105,7 @@ class GroupProjectBlock(XBlock):
                 else:
                     self._workgroup = self.project_api.get_user_workgroup_for_course(
                         self.user_id,
-                        self.xmodule_runtime.course_id
+                        self.course_id
                     )
             except:
                 self._workgroup = {
@@ -122,6 +122,20 @@ class GroupProjectBlock(XBlock):
     @property
     def is_admin_grader(self):
         return not self.is_group_member
+
+    @property
+    def content_id(self):
+        try:
+            return unicode(self.scope_ids.usage_id)
+        except:
+            return self.id
+
+    @property
+    def course_id(self):
+        try:
+            return unicode(self.xmodule_runtime.course_id)
+        except:
+            return self.xmodule_runtime.course_id
 
     def student_view(self, context):
         """
@@ -191,8 +205,8 @@ class GroupProjectBlock(XBlock):
     def assign_grade_to_group(self, group_id, grade_value):
         self.project_api.set_group_grade(
             group_id,
-            self.xmodule_runtime.course_id,
-            self.id,
+            self.course_id,
+            self.content_id,
             grade_value,
             self.weight
         )
@@ -248,8 +262,8 @@ class GroupProjectBlock(XBlock):
     def mark_complete_stage(self, user_id, stage):
         try:
             self.project_api.mark_as_complete(
-                self.xmodule_runtime.course_id,
-                self.id,
+                self.course_id,
+                self.content_id,
                 user_id,
                 stage
             )
@@ -383,7 +397,7 @@ class GroupProjectBlock(XBlock):
             self.project_api.submit_workgroup_review_items(
                 self.xmodule_runtime.anonymous_student_id,
                 group_id,
-                self.id,
+                self.content_id,
                 submissions
             )
 
@@ -428,7 +442,7 @@ class GroupProjectBlock(XBlock):
         feedback = self.project_api.get_workgroup_review_items(
             self.xmodule_runtime.anonymous_student_id,
             group_id,
-            self.id
+            self.content_id
         )
 
         # pivot the data to show question -> answer
@@ -484,7 +498,7 @@ class GroupProjectBlock(XBlock):
                 "user_id": self.user_id,
                 "group_id": self.workgroup['id'],
                 "project_api": self.project_api,
-                "course_id": self.xmodule_runtime.course_id
+                "course_id": self.course_id
             }
 
             upload_files = [UploadFile(request.params[s.id].file, s.id, context)
