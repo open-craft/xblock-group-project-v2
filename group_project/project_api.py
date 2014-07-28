@@ -30,6 +30,18 @@ class ProjectAPI(object):
     def __init__(self, address):
         self._api_server_address = address
 
+    def get_user_preferences(self, user_id):
+        ''' gets users preferences information '''
+        response = GET(
+            '{}/{}/{}/preferences'.format(
+                self._api_server_address,
+                USERS_API,
+                user_id,
+            ),
+        )
+
+        return json.loads(response.read())
+
     @api_error_protect
     def get_peer_review_items_for_group(self, group_id):
         response = GET(

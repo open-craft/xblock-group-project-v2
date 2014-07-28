@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from pkg_resources import resource_filename
 
 from utils import render_template
+from .project_api import _build_date_field
 
 def outer_html(node):
     if node is None:
@@ -54,16 +55,19 @@ class ActivityQuestion(object):
         if self.section.component.is_closed:
             answer_node.set('disabled', 'disabled')
 
+        ans_html = outer_html(answer_node)
+        if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html)-1:
+            ans_html = ans_html[:-1] + ' />'
+
         label_node = copy.deepcopy(self.label)
+        if len(inner_html(label_node)) < 1:
+            return ans_html
+
         label_node.set('for', self.id)
         label_class = 'prompt'
         if self.small:
             label_class = 'prompt side'
         label_node.set('class', label_class)
-
-        ans_html = outer_html(answer_node)
-        if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html)-1:
-            ans_html = ans_html[:-1] + ' />'
 
         return "{}{}".format(
             outer_html(label_node),
@@ -171,6 +175,10 @@ class ActivitySection(object):
         return file_links
 
     @property
+    def has_submissions(self):
+        return len([file_link for file_link in self.file_links if file_link.location]) > 0
+
+    @property
     def upload_links(self):
         if not self.upload_dialog:
             return None
@@ -216,6 +224,8 @@ class ActivitySection(object):
 class ActivityComponent(object):
 
     def __init__(self, doc_tree, activity):
+
+        self.grading_override = activity.grading_override
 
         self.sections = []
         self.peer_review_sections = []
@@ -292,8 +302,13 @@ class ActivityComponent(object):
 
     @property
     def is_closed(self):
-        return (self.close_date is not None) and (self.close_date < date.today())
+        # If this component is being loaded for the purposes of a TA grading,
+        # then we never close the component - in this way a TA can impose any
+        # action necessary even if it has been closed to the group members
+        if self.grading_override:
+            return False
 
+        return (self.close_date is not None) and (self.close_date < date.today())
 
     @property
     def export_xml(self):
@@ -310,7 +325,7 @@ class GroupActivity(object):
         split_string = date_string.split('/')
         return date(int(split_string[2]), int(split_string[0]), int(split_string[1]))
 
-    def __init__(self, doc_tree):
+    def __init__(self, doc_tree, grading_override = False):
 
         self.resources = []
         self.submissions = []
@@ -319,6 +334,7 @@ class GroupActivity(object):
         self.milestone_dates = {}
 
         self.grade_questions = []
+        self.grading_override = grading_override
 
         # import resources
         for document in doc_tree.findall("./resources/document"):
@@ -351,10 +367,17 @@ class GroupActivity(object):
             self.activity_components.append(ActivityComponent(component, self))
 
     def update_submission_data(self, submission_map):
+
+        def formatted_date(iso_date_value):
+            return ActivityComponent._formatted_date(
+                _build_date_field(iso_date_value)
+            )
+
         for submission in self.submissions:
             if submission["id"] in submission_map:
                 submission["location"] = submission_map[submission["id"]]["document_url"]
                 submission["file_name"] = submission_map[submission["id"]]["document_filename"]
+                submission["submission_date"] = formatted_date(submission_map[submission["id"]]["modified"])
 
     @property
     def export_xml(self):
@@ -399,8 +422,13 @@ class GroupActivity(object):
                 )
             ordered_list.append(ac.id)
             prev_step = ac.id
-            if ac.open_date and ac.open_date < date.today():
+
+            if self.grading_override:
+                if len(ac.other_group_sections) > 0:
+                    default_stage = ac.id
+            elif ac.open_date and ac.open_date < date.today():
                 default_stage = ac.id
+
 
         next_step = None
         for ac in reversed(self.activity_components):
@@ -428,7 +456,7 @@ class GroupActivity(object):
         return cls(doc_tree)
 
     @classmethod
-    def import_xml_string(cls, xml):
+    def import_xml_string(cls, xml, grading_override = False):
         doc_tree = ET.fromstring(xml)
-        return cls(doc_tree)
+        return cls(doc_tree, grading_override)
 
