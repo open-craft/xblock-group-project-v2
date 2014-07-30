@@ -1,5 +1,15 @@
 function GroupProjectBlock(runtime, element) {
 
+  var message_box = $('.message', element).appendTo($(document.body));
+  message_box.on('click', '.button, .close-box', function(){
+    message_box.hide();
+  })
+
+  var show_message = function(msg){
+    message_box.find('.message_text').text(msg);
+    message_box.show();
+  }
+
   var mean = function(value_array){
     var sum = 0;
     var count = value_array.length;
@@ -57,10 +67,10 @@ function GroupProjectBlock(runtime, element) {
       success: function(data){
         if(data.result && data.result == "error"){
           if(data.msg){
-            alert(data.msg);
+            show_message(data.msg);
           }
           else{
-            alert('Error loading feedback');
+            show_message('Error loading feedback');
           }
         }
         else{
@@ -68,7 +78,7 @@ function GroupProjectBlock(runtime, element) {
         }
       },
       error: function(data){
-        alert('Error loading feedback');
+        show_message('Error loading feedback');
       }
     })
   }
@@ -101,10 +111,10 @@ function GroupProjectBlock(runtime, element) {
         if(data.msg){
           msg = data.msg;
         }
-        alert(msg);
+        show_message(msg);
       },
       error: function(data){
-        alert('Sorry, there was an error saving your feedback');
+        show_message('Sorry, there was an error saving your feedback');
       },
       complete: function(data){
         $form.find(':submit').prop('disabled', false);
@@ -118,7 +128,9 @@ function GroupProjectBlock(runtime, element) {
   var peer_node = function(peer){
     var pn = $('<a class="select_peer" />');
     var pi = $('<img class="avatar" />');
-    pi.attr('src', peer.img);
+    if(peer.avatar_url){
+      pi.attr('src', peer.avatar_url);
+    }
     pn.attr('title', peer.full_name);
     pn.data('id', peer.id);
     pn.append(pi);
@@ -133,8 +145,7 @@ function GroupProjectBlock(runtime, element) {
   var groups = JSON.parse($('.assess_groups', element).html());
   var group_node = function(group){
     var gn = $('<a class="select_group" />');
-    var gi = $('<img class="avatar" />');
-    gi.attr('src', group.img);
+    var gi = $('<span class="avatar"><i class="fa fa-users" /></span>');
     gn.data('id', group.id);
     gn.append(gi);
 
@@ -272,7 +283,7 @@ function GroupProjectBlock(runtime, element) {
           $('.group_submissions', element).html(data.html);
         },
         error: function(data){
-          alert('Error loading links for group!!!');
+          show_message('Error loading links for group!!!');
         }
       });
 
@@ -311,7 +322,7 @@ function GroupProjectBlock(runtime, element) {
           $flyup.html(data.html).show();
         },
         error: function(data){
-          alert('Error loading links for group!!!');
+          show_message('Error loading links for group!!!');
         }
       });
     }
