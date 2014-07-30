@@ -64,7 +64,7 @@
       <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }} - {{ file_link.submission_date }}){% endif %}</a></div>
     {% endif %}
   {% endfor %}
-{% else %}
+{% elif not activity_section.upload_dialog %}
   <div class="submissions_message">No submissions have been uploaded for this group</div>
 {% endif %}
 </div>

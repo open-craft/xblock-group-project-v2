@@ -67,9 +67,11 @@
     </section>
     <section>
       <content>
-        <span class="peers"></span>
-        <span style="background-color:grey;height:auto;width:1px;display:inline-block;"></span>
-        <span class="other_groups"></span>
+        <div class="centered">
+          <span class="peers"></span>
+          <span style="background-color:grey;height:auto;width:1px;display:inline-block;"></span>
+          <span class="other_groups"></span>
+        </div>
       </content>
     </section>
     <peerreview>

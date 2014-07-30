@@ -6,6 +6,10 @@
   padding: 10px;
 }
 
+.group-project-xblock-wrapper div{
+  line-height: 1.6;
+}
+
 .group-project-xblock-wrapper .activity_section{
   display: none;
 }
@@ -60,7 +64,7 @@
   width: 70%;
   display: inline-block;
   min-height: 70px;
-  padding-top: 10px;
+  padding-top: 0;
 }
 
 .group-project-xblock-wrapper .answer.side{
@@ -99,12 +103,11 @@
   box-sizing: border-box;
   height: 40px;
   width: 40px;
-  padding: 5px;
+  margin: 2px;
 }
 
 .group-project-xblock-wrapper .selected .avatar{
   border: 2px solid #E37222;
-  padding: 3px;
 }
 
 .group-project-xblock-wrapper .data-closed button{
@@ -113,7 +116,7 @@
 
 .group-project-xblock-wrapper label.prompt{
   padding-top: 15px;
-  line-height: 1em;
+  line-height: 1.6;
 }
 .group-project-xblock-wrapper .quote{
   line-height: 1.5em;
@@ -161,7 +164,7 @@
   font-style: italic;
 }
 
-.upload_form{
+.upload_form, .message{
   display: none;
 }
 
@@ -190,11 +193,11 @@
   font-style: italic;
 }
 
-.upload_form .action_buttons{
+.action_buttons{
   float:right;
 }
 
-.upload_form .modal-bg{
+.modal-bg{
   position: fixed;
   height: 100%;
   width: 100%;
@@ -203,12 +206,26 @@
   top: 0;
   left: 0;
 }
-.upload_form .reveal-modal.open{
+.reveal-modal.open{
   display:block !important;
   visibility:visible !important;
   width:80% !important;
 }
-.upload_form .close-box{
+.message .reveal-modal.open{
+  width:500px !important;
+  margin-left: -250px;
+  position: fixed;
+  top:45%;
+  left:50%;
+  padding-bottom: 0;
+}
+.message .reveal-modal.open .button{
+  margin-top:30px;
+}
+.message .message_text{
+  font-size:16px;
+}
+.close-box{
   font-size: 1.78571rem;
   line-height: 1;
   position: absolute;
