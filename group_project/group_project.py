@@ -278,6 +278,10 @@ class GroupProjectBlock(XBlock):
         for u in self.workgroup["users"]:
             self.mark_complete_stage(u["id"], "upload")
 
+    def graded_and_complete(self):
+        for u in self.workgroup["users"]:
+            self.mark_complete_stage(u["id"], None)
+
     def evaluations_complete(self):
         group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
         peer_review_components = [c for c in group_activity.activity_components if c.peer_reviews]
@@ -485,6 +489,7 @@ class GroupProjectBlock(XBlock):
         final_grade = self.calculate_grade(workgroup_id)
         if final_grade:
             results["final_grade"] = [final_grade]
+            self.graded_and_complete()
 
         return webob.response.Response(body=json.dumps(results))
 
