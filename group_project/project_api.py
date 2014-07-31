@@ -391,3 +391,16 @@ class ProjectAPI(object):
         )
 
         return json.loads(response.read())
+
+    @api_error_protect
+    def get_user_roles_for_course(self, user_id, course_id):
+        response = GET(
+            '{}/{}/{}/roles/?user_id={}'.format(
+                self._api_server_address,
+                COURSES_API,
+                course_id,
+                user_id,
+            )
+        )
+
+        return json.loads(response.read())

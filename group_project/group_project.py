@@ -27,6 +27,10 @@ from .project_api import ProjectAPI
 from .upload_file import UploadFile
 from .api_error import ApiError
 
+ALLOWED_OUTSIDER_ROLES = getattr(settings, "ALLOWED_OUTSIDER_ROLES", None)
+if ALLOWED_OUTSIDER_ROLES is None:
+    ALLOWED_OUTSIDER_ROLES = ["staff"]
+
 
 # Globals ###########################################################
 
@@ -37,6 +41,17 @@ log = logging.getLogger(__name__)
 
 def make_key(*args):
     return ":".join([str(a) for a in args])
+
+class OutsiderDisallowedError(Exception):
+    def __init__(self, detail):
+        self.value = detail
+        super(OutsiderDisallowedError, self).__init__()
+
+    def __str__(self):
+        return "Outsider Denied Access: {}".format(self.value)
+
+    def __unicode__(self):
+        return u"Outsider Denied Access: {}".format(self.value)
 
 class GroupProjectBlock(XBlock):
 
@@ -76,6 +91,14 @@ class GroupProjectBlock(XBlock):
 
     _project_api = None
 
+    def _confirm_outsider_allowed(self):
+        granted_roles = [r["role"] for r in self.project_api.get_user_roles_for_course(self.user_id, self.course_id)]
+        for allowed_role in ALLOWED_OUTSIDER_ROLES:
+            if allowed_role in granted_roles:
+                return True
+
+        raise OutsiderDisallowedError("User does not have an allowed role")
+
     @property
     def project_api(self):
         if self._project_api is None:
@@ -101,12 +124,15 @@ class GroupProjectBlock(XBlock):
                 user_prefs = self.project_api.get_user_preferences(self.user_id)
 
                 if "TA_REVIEW_WORKGROUP" in user_prefs:
+                    self._confirm_outsider_allowed()
                     self._workgroup = self.project_api.get_workgroup_by_id(user_prefs["TA_REVIEW_WORKGROUP"])
                 else:
                     self._workgroup = self.project_api.get_user_workgroup_for_course(
                         self.user_id,
                         self.course_id
                     )
+            except OutsiderDisallowedError:
+                raise
             except:
                 self._workgroup = {
                     "id": "0",
@@ -141,19 +167,29 @@ class GroupProjectBlock(XBlock):
         """
         Player view, displayed to the student
         """
+
+        try:
+            workgroup = self.workgroup
+        except OutsiderDisallowedError as ode:
+            error_fragment = Fragment()
+            error_fragment.add_content(render_template('/templates/html/loading_error.html', {'error_message': unicode(ode)}))
+            error_fragment.add_javascript(load_resource('public/js/group_project_error.js'))
+            error_fragment.initialize_js('GroupProjectError')
+            return error_fragment
+
         user_id = self.user_id
         group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
 
         try:
             group_activity.update_submission_data(
-                self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup["id"])
+                self.project_api.get_latest_workgroup_submissions_by_id(workgroup["id"])
             )
         except:
             pass
 
         if self.is_group_member:
             try:
-                team_members = [self.project_api.get_user_details(tm["id"]) for tm in self.workgroup["users"] if user_id != int(tm["id"])]
+                team_members = [self.project_api.get_user_details(tm["id"]) for tm in workgroup["users"] if user_id != int(tm["id"])]
             except:
                 team_members = []
 
@@ -163,7 +199,7 @@ class GroupProjectBlock(XBlock):
                 assess_groups = []
         else:
             team_members = []
-            assess_groups = [self.workgroup]
+            assess_groups = [workgroup]
 
         context = {
             "group_activity": group_activity,
