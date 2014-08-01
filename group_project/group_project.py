@@ -444,8 +444,9 @@ class GroupProjectBlock(XBlock):
             grade_value = self.calculate_grade(group_id)
             if grade_value:
                 self.assign_grade_to_group(group_id, grade_value)
+                self.graded_and_complete()
 
-            if self.grading_complete():
+            if self.is_group_member and self.grading_complete():
                 self.mark_complete_stage(self.user_id, "grade")
 
         except Exception as e:
@@ -525,7 +526,6 @@ class GroupProjectBlock(XBlock):
         final_grade = self.calculate_grade(workgroup_id)
         if final_grade:
             results["final_grade"] = [final_grade]
-            self.graded_and_complete()
 
         return webob.response.Response(body=json.dumps(results))
 
