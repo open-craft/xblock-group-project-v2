@@ -5,13 +5,15 @@ import datetime
 from .json_requests import GET, POST, PUT, DELETE
 from .api_error import api_error_protect
 
-WORKGROUP_API = 'api/workgroups'
-PEER_REVIEW_API = 'api/peer_reviews'
-WORKGROUP_REVIEW_API = 'api/workgroup_reviews'
-USERS_API = 'api/users'
-SUBMISSION_API = 'api/submissions'
-GROUP_API = 'api/groups'
-COURSES_API = 'api/courses'
+API_PREFIX = '/'.join(['api', 'server'])
+
+WORKGROUP_API = '/'.join([API_PREFIX, 'workgroups'])
+PEER_REVIEW_API = '/'.join([API_PREFIX, 'peer_reviews'])
+WORKGROUP_REVIEW_API = '/'.join([API_PREFIX, 'workgroup_reviews'])
+USERS_API = '/'.join([API_PREFIX, 'users'])
+SUBMISSION_API = '/'.join([API_PREFIX, 'submissions'])
+GROUP_API = '/'.join([API_PREFIX, 'groups'])
+COURSES_API = '/'.join([API_PREFIX, 'courses'])
 
 def _build_date_field(json_date_string_value):
     ''' converts json date string to date object '''
