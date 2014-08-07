@@ -1,6 +1,7 @@
 ''' API calls with respect group projects'''
 import json
 import datetime
+from urllib import urlencode
 
 from .json_requests import GET, POST, PUT, DELETE
 from .api_error import api_error_protect
@@ -321,12 +322,18 @@ class ProjectAPI(object):
         return submissions_by_id
 
     @api_error_protect
-    def get_review_assignment_groups(self, user_id):
+    def get_review_assignment_groups(self, user_id, course_id, xblock_id):
+        qs_params = {
+            "course": course_id,
+            "type": "reviewassignment",
+            "data__xblock_id": xblock_id,
+        }
         response = GET(
-            '{}/{}/{}/groups/?type=reviewassignment'.format(
+            '{}/{}/{}/groups/?{}'.format(
                 self._api_server_address,
                 USERS_API,
-                user_id
+                user_id,
+                urlencode(qs_params)
             )
         )
 
@@ -346,9 +353,21 @@ class ProjectAPI(object):
         return workgroups["results"]
 
     @api_error_protect
-    def get_workgroups_to_review(self, user_id):
+    def get_group_detail(self, group_id):
+        response = GET(
+            '{}/{}/{}/'.format(
+                self._api_server_address,
+                GROUP_API,
+                group_id
+            )
+        )
+
+        return json.loads(response.read())
+
+    @api_error_protect
+    def get_workgroups_to_review(self, user_id, course_id, xblock_id):
         workgroups = []
-        assignments = self.get_review_assignment_groups(user_id)
+        assignments = self.get_review_assignment_groups(user_id, course_id, xblock_id)
 
         workgroup_assignments = []
         for assignment in assignments:

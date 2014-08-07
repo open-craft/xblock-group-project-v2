@@ -208,7 +208,7 @@ class GroupProjectBlock(XBlock):
                 team_members = []
 
             try:
-                assess_groups = self.project_api.get_workgroups_to_review(user_id)
+                assess_groups = self.project_api.get_workgroups_to_review(user_id, self.course_id, self.content_id)
             except:
                 assess_groups = []
         else:
@@ -366,7 +366,7 @@ class GroupProjectBlock(XBlock):
                 group_review_questions.extend([q.id for q in sec.questions if q.required])
 
         group_review_items = []
-        assess_groups = self.project_api.get_workgroups_to_review(self.user_id)
+        assess_groups = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
         for assess_group in assess_groups:
             group_review_items.extend(self.project_api.get_workgroup_review_items_for_group(assess_group["id"]))
         my_feedback = {make_key(pri["workgroup"], pri["question"]): pri["answer"] for pri in group_review_items if pri['reviewer'] == self.xmodule_runtime.anonymous_student_id}
