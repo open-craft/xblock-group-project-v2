@@ -6,7 +6,9 @@ function GroupProjectEditBlock(runtime, element) {
         var data = {
             'display_name': $(element).find('.edit-display-name').val(),
             'max_score': $('.edit-max-score', element).val(),
-            'data': xmlEditor.getValue(),
+            'group_reviews_required_count': $('.edit-ta-graded', element).is(':checked') ? 0 : $('.edit-group-review-count', element).val(),
+            'user_review_count': $('.edit-ta-graded', element).is(':checked') ? 0 : $('.edit-user-review-count', element).val(),
+            'data': xmlEditor.getValue()
         };
 
         $('.xblock-editor-error-message', element).html();
@@ -24,5 +26,17 @@ function GroupProjectEditBlock(runtime, element) {
 
     $(element).find('.cancel-button').bind('click', function() {
         runtime.notify('cancel', {});
+    });
+
+    var hide_show_for_ta = function(){
+        $('.not-ta-graded', element).toggle(!$('.edit-ta-graded', element).is(':checked'));
+    };
+
+    $('.edit-ta-graded', element).on('change', function(){
+        hide_show_for_ta();
+    });
+
+    $(function(){
+        hide_show_for_ta();
     });
 }

@@ -15,7 +15,7 @@ from django.conf import settings
 from django.utils.translation import ugettext as _
 
 from xblock.core import XBlock
-from xblock.fields import Scope, String, Dict, Float
+from xblock.fields import Scope, String, Dict, Float, Integer
 from xblock.fragment import Fragment
 
 from StringIO import StringIO
@@ -68,6 +68,20 @@ class GroupProjectBlock(XBlock):
     weight = Float(
         display_name="Weight",
         help="This is the maximum score that the user receives when he/she successfully completes the problem",
+        scope=Scope.settings,
+        default=1
+    )
+
+    group_reviews_required_count = Integer(
+        display_name="Reviews Required Minimum",
+        help="The minimum number of group-reviews that should be applied to a set of submissions (set to 0 to be 'TA Graded')",
+        scope=Scope.settings,
+        default=3
+    )
+
+    user_review_count = Integer(
+        display_name="User Reviews Required Minimum",
+        help="The minimum number of other-group reviews that an individual user should perform",
         scope=Scope.settings,
         default=1
     )
@@ -194,7 +208,7 @@ class GroupProjectBlock(XBlock):
                 team_members = []
 
             try:
-                assess_groups = self.project_api.get_workgroups_to_review(user_id)
+                assess_groups = self.project_api.get_workgroups_to_review(user_id, self.course_id, self.content_id)
             except:
                 assess_groups = []
         else:
@@ -230,6 +244,7 @@ class GroupProjectBlock(XBlock):
         fragment.add_content(render_template('/templates/html/group_project_edit.html', {
             'self': self,
         }))
+        fragment.add_css(load_resource('public/css/group_project_edit.css'))
 
         fragment.add_javascript(
             load_resource('public/js/group_project_edit.js'))
@@ -351,7 +366,7 @@ class GroupProjectBlock(XBlock):
                 group_review_questions.extend([q.id for q in sec.questions if q.required])
 
         group_review_items = []
-        assess_groups = self.project_api.get_workgroups_to_review(self.user_id)
+        assess_groups = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
         for assess_group in assess_groups:
             group_review_items.extend(self.project_api.get_workgroup_review_items_for_group(assess_group["id"]))
         my_feedback = {make_key(pri["workgroup"], pri["question"]): pri["answer"] for pri in group_review_items if pri['reviewer'] == self.xmodule_runtime.anonymous_student_id}
@@ -374,6 +389,8 @@ class GroupProjectBlock(XBlock):
         self.display_name = submissions['display_name']
         xml_content = submissions['data']
         max_score = submissions['max_score']
+        group_reviews_required_count = submissions['group_reviews_required_count']
+        user_review_count = submissions['user_review_count']
 
         if not max_score:
             # empty = default
@@ -386,6 +403,20 @@ class GroupProjectBlock(XBlock):
                 max_score = 100
 
         self.weight = max_score
+
+        try:
+            group_reviews_required_count = int(group_reviews_required_count)
+        except:
+            group_reviews_required_count = 3
+
+        self.group_reviews_required_count = group_reviews_required_count
+
+        try:
+            user_review_count = int(user_review_count)
+        except:
+            user_review_count = 1
+
+        self.user_review_count = user_review_count
 
         try:
             etree.parse(StringIO(xml_content))
