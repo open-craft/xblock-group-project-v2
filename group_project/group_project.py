@@ -268,7 +268,7 @@ class GroupProjectBlock(XBlock):
             numeric_values = [float(v) for v in value_array]
             return float(sum(numeric_values)/len(numeric_values))
 
-        review_item_data = self.project_api.get_workgroup_review_items_for_group(group_id)
+        review_item_data = self.project_api.get_workgroup_review_items_for_group(group_id, self.content_id)
         review_item_map = {make_key(r['question'], self.xmodule_runtime.get_real_user(r['reviewer']).id) : r['answer'] for r in review_item_data}
         group_reviewer_ids = [u["id"] for u in self.project_api.get_workgroup_reviewers(group_id)]
 
@@ -341,7 +341,7 @@ class GroupProjectBlock(XBlock):
             for sec in prc.peer_review_sections:
                 peer_review_questions.extend([q.id for q in sec.questions if q.required])
 
-        group_peer_items = self.project_api.get_peer_review_items_for_group(self.workgroup['id'])
+        group_peer_items = self.project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
         my_feedback = {make_key(pri["user"], pri["question"]): pri["answer"] for pri in group_peer_items if pri['reviewer'] == self.xmodule_runtime.anonymous_student_id}
         my_peers = [u for u in self.workgroup["users"] if u["id"] != self.user_id]
 
@@ -368,7 +368,7 @@ class GroupProjectBlock(XBlock):
         group_review_items = []
         assess_groups = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
         for assess_group in assess_groups:
-            group_review_items.extend(self.project_api.get_workgroup_review_items_for_group(assess_group["id"]))
+            group_review_items.extend(self.project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id))
         my_feedback = {make_key(pri["workgroup"], pri["question"]): pri["answer"] for pri in group_review_items if pri['reviewer'] == self.xmodule_runtime.anonymous_student_id}
 
         for assess_group in assess_groups:
@@ -442,7 +442,8 @@ class GroupProjectBlock(XBlock):
                 self.xmodule_runtime.anonymous_student_id,
                 peer_id,
                 self.workgroup['id'],
-                submissions
+                self.content_id,
+                submissions,
             )
 
             if self.evaluations_complete():
@@ -498,7 +499,8 @@ class GroupProjectBlock(XBlock):
         feedback = self.project_api.get_peer_review_items(
             self.xmodule_runtime.anonymous_student_id,
             peer_id,
-            self.workgroup['id']
+            self.workgroup['id'],
+            self.content_id,
         )
 
         # pivot the data to show question -> answer
@@ -528,7 +530,8 @@ class GroupProjectBlock(XBlock):
         user_id = self.user_id
         feedback = self.project_api.get_user_peer_review_items(
             user_id,
-            self.workgroup['id']
+            self.workgroup['id'],
+            self.content_id,
         )
 
         results = {}
@@ -545,6 +548,7 @@ class GroupProjectBlock(XBlock):
         workgroup_id = self.workgroup['id']
         feedback = self.project_api.get_workgroup_review_items_for_group(
             workgroup_id,
+            self.content_id,
         )
 
         results = {}

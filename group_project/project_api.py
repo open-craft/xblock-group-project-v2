@@ -46,12 +46,16 @@ class ProjectAPI(object):
         return json.loads(response.read())
 
     @api_error_protect
-    def get_peer_review_items_for_group(self, group_id):
+    def get_peer_review_items_for_group(self, group_id, content_id):
+        qs_params = {
+            "content_id": content_id,
+        }
         response = GET(
-            '{}/{}/{}/peer_reviews/'.format(
+            '{}/{}/{}/peer_reviews/?{}'.format(
                 self._api_server_address,
                 WORKGROUP_API,
-                group_id
+                group_id,
+                urlencode(qs_params),
             )
         )
         return json.loads(response.read())
@@ -92,12 +96,16 @@ class ProjectAPI(object):
         )
 
     @api_error_protect
-    def get_workgroup_review_items_for_group(self, group_id):
+    def get_workgroup_review_items_for_group(self, group_id, content_id):
+        qs_params = {
+            "content_id": content_id,
+        }
         response = GET(
-            '{}/{}/{}/workgroup_reviews/'.format(
+            '{}/{}/{}/workgroup_reviews/?{}'.format(
                 self._api_server_address,
                 WORKGROUP_API,
-                group_id
+                group_id,
+                urlencode(qs_params),
             )
         )
         return json.loads(response.read())
@@ -137,17 +145,17 @@ class ProjectAPI(object):
             )
         )
 
-    def get_peer_review_items(self, reviewer_id, peer_id, group_id):
-        group_peer_items = self.get_peer_review_items_for_group(group_id)
+    def get_peer_review_items(self, reviewer_id, peer_id, group_id, content_id):
+        group_peer_items = self.get_peer_review_items_for_group(group_id, content_id)
         return [pri for pri in group_peer_items if pri['reviewer'] == reviewer_id and (pri['user'] == peer_id or pri['user'] == int(peer_id))]
 
-    def get_user_peer_review_items(self, user_id, group_id):
-        group_peer_items = self.get_peer_review_items_for_group(group_id)
+    def get_user_peer_review_items(self, user_id, group_id, content_id):
+        group_peer_items = self.get_peer_review_items_for_group(group_id, content_id)
         return [pri for pri in group_peer_items if pri['user'] == user_id or pri['user'] == int(user_id)]
 
-    def submit_peer_review_items(self, reviewer_id, peer_id, group_id, data):
+    def submit_peer_review_items(self, reviewer_id, peer_id, group_id, content_id, data):
         # get any data already there
-        current_data = {pi['question']: pi for pi in self.get_peer_review_items(reviewer_id, peer_id, group_id)}
+        current_data = {pi['question']: pi for pi in self.get_peer_review_items(reviewer_id, peer_id, group_id, content_id)}
         for k,v in data.iteritems():
             if k in current_data:
                 question_data = current_data[k]
@@ -170,11 +178,12 @@ class ProjectAPI(object):
                     "workgroup": group_id,
                     "user": peer_id,
                     "reviewer": reviewer_id,
+                    "content_id": content_id,
                 }
                 self.create_peer_review_assessment(question_data)
 
     def get_workgroup_review_items(self, reviewer_id, group_id, content_id):
-        group_review_items = self.get_workgroup_review_items_for_group(group_id)
+        group_review_items = self.get_workgroup_review_items_for_group(group_id, content_id)
         return [gri for gri in group_review_items if gri['reviewer'] == reviewer_id and gri['content_id'] == content_id]
 
     def submit_workgroup_review_items(self, reviewer_id, group_id, content_id, data):
@@ -219,12 +228,15 @@ class ProjectAPI(object):
 
     @api_error_protect
     def get_user_workgroup_for_course(self, user_id, course_id):
+        qs_params = {
+            "course": course_id,
+        }
         response = GET(
-            '{}/{}/{}/workgroups/?course={}'.format(
+            '{}/{}/{}/workgroups/?{}'.format(
                 self._api_server_address,
                 USERS_API,
                 user_id,
-                course_id
+                urlencode(qs_params),
             )
         )
 
@@ -415,12 +427,15 @@ class ProjectAPI(object):
 
     @api_error_protect
     def get_user_roles_for_course(self, user_id, course_id):
+        qs_params = {
+            "user_id": user_id,
+        }
         response = GET(
-            '{}/{}/{}/roles/?user_id={}'.format(
+            '{}/{}/{}/roles/?{}'.format(
                 self._api_server_address,
                 COURSES_API,
                 course_id,
-                user_id,
+                urlencode(qs_params),
             )
         )
 
