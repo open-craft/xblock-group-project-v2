@@ -261,6 +261,17 @@ class GroupProjectBlock(XBlock):
             grade_value,
             self.weight
         )
+        # Emit analytics event...
+        self.runtime.publish(
+            self,
+            "group_activity.final_grade",
+            {
+                "grade_value": grade_value,
+                "group_id": group_id,
+                "content_id": self.content_id,
+            }
+        )
+
 
     def calculate_grade(self, group_id):
 
@@ -473,6 +484,23 @@ class GroupProjectBlock(XBlock):
                 submissions
             )
 
+            group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+            for q_id in group_activity.grade_questions:
+                if q_id in submissions:
+                    # Emit analytics event...
+                    self.runtime.publish(
+                        self,
+                        "group_activity.received_grade_question_score",
+                        {
+                            "question": q_id,
+                            "answer": submissions[q_id],
+                            "reviewer_id": self.xmodule_runtime.anonymous_student_id,
+                            "is_admin_grader": self.is_admin_grader,
+                            "group_id": group_id,
+                            "content_id": self.content_id,
+                        }
+                    )
+
             grade_value = self.calculate_grade(group_id)
             if grade_value:
                 self.assign_grade_to_group(group_id, grade_value)
@@ -587,6 +615,18 @@ class GroupProjectBlock(XBlock):
             # They all got saved... note the submissions
             for uf in upload_files:
                 uf.submit()
+                # Emit analytics event...
+                self.runtime.publish(
+                    self,
+                    "group_activity.received_submission",
+                    {
+                        "submission_id": uf.submission_id,
+                        "filename": uf.file.name,
+                        "content_id": self.content_id,
+                        "group_id": self.workgroup['id'],
+                        "user_id": self.user_id,
+                    }
+                )
 
             response_data.update({uf.submission_id : uf.file_url for uf in upload_files})
 
