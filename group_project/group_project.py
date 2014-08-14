@@ -219,6 +219,7 @@ class GroupProjectBlock(XBlock):
             "group_activity": group_activity,
             "team_members": json.dumps(team_members),
             "assess_groups": json.dumps(assess_groups),
+            "ta_graded": (self.group_reviews_required_count < 1),
         }
 
         fragment = Fragment()

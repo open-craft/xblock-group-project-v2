@@ -14,7 +14,7 @@
   {% for activity_component in group_activity.activity_components %}
     <div id="activity_{{ activity_component.id }}" {% if activity_component.is_closed %}class="activity_section data-closed"{% else %}class="activity_section"{% endif %}>
     {% if activity_component.grading_override %}
-      <div class="grading_override">
+      <div class="grading_override {% if ta_graded %}ta_graded{% endif %}">
         <span class="default_message">Grading View</span>
         <span class="custom_message"></span>
       </div>
