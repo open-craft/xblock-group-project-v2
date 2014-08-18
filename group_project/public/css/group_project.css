@@ -206,12 +206,15 @@
   top: 0;
   left: 0;
 }
-.reveal-modal.open{
+.xblock-reveal.reveal-modal.open{
   display:block !important;
   visibility:visible !important;
   width:80% !important;
 }
-.message .reveal-modal.open{
+.xblock-reveal.reveal-modal.open.small{
+  width:40% !important;
+}
+.message .xblock-reveal.reveal-modal.open{
   width:500px !important;
   margin-left: -250px;
   position: fixed;
@@ -219,7 +222,7 @@
   left:50%;
   padding-bottom: 0;
 }
-.message .reveal-modal.open .button{
+.message .xblock-reveal.reveal-modal.open .button{
   margin-top:30px;
 }
 .message .message_text{
