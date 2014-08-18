@@ -80,7 +80,7 @@
           <label>Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
-              <option value="">Grade</option>
+              <option value="">Rating</option>
               <option value="1">1</option>
               <option value="2">2</option>
               <option value="3">3</option>
