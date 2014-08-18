@@ -1,5 +1,12 @@
 function GroupProjectBlock(runtime, element) {
 
+  var get_from_node = function(selector, default_value){
+    var the_node = $(selector, element);
+    return (the_node.length > 0) ? the_node.html() : default_value;
+  };
+  var DATA_PRESENT_SUBMIT = get_from_node('.data-present-button-text', 'Resubmit');
+  var NO_DATA_PRESENT_SUBMIT = get_from_node('.no-data-button-text', 'Submit');
+
   var message_box = $('.message', element).appendTo($(document.body));
   message_box.on('click', '.button, .close-box', function(){
     message_box.hide();
@@ -27,6 +34,7 @@ function GroupProjectBlock(runtime, element) {
   var load_data_into_form = function(form_node, data_for_form){
     form_node.find('.answer').val(null);
     for(data_item in data_for_form){
+      form_node.find('button.submit').html(DATA_PRESENT_SUBMIT);
       // NOTE: use of ids specified by designer here
       var $form_item = form_node.find("#" + data_item);
       $form_item.val(data_for_form[data_item]);
@@ -54,7 +62,7 @@ function GroupProjectBlock(runtime, element) {
       }
 
       var mean_field = $('#mean_' + data_item, section_node);
-      mean_field.text(mean(data[data_item]));
+      mean_field.text(Math.round(mean(data[data_item])));
     }
   }
 
@@ -62,6 +70,7 @@ function GroupProjectBlock(runtime, element) {
     $('.group-project-xblock-wrapper', element).addClass('waiting');
     form_node.find('.editable').attr('disabled', 'disabled');
     form_node.find('.answer').val(null);
+    form_node.find('button.submit').html(NO_DATA_PRESENT_SUBMIT);
     $.ajax({
       url: runtime.handlerUrl(element, handler_name),
       data: args,
@@ -122,7 +131,7 @@ function GroupProjectBlock(runtime, element) {
         show_message('Sorry, there was an error saving your feedback');
       },
       complete: function(data){
-        $form.find(':submit').prop('disabled', false);
+        $form.find(':submit').prop('disabled', false).html(DATA_PRESENT_SUBMIT);
       }
     });
 
