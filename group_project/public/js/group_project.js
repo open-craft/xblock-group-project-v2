@@ -151,7 +151,7 @@ function GroupProjectBlock(runtime, element) {
   var groups = JSON.parse($('.assess_groups', element).html());
   var group_node = function(group){
     var gn = $('<a class="select_group" />');
-    var gi = $('<span class="avatar"><i class="fa fa-users" /></span>');
+    var gi = $('<span class="avatar"><i class="fa fa-users mk-icon-groupworknav" /></span>');
     gn.data('id', group.id);
     gn.append(gi);
 
