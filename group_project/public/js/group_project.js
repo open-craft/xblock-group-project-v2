@@ -24,12 +24,11 @@ function GroupProjectBlock(runtime, element) {
     return sum / count;
   }
 
-  var load_data_into_form = function (form_id, data_for_form){
-    var $form = $("." + form_id, element);
-    $form.find('.answer').val(null);
+  var load_data_into_form = function(form_node, data_for_form){
+    form_node.find('.answer').val(null);
     for(data_item in data_for_form){
       // NOTE: use of ids specified by designer here
-      var $form_item = $form.find("#" + data_item);
+      var $form_item = form_node.find("#" + data_item);
       $form_item.val(data_for_form[data_item]);
     }
   }
@@ -59,7 +58,10 @@ function GroupProjectBlock(runtime, element) {
     }
   }
 
-  var _load_data = function (handler_name, args, post_data_fn){
+  var _load_data = function (handler_name, args, form_node, post_data_fn){
+    $('.group-project-xblock-wrapper', element).addClass('waiting');
+    form_node.find('.editable').attr('disabled', 'disabled');
+    form_node.find('.answer').val(null);
     $.ajax({
       url: runtime.handlerUrl(element, handler_name),
       data: args,
@@ -74,21 +76,24 @@ function GroupProjectBlock(runtime, element) {
           }
         }
         else{
-          post_data_fn(data);
+          post_data_fn(form_node, data);
         }
       },
       error: function(data){
         show_message('Error loading feedback');
       }
-    })
+    }).done(function(){
+      $('.group-project-xblock-wrapper', element).removeClass('waiting');
+      form_node.find('.editable').removeAttr('disabled');
+    });
   }
 
   var load_data_for_peer = function (peer_id){
-    _load_data('load_peer_feedback', 'peer_id=' + peer_id, function(data){load_data_into_form('peer_review', data);});
+    _load_data('load_peer_feedback', 'peer_id=' + peer_id, $('.peer_review', element), load_data_into_form);
   }
 
   var load_data_for_other_group = function (group_id){
-    _load_data('load_other_group_feedback', 'group_id=' + group_id, function(data){load_data_into_form('other_group_review', data);});
+    _load_data('load_other_group_feedback', 'group_id=' + group_id, $('.other_group_review', element), load_data_into_form);
   }
 
   $('form.peer_review, form.other_group_review', element).on('submit', function(ev){
@@ -133,6 +138,7 @@ function GroupProjectBlock(runtime, element) {
     }
     pn.attr('title', peer.full_name);
     pn.data('id', peer.id);
+    pn.data('username', peer.username)
     pn.append(pi);
 
     return pn;
@@ -206,10 +212,10 @@ function GroupProjectBlock(runtime, element) {
     $(this).addClass('selected');
 
     if(showid == "cohort_feedback"){
-      _load_data('load_my_group_feedback', null, function(data){load_my_feedback_data($('.cohort_feedback', element), data);});
+      _load_data('load_my_group_feedback', null, $('.cohort_feedback', element), load_my_feedback_data);
     }
     else{
-      _load_data('load_my_peer_feedback', null, function(data){load_my_feedback_data($('.team_feedback', element), data);});
+      _load_data('load_my_peer_feedback', null, $('.team_feedback', element), load_my_feedback_data);
     }
 
     ev.preventDefault();
@@ -217,12 +223,14 @@ function GroupProjectBlock(runtime, element) {
   });
 
   $('.select_peer').on('click', function(ev){
+    var $this = $(this);
     $('.select_peer,.select_group').removeClass('selected');
-    $(this).addClass('selected');
+    $this.addClass('selected');
     $('.other_group_review', element).hide();
     $('.peer_review', element).show();
-    $('.peer_id', element).attr('value', $(this).data('id'));
-    load_data_for_peer($(this).data('id'));
+    $('.peer_id', element).attr('value', $this.data('id'));
+    $('.username', element).text($this.data('username'));
+    load_data_for_peer($this.data('id'));
 
     ev.preventDefault();
     return false;

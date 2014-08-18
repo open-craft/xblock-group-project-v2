@@ -246,12 +246,12 @@
   visibility: hidden;
 }
 .upload_form .file-progress-box .file-progress{
-  background-color: #002960;
+  background-color: #cccccc;
   width: 20%;
   height: 5px;
 }
 .upload_form .file-progress-box .file-progress.complete{
-  background-color: #629B2B;
+  background-color: #999999;
 }
 
 .group-project-xblock-wrapper .highlight,
@@ -259,3 +259,15 @@
   color: #E37222;
 }
 
+.group-project-xblock-wrapper.waiting{
+  cursor: wait !important;
+}
+.group-project-xblock-wrapper.waiting img,
+.group-project-xblock-wrapper.waiting label,
+.group-project-xblock-wrapper.waiting select,
+.group-project-xblock-wrapper.waiting textarea,
+.group-project-xblock-wrapper.waiting button,
+.group-project-xblock-wrapper.waiting input,
+.group-project-xblock-wrapper.waiting a{
+  cursor: wait !important;
+}

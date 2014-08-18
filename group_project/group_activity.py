@@ -47,13 +47,14 @@ class ActivityQuestion(object):
         answer_node = copy.deepcopy(self.answer)
         answer_node.set('name', self.id)
         answer_node.set('id', self.id)
-        answer_class = 'answer'
+        answer_classes = ['answer']
         if self.small:
-            answer_class = 'answer side'
-        answer_node.set('class', answer_class)
-
+            answer_classes.append('side')
         if self.section.component.is_closed:
             answer_node.set('disabled', 'disabled')
+        else:
+            answer_classes.append('editable')
+        answer_node.set('class', ' '.join(answer_classes))
 
         ans_html = outer_html(answer_node)
         if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html)-1:
