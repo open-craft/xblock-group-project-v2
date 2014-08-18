@@ -113,6 +113,12 @@ class GroupProjectBlock(XBlock):
 
         raise OutsiderDisallowedError("User does not have an allowed role")
 
+    _known_real_user_ids = {}
+    def real_user_id(self, anonymous_student_id):
+        if anonymous_student_id not in self._known_real_user_ids:
+            self._known_real_user_ids[anonymous_student_id] = self.xmodule_runtime.get_real_user(anonymous_student_id).id
+        return self._known_real_user_ids[anonymous_student_id]
+
     @property
     def project_api(self):
         if self._project_api is None:
@@ -125,7 +131,7 @@ class GroupProjectBlock(XBlock):
     @property
     def user_id(self):
         try:
-            return self.xmodule_runtime.get_real_user(self.xmodule_runtime.anonymous_student_id).id
+            return self.real_user_id(self.xmodule_runtime.anonymous_student_id)
         except:
             return None
 
@@ -281,8 +287,10 @@ class GroupProjectBlock(XBlock):
             return float(sum(numeric_values)/len(numeric_values))
 
         review_item_data = self.project_api.get_workgroup_review_items_for_group(group_id, self.content_id)
-        review_item_map = {make_key(r['question'], self.xmodule_runtime.get_real_user(r['reviewer']).id) : r['answer'] for r in review_item_data}
+        review_item_map = {make_key(r['question'], self.real_user_id(r['reviewer'])) : r['answer'] for r in review_item_data}
+        all_reviewer_ids = set([self.real_user_id(r['reviewer']) for r in review_item_data])
         group_reviewer_ids = [u["id"] for u in self.project_api.get_workgroup_reviewers(group_id)]
+        admin_reviewer_ids = [ar_id for ar_id in all_reviewer_ids if ar_id not in group_reviewer_ids]
 
         group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
 
@@ -298,7 +306,16 @@ class GroupProjectBlock(XBlock):
 
             return user_grades
 
-        admin_provided_grades = get_user_grade_value_list(self.user_id) if self.is_admin_grader else None
+        admin_provided_grades = None
+        if len(admin_reviewer_ids) > 0:
+            admin_provided_grades = []
+            admin_reviewer_grades = [get_user_grade_value_list(admin_id) for admin_id in admin_reviewer_ids]
+            admin_grader_count = len(admin_reviewer_grades)
+            if admin_grader_count > 1:
+                for idx in range(admin_grader_count):
+                    admin_provided_grades.append(mean([adm[idx] for adm in admin_reviewer_grades]))
+            else:
+                admin_provided_grades = admin_reviewer_grades[0]
 
         user_grades = {}
         if len(group_reviewer_ids) > 0:

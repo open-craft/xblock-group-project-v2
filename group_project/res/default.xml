@@ -75,12 +75,15 @@
       </content>
     </section>
     <peerreview>
-      <section title="Evaluate Teammate">
+      <section>
+        <content>
+          <h4>Evaluate <span class="username">this teammate</span></h4>
+        </content>
         <question id="peer_score">
-          <label>Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+          <label>Did <span class="username">this teammate</span> lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer small="true">
             <select>
-              <option value="">Grade</option>
+              <option value="">Rating</option>
               <option value="1">1</option>
               <option value="2">2</option>
               <option value="3">3</option>
@@ -97,19 +100,19 @@
       </section>
       <section title="Questions">
         <question id="peer_q1">
-          <label>Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+          <label>Did <span class="username">this teammate</span> lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
             <textarea placeholder="Give your opinion here"></textarea>
           </answer>
         </question>
         <question id="peer_q2">
-          <label>Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+          <label>Did <span class="username">this teammate</span> lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
             <textarea placeholder="Give your opinion here"></textarea>
           </answer>
         </question>
         <question id="peer_q3">
-          <label>Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+          <label>Did <span class="username">this teammate</span> lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
             <textarea placeholder="Give your opinion here"></textarea>
           </answer>
