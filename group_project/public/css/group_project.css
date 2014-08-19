@@ -173,16 +173,16 @@
   font-size: 14px;
 }
 .upload_form .upload_item input[type=text]{
-  width: 79%;
+  width: 86%;
   display: inline-block;
   background-color: transparent;
   color: #3384ca;
   margin-bottom: 0;
 }
 .upload_form .upload_item label{
-  width: 20%;
+  width: 13%;
   display: inline-block;
-  padding-left: 1%;
+  text-align: right;
 }
 .upload_form .upload_item label span{
   margin-bottom: 0;
@@ -241,13 +241,13 @@
 
 .upload_form .file-progress-box{
   background-color: transparent;
-  width: 79%;
+  width: 86%;
   height: 5px;
   visibility: hidden;
 }
 .upload_form .file-progress-box .file-progress{
   background-color: #cccccc;
-  width: 20%;
+  width: 13%;
   height: 5px;
 }
 .upload_form .file-progress-box .file-progress.complete{

@@ -54,7 +54,7 @@
         <h1>Upload</h1>
         <hr />
         <div>
-          Upload your team submission(s) below. You can continue to upload revisions until the <span class="highlight">upload period closes on <span class="milestone" data-date="submissions"></span>.</span>Only your last uploaded file(s) will be graded. Final text will be written. Placeholder only.
+          Upload your team submission(s) below. You can continue to upload revisions until the <span class="highlight">upload period closes on <span class="milestone" data-date="submissions"></span>.</span> Only your last uploaded file(s) will be graded.
         </div>
       </content>
     </section>
