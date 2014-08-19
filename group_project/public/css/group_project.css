@@ -209,10 +209,6 @@
 .xblock-reveal.reveal-modal.open{
   display:block !important;
   visibility:visible !important;
-  width:80% !important;
-}
-.xblock-reveal.reveal-modal.open.small{
-  width:40% !important;
 }
 .message .xblock-reveal.reveal-modal.open{
   width:500px !important;
