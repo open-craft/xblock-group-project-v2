@@ -38,6 +38,10 @@ class ActivityQuestion(object):
         self.small = (answer_node.get("small", "false") == "true")
         self.section = section
         self.required = (doc_tree.get("required", "true") == "true")
+        designer_class = doc_tree.get("class")
+        self.question_classes = ["question"]
+        if designer_class:
+            self.question_classes.append(designer_class)
 
         if doc_tree.get("grade") == "true":
             self.section.activity.grade_questions.append(self.id)
@@ -47,7 +51,10 @@ class ActivityQuestion(object):
         answer_node = copy.deepcopy(self.answer)
         answer_node.set('name', self.id)
         answer_node.set('id', self.id)
+        current_class = answer_node.get('class')
         answer_classes = ['answer']
+        if current_class:
+            answer_classes.append(current_class)
         if self.small:
             answer_classes.append('side')
         if self.section.component.is_closed:
@@ -65,12 +72,16 @@ class ActivityQuestion(object):
             return ans_html
 
         label_node.set('for', self.id)
-        label_class = 'prompt'
+        current_class = label_node.get('class')
+        label_classes = ['prompt']
+        if current_class:
+            label_classes.append(current_class)
         if self.small:
-            label_class = 'prompt side'
-        label_node.set('class', label_class)
+            label_classes.append('side')
+        label_node.set('class', ' '.join(label_classes))
 
-        return "{}{}".format(
+        return '<div class="{}">{}{}</div>'.format(
+            ' '.join(self.question_classes),
             outer_html(label_node),
             ans_html,
         )
@@ -109,10 +120,13 @@ class ActivityAssessment(object):
 
         label_node = copy.deepcopy(self.label)
         label_node.set('for', self.id)
-        label_class = 'prompt'
+        current_class = label_node.get('class')
+        label_classes = ['prompt']
+        if current_class:
+            label_classes.append(current_class)
         if self.small:
-            label_class = 'prompt side'
-        label_node.set('class', label_class)
+            label_classes.append('side')
+        label_node.set('class', ' '.join(label_classes))
 
         ans_html = outer_html(answer_node)
         if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html)-1:

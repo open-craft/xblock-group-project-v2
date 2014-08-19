@@ -55,7 +55,7 @@
 }
 
 .group-project-xblock-wrapper .prompt{
-  padding-bottom: 10px;
+  padding-bottom: 5px;
   font-size: 14px;
   line-height: 22px;
 }
@@ -63,7 +63,7 @@
 .group-project-xblock-wrapper .prompt.side{
   width: 70%;
   display: inline-block;
-  min-height: 70px;
+  min-height: 55px;
   padding-top: 0;
 }
 
@@ -115,7 +115,7 @@
 }
 
 .group-project-xblock-wrapper label.prompt{
-  padding-top: 15px;
+  padding: 5px auto;
   line-height: 1.6;
 }
 .group-project-xblock-wrapper .quote{
