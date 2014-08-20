@@ -145,7 +145,7 @@ function GroupProjectBlock(runtime, element) {
     if(peer.avatar_url){
       pi.attr('src', peer.avatar_url);
     }
-    pn.attr('title', peer.full_name);
+    pn.attr('title', peer.username);
     pn.data('id', peer.id);
     pn.data('username', peer.username)
     pn.append(pi);
