@@ -12,7 +12,7 @@
   </nav>
 
   {% for activity_component in group_activity.activity_components %}
-    <div id="activity_{{ activity_component.id }}" {% if activity_component.is_closed %}class="activity_section data-closed"{% else %}class="activity_section"{% endif %}>
+    <div id="activity_{{ activity_component.id }}" class="activity_section">
     {% if activity_component.grading_override %}
       <div class="grading_override {% if ta_graded %}ta_graded{% endif %}">
         <span class="default_message">Grading View</span>
@@ -47,7 +47,7 @@
         {% endautoescape %}
         <hr />
       {% endfor %}
-        <button class="submit">Submit</button>
+        <button class="submit" {% if activity_component.is_closed %}disabled="disabled"{% endif %}>Submit</button>
       </form>
       {% endif %}
       {% if activity_component.other_group_reviews %}
@@ -60,7 +60,7 @@
         {% endautoescape %}
         <hr />
       {% endfor %}
-        <button class="submit">Submit</button>
+        <button class="submit" {% if activity_component.is_closed %}disabled="disabled"{% endif %}>Submit</button>
       </form>
       {% endif %}
       {% if activity_component.peer_assessments %}

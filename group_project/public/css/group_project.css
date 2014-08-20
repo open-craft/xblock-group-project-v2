@@ -110,8 +110,8 @@
   border: 2px solid #E37222;
 }
 
-.group-project-xblock-wrapper .data-closed button{
-  display: none !important;
+.group-project-xblock-wrapper button[disabled]{
+  cursor: not-allowed !important;
 }
 
 .group-project-xblock-wrapper label.prompt{
