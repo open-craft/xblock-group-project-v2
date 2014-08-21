@@ -358,8 +358,9 @@ class GroupProjectBlock(XBlock):
         for u in self.workgroup["users"]:
             self.mark_complete_stage(u["id"], "upload")
 
-    def graded_and_complete(self):
-        for u in self.workgroup["users"]:
+    def graded_and_complete(self, group_id):
+        workgroup = self.project_api.get_workgroup_by_id(group_id)
+        for u in workgroup["users"]:
             self.mark_complete_stage(u["id"], None)
 
     def evaluations_complete(self):
@@ -522,7 +523,7 @@ class GroupProjectBlock(XBlock):
             grade_value = self.calculate_grade(group_id)
             if grade_value:
                 self.assign_grade_to_group(group_id, grade_value)
-                self.graded_and_complete()
+                self.graded_and_complete(group_id)
 
             if self.is_group_member and self.grading_complete():
                 self.mark_complete_stage(self.user_id, "grade")
