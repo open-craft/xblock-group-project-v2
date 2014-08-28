@@ -13,7 +13,7 @@ function GroupProjectBlock(runtime, element) {
   })
 
   var show_message = function(msg){
-    message_box.find('.message_text').text(msg);
+    message_box.find('.message_text').html(msg);
     message_box.show();
   }
 
@@ -263,13 +263,17 @@ function GroupProjectBlock(runtime, element) {
   $(document).trigger("select_stage", step_map["default"]);
 
   var upload_form = $('.upload_form', element).appendTo($(document.body));
+  var failed_uploads = [];
 
   var upload_data = {
     dataType: 'json',
     url: runtime.handlerUrl(element, "upload_submission"),
     add: function(e, data){
       var target_form = $(e.target);
-      $('.' + data.paramName + '_name', target_form).val(data.files[0].name);
+      var inputField = $('.' + data.paramName + '_name', target_form);
+      inputField
+        .attr('data-original-value', inputField.val())
+        .val(data.files[0].name);
       $('.' + data.paramName + '_label', target_form).text("Update");
       $('.' + data.paramName + '_progress', target_form).css({width: '0%'});
       $('.' + data.paramName + '_progress_box', target_form).css({visibility: 'visible'});
@@ -286,12 +290,27 @@ function GroupProjectBlock(runtime, element) {
     done: function(e, data){
       var target_form = $(e.target);
       $('.' + data.paramName + '_progress', target_form).css('width', '100%').addClass('complete');
-      setTimeout(function(){
-        $('.' + data.paramName + '_progress_box', target_form).css('visibility', 'hidden');
-        $('.' + data.paramName + '_progress', target_form).removeClass('complete');
-      }, 500);
     },
     stop: function(e){
+      // show failed file uploads
+      if (failed_uploads.length > 0) {
+        var target_form = $(e.target);
+        var fileList = [];
+        $.each(failed_uploads, function(i, paramName) {
+          var inputField = $('.' + paramName + '_name', target_form);
+          fileList.push(inputField.val());
+          inputField.val(inputField.attr('data-original-value'));
+        });
+        if (fileList.length == 1) {
+          show_message('File <b>' + fileList[0] + '</b> has failed to upload!');
+        }
+        else {
+          show_message('Some files have failed to upload: <ul><li>' + fileList.join('</li><li>') + '</li></ul>');
+        }
+        // empty list
+        failed_uploads = [];
+      }
+
       $('.group_submissions', element).empty();
       $.ajax({
         url: runtime.handlerUrl(element, "refresh_submission_links"),
@@ -308,6 +327,18 @@ function GroupProjectBlock(runtime, element) {
         upload_form.hide();
         $('.action_buttons a', element).css('cursor', 'pointer').removeAttr('disabled');
       }, 1000);
+    },
+    fail: function(e, data) {
+      var target_form = $(e.target);
+      $('.' + data.paramName + '_progress', target_form).css('width', '100%').addClass('failed');
+      failed_uploads.push(data.paramName);
+    },
+    always: function(e, data) {
+      var target_form = $(e.target);
+      setTimeout(function(){
+        $('.' + data.paramName + '_progress_box', target_form).css('visibility', 'hidden');
+        $('.' + data.paramName + '_progress', target_form).removeClass('complete failed');
+      }, 500);
     }
   };
 
