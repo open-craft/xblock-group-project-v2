@@ -81,7 +81,7 @@ function GroupProjectBlock(runtime, element) {
             show_message(data.msg);
           }
           else{
-            show_message('Error loading feedback');
+            show_message('We encountered an error loading feedback.');
           }
         }
         else{
@@ -89,7 +89,7 @@ function GroupProjectBlock(runtime, element) {
         }
       },
       error: function(data){
-        show_message('Error loading feedback');
+        show_message('We encountered an error loading feedback.');
       }
     }).done(function(){
       $('.group-project-xblock-wrapper', element).removeClass('waiting');
@@ -128,7 +128,7 @@ function GroupProjectBlock(runtime, element) {
         show_message(msg);
       },
       error: function(data){
-        show_message('Sorry, there was an error saving your feedback');
+        show_message('We encountered an error saving your feedback.');
       },
       complete: function(data){
         $form.find(':submit').prop('disabled', false).html(DATA_PRESENT_SUBMIT);
@@ -300,7 +300,7 @@ function GroupProjectBlock(runtime, element) {
           $('.group_submissions', element).html(data.html);
         },
         error: function(data){
-          show_message('Error loading links for group!!!');
+          show_message('We encountered an error.');
         }
       });
 
@@ -339,7 +339,7 @@ function GroupProjectBlock(runtime, element) {
           $flyup.html(data.html).show();
         },
         error: function(data){
-          show_message('Error loading links for group!!!');
+          show_message('We encountered an error.');
         }
       });
     }
