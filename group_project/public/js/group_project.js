@@ -270,17 +270,17 @@ function GroupProjectBlock(runtime, element) {
     url: runtime.handlerUrl(element, "upload_submission"),
     add: function(e, data){
       var target_form = $(e.target);
-      var inputField = $('.' + data.paramName + '_name', target_form);
-      inputField
-        .attr('data-original-value', inputField.val())
-        .val(data.files[0].name);
+      $('.' + data.paramName + '_name', target_form).val(data.files[0].name);
       $('.' + data.paramName + '_label', target_form).text("Update");
-      $('.' + data.paramName + '_progress', target_form).css({width: '0%'});
+      $('.' + data.paramName + '_progress', target_form).css({width: '0%'}).removeClass('complete failed');
       $('.' + data.paramName + '_progress_box', target_form).css({visibility: 'visible'});
 
       $(document).one('perform_uploads', function(ev){
         data.submit();
       });
+
+      // enable upload button & reset progress
+      $('.do_upload', upload_form).removeProp('disabled');
     },
     progress: function(e, data){
       var target_form = $(e.target);
@@ -290,27 +290,11 @@ function GroupProjectBlock(runtime, element) {
     done: function(e, data){
       var target_form = $(e.target);
       $('.' + data.paramName + '_progress', target_form).css('width', '100%').addClass('complete');
+      var input = $('.' + data.paramName + '_name', target_form);
+      input.attr('data-original-value', input.val());
     },
     stop: function(e){
-      // show failed file uploads
-      if (failed_uploads.length > 0) {
-        var target_form = $(e.target);
-        var fileList = [];
-        $.each(failed_uploads, function(i, paramName) {
-          var inputField = $('.' + paramName + '_name', target_form);
-          fileList.push(inputField.val());
-          inputField.val(inputField.attr('data-original-value'));
-        });
-        if (fileList.length == 1) {
-          show_message('File <b>' + fileList[0] + '</b> has failed to upload!');
-        }
-        else {
-          show_message('Some files have failed to upload: <ul><li>' + fileList.join('</li><li>') + '</li></ul>');
-        }
-        // empty list
-        failed_uploads = [];
-      }
-
+      $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'pointer');
       $('.group_submissions', element).empty();
       $.ajax({
         url: runtime.handlerUrl(element, "refresh_submission_links"),
@@ -323,22 +307,17 @@ function GroupProjectBlock(runtime, element) {
         }
       });
 
-      setTimeout(function(){
-        upload_form.hide();
-        $('.action_buttons a', element).css('cursor', 'pointer').removeAttr('disabled');
-      }, 1000);
+      if (failed_uploads.length <= 0) {
+        setTimeout(function(){
+          upload_form.hide();
+        }, 1000);
+      }
+      failed_uploads = [];
     },
     fail: function(e, data) {
       var target_form = $(e.target);
       $('.' + data.paramName + '_progress', target_form).css('width', '100%').addClass('failed');
-      failed_uploads.push(data.paramName);
-    },
-    always: function(e, data) {
-      var target_form = $(e.target);
-      setTimeout(function(){
-        $('.' + data.paramName + '_progress_box', target_form).css('visibility', 'hidden');
-        $('.' + data.paramName + '_progress', target_form).removeClass('complete failed');
-      }, 500);
+      failed_uploads.push(data.files[0].name);
     }
   };
 
@@ -348,11 +327,23 @@ function GroupProjectBlock(runtime, element) {
     upload_form.hide();
   })
   $('.do_upload', upload_form).on('click', function(){
-    $('.action_buttons a', element).css('cursor', 'wait').attr('disabled', 'disabled');
+    $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'wait');
     $(document).trigger('perform_uploads');
   })
 
   $('.show_upload_form', element).on('click', function(){
+    // upload button initially disabled
+    $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'pointer');
+    $('.file-progress-box', upload_form).css('visibility', 'hidden');
+    $('.file-progress', upload_form).removeClass('complete failed');
+
+    // reset file input fields
+    var fields = upload_form.find('.upload_item input');
+    fields.each(function(i,v) {
+      var field = $(v);
+      field.val(field.attr('data-original-value'));
+    });
+
     upload_form.show();
   });
 
