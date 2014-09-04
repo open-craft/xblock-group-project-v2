@@ -249,6 +249,9 @@
 .upload_form .file-progress-box .file-progress.complete{
   background-color: #999999;
 }
+.upload_form .file-progress-box .file-progress.failed{
+  background-color: #B85433;
+}
 
 .group-project-xblock-wrapper .highlight,
 .upload_form .highlight{
