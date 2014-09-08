@@ -191,7 +191,7 @@ class ActivitySection(object):
 
     @property
     def has_submissions(self):
-        return len([file_link for file_link in self.file_links if file_link.location]) > 0
+        return len([file_link for file_link in self.file_links if hasattr(file_link, 'location') and file_link.location]) > 0
 
     @property
     def upload_links(self):
@@ -457,12 +457,12 @@ class GroupActivity(object):
 
     @property
     def has_submissions(self):
-        uploaded_submissions = [s for s in self.submissions if s.location]
+        uploaded_submissions = [s for s in self.submissions if hasattr(s, 'location') and s.location]
         return len(uploaded_submissions) > 0
 
     @property
     def has_all_submissions(self):
-        uploaded_submissions = [s for s in self.submissions if s.location]
+        uploaded_submissions = [s for s in self.submissions if hasattr(s, 'location') and s.location]
         return len(uploaded_submissions) == len(self.submissions)
 
     @classmethod
