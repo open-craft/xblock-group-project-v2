@@ -37,7 +37,7 @@ function GroupProjectBlock(runtime, element) {
       form_node.find('button.submit').html(DATA_PRESENT_SUBMIT);
       // NOTE: use of ids specified by designer here
       var $form_item = form_node.find("#" + data_item);
-      $form_item.val(data_for_form[data_item]);
+      $form_item.val(decodeURIComponent(data_for_form[data_item]));
     }
   }
 
@@ -57,7 +57,7 @@ function GroupProjectBlock(runtime, element) {
         if(data_class && data_class.length > 0){
           node.addClass(data_class);
         }
-        node.text(data[data_item][i]);
+        node.text(decodeURIComponent(data[data_item][i]));
         fill_field.append(node);
       }
 
