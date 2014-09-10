@@ -6,7 +6,9 @@
 import logging
 import textwrap
 import json
+import urllib
 import webob
+
 from lxml import etree
 from xml.etree import ElementTree as ET
 from pkg_resources import resource_filename
@@ -36,6 +38,8 @@ if ALLOWED_OUTSIDER_ROLES is None:
 
 log = logging.getLogger(__name__)
 
+def encode_string(string_value):
+    return urllib.quote(string_value.encode("utf-8"))
 
 # Classes ###########################################################
 
@@ -69,7 +73,7 @@ class GroupProjectBlock(XBlock):
         display_name="Weight",
         help="This is the maximum score that the user receives when he/she successfully completes the problem",
         scope=Scope.settings,
-        default=1
+        default=100.0
     )
 
     group_reviews_required_count = Integer(
@@ -551,7 +555,7 @@ class GroupProjectBlock(XBlock):
         )
 
         # pivot the data to show question -> answer
-        results = {pi['question']: pi['answer'] for pi in feedback}
+        results = {pi['question']: encode_string(pi['answer']) for pi in feedback}
 
         return webob.response.Response(body=json.dumps(results))
 
@@ -567,7 +571,7 @@ class GroupProjectBlock(XBlock):
         )
 
         # pivot the data to show question -> answer
-        results = {ri['question']: ri['answer'] for ri in feedback}
+        results = {ri['question']: encode_string(ri['answer']) for ri in feedback}
 
         return webob.response.Response(body=json.dumps(results))
 
@@ -584,9 +588,9 @@ class GroupProjectBlock(XBlock):
         results = {}
         for item in feedback:
             if item['question'] in results:
-                results[item['question']].append(item['answer'])
+                results[item['question']].append(encode_string(item['answer']))
             else:
-                results[item['question']] = [item['answer']]
+                results[item['question']] = [encode_string(item['answer'])]
 
         return webob.response.Response(body=json.dumps(results))
 
@@ -601,9 +605,9 @@ class GroupProjectBlock(XBlock):
         results = {}
         for item in feedback:
             if item['question'] in results:
-                results[item['question']].append(item['answer'])
+                results[item['question']].append(encode_string(item['answer']))
             else:
-                results[item['question']] = [item['answer']]
+                results[item['question']] = [encode_string(item['answer'])]
 
         final_grade = self.calculate_grade(workgroup_id)
         if final_grade:
