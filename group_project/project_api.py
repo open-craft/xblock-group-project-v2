@@ -229,7 +229,7 @@ class ProjectAPI(object):
     @api_error_protect
     def get_user_workgroup_for_course(self, user_id, course_id):
         qs_params = {
-            "course": course_id,
+            "course_id": course_id,
         }
         response = GET(
             '{}/{}/{}/workgroups/?{}'.format(
