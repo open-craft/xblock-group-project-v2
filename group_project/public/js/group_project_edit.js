@@ -5,9 +5,9 @@ function GroupProjectEditBlock(runtime, element) {
     $(element).find('.save-button').bind('click', function() {
         var data = {
             'display_name': $(element).find('.edit-display-name').val(),
-            'max_score': $('.edit-max-score', element).val(),
-            'group_reviews_required_count': $('.edit-ta-graded', element).is(':checked') ? 0 : $('.edit-group-review-count', element).val(),
-            'user_review_count': $('.edit-ta-graded', element).is(':checked') ? 0 : $('.edit-user-review-count', element).val(),
+            'max_score': parseFloat($('.edit-max-score', element).val()),
+            'group_reviews_required_count': parseInt($('.edit-ta-graded', element).is(':checked') ? 0 : $('.edit-group-review-count', element).val()),
+            'user_review_count': parseInt($('.edit-ta-graded', element).is(':checked') ? 0 : $('.edit-user-review-count', element).val()),
             'data': xmlEditor.getValue()
         };
 
