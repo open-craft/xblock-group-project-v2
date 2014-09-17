@@ -52,9 +52,7 @@ class UploadFile(object):
         return location
 
     def _file_storage_path(self):
-        course_path = self.course_id.replace('/', '_')
-        file_name = "{}_{}".format(self.sha1, self.file.name)
-        return "workgroup_submissions/{}/{}/{}".format(course_path, self.group_id, file_name)
+        return "group_work/{}/{}/{}".format(self.group_id, self.sha1, self.file.name)
 
     def save_file(self):
         path = self._file_storage_path()
