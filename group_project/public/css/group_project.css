@@ -253,6 +253,13 @@
   background-color: #B85433;
 }
 
+.upload_form .xblock-reveal.reveal-modal.open{
+  position: fixed;
+  top:30%;
+  left:50%;
+  padding-bottom: 0;
+}
+
 .group-project-xblock-wrapper .highlight,
 .upload_form .highlight{
   color: #E37222;
