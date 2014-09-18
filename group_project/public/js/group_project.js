@@ -318,6 +318,8 @@ function GroupProjectBlock(runtime, element) {
       var target_form = $(e.target);
       $('.' + data.paramName + '_progress', target_form).css('width', '100%').addClass('failed');
       failed_uploads.push(data.files[0].name);
+      var message = data.jqXHR.responseJSON ? data.jqXHR.responseJSON.message : data.jqXHR.responseText;
+      target_form.prop('title', message);
     }
   };
 

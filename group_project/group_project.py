@@ -616,6 +616,7 @@ class GroupProjectBlock(XBlock):
     @XBlock.handler
     def upload_submission(self, request, suffix=''):
         response_data = {"message": _("File(s) successfully submitted")}
+        failure_code = 0
         try:
             group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
 
@@ -631,23 +632,33 @@ class GroupProjectBlock(XBlock):
 
             # Save the files first
             for uf in upload_files:
-                uf.save_file()
+                try:
+                    uf.save_file()
+                except Exception as save_file_error:
+                    original_message = save_file_error.message if hasattr(save_file_error, "message") else ""
+                    save_file_error.message = _("Error storing file {} - {}").format(uf.file.name, original_message)
+                    raise
 
             # They all got saved... note the submissions
             for uf in upload_files:
-                uf.submit()
-                # Emit analytics event...
-                self.runtime.publish(
-                    self,
-                    "group_activity.received_submission",
-                    {
-                        "submission_id": uf.submission_id,
-                        "filename": uf.file.name,
-                        "content_id": self.content_id,
-                        "group_id": self.workgroup['id'],
-                        "user_id": self.user_id,
-                    }
-                )
+                try:
+                    uf.submit()
+                    # Emit analytics event...
+                    self.runtime.publish(
+                        self,
+                        "group_activity.received_submission",
+                        {
+                            "submission_id": uf.submission_id,
+                            "filename": uf.file.name,
+                            "content_id": self.content_id,
+                            "group_id": self.workgroup['id'],
+                            "user_id": self.user_id,
+                        }
+                    )
+                except Exception as save_record_error:
+                    original_message = save_record_error.message if hasattr(save_record_error, "message") else ""
+                    save_record_error.message = _("Error recording file information {} - {}").format(uf.file.name, original_message)
+                    raise
 
             response_data.update({uf.submission_id : uf.file_url for uf in upload_files})
 
@@ -658,9 +669,18 @@ class GroupProjectBlock(XBlock):
                 self.update_upload_complete()
 
         except Exception as e:
-            response_data.update({"message": _("Error uploading file(s) - {}").format(e.message)})
+            failure_code = 500
+            if isinstance(e, ApiError):
+                failure_code = e.code
+            if not hasattr(e, "message"):
+                e.message = _("Error uploading at least one file")
+            response_data.update({"message": e.message})
 
-        return webob.response.Response(body=json.dumps(response_data))
+        response = webob.response.Response(body=json.dumps(response_data))
+        if failure_code:
+            response.status_code = failure_code
+
+        return response
 
     @XBlock.handler
     def other_submission_links(self, request, suffix=''):
