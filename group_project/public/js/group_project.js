@@ -268,6 +268,12 @@ function GroupProjectBlock(runtime, element) {
   var upload_data = {
     dataType: 'json',
     url: runtime.handlerUrl(element, "upload_submission"),
+    formData: [
+      {
+        name: 'csrfmiddlewaretoken',
+        value: $.cookie('csrftoken')
+      }
+    ],
     add: function(e, data){
       var target_form = $(e.target);
       $('.' + data.paramName + '_name', target_form).val(data.files[0].name);
