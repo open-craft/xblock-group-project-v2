@@ -31,7 +31,7 @@ from .api_error import ApiError
 
 ALLOWED_OUTSIDER_ROLES = getattr(settings, "ALLOWED_OUTSIDER_ROLES", None)
 if ALLOWED_OUTSIDER_ROLES is None:
-    ALLOWED_OUTSIDER_ROLES = ["staff"]
+    ALLOWED_OUTSIDER_ROLES = ["assistant"]
 
 
 # Globals ###########################################################
