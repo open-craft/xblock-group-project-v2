@@ -220,40 +220,40 @@ function GroupProjectBlock(runtime, element) {
     $('.' + showid, element).show();
     $(this).addClass('selected');
 
-    if(showid == "cohort_feedback"){
-      _load_data('load_my_group_feedback', null, $('.cohort_feedback', element), load_my_feedback_data);
-    }
-    else{
-      _load_data('load_my_peer_feedback', null, $('.team_feedback', element), load_my_feedback_data);
-    }
+    var operation = (showid == "cohort_feedback") ? 'load_my_group_feedback' : 'load_my_peer_feedback';
+    var selector = (showid == "cohort_feedback") ? '.cohort_feedback' : '.team_feedback';
+    _load_data(operation, null, $(selector, element), load_my_feedback_data);
 
+    $(document).trigger('data_loaded', {operation: operation});
     ev.preventDefault();
     return false;
   });
 
-  $('.select_peer').on('click', function(ev){
+  $('.select_peer,.select_group').on('click', function(ev){
     var $this = $(this);
+    var is_peer = $this.hasClass('select_peer');
     $('.select_peer,.select_group').removeClass('selected');
     $this.addClass('selected');
-    $('.other_group_review', element).hide();
-    $('.peer_review', element).show();
-    $('.peer_id', element).attr('value', $this.data('id'));
-    $('.username', element).text($this.data('username'));
-    load_data_for_peer($this.data('id'));
+    $('.other_group_review', element).toggle(!is_peer);
+    $('.peer_review', element).toggle(is_peer);
 
-    ev.preventDefault();
-    return false;
-  });
+    var load_operation = load_data_for_peer;
+    var operation_name = 'load_data_for_peer';
+    var id_field_selector = '.peer_id';
+    if(is_peer){
+      $('.username', element).text($this.data('username'));
+    }
+    else{
+      id_field_selector = '.group_id';
+      load_operation = load_data_for_other_group;
+      operation_name = 'load_data_for_other_group';
+      $('.other_submission_links', element).empty().hide();
+    }
 
-  $('.select_group').on('click', function(ev){
-    $('.select_peer,.select_group').removeClass('selected');
-    $(this).addClass('selected');
-    $('.other_group_review', element).show();
-    $('.peer_review', element).hide();
-    $('.group_id', element).attr('value', $(this).data('id'));
-    $('.other_submission_links', element).empty().hide();
-    load_data_for_other_group($(this).data('id'));
+    $(id_field_selector, element).attr('value', $this.data('id'));
+    load_operation($this.data('id'));
 
+    $(document).trigger('data_loaded', {operation: operation_name, data_for: $this.data('id')});
     ev.preventDefault();
     return false;
   });
