@@ -122,6 +122,11 @@ class GroupProjectBlock(XBlock):
         return self._known_real_user_ids[anonymous_student_id]
 
     @property
+    def milestone_dates(self):
+        group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+        return group_activity.milestone_dates
+
+    @property
     def project_api(self):
         if self._project_api is None:
             api_server = "http://127.0.0.1:8000"
