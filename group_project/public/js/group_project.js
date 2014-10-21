@@ -286,7 +286,7 @@ function GroupProjectBlock(runtime, element) {
       });
 
       // enable upload button & reset progress
-      $('.do_upload', upload_form).removeProp('disabled');
+      $('.do_upload', upload_form).prop('disabled', false).css('cursor', 'pointer');
     },
     progress: function(e, data){
       var target_form = $(e.target);
@@ -300,7 +300,7 @@ function GroupProjectBlock(runtime, element) {
       input.attr('data-original-value', input.val());
     },
     stop: function(e){
-      $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'pointer');
+      $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'not-allowed');
       $('.group_submissions', element).empty();
       $.ajax({
         url: runtime.handlerUrl(element, "refresh_submission_links"),
@@ -341,7 +341,7 @@ function GroupProjectBlock(runtime, element) {
 
   $('.show_upload_form', element).on('click', function(){
     // upload button initially disabled
-    $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'pointer');
+    $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'not-allowed');
     $('.file-progress-box', upload_form).css('visibility', 'hidden');
     $('.file-progress', upload_form).removeClass('complete failed');
 
