@@ -254,9 +254,8 @@
 }
 
 .upload_form .xblock-reveal.reveal-modal.open{
-  position: fixed;
-  top:30%;
-  left:50%;
+  max-height: 80%;
+  overflow: auto;
   padding-bottom: 0;
 }
 
