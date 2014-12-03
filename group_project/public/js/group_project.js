@@ -333,11 +333,11 @@ function GroupProjectBlock(runtime, element) {
 
   $('.cancel_upload', upload_form).on('click', function(){
     upload_form.hide();
-  })
+  });
   $('.do_upload', upload_form).on('click', function(){
     $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'wait');
     $(document).trigger('perform_uploads');
-  })
+  });
 
   $('.show_upload_form', element).on('click', function(){
     // upload button initially disabled
@@ -355,24 +355,26 @@ function GroupProjectBlock(runtime, element) {
     upload_form.show();
   });
 
+  var review_submissions_dialog = $('.review_submissions_dialog', element).appendTo($(document.body));
   $('.view_other_submissions', element).on('click', function(){
-    var $flyup = $('.other_submission_links', element);
-    var is_visible = $flyup.is(":visible");
-    $flyup.empty().hide();
-    if(!is_visible){
-      var selected_group_id = $('.select_group.selected').data("id");
-      $.ajax({
-        url: runtime.handlerUrl(element, "other_submission_links"),
-        data: {group_id: selected_group_id},
-        dataType: 'json',
-        success: function(data){
-          $flyup.html(data.html).show();
-        },
-        error: function(data){
-          show_message('We encountered an error.');
-        }
-      });
-    }
+    var $content = $('.other_submission_links', review_submissions_dialog);
+    $content.empty().hide();
+    var selected_group_id = $('.select_group.selected').data("id");
+    $.ajax({
+      url: runtime.handlerUrl(element, "other_submission_links"),
+      data: {group_id: selected_group_id},
+      dataType: 'json',
+      success: function(data){
+        $content.html(data.html).show();
+        review_submissions_dialog.show();
+      },
+      error: function(data){
+        show_message('We encountered an error.');
+      }
+    });
+  });
+  $('.close_review_dialog', review_submissions_dialog).on('click', function(){
+    review_submissions_dialog.hide();
   });
 
   // Activate the first peer, or the first group if no peers
