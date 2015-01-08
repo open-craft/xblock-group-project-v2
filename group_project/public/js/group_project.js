@@ -329,32 +329,6 @@ function GroupProjectBlock(runtime, element) {
     }
   };
 
-  $('.uploader', upload_form).fileupload(upload_data);
-
-  $('.cancel_upload', upload_form).on('click', function(){
-    upload_form.hide();
-  });
-  $('.do_upload', upload_form).on('click', function(){
-    $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'wait');
-    $(document).trigger('perform_uploads');
-  });
-
-  $('.show_upload_form', element).on('click', function(){
-    // upload button initially disabled
-    $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'not-allowed');
-    $('.file-progress-box', upload_form).css('visibility', 'hidden');
-    $('.file-progress', upload_form).removeClass('complete failed');
-
-    // reset file input fields
-    var fields = upload_form.find('.upload_item input');
-    fields.each(function(i,v) {
-      var field = $(v);
-      field.val(field.attr('data-original-value'));
-    });
-
-    upload_form.show();
-  });
-
   var review_submissions_dialog = $('.review_submissions_dialog', element).appendTo($(document.body));
   $('.view_other_submissions', element).on('click', function(){
     var $content = $('.other_submission_links', review_submissions_dialog);
@@ -377,11 +351,39 @@ function GroupProjectBlock(runtime, element) {
     review_submissions_dialog.hide();
   });
 
-  // Activate the first peer, or the first group if no peers
-  $(function(){
-    var select_from = $('.select_peer, .select_group');
-    if(select_from.length > 0){
-      select_from[0].click();
-    }
-  })
+  if($.fn.fileupload){
+    $('.uploader', upload_form).fileupload(upload_data);
+
+    $('.cancel_upload', upload_form).on('click', function(){
+      upload_form.hide();
+    });
+    $('.do_upload', upload_form).on('click', function(){
+      $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'wait');
+      $(document).trigger('perform_uploads');
+    });
+
+    $('.show_upload_form', element).on('click', function(){
+      // upload button initially disabled
+      $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'not-allowed');
+      $('.file-progress-box', upload_form).css('visibility', 'hidden');
+      $('.file-progress', upload_form).removeClass('complete failed');
+
+      // reset file input fields
+      var fields = upload_form.find('.upload_item input');
+      fields.each(function(i,v) {
+        var field = $(v);
+        field.val(field.attr('data-original-value'));
+      });
+
+      upload_form.show();
+    });
+
+    // Activate the first peer, or the first group if no peers
+    $(function(){
+      var select_from = $('.select_peer, .select_group');
+      if(select_from.length > 0){
+        select_from[0].click();
+      }
+    })
+  }
 }
