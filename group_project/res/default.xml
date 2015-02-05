@@ -268,19 +268,19 @@
         <assessment id="assess_peer_q1">
           <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
-            <div id="list_peer_q1" data-class="quote" class="answer-value"></div>
+            <div id="list_peer_q1" data-class="quote"></div>
           </answer>
         </assessment>
         <assessment id="assess_peer_q2">
           <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
-            <div id="list_peer_q2" data-class="quote" class="answer-value"></div>
+            <div id="list_peer_q2" data-class="quote"></div>
           </answer>
         </assessment>
         <assessment id="assess_peer_q3">
           <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
           <answer>
-            <div id="list_peer_q3" data-class="quote" class="answer-value"></div>
+            <div id="list_peer_q3" data-class="quote"></div>
           </answer>
         </assessment>
       </section>
@@ -291,9 +291,9 @@
             <div style="float:right;text-align:right;">
               <span class="highlight">
                 <span>AVERAGE OVERALL SCORE:</span>
-                <span id="mean_peer_score" class="answer-value"></span>
+                <span id="mean_peer_score"></span>
               </span>
-              (<span id="list_peer_score" data-class="comma" class="answer-value"></span>)
+              (<span id="list_peer_score" data-class="comma"></span>)
             </div>
           </answer>
         </assessment>
@@ -304,7 +304,7 @@
         <assessment id="assess_other_team_comments">
           <label>General:</label>
           <answer quote="true">
-            <div data-class="quote" class="answer-value"></div>
+            <div data-class="quote"></div>
           </answer>
         </assessment>
       </section>
@@ -315,9 +315,9 @@
             <div>
               <span class="highlight">
                 <span>GRADE:</span>
-                <span id="mean_other_team_q1" class="answer-value"></span>
+                <span id="mean_other_team_q1"></span>
               </span>
-              (<span id="list_other_team_q1" data-class="comma" class="answer-value"></span>)
+              (<span id="list_other_team_q1" data-class="comma"></span>)
             </div>
           </answer>
         </assessment>
@@ -327,9 +327,9 @@
             <div>
               <span class="highlight">
                 <span>GRADE:</span>
-                <span id="mean_other_team_q2" class="answer-value"></span>
+                <span id="mean_other_team_q2"></span>
               </span>
-              (<span id="list_other_team_q2" data-class="comma" class="answer-value"></span>)
+              (<span id="list_other_team_q2" data-class="comma"></span>)
             </div>
           </answer>
         </assessment>
@@ -339,9 +339,9 @@
             <div>
               <span class="highlight">
                 <span>GRADE:</span>
-                <span id="mean_other_team_q3" class="answer-value"></span>
+                <span id="mean_other_team_q3"></span>
               </span>
-              (<span id="list_other_team_q3" data-class="comma" class="answer-value"></span>)
+              (<span id="list_other_team_q3" data-class="comma"></span>)
             </div>
           </answer>
         </assessment>
@@ -351,9 +351,9 @@
             <div>
               <span class="highlight">
                 <span>GRADE:</span>
-                <span id="mean_other_team_q4" class="answer-value"></span>
+                <span id="mean_other_team_q4"></span>
               </span>
-              (<span id="list_other_team_q4" data-class="comma" class="answer-value"></span>)
+              (<span id="list_other_team_q4" data-class="comma"></span>)
             </div>
           </answer>
         </assessment>
@@ -365,7 +365,7 @@
             <div style="float:right;text-align:right;">
               <div class="highlight">
                 <span>FINAL ACTIVITY GRADE:</span>
-                <span id="list_final_grade" class="answer-value" data-class="comma"></span>
+                <span id="list_final_grade" data-class="comma"></span>
               </div>
             </div>
           </answer>

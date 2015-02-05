@@ -43,7 +43,7 @@ function GroupProjectBlock(runtime, element) {
 
   var load_my_feedback_data = function(section_node, data){
     // Clean existing values
-    $('.answer-value', section_node).empty();
+    $('.feedback-data', section_node).remove();
 
     for(data_item in data){
       // either a place witin to list it or the outer location
@@ -52,8 +52,9 @@ function GroupProjectBlock(runtime, element) {
         fill_field = $('#assess_' + data_item, section_node);
       }
       var data_class = fill_field.data('class');
+
       for(var i=0; i<data[data_item].length; ++i){
-        var node = $("<div/>");
+        var node = $("<div class='feedback-data' />");
         if(data_class && data_class.length > 0){
           node.addClass(data_class);
         }
