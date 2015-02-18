@@ -39,6 +39,7 @@ function GroupProjectBlock(runtime, element) {
       var $form_item = form_node.find("#" + data_item);
       $form_item.val(data_for_form[data_item]);
     }
+    validate_form_answers(form_node);
   }
 
   var load_my_feedback_data = function(section_node, data){
@@ -71,7 +72,7 @@ function GroupProjectBlock(runtime, element) {
     $('.group-project-xblock-wrapper', element).addClass('waiting');
     form_node.find('.editable').attr('disabled', 'disabled');
     form_node.find('.answer').val(null);
-    form_node.find('button.submit').html(NO_DATA_PRESENT_SUBMIT);
+    form_node.find('button.submit').html(NO_DATA_PRESENT_SUBMIT).attr('disabled', 'disabled');
     $.ajax({
       url: runtime.handlerUrl(element, handler_name),
       data: args,
@@ -172,6 +173,37 @@ function GroupProjectBlock(runtime, element) {
     $('.other_groups', element).append(group_node(groups[i]));
   }
 
+  var validate_form_answers = function(form_node){
+      var answers = form_node.find('.answer');
+      var submitButton = form_node.find('button.submit');
+      var check_answered_total = function(answers, submitButton){
+        var answers_total = answers_checked = 0;
+        submitButton.attr('disabled', 'disabled');
+        $.each(answers, function(){
+          if($(this).is('textarea')){
+            answers_total += 1;
+            if($(this).val() !== ''){
+              answers_checked += 1;
+            }
+          }
+          else if($(this).is('select')){
+            answers_total += 1;
+            if($(this).find('option:selected').attr('value') !== ''){
+              answers_checked += 1;
+            }
+          }
+        });
+        if(answers_total === answers_checked){
+          submitButton.attr('disabled', false);
+        }
+      };
+
+      check_answered_total(answers, submitButton);
+
+      answers.on('change keyup paste', function(){
+        check_answered_total(answers, submitButton);
+      });
+  };
 
   var step_map = JSON.parse($('.step_map', element).html());
 
