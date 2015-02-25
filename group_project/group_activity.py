@@ -40,6 +40,9 @@ class ActivityQuestion(object):
         self.required = (doc_tree.get("required", "true") == "true")
         designer_class = doc_tree.get("class")
         self.question_classes = ["question"]
+
+        if self.required:
+            self.question_classes.append("required")
         if designer_class:
             self.question_classes.append(designer_class)
 

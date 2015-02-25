@@ -174,7 +174,7 @@ function GroupProjectBlock(runtime, element) {
   }
 
   var validate_form_answers = function(form_node){
-      var answers = form_node.find('.answer');
+      var answers = form_node.find('.required .answer');
       var submitButton = form_node.find('button.submit');
       var check_answered_total = function(answers, submitButton){
         var answers_total = answers_checked = 0;
