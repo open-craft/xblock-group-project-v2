@@ -316,12 +316,17 @@ class GroupProjectBlock(XBlock):
         admin_provided_grades = None
         if len(admin_reviewer_ids) > 0:
             admin_provided_grades = []
-            admin_reviewer_grades = [get_user_grade_value_list(admin_id) for admin_id in admin_reviewer_ids]
+            # Only include complete admin gradesets
+            admin_reviewer_grades = [
+                arg
+                for arg in [get_user_grade_value_list(admin_id) for admin_id in admin_reviewer_ids]
+                if arg
+            ]
             admin_grader_count = len(admin_reviewer_grades)
             if admin_grader_count > 1:
-                for idx in range(admin_grader_count):
+                for idx in range(len(group_activity.grade_questions)):
                     admin_provided_grades.append(mean([adm[idx] for adm in admin_reviewer_grades]))
-            else:
+            elif admin_grader_count > 0:
                 admin_provided_grades = admin_reviewer_grades[0]
 
         user_grades = {}
