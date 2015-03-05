@@ -70,22 +70,22 @@ class ActivityQuestion(object):
         if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html)-1:
             ans_html = ans_html[:-1] + ' />'
 
+        label_html = ''
         label_node = copy.deepcopy(self.label)
-        if len(inner_html(label_node)) < 1:
-            return ans_html
-
-        label_node.set('for', self.id)
-        current_class = label_node.get('class')
-        label_classes = ['prompt']
-        if current_class:
-            label_classes.append(current_class)
-        if self.small:
-            label_classes.append('side')
-        label_node.set('class', ' '.join(label_classes))
+        if len(inner_html(label_node)) > 0:
+            label_node.set('for', self.id)
+            current_class = label_node.get('class')
+            label_classes = ['prompt']
+            if current_class:
+                label_classes.append(current_class)
+            if self.small:
+                label_classes.append('side')
+            label_node.set('class', ' '.join(label_classes))
+            label_html = outer_html(label_node)
 
         return '<div class="{}">{}{}</div>'.format(
             ' '.join(self.question_classes),
-            outer_html(label_node),
+            label_html,
             ans_html,
         )
 
