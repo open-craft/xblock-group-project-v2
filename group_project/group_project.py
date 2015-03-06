@@ -61,6 +61,7 @@ class OutsiderDisallowedError(Exception):
         return u"Outsider Denied Access: {}".format(self.value)
 
 @XBlock.wants('notifications')
+@XBlock.wants('courseware_parent_info')
 class GroupProjectBlock(XBlock):
 
     """
@@ -699,16 +700,39 @@ class GroupProjectBlock(XBlock):
                             else:
                                 uploader_username = user['username']
 
+                        # get the activity name which is simply our hosting
+                        # Sequence's Display Name, so call out to a new xBlock
+                        # runtime Service
+                        activity_name = self.display_name
+                        try:
+                            courseware_parent_info_service = self.runtime.service(self, 'courseware_parent_info')
+                            if courseware_parent_info_service:
+                                # First get Unit (first parent)
+                                unit_location = courseware_parent_info_service.get_parent_info(
+                                    self.location
+                                )['location']
+
+                                # Then get Sequence (second parent)
+                                activity_name = courseware_parent_info_service.get_parent_info(
+                                    unit_location
+                                )['display_name']
+                        except Exception, e:
+                            # Can't look this up then log and just use the default
+                            # which is our display_name
+                            log.exception(e)
+
                         msg = NotificationMessage(
                             msg_type=msg_type,
                             payload={
                                 '_schema_version': 1,
                                 'action_username': uploader_username,
-                                'activity_name': 'placeholder activity',
+                                'activity_name': activity_name,
                                 'verb': 'uploaded a file',
                             }
                         )
 
+                        # NOTE: We're not using Celery here since we only
+                        # will have a very small handful of workgroup users
                         notifications_service.bulk_publish_notification_to_users(
                             workgroup_user_ids,
                             msg
