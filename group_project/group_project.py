@@ -650,6 +650,7 @@ class GroupProjectBlock(XBlock):
                     raise
 
             # They all got saved... note the submissions
+            at_least_one_success = False
             for uf in upload_files:
                 try:
                     uf.submit()
@@ -665,10 +666,38 @@ class GroupProjectBlock(XBlock):
                             "user_id": self.user_id,
                         }
                     )
+                    at_least_one_success = True
                 except Exception as save_record_error:
                     original_message = save_record_error.message if hasattr(save_record_error, "message") else ""
                     save_record_error.message = _("Error recording file information {} - {}").format(uf.file.name, original_message)
                     raise
+
+            if at_least_one_success:
+                # See if the xBlock Notification Service is available, and - if so -
+                # dispatch a notification to the entire workgroup that a file has been uploaded
+                # Note that the NotificationService can be disabled, so it might not be available
+                # in the list of services
+                notifications_service = self.runtime.service('notifications')
+                if notifications_service:
+
+                    # this NotificationType is registered in the list of default Open edX Notifications
+                    msg_type = notifications_service.get_notification_type('open-edx.xblock.group_project.file_uploaded')
+                    msg = NotificationMessage(
+                        msg_type=msg_type,
+                        payload={
+                            '_schema_version': 1,
+                            'action_username': 'placeholderuser',
+                            'activity_name': 'placeholder activity',
+                        }
+                    )
+
+                    # placeholder for now
+                    workgroup_user_ids = [self.user_id]
+
+                    notifications_service.bulk_publish_notification_to_users(
+                        workgroup_user_ids,
+                        msg
+                    )
 
             response_data.update({uf.submission_id : uf.file_url for uf in upload_files})
 
