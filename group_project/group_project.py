@@ -723,6 +723,7 @@ class GroupProjectBlock(XBlock):
 
                         msg = NotificationMessage(
                             msg_type=msg_type,
+                            namespace=self.course_id,
                             payload={
                                 '_schema_version': 1,
                                 'action_username': uploader_username,
