@@ -33,6 +33,11 @@ ALLOWED_OUTSIDER_ROLES = getattr(settings, "ALLOWED_OUTSIDER_ROLES", None)
 if ALLOWED_OUTSIDER_ROLES is None:
     ALLOWED_OUTSIDER_ROLES = ["assistant"]
 
+try:
+    from edx_notifications.data import NotificationMessage
+except:
+    # Notifications is an optional runtime configuration, so it may not be available for import
+    pass
 
 # Globals ###########################################################
 
@@ -55,6 +60,7 @@ class OutsiderDisallowedError(Exception):
     def __unicode__(self):
         return u"Outsider Denied Access: {}".format(self.value)
 
+@XBlock.wants('notifications')
 class GroupProjectBlock(XBlock):
 
     """
@@ -677,27 +683,41 @@ class GroupProjectBlock(XBlock):
                 # dispatch a notification to the entire workgroup that a file has been uploaded
                 # Note that the NotificationService can be disabled, so it might not be available
                 # in the list of services
-                notifications_service = self.runtime.service('notifications')
+                notifications_service = self.runtime.service(self, 'notifications')
                 if notifications_service:
 
-                    # this NotificationType is registered in the list of default Open edX Notifications
-                    msg_type = notifications_service.get_notification_type('open-edx.xblock.group_project.file_uploaded')
-                    msg = NotificationMessage(
-                        msg_type=msg_type,
-                        payload={
-                            '_schema_version': 1,
-                            'action_username': 'placeholderuser',
-                            'activity_name': 'placeholder activity',
-                        }
-                    )
+                    try:
+                        # this NotificationType is registered in the list of default Open edX Notifications
+                        msg_type = notifications_service.get_notification_type('open-edx.xblock.group-project.file-uploaded')
 
-                    # placeholder for now
-                    workgroup_user_ids = [self.user_id]
+                        workgroup_user_ids = []
+                        uploader_username = ''
+                        for user in self.workgroup['users']:
+                            # don't send to ourselves
+                            if user['id'] != self.user_id:
+                                workgroup_user_ids.append(user['id'])
+                            else:
+                                uploader_username = user['username']
 
-                    notifications_service.bulk_publish_notification_to_users(
-                        workgroup_user_ids,
-                        msg
-                    )
+                        msg = NotificationMessage(
+                            msg_type=msg_type,
+                            payload={
+                                '_schema_version': 1,
+                                'action_username': uploader_username,
+                                'activity_name': 'placeholder activity',
+                                'verb': 'uploaded a file',
+                            }
+                        )
+
+                        notifications_service.bulk_publish_notification_to_users(
+                            workgroup_user_ids,
+                            msg
+                        )
+                    except Exception, ex:
+                        # While we *should* send notification, if there is some
+                        # error here, we don't want to blow the whole thing up.
+                        # So log it and continue....
+                        log.exception(ex)
 
             response_data.update({uf.submission_id : uf.file_url for uf in upload_files})
 
@@ -708,6 +728,7 @@ class GroupProjectBlock(XBlock):
                 self.update_upload_complete()
 
         except Exception as e:
+            log.exception(e)
             failure_code = 500
             if isinstance(e, ApiError):
                 failure_code = e.code
