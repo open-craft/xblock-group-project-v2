@@ -704,6 +704,7 @@ class GroupProjectBlock(XBlock):
                         # Sequence's Display Name, so call out to a new xBlock
                         # runtime Service
                         activity_name = self.display_name
+                        activity_location = None
                         try:
                             courseware_parent_info_service = self.runtime.service(self, 'courseware_parent_info')
                             if courseware_parent_info_service:
@@ -713,17 +714,19 @@ class GroupProjectBlock(XBlock):
                                 )['location']
 
                                 # Then get Sequence (second parent)
-                                activity_name = courseware_parent_info_service.get_parent_info(
+                                activity_courseware_info = courseware_parent_info_service.get_parent_info(
                                     unit_location
-                                )['display_name']
-                        except Exception, e:
+                                )
+                                activity_name = activity_courseware_info['display_name']
+                                activity_location = activity_courseware_info['location']
+                        except Exception, ex:
                             # Can't look this up then log and just use the default
                             # which is our display_name
-                            log.exception(e)
+                            log.exception(ex)
 
                         msg = NotificationMessage(
                             msg_type=msg_type,
-                            namespace=self.course_id,
+                            namespace=unicode(self.course_id),
                             payload={
                                 '_schema_version': 1,
                                 'action_username': uploader_username,
@@ -731,6 +734,21 @@ class GroupProjectBlock(XBlock):
                                 'verb': 'uploaded a file',
                             }
                         )
+
+                        #
+                        # add in all the context parameters we'll need to
+                        # generate a URL back to the website that will
+                        # present the new course announcement
+                        #
+                        # IMPORTANT: This can be changed to msg.add_click_link() if we
+                        # have a particular URL that we wish to use. In the initial use case,
+                        # we need to make the link point to a different front end website
+                        # so we need to resolve these links at dispatch time
+                        #
+                        msg.add_click_link_params({
+                            'course_id': unicode(self.course_id),
+                            'activity_location': unicode(activity_location) if activity_location else '',
+                        })
 
                         # NOTE: We're not using Celery here since we only
                         # will have a very small handful of workgroup users
