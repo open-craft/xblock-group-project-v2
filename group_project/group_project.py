@@ -868,12 +868,13 @@ class GroupProjectBlock(XBlock):
         #
         msg.add_click_link_params({
             'course_id': unicode(course_id),
-            'activity_location': activity_location,
+            'activity_location': unicode(activity_location),
         })
 
         notifications_service.publish_timed_notification(
             msg=msg,
             send_at=milestone_date_tz,
+            # send to entire course enrollments
             scope_name='course_enrollments',
             scope_context={
                 'course_id': unicode(course_id),
