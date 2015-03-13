@@ -7,6 +7,8 @@ import logging
 import textwrap
 import json
 import webob
+from datetime import datetime, timedelta
+import pytz
 
 from lxml import etree
 from xml.etree import ElementTree as ET
@@ -470,6 +472,7 @@ class GroupProjectBlock(XBlock):
         try:
             etree.parse(StringIO(xml_content))
             self.data = xml_content
+
         except etree.XMLSyntaxError as e:
             return {
                 'result': 'error',
@@ -734,6 +737,39 @@ class GroupProjectBlock(XBlock):
 
         return webob.response.Response(body=json.dumps({"html":html_output}))
 
+    def get_courseware_info(self, courseware_parent_info_service):
+        activity_name = self.display_name
+        activity_location = None
+        stage_name = self.display_name
+        stage_location = None
+
+        try:
+            if courseware_parent_info_service:
+                # First get Unit (first parent)
+                stage_info = courseware_parent_info_service.get_parent_info(
+                    self.location
+                )
+                stage_location = stage_info['location']
+                stage_name = stage_info['display_name']
+
+                # Then get Sequence (second parent)
+                activity_courseware_info = courseware_parent_info_service.get_parent_info(
+                    stage_location
+                )
+                activity_name = activity_courseware_info['display_name']
+                activity_location = activity_courseware_info['location']
+        except Exception, ex:
+            # Can't look this up then log and just use the default
+            # which is our display_name
+            log.exception(ex)
+
+        return {
+            'stage_name': stage_name,
+            'stage_location': stage_location,
+            'activity_name': activity_name,
+            'activity_location': activity_location,
+        }
+
     def fire_file_upload_notification(self, notifications_service):
         try:
             # this NotificationType is registered in the list of default Open edX Notifications
@@ -751,26 +787,11 @@ class GroupProjectBlock(XBlock):
             # get the activity name which is simply our hosting
             # Sequence's Display Name, so call out to a new xBlock
             # runtime Service
-            activity_name = self.display_name
-            activity_location = None
-            try:
-                courseware_parent_info_service = self.runtime.service(self, 'courseware_parent_info')
-                if courseware_parent_info_service:
-                    # First get Unit (first parent)
-                    unit_location = courseware_parent_info_service.get_parent_info(
-                        self.location
-                    )['location']
 
-                    # Then get Sequence (second parent)
-                    activity_courseware_info = courseware_parent_info_service.get_parent_info(
-                        unit_location
-                    )
-                    activity_name = activity_courseware_info['display_name']
-                    activity_location = activity_courseware_info['location']
-            except Exception, ex:
-                # Can't look this up then log and just use the default
-                # which is our display_name
-                log.exception(ex)
+            courseware_info = self.get_courseware_info(self.runtime.service(self, 'courseware_parent_info'))
+
+            activity_name = courseware_info['activity_name']
+            activity_location = course_info['activity_location']
 
             msg = NotificationMessage(
                 msg_type=msg_type,
@@ -779,7 +800,6 @@ class GroupProjectBlock(XBlock):
                     '_schema_version': 1,
                     'action_username': uploader_username,
                     'activity_name': activity_name,
-                    'verb': 'uploaded a file',
                 }
             )
 
@@ -808,4 +828,142 @@ class GroupProjectBlock(XBlock):
             # While we *should* send notification, if there is some
             # error here, we don't want to blow the whole thing up.
             # So log it and continue....
+            log.exception(ex)
+
+    def _get_component_timer_name(self, timer_name_suffix):
+        return '{location}-{timer_name_suffix}'.format(location=self.location, timer_name_suffix=timer_name_suffix)
+
+    def _set_activity_timed_notification(self, course_id, activity, msg_type, component_name, milestone_date, services, timer_name_suffix):
+
+        notifications_service = services.get('notifications')
+        courseware_parent_info = services.get('courseware_parent_info')
+
+        courseware_info = self.get_courseware_info(courseware_parent_info)
+
+        activity_name = courseware_info['activity_name']
+        activity_location = courseware_info['activity_location']
+
+        milestone_date_tz = milestone_date.replace(tzinfo=pytz.UTC)
+
+        msg = NotificationMessage(
+            msg_type=notifications_service.get_notification_type(msg_type),
+            namespace=unicode(course_id),
+            payload={
+                '_schema_version': 1,
+                'activity_name': activity_name,
+                'stage': component_name,
+                'due_date': milestone_date_tz.strftime('%-m/%-d'),
+            }
+        )
+
+        #
+        # add in all the context parameters we'll need to
+        # generate a URL back to the website that will
+        # present the new course announcement
+        #
+        # IMPORTANT: This can be changed to msg.add_click_link() if we
+        # have a particular URL that we wish to use. In the initial use case,
+        # we need to make the link point to a different front end website
+        # so we need to resolve these links at dispatch time
+        #
+        msg.add_click_link_params({
+            'course_id': unicode(course_id),
+            'activity_location': activity_location,
+        })
+
+        notifications_service.publish_timed_notification(
+            msg=msg,
+            send_at=milestone_date_tz,
+            scope_name='course_enrollments',
+            scope_context={
+                'course_id': unicode(course_id),
+            },
+            timer_name=self._get_component_timer_name(timer_name_suffix),
+            ignore_if_past_due=True  # don't send if we're already late!
+        )
+
+    def on_studio_published(self, course_id, services):
+        """
+        A hook into when this xblock is published in Studio. When we are published we should
+        register a Notification to be send on key dates
+        """
+        try:
+            log.info('GroupProjectBlock.on_published() on location = {}'.format(self.location))
+
+            group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+
+            # see if we are running in an environment which has Notifications enabled
+            notifications_service = services.get('notifications')
+            if notifications_service:
+                # set (or update) Notification timed message based on
+                # the current key dates
+                for component in group_activity.activity_components:
+
+                    # if the component has a opening date, then send a msg then
+                    if component.open_date:
+                        self._set_activity_timed_notification(
+                            course_id,
+                            group_activity,
+                            u'open-edx.xblock.group-project.stage-open',
+                            component.name,
+                            datetime.combine(component.open_date, datetime.min.time()),
+                            services,
+                            component.name + '-open'
+                        )
+
+                    # if the component has a close date, then send a msg then
+                    if component.close_date:
+                        self._set_activity_timed_notification(
+                            course_id,
+                            group_activity,
+                            u'open-edx.xblock.group-project.stage-due',
+                            component.name,
+                            datetime.combine(component.close_date, datetime.min.time()),
+                            services,
+                            component.name + '-due'
+                        )
+
+                        # and also send a notice 3 days earlier
+                        self._set_activity_timed_notification(
+                            course_id,
+                            group_activity,
+                            u'open-edx.xblock.group-project.stage-due',
+                            component.name,
+                            datetime.combine(component.close_date, datetime.min.time()) - timedelta(days=3),
+                            services,
+                            component.name + '-coming-due'
+                        )
+
+        except Exception, ex:
+            log.exception(ex)
+
+    def on_before_studio_delete(self, course_id, services):
+        """
+        A hook into when this xblock is deleted in Studio, for xblocks to do any lifecycle
+        management
+        """
+        log.info('GroupProjectBlock.on_before_delete() on location = {}'.format(self.location))
+
+        try:
+            group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+
+            # see if we are running in an environment which has Notifications enabled
+            notifications_service = services.get('notifications')
+            if notifications_service:
+                # If we are being delete, then we should remove any NotificationTimers that
+                # may have been registered before
+                for component in group_activity.activity_components:
+                    notifications_service.cancel_timed_notification(
+                        self._get_component_timer_name(component.name + '-open')
+                    )
+
+                    notifications_service.cancel_timed_notification(
+                        self._get_component_timer_name(component.name + '-due')
+                    )
+
+                    notifications_service.cancel_timed_notification(
+                        self._get_component_timer_name(component.name + '-coming-due')
+                    )
+
+        except Exception, ex:
             log.exception(ex)
