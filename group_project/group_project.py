@@ -791,7 +791,7 @@ class GroupProjectBlock(XBlock):
             courseware_info = self.get_courseware_info(self.runtime.service(self, 'courseware_parent_info'))
 
             activity_name = courseware_info['activity_name']
-            activity_location = course_info['activity_location']
+            activity_location = courseware_info['activity_location']
 
             msg = NotificationMessage(
                 msg_type=msg_type,
