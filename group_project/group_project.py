@@ -833,7 +833,7 @@ class GroupProjectBlock(XBlock):
     def _get_component_timer_name(self, timer_name_suffix):
         return '{location}-{timer_name_suffix}'.format(location=self.location, timer_name_suffix=timer_name_suffix)
 
-    def _set_activity_timed_notification(self, course_id, activity, msg_type, component_name, milestone_date, services, timer_name_suffix):
+    def _set_activity_timed_notification(self, course_id, activity, msg_type, component_name, milestone_date, send_at_date, services, timer_name_suffix):
 
         notifications_service = services.get('notifications')
         courseware_parent_info = services.get('courseware_parent_info')
@@ -844,6 +844,7 @@ class GroupProjectBlock(XBlock):
         activity_location = courseware_info['activity_location']
 
         milestone_date_tz = milestone_date.replace(tzinfo=pytz.UTC)
+        send_at_date_tz = milestone_date.replace(tzinfo=pytz.UTC)
 
         msg = NotificationMessage(
             msg_type=notifications_service.get_notification_type(msg_type),
@@ -873,7 +874,7 @@ class GroupProjectBlock(XBlock):
 
         notifications_service.publish_timed_notification(
             msg=msg,
-            send_at=milestone_date_tz,
+            send_at=send_at_date_tz,
             # send to entire course enrollments
             scope_name='course_enrollments',
             scope_context={
@@ -908,6 +909,7 @@ class GroupProjectBlock(XBlock):
                             u'open-edx.xblock.group-project.stage-open',
                             component.name,
                             datetime.combine(component.open_date, datetime.min.time()),
+                            datetime.combine(component.open_date, datetime.min.time()),
                             services,
                             component.name + '-open'
                         )
@@ -920,6 +922,7 @@ class GroupProjectBlock(XBlock):
                             u'open-edx.xblock.group-project.stage-due',
                             component.name,
                             datetime.combine(component.close_date, datetime.min.time()),
+                            datetime.combine(component.close_date, datetime.min.time()),
                             services,
                             component.name + '-due'
                         )
@@ -930,6 +933,7 @@ class GroupProjectBlock(XBlock):
                             group_activity,
                             u'open-edx.xblock.group-project.stage-due',
                             component.name,
+                            datetime.combine(component.close_date, datetime.min.time()),
                             datetime.combine(component.close_date, datetime.min.time()) - timedelta(days=3),
                             services,
                             component.name + '-coming-due'
