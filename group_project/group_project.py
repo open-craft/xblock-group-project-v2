@@ -844,7 +844,7 @@ class GroupProjectBlock(XBlock):
         activity_location = courseware_info['activity_location']
 
         milestone_date_tz = milestone_date.replace(tzinfo=pytz.UTC)
-        send_at_date_tz = milestone_date.replace(tzinfo=pytz.UTC)
+        send_at_date_tz = send_at_date.replace(tzinfo=pytz.UTC)
 
         msg = NotificationMessage(
             msg_type=notifications_service.get_notification_type(msg_type),
@@ -853,7 +853,7 @@ class GroupProjectBlock(XBlock):
                 '_schema_version': 1,
                 'activity_name': activity_name,
                 'stage': component_name,
-                'due_date': milestone_date_tz.strftime('%-m/%-d'),
+                'due_date': milestone_date_tz.strftime('%-m/%-d/%-y'),
             }
         )
 
