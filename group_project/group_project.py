@@ -894,7 +894,7 @@ class GroupProjectBlock(XBlock):
                 'content_id': unicode(project_location),
             },
             timer_name=self._get_component_timer_name(timer_name_suffix),
-            ignore_if_past_due=False  # don't send if we're already late!
+            ignore_if_past_due=True  # don't send if we're already late!
         )
 
     def on_studio_published(self, course_id, services):
