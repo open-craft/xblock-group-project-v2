@@ -758,6 +758,14 @@ class GroupProjectBlock(XBlock):
                 )
                 activity_name = activity_courseware_info['display_name']
                 activity_location = activity_courseware_info['location']
+
+                project_courseware_info = courseware_parent_info_service.get_parent_info(
+                    activity_location
+                )
+                project_name = project_courseware_info['display_name']
+                project_location = project_courseware_info['location']
+
+
         except Exception, ex:
             # Can't look this up then log and just use the default
             # which is our display_name
@@ -768,6 +776,8 @@ class GroupProjectBlock(XBlock):
             'stage_location': stage_location,
             'activity_name': activity_name,
             'activity_location': activity_location,
+            'project_name': project_name,
+            'project_location': project_location,
         }
 
     def fire_file_upload_notification(self, notifications_service):
@@ -843,6 +853,8 @@ class GroupProjectBlock(XBlock):
         activity_name = courseware_info['activity_name']
         activity_location = courseware_info['activity_location']
 
+        project_location = courseware_info['project_location']
+
         milestone_date_tz = milestone_date.replace(tzinfo=pytz.UTC)
         send_at_date_tz = send_at_date.replace(tzinfo=pytz.UTC)
 
@@ -875,13 +887,14 @@ class GroupProjectBlock(XBlock):
         notifications_service.publish_timed_notification(
             msg=msg,
             send_at=send_at_date_tz,
-            # send to entire course enrollments
-            scope_name='course_enrollments',
+            # send to all students participating in this project
+            scope_name='group_project_participants',
             scope_context={
                 'course_id': unicode(course_id),
+                'content_id': unicode(project_location),
             },
             timer_name=self._get_component_timer_name(timer_name_suffix),
-            ignore_if_past_due=True  # don't send if we're already late!
+            ignore_if_past_due=False  # don't send if we're already late!
         )
 
     def on_studio_published(self, course_id, services):
