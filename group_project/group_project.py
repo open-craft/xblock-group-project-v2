@@ -294,6 +294,9 @@ class GroupProjectBlock(XBlock):
                 "content_id": self.content_id,
             }
         )
+        notifications_service = self.runtime.service(self, 'notifications')
+        if notifications_service:
+            self.fire_grades_posted_notification(notifications_service)
 
 
     def calculate_grade(self, group_id):
@@ -832,6 +835,57 @@ class GroupProjectBlock(XBlock):
             # will have only a very small handful of workgroup users
             notifications_service.bulk_publish_notification_to_users(
                 workgroup_user_ids,
+                msg
+            )
+        except Exception, ex:
+            # While we *should* send notification, if there is some
+            # error here, we don't want to blow the whole thing up.
+            # So log it and continue....
+            log.exception(ex)
+
+    def fire_grades_posted_notification(self, notifications_service):
+        try:
+            # this NotificationType is registered in the list of default Open edX Notifications
+            msg_type = notifications_service.get_notification_type('open-edx.xblock.group-project.grades-posted')
+
+            # get the activity name which is simply our hosting
+            # Sequence's Display Name, so call out to a new xBlock
+            # runtime Service
+            courseware_info = self.get_courseware_info(self.runtime.service(self, 'courseware_parent_info'))
+            activity_name = courseware_info['activity_name']
+            activity_location = courseware_info['activity_location']
+
+            msg = NotificationMessage(
+                msg_type=msg_type,
+                namespace=unicode(self.course_id),
+                payload={
+                    '_schema_version': 1,
+                    'activity_name': activity_name,
+                }
+            )
+
+            #
+            # add in all the context parameters we'll need to
+            # generate a URL back to the website that will
+            # present the new course announcement
+            #
+            # IMPORTANT: This can be changed to msg.add_click_link() if we
+            # have a particular URL that we wish to use. In the initial use case,
+            # we need to make the link point to a different front end website
+            # so we need to resolve these links at dispatch time
+            #
+            msg.add_click_link_params({
+                'course_id': unicode(self.course_id),
+                'activity_location': unicode(activity_location) if activity_location else '',
+            })
+
+            # Bulk publish to the 'group_project_workgroup' user scope
+            notifications_service.bulk_publish_notification_to_scope(
+                'group_project_workgroup',
+                {
+                    # I think self.workgroup['id'] is a string version of an integer
+                    'workgroup_id': int(self.workgroup['id']),
+                },
                 msg
             )
         except Exception, ex:
