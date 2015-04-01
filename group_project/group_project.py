@@ -296,7 +296,7 @@ class GroupProjectBlock(XBlock):
         )
         notifications_service = self.runtime.service(self, 'notifications')
         if notifications_service:
-            self.fire_grades_posted_notification(notifications_service)
+            self.fire_grades_posted_notification(group_id, notifications_service)
 
 
     def calculate_grade(self, group_id):
@@ -843,7 +843,7 @@ class GroupProjectBlock(XBlock):
             # So log it and continue....
             log.exception(ex)
 
-    def fire_grades_posted_notification(self, notifications_service):
+    def fire_grades_posted_notification(self, group_id, notifications_service):
         try:
             # this NotificationType is registered in the list of default Open edX Notifications
             msg_type = notifications_service.get_notification_type('open-edx.xblock.group-project.grades-posted')
@@ -884,7 +884,7 @@ class GroupProjectBlock(XBlock):
                 'group_project_workgroup',
                 {
                     # I think self.workgroup['id'] is a string version of an integer
-                    'workgroup_id': int(self.workgroup['id']),
+                    'workgroup_id': group_id,
                 },
                 msg
             )
