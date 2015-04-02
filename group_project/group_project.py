@@ -894,11 +894,16 @@ class GroupProjectBlock(XBlock):
             # So log it and continue....
             log.exception(ex)
 
-    def _get_component_timer_name(self, timer_name_suffix):
-        return '{location}-{timer_name_suffix}'.format(location=self.location, timer_name_suffix=timer_name_suffix)
+    def _get_component_timer_name(self, component, timer_name_suffix):
+        return '{location}-{component}-{timer_name_suffix}'.format(
+            location=self.location,
+            component=component.id,
+            timer_name_suffix=timer_name_suffix
+        )
 
-    def _set_activity_timed_notification(self, course_id, activity, msg_type, component_name, milestone_date, send_at_date, services, timer_name_suffix):
+    def _set_activity_timed_notification(self, course_id, activity, msg_type, component, milestone_date, send_at_date, services, timer_name_suffix):
 
+        component_name = component.name
         notifications_service = services.get('notifications')
         courseware_parent_info = services.get('courseware_parent_info')
 
@@ -947,7 +952,7 @@ class GroupProjectBlock(XBlock):
                 'course_id': unicode(course_id),
                 'content_id': unicode(project_location),
             },
-            timer_name=self._get_component_timer_name(timer_name_suffix),
+            timer_name=self._get_component_timer_name(component, timer_name_suffix),
             ignore_if_past_due=True  # don't send if we're already late!
         )
 
@@ -974,11 +979,11 @@ class GroupProjectBlock(XBlock):
                             course_id,
                             group_activity,
                             u'open-edx.xblock.group-project.stage-open',
-                            component.name,
+                            component,
                             datetime.combine(component.open_date, datetime.min.time()),
                             datetime.combine(component.open_date, datetime.min.time()),
                             services,
-                            component.name + '-open'
+                            'open'
                         )
 
                     # if the component has a close date, then send a msg then
@@ -987,11 +992,11 @@ class GroupProjectBlock(XBlock):
                             course_id,
                             group_activity,
                             u'open-edx.xblock.group-project.stage-due',
-                            component.name,
+                            component,
                             datetime.combine(component.close_date, datetime.min.time()),
                             datetime.combine(component.close_date, datetime.min.time()),
                             services,
-                            component.name + '-due'
+                            'due'
                         )
 
                         # and also send a notice 3 days earlier
@@ -999,11 +1004,11 @@ class GroupProjectBlock(XBlock):
                             course_id,
                             group_activity,
                             u'open-edx.xblock.group-project.stage-due',
-                            component.name,
+                            component,
                             datetime.combine(component.close_date, datetime.min.time()),
                             datetime.combine(component.close_date, datetime.min.time()) - timedelta(days=3),
                             services,
-                            component.name + '-coming-due'
+                            'coming-due'
                         )
 
         except Exception, ex:
@@ -1026,15 +1031,15 @@ class GroupProjectBlock(XBlock):
                 # may have been registered before
                 for component in group_activity.activity_components:
                     notifications_service.cancel_timed_notification(
-                        self._get_component_timer_name(component.name + '-open')
+                        self._get_component_timer_name(component, 'open')
                     )
 
                     notifications_service.cancel_timed_notification(
-                        self._get_component_timer_name(component.name + '-due')
+                        self._get_component_timer_name(component, 'due')
                     )
 
                     notifications_service.cancel_timed_notification(
-                        self._get_component_timer_name(component.name + '-coming-due')
+                        self._get_component_timer_name(component, 'coming-due')
                     )
 
         except Exception, ex:
