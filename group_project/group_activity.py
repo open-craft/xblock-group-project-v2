@@ -444,7 +444,7 @@ class GroupActivity(object):
             if self.grading_override:
                 if len(ac.other_group_sections) > 0:
                     default_stage = ac.id
-            elif ac.open_date and ac.open_date < date.today():
+            elif ac.open_date and ac.open_date <= date.today():
                 default_stage = ac.id
 
 
