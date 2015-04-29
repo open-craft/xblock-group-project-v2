@@ -24,6 +24,7 @@ def trace_request_information(func):
     '''
     Decorator which will trace information
     '''
+    # TODO: logging instead of print
     def make_request(*args, **kwargs):
         # log information about the request
         print "!!! {} request to {}".format(func.__name__, args[0])

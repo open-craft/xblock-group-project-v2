@@ -132,12 +132,15 @@ class GroupProjectBlock(XBlock):
 
     @property
     def milestone_dates(self):
+        # TODO: this GroupActivity.import_xml_string(...) is everywhere - probably should be a property
         group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
         return group_activity.milestone_dates
 
-    @property
+    @property  # lazy
     def project_api(self):
         if self._project_api is None:
+            # Looks like it's an issue, but technically it's not; this code runs in LMS, so 127.0.0.1 is always correct
+            # location for API server, as it's basically executed in a neighbour thread/process/whatever.
             api_server = "http://127.0.0.1:8000"
             if hasattr(settings, 'API_LOOPBACK_ADDRESS'):
                 api_server = settings.API_LOOPBACK_ADDRESS
@@ -153,7 +156,7 @@ class GroupProjectBlock(XBlock):
 
     _workgroup = None
 
-    @property
+    @property  # lazy
     def workgroup(self):
         if self._workgroup is None:
             try:
@@ -225,7 +228,11 @@ class GroupProjectBlock(XBlock):
 
         if self.is_group_member:
             try:
-                team_members = [self.project_api.get_user_details(tm["id"]) for tm in workgroup["users"] if user_id != int(tm["id"])]
+                team_members = [
+                    self.project_api.get_user_details(team_member["id"])
+                    for team_member in workgroup["users"]
+                    if user_id != int(team_member["id"])
+                ]
             except:
                 team_members = []
 
@@ -306,17 +313,20 @@ class GroupProjectBlock(XBlock):
             return float(sum(numeric_values)/len(numeric_values))
 
         review_item_data = self.project_api.get_workgroup_review_items_for_group(group_id, self.content_id)
-        review_item_map = {make_key(r['question'], self.real_user_id(r['reviewer'])) : r['answer'] for r in review_item_data}
-        all_reviewer_ids = set([self.real_user_id(r['reviewer']) for r in review_item_data])
-        group_reviewer_ids = [u["id"] for u in self.project_api.get_workgroup_reviewers(group_id)]
-        admin_reviewer_ids = [ar_id for ar_id in all_reviewer_ids if ar_id not in group_reviewer_ids]
+        review_item_map = {
+            make_key(review_item['question'], self.real_user_id(review_item['reviewer'])): review_item['answer']
+            for review_item in review_item_data
+        }
+        all_reviewer_ids = set([self.real_user_id(review_item['reviewer']) for review_item in review_item_data])
+        group_reviewer_ids = [user["id"] for user in self.project_api.get_workgroup_reviewers(group_id)]
+        admin_reviewer_ids = [reviewer_id for reviewer_id in all_reviewer_ids if reviewer_id not in group_reviewer_ids]
 
         group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
 
         def get_user_grade_value_list(user_id):
             user_grades = []
-            for q_id in group_activity.grade_questions:
-                user_value = review_item_map.get(make_key(q_id, user_id), None)
+            for question_id in group_activity.grade_questions:
+                user_value = review_item_map.get(make_key(question_id, user_id), None)
                 if user_value is None:
                     # if any are incomplete, we consider the whole set to be unusable
                     return None
@@ -338,19 +348,19 @@ class GroupProjectBlock(XBlock):
             if admin_grader_count > 1:
                 for idx in range(len(group_activity.grade_questions)):
                     admin_provided_grades.append(mean([adm[idx] for adm in admin_reviewer_grades]))
-            elif admin_grader_count > 0:
+            elif admin_grader_count > 0:  # which actually means admin_grader_count == 1
                 admin_provided_grades = admin_reviewer_grades[0]
 
         user_grades = {}
         if len(group_reviewer_ids) > 0:
-            for r_id in group_reviewer_ids:
-                this_reviewers_grades = get_user_grade_value_list(r_id)
+            for reviewer_id in group_reviewer_ids:
+                this_reviewers_grades = get_user_grade_value_list(reviewer_id)
                 if this_reviewers_grades is None:
                     if admin_provided_grades:
                         this_reviewers_grades = admin_provided_grades
                     else:
                         return None
-                user_grades[r_id] = this_reviewers_grades
+                user_grades[reviewer_id] = this_reviewers_grades
         elif admin_provided_grades:
             group_reviewer_ids = [self.user_id]
             user_grades[self.user_id] = admin_provided_grades
@@ -358,7 +368,11 @@ class GroupProjectBlock(XBlock):
             return None
 
         # Okay, if we've got here we have a complete set of marks to calculate the grade
-        reviewer_grades = [mean(user_grades[r_id]) for r_id in group_reviewer_ids if len(user_grades[r_id]) > 0]
+        reviewer_grades = [
+            mean(user_grades[reviewer_id])
+            for reviewer_id in group_reviewer_ids
+            if len(user_grades[reviewer_id]) > 0
+        ]
         group_grade = round(mean(reviewer_grades)) if len(reviewer_grades) > 0 else None
 
         return group_grade
@@ -389,20 +403,24 @@ class GroupProjectBlock(XBlock):
 
     def evaluations_complete(self):
         group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
-        peer_review_components = [c for c in group_activity.activity_components if c.peer_reviews]
+        peer_review_components = [component for component in group_activity.activity_components if component.peer_reviews]
         peer_review_questions = []
-        for prc in peer_review_components:
-            for sec in prc.peer_review_sections:
-                peer_review_questions.extend([q.id for q in sec.questions if q.required])
+        for peer_review_component in peer_review_components:
+            for peer_review_section in peer_review_component.peer_review_sections:
+                peer_review_questions.extend([question.id for question in peer_review_section.questions if question.required])
 
         group_peer_items = self.project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
-        my_feedback = {make_key(pri["user"], pri["question"]): pri["answer"] for pri in group_peer_items if pri['reviewer'] == self.xmodule_runtime.anonymous_student_id}
-        my_peers = [u for u in self.workgroup["users"] if u["id"] != self.user_id]
+        my_feedback = {
+            make_key(peer_review_item["user"], peer_review_item["question"]): peer_review_item["answer"]
+            for peer_review_item in group_peer_items
+            if peer_review_item['reviewer'] == self.xmodule_runtime.anonymous_student_id
+        }
+        my_peers = [user for user in self.workgroup["users"] if user["id"] != self.user_id]
 
         for peer in my_peers:
-            for q_id in peer_review_questions:
-                k = make_key(peer["id"], q_id)
-                if not k in my_feedback:
+            for question_id in peer_review_questions:
+                k = make_key(peer["id"], question_id)
+                if k not in my_feedback:
                     return False
                 if my_feedback[k] is None:
                     return False
@@ -413,26 +431,30 @@ class GroupProjectBlock(XBlock):
 
     def grading_complete(self):
         group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
-        group_review_components = [c for c in group_activity.activity_components if c.other_group_reviews]
+        group_review_components = [component for component in group_activity.activity_components if component.other_group_reviews]
         group_review_questions = []
-        for prc in group_review_components:
-            for sec in prc.other_group_sections:
-                group_review_questions.extend([q.id for q in sec.questions if q.required])
+        for group_review_component in group_review_components:
+            for review_section in group_review_component.other_group_sections:
+                group_review_questions.extend([q.id for q in review_section.questions if q.required])
 
         group_review_items = []
         assess_groups = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
         for assess_group in assess_groups:
             group_review_items.extend(self.project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id))
-        my_feedback = {make_key(pri["workgroup"], pri["question"]): pri["answer"] for pri in group_review_items if pri['reviewer'] == self.xmodule_runtime.anonymous_student_id}
+        my_feedback = {
+            make_key(peer_review_item["workgroup"], peer_review_item["question"]): peer_review_item["answer"]
+            for peer_review_item in group_review_items
+            if peer_review_item['reviewer'] == self.xmodule_runtime.anonymous_student_id
+        }
 
         for assess_group in assess_groups:
-            for q_id in group_review_questions:
-                k = make_key(assess_group["id"], q_id)
-                if not k in my_feedback:
+            for question_id in group_review_questions:
+                key = make_key(assess_group["id"], question_id)
+                if key not in my_feedback:
                     return False
-                if my_feedback[k] is None:
+                if my_feedback[key] is None:
                     return False
-                if my_feedback[k] == '':
+                if my_feedback[key] == '':
                     return False
 
         return True
@@ -446,6 +468,7 @@ class GroupProjectBlock(XBlock):
         group_reviews_required_count = submissions['group_reviews_required_count']
         user_review_count = submissions['user_review_count']
 
+        # TODO: Better use validations than using default values to mask errors
         if not max_score:
             # empty = default
             max_score = 100
@@ -529,15 +552,15 @@ class GroupProjectBlock(XBlock):
             )
 
             group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
-            for q_id in group_activity.grade_questions:
-                if q_id in submissions:
+            for question_id in group_activity.grade_questions:
+                if question_id in submissions:
                     # Emit analytics event...
                     self.runtime.publish(
                         self,
                         "group_activity.received_grade_question_score",
                         {
-                            "question": q_id,
-                            "answer": submissions[q_id],
+                            "question": question_id,
+                            "answer": submissions[question_id],
                             "reviewer_id": self.xmodule_runtime.anonymous_student_id,
                             "is_admin_grader": self.is_admin_grader,
                             "group_id": group_id,
@@ -608,6 +631,7 @@ class GroupProjectBlock(XBlock):
 
         results = {}
         for item in feedback:
+            # TODO: results could be defaultdict(list)
             if item['question'] in results:
                 results[item['question']].append(html.escape(item['answer']))
             else:
@@ -625,6 +649,7 @@ class GroupProjectBlock(XBlock):
 
         results = {}
         for item in feedback:
+            # TODO: results could be defaultdict(list)
             if item['question'] in results:
                 results[item['question']].append(html.escape(item['answer']))
             else:
@@ -650,8 +675,8 @@ class GroupProjectBlock(XBlock):
                 "course_id": self.course_id
             }
 
-            upload_files = [UploadFile(request.params[s.id].file, s.id, context)
-                            for s in group_activity.submissions if s.id in request.params]
+            upload_files = [UploadFile(request.params[submission.id].file, submission.id, context)
+                            for submission in group_activity.submissions if submission.id in request.params]
 
             # Save the files first
             for uf in upload_files:
@@ -722,6 +747,7 @@ class GroupProjectBlock(XBlock):
         group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
         group_id = request.GET["group_id"]
 
+        # TODO: this update_submission_data is common as well - might make sense to extract a method
         group_activity.update_submission_data(
             self.project_api.get_latest_workgroup_submissions_by_id(group_id)
         )
@@ -783,6 +809,7 @@ class GroupProjectBlock(XBlock):
             'project_location': project_location,
         }
 
+    # TODO: this fire_* methods are mostly identical - might make sense to refactor into single method
     def fire_file_upload_notification(self, notifications_service):
         try:
             # this NotificationType is registered in the list of default Open edX Notifications

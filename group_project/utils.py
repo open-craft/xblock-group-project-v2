@@ -16,6 +16,7 @@ log = logging.getLogger(__name__)
 
 # Functions #########################################################
 
+# TODO: use xblock-utils ResourceLoader
 def load_resource(resource_path):
     """
     Gets the content of a resource
@@ -31,6 +32,7 @@ def render_template(template_path, context={}):
     template = Template(template_str)
     return template.render(Context(context))
 
+# TODO: class not used
 class AttrDict(dict):
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)

@@ -26,12 +26,23 @@ def _build_date_field(json_date_string_value):
     except ValueError:
         return None
 
+# TODO: this class crosses service boundary, but some methods post-process responses, while other do not
+# There're two things to improve:
+# * SRP - it should only cross the service boundary, and not do any post-processing
+# * Service isolation - it should be used only through some other (not existent yet) class that would ALWAYS do
+#   post-processing in order to isolate clients from response format changes. As of now, if format changes
+#   virtually every method in group_project might be affected.
 class ProjectAPI(object):
 
     _api_server_address = None
 
     def __init__(self, address):
         self._api_server_address = address
+
+    # TODO: self._api_server_address is used virtually everywhere - maybe should extract method, e.g.
+    # send_request(GET, USERS_API, user_id, 'preferences')
+    # send_request(GET, WORKGROUP_API, group_id, 'preferences', querystring=urlencode(qs_params))
+    # send_request(PUT, PEER_REVIEW_API, question_data['id'], data=question_data)
 
     def get_user_preferences(self, user_id):
         ''' gets users preferences information '''
@@ -145,14 +156,17 @@ class ProjectAPI(object):
             )
         )
 
+    # TODO: this method post-process api response: probably they should be moved outside of this class
     def get_peer_review_items(self, reviewer_id, peer_id, group_id, content_id):
         group_peer_items = self.get_peer_review_items_for_group(group_id, content_id)
         return [pri for pri in group_peer_items if pri['reviewer'] == reviewer_id and (pri['user'] == peer_id or pri['user'] == int(peer_id))]
 
+    # TODO: this method post-process api response: probably they should be moved outside of this class
     def get_user_peer_review_items(self, user_id, group_id, content_id):
         group_peer_items = self.get_peer_review_items_for_group(group_id, content_id)
         return [pri for pri in group_peer_items if pri['user'] == user_id or pri['user'] == int(user_id)]
 
+    # TODO: this method pre-process api request: probably they should be moved outside of this class
     def submit_peer_review_items(self, reviewer_id, peer_id, group_id, content_id, data):
         # get any data already there
         current_data = {pi['question']: pi for pi in self.get_peer_review_items(reviewer_id, peer_id, group_id, content_id)}
@@ -182,10 +196,12 @@ class ProjectAPI(object):
                 }
                 self.create_peer_review_assessment(question_data)
 
+    # TODO: this method post-process api response: probably they should be moved outside of this class
     def get_workgroup_review_items(self, reviewer_id, group_id, content_id):
         group_review_items = self.get_workgroup_review_items_for_group(group_id, content_id)
         return [gri for gri in group_review_items if gri['reviewer'] == reviewer_id and gri['content_id'] == content_id]
 
+    # TODO: this method pre-process api request: probably they should be moved outside of this class
     def submit_workgroup_review_items(self, reviewer_id, group_id, content_id, data):
         # get any data already there
         current_data = {ri['question']: ri for ri in self.get_workgroup_review_items(reviewer_id, group_id, content_id)}
@@ -317,6 +333,7 @@ class ProjectAPI(object):
         return json.loads(response.read())
 
 
+    # TODO: this method post-process api response: probably they should be moved outside of this class
     def get_latest_workgroup_submissions_by_id(self, group_id):
         submission_list = self.get_workgroup_submissions(group_id)
 

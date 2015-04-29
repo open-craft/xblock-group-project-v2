@@ -6,6 +6,7 @@ from django.core.files.storage import default_storage
 
 from django.conf import settings
 
+# TODO: replace TRACE and print with logging
 TRACE = True
 
 class UploadFile(object):
@@ -23,7 +24,7 @@ class UploadFile(object):
         self.project_api = project_context["project_api"]
         self.course_id = project_context["course_id"]
 
-    @property
+    @property  # TODO: lazy
     def sha1(self):
         if self._sha1_hash is None:
             self.file.seek(0)
@@ -39,7 +40,7 @@ class UploadFile(object):
 
         return self._sha1_hash
 
-    @property
+    @property  # TODO: lazy?
     def file_url(self):
         location = None
         path = self._file_storage_path()
@@ -51,6 +52,7 @@ class UploadFile(object):
 
         return location
 
+    # TODO: lazy?
     def _file_storage_path(self):
         return "group_work/{}/{}/{}".format(self.group_id, self.sha1, self.file.name)
 

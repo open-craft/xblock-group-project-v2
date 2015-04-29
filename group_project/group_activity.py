@@ -1,3 +1,75 @@
+"""
+This module parses Group project XML into a tree of domain-specific objects.
+Basically it looks like the following
+
+GroupActivity (.)
+- ActivityComponent (./projectcomponent)
+-- ActivitySection (//section - different paths)
+--- ActivityQuestion (//section/question)
+---- <no dedicated class, etree.Element is used> (//section/question/answer)
+--- ActivityAssessment (//section/assessment)
+---- <no dedicated class, etree.Element is used> (//section/assessment/answer)
+
+GroupActivity (paths relative to root element)
+- resources: [DottableDict(title, description, location)] - ./resources/document
+- grading_criteria: [DottableDict(title, description, location)] - ./resources/document[@grading_criteria="true"]     # attribute filter implicit
+- milestone_dates: {str: datetime.date} - ./dates/milestone
+- submissions: [DottableDict(id, title, description, location?)] - ./submissions/document
+- grade_questions: [ActivityQuestion] - //section/question
+- activity_components: [ActivityComponent] - ./projectcomponent
+- grading_override: Bool                                                                # if True - allows visiting components after close date; used by TA
+* has_submissions: Bool                                                                 # True if ANY submission uploaded
+* has_all_submissions: Bool                                                             # True if ALL submission uploaded
+* submission_json: json                                                                 # submissions serialized into json format
+* step_map: json
+    {
+        component_id: { prev: prev_component.id, name: component.name, next: next_component.id},
+        ordered_list: [component1.id, component2.id, ...],
+        default: <latest_open_component.id if not grading_override else latest_component_with_other_group_sections.id>
+    }
+
+ActivityComponent (paths relative to ./projectcomponent)
+-- id: str - ./@id
+-- name: str - ./@name
+-- sections: [ActivitySection] - ./section
+-- peer_review_sections: [ActivitySection] - ./peerreview/section
+-- peer_assessment_sections: [ActivitySection] - ./peerassessment/section
+-- other_group_sections: [ActivitySection] - ./projectreview/section
+-- other_group_assessment_sections: [ActivitySection] - ./projectassessment/section
+-- open_date: datetime.date - ./dates/milestone[@name=val(./open)]                      # implicitly
+-- open_date_name: str - ./open                                                         # reference to milestone_dates key
+-- close_date: datetime.date - ./dates/milestone[@name=val(./close)]                    # implicitly
+-- close_date_name: str - ./close                                                       # reference to milestone_dates key
+
+ActivitySection (paths relative to (//section)
+--- activity: GroupActivity                                                             # grandparent reference
+--- component: ActivityComponent                                                        # parent reference
+--- title: str - ./@title
+--- upload_dialog: Bool - ./@upload_dialog
+--- file_link_name: str - ./@file_links                                                 # must be one of (resources, submissions, grading_criteria)
+--- questions: [ActivityQuestion] - ./question
+--- assessments: [ActivityAssessment] - ./assessment
+--- content: etree.Element - ./content                                                  # HTML; ./content/span[@class='milestone'] got replaced with milestone dates by name)
+*** file_links: [DottableDict(id?, title, description, location?)                       # if section IS NOT upload dialog gets links for resource, submission or grading_criteria files
+*** upload_links: [DottableDict(id?, title, description, location?)                     # if section IS an upload dialog gets links for resource, submission or grading_criteria files
+*** is_upload_available: Bool                                                           # IS upload section and opened and not closed
+
+ActivityQuestion (paths relative to //section/question)
+---- id: str - ./@id
+---- label: etree.Element - ./label
+---- section: ActivitySection                                                           # parent reference
+---- answer: etree.Element - ./answer[0]                                                # should contain single HTML input control
+---- small: Bool - ./answer[0]/@small                                                   # affects "answer" presentation - adds "side" class
+---- required: Bool - ./@required                                                       # affects "question" presentation - adds "required" class
+---- designer_class: [str] - ./@class                                                   # affects "question" presentation - added as is
+---- question_classes: [str]                                                            # ['question', designer_class?, "required"?]
+
+ActivityAssessment (paths relative to //section/assessment)
+---- id: str - ./@id
+---- label: etree.Element ./label
+---- answer: etree.Element = ./answer[0]                                                # should contain single HTML input control
+---- small: Bool - ./answer[0]/@small                                                   # affects "answer" presentation - adds "side" class
+"""
 import xml.etree.ElementTree as ET
 from datetime import date
 import copy
@@ -66,6 +138,7 @@ class ActivityQuestion(object):
             answer_classes.append('editable')
         answer_node.set('class', ' '.join(answer_classes))
 
+        # TODO: this exactly matches answer_html property below
         ans_html = outer_html(answer_node)
         if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html)-1:
             ans_html = ans_html[:-1] + ' />'
@@ -131,6 +204,7 @@ class ActivityAssessment(object):
             label_classes.append('side')
         label_node.set('class', ' '.join(label_classes))
 
+        # TODO: this exactly matches answer_html property below
         ans_html = outer_html(answer_node)
         if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html)-1:
             ans_html = ans_html[:-1] + ' />'
@@ -179,6 +253,7 @@ class ActivitySection(object):
         for date_span in self.content.findall(".//span[@class='milestone']"):
             date_name = date_span.get("data-date")
             date_value = self.activity.milestone_dates[date_name]
+            # TODO: _formatted_date should be a normal (non static) method probably
             date_span.text = ActivityComponent._formatted_date(date_value)
 
     @property
@@ -288,8 +363,9 @@ class ActivityComponent(object):
 
     @staticmethod
     def _formatted_date(date_value):
-        return date_value.strftime("%m/%d/%Y")
+        return date_value.strftime("%m/%d/%Y")  # TODO: not l10n friendly
 
+    # TODO: these four properties should be better named as has_*
     @property
     def peer_reviews(self):
         return len(self.peer_review_sections) > 0

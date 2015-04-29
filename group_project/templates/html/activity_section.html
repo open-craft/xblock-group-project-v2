@@ -16,6 +16,7 @@
     {{ activity_assessment.render }}
   {% endautoescape %}
 {% endfor %}
+<!-- This will likely go to Project Navigator.Uploads -->
 {% if activity_section.is_upload_available %}
 <button class="show_upload_form">Upload</button>
 <div class="upload_form">
@@ -56,6 +57,7 @@
   </div>
 </div>
 {% else %}
+<!-- This will likely go to Project Navigator.Resources -->
 {% if activity_section.file_link_name %}
 <div class="group_{{ activity_section.file_link_name }}">
 {% if activity_section.has_submissions %}
