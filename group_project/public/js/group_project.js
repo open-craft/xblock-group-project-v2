@@ -1,3 +1,5 @@
+// TODO: this function does way too much: might make sense to extract reviews, assessments, etc.
+// into separate functions and make this function call them
 function GroupProjectBlock(runtime, element) {
 
     var get_from_node = function (selector, default_value) {
@@ -223,6 +225,8 @@ function GroupProjectBlock(runtime, element) {
         // Update step makers
         var step_pn = step_map[selected_step_id];
         $('.page-to.previous, .page-to.next', element).attr('title', '').off('click').removeAttr('href');
+
+        // TODO: almost identical blocks: extract method
         if (step_pn.prev) {
             var prev = step_map[step_pn.prev];
             $('.page-to.previous', element)
