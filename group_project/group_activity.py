@@ -32,10 +32,10 @@ ActivityComponent (paths relative to ./projectcomponent)
 -- id: str - ./@id
 -- name: str - ./@name
 -- sections: [ActivitySection] - ./section
--- peer_review_sections: [ActivitySection] - ./peerreview/section
--- peer_assessment_sections: [ActivitySection] - ./peerassessment/section
--- other_group_sections: [ActivitySection] - ./projectreview/section
--- other_group_assessment_sections: [ActivitySection] - ./projectassessment/section
+-- peer_review_sections: [ActivitySection] - ./peerreview/section                       # peer review - providing feedaback to teammates
+-- peer_assessment_sections: [ActivitySection] - ./peerassessment/section               # peer review - reviewing teammates' feedaback on curernt student
+-- other_group_sections: [ActivitySection] - ./projectreview/section                    # group review - providing feedaback to other groups
+-- other_group_assessment_sections: [ActivitySection] - ./projectassessment/section     # group review - reviewing other groups' feedaback on curernt group
 -- open_date: datetime.date - ./dates/milestone[@name=val(./open)]                      # implicitly
 -- open_date_name: str - ./open                                                         # reference to milestone_dates key
 -- close_date: datetime.date - ./dates/milestone[@name=val(./close)]                    # implicitly
