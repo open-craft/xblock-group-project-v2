@@ -30,7 +30,7 @@ setup(
         'XBlock',
     ],
     entry_points={
-        'xblock.v1': 'group-project = group_project:GroupProjectBlock',
+        'xblock.v1': 'group-project-v2 = group_project:GroupProjectBlock',
     },
     package_data=package_data("group_project", ["static", "templates", "public", "res"]),
 )
