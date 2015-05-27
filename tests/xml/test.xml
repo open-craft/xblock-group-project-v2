@@ -1,21 +1,23 @@
 <group_project schema_version='1'>
-  <resources>
-    <document title="Issue Tree Template">http://download/file.doc</document>
-    <document title="Instructions" description="These are the instructions for this activity" grading_criteria="false">http://download/file.doc</document>
-    <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
-  </resources>
-  <submissions>
-    <document id="issue_tree" title="Issue Tree" />
-    <document id="marketing_pitch" title="Marketing Pitch" />
-    <document id="budget" title="Budget" description="xls budget plan" />
-  </submissions>
   <activitystage name="Overview">
+    <resources>
+      <document title="Issue Tree Template">http://download/file.doc</document>
+      <document title="Instructions" description="These are the instructions for this activity" grading_criteria="false">http://download/file.doc</document>
+    </resources>
     <section title="Section Title"><content><p>Html Description Blah Blah Blah<span>Additional info</span></p></content></section>
     <section title="Details"><content>Html Description Blah Blah Blah</content></section>
     <section title="Suggested Schedule"><content>Html Description Blah Blah Blah</content></section>
     <section title="Project Materials" file_links="resources"><content>Html Description Blah Blah Blah</content></section>
   </activitystage>
   <activitystage name="Upload" close="5/24/2014">
+    <resources>
+      <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
+    </resources>
+    <submissions>
+      <document id="issue_tree" title="Issue Tree" />
+      <document id="marketing_pitch" title="Marketing Pitch" />
+      <document id="budget" title="Budget" description="xls budget plan" />
+    </submissions>
     <section title="Team Submission">html Description</section>
     <section title="Current Files" file_links="submissions">html descirpition</section>
   </activitystage>

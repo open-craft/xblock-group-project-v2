@@ -1,15 +1,9 @@
 <group_project schema_version='1'>
-  <resources>
-    <document title="Issue Tree Template">http://download/file.doc</document>
-    <document title="Instructions" description="These are the instructions for this activity" grading_criteria="false">http://download/file.doc</document>
-    <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
-  </resources>
-  <submissions>
-    <document id="issue_tree" title="Issue Tree" />
-    <document id="marketing_pitch" title="Marketing Pitch" />
-    <document id="budget" title="Budget" description="xls budget plan" />
-  </submissions>
   <activitystage name="Activity 1: Overview" id="overview">
+    <resources>
+      <document title="Issue Tree Template">http://download/file.doc</document>
+      <document title="Instructions" description="These are the instructions for this activity" grading_criteria="false">http://download/file.doc</document>
+    </resources>
     <section title="Lorem Ipsum">
       <content>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
@@ -40,6 +34,11 @@
     </section>
   </activitystage>
   <activitystage name="Activity 1: Upload" close="8/18/2014" id="upload">
+    <submissions>
+      <document id="issue_tree" title="Issue Tree" />
+      <document id="marketing_pitch" title="Marketing Pitch" />
+      <document id="budget" title="Budget" description="xls budget plan" />
+    </submissions>
     <section title="Team Submission">
       <content>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</content>
     </section>
@@ -56,6 +55,9 @@
     </section>
   </activitystage>
   <activitystage name="Activity 1: Reviews" open="8/18/2014" close="8/19/2014" id="review">
+    <resources>
+      <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
+    </resources>
     <section title="Lorem Ipsum" file_links="grading_criteria">
       <content>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat
