@@ -4,10 +4,6 @@
     <document title="Instructions" description="These are the instructions for this activity" grading_criteria="false">http://download/file.doc</document>
     <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
   </resources>
-  <dates>
-    <milestone name="submissions">5/24/2014</milestone>
-    <milestone name="review">6/20/2014</milestone>
-  </dates>
   <submissions>
     <document id="issue_tree" title="Issue Tree" />
     <document id="marketing_pitch" title="Marketing Pitch" />
@@ -19,11 +15,11 @@
     <section title="Suggested Schedule"><content>Html Description Blah Blah Blah</content></section>
     <section title="Project Materials" file_links="resources"><content>Html Description Blah Blah Blah</content></section>
   </projectcomponent>
-  <projectcomponent name="Upload" close="submissions">
+  <projectcomponent name="Upload" close="5/24/2014">
     <section title="Team Submission">html Description</section>
     <section title="Current Files" file_links="submissions">html descirpition</section>
   </projectcomponent>
-  <projectcomponent name="Review" open="submissions" close="review">
+  <projectcomponent name="Review" open="5/24/2014" close="6/20/2014">
     <section title="Lorem Ipsum" file_links="grading_criteria">aslkd as</section>
     <peerreview>
       <section title="Evaluate Teammate">
@@ -80,7 +76,7 @@
       </section>
     </projectreview>
   </projectcomponent>
-  <projectcomponent name="Grade" open="review">
+  <projectcomponent name="Grade" open="6/20/2014">
     <section title="Blah"><content>aisjd saijd</content></section>
     <peerassessment>
       <questionresults id="q1">

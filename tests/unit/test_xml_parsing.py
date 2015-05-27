@@ -8,11 +8,12 @@ from group_project_v2.group_activity import GroupActivity
 
 
 class GroupActivitityXmlTest(TestCase):
+    def _assert_stage_start_and_end_date(self, stage, expected_open, expected_close):
+        self.assertEqual(stage.open_date, expected_open)
+        self.assertEqual(stage.close_date, expected_close)
+
     def test_read_from_xml(self):
         grp_act = GroupActivity.import_xml_file('tests/xml/test.xml')
-
-        self.assertEqual(grp_act.milestone_dates["submissions"], date(2014, 5, 24))
-        self.assertEqual(grp_act.milestone_dates["review"], date(2014, 6, 20))
 
         ir = grp_act.resources
         self.assertEqual(len(ir), 3)
@@ -37,6 +38,11 @@ class GroupActivitityXmlTest(TestCase):
         self.assertEqual(ac[1].name, "Upload")
         self.assertEqual(ac[2].name, "Review")
         self.assertEqual(ac[3].name, "Grade")
+
+        self._assert_stage_start_and_end_date(ac[0], None, None)
+        self._assert_stage_start_and_end_date(ac[1], None, date(2014, 5, 24))
+        self._assert_stage_start_and_end_date(ac[2], date(2014, 5, 24), date(2014, 6, 20))
+        self._assert_stage_start_and_end_date(ac[3], date(2014, 6, 20), None)
 
         self.assertEqual(len(ac[0].sections), 4)
         self.assertEqual(ac[0].sections[0].title, "Section Title")

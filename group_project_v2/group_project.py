@@ -134,12 +134,6 @@ class GroupProjectV2Block(XBlock):
                 anonymous_student_id).id
         return self._known_real_user_ids[anonymous_student_id]
 
-    @property
-    def milestone_dates(self):
-        # TODO: this GroupActivity.import_xml_string(...) is everywhere - probably should be a property
-        group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
-        return group_activity.milestone_dates
-
     @property  # lazy
     def project_api(self):
         if self._project_api is None:
@@ -936,7 +930,7 @@ class GroupProjectV2Block(XBlock):
             timer_name_suffix=timer_name_suffix
         )
 
-    def _set_activity_timed_notification(self, course_id, activity, msg_type, component, milestone_date, send_at_date,
+    def _set_activity_timed_notification(self, course_id, activity, msg_type, component, activity_date, send_at_date,
                                          services, timer_name_suffix):
 
         component_name = component.name
@@ -950,7 +944,7 @@ class GroupProjectV2Block(XBlock):
 
         project_location = courseware_info['project_location']
 
-        milestone_date_tz = milestone_date.replace(tzinfo=pytz.UTC)
+        activity_date_tz = activity_date.replace(tzinfo=pytz.UTC)
         send_at_date_tz = send_at_date.replace(tzinfo=pytz.UTC)
 
         msg = NotificationMessage(
@@ -960,7 +954,7 @@ class GroupProjectV2Block(XBlock):
                 '_schema_version': 1,
                 'activity_name': activity_name,
                 'stage': component_name,
-                'due_date': milestone_date_tz.strftime('%-m/%-d/%-y'),
+                'due_date': activity_date_tz.strftime('%-m/%-d/%-y'),
             }
         )
 

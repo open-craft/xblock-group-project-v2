@@ -14,7 +14,6 @@ GroupActivity (paths relative to root element)
 - resources: [DottableDict(title, description, location)] - ./resources/document
 # attribute filter implicit
 - grading_criteria: [DottableDict(title, description, location)] - ./resources/document[@grading_criteria="true"]
-- milestone_dates: {str: datetime.date} - ./dates/milestone
 - submissions: [DottableDict(id, title, description, location?)] - ./submissions/document
 - grade_questions: [ActivityQuestion] - //section/question
 - activity_components: [ActivityComponent] - ./projectcomponent
@@ -37,10 +36,8 @@ ActivityComponent (paths relative to ./projectcomponent)
 -- peer_assessment_sections: [ActivitySection] - ./peerassessment/section             # assessing teammates' feedback
 -- other_group_sections: [ActivitySection] - ./projectreview/section                  # reviewing other groups
 -- other_group_assessment_sections: [ActivitySection] - ./projectassessment/section   # assessing other groups' feedback
--- open_date: datetime.date - ./dates/milestone[@name=val(./open)]                    # implicitly
--- open_date_name: str - ./open                                                       # reference to milestone_dates key
--- close_date: datetime.date - ./dates/milestone[@name=val(./close)]                  # implicitly
--- close_date_name: str - ./close                                                     # reference to milestone_dates key
+-- open_date: datetime.date - @open
+-- close_date: datetime.date - @close                                              # reference to milestone_dates key
 
 ActivitySection (paths relative to (//section)
 --- activity: GroupActivity                                             # grandparent reference
@@ -50,8 +47,7 @@ ActivitySection (paths relative to (//section)
 --- file_link_name: str - ./@file_links                                 # resources / submissions / grading_criteria
 --- questions: [ActivityQuestion] - ./question
 --- assessments: [ActivityAssessment] - ./assessment
-# HTML; ./content/span[@class='milestone'] got replaced with milestone dates by name)
---- content: etree.Element - ./content
+--- content: etree.Element - ./content                                  # HTML
 # if section IS NOT upload dialog gets links for resource, submission or grading_criteria files
 *** file_links: [DottableDict(id?, title, description, location?)
 # if section IS an upload dialog gets links for resource, submission or grading_criteria files
@@ -84,6 +80,11 @@ from pkg_resources import resource_filename
 
 from utils import render_template
 from .project_api import _build_date_field
+
+
+def parse_date(date_string):
+    split_string = date_string.split('/')
+    return date(int(split_string[2]), int(split_string[0]), int(split_string[1]))
 
 
 def outer_html(node):
@@ -240,9 +241,6 @@ class ActivitySection(object):
         self.title = doc_tree.get("title")
         self.content = doc_tree.find("./content")
 
-        if self.content is not None:
-            self._replace_date_values()
-
         self.upload_dialog = (doc_tree.get("upload_dialog") == "true")
 
         self.file_link_name = doc_tree.get("file_links")
@@ -254,13 +252,6 @@ class ActivitySection(object):
         # import any assessments
         for assessment in doc_tree.findall("./assessment"):
             self.assessments.append(ActivityAssessment(assessment))
-
-    def _replace_date_values(self):
-        for date_span in self.content.findall(".//span[@class='milestone']"):
-            date_name = date_span.get("data-date")
-            date_value = self.activity.milestone_dates[date_name]
-            # TODO: formatted_date should be a normal (non static) method probably
-            date_span.text = ActivityComponent.formatted_date(date_value)
 
     @property
     def file_links(self):
@@ -331,20 +322,16 @@ class ActivityComponent(object):
         self.peer_assessment_sections = []
         self.other_group_assessment_sections = []
         self.open_date = None
-        self.open_date_name = None
         self.close_date = None
-        self.close_date_name = None
 
         self.name = doc_tree.get("name")
         self.id = doc_tree.get("id")
 
         if doc_tree.get("open"):
-            self.open_date_name = doc_tree.get("open")
-            self.open_date = activity.milestone_dates[doc_tree.get("open")]
+            self.open_date = parse_date(doc_tree.get("open"))
 
         if doc_tree.get("close"):
-            self.close_date_name = doc_tree.get("close")
-            self.close_date = activity.milestone_dates[doc_tree.get("close")]
+            self.close_date = parse_date(doc_tree.get("close"))
 
         # import sections
         for section in doc_tree.findall("./section"):
@@ -418,18 +405,12 @@ class ActivityComponent(object):
 
 
 class GroupActivity(object):
-    @staticmethod
-    def parse_date(date_string):
-        split_string = date_string.split('/')
-        return date(int(split_string[2]), int(split_string[0]), int(split_string[1]))
-
     def __init__(self, doc_tree, grading_override=False):
 
         self.resources = []
         self.submissions = []
         self.activity_components = []
         self.grading_criteria = []
-        self.milestone_dates = {}
 
         self.grade_questions = []
         self.grading_override = grading_override
@@ -445,12 +426,6 @@ class GroupActivity(object):
 
             if document.get("grading_criteria") == "true":
                 self.grading_criteria.append(document_info)
-
-        # import milestone dates
-        for milestone in doc_tree.findall("./dates/milestone"):
-            self.milestone_dates.update({
-                milestone.get("name"): self.parse_date(milestone.text)
-            })
 
         # import submission defintions
         for document in doc_tree.findall("./submissions/document"):
@@ -486,12 +461,8 @@ class GroupActivity(object):
             document["grading_criteria"] = True if document in self.grading_criteria else None
             dottable_documents.append(DottableDict(document))
 
-        milestones = [DottableDict({"name": key, "mmddyy": value.strftime("%m/%d/%Y")}) for key, value in
-                      self.milestone_dates.iteritems()]
-
         data = {
             "documents": dottable_documents,
-            "milestones": milestones,
             "group_activity": self,
             "activity_component_path": resource_filename(__name__, 'templates/activity_component.xml')
         }

@@ -19,7 +19,7 @@
       <content>
         <ul>
           <li>Type: <b>Issue Tree</b></li>
-          <li>Deadline: <b><span class="milestone" data-date="submissions"></span></b></li>
+          <li>Deadline: <b>8/18/2014</b></li>
           <li>Deliverables: <b>PPT</b></li>
           <li>Grading: <b>Lorem Ipsum</b></li>
         </ul>
@@ -28,7 +28,7 @@
     <section title="Suggested Schedule">
       <content>
         <ul>
-          <li>Activity Deadline: <b><span class="milestone" data-date="review"></span></b></li>
+          <li>Activity Deadline: <b>8/19/2014</b></li>
           <li>Reviews: <b class="highlight">Please complete your reviews within 3 days once they are available for grading.</b></li>
         </ul>
       </content>
@@ -39,7 +39,7 @@
       </content>
     </section>
   </projectcomponent>
-  <projectcomponent name="Activity 1: Upload" close="submissions" id="upload">
+  <projectcomponent name="Activity 1: Upload" close="8/18/2014" id="upload">
     <section title="Team Submission">
       <content>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</content>
     </section>
@@ -55,7 +55,7 @@
       </content>
     </section>
   </projectcomponent>
-  <projectcomponent name="Activity 1: Reviews" open="submissions" close="review" id="review">
+  <projectcomponent name="Activity 1: Reviews" open="8/18/2014" close="8/19/2014" id="review">
     <section title="Lorem Ipsum" file_links="grading_criteria">
       <content>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat
@@ -244,7 +244,7 @@
       </section>
     </projectreview>
   </projectcomponent>
-  <projectcomponent name="Activity 1: Grade" open="review" id="grade">
+  <projectcomponent name="Activity 1: Grade" open="8/19/2014" id="grade">
     <section title="Blah">
       <content>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
