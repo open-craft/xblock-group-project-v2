@@ -9,11 +9,11 @@ from django.conf import settings
 # TODO: replace TRACE and print with logging
 TRACE = True
 
-class UploadFile(object):
 
+class UploadFile(object):
     _sha1_hash = None
 
-    def __init__(self, file, submission_id, project_context):#group_id, user_id, project_api)
+    def __init__(self, file, submission_id, project_context):  # group_id, user_id, project_api)
 
         self.file = file
         self.mimetype = mimetypes.guess_type(self.file.name)[0]

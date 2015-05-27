@@ -12,15 +12,16 @@ GroupActivity (.)
 
 GroupActivity (paths relative to root element)
 - resources: [DottableDict(title, description, location)] - ./resources/document
-- grading_criteria: [DottableDict(title, description, location)] - ./resources/document[@grading_criteria="true"]     # attribute filter implicit
+# attribute filter implicit
+- grading_criteria: [DottableDict(title, description, location)] - ./resources/document[@grading_criteria="true"]
 - milestone_dates: {str: datetime.date} - ./dates/milestone
 - submissions: [DottableDict(id, title, description, location?)] - ./submissions/document
 - grade_questions: [ActivityQuestion] - //section/question
 - activity_components: [ActivityComponent] - ./projectcomponent
-- grading_override: Bool                                                                # if True - allows visiting components after close date; used by TA
-* has_submissions: Bool                                                                 # True if ANY submission uploaded
-* has_all_submissions: Bool                                                             # True if ALL submission uploaded
-* submission_json: json                                                                 # submissions serialized into json format
+- grading_override: Bool                            # if True - allows visiting components after close date; used by TA
+* has_submissions: Bool                             # True if ANY submission uploaded
+* has_all_submissions: Bool                         # True if ALL submission uploaded
+* submission_json: json                             # submissions serialized into json format
 * step_map: json
     {
         component_id: { prev: prev_component.id, name: component.name, next: next_component.id},
@@ -32,43 +33,47 @@ ActivityComponent (paths relative to ./projectcomponent)
 -- id: str - ./@id
 -- name: str - ./@name
 -- sections: [ActivitySection] - ./section
--- peer_review_sections: [ActivitySection] - ./peerreview/section                       # peer review - providing feedaback to teammates
--- peer_assessment_sections: [ActivitySection] - ./peerassessment/section               # peer review - reviewing teammates' feedaback on curernt student
--- other_group_sections: [ActivitySection] - ./projectreview/section                    # group review - providing feedaback to other groups
--- other_group_assessment_sections: [ActivitySection] - ./projectassessment/section     # group review - reviewing other groups' feedaback on curernt group
--- open_date: datetime.date - ./dates/milestone[@name=val(./open)]                      # implicitly
--- open_date_name: str - ./open                                                         # reference to milestone_dates key
--- close_date: datetime.date - ./dates/milestone[@name=val(./close)]                    # implicitly
--- close_date_name: str - ./close                                                       # reference to milestone_dates key
+-- peer_review_sections: [ActivitySection] - ./peerreview/section                     # reviewing teammates
+-- peer_assessment_sections: [ActivitySection] - ./peerassessment/section             # assessing teammates' feedback
+-- other_group_sections: [ActivitySection] - ./projectreview/section                  # reviewing other groups
+-- other_group_assessment_sections: [ActivitySection] - ./projectassessment/section   # assessing other groups' feedback
+-- open_date: datetime.date - ./dates/milestone[@name=val(./open)]                    # implicitly
+-- open_date_name: str - ./open                                                       # reference to milestone_dates key
+-- close_date: datetime.date - ./dates/milestone[@name=val(./close)]                  # implicitly
+-- close_date_name: str - ./close                                                     # reference to milestone_dates key
 
 ActivitySection (paths relative to (//section)
---- activity: GroupActivity                                                             # grandparent reference
---- component: ActivityComponent                                                        # parent reference
+--- activity: GroupActivity                                             # grandparent reference
+--- component: ActivityComponent                                        # parent reference
 --- title: str - ./@title
 --- upload_dialog: Bool - ./@upload_dialog
---- file_link_name: str - ./@file_links                                                 # must be one of (resources, submissions, grading_criteria)
+--- file_link_name: str - ./@file_links                                 # resources / submissions / grading_criteria
 --- questions: [ActivityQuestion] - ./question
 --- assessments: [ActivityAssessment] - ./assessment
---- content: etree.Element - ./content                                                  # HTML; ./content/span[@class='milestone'] got replaced with milestone dates by name)
-*** file_links: [DottableDict(id?, title, description, location?)                       # if section IS NOT upload dialog gets links for resource, submission or grading_criteria files
-*** upload_links: [DottableDict(id?, title, description, location?)                     # if section IS an upload dialog gets links for resource, submission or grading_criteria files
-*** is_upload_available: Bool                                                           # IS upload section and opened and not closed
+# HTML; ./content/span[@class='milestone'] got replaced with milestone dates by name)
+--- content: etree.Element - ./content
+# if section IS NOT upload dialog gets links for resource, submission or grading_criteria files
+*** file_links: [DottableDict(id?, title, description, location?)
+# if section IS an upload dialog gets links for resource, submission or grading_criteria files
+*** upload_links: [DottableDict(id?, title, description, location?)
+# IS upload section and opened and not closed
+*** is_upload_available: Bool
 
 ActivityQuestion (paths relative to //section/question)
 ---- id: str - ./@id
 ---- label: etree.Element - ./label
----- section: ActivitySection                                                           # parent reference
----- answer: etree.Element - ./answer[0]                                                # should contain single HTML input control
----- small: Bool - ./answer[0]/@small                                                   # affects "answer" presentation - adds "side" class
----- required: Bool - ./@required                                                       # affects "question" presentation - adds "required" class
----- designer_class: [str] - ./@class                                                   # affects "question" presentation - added as is
----- question_classes: [str]                                                            # ['question', designer_class?, "required"?]
+---- section: ActivitySection                               # parent reference
+---- answer: etree.Element - ./answer[0]                    # should contain single HTML input control
+---- small: Bool - ./answer[0]/@small                       # affects "answer" presentation - adds "side" class
+---- required: Bool - ./@required                           # affects "question" presentation - adds "required" class
+---- designer_class: [str] - ./@class                       # affects "question" presentation - added as is
+---- question_classes: [str]                                # ['question', designer_class?, "required"?]
 
 ActivityAssessment (paths relative to //section/assessment)
 ---- id: str - ./@id
 ---- label: etree.Element ./label
----- answer: etree.Element = ./answer[0]                                                # should contain single HTML input control
----- small: Bool - ./answer[0]/@small                                                   # affects "answer" presentation - adds "side" class
+---- answer: etree.Element = ./answer[0]                    # should contain single HTML input control
+---- small: Bool - ./answer[0]/@small                       # affects "answer" presentation - adds "side" class
 """
 import xml.etree.ElementTree as ET
 from datetime import date
@@ -80,18 +85,21 @@ from pkg_resources import resource_filename
 from utils import render_template
 from .project_api import _build_date_field
 
+
 def outer_html(node):
     if node is None:
         return None
 
     return ET.tostring(node, 'utf-8', 'html').strip()
 
+
 def inner_html(node):
     if node is None:
         return None
 
     tag_length = len(node.tag)
-    return outer_html(node)[tag_length+2:-1*(tag_length+3)]
+    return outer_html(node)[tag_length + 2:-1 * (tag_length + 3)]
+
 
 class DottableDict(dict):
     def __init__(self, *args, **kwargs):
@@ -100,7 +108,6 @@ class DottableDict(dict):
 
 
 class ActivityQuestion(object):
-
     def __init__(self, doc_tree, section):
 
         self.id = doc_tree.get("id")
@@ -140,7 +147,7 @@ class ActivityQuestion(object):
 
         # TODO: this exactly matches answer_html property below
         ans_html = outer_html(answer_node)
-        if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html)-1:
+        if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html) - 1:
             ans_html = ans_html[:-1] + ' />'
 
         label_html = ''
@@ -165,14 +172,13 @@ class ActivityQuestion(object):
     @property
     def answer_html(self):
         html = outer_html(self.answer)
-        if len(self.answer.findall('./*')) < 1 and html.index('>') == len(html)-1:
+        if len(self.answer.findall('./*')) < 1 and html.index('>') == len(html) - 1:
             html = html[:-1] + ' />'
 
         return html
 
 
 class ActivityAssessment(object):
-
     def __init__(self, doc_tree):
 
         self.id = doc_tree.get("id")
@@ -206,7 +212,7 @@ class ActivityAssessment(object):
 
         # TODO: this exactly matches answer_html property below
         ans_html = outer_html(answer_node)
-        if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html)-1:
+        if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html) - 1:
             ans_html = ans_html[:-1] + ' />'
 
         return "{}{}".format(
@@ -217,13 +223,13 @@ class ActivityAssessment(object):
     @property
     def answer_html(self):
         html = outer_html(self.answer)
-        if len(self.answer.findall('./*')) < 1 and html.index('>') == len(html)-1:
+        if len(self.answer.findall('./*')) < 1 and html.index('>') == len(html) - 1:
             html = html[:-1] + ' />'
 
         return html
 
-class ActivitySection(object):
 
+class ActivitySection(object):
     def __init__(self, doc_tree, component, activity):
 
         self.component = component
@@ -253,8 +259,8 @@ class ActivitySection(object):
         for date_span in self.content.findall(".//span[@class='milestone']"):
             date_name = date_span.get("data-date")
             date_value = self.activity.milestone_dates[date_name]
-            # TODO: _formatted_date should be a normal (non static) method probably
-            date_span.text = ActivityComponent._formatted_date(date_value)
+            # TODO: formatted_date should be a normal (non static) method probably
+            date_span.text = ActivityComponent.formatted_date(date_value)
 
     @property
     def file_links(self):
@@ -269,7 +275,8 @@ class ActivitySection(object):
 
     @property
     def has_submissions(self):
-        return len([file_link for file_link in self.file_links if hasattr(file_link, 'location') and file_link.location]) > 0
+        return len(
+            [file_link for file_link in self.file_links if hasattr(file_link, 'location') and file_link.location]) > 0
 
     @property
     def upload_links(self):
@@ -294,7 +301,6 @@ class ActivitySection(object):
             return inner_html(self.content)
         return None
 
-
     @property
     def export_xml(self):
         data = {
@@ -315,7 +321,6 @@ class ActivitySection(object):
 
 
 class ActivityComponent(object):
-
     def __init__(self, doc_tree, activity):
 
         self.grading_override = activity.grading_override
@@ -362,7 +367,7 @@ class ActivityComponent(object):
             self.other_group_assessment_sections.append(ActivitySection(section, self, activity))
 
     @staticmethod
-    def _formatted_date(date_value):
+    def formatted_date(date_value):
         return date_value.strftime("%m/%d/%Y")  # TODO: not l10n friendly
 
     # TODO: these four properties should be better named as has_*
@@ -384,11 +389,11 @@ class ActivityComponent(object):
 
     @property
     def formatted_open_date(self):
-        return ActivityComponent._formatted_date(self.open_date)
+        return ActivityComponent.formatted_date(self.open_date)
 
     @property
     def formatted_close_date(self):
-        return ActivityComponent._formatted_date(self.close_date)
+        return ActivityComponent.formatted_date(self.close_date)
 
     @property
     def is_open(self):
@@ -413,13 +418,12 @@ class ActivityComponent(object):
 
 
 class GroupActivity(object):
-
     @staticmethod
     def parse_date(date_string):
         split_string = date_string.split('/')
         return date(int(split_string[2]), int(split_string[0]), int(split_string[1]))
 
-    def __init__(self, doc_tree, grading_override = False):
+    def __init__(self, doc_tree, grading_override=False):
 
         self.resources = []
         self.submissions = []
@@ -463,7 +467,7 @@ class GroupActivity(object):
     def update_submission_data(self, submission_map):
 
         def formatted_date(iso_date_value):
-            return ActivityComponent._formatted_date(
+            return ActivityComponent.formatted_date(
                 _build_date_field(iso_date_value)
             )
 
@@ -482,7 +486,8 @@ class GroupActivity(object):
             document["grading_criteria"] = True if document in self.grading_criteria else None
             dottable_documents.append(DottableDict(document))
 
-        milestones = [DottableDict({"name": key, "mmddyy": value.strftime("%m/%d/%Y")}) for key, value in self.milestone_dates.iteritems()]
+        milestones = [DottableDict({"name": key, "mmddyy": value.strftime("%m/%d/%Y")}) for key, value in
+                      self.milestone_dates.iteritems()]
 
         data = {
             "documents": dottable_documents,
@@ -523,7 +528,6 @@ class GroupActivity(object):
             elif ac.open_date and ac.open_date <= date.today():
                 default_stage = ac.id
 
-
         next_step = None
         for ac in reversed(self.activity_components):
             step_map[ac.id]["next"] = next_step
@@ -550,7 +554,6 @@ class GroupActivity(object):
         return cls(doc_tree)
 
     @classmethod
-    def import_xml_string(cls, xml, grading_override = False):
+    def import_xml_string(cls, xml, grading_override=False):
         doc_tree = ET.fromstring(xml)
         return cls(doc_tree, grading_override)
-

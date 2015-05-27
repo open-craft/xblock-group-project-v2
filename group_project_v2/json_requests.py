@@ -20,6 +20,7 @@ TIMEOUT = 20
 
 TRACE = True
 
+
 def trace_request_information(func):
     '''
     Decorator which will trace information
@@ -37,6 +38,7 @@ def trace_request_information(func):
         print "!!! Reponse code: {}".format(response.code)
 
         return response
+
     return make_request
 
 
@@ -71,6 +73,7 @@ def PUT(url_path, data):
         url=url_path, headers=json_headers(), data=json.dumps(data))
     request.get_method = lambda: 'PUT'
     return opener.open(request, None, TIMEOUT)
+
 
 if TRACE:
     GET = trace_request_information(GET)

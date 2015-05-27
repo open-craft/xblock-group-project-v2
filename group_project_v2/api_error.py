@@ -6,15 +6,16 @@ from django.utils.translation import ugettext as _
 
 ERROR_CODE_MESSAGES = {}
 
+
 class ApiError(Exception):
-    code = 1000 # 1000 represents client-side error, or unknown code
+    """
+    Exception to be thrown when the Api returns an Http error
+    """
+    code = 1000  # 1000 represents client-side error, or unknown code
     message = _("Unknown error calling API")
     content_dictionary = {}
     http_error = None
 
-    '''
-    Exception to be thrown when the Api returns an Http error
-    '''
     def __init__(self, thrown_error, error_code_messages=None):
         # store the code and
         self.http_error = thrown_error
@@ -40,10 +41,12 @@ class ApiError(Exception):
     def __str__(self):
         return "ApiError '{}' ({})".format(self.message, self.code)
 
+
 def api_error_protect(func):
-    '''
+    """
     Decorator which will raise an ApiError for api calls
-    '''
+    """
+
     def call_api_method(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -51,4 +54,5 @@ def api_error_protect(func):
             api_error = ApiError(he, ERROR_CODE_MESSAGES.get(func, None))
             print "Error calling {}: {}".format(func, api_error)
             raise api_error
+
     return call_api_method

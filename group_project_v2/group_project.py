@@ -51,6 +51,7 @@ log = logging.getLogger(__name__)
 def make_key(*args):
     return ":".join([str(a) for a in args])
 
+
 class OutsiderDisallowedError(Exception):
     def __init__(self, detail):
         self.value = detail
@@ -62,10 +63,10 @@ class OutsiderDisallowedError(Exception):
     def __unicode__(self):
         return u"Outsider Denied Access: {}".format(self.value)
 
+
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
 class GroupProjectBlock(XBlock):
-
     """
     XBlock providing a group activity project for a group of students to collaborate upon
     """
@@ -85,7 +86,8 @@ class GroupProjectBlock(XBlock):
 
     group_reviews_required_count = Integer(
         display_name="Reviews Required Minimum",
-        help="The minimum number of group-reviews that should be applied to a set of submissions (set to 0 to be 'TA Graded')",
+        help="The minimum number of group-reviews that should be applied to a set of submissions "
+             "(set to 0 to be 'TA Graded')",
         scope=Scope.settings,
         default=3
     )
@@ -125,9 +127,11 @@ class GroupProjectBlock(XBlock):
         raise OutsiderDisallowedError("User does not have an allowed role")
 
     _known_real_user_ids = {}
+
     def real_user_id(self, anonymous_student_id):
         if anonymous_student_id not in self._known_real_user_ids:
-            self._known_real_user_ids[anonymous_student_id] = self.xmodule_runtime.get_real_user(anonymous_student_id).id
+            self._known_real_user_ids[anonymous_student_id] = self.xmodule_runtime.get_real_user(
+                anonymous_student_id).id
         return self._known_real_user_ids[anonymous_student_id]
 
     @property
@@ -211,7 +215,8 @@ class GroupProjectBlock(XBlock):
             workgroup = self.workgroup
         except OutsiderDisallowedError as ode:
             error_fragment = Fragment()
-            error_fragment.add_content(render_template('/templates/html/loading_error.html', {'error_message': unicode(ode)}))
+            error_fragment.add_content(
+                render_template('/templates/html/loading_error.html', {'error_message': unicode(ode)}))
             error_fragment.add_javascript(load_resource('public/js/group_project_error.js'))
             error_fragment.initialize_js('GroupProjectError')
             return error_fragment
@@ -258,7 +263,8 @@ class GroupProjectBlock(XBlock):
 
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.ui.widget.js'))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.fileupload.js'))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.iframe-transport.js'))
+        fragment.add_javascript_url(
+            self.runtime.local_resource_url(self, 'public/js/vendor/jquery.iframe-transport.js'))
 
         fragment.add_javascript(load_resource('public/js/group_project.js'))
 
@@ -305,12 +311,11 @@ class GroupProjectBlock(XBlock):
         if notifications_service:
             self.fire_grades_posted_notification(group_id, notifications_service)
 
-
     def calculate_grade(self, group_id):
 
         def mean(value_array):
             numeric_values = [float(v) for v in value_array]
-            return float(sum(numeric_values)/len(numeric_values))
+            return float(sum(numeric_values) / len(numeric_values))
 
         review_item_data = self.project_api.get_workgroup_review_items_for_group(group_id, self.content_id)
         review_item_map = {
@@ -391,7 +396,6 @@ class GroupProjectBlock(XBlock):
             if e.code != 409:
                 raise
 
-
     def update_upload_complete(self):
         for u in self.workgroup["users"]:
             self.mark_complete_stage(u["id"], "upload")
@@ -403,11 +407,13 @@ class GroupProjectBlock(XBlock):
 
     def evaluations_complete(self):
         group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
-        peer_review_components = [component for component in group_activity.activity_components if component.peer_reviews]
+        peer_review_components = [component for component in group_activity.activity_components if
+                                  component.peer_reviews]
         peer_review_questions = []
         for peer_review_component in peer_review_components:
             for peer_review_section in peer_review_component.peer_review_sections:
-                peer_review_questions.extend([question.id for question in peer_review_section.questions if question.required])
+                peer_review_questions.extend(
+                    [question.id for question in peer_review_section.questions if question.required])
 
         group_peer_items = self.project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
         my_feedback = {
@@ -431,7 +437,8 @@ class GroupProjectBlock(XBlock):
 
     def grading_complete(self):
         group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
-        group_review_components = [component for component in group_activity.activity_components if component.other_group_reviews]
+        group_review_components = [component for component in group_activity.activity_components if
+                                   component.other_group_reviews]
         group_review_questions = []
         for group_review_component in group_review_components:
             for review_section in group_review_component.other_group_sections:
@@ -440,7 +447,8 @@ class GroupProjectBlock(XBlock):
         group_review_items = []
         assess_groups = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
         for assess_group in assess_groups:
-            group_review_items.extend(self.project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id))
+            group_review_items.extend(
+                self.project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id))
         my_feedback = {
             make_key(peer_review_item["workgroup"], peer_review_item["question"]): peer_review_item["answer"]
             for peer_review_item in group_review_items
@@ -707,7 +715,8 @@ class GroupProjectBlock(XBlock):
                     at_least_one_success = True
                 except Exception as save_record_error:
                     original_message = save_record_error.message if hasattr(save_record_error, "message") else ""
-                    save_record_error.message = _("Error recording file information {} - {}").format(uf.file.name, original_message)
+                    save_record_error.message = _("Error recording file information {} - {}").format(uf.file.name,
+                                                                                                     original_message)
                     raise
 
             if at_least_one_success:
@@ -719,7 +728,7 @@ class GroupProjectBlock(XBlock):
                 if notifications_service:
                     self.fire_file_upload_notification(notifications_service)
 
-            response_data.update({uf.submission_id : uf.file_url for uf in upload_files})
+            response_data.update({uf.submission_id: uf.file_url for uf in upload_files})
 
             group_activity.update_submission_data(
                 self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup['id'])
@@ -753,7 +762,7 @@ class GroupProjectBlock(XBlock):
         )
         html_output = render_template('/templates/html/review_submissions.html', {"group_activity": group_activity})
 
-        return webob.response.Response(body=json.dumps({"html":html_output}))
+        return webob.response.Response(body=json.dumps({"html": html_output}))
 
     @XBlock.handler
     def refresh_submission_links(self, request, suffix=''):
@@ -764,7 +773,7 @@ class GroupProjectBlock(XBlock):
         )
         html_output = render_template('/templates/html/submission_links.html', {"group_activity": group_activity})
 
-        return webob.response.Response(body=json.dumps({"html":html_output}))
+        return webob.response.Response(body=json.dumps({"html": html_output}))
 
     def get_courseware_info(self, courseware_parent_info_service):
         activity_name = self.display_name
@@ -793,7 +802,6 @@ class GroupProjectBlock(XBlock):
                 )
                 project_name = project_courseware_info['display_name']
                 project_location = project_courseware_info['location']
-
 
         except Exception, ex:
             # Can't look this up then log and just use the default
@@ -928,7 +936,8 @@ class GroupProjectBlock(XBlock):
             timer_name_suffix=timer_name_suffix
         )
 
-    def _set_activity_timed_notification(self, course_id, activity, msg_type, component, milestone_date, send_at_date, services, timer_name_suffix):
+    def _set_activity_timed_notification(self, course_id, activity, msg_type, component, milestone_date, send_at_date,
+                                         services, timer_name_suffix):
 
         component_name = component.name
         notifications_service = services.get('notifications')
