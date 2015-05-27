@@ -401,11 +401,11 @@ class GroupActivityXBlock(XBlock):
 
     def evaluations_complete(self):
         group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
-        peer_review_components = [component for component in group_activity.activity_stages if
-                                  component.peer_reviews]
+        peer_review_stages = [stage for stage in group_activity.activity_stages if
+                              stage.peer_reviews]
         peer_review_questions = []
-        for peer_review_component in peer_review_components:
-            for peer_review_section in peer_review_component.peer_review_sections:
+        for peer_review_stage in peer_review_stages:
+            for peer_review_section in peer_review_stage.peer_review_sections:
                 peer_review_questions.extend(
                     [question.id for question in peer_review_section.questions if question.required])
 
@@ -431,11 +431,11 @@ class GroupActivityXBlock(XBlock):
 
     def grading_complete(self):
         group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
-        group_review_components = [component for component in group_activity.activity_stages if
-                                   component.other_group_reviews]
+        group_review_stages = [stage for stage in group_activity.activity_stages if
+                               stage.other_group_reviews]
         group_review_questions = []
-        for group_review_component in group_review_components:
-            for review_section in group_review_component.other_group_sections:
+        for group_review_stage in group_review_stages:
+            for review_section in group_review_stage.other_group_sections:
                 group_review_questions.extend([q.id for q in review_section.questions if q.required])
 
         group_review_items = []
@@ -923,17 +923,17 @@ class GroupActivityXBlock(XBlock):
             # So log it and continue....
             log.exception(ex)
 
-    def _get_component_timer_name(self, component, timer_name_suffix):
-        return '{location}-{component}-{timer_name_suffix}'.format(
+    def _get_stage_timer_name(self, stage, timer_name_suffix):
+        return '{location}-{stage}-{timer_name_suffix}'.format(
             location=self.location,
-            component=component.id,
+            stage=stage.id,
             timer_name_suffix=timer_name_suffix
         )
 
-    def _set_activity_timed_notification(self, course_id, activity, msg_type, component, activity_date, send_at_date,
+    def _set_activity_timed_notification(self, course_id, activity, msg_type, stage, activity_date, send_at_date,
                                          services, timer_name_suffix):
 
-        component_name = component.name
+        stage_name = stage.name
         notifications_service = services.get('notifications')
         courseware_parent_info = services.get('courseware_parent_info')
 
@@ -953,7 +953,7 @@ class GroupActivityXBlock(XBlock):
             payload={
                 '_schema_version': 1,
                 'activity_name': activity_name,
-                'stage': component_name,
+                'stage': stage_name,
                 'due_date': activity_date_tz.strftime('%-m/%-d/%-y'),
             }
         )
@@ -982,7 +982,7 @@ class GroupActivityXBlock(XBlock):
                 'course_id': unicode(course_id),
                 'content_id': unicode(project_location),
             },
-            timer_name=self._get_component_timer_name(component, timer_name_suffix),
+            timer_name=self._get_stage_timer_name(stage, timer_name_suffix),
             ignore_if_past_due=True  # don't send if we're already late!
         )
 
@@ -1001,30 +1001,30 @@ class GroupActivityXBlock(XBlock):
             if notifications_service:
                 # set (or update) Notification timed message based on
                 # the current key dates
-                for component in group_activity.activity_stages:
+                for stage in group_activity.activity_stages:
 
-                    # if the component has a opening date, then send a msg then
-                    if component.open_date:
+                    # if the stage has a opening date, then send a msg then
+                    if stage.open_date:
                         self._set_activity_timed_notification(
                             course_id,
                             group_activity,
                             u'open-edx.xblock.group-project.stage-open',
-                            component,
-                            datetime.combine(component.open_date, datetime.min.time()),
-                            datetime.combine(component.open_date, datetime.min.time()),
+                            stage,
+                            datetime.combine(stage.open_date, datetime.min.time()),
+                            datetime.combine(stage.open_date, datetime.min.time()),
                             services,
                             'open'
                         )
 
-                    # if the component has a close date, then send a msg then
-                    if component.close_date:
+                    # if the stage has a close date, then send a msg then
+                    if stage.close_date:
                         self._set_activity_timed_notification(
                             course_id,
                             group_activity,
                             u'open-edx.xblock.group-project.stage-due',
-                            component,
-                            datetime.combine(component.close_date, datetime.min.time()),
-                            datetime.combine(component.close_date, datetime.min.time()),
+                            stage,
+                            datetime.combine(stage.close_date, datetime.min.time()),
+                            datetime.combine(stage.close_date, datetime.min.time()),
                             services,
                             'due'
                         )
@@ -1034,9 +1034,9 @@ class GroupActivityXBlock(XBlock):
                             course_id,
                             group_activity,
                             u'open-edx.xblock.group-project.stage-due',
-                            component,
-                            datetime.combine(component.close_date, datetime.min.time()),
-                            datetime.combine(component.close_date, datetime.min.time()) - timedelta(days=3),
+                            stage,
+                            datetime.combine(stage.close_date, datetime.min.time()),
+                            datetime.combine(stage.close_date, datetime.min.time()) - timedelta(days=3),
                             services,
                             'coming-due'
                         )
@@ -1059,17 +1059,17 @@ class GroupActivityXBlock(XBlock):
             if notifications_service:
                 # If we are being delete, then we should remove any NotificationTimers that
                 # may have been registered before
-                for component in group_activity.activity_stages:
+                for stage in group_activity.activity_stages:
                     notifications_service.cancel_timed_notification(
-                        self._get_component_timer_name(component, 'open')
+                        self._get_stage_timer_name(stage, 'open')
                     )
 
                     notifications_service.cancel_timed_notification(
-                        self._get_component_timer_name(component, 'due')
+                        self._get_stage_timer_name(stage, 'due')
                     )
 
                     notifications_service.cancel_timed_notification(
-                        self._get_component_timer_name(component, 'coming-due')
+                        self._get_stage_timer_name(stage, 'coming-due')
                     )
 
         except Exception, ex:

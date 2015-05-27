@@ -15,17 +15,17 @@ GroupActivity (paths relative to root element)
 # attribute filter implicit
 - grading_criteria: [DottableDict(title, description, location)] - ./resources/document[@grading_criteria="true"]
 - submissions: [DottableDict(id, title, description, location?)] - ./submissions/document
-- grade_questions: [ActivityQuestion] - //section/question
-- activity_stages: [ActivityComponent] - ./activitystage
-- grading_override: Bool                            # if True - allows visiting components after close date; used by TA
+- grade_questions: [GroupActivityQuestion] - //section/question
+- activity_stages: [GroupActivityStage] - ./activitystage
+- grading_override: Bool                            # if True - allows visiting stages after close date; used by TA
 * has_submissions: Bool                             # True if ANY submission uploaded
 * has_all_submissions: Bool                         # True if ALL submission uploaded
 * submission_json: json                             # submissions serialized into json format
 * step_map: json
     {
-        component_id: { prev: prev_component.id, name: component.name, next: next_component.id},
-        ordered_list: [component1.id, component2.id, ...],
-        default: <latest_open_component.id if not grading_override else latest_component_with_other_group_sections.id>
+        <stage_id>: { prev: prev_stage.id, name: stage.name, next: next_stage.id},
+        ordered_list: [stage1.id, stage2.id, ...],
+        default: <latest_open_cstage.id if not grading_override else latest_stage_with_other_group_sections.id>
     }
 
 GroupActivityStage (paths relative to ./activitystage)
@@ -40,8 +40,8 @@ GroupActivityStage (paths relative to ./activitystage)
 -- close_date: datetime.date - @close                                              # reference to milestone_dates key
 
 GroupActivityStageSection (paths relative to (//section)
---- activity: GroupActivity                                             # grandparent reference
---- component: GroupActivityStage                                       # parent reference
+--- activity: GroupActivity                                          # grandparent reference
+--- stage: GroupActivityStage                                    # parent reference
 --- title: str - ./@title
 --- upload_dialog: Bool - ./@upload_dialog
 --- file_link_name: str - ./@file_links                                 # resources / submissions / grading_criteria
@@ -140,7 +140,7 @@ class GroupActivityQuestion(object):
             answer_classes.append(current_class)
         if self.small:
             answer_classes.append('side')
-        if self.section.component.is_closed:
+        if self.section.stage.is_closed:
             answer_node.set('disabled', 'disabled')
         else:
             answer_classes.append('editable')
@@ -231,9 +231,9 @@ class GroupActivityAssessment(object):
 
 
 class GroupActivityStageSection(object):
-    def __init__(self, doc_tree, component, activity):
+    def __init__(self, doc_tree, stage, activity):
 
-        self.component = component
+        self.stage = stage
         self.questions = []
         self.assessments = []
         self.activity = activity
@@ -308,7 +308,7 @@ class GroupActivityStageSection(object):
 
     @property
     def is_upload_available(self):
-        return self.upload_dialog and self.component.is_open and not self.component.is_closed
+        return self.upload_dialog and self.stage.is_open and not self.stage.is_closed
 
 
 class GroupActivityStage(object):
@@ -388,8 +388,8 @@ class GroupActivityStage(object):
 
     @property
     def is_closed(self):
-        # If this component is being loaded for the purposes of a TA grading,
-        # then we never close the component - in this way a TA can impose any
+        # If this stage is being loaded for the purposes of a TA grading,
+        # then we never close the stage - in this way a TA can impose any
         # action necessary even if it has been closed to the group members
         if self.grading_override:
             return False
@@ -399,9 +399,9 @@ class GroupActivityStage(object):
     @property
     def export_xml(self):
         data = {
-            "activity_component": self,
+            "activity_stage": self,
         }
-        return render_template('/templates/xml/activity_component.xml', data)
+        return render_template('/templates/xml/activity_stage.xml', data)
 
 
 class GroupActivity(object):
@@ -463,8 +463,7 @@ class GroupActivity(object):
 
         data = {
             "documents": dottable_documents,
-            "group_activity": self,
-            "activity_component_path": resource_filename(__name__, 'templates/activity_component.xml')
+            "group_activity": self
         }
 
         return render_template('/templates/xml/group_activity.xml', data)

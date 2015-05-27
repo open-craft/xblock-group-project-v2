@@ -1,0 +1,19 @@
+<activitystage id='{{ activity_stage.id }}' name='{{ activity_stage.name }}'{% ifnotequal activity_stage.close_date_name None %} close='{{ activity_stage.close_date_name }}'{% endifnotequal %}{% ifnotequal activity_stage.open_date_name None %} open='{{ activity_stage.open_date_name }}'{% endifnotequal %}>
+  {% for activity_section in activity_stage.sections %}
+    {{ activity_section.export_xml }}
+  {% endfor %}
+  {% if activity_stage.peer_reviews %}
+  <peerreview>
+  {% for activity_section in activity_stage.peer_review_sections %}
+    {{ activity_section.export_xml }}
+  {% endfor %}
+  </peerreview>
+  {% endif %}
+  {% if activity_stage.other_group_reviews %}
+  <projectreview>
+  {% for activity_section in activity_stage.other_group_sections %}
+    {{ activity_section.export_xml }}
+  {% endfor %}
+  </projectreview>
+  {% endif %}
+</activitystage>

@@ -18,7 +18,7 @@
       <document {% ifnotequal document.description None %}description='{{ document.description }}' {% endifnotequal %}title='{{ document.title }}'></document>
     {% endfor %}
   </submissions>
-  {% for activity_component in group_activity.activity_stages %}
-    {{ activity_component.export_xml }}
+  {% for activity_stage in group_activity.activity_stages %}
+    {{ activity_stage.export_xml }}
   {% endfor %}
 </group_project>
