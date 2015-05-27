@@ -4,7 +4,7 @@
   <nav>
     Steps
     <ul>
-      {% for activity_component in group_activity.activity_components %}
+      {% for activity_component in group_activity.activity_stages %}
         <li>
           <a href="#" class="revealer" id="{{ activity_component.id }}">{{ activity_component.name }}</a>
         </li>
@@ -12,7 +12,7 @@
     </ul>
   </nav>
 
-  {% for activity_component in group_activity.activity_components %}
+  {% for activity_component in group_activity.activity_stages %}
     <div id="activity_{{ activity_component.id }}" class="activity_section">
     {% if activity_component.grading_override %}
       <div class="grading_override {% if ta_graded %}ta_graded{% endif %}">

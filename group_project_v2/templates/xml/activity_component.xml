@@ -1,4 +1,4 @@
-<projectcomponent id='{{ activity_component.id }}' name='{{ activity_component.name }}'{% ifnotequal activity_component.close_date_name None %} close='{{ activity_component.close_date_name }}'{% endifnotequal %}{% ifnotequal activity_component.open_date_name None %} open='{{ activity_component.open_date_name }}'{% endifnotequal %}>
+<activitystage id='{{ activity_component.id }}' name='{{ activity_component.name }}'{% ifnotequal activity_component.close_date_name None %} close='{{ activity_component.close_date_name }}'{% endifnotequal %}{% ifnotequal activity_component.open_date_name None %} open='{{ activity_component.open_date_name }}'{% endifnotequal %}>
   {% for activity_section in activity_component.sections %}
     {{ activity_section.export_xml }}
   {% endfor %}
@@ -16,4 +16,4 @@
   {% endfor %}
   </projectreview>
   {% endif %}
-</projectcomponent>
+</activitystage>

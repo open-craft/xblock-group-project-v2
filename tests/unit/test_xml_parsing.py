@@ -32,7 +32,7 @@ class GroupActivitityXmlTest(TestCase):
         self.assertEqual(sr[0]["description"], None)
         self.assertEqual(sr[2]["description"], "xls budget plan")
 
-        ac = grp_act.activity_components
+        ac = grp_act.activity_stages
         self.assertEqual(len(ac), 4)
         self.assertEqual(ac[0].name, "Overview")
         self.assertEqual(ac[1].name, "Upload")

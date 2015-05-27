@@ -9,7 +9,7 @@
     <document id="marketing_pitch" title="Marketing Pitch" />
     <document id="budget" title="Budget" description="xls budget plan" />
   </submissions>
-  <projectcomponent name="Activity 1: Overview" id="overview">
+  <activitystage name="Activity 1: Overview" id="overview">
     <section title="Lorem Ipsum">
       <content>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
@@ -38,8 +38,8 @@
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation:
       </content>
     </section>
-  </projectcomponent>
-  <projectcomponent name="Activity 1: Upload" close="8/18/2014" id="upload">
+  </activitystage>
+  <activitystage name="Activity 1: Upload" close="8/18/2014" id="upload">
     <section title="Team Submission">
       <content>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</content>
     </section>
@@ -54,8 +54,8 @@
         </div>
       </content>
     </section>
-  </projectcomponent>
-  <projectcomponent name="Activity 1: Reviews" open="8/18/2014" close="8/19/2014" id="review">
+  </activitystage>
+  <activitystage name="Activity 1: Reviews" open="8/18/2014" close="8/19/2014" id="review">
     <section title="Lorem Ipsum" file_links="grading_criteria">
       <content>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat
@@ -243,8 +243,8 @@
         </question>
       </section>
     </projectreview>
-  </projectcomponent>
-  <projectcomponent name="Activity 1: Grade" open="8/19/2014" id="grade">
+  </activitystage>
+  <activitystage name="Activity 1: Grade" open="8/19/2014" id="grade">
     <section title="Blah">
       <content>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
@@ -368,5 +368,5 @@
         </assessment>
       </section>
     </projectassessment>
-  </projectcomponent>
+  </activitystage>
 </group_project>

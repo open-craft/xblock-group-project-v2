@@ -66,7 +66,7 @@ class OutsiderDisallowedError(Exception):
 
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
-class GroupProjectV2Block(XBlock):
+class GroupActivityXBlock(XBlock):
     """
     XBlock providing a group activity project for a group of students to collaborate upon
     """
@@ -401,7 +401,7 @@ class GroupProjectV2Block(XBlock):
 
     def evaluations_complete(self):
         group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
-        peer_review_components = [component for component in group_activity.activity_components if
+        peer_review_components = [component for component in group_activity.activity_stages if
                                   component.peer_reviews]
         peer_review_questions = []
         for peer_review_component in peer_review_components:
@@ -431,7 +431,7 @@ class GroupProjectV2Block(XBlock):
 
     def grading_complete(self):
         group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
-        group_review_components = [component for component in group_activity.activity_components if
+        group_review_components = [component for component in group_activity.activity_stages if
                                    component.other_group_reviews]
         group_review_questions = []
         for group_review_component in group_review_components:
@@ -992,7 +992,7 @@ class GroupProjectV2Block(XBlock):
         register a Notification to be send on key dates
         """
         try:
-            log.info('GroupProjectV2Block.on_published() on location = {}'.format(self.location))
+            log.info('GroupActivityXBlock.on_published() on location = {}'.format(self.location))
 
             group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
 
@@ -1001,7 +1001,7 @@ class GroupProjectV2Block(XBlock):
             if notifications_service:
                 # set (or update) Notification timed message based on
                 # the current key dates
-                for component in group_activity.activity_components:
+                for component in group_activity.activity_stages:
 
                     # if the component has a opening date, then send a msg then
                     if component.open_date:
@@ -1049,7 +1049,7 @@ class GroupProjectV2Block(XBlock):
         A hook into when this xblock is deleted in Studio, for xblocks to do any lifecycle
         management
         """
-        log.info('GroupProjectV2Block.on_before_delete() on location = {}'.format(self.location))
+        log.info('GroupActivityXBlock.on_before_delete() on location = {}'.format(self.location))
 
         try:
             group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
@@ -1059,7 +1059,7 @@ class GroupProjectV2Block(XBlock):
             if notifications_service:
                 # If we are being delete, then we should remove any NotificationTimers that
                 # may have been registered before
-                for component in group_activity.activity_components:
+                for component in group_activity.activity_stages:
                     notifications_service.cancel_timed_notification(
                         self._get_component_timer_name(component, 'open')
                     )

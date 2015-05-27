@@ -3,11 +3,11 @@ This module parses Group project XML into a tree of domain-specific objects.
 Basically it looks like the following
 
 GroupActivity (.)
-- ActivityComponent (./projectcomponent)
--- ActivitySection (//section - different paths)
---- ActivityQuestion (//section/question)
+- GroupActivityStage (./activitystage)
+-- GroupActivityStageSection (//section - different paths)
+--- GroupActivityQuestion (//section/question)
 ---- <no dedicated class, etree.Element is used> (//section/question/answer)
---- ActivityAssessment (//section/assessment)
+--- GroupActivityAssessment (//section/assessment)
 ---- <no dedicated class, etree.Element is used> (//section/assessment/answer)
 
 GroupActivity (paths relative to root element)
@@ -16,7 +16,7 @@ GroupActivity (paths relative to root element)
 - grading_criteria: [DottableDict(title, description, location)] - ./resources/document[@grading_criteria="true"]
 - submissions: [DottableDict(id, title, description, location?)] - ./submissions/document
 - grade_questions: [ActivityQuestion] - //section/question
-- activity_components: [ActivityComponent] - ./projectcomponent
+- activity_stages: [ActivityComponent] - ./activitystage
 - grading_override: Bool                            # if True - allows visiting components after close date; used by TA
 * has_submissions: Bool                             # True if ANY submission uploaded
 * has_all_submissions: Bool                         # True if ALL submission uploaded
@@ -28,7 +28,7 @@ GroupActivity (paths relative to root element)
         default: <latest_open_component.id if not grading_override else latest_component_with_other_group_sections.id>
     }
 
-ActivityComponent (paths relative to ./projectcomponent)
+GroupActivityStage (paths relative to ./activitystage)
 -- id: str - ./@id
 -- name: str - ./@name
 -- sections: [ActivitySection] - ./section
@@ -39,9 +39,9 @@ ActivityComponent (paths relative to ./projectcomponent)
 -- open_date: datetime.date - @open
 -- close_date: datetime.date - @close                                              # reference to milestone_dates key
 
-ActivitySection (paths relative to (//section)
+GroupActivityStageSection (paths relative to (//section)
 --- activity: GroupActivity                                             # grandparent reference
---- component: ActivityComponent                                        # parent reference
+--- component: GroupActivityStage                                       # parent reference
 --- title: str - ./@title
 --- upload_dialog: Bool - ./@upload_dialog
 --- file_link_name: str - ./@file_links                                 # resources / submissions / grading_criteria
@@ -55,7 +55,7 @@ ActivitySection (paths relative to (//section)
 # IS upload section and opened and not closed
 *** is_upload_available: Bool
 
-ActivityQuestion (paths relative to //section/question)
+GroupActivityQuestion (paths relative to //section/question)
 ---- id: str - ./@id
 ---- label: etree.Element - ./label
 ---- section: ActivitySection                               # parent reference
@@ -65,7 +65,7 @@ ActivityQuestion (paths relative to //section/question)
 ---- designer_class: [str] - ./@class                       # affects "question" presentation - added as is
 ---- question_classes: [str]                                # ['question', designer_class?, "required"?]
 
-ActivityAssessment (paths relative to //section/assessment)
+GroupActivityAssessment (paths relative to //section/assessment)
 ---- id: str - ./@id
 ---- label: etree.Element ./label
 ---- answer: etree.Element = ./answer[0]                    # should contain single HTML input control
@@ -108,7 +108,7 @@ class DottableDict(dict):
         self.__dict__ = self
 
 
-class ActivityQuestion(object):
+class GroupActivityQuestion(object):
     def __init__(self, doc_tree, section):
 
         self.id = doc_tree.get("id")
@@ -179,7 +179,7 @@ class ActivityQuestion(object):
         return html
 
 
-class ActivityAssessment(object):
+class GroupActivityAssessment(object):
     def __init__(self, doc_tree):
 
         self.id = doc_tree.get("id")
@@ -230,7 +230,7 @@ class ActivityAssessment(object):
         return html
 
 
-class ActivitySection(object):
+class GroupActivityStageSection(object):
     def __init__(self, doc_tree, component, activity):
 
         self.component = component
@@ -247,11 +247,11 @@ class ActivitySection(object):
 
         # import any questions
         for question in doc_tree.findall("./question"):
-            self.questions.append(ActivityQuestion(question, self))
+            self.questions.append(GroupActivityQuestion(question, self))
 
         # import any assessments
         for assessment in doc_tree.findall("./assessment"):
-            self.assessments.append(ActivityAssessment(assessment))
+            self.assessments.append(GroupActivityAssessment(assessment))
 
     @property
     def file_links(self):
@@ -311,7 +311,7 @@ class ActivitySection(object):
         return self.upload_dialog and self.component.is_open and not self.component.is_closed
 
 
-class ActivityComponent(object):
+class GroupActivityStage(object):
     def __init__(self, doc_tree, activity):
 
         self.grading_override = activity.grading_override
@@ -335,23 +335,23 @@ class ActivityComponent(object):
 
         # import sections
         for section in doc_tree.findall("./section"):
-            self.sections.append(ActivitySection(section, self, activity))
+            self.sections.append(GroupActivityStageSection(section, self, activity))
 
         # import questions for peer review
         for section in doc_tree.findall("./peerreview/section"):
-            self.peer_review_sections.append(ActivitySection(section, self, activity))
+            self.peer_review_sections.append(GroupActivityStageSection(section, self, activity))
 
         # import questions for project review
         for section in doc_tree.findall("./projectreview/section"):
-            self.other_group_sections.append(ActivitySection(section, self, activity))
+            self.other_group_sections.append(GroupActivityStageSection(section, self, activity))
 
         # import questions for peer review
         for section in doc_tree.findall("./peerassessment/section"):
-            self.peer_assessment_sections.append(ActivitySection(section, self, activity))
+            self.peer_assessment_sections.append(GroupActivityStageSection(section, self, activity))
 
         # import questions for project review
         for section in doc_tree.findall("./projectassessment/section"):
-            self.other_group_assessment_sections.append(ActivitySection(section, self, activity))
+            self.other_group_assessment_sections.append(GroupActivityStageSection(section, self, activity))
 
     @staticmethod
     def formatted_date(date_value):
@@ -376,11 +376,11 @@ class ActivityComponent(object):
 
     @property
     def formatted_open_date(self):
-        return ActivityComponent.formatted_date(self.open_date)
+        return GroupActivityStage.formatted_date(self.open_date)
 
     @property
     def formatted_close_date(self):
-        return ActivityComponent.formatted_date(self.close_date)
+        return GroupActivityStage.formatted_date(self.close_date)
 
     @property
     def is_open(self):
@@ -409,7 +409,7 @@ class GroupActivity(object):
 
         self.resources = []
         self.submissions = []
-        self.activity_components = []
+        self.activity_stages = []
         self.grading_criteria = []
 
         self.grade_questions = []
@@ -436,13 +436,13 @@ class GroupActivity(object):
             }))
 
         # import project components
-        for component in doc_tree.findall("./projectcomponent"):
-            self.activity_components.append(ActivityComponent(component, self))
+        for component in doc_tree.findall("./activitystage"):
+            self.activity_stages.append(GroupActivityStage(component, self))
 
     def update_submission_data(self, submission_map):
 
         def formatted_date(iso_date_value):
-            return ActivityComponent.formatted_date(
+            return GroupActivityStage.formatted_date(
                 _build_date_field(iso_date_value)
             )
 
@@ -479,8 +479,8 @@ class GroupActivity(object):
         step_map = {}
         ordered_list = []
         prev_step = None
-        default_stage = self.activity_components[0].id
-        for ac in self.activity_components:
+        default_stage = self.activity_stages[0].id
+        for ac in self.activity_stages:
             step_map[ac.id] = {
                 "prev": prev_step,
                 "name": ac.name,
@@ -500,7 +500,7 @@ class GroupActivity(object):
                 default_stage = ac.id
 
         next_step = None
-        for ac in reversed(self.activity_components):
+        for ac in reversed(self.activity_stages):
             step_map[ac.id]["next"] = next_step
             next_step = ac.id
 
