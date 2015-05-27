@@ -12,20 +12,25 @@ class GroupActivitityXmlTest(TestCase):
         self.assertEqual(stage.open_date, expected_open)
         self.assertEqual(stage.close_date, expected_close)
 
+    def _assert_resources_submissions_and_grading(self, stage, resources=0, submissions=0, grading_criteria=0):
+        self.assertEqual(len(list(stage.resources)), resources)
+        self.assertEqual(len(list(stage.submissions)), submissions)
+        self.assertEqual(len(list(stage.grading_criteria)), grading_criteria)
+
     def test_read_from_xml(self):
         grp_act = GroupActivity.import_xml_file('tests/xml/test.xml')
 
-        ir = grp_act.resources
-        self.assertEqual(len(ir), 3)
+        ir = list(grp_act.resources)
+        self.assertEqual(len(ir), 2)
         self.assertEqual(ir[0]["title"], "Issue Tree Template")
         self.assertEqual(ir[0]["description"], None)
         self.assertEqual(ir[0]["location"], "http://download/file.doc")
         self.assertEqual(ir[1]["description"], "These are the instructions for this activity")
 
-        gc = grp_act.grading_criteria
+        gc = list(grp_act.grading_criteria)
         self.assertEqual(len(gc), 1)
 
-        sr = grp_act.submissions
+        sr = list(grp_act.submissions)
         self.assertEqual(len(sr), 3)
         self.assertEqual(sr[0]["id"], "issue_tree")
         self.assertEqual(sr[0]["title"], "Issue Tree")
@@ -50,15 +55,20 @@ class GroupActivitityXmlTest(TestCase):
         self.assertEqual(ac[0].sections[2].title, "Suggested Schedule")
         self.assertEqual(ac[0].sections[3].title, "Project Materials")
 
+        self._assert_resources_submissions_and_grading(ac[0], resources=2, submissions=0, grading_criteria=0)
+        self._assert_resources_submissions_and_grading(ac[1], resources=0, submissions=3, grading_criteria=1)
+        self._assert_resources_submissions_and_grading(ac[2], resources=0, submissions=0, grading_criteria=0)
+        self._assert_resources_submissions_and_grading(ac[3], resources=0, submissions=0, grading_criteria=0)
+
         pm = ac[0].sections[3]
-        self.assertEqual(pm.file_links, ir)
+        self.assertEqual(list(pm.file_links), ir)
         self.assertEqual(pm.file_link_name, "resources")
 
         self.assertNotEqual(ac[0].sections[0].content, None)
         self.assertEqual(ac[0].sections[0].content_html, "<p>Html Description Blah Blah Blah<span>Additional info</span></p>")
 
         sl = ac[1].sections[1]
-        self.assertEqual(sl.file_links, sr)
+        self.assertEqual(list(sl.file_links), sr)
 
         self.assertEqual(len(ac[2].sections), 1)
         self.assertEqual(len(ac[2].peer_review_sections), 2)

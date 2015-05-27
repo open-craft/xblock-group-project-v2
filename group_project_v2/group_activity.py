@@ -71,6 +71,7 @@ GroupActivityAssessment (paths relative to //section/assessment)
 ---- answer: etree.Element = ./answer[0]                    # should contain single HTML input control
 ---- small: Bool - ./answer[0]/@small                       # affects "answer" presentation - adds "side" class
 """
+import itertools
 import xml.etree.ElementTree as ET
 from datetime import date
 import copy
@@ -260,7 +261,7 @@ class GroupActivityStageSection(object):
 
         file_links = None
         if self.file_link_name:
-            file_links = getattr(self.activity, self.file_link_name, None)
+            file_links = getattr(self.stage, self.file_link_name, None)
 
         return file_links
 
@@ -276,7 +277,7 @@ class GroupActivityStageSection(object):
 
         file_links = None
         if self.file_link_name:
-            file_links = getattr(self.activity, self.file_link_name, None)
+            file_links = getattr(self.stage, self.file_link_name, None)
 
         return file_links
 
@@ -316,6 +317,9 @@ class GroupActivityStage(object):
 
         self.grading_override = activity.grading_override
 
+        self._resources = []
+        self._submissions = []
+
         self.sections = []
         self.peer_review_sections = []
         self.other_group_sections = []
@@ -332,6 +336,23 @@ class GroupActivityStage(object):
 
         if doc_tree.get("close"):
             self.close_date = parse_date(doc_tree.get("close"))
+
+        # import resources
+        for document in doc_tree.findall("./resources/document"):
+            self._resources.append(DottableDict({
+                "title": document.get("title"),
+                "description": document.get("description"),
+                "location": document.text,
+                "grading_criteria": document.get("grading_criteria") == "true"
+            }))
+
+        # import submission defintions
+        for document in doc_tree.findall("./submissions/document"):
+            self._submissions.append(DottableDict({
+                "id": document.get("id"),
+                "title": document.get("title"),
+                "description": document.get("description"),
+            }))
 
         # import sections
         for section in doc_tree.findall("./section"):
@@ -352,6 +373,18 @@ class GroupActivityStage(object):
         # import questions for project review
         for section in doc_tree.findall("./projectassessment/section"):
             self.other_group_assessment_sections.append(GroupActivityStageSection(section, self, activity))
+
+    @property
+    def resources(self):
+        return (resource for resource in self._resources if not resource.grading_criteria)
+
+    @property
+    def submissions(self):
+        return self._submissions
+
+    @property
+    def grading_criteria(self):
+        return (resource for resource in self._resources if resource.grading_criteria)
 
     @staticmethod
     def formatted_date(date_value):
@@ -406,38 +439,32 @@ class GroupActivityStage(object):
 
 class GroupActivity(object):
     def __init__(self, doc_tree, grading_override=False):
-
-        self.resources = []
-        self.submissions = []
         self.activity_stages = []
-        self.grading_criteria = []
 
         self.grade_questions = []
         self.grading_override = grading_override
 
-        # import resources
-        for document in doc_tree.findall("./resources/document"):
-            document_info = DottableDict({
-                "title": document.get("title"),
-                "description": document.get("description"),
-                "location": document.text,
-            })
-            self.resources.append(document_info)
-
-            if document.get("grading_criteria") == "true":
-                self.grading_criteria.append(document_info)
-
-        # import submission defintions
-        for document in doc_tree.findall("./submissions/document"):
-            self.submissions.append(DottableDict({
-                "id": document.get("id"),
-                "title": document.get("title"),
-                "description": document.get("description"),
-            }))
-
         # import project components
         for component in doc_tree.findall("./activitystage"):
             self.activity_stages.append(GroupActivityStage(component, self))
+
+    @property
+    def resources(self):
+        return itertools.chain(
+            *[stage.resources for stage in self.activity_stages]
+        )
+
+    @property
+    def submissions(self):
+        return itertools.chain(
+            *[stage.submissions for stage in self.activity_stages]
+        )
+
+    @property
+    def grading_criteria(self):
+        return itertools.chain(
+            *[stage.grading_criteria for stage in self.activity_stages]
+        )
 
     def update_submission_data(self, submission_map):
 
