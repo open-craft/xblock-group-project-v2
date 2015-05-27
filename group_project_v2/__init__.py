@@ -1,1 +1,1 @@
-from .group_project import GroupProjectBlock
+from .group_project import GroupProjectV2Block

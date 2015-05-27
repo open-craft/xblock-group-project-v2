@@ -66,7 +66,7 @@ class OutsiderDisallowedError(Exception):
 
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
-class GroupProjectBlock(XBlock):
+class GroupProjectV2Block(XBlock):
     """
     XBlock providing a group activity project for a group of students to collaborate upon
     """
@@ -74,7 +74,7 @@ class GroupProjectBlock(XBlock):
         display_name="Display Name",
         help="This name appears in the horizontal navigation at the top of the page.",
         scope=Scope.settings,
-        default="Group Project"
+        default="Group Project V2"
     )
 
     weight = Float(
@@ -998,7 +998,7 @@ class GroupProjectBlock(XBlock):
         register a Notification to be send on key dates
         """
         try:
-            log.info('GroupProjectBlock.on_published() on location = {}'.format(self.location))
+            log.info('GroupProjectV2Block.on_published() on location = {}'.format(self.location))
 
             group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
 
@@ -1055,7 +1055,7 @@ class GroupProjectBlock(XBlock):
         A hook into when this xblock is deleted in Studio, for xblocks to do any lifecycle
         management
         """
-        log.info('GroupProjectBlock.on_before_delete() on location = {}'.format(self.location))
+        log.info('GroupProjectV2Block.on_before_delete() on location = {}'.format(self.location))
 
         try:
             group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)

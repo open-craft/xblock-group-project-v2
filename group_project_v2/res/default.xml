@@ -4,10 +4,6 @@
     <document title="Instructions" description="These are the instructions for this activity" grading_criteria="false">http://download/file.doc</document>
     <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
   </resources>
-  <dates>
-    <milestone name="submissions">8/18/2014</milestone>
-    <milestone name="review">8/19/2014</milestone>
-  </dates>
   <submissions>
     <document id="issue_tree" title="Issue Tree" />
     <document id="marketing_pitch" title="Marketing Pitch" />
