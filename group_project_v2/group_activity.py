@@ -444,9 +444,9 @@ class GroupActivity(object):
         self.grade_questions = []
         self.grading_override = grading_override
 
-        # import project components
-        for component in doc_tree.findall("./activitystage"):
-            self.activity_stages.append(GroupActivityStage(component, self))
+        # import project stage
+        for stage in doc_tree.findall("./activitystage"):
+            self.activity_stages.append(GroupActivityStage(stage, self))
 
     @property
     def resources(self):
