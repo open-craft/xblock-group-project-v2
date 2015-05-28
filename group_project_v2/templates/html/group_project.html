@@ -24,55 +24,41 @@
       <h1>
         {{ activity_stage.name }}
         {% if activity_stage.close_date %}
-        {% if activity_stage.is_closed %}
-          <span class="highlight">closed on {{ activity_stage.formatted_close_date }}</span>
-        {% else %}
-          <span class="highlight">due {{ activity_stage.formatted_close_date }}</span>
-        {% endif %}
+          {% if activity_stage.is_closed %}
+            <span class="highlight">closed on {{ activity_stage.formatted_close_date }}</span>
+          {% else %}
+            <span class="highlight">due {{ activity_stage.formatted_close_date }}</span>
+          {% endif %}
         {% endif %}
       </h1>
-      {% for activity_section in activity_stage.sections %}
-          {{ activity_section.render|safe }}
-        {% ifequal activity_section.upload_html None %}
-        <hr />
-        {% endifequal %}
-      {% endfor %}
       {% if activity_stage.peer_reviews %}
-      <form class="peer_review" action="submit_peer_feedback" method="POST">
-        <input type="hidden" class="peer_id" name="peer_id" value="" />
-      {% for activity_section in activity_stage.peer_review_sections %}
-          {{ activity_section.render|safe }}
-        <hr />
-      {% endfor %}
-        <button class="submit" {% if activity_stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
-      </form>
+        <form class="peer_review" action="submit_peer_feedback" method="POST">
+          <input type="hidden" class="peer_id" name="peer_id" value="" />
+            {{activity_stage.render|safe}}
+            <hr/>
+          <button class="submit" {% if activity_stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
+        </form>
       {% endif %}
       {% if activity_stage.other_group_reviews %}
-      <form class="other_group_review" action="submit_other_group_feedback" method="POST">
-        <input type="hidden" class="group_id" name="group_id" value="" />
-      <div class="other_submissions"><a href="#" class="view_other_submissions">View team submissions</a></div>
-      {% for activity_section in activity_stage.other_group_sections %}
-          {{ activity_section.render|safe }}
-        <hr />
-      {% endfor %}
-        <button class="submit" {% if activity_stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
-      </form>
+        <form class="other_group_review" action="submit_other_group_feedback" method="POST">
+          <input type="hidden" class="group_id" name="group_id" value="" />
+          <div class="other_submissions"><a href="#" class="view_other_submissions">View team submissions</a></div>
+          {{activity_stage.render|safe}}
+          <hr/>
+          <button class="submit" {% if activity_stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
+        </form>
       {% endif %}
       {% if activity_stage.peer_assessments %}
-      <div class="feedback_sections team_feedback">
-      {% for activity_section in activity_stage.peer_assessment_sections %}
-          {{ activity_section.render|safe }}
-        <hr />
-      {% endfor %}
-      </div>
+        <div class="feedback_sections team_feedback">
+          {{activity_stage.render|safe}}
+          <hr />
+        </div>
       {% endif %}
       {% if activity_stage.other_group_assessments %}
-      <div class="feedback_sections cohort_feedback">
-      {% for activity_section in activity_stage.other_group_assessment_sections %}
-          {{ activity_section.render|safe }}
-        <hr />
-      {% endfor %}
-      </div>
+        <div class="feedback_sections cohort_feedback">
+          {{activity_stage.render|safe}}
+          <hr />
+        </div>
       {% endif %}
     {% else %}
       <h1>
