@@ -22,10 +22,10 @@ def package_data(pkg, root_list):
 # Main ##############################################################
 
 setup(
-    name='xblock-group-project',
+    name='xblock-group-project-v2',
     version='0.1',
     description='XBlock - Group Project',
-    packages=['group_project'],
+    packages=['group_project_v2'],
     install_requires=[
         'XBlock',
     ],
