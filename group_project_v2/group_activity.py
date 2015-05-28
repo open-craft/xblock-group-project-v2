@@ -312,10 +312,20 @@ class GroupActivityStageSection(object):
         return self.upload_dialog and self.stage.is_open and not self.stage.is_closed
 
 
+STAGE_TYPES = DottableDict(
+    NORMAL='normal',
+    PEER_REVIEW='peer_review',
+    PEER_ASSESSMENT='peer_assessment',
+    GROUP_REVIEW='group_review',
+    GROUP_ASSESSMENT='group_assessment',
+)
+
+
 class GroupActivityStage(object):
     def __init__(self, doc_tree, activity):
 
         self.grading_override = activity.grading_override
+        self.type = STAGE_TYPES.NORMAL
 
         self._resources = []
         self._submissions = []
@@ -330,6 +340,10 @@ class GroupActivityStage(object):
 
         self.name = doc_tree.get("name")
         self.id = doc_tree.get("id")
+
+        xml_type = doc_tree.get("type")
+        if xml_type and xml_type in STAGE_TYPES.values():
+            self.type = xml_type
 
         if doc_tree.get("open"):
             self.open_date = parse_date(doc_tree.get("open"))
