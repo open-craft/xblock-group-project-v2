@@ -407,19 +407,19 @@ class GroupActivityStage(object):
     # TODO: these four properties should be better named as has_*
     @property
     def peer_reviews(self):
-        return len(self.peer_review_sections) > 0
+        return self.type == STAGE_TYPES.PEER_REVIEW
 
     @property
     def other_group_reviews(self):
-        return len(self.other_group_sections) > 0
+        return self.type == STAGE_TYPES.GROUP_REVIEW
 
     @property
     def peer_assessments(self):
-        return len(self.peer_assessment_sections) > 0
+        return self.type == STAGE_TYPES.PEER_ASSESSMENT
 
     @property
     def other_group_assessments(self):
-        return len(self.other_group_assessment_sections) > 0
+        return self.type == STAGE_TYPES.GROUP_ASSESSMENT
 
     @property
     def formatted_open_date(self):
