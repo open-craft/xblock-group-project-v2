@@ -32,9 +32,7 @@
         {% endif %}
       </h1>
       {% for activity_section in activity_component.sections %}
-        {% autoescape off %}
-          {{ activity_section.render }}
-        {% endautoescape %}
+          {{ activity_section.render|safe }}
         {% ifequal activity_section.upload_html None %}
         <hr />
         {% endifequal %}
@@ -43,9 +41,7 @@
       <form class="peer_review" action="submit_peer_feedback" method="POST">
         <input type="hidden" class="peer_id" name="peer_id" value="" />
       {% for activity_section in activity_component.peer_review_sections %}
-        {% autoescape off %}
-          {{ activity_section.render }}
-        {% endautoescape %}
+          {{ activity_section.render|safe }}
         <hr />
       {% endfor %}
         <button class="submit" {% if activity_component.is_closed %}disabled="disabled"{% endif %}>Submit</button>
@@ -56,9 +52,7 @@
         <input type="hidden" class="group_id" name="group_id" value="" />
       <div class="other_submissions"><a href="#" class="view_other_submissions">View team submissions</a></div>
       {% for activity_section in activity_component.other_group_sections %}
-        {% autoescape off %}
-          {{ activity_section.render }}
-        {% endautoescape %}
+          {{ activity_section.render|safe }}
         <hr />
       {% endfor %}
         <button class="submit" {% if activity_component.is_closed %}disabled="disabled"{% endif %}>Submit</button>
@@ -67,9 +61,7 @@
       {% if activity_component.peer_assessments %}
       <div class="feedback_sections team_feedback">
       {% for activity_section in activity_component.peer_assessment_sections %}
-        {% autoescape off %}
-          {{ activity_section.render }}
-        {% endautoescape %}
+          {{ activity_section.render|safe }}
         <hr />
       {% endfor %}
       </div>
@@ -77,9 +69,7 @@
       {% if activity_component.other_group_assessments %}
       <div class="feedback_sections cohort_feedback">
       {% for activity_section in activity_component.other_group_assessment_sections %}
-        {% autoescape off %}
-          {{ activity_section.render }}
-        {% endautoescape %}
+          {{ activity_section.render|safe }}
         <hr />
       {% endfor %}
       </div>
