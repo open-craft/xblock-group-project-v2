@@ -4,10 +4,14 @@
 import sys
 from unittest import TestCase
 from datetime import date
-from group_project_v2.group_activity import GroupActivity
+from group_project_v2.group_activity import GroupActivity, STAGE_TYPES
 
 
 class GroupActivitityXmlTest(TestCase):
+    def _assert_stage_name_and_type(self, stage, expected_name, expected_type):
+        self.assertEqual(stage.name, expected_name)
+        self.assertEqual(stage.type, expected_type)
+
     def _assert_stage_start_and_end_date(self, stage, expected_open, expected_close):
         self.assertEqual(stage.open_date, expected_open)
         self.assertEqual(stage.close_date, expected_close)
@@ -48,12 +52,12 @@ class GroupActivitityXmlTest(TestCase):
 
         ac = grp_act.activity_stages
         self.assertEqual(len(ac), 6)
-        self.assertEqual(ac[0].name, "Overview")
-        self.assertEqual(ac[1].name, "Upload")
-        self.assertEqual(ac[2].name, "Review Team")
-        self.assertEqual(ac[3].name, "Review Group")
-        self.assertEqual(ac[4].name, "Evaluate Team Feedback")
-        self.assertEqual(ac[5].name, "Evaluate Group Feedback")
+        self._assert_stage_name_and_type(ac[0], "Overview", STAGE_TYPES.NORMAL)
+        self._assert_stage_name_and_type(ac[1], "Upload", STAGE_TYPES.NORMAL)
+        self._assert_stage_name_and_type(ac[2], "Review Team", STAGE_TYPES.PEER_REVIEW)
+        self._assert_stage_name_and_type(ac[3], "Review Group", STAGE_TYPES.GROUP_REVIEW)
+        self._assert_stage_name_and_type(ac[4], "Evaluate Team Feedback", STAGE_TYPES.PEER_ASSESSMENT)
+        self._assert_stage_name_and_type(ac[5], "Evaluate Group Feedback", STAGE_TYPES.GROUP_ASSESSMENT)
 
         self._assert_stage_start_and_end_date(ac[0], None, None)
         self._assert_stage_start_and_end_date(ac[1], None, date(2014, 5, 24))
