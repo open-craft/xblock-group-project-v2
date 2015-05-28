@@ -17,6 +17,15 @@ class GroupActivitityXmlTest(TestCase):
         self.assertEqual(len(list(stage.submissions)), submissions)
         self.assertEqual(len(list(stage.grading_criteria)), grading_criteria)
 
+    def _assert_stage_sections(self, stage, normal=0,
+                               peer_review=0, group_review=0, peer_assessment=0, group_assessment=0):
+        self.assertEqual(len(stage.sections), normal)
+        self.assertEqual(len(stage.peer_review_sections), peer_review)
+        self.assertEqual(len(stage.other_group_sections), group_review)
+        self.assertEqual(len(stage.peer_assessment_sections), peer_assessment)
+        self.assertEqual(len(stage.other_group_assessment_sections), group_assessment)
+
+
     def test_read_from_xml(self):
         grp_act = GroupActivity.import_xml_file('tests/xml/test.xml')
 
@@ -38,27 +47,31 @@ class GroupActivitityXmlTest(TestCase):
         self.assertEqual(sr[2]["description"], "xls budget plan")
 
         ac = grp_act.activity_stages
-        self.assertEqual(len(ac), 4)
+        self.assertEqual(len(ac), 6)
         self.assertEqual(ac[0].name, "Overview")
         self.assertEqual(ac[1].name, "Upload")
-        self.assertEqual(ac[2].name, "Review")
-        self.assertEqual(ac[3].name, "Grade")
+        self.assertEqual(ac[2].name, "Review Team")
+        self.assertEqual(ac[3].name, "Review Group")
+        self.assertEqual(ac[4].name, "Evaluate Team Feedback")
+        self.assertEqual(ac[5].name, "Evaluate Group Feedback")
 
         self._assert_stage_start_and_end_date(ac[0], None, None)
         self._assert_stage_start_and_end_date(ac[1], None, date(2014, 5, 24))
         self._assert_stage_start_and_end_date(ac[2], date(2014, 5, 24), date(2014, 6, 20))
-        self._assert_stage_start_and_end_date(ac[3], date(2014, 6, 20), None)
+        self._assert_stage_start_and_end_date(ac[3], date(2014, 5, 24), date(2014, 6, 20))
+        self._assert_stage_start_and_end_date(ac[4], date(2014, 6, 20), None)
+        self._assert_stage_start_and_end_date(ac[5], date(2014, 6, 20), None)
+
+        self._assert_resources_submissions_and_grading(ac[0], resources=2, submissions=0, grading_criteria=0)
+        self._assert_resources_submissions_and_grading(ac[1], resources=0, submissions=3, grading_criteria=1)
+        self._assert_resources_submissions_and_grading(ac[2], resources=0, submissions=0, grading_criteria=0)
+        self._assert_resources_submissions_and_grading(ac[3], resources=0, submissions=0, grading_criteria=0)
 
         self.assertEqual(len(ac[0].sections), 4)
         self.assertEqual(ac[0].sections[0].title, "Section Title")
         self.assertEqual(ac[0].sections[1].title, "Details")
         self.assertEqual(ac[0].sections[2].title, "Suggested Schedule")
         self.assertEqual(ac[0].sections[3].title, "Project Materials")
-
-        self._assert_resources_submissions_and_grading(ac[0], resources=2, submissions=0, grading_criteria=0)
-        self._assert_resources_submissions_and_grading(ac[1], resources=0, submissions=3, grading_criteria=1)
-        self._assert_resources_submissions_and_grading(ac[2], resources=0, submissions=0, grading_criteria=0)
-        self._assert_resources_submissions_and_grading(ac[3], resources=0, submissions=0, grading_criteria=0)
 
         pm = ac[0].sections[3]
         self.assertEqual(list(pm.file_links), ir)
@@ -70,9 +83,15 @@ class GroupActivitityXmlTest(TestCase):
         sl = ac[1].sections[1]
         self.assertEqual(list(sl.file_links), sr)
 
+        self._assert_stage_sections(ac[2], normal=1, peer_review=2)
+        self._assert_stage_sections(ac[3], group_review=2)
+        self._assert_stage_sections(ac[4], normal=1, peer_assessment=1)
+        self._assert_stage_sections(ac[5], group_assessment=1)
+
         self.assertEqual(len(ac[2].sections), 1)
         self.assertEqual(len(ac[2].peer_review_sections), 2)
-        self.assertEqual(len(ac[2].other_group_sections), 2)
+        self.assertEqual(len(ac[2].other_group_sections), 0)
+        self.assertEqual(len(ac[3].other_group_sections), 2)
         self.assertEqual(len(ac[2].peer_review_sections[0].questions), 1)
         self.assertEqual(len(ac[2].peer_review_sections[1].questions), 2)
 

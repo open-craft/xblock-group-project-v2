@@ -6,22 +6,10 @@
         http://download/file.doc
       </document>
     </resources>
-    <section title="Section Title">
-      <content>
-        <p>Html Description Blah Blah Blah
-          <span>Additional info</span>
-        </p>
-      </content>
-    </section>
-    <section title="Details">
-      <content>Html Description Blah Blah Blah</content>
-    </section>
-    <section title="Suggested Schedule">
-      <content>Html Description Blah Blah Blah</content>
-    </section>
-    <section title="Project Materials" file_links="resources">
-      <content>Html Description Blah Blah Blah</content>
-    </section>
+    <section title="Section Title"><content><p>Html Description Blah Blah Blah<span>Additional info</span></p></content></section>
+    <section title="Details"><content>Html Description Blah Blah Blah</content></section>
+    <section title="Suggested Schedule"><content>Html Description Blah Blah Blah</content></section>
+    <section title="Project Materials" file_links="resources"><content>Html Description Blah Blah Blah</content></section>
   </activitystage>
   <activitystage name="Upload" close="5/24/2014">
     <resources>
@@ -35,7 +23,7 @@
     <section title="Team Submission">html Description</section>
     <section title="Current Files" file_links="submissions">html descirpition</section>
   </activitystage>
-  <activitystage name="Review" open="5/24/2014" close="6/20/2014">
+  <activitystage name="Review Team" open="5/24/2014" close="6/20/2014" type="peer_review">
     <section title="Lorem Ipsum" file_links="grading_criteria">aslkd as</section>
     <peerreview>
       <section title="Evaluate Teammate">
@@ -64,6 +52,8 @@
         </question>
       </section>
     </peerreview>
+  </activitystage>
+  <activitystage name="Review Group" open="5/24/2014" close="6/20/2014" type="group_review">
     <projectreview>
       <section title="Evaluate Teammate">
         <question id="score">
@@ -92,19 +82,24 @@
       </section>
     </projectreview>
   </activitystage>
-  <activitystage name="Grade" open="6/20/2014">
+  <activitystage name="Evaluate Team Feedback" open="6/20/2014" type="peer_assessment">
     <section title="Blah">
       <content>aisjd saijd</content>
     </section>
     <peerassessment>
-      <questionresults id="q1">
-      </questionresults>
-      <questionresults id="q2"></questionresults>
-      <questionresults id="q3"></questionresults>
-      <questionresults id="q4"></questionresults>
-      <questionresults id="score" summary="mean">{{summary}} (','.join({{values}}))</questionresults>
+      <section>
+        <questionresults id="q1">
+        </questionresults>
+        <questionresults id="q2"></questionresults>
+        <questionresults id="q3"></questionresults>
+        <questionresults id="q4"></questionresults>
+        <questionresults id="score" summary="mean">{{summary}} (','.join({{values}}))</questionresults>
+      </section>
     </peerassessment>
+  </activitystage>
+  <activitystage name="Evaluate Group Feedback" open="6/20/2014" type="group_assessment">
     <projectassessment>
+      <section></section>
     </projectassessment>
   </activitystage>
 </group_project>
