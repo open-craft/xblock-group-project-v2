@@ -1,19 +1,37 @@
-<activitystage id='{{ activity_stage.id }}' name='{{ activity_stage.name }}'{% ifnotequal activity_stage.close_date_name None %} close='{{ activity_stage.close_date_name }}'{% endifnotequal %}{% ifnotequal activity_stage.open_date_name None %} open='{{ activity_stage.open_date_name }}'{% endifnotequal %}>
-  {% for activity_section in activity_stage.sections %}
-    {{ activity_section.export_xml }}
+<activitystage
+    id='{{ activity_stage.id }}' name='{{ activity_stage.name }}' type='{{ activity_stage.type }}'
+    {% ifnotequal activity_stage.open_date None %} open='{{ activity_stage.open_date }}'{% endifnotequal %}
+    {% ifnotequal activity_stage.close_date None %} open='{{ activity_stage.close_date }}'{% endifnotequal %}
+>
+  {% ifnotequal activity_stage.content_html None %}
+    <content>
+    {% autoescape off %}
+      {{ activity_stage.content_html }}
+    {% endautoescape %}
+    </content>
+  {% endifnotequal %}
+  {% for question in activity_stage.questions %}
+    <question id='{{question.id}}'>
+      <label>
+        {{ question.label.text }}
+      </label>
+      <answer>
+        {% autoescape off %}
+          {{ question.answer_html }}
+        {% endautoescape %}
+      </answer>
+    </question>
   {% endfor %}
-  {% if activity_stage.peer_reviews %}
-  <peerreview>
-  {% for activity_section in activity_stage.peer_review_sections %}
-    {{ activity_section.export_xml }}
+  {% for assessment in activity_stage.assessments %}
+    <assessment id='{{assessment.id}}'>
+      <label>
+        {{ assessment.label.text }}
+      </label>
+      <answer>
+        {% autoescape off %}
+          {{ assessment.answer_html }}
+        {% endautoescape %}
+      </answer>
+    </assessment>
   {% endfor %}
-  </peerreview>
-  {% endif %}
-  {% if activity_stage.other_group_reviews %}
-  <projectreview>
-  {% for activity_section in activity_stage.other_group_sections %}
-    {{ activity_section.export_xml }}
-  {% endfor %}
-  </projectreview>
-  {% endif %}
 </activitystage>
