@@ -1,21 +1,17 @@
 {% if activity_section.title %}
   <h4>{{ activity_section.title }}</h4>
 {% endif %}
-{% if activity_section.content_html %}
-  {% autoescape off %}
-    {{ activity_section.content_html }}
-  {% endautoescape %}
-{% endif %}
-{% for activity_question in activity_section.questions %}
-  {% autoescape off %}
-    {{ activity_question.render }}
-  {% endautoescape %}
-{% endfor %}
-{% for activity_assessment in activity_section.assessments %}
-  {% autoescape off %}
-    {{ activity_assessment.render }}
-  {% endautoescape %}
-{% endfor %}
+{% autoescape off %}
+    {% if activity_section.content_html %}
+        {{ activity_section.content_html }}
+    {% endif %}
+    {% for activity_question in activity_section.questions %}
+        {{ activity_question.render }}
+    {% endfor %}
+    {% for activity_assessment in activity_section.assessments %}
+        {{ activity_assessment.render }}
+    {% endfor %}
+{% endautoescape %}
 <!-- This will likely go to Project Navigator.Uploads -->
 {% if activity_section.is_upload_available %}
 <button class="show_upload_form">Upload</button>
