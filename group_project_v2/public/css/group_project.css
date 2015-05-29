@@ -72,8 +72,6 @@
   float: right;
 }
 
-.group-project-xblock-wrapper .peer_review,
-.group-project-xblock-wrapper .other_group_review,
 .group-project-xblock-wrapper .feedback_sections{
   display: none;
 }

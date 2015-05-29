@@ -266,6 +266,7 @@ function GroupProjectBlock(runtime, element) {
 
         var operation = (showid == "cohort_feedback") ? 'load_my_group_feedback' : 'load_my_peer_feedback';
         var selector = (showid == "cohort_feedback") ? '.cohort_feedback' : '.team_feedback';
+        debugger;
         _load_data(operation, null, $(selector, element), load_my_feedback_data);
 
         $(document).trigger('data_loaded', {operation: operation});
@@ -278,8 +279,6 @@ function GroupProjectBlock(runtime, element) {
         var is_peer = $this.hasClass('select_peer');
         $('.select_peer,.select_group').removeClass('selected'); // removing selection from other peers/groups. NOT a bug
         $this.addClass('selected');
-        $('.other_group_review', element).toggle(!is_peer);
-        $('.peer_review', element).toggle(is_peer);
 
         var load_operation = load_data_for_peer;
         var operation_name = 'load_data_for_peer';

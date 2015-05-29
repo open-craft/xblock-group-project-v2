@@ -1,374 +1,327 @@
 <group_project schema_version='1'>
-  <activitystage name="Activity 1: Overview" id="overview">
+  <activitystage title="Activity 1: Overview" id="overview">
     <resources>
       <document title="Issue Tree Template">http://download/file.doc</document>
       <document title="Instructions" description="These are the instructions for this activity" grading_criteria="false">http://download/file.doc</document>
     </resources>
-    <section title="Lorem Ipsum">
-      <content>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-      </content>
-    </section>
-    <section title="Details">
-      <content>
-        <ul>
-          <li>Type: <b>Issue Tree</b></li>
-          <li>Deadline: <b>8/18/2014</b></li>
-          <li>Deliverables: <b>PPT</b></li>
-          <li>Grading: <b>Lorem Ipsum</b></li>
-        </ul>
-      </content>
-    </section>
-    <section title="Suggested Schedule">
-      <content>
-        <ul>
-          <li>Activity Deadline: <b>8/19/2014</b></li>
-          <li>Reviews: <b class="highlight">Please complete your reviews within 3 days once they are available for grading.</b></li>
-        </ul>
-      </content>
-    </section>
-    <section title="Project Materials" file_links="resources">
-      <content>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation:
-      </content>
-    </section>
+    <content>
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+      <ul>
+        <li>Type: <b>Issue Tree</b></li>
+        <li>Deliverables: <b>PPT</b></li>
+        <li>Grading: <b>Lorem Ipsum</b></li>
+      </ul>
+      <ul>
+        <li>Reviews: <b class="highlight">Please complete your reviews within 3 days once they are available for grading.</b></li>
+      </ul>
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation:</p>
+    </content>
   </activitystage>
-  <activitystage name="Activity 1: Upload" close="8/18/2014" id="upload">
+  <activitystage title="Activity 1: Upload" close="8/18/2015" id="upload" type="upload">
     <submissions>
       <document id="issue_tree" title="Issue Tree" />
       <document id="marketing_pitch" title="Marketing Pitch" />
       <document id="budget" title="Budget" description="xls budget plan" />
     </submissions>
-    <section title="Team Submission">
-      <content>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</content>
-    </section>
-    <section title="Current Files" file_links="submissions">
-    </section>
-    <section upload_dialog="true" file_links="submissions">
-      <content>
-        <h1>Upload</h1>
-        <hr />
-        <div>
-          Upload your team submission(s) below. You can continue to upload revisions until the <span class="highlight">upload period closes on <span class="milestone" data-date="submissions"></span>.</span> Only your last uploaded file(s) will be graded.
-        </div>
-      </content>
-    </section>
+    <content>
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
+    </content>
+    <upload>
+      <h1>Upload</h1>
+      <hr />
+      <div>
+        Upload your team submission(s) below. You can continue to upload revisions until the <span class="highlight">upload period closes on 8/18/2015.</span> Only your last uploaded file(s) will be graded.
+      </div>
+    </upload>
   </activitystage>
-  <activitystage name="Activity 1: Reviews" open="8/18/2014" close="8/19/2014" id="review">
+  <activitystage title="Activity 1: Peer Reviews" open="8/18/2014" close="8/19/2015" id="peer_review" type="peer_review">
     <resources>
       <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
     </resources>
-    <section title="Lorem Ipsum" file_links="grading_criteria">
-      <content>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat
-      </content>
-    </section>
-    <section>
-      <content>
-        <div class="centered">
-          <span class="peers"></span>
-          <span style="background-color:grey;height:auto;width:1px;display:inline-block;"></span>
-          <span class="other_groups"></span>
-        </div>
-      </content>
-    </section>
-    <peerreview>
-      <section>
-        <content>
-          <h4>Evaluate <span class="username">this teammate</span></h4>
-        </content>
-        <question id="peer_score">
-          <label>Did <span class="username">this teammate</span> lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer small="true">
-            <select>
-              <option value="">Rating</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-            </select>
-          </answer>
-        </question>
-      </section>
-      <section title="Questions">
-        <question id="peer_q1">
-          <label>Did <span class="username">this teammate</span> lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer>
-            <textarea placeholder="Give your opinion here"></textarea>
-          </answer>
-        </question>
-        <question id="peer_q2">
-          <label>Did <span class="username">this teammate</span> lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer>
-            <textarea placeholder="Give your opinion here"></textarea>
-          </answer>
-        </question>
-        <question id="peer_q3">
-          <label>Did <span class="username">this teammate</span> lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer>
-            <textarea placeholder="Give your opinion here"></textarea>
-          </answer>
-        </question>
-      </section>
-    </peerreview>
-    <projectreview>
-      <section title="Evaluate Project Submissions">
-        <question id="other_team_comments">
-          <label></label>
-          <answer>
-            <textarea rows="4" placeholder="Please provide a qualitative summary of the peer group's submissions based on the provided grading rubric."></textarea>
-          </answer>
-        </question>
-      </section>
-      <section title="Questions">
-        <question id="other_team_q1" grade="true" class="grade_question">
-          <label class="qmark">Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer small="true">
-            <select>
-              <option value="">Grade</option>
-              <option value="0">0</option>
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="15">15</option>
-              <option value="20">20</option>
-              <option value="25">25</option>
-              <option value="30">30</option>
-              <option value="35">35</option>
-              <option value="40">40</option>
-              <option value="45">45</option>
-              <option value="50">50</option>
-              <option value="55">55</option>
-              <option value="60">60</option>
-              <option value="65">65</option>
-              <option value="70">70</option>
-              <option value="75">75</option>
-              <option value="80">80</option>
-              <option value="85">85</option>
-              <option value="90">90</option>
-              <option value="95">95</option>
-              <option value="100">100</option>
-            </select>
-          </answer>
-        </question>
-        <question id="other_team_q2" grade="true" class="grade_question">
-          <label class="qmark">Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer small="true">
-            <select>
-              <option value="">Grade</option>
-              <option value="0">0</option>
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="15">15</option>
-              <option value="20">20</option>
-              <option value="25">25</option>
-              <option value="30">30</option>
-              <option value="35">35</option>
-              <option value="40">40</option>
-              <option value="45">45</option>
-              <option value="50">50</option>
-              <option value="55">55</option>
-              <option value="60">60</option>
-              <option value="65">65</option>
-              <option value="70">70</option>
-              <option value="75">75</option>
-              <option value="80">80</option>
-              <option value="85">85</option>
-              <option value="90">90</option>
-              <option value="95">95</option>
-              <option value="100">100</option>
-            </select>
-          </answer>
-        </question>
-        <question id="other_team_q3" grade="true" class="grade_question">
-          <label class="qmark">Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer small="true">
-            <select>
-              <option value="">Grade</option>
-              <option value="0">0</option>
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="15">15</option>
-              <option value="20">20</option>
-              <option value="25">25</option>
-              <option value="30">30</option>
-              <option value="35">35</option>
-              <option value="40">40</option>
-              <option value="45">45</option>
-              <option value="50">50</option>
-              <option value="55">55</option>
-              <option value="60">60</option>
-              <option value="65">65</option>
-              <option value="70">70</option>
-              <option value="75">75</option>
-              <option value="80">80</option>
-              <option value="85">85</option>
-              <option value="90">90</option>
-              <option value="95">95</option>
-              <option value="100">100</option>
-            </select>
-          </answer>
-        </question>
-        <question id="other_team_q4" grade="true" class="grade_question">
-          <label class="qmark">Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer small="true">
-            <select>
-              <option value="">Grade</option>
-              <option value="0">0</option>
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="15">15</option>
-              <option value="20">20</option>
-              <option value="25">25</option>
-              <option value="30">30</option>
-              <option value="35">35</option>
-              <option value="40">40</option>
-              <option value="45">45</option>
-              <option value="50">50</option>
-              <option value="55">55</option>
-              <option value="60">60</option>
-              <option value="65">65</option>
-              <option value="70">70</option>
-              <option value="75">75</option>
-              <option value="80">80</option>
-              <option value="85">85</option>
-              <option value="90">90</option>
-              <option value="95">95</option>
-              <option value="100">100</option>
-            </select>
-          </answer>
-        </question>
-      </section>
-    </projectreview>
+    <content>
+      <h1>Evaluate Team Members' Performance</h1>
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat</p>
+      <div class="centered">
+        <span class="peers"/>
+      </div>
+      <h4>Evaluate <span class="username">this teammate</span></h4>
+    </content>
+    <question id="peer_score">
+      <label>Did <span class="username">this teammate</span> lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer small="true">
+        <select>
+          <option value="">Rating</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+        </select>
+      </answer>
+    </question>
+    <question id="peer_q1">
+      <label>Did <span class="username">this teammate</span> lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer>
+        <textarea placeholder="Give your opinion here"/>
+      </answer>
+    </question>
+    <question id="peer_q2">
+      <label>Did <span class="username">this teammate</span> lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer>
+        <textarea placeholder="Give your opinion here"/>
+      </answer>
+    </question>
+    <question id="peer_q3">
+      <label>Did <span class="username">this teammate</span> lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer>
+        <textarea placeholder="Give your opinion here"/>
+      </answer>
+    </question>
   </activitystage>
-  <activitystage name="Activity 1: Grade" open="8/19/2014" id="grade">
-    <section title="Blah">
-      <content>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-      </content>
-    </section>
-    <section>
-      <content>
-        <div class="centered">
-          <a data-showid="team_feedback" class="view_feedback">Team Feedback</a>
-          <span>|</span>
-          <a data-showid="cohort_feedback" class="view_feedback">Cohort Feedback</a>
+  <activitystage title="Activity 2: Group Reviews" open="8/18/2014" close="8/19/2015" id="group_review" type="group_review">
+    <content>
+      <h1>Evaluate Project Submissions</h1>
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat</p>
+      <div class="centered">
+        <span class="other_groups"/>
+      </div>
+    </content>
+    <question id="other_team_comments">
+      <label/>
+      <answer>
+        <textarea rows="4" placeholder="Please provide a qualitative summary of the peer group's submissions based on the provided grading rubric."/>
+      </answer>
+    </question>
+    <question id="other_team_q1" grade="true" class="grade_question">
+      <label class="qmark">Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer small="true">
+        <select>
+          <option value="">Grade</option>
+          <option value="0">0</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+          <option value="30">30</option>
+          <option value="35">35</option>
+          <option value="40">40</option>
+          <option value="45">45</option>
+          <option value="50">50</option>
+          <option value="55">55</option>
+          <option value="60">60</option>
+          <option value="65">65</option>
+          <option value="70">70</option>
+          <option value="75">75</option>
+          <option value="80">80</option>
+          <option value="85">85</option>
+          <option value="90">90</option>
+          <option value="95">95</option>
+          <option value="100">100</option>
+        </select>
+      </answer>
+    </question>
+    <question id="other_team_q2" grade="true" class="grade_question">
+      <label class="qmark">Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer small="true">
+        <select>
+          <option value="">Grade</option>
+          <option value="0">0</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+          <option value="30">30</option>
+          <option value="35">35</option>
+          <option value="40">40</option>
+          <option value="45">45</option>
+          <option value="50">50</option>
+          <option value="55">55</option>
+          <option value="60">60</option>
+          <option value="65">65</option>
+          <option value="70">70</option>
+          <option value="75">75</option>
+          <option value="80">80</option>
+          <option value="85">85</option>
+          <option value="90">90</option>
+          <option value="95">95</option>
+          <option value="100">100</option>
+        </select>
+      </answer>
+    </question>
+    <question id="other_team_q3" grade="true" class="grade_question">
+      <label class="qmark">Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer small="true">
+        <select>
+          <option value="">Grade</option>
+          <option value="0">0</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+          <option value="30">30</option>
+          <option value="35">35</option>
+          <option value="40">40</option>
+          <option value="45">45</option>
+          <option value="50">50</option>
+          <option value="55">55</option>
+          <option value="60">60</option>
+          <option value="65">65</option>
+          <option value="70">70</option>
+          <option value="75">75</option>
+          <option value="80">80</option>
+          <option value="85">85</option>
+          <option value="90">90</option>
+          <option value="95">95</option>
+          <option value="100">100</option>
+        </select>
+      </answer>
+    </question>
+    <question id="other_team_q4" grade="true" class="grade_question">
+      <label class="qmark">Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer small="true">
+        <select>
+          <option value="">Grade</option>
+          <option value="0">0</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+          <option value="30">30</option>
+          <option value="35">35</option>
+          <option value="40">40</option>
+          <option value="45">45</option>
+          <option value="50">50</option>
+          <option value="55">55</option>
+          <option value="60">60</option>
+          <option value="65">65</option>
+          <option value="70">70</option>
+          <option value="75">75</option>
+          <option value="80">80</option>
+          <option value="85">85</option>
+          <option value="90">90</option>
+          <option value="95">95</option>
+          <option value="100">100</option>
+        </select>
+      </answer>
+    </question>
+  </activitystage>
+  <activitystage title="Activity 3: Evaluate Team Feedback" open="8/19/2014" id="peer_assessment" type="peer_assessment">
+    <content>
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+      <div class="centered">
+        <a data-showid="team_feedback" class="view_feedback">Team Feedback</a>
+        <span>|</span>
+        <a data-showid="cohort_feedback" class="view_feedback">Cohort Feedback</a>
+      </div>
+    </content>
+    <assessment id="assess_peer_q1">
+      <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer>
+        <div id="list_peer_q1" data-class="quote"/>
+      </answer>
+    </assessment>
+    <assessment id="assess_peer_q2">
+      <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer>
+        <div id="list_peer_q2" data-class="quote"/>
+      </answer>
+    </assessment>
+    <assessment id="assess_peer_q3">
+      <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer>
+        <div id="list_peer_q3" data-class="quote"/>
+      </answer>
+    </assessment>
+    <assessment id="assess_peer_score">
+      <label/>
+      <answer>
+        <div style="float:right;text-align:right;">
+          <span class="highlight">
+            <span>AVERAGE OVERALL SCORE:</span>
+            <span id="mean_peer_score"/>
+          </span>
+          (<span id="list_peer_score" data-class="comma"/>)
         </div>
-      </content>
-    </section>
-    <peerassessment>
-      <section title="FEEDBACK">
-        <assessment id="assess_peer_q1">
-          <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer>
-            <div id="list_peer_q1" data-class="quote"></div>
-          </answer>
-        </assessment>
-        <assessment id="assess_peer_q2">
-          <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer>
-            <div id="list_peer_q2" data-class="quote"></div>
-          </answer>
-        </assessment>
-        <assessment id="assess_peer_q3">
-          <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer>
-            <div id="list_peer_q3" data-class="quote"></div>
-          </answer>
-        </assessment>
-      </section>
-      <section>
-        <assessment id="assess_peer_score">
-          <label></label>
-          <answer>
-            <div style="float:right;text-align:right;">
-              <span class="highlight">
-                <span>AVERAGE OVERALL SCORE:</span>
-                <span id="mean_peer_score"></span>
-              </span>
-              (<span id="list_peer_score" data-class="comma"></span>)
-            </div>
-          </answer>
-        </assessment>
-      </section>
-    </peerassessment>
-    <projectassessment>
-      <section title="FEEDBACK">
-        <assessment id="assess_other_team_comments">
-          <label>General:</label>
-          <answer quote="true">
-            <div data-class="quote"></div>
-          </answer>
-        </assessment>
-      </section>
-      <section>
-        <assessment id="assess_other_team_q1">
-          <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer>
-            <div>
-              <span class="highlight">
-                <span>GRADE:</span>
-                <span id="mean_other_team_q1"></span>
-              </span>
-              (<span id="list_other_team_q1" data-class="comma"></span>)
-            </div>
-          </answer>
-        </assessment>
-        <assessment id="assess_other_team_q2">
-          <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer>
-            <div>
-              <span class="highlight">
-                <span>GRADE:</span>
-                <span id="mean_other_team_q2"></span>
-              </span>
-              (<span id="list_other_team_q2" data-class="comma"></span>)
-            </div>
-          </answer>
-        </assessment>
-        <assessment id="assess_other_team_q3">
-          <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer>
-            <div>
-              <span class="highlight">
-                <span>GRADE:</span>
-                <span id="mean_other_team_q3"></span>
-              </span>
-              (<span id="list_other_team_q3" data-class="comma"></span>)
-            </div>
-          </answer>
-        </assessment>
-        <assessment id="assess_other_team_q4">
-          <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
-          <answer>
-            <div>
-              <span class="highlight">
-                <span>GRADE:</span>
-                <span id="mean_other_team_q4"></span>
-              </span>
-              (<span id="list_other_team_q4" data-class="comma"></span>)
-            </div>
-          </answer>
-        </assessment>
-      </section>
-      <section>
-        <assessment id="assess_final_grade">
-          <label></label>
-          <answer>
-            <div style="float:right;text-align:right;">
-              <div class="highlight">
-                <span>FINAL ACTIVITY GRADE:</span>
-                <span id="list_final_grade" data-class="comma"></span>
-              </div>
-            </div>
-          </answer>
-        </assessment>
-      </section>
-    </projectassessment>
+      </answer>
+    </assessment>
+  </activitystage>
+  <activitystage title="Activity 4: Evaluate Group Feedback" open="8/19/2014" id="group_assessment" type="group_assessment">
+    <content>
+      <h1>FEEDBACK</h1>
+    </content>
+    <assessment id="assess_other_team_comments">
+      <label>General:</label>
+      <answer quote="true">
+        <div data-class="quote"></div>
+      </answer>
+    </assessment>
+    <assessment id="assess_other_team_q1">
+      <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer>
+        <div>
+          <span class="highlight">
+            <span>GRADE:</span>
+            <span id="mean_other_team_q1"></span>
+          </span>
+          (<span id="list_other_team_q1" data-class="comma"></span>)
+        </div>
+      </answer>
+    </assessment>
+    <assessment id="assess_other_team_q2">
+      <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer>
+        <div>
+          <span class="highlight">
+            <span>GRADE:</span>
+            <span id="mean_other_team_q2"></span>
+          </span>
+          (<span id="list_other_team_q2" data-class="comma"></span>)
+        </div>
+      </answer>
+    </assessment>
+    <assessment id="assess_other_team_q3">
+      <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer>
+        <div>
+          <span class="highlight">
+            <span>GRADE:</span>
+            <span id="mean_other_team_q3"></span>
+          </span>
+          (<span id="list_other_team_q3" data-class="comma"></span>)
+        </div>
+      </answer>
+    </assessment>
+    <assessment id="assess_other_team_q4">
+      <label>Q: Did project submissions lorem mit dolor sit amet, consectetur adipisicing elit?</label>
+      <answer>
+        <div>
+          <span class="highlight">
+            <span>GRADE:</span>
+            <span id="mean_other_team_q4"></span>
+          </span>
+          (<span id="list_other_team_q4" data-class="comma"></span>)
+        </div>
+      </answer>
+    </assessment>
+    <assessment id="assess_final_grade">
+      <label/>
+      <answer>
+        <div style="float:right;text-align:right;">
+          <div class="highlight">
+            <span>FINAL ACTIVITY GRADE:</span>
+            <span id="list_final_grade" data-class="comma"/>
+          </div>
+        </div>
+      </answer>
+    </assessment>
   </activitystage>
 </group_project>

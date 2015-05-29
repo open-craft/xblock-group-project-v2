@@ -34,6 +34,7 @@ GroupActivityStage (paths relative to ./activitystage)
 -- content: etree.Element - ./content                       # HTML
 -- open_date: datetime.date - ./@open
 -- close_date: datetime.date - ./@close
+-- activity: GroupActivity                                  # parent link
 ** questions: [ActivityQuestion] - ./question
 ** assessments: [ActivityAssessment] - ./assessment
 ** resources: [DottableDict(title, description, location, grading_criteria)] - ./submissions/resource
@@ -106,14 +107,12 @@ class GroupActivityQuestion(object):
         self.required = (doc_tree.get("required", "true") == "true")
         designer_class = doc_tree.get("class")
         self.question_classes = ["question"]
+        self.grade = doc_tree.get("grade") == "true"
 
         if self.required:
             self.question_classes.append("required")
         if designer_class:
             self.question_classes.append(designer_class)
-
-        if doc_tree.get("grade") == "true":
-            self.stage.activity.grade_questions.append(self.id)
 
     @property
     def render(self):
@@ -229,6 +228,7 @@ STAGE_TYPES = DottableDict(
 class GroupActivityStage(object):
     def __init__(self, doc_tree, activity):
 
+        self.activity = activity
         self.grading_override = activity.grading_override
         self.type = STAGE_TYPES.NORMAL
 
@@ -257,7 +257,8 @@ class GroupActivityStage(object):
 
         # import any questions
         for question in doc_tree.findall("./question"):
-            self.questions.append(GroupActivityQuestion(question, self))
+            question = GroupActivityQuestion(question, self)
+            self.questions.append(question)
 
         # import any assessments
         for assessment in doc_tree.findall("./assessment"):
@@ -281,6 +282,13 @@ class GroupActivityStage(object):
             }))
 
     @property
+    def name(self):
+        """
+        Alias of title
+        """
+        return self.title
+
+    @property
     def content_html(self):
         return inner_html(self.content)
 
@@ -294,15 +302,21 @@ class GroupActivityStage(object):
 
     @property
     def resources(self):
-        return (resource for resource in self._resources if not resource.grading_criteria)
+        # need to be a list to support "if activity_stage.resources" check in templates
+        return self._resources
 
     @property
     def submissions(self):
+        # need to be a list to support "if activity_stage.resources" check in templates
         return self._submissions
 
     @property
     def grading_criteria(self):
         return (resource for resource in self._resources if resource.grading_criteria)
+
+    @property
+    def grade_questions(self):
+        return (question for question in self._questions if question.grade)
 
     @staticmethod
     def formatted_date(date_value):
@@ -349,11 +363,30 @@ class GroupActivityStage(object):
 
     @property
     def is_upload_available(self):
-        return self.upload_dialog and self.is_open and not self.is_closed
+        return self.submissions and self.is_open and not self.is_closed
 
     @property
     def has_submissions(self):
-        return any([getattr(submission, 'location', None) for submission in self.submisssions])
+        return any([getattr(submission, 'location', None) for submission in self.submissions])
+
+    #TODO: this method is used in presentation layer only - should remove it when possible
+    @property
+    def feedback_parameters(self):
+        result = {}
+        if self.type == STAGE_TYPES.PEER_REVIEW:
+            result = dict(
+                form_class='peer_review',
+                form_action='submit_peer_feedback',
+                input_id='peer_id'
+            )
+        elif self.type == STAGE_TYPES.GROUP_REVIEW:
+            result = dict(
+                form_class='other_group_review',
+                form_action='submit_other_group_feedback',
+                input_id='group_id'
+            )
+
+        return result
 
     @property
     def export_xml(self):
@@ -368,7 +401,6 @@ class GroupActivity(object):
     def __init__(self, doc_tree, grading_override=False):
         self.activity_stages = []
 
-        self.grade_questions = []
         self.grading_override = grading_override
 
         # import project stage
@@ -392,6 +424,12 @@ class GroupActivity(object):
         return itertools.chain(
             *[stage.grading_criteria for stage in self.activity_stages]
         )
+
+    @property
+    def grade_questions(self):
+        return list(itertools.chain(
+            *[stage.grade_questions for stage in self.activity_stages]
+        ))
 
     def update_submission_data(self, submission_map):
 
@@ -470,7 +508,7 @@ class GroupActivity(object):
     @property
     def has_all_submissions(self):
         uploaded_submissions = [s for s in self.submissions if hasattr(s, 'location') and s.location]
-        return len(uploaded_submissions) == len(self.submissions)
+        return len(uploaded_submissions) == len(list(self.submissions))
 
     @classmethod
     def import_xml_file(cls, file_name):
