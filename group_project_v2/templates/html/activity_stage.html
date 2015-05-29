@@ -1,70 +1,104 @@
-{% if activity_stage.title %}
-  <h4>{{ activity_stage.title }}</h4>
+{% if activity_stage.content_html %}
+  {{ activity_stage.content_html|safe }}
+  <hr/>
 {% endif %}
-{% autoescape off %}
-    {% if activity_stage.content_html %}
-        {{ activity_stage.content_html }}
+
+<!-- This will likely go to Project Navigator.Resources -->
+{% if activity_stage.resources %}
+  <div class="group_resources">
+    <h4>Resources</h4>
+    {% for file_link in activity_stage.resources %}
+      {% if file_link.location %}
+        <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }} - {{ file_link.submission_date }}){% endif %}</a></div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <hr/>
+{% endif %}
+
+{% if activity_stage.submissions %}
+  <div class="group_submissions">
+    <h4>Current Uploads</h4>
+    {% if activity_stage.has_submissions %}
+      {% for file_link in activity_stage.submissions %}
+        {% if file_link.location %}
+          <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }} - {{ file_link.submission_date }}){% endif %}</a></div>
+        {% endif %}
+      {% endfor %}
+    {% elif not activity_stage.upload_dialog %}
+        <div class="submissions_message">No submissions have been uploaded for this group</div>
     {% endif %}
-    {% for activity_question in activity_stage.questions %}
-        {{ activity_question.render }}
-    {% endfor %}
-    {% for activity_assessment in activity_stage.assessments %}
-        {{ activity_assessment.render }}
-    {% endfor %}
-{% endautoescape %}
+  </div>
+  <hr/>
+{% endif %}
+
 <!-- This will likely go to Project Navigator.Uploads -->
 {% if activity_stage.is_upload_available %}
-<button class="show_upload_form">Upload</button>
-<div class="upload_form">
-  <div class="modal-bg"></div>
-  <div class="xblock-reveal reveal-modal open small">
-    <div class="close-box cancel_upload">
-      <i class="fa fa-times-circle"></i>
-    </div>
-    {% if activity_stage.upload_html %}
-      {% autoescape off %}
-        {{ activity_stage.upload_html }}
-        <hr />
-      {% endautoescape %}
-    {% endif %}
-    <form class="uploader">
-      {% for file_link in activity_stage.upload_links %}
-        <div class="upload_item">
-          <div class="upload_title">{{ file_link.title }}</div>
-          <input class="{{ file_link.id }}_name" placeholder="Browse your computer to upload file..." disabled="disabled" type="text" {% if file_link.file_name %}value="{{ file_link.file_name }}" data-original-value="{{ file_link.file_name }}"{% endif %}/>
-          <label for="{{ file_link.id }}">
-            <span class="side button tiny radius {{ file_link.id }}_label">{% if file_link.location %}Update{% else %}Browse{% endif %}</span>
-          </label>
-          <input style="display:none;" class="file_upload" name="{{ file_link.id }}" id="{{ file_link.id }}" type="file" />
-          {% if file_link.description %}
-            <div class="description">{{ file_link.description }}</div>
-          {% endif %}
-          <div class="{{ file_link.id }}_progress_box file-progress-box">
-            <div class="{{ file_link.id }}_progress file-progress"></div>
+  <button class="show_upload_form">Upload</button>
+  <div class="upload_form">
+    <div class="modal-bg"></div>
+    <div class="xblock-reveal reveal-modal open small">
+      <div class="close-box cancel_upload">
+        <i class="fa fa-times-circle"></i>
+      </div>
+      {% if activity_stage.upload_html %}
+        {% autoescape off %}
+          {{ activity_stage.upload_html }}
+          <hr />
+        {% endautoescape %}
+      {% endif %}
+      <form class="uploader">
+        {% for file_link in activity_stage.submissions %}
+          <div class="upload_item">
+            <div class="upload_title">{{ file_link.title }}</div>
+            <input class="{{ file_link.id }}_name" placeholder="Browse your computer to upload file..." disabled="disabled" type="text" {% if file_link.file_name %}value="{{ file_link.file_name }}" data-original-value="{{ file_link.file_name }}"{% endif %}/>
+            <label for="{{ file_link.id }}">
+              <span class="side button tiny radius {{ file_link.id }}_label">{% if file_link.location %}Update{% else %}Browse{% endif %}</span>
+            </label>
+            <input style="display:none;" class="file_upload" name="{{ file_link.id }}" id="{{ file_link.id }}" type="file" />
+            {% if file_link.description %}
+              <div class="description">{{ file_link.description }}</div>
+            {% endif %}
+            <div class="{{ file_link.id }}_progress_box file-progress-box">
+              <div class="{{ file_link.id }}_progress file-progress"></div>
+            </div>
           </div>
-        </div>
-      {% endfor %}
-    </form>
-    <hr />
-    <div class="action_buttons">
-      <a href="#" class="cancel_upload">Cancel</a>
-      <button disabled href="#" class="do_upload button radius small">Upload</button>
+        {% endfor %}
+      </form>
+      <hr />
+      <div class="action_buttons">
+        <a href="#" class="cancel_upload">Cancel</a>
+        <button disabled href="#" class="do_upload button radius small">Upload</button>
+      </div>
     </div>
   </div>
-</div>
-{% else %}
-<!-- This will likely go to Project Navigator.Resources -->
-{% if activity_stage.file_link_name %}
-<div class="group_{{ activity_stage.file_link_name }}">
-{% if activity_stage.has_submissions %}
-  {% for file_link in activity_stage.file_links %}
-    {% if file_link.location %}
-      <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }} - {{ file_link.submission_date }}){% endif %}</a></div>
-    {% endif %}
-  {% endfor %}
-{% elif not activity_stage.upload_dialog %}
-  <div class="submissions_message">No submissions have been uploaded for this group</div>
 {% endif %}
-</div>
-{% endif %}
-{% endif %}
+
+{% autoescape off %}
+  {% if activity_stage.type == 'peer_review' or activity_stage.type == 'group_review' %}
+    <form class="{{ activity_stage.feedback_parameters.form_class }}" action="{{ activity_stage.feedback_parameters.form_action }}" method="POST">
+      <input type="hidden" class="{{ activity_stage.feedback_parameters.input_id }}" name="{{ activity_stage.feedback_parameters.input_id }}" value="" />
+      {% if activity_stage.type == 'group_review' %}
+        <div class="other_submissions"><a href="#" class="view_other_submissions">View team submissions</a></div>
+      {% endif %}
+      {% if activity_stage.questions %}
+        {% for activity_question in activity_stage.questions %}
+          {{ activity_question.render }}
+        {% endfor %}
+        <hr/>
+      {% endif %}
+      <button class="submit" {% if activity_stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
+    </form>
+  {% endif %}
+
+  {% if activity_stage.type == 'peer_assessment' or activity_stage.type == 'group_assessment' %}
+    <div class="feedback_sections {% if activity_stage.type == 'peer_assessment' %}team_feedback{% else %}cohort_feedback{% endif %}">
+      {% if activity_stage.assessments %}
+        {% for activity_assessment in activity_stage.assessments %}
+          {{ activity_assessment.render }}
+        {% endfor %}
+        <hr/>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endautoescape %}
