@@ -216,12 +216,9 @@
   </activitystage>
   <activitystage title="Activity 3: Evaluate Team Feedback" open="8/19/2014" id="peer_assessment" type="peer_assessment">
     <content>
+      <h1>FEEDBACK</h1>
       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-      <div class="centered">
-        <a data-showid="team_feedback" class="view_feedback">Team Feedback</a>
-        <span>|</span>
-        <a data-showid="cohort_feedback" class="view_feedback">Cohort Feedback</a>
-      </div>
+      <div><a class="view_feedback">View Team Feedback</a></div>
     </content>
     <assessment id="assess_peer_q1">
       <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
@@ -257,6 +254,8 @@
   <activitystage title="Activity 4: Evaluate Group Feedback" open="8/19/2014" id="group_assessment" type="group_assessment">
     <content>
       <h1>FEEDBACK</h1>
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+      <div><a class="view_feedback">View Cohort Feedback</a></div>
     </content>
     <assessment id="assess_other_team_comments">
       <label>General:</label>
