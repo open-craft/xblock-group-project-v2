@@ -35,8 +35,7 @@ def render_template(template_path, context=None):
     return template.render(Context(context))
 
 
-# TODO: class not used
-class AttrDict(dict):
+class DottableDict(dict):
     def __init__(self, *args, **kwargs):
-        super(AttrDict, self).__init__(*args, **kwargs)
+        dict.__init__(self, *args, **kwargs)
         self.__dict__ = self

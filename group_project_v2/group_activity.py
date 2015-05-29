@@ -65,7 +65,7 @@ import json
 from django.template.loader import render_to_string
 from pkg_resources import resource_filename
 
-from utils import render_template
+from utils import render_template, DottableDict
 from .project_api import _build_date_field
 
 
@@ -87,12 +87,6 @@ def inner_html(node):
 
     tag_length = len(node.tag)
     return outer_html(node)[tag_length + 2:-1 * (tag_length + 3)]
-
-
-class DottableDict(dict):
-    def __init__(self, *args, **kwargs):
-        dict.__init__(self, *args, **kwargs)
-        self.__dict__ = self
 
 
 class GroupActivityQuestion(object):
