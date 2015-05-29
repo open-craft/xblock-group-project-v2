@@ -26,7 +26,7 @@ from StringIO import StringIO
 
 from .utils import render_template, load_resource
 
-from .group_activity import GroupActivity
+from components.activity import GroupActivity
 from .project_api import ProjectAPI
 from .upload_file import UploadFile
 from .api_error import ApiError
@@ -216,7 +216,7 @@ class GroupActivityXBlock(XBlock):
             return error_fragment
 
         user_id = self.user_id
-        group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+        group_activity = self.get_group_activity()
 
         try:
             group_activity.update_submission_data(
@@ -320,7 +320,7 @@ class GroupActivityXBlock(XBlock):
         group_reviewer_ids = [user["id"] for user in self.project_api.get_workgroup_reviewers(group_id)]
         admin_reviewer_ids = [reviewer_id for reviewer_id in all_reviewer_ids if reviewer_id not in group_reviewer_ids]
 
-        group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+        group_activity = self.get_group_activity()
 
         def get_user_grade_value_list(user_id):
             user_grades = []
@@ -400,7 +400,7 @@ class GroupActivityXBlock(XBlock):
             self.mark_complete_stage(u["id"], None)
 
     def evaluations_complete(self):
-        group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+        group_activity = self.get_group_activity()
         peer_review_stages = [stage for stage in group_activity.activity_stages if
                               stage.peer_reviews]
         peer_review_questions = []
@@ -430,7 +430,7 @@ class GroupActivityXBlock(XBlock):
         return True
 
     def grading_complete(self):
-        group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+        group_activity = self.get_group_activity()
         group_review_stages = [stage for stage in group_activity.activity_stages if
                                stage.other_group_reviews]
         group_review_questions = []
@@ -552,7 +552,7 @@ class GroupActivityXBlock(XBlock):
                 submissions
             )
 
-            group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+            group_activity = self.get_group_activity()
             for question_id in group_activity.grade_questions:
                 if question_id in submissions:
                     # Emit analytics event...
@@ -667,7 +667,7 @@ class GroupActivityXBlock(XBlock):
         response_data = {"message": _("File(s) successfully submitted")}
         failure_code = 0
         try:
-            group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+            group_activity = self.get_group_activity()
 
             context = {
                 "user_id": self.user_id,
@@ -746,7 +746,7 @@ class GroupActivityXBlock(XBlock):
 
     @XBlock.handler
     def other_submission_links(self, request, suffix=''):
-        group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+        group_activity = self.get_group_activity()
         group_id = request.GET["group_id"]
 
         # TODO: this update_submission_data is common as well - might make sense to extract a method
@@ -759,7 +759,7 @@ class GroupActivityXBlock(XBlock):
 
     @XBlock.handler
     def refresh_submission_links(self, request, suffix=''):
-        group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+        group_activity = self.get_group_activity()
 
         group_activity.update_submission_data(
             self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup['id'])
@@ -993,7 +993,7 @@ class GroupActivityXBlock(XBlock):
         try:
             log.info('GroupActivityXBlock.on_published() on location = {}'.format(self.location))
 
-            group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+            group_activity = self.get_group_activity()
 
             # see if we are running in an environment which has Notifications enabled
             notifications_service = services.get('notifications')
@@ -1043,6 +1043,9 @@ class GroupActivityXBlock(XBlock):
         except Exception, ex:
             log.exception(ex)
 
+    def get_group_activity(self):
+        return GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+
     def on_before_studio_delete(self, course_id, services):
         """
         A hook into when this xblock is deleted in Studio, for xblocks to do any lifecycle
@@ -1051,7 +1054,7 @@ class GroupActivityXBlock(XBlock):
         log.info('GroupActivityXBlock.on_before_delete() on location = {}'.format(self.location))
 
         try:
-            group_activity = GroupActivity.import_xml_string(self.data, self.is_admin_grader)
+            group_activity = self.get_group_activity()
 
             # see if we are running in an environment which has Notifications enabled
             notifications_service = services.get('notifications')
