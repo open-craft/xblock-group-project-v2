@@ -367,7 +367,7 @@ class GroupActivityStage(object):
     def has_submissions(self):
         return any([getattr(submission, 'location', None) for submission in self.submissions])
 
-    #TODO: this method is used in presentation layer only - should remove it when possible
+    # TODO: this method is used in presentation layer only - should remove it when possible
     @property
     def feedback_parameters(self):
         result = {}

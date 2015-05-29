@@ -258,15 +258,13 @@ function GroupProjectBlock(runtime, element) {
     });
 
     $('.view_feedback').on('click', function (ev) {
-        $('.feedback_sections').hide();
-        $('.view_feedback').removeClass('selected');
         var showid = $(this).data('showid');
-        $('.' + showid, element).show();
-        $(this).addClass('selected');
 
         var operation = (showid == "cohort_feedback") ? 'load_my_group_feedback' : 'load_my_peer_feedback';
-        var selector = (showid == "cohort_feedback") ? '.cohort_feedback' : '.team_feedback';
+        var selector = (showid == "cohort_feedback") ? '.group_assessment' : '.peer_assessment';
+
         _load_data(operation, null, $(selector, element), load_my_feedback_data);
+        $(selector, element).show();
 
         $(document).trigger('data_loaded', {operation: operation});
         ev.preventDefault();
