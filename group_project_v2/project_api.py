@@ -3,8 +3,10 @@ import json
 import datetime
 from urllib import urlencode
 
+from group_project_v2.utils import build_date_field
 from .json_requests import GET, POST, PUT, DELETE
 from .api_error import api_error_protect
+
 
 API_PREFIX = '/'.join(['api', 'server'])
 
@@ -15,17 +17,6 @@ USERS_API = '/'.join([API_PREFIX, 'users'])
 SUBMISSION_API = '/'.join([API_PREFIX, 'submissions'])
 GROUP_API = '/'.join([API_PREFIX, 'groups'])
 COURSES_API = '/'.join([API_PREFIX, 'courses'])
-
-
-def _build_date_field(json_date_string_value):
-    """ converts json date string to date object """
-    try:
-        return datetime.datetime.strptime(
-            json_date_string_value,
-            '%Y-%m-%dT%H:%M:%SZ'
-        )
-    except ValueError:
-        return None
 
 
 # TODO: this class crosses service boundary, but some methods post-process responses, while other do not
@@ -337,8 +328,8 @@ class ProjectAPI(object):
         for submission in submission_list:
             submission_id = submission['document_id']
             if submission_id in submissions_by_id:
-                last_modified = _build_date_field(submissions_by_id[submission_id]["modified"])
-                this_modified = _build_date_field(submission["modified"])
+                last_modified = build_date_field(submissions_by_id[submission_id]["modified"])
+                this_modified = build_date_field(submission["modified"])
                 if this_modified > last_modified:
                     submissions_by_id[submission["document_id"]] = submission
             else:
