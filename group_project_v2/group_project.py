@@ -24,7 +24,7 @@ from xblock.fragment import Fragment
 
 from StringIO import StringIO
 
-from .utils import render_template, AttrDict, load_resource
+from .utils import render_template, load_resource
 
 from .group_activity import GroupActivity
 from .project_api import ProjectAPI
