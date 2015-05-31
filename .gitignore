@@ -1,3 +1,6 @@
-xblock_group_projects.egg-info
+*.egg-info
 *.pyc
 *~
+.coverage
+*.log
+.DS_Store

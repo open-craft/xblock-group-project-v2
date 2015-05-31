@@ -13,7 +13,7 @@ Top level node
 
 `dates` _Optional_
 
-`projectcomponent` _Required_
+`activitystage` _Required_
 
 ## `<resources>`
 Node defining which external resources (authored by instructor or others) provide useful information about the project
@@ -42,7 +42,7 @@ _None_
 ### Child Nodes
 `milestone` _Required_
 
-## `<projectcomponent>`
+## `<activitystage>`
 Node defining a stage for a group project
 
 ### Attributes
@@ -104,7 +104,7 @@ Node describing content to display within the page
 
 ## `<peerreview>`
 Node to define sections to be associated with specific peer selection
-**Note that it is important to provide a node with class "peers" in a section/content node within the same projectcomponent, but outside of the scope of this peerreview node - this node is injected with the peers within the user's group**
+**Note that it is important to provide a node with class "peers" in a section/content node within the same activitystage, but outside of the scope of this peerreview node - this node is injected with the peers within the user's group**
 
 ### Attributes
 None
@@ -114,7 +114,7 @@ None
 
 ## `<projectreview>`
 Node to define sections to be associated with specific group review selection 
-**Note that it is important to provide a node with class "other_groups" in a section/content node within the same projectcomponent, but outside of the scope of this projectreview node - this node is injected with the groups for whom the user has been chosen to provide feedback**
+**Note that it is important to provide a node with class "other_groups" in a section/content node within the same activitystage, but outside of the scope of this projectreview node - this node is injected with the groups for whom the user has been chosen to provide feedback**
 
 ### Attributes
 None
@@ -124,7 +124,7 @@ None
 
 ## `<peerassessment>`
 Node to define sections to display the feedback that the user has recieved from her/his peers.
-**Note that it is important to provide a link with the following definition in a section/content node within the same projectcomponent, but outside of the scope of this peerassessment node - this link tells the xblock to show/hide the peer assessments (_You can provide custom content_):**
+**Note that it is important to provide a link with the following definition in a section/content node within the same activitystage, but outside of the scope of this peerassessment node - this link tells the xblock to show/hide the peer assessments (_You can provide custom content_):**
     
     <a data-showid="team_feedback" class="view_feedback">Team Feedback</a>
 
@@ -136,7 +136,7 @@ None
 
 ## `<projectassessment>`
 Node to define sections to display the feedback that the group has recieved from others about their project.
-**Note that it is important to provide a link with the following definition in a section/content node within the same projectcomponent, but outside of the scope of this projectassessment node - this link tells the xblock to show/hide the project assessments (_You can provide custom content_):**
+**Note that it is important to provide a link with the following definition in a section/content node within the same activitystage, but outside of the scope of this projectassessment node - this link tells the xblock to show/hide the project assessments (_You can provide custom content_):**
     
     <a data-showid="cohort_feedback" class="view_feedback">Cohort Feedback</a>
 
