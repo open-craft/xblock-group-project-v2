@@ -4,18 +4,17 @@ Basically it looks like the following
 
 GroupActivity (.)
 - GroupActivityStage (./activitystage)
--- GroupActivityStageSection (//section - different paths)
---- GroupActivityQuestion (//section/question)
----- <no dedicated class, etree.Element is used> (//section/question/answer)
---- GroupActivityAssessment (//section/assessment)
----- <no dedicated class, etree.Element is used> (//section/assessment/answer)
+-- GroupActivityQuestion (./activitystage/question)
+--- <no dedicated class, etree.Element is used> (./activitystage/question/answer)
+-- GroupActivityAssessment (./activitystage/assessment)
+--- <no dedicated class, etree.Element is used> (./activitystage/assessment/answer)
 
 GroupActivity (paths relative to root element)
 - resources: [DottableDict(title, description, location)] - ./resources/document
 # attribute filter implicit
 - grading_criteria: [DottableDict(title, description, location)] - ./resources/document[@grading_criteria="true"]
 - submissions: [DottableDict(id, title, description, location?)] - ./submissions/document
-- grade_questions: [GroupActivityQuestion] - //section/question
+- grade_questions: [GroupActivityQuestion] - ./activitystage/question
 - activity_stages: [GroupActivityStage] - ./activitystage
 - grading_override: Bool                            # if True - allows visiting stages after close date; used by TA
 * has_submissions: Bool                             # True if ANY submission uploaded
@@ -25,51 +24,38 @@ GroupActivity (paths relative to root element)
     {
         <stage_id>: { prev: prev_stage.id, name: stage.name, next: next_stage.id},
         ordered_list: [stage1.id, stage2.id, ...],
-        default: <latest_open_cstage.id if not grading_override else latest_stage_with_other_group_sections.id>
+        default: <latest_open_stage.id if not grading_override else latest_stage_with_group_review_stage.id>
     }
 
 GroupActivityStage (paths relative to ./activitystage)
 -- id: str - ./@id
--- name: str - ./@name
--- sections: [ActivitySection] - ./section
--- peer_review_sections: [ActivitySection] - ./peerreview/section                     # reviewing teammates
--- peer_assessment_sections: [ActivitySection] - ./peerassessment/section             # assessing teammates' feedback
--- other_group_sections: [ActivitySection] - ./projectreview/section                  # reviewing other groups
--- other_group_assessment_sections: [ActivitySection] - ./projectassessment/section   # assessing other groups' feedback
--- open_date: datetime.date - @open
--- close_date: datetime.date - @close                                              # reference to milestone_dates key
-
-GroupActivityStageSection (paths relative to (//section)
---- activity: GroupActivity                                          # grandparent reference
---- stage: GroupActivityStage                                    # parent reference
---- title: str - ./@title
---- upload_dialog: Bool - ./@upload_dialog
---- file_link_name: str - ./@file_links                                 # resources / submissions / grading_criteria
---- questions: [ActivityQuestion] - ./question
---- assessments: [ActivityAssessment] - ./assessment
---- content: etree.Element - ./content                                  # HTML
-# if section IS NOT upload dialog gets links for resource, submission or grading_criteria files
-*** file_links: [DottableDict(id?, title, description, location?)
-# if section IS an upload dialog gets links for resource, submission or grading_criteria files
-*** upload_links: [DottableDict(id?, title, description, location?)
-# IS upload section and opened and not closed
-*** is_upload_available: Bool
+-- title: str - ./@title
+-- type: str - ./@type                                      # governs stage behavior
+-- content: etree.Element - ./content                       # HTML
+-- open_date: datetime.date - ./@open
+-- close_date: datetime.date - ./@close
+-- activity: GroupActivity                                  # parent link
+** questions: [ActivityQuestion] - ./question
+** assessments: [ActivityAssessment] - ./assessment
+** resources: [DottableDict(title, description, location, grading_criteria)] - ./submissions/resource
+** submissions: [DottableDict(id, title, description, location?)] - ./submissions/document
+** is_upload_available: Bool                                # IS upload stage and opened and not closed
 
 GroupActivityQuestion (paths relative to //section/question)
 ---- id: str - ./@id
 ---- label: etree.Element - ./label
----- section: ActivitySection                               # parent reference
----- answer: etree.Element - ./answer[0]                    # should contain single HTML input control
----- small: Bool - ./answer[0]/@small                       # affects "answer" presentation - adds "side" class
----- required: Bool - ./@required                           # affects "question" presentation - adds "required" class
----- designer_class: [str] - ./@class                       # affects "question" presentation - added as is
----- question_classes: [str]                                # ['question', designer_class?, "required"?]
+---- stage: GroupActivityStage                               # parent reference
+---- answer: etree.Element - ./answer[0]                     # should contain single HTML input control
+---- small: Bool - ./answer[0]/@small                        # affects "answer" presentation - adds "side" class
+---- required: Bool - ./@required                            # affects "question" presentation - adds "required" class
+---- designer_class: [str] - ./@class                        # affects "question" presentation - added as is
+---- question_classes: [str]                                 # ['question', designer_class?, "required"?]
 
 GroupActivityAssessment (paths relative to //section/assessment)
 ---- id: str - ./@id
 ---- label: etree.Element ./label
----- answer: etree.Element = ./answer[0]                    # should contain single HTML input control
----- small: Bool - ./answer[0]/@small                       # affects "answer" presentation - adds "side" class
+---- answer: etree.Element = ./answer[0]                     # should contain single HTML input control
+---- small: Bool - ./answer[0]/@small                        # affects "answer" presentation - adds "side" class
 """
 import itertools
 import xml.etree.ElementTree as ET
@@ -79,7 +65,7 @@ import json
 from django.template.loader import render_to_string
 from pkg_resources import resource_filename
 
-from utils import render_template
+from utils import render_template, DottableDict
 from .project_api import _build_date_field
 
 
@@ -103,32 +89,24 @@ def inner_html(node):
     return outer_html(node)[tag_length + 2:-1 * (tag_length + 3)]
 
 
-class DottableDict(dict):
-    def __init__(self, *args, **kwargs):
-        dict.__init__(self, *args, **kwargs)
-        self.__dict__ = self
-
-
 class GroupActivityQuestion(object):
-    def __init__(self, doc_tree, section):
+    def __init__(self, doc_tree, stage):
 
         self.id = doc_tree.get("id")
         self.label = doc_tree.find("./label")
         answer_node = doc_tree.find("./answer")
         self.answer = answer_node[0]
         self.small = (answer_node.get("small", "false") == "true")
-        self.section = section
+        self.stage = stage
         self.required = (doc_tree.get("required", "true") == "true")
         designer_class = doc_tree.get("class")
         self.question_classes = ["question"]
+        self.grade = doc_tree.get("grade") == "true"
 
         if self.required:
             self.question_classes.append("required")
         if designer_class:
             self.question_classes.append(designer_class)
-
-        if doc_tree.get("grade") == "true":
-            self.section.activity.grade_questions.append(self.id)
 
     @property
     def render(self):
@@ -141,7 +119,7 @@ class GroupActivityQuestion(object):
             answer_classes.append(current_class)
         if self.small:
             answer_classes.append('side')
-        if self.section.stage.is_closed:
+        if self.stage.is_closed:
             answer_node.set('disabled', 'disabled')
         else:
             answer_classes.append('editable')
@@ -231,111 +209,54 @@ class GroupActivityAssessment(object):
         return html
 
 
-class GroupActivityStageSection(object):
-    def __init__(self, doc_tree, stage, activity):
-
-        self.stage = stage
-        self.questions = []
-        self.assessments = []
-        self.activity = activity
-
-        self.title = doc_tree.get("title")
-        self.content = doc_tree.find("./content")
-
-        self.upload_dialog = (doc_tree.get("upload_dialog") == "true")
-
-        self.file_link_name = doc_tree.get("file_links")
-
-        # import any questions
-        for question in doc_tree.findall("./question"):
-            self.questions.append(GroupActivityQuestion(question, self))
-
-        # import any assessments
-        for assessment in doc_tree.findall("./assessment"):
-            self.assessments.append(GroupActivityAssessment(assessment))
-
-    @property
-    def file_links(self):
-        if self.upload_dialog:
-            return None
-
-        file_links = None
-        if self.file_link_name:
-            file_links = getattr(self.stage, self.file_link_name, None)
-
-        return file_links
-
-    @property
-    def has_submissions(self):
-        return len(
-            [file_link for file_link in self.file_links if hasattr(file_link, 'location') and file_link.location]) > 0
-
-    @property
-    def upload_links(self):
-        if not self.upload_dialog:
-            return None
-
-        file_links = None
-        if self.file_link_name:
-            file_links = getattr(self.stage, self.file_link_name, None)
-
-        return file_links
-
-    @property
-    def content_html(self):
-        if self.upload_dialog:
-            return None
-        return inner_html(self.content)
-
-    @property
-    def upload_html(self):
-        if self.upload_dialog:
-            return inner_html(self.content)
-        return None
-
-    @property
-    def export_xml(self):
-        data = {
-            "activity_section": self,
-        }
-        return render_template('/templates/xml/activity_section.xml', data)
-
-    @property
-    def render(self):
-        data = {
-            "activity_section": self,
-        }
-        return render_template('/templates/html/activity_section.html', data)
-
-    @property
-    def is_upload_available(self):
-        return self.upload_dialog and self.stage.is_open and not self.stage.is_closed
+STAGE_TYPES = DottableDict(
+    NORMAL='normal',
+    UPLOAD='upload',
+    PEER_REVIEW='peer_review',
+    PEER_ASSESSMENT='peer_assessment',
+    GROUP_REVIEW='group_review',
+    GROUP_ASSESSMENT='group_assessment',
+)
 
 
 class GroupActivityStage(object):
     def __init__(self, doc_tree, activity):
 
+        self.activity = activity
         self.grading_override = activity.grading_override
+        self.type = STAGE_TYPES.NORMAL
 
         self._resources = []
         self._submissions = []
+        self._questions = []
+        self._assessments = []
 
-        self.sections = []
-        self.peer_review_sections = []
-        self.other_group_sections = []
-        self.peer_assessment_sections = []
-        self.other_group_assessment_sections = []
         self.open_date = None
         self.close_date = None
 
-        self.name = doc_tree.get("name")
         self.id = doc_tree.get("id")
+        self.title = doc_tree.get("title")
+        self.content = doc_tree.find("./content")
+        self.upload = doc_tree.find("./upload")
+
+        xml_type = doc_tree.get("type")
+        if xml_type and xml_type in STAGE_TYPES.values():
+            self.type = xml_type
 
         if doc_tree.get("open"):
             self.open_date = parse_date(doc_tree.get("open"))
 
         if doc_tree.get("close"):
             self.close_date = parse_date(doc_tree.get("close"))
+
+        # import any questions
+        for question in doc_tree.findall("./question"):
+            question = GroupActivityQuestion(question, self)
+            self._questions.append(question)
+
+        # import any assessments
+        for assessment in doc_tree.findall("./assessment"):
+            self._assessments.append(GroupActivityAssessment(assessment))
 
         # import resources
         for document in doc_tree.findall("./resources/document"):
@@ -354,37 +275,40 @@ class GroupActivityStage(object):
                 "description": document.get("description"),
             }))
 
-        # import sections
-        for section in doc_tree.findall("./section"):
-            self.sections.append(GroupActivityStageSection(section, self, activity))
+    @property
+    def name(self):
+        """
+        Alias of title
+        """
+        return self.title
 
-        # import questions for peer review
-        for section in doc_tree.findall("./peerreview/section"):
-            self.peer_review_sections.append(GroupActivityStageSection(section, self, activity))
+    @property
+    def content_html(self):
+        return inner_html(self.content)
 
-        # import questions for project review
-        for section in doc_tree.findall("./projectreview/section"):
-            self.other_group_sections.append(GroupActivityStageSection(section, self, activity))
+    @property
+    def questions(self):
+        return tuple(self._questions)
 
-        # import questions for peer review
-        for section in doc_tree.findall("./peerassessment/section"):
-            self.peer_assessment_sections.append(GroupActivityStageSection(section, self, activity))
-
-        # import questions for project review
-        for section in doc_tree.findall("./projectassessment/section"):
-            self.other_group_assessment_sections.append(GroupActivityStageSection(section, self, activity))
+    @property
+    def assessments(self):
+        return tuple(self._assessments)
 
     @property
     def resources(self):
-        return (resource for resource in self._resources if not resource.grading_criteria)
+        return tuple(self._resources)
 
     @property
     def submissions(self):
-        return self._submissions
+        return tuple(self._submissions)
 
     @property
     def grading_criteria(self):
         return (resource for resource in self._resources if resource.grading_criteria)
+
+    @property
+    def grade_questions(self):
+        return (question for question in self._questions if question.grade)
 
     @staticmethod
     def formatted_date(date_value):
@@ -393,19 +317,19 @@ class GroupActivityStage(object):
     # TODO: these four properties should be better named as has_*
     @property
     def peer_reviews(self):
-        return len(self.peer_review_sections) > 0
+        return self.type == STAGE_TYPES.PEER_REVIEW
 
     @property
     def other_group_reviews(self):
-        return len(self.other_group_sections) > 0
+        return self.type == STAGE_TYPES.GROUP_REVIEW
 
     @property
     def peer_assessments(self):
-        return len(self.peer_assessment_sections) > 0
+        return self.type == STAGE_TYPES.PEER_ASSESSMENT
 
     @property
     def other_group_assessments(self):
-        return len(self.other_group_assessment_sections) > 0
+        return self.type == STAGE_TYPES.GROUP_ASSESSMENT
 
     @property
     def formatted_open_date(self):
@@ -430,23 +354,50 @@ class GroupActivityStage(object):
         return (self.close_date is not None) and (self.close_date < date.today())
 
     @property
+    def is_upload_available(self):
+        return self.submissions and self.is_open and not self.is_closed
+
+    @property
+    def has_submissions(self):
+        return any([getattr(submission, 'location', None) for submission in self.submissions])
+
+    # TODO: this method is used in presentation layer only - should remove it when possible
+    @property
+    def feedback_parameters(self):
+        result = {}
+        if self.type == STAGE_TYPES.PEER_REVIEW:
+            result = dict(
+                form_class='peer_review',
+                form_action='submit_peer_feedback',
+                input_id='peer_id'
+            )
+        elif self.type == STAGE_TYPES.GROUP_REVIEW:
+            result = dict(
+                form_class='other_group_review',
+                form_action='submit_other_group_feedback',
+                input_id='group_id'
+            )
+
+        return result
+
+    @property
     def export_xml(self):
-        data = {
-            "activity_stage": self,
-        }
-        return render_template('/templates/xml/activity_stage.xml', data)
+        return render_template('/templates/xml/activity_stage.xml', {"activity_stage": self})
+
+    @property
+    def render(self):
+        return render_template('/templates/html/activity_stage.html', {"activity_stage": self})
 
 
 class GroupActivity(object):
     def __init__(self, doc_tree, grading_override=False):
         self.activity_stages = []
 
-        self.grade_questions = []
         self.grading_override = grading_override
 
-        # import project components
-        for component in doc_tree.findall("./activitystage"):
-            self.activity_stages.append(GroupActivityStage(component, self))
+        # import project stage
+        for stage in doc_tree.findall("./activitystage"):
+            self.activity_stages.append(GroupActivityStage(stage, self))
 
     @property
     def resources(self):
@@ -465,6 +416,12 @@ class GroupActivity(object):
         return itertools.chain(
             *[stage.grading_criteria for stage in self.activity_stages]
         )
+
+    @property
+    def grade_questions(self):
+        return list(itertools.chain(
+            *[stage.grade_questions for stage in self.activity_stages]
+        ))
 
     def update_submission_data(self, submission_map):
 
@@ -520,7 +477,7 @@ class GroupActivity(object):
             prev_step = ac.id
 
             if self.grading_override:
-                if len(ac.other_group_sections) > 0:
+                if ac.other_group_reviews:
                     default_stage = ac.id
             elif ac.open_date and ac.open_date <= date.today():
                 default_stage = ac.id
@@ -543,7 +500,7 @@ class GroupActivity(object):
     @property
     def has_all_submissions(self):
         uploaded_submissions = [s for s in self.submissions if hasattr(s, 'location') and s.location]
-        return len(uploaded_submissions) == len(self.submissions)
+        return len(uploaded_submissions) == len(list(self.submissions))
 
     @classmethod
     def import_xml_file(cls, file_name):

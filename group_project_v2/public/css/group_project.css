@@ -72,9 +72,7 @@
   float: right;
 }
 
-.group-project-xblock-wrapper .peer_review,
-.group-project-xblock-wrapper .other_group_review,
-.group-project-xblock-wrapper .feedback_sections{
+.group-project-xblock-wrapper .feedback_stage{
   display: none;
 }
 
@@ -148,7 +146,7 @@
   color: #cccccc;
 }
 
-.group-project-xblock-wrapper .feedback_sections .prompt{
+.group-project-xblock-wrapper .feedback_stage .prompt{
   font-weight: bold;
 }
 

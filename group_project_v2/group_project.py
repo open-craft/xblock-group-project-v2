@@ -24,7 +24,7 @@ from xblock.fragment import Fragment
 
 from StringIO import StringIO
 
-from .utils import render_template, AttrDict, load_resource
+from .utils import render_template, load_resource
 
 from .group_activity import GroupActivity
 from .project_api import ProjectAPI
@@ -405,9 +405,9 @@ class GroupActivityXBlock(XBlock):
                               stage.peer_reviews]
         peer_review_questions = []
         for peer_review_stage in peer_review_stages:
-            for peer_review_section in peer_review_stage.peer_review_sections:
-                peer_review_questions.extend(
-                    [question.id for question in peer_review_section.questions if question.required])
+                peer_review_questions.extend([
+                    question.id for question in peer_review_stage.questions if question.required
+                ])
 
         group_peer_items = self.project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
         my_feedback = {
@@ -435,8 +435,7 @@ class GroupActivityXBlock(XBlock):
                                stage.other_group_reviews]
         group_review_questions = []
         for group_review_stage in group_review_stages:
-            for review_section in group_review_stage.other_group_sections:
-                group_review_questions.extend([q.id for q in review_section.questions if q.required])
+            group_review_questions.extend([q.id for q in group_review_stage.questions if q.required])
 
         group_review_items = []
         assess_groups = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)

@@ -4,91 +4,39 @@
   <nav>
     Steps
     <ul>
-      {% for activity_component in group_activity.activity_stages %}
+      {% for activity_stage in group_activity.activity_stages %}
         <li>
-          <a href="#" class="revealer" id="{{ activity_component.id }}">{{ activity_component.name }}</a>
+          <a href="#" class="revealer" id="{{ activity_stage.id }}">{{ activity_stage.name }}</a>
         </li>
       {% endfor %}
     </ul>
   </nav>
 
-  {% for activity_component in group_activity.activity_stages %}
-    <div id="activity_{{ activity_component.id }}" class="activity_section">
-    {% if activity_component.grading_override %}
+  {% for activity_stage in group_activity.activity_stages %}
+    <div id="activity_{{ activity_stage.id }}" class="activity_section">
+    {% if activity_stage.grading_override %}
       <div class="grading_override {% if ta_graded %}ta_graded{% endif %}">
         <span class="default_message">Grading View</span>
         <span class="custom_message"></span>
       </div>
     {% endif %}
-    {% if activity_component.is_open %}
+    {% if activity_stage.is_open %}
       <h1>
-        {{ activity_component.name }}
-        {% if activity_component.close_date %}
-        {% if activity_component.is_closed %}
-          <span class="highlight">closed on {{ activity_component.formatted_close_date }}</span>
-        {% else %}
-          <span class="highlight">due {{ activity_component.formatted_close_date }}</span>
-        {% endif %}
+        {{ activity_stage.title }}
+        {% if activity_stage.close_date %}
+          {% if activity_stage.is_closed %}
+            <span class="highlight">closed on {{ activity_stage.formatted_close_date }}</span>
+          {% else %}
+            <span class="highlight">due {{ activity_stage.formatted_close_date }}</span>
+          {% endif %}
         {% endif %}
       </h1>
-      {% for activity_section in activity_component.sections %}
-        {% autoescape off %}
-          {{ activity_section.render }}
-        {% endautoescape %}
-        {% ifequal activity_section.upload_html None %}
-        <hr />
-        {% endifequal %}
-      {% endfor %}
-      {% if activity_component.peer_reviews %}
-      <form class="peer_review" action="submit_peer_feedback" method="POST">
-        <input type="hidden" class="peer_id" name="peer_id" value="" />
-      {% for activity_section in activity_component.peer_review_sections %}
-        {% autoescape off %}
-          {{ activity_section.render }}
-        {% endautoescape %}
-        <hr />
-      {% endfor %}
-        <button class="submit" {% if activity_component.is_closed %}disabled="disabled"{% endif %}>Submit</button>
-      </form>
-      {% endif %}
-      {% if activity_component.other_group_reviews %}
-      <form class="other_group_review" action="submit_other_group_feedback" method="POST">
-        <input type="hidden" class="group_id" name="group_id" value="" />
-      <div class="other_submissions"><a href="#" class="view_other_submissions">View team submissions</a></div>
-      {% for activity_section in activity_component.other_group_sections %}
-        {% autoescape off %}
-          {{ activity_section.render }}
-        {% endautoescape %}
-        <hr />
-      {% endfor %}
-        <button class="submit" {% if activity_component.is_closed %}disabled="disabled"{% endif %}>Submit</button>
-      </form>
-      {% endif %}
-      {% if activity_component.peer_assessments %}
-      <div class="feedback_sections team_feedback">
-      {% for activity_section in activity_component.peer_assessment_sections %}
-        {% autoescape off %}
-          {{ activity_section.render }}
-        {% endautoescape %}
-        <hr />
-      {% endfor %}
-      </div>
-      {% endif %}
-      {% if activity_component.other_group_assessments %}
-      <div class="feedback_sections cohort_feedback">
-      {% for activity_section in activity_component.other_group_assessment_sections %}
-        {% autoescape off %}
-          {{ activity_section.render }}
-        {% endautoescape %}
-        <hr />
-      {% endfor %}
-      </div>
-      {% endif %}
+      {{activity_stage.render|safe}}
     {% else %}
       <h1>
-        {{ activity_component.name }}
-        {% if activity_component.open_date %}
-          <span class="highlight">opens {{ activity_component.formatted_open_date }}</span>
+        {{ activity_stage.title }}
+        {% if activity_stage.open_date %}
+          <span class="highlight">opens {{ activity_stage.formatted_open_date }}</span>
         {% endif %}
       </h1>
       <div class="error">This stage has not yet been opened</div>
