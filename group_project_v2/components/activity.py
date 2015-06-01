@@ -7,10 +7,10 @@ import json
 from django.template.loader import render_to_string
 from pkg_resources import resource_filename
 
-from ..utils import inner_html, outer_html, build_date_field, render_template, DottableDict
+from ..utils import inner_html, outer_html, build_date_field, render_template, DottableDict, format_date
 from ..project_api import build_date_field
 
-from .stage import GroupActivityStage, GroupActivityStageFactory
+from .stage import GroupActivityStageFactory
 
 
 class GroupActivity(object):
@@ -33,7 +33,7 @@ class GroupActivity(object):
     @property
     def submissions(self):
         return itertools.chain(
-            *[stage.submissions for stage in self.activity_stages]
+            *[getattr(stage, 'submissions', ()) for stage in self.activity_stages]
         )
 
     @property
@@ -51,9 +51,7 @@ class GroupActivity(object):
     def update_submission_data(self, submission_map):
 
         def formatted_date(iso_date_value):
-            return GroupActivityStage.formatted_date(
-                build_date_field(iso_date_value)
-            )
+            return format_date(build_date_field(iso_date_value))
 
         for submission in self.submissions:
             if submission["id"] in submission_map:

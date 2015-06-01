@@ -1,56 +1,42 @@
 import copy
+import abc
 from datetime import date
 
 from group_project_v2.components.review import GroupActivityQuestion, GroupActivityAssessment
-from group_project_v2.utils import DottableDict, render_template, parse_date, inner_html, outer_html
+from group_project_v2.utils import DottableDict, render_template, parse_date, inner_html, outer_html, format_date
 
 
-STAGE_TYPES = DottableDict(
-    NORMAL='normal',
-    UPLOAD='upload',
-    PEER_REVIEW='peer_review',
-    PEER_ASSESSMENT='peer_assessment',
-    GROUP_REVIEW='group_review',
-    GROUP_ASSESSMENT='group_assessment',
-)
+class StageType(object):
+    NORMAL = 'normal'
+    UPLOAD = 'upload'
+    PEER_REVIEW = 'peer_review'
+    PEER_ASSESSMENT = 'peer_assessment'
+    GROUP_REVIEW = 'group_review'
+    GROUP_ASSESSMENT = 'group_assessment'
 
 
-class GroupActivityStage(object):
+class BaseGroupActivityStage(object):
+    __metaclass__ = abc.ABCMeta
+
+    XML_TEMPLATE = 'templates/xml/activity_stage.xml'
+    HTML_TEMPLATE = 'templates/html/stages/text.html'
+
     def __init__(self, doc_tree, grading_override):
-        self.type = STAGE_TYPES.NORMAL
-
         self.grading_override = grading_override
         self._resources = []
-        self._submissions = []
-        self._questions = []
-        self._assessments = []
 
         self.open_date = None
         self.close_date = None
 
         self.id = doc_tree.get("id")
         self.title = doc_tree.get("title")
-        self.content = doc_tree.find("./content")
-        self.upload = doc_tree.find("./upload")
-
-        xml_type = doc_tree.get("type")
-        if xml_type and xml_type in STAGE_TYPES.values():
-            self.type = xml_type
+        self._content = doc_tree.find("./content")
 
         if doc_tree.get("open"):
             self.open_date = parse_date(doc_tree.get("open"))
 
         if doc_tree.get("close"):
             self.close_date = parse_date(doc_tree.get("close"))
-
-        # import any questions
-        for question in doc_tree.findall("./question"):
-            question = GroupActivityQuestion(question, self)
-            self._questions.append(question)
-
-        # import any assessments
-        for assessment in doc_tree.findall("./assessment"):
-            self._assessments.append(GroupActivityAssessment(assessment))
 
         # import resources
         for document in doc_tree.findall("./resources/document"):
@@ -59,14 +45,6 @@ class GroupActivityStage(object):
                 "description": document.get("description"),
                 "location": document.text,
                 "grading_criteria": document.get("grading_criteria") == "true"
-            }))
-
-        # import submission defintions
-        for document in doc_tree.findall("./submissions/document"):
-            self._submissions.append(DottableDict({
-                "id": document.get("id"),
-                "title": document.get("title"),
-                "description": document.get("description"),
             }))
 
     @property
@@ -78,60 +56,23 @@ class GroupActivityStage(object):
 
     @property
     def content_html(self):
-        return inner_html(self.content)
-
-    @property
-    def questions(self):
-        return tuple(self._questions)
-
-    @property
-    def assessments(self):
-        return tuple(self._assessments)
+        return inner_html(self._content)
 
     @property
     def resources(self):
         return tuple(self._resources)
 
     @property
-    def submissions(self):
-        return tuple(self._submissions)
-
-    @property
     def grading_criteria(self):
         return (resource for resource in self._resources if resource.grading_criteria)
 
     @property
-    def grade_questions(self):
-        return (question for question in self._questions if question.grade)
-
-    @staticmethod
-    def formatted_date(date_value):
-        return date_value.strftime("%m/%d/%Y")  # TODO: not l10n friendly
-
-    # TODO: these four properties should be better named as has_*
-    @property
-    def peer_reviews(self):
-        return self.type == STAGE_TYPES.PEER_REVIEW
-
-    @property
-    def other_group_reviews(self):
-        return self.type == STAGE_TYPES.GROUP_REVIEW
-
-    @property
-    def peer_assessments(self):
-        return self.type == STAGE_TYPES.PEER_ASSESSMENT
-
-    @property
-    def other_group_assessments(self):
-        return self.type == STAGE_TYPES.GROUP_ASSESSMENT
-
-    @property
     def formatted_open_date(self):
-        return GroupActivityStage.formatted_date(self.open_date)
+        return format_date(self.open_date)
 
     @property
     def formatted_close_date(self):
-        return GroupActivityStage.formatted_date(self.close_date)
+        return format_date(self.close_date)
 
     @property
     def is_open(self):
@@ -147,6 +88,47 @@ class GroupActivityStage(object):
 
         return (self.close_date is not None) and (self.close_date < date.today())
 
+    def _render(self, template):
+        return render_template(template, {"activity_stage": self})
+
+    @property
+    def export_xml(self):
+        return self._render(self.XML_TEMPLATE)
+
+    @property
+    def render(self):
+        return self._render(self.HTML_TEMPLATE)
+
+
+class BasicStage(BaseGroupActivityStage):
+    HTML_TEMPLATE = 'templates/html/stages/text.html'
+
+
+class SubmissionStage(BaseGroupActivityStage):
+    HTML_TEMPLATE = 'templates/html/stages/upload.html'
+
+    def __init__(self, doc_tree, grading_override):
+        super(SubmissionStage, self).__init__(doc_tree, grading_override)
+        self._submissions = []
+        self._upload = doc_tree.find("./upload")
+
+        # import submission definitions
+        for document in doc_tree.findall("./submissions/document"):
+            self._submissions.append(DottableDict({
+                "id": document.get("id"),
+                "title": document.get("title"),
+                "description": document.get("description"),
+            }))
+
+    @property
+    def submissions(self):
+        # need to be a list to support "if activity_stage.resources" check in templates
+        return self._submissions
+
+    @property
+    def upload_html(self):
+        return inner_html(self._upload)
+
     @property
     def is_upload_available(self):
         return self.submissions and self.is_open and not self.is_closed
@@ -155,38 +137,76 @@ class GroupActivityStage(object):
     def has_submissions(self):
         return any([getattr(submission, 'location', None) for submission in self.submissions])
 
-    # TODO: this method is used in presentation layer only - should remove it when possible
-    @property
-    def feedback_parameters(self):
-        result = {}
-        if self.type == STAGE_TYPES.PEER_REVIEW:
-            result = dict(
-                form_class='peer_review',
-                form_action='submit_peer_feedback',
-                input_id='peer_id'
-            )
-        elif self.type == STAGE_TYPES.GROUP_REVIEW:
-            result = dict(
-                form_class='other_group_review',
-                form_action='submit_other_group_feedback',
-                input_id='group_id'
-            )
 
-        return result
+class ReviewBaseStage(BaseGroupActivityStage):
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, doc_tree, grading_override):
+        super(ReviewBaseStage, self).__init__(doc_tree, grading_override)
+        self._questions = []
+
+        self._grade_header = doc_tree.find("./grade_header")
+
+        # import any questions
+        for question in doc_tree.findall("./question"):
+            question = GroupActivityQuestion(question, self)
+            self._questions.append(question)
 
     @property
-    def export_xml(self):
-        return render_template('/templates/xml/activity_stage.xml', {"activity_stage": self})
+    def questions(self):
+        return tuple(self._questions)
 
     @property
-    def render(self):
-        return render_template('/templates/html/activity_stage.html', {"activity_stage": self})
+    def grade_questions(self):
+        return (question for question in self._questions if question.grade)
+
+    @property
+    def grade_header_html(self):
+        return inner_html(self._grade_header)
+
+
+class PeerReviewStage(ReviewBaseStage):
+    HTML_TEMPLATE = 'templates/html/stages/peer_review.html'
+
+
+class GroupReviewStage(ReviewBaseStage):
+    HTML_TEMPLATE = 'templates/html/stages/group_review.html'
+
+
+class AssessmentBaseStage(BaseGroupActivityStage):
+    __metaclass__ = abc.ABCMeta
+
+    HTML_TEMPLATE = 'templates/html/stages/peer_assessment.html'
+
+    def __init__(self, doc_tree, grading_override):
+        super(AssessmentBaseStage, self).__init__(doc_tree, grading_override)
+        self._assessments = []
+
+        # import any assessments
+        for assessment in doc_tree.findall("./assessment"):
+            self._assessments.append(GroupActivityAssessment(assessment))
+
+    @property
+    def assessments(self):
+        return tuple(self._assessments)
+
+
+class PeerAssessmentStage(AssessmentBaseStage):
+    HTML_TEMPLATE = 'templates/html/stages/peer_assessment.html'
+
+
+class GroupAssessmentStage(AssessmentBaseStage):
+    HTML_TEMPLATE = 'templates/html/stages/group_assessment.html'
 
 
 class GroupActivityStageFactory(object):
     _type_map = {}
 
-    _default_stage_class = GroupActivityStage
+    _default_stage_class = BasicStage
+
+    @classmethod
+    def register(cls, type, stage_class):
+        cls._type_map[type] = stage_class
 
     @classmethod
     def create(cls, xml_node, grading_override):
@@ -194,3 +214,10 @@ class GroupActivityStageFactory(object):
         stage_class = cls._type_map.get(stage_type, cls._default_stage_class)
 
         return stage_class(xml_node, grading_override)
+
+GroupActivityStageFactory.register(StageType.NORMAL, BasicStage)
+GroupActivityStageFactory.register(StageType.UPLOAD, SubmissionStage)
+GroupActivityStageFactory.register(StageType.PEER_REVIEW, PeerReviewStage)
+GroupActivityStageFactory.register(StageType.GROUP_REVIEW, GroupReviewStage)
+GroupActivityStageFactory.register(StageType.PEER_ASSESSMENT, PeerAssessmentStage)
+GroupActivityStageFactory.register(StageType.GROUP_ASSESSMENT, GroupAssessmentStage)

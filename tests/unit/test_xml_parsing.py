@@ -5,22 +5,32 @@ import sys
 import textwrap
 from unittest import TestCase
 from datetime import date
-from group_project_v2.group_activity import GroupActivity, STAGE_TYPES
+from group_project_v2.components import GroupActivity, StageType
+from group_project_v2.components.stage import (
+    BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage, PeerAssessmentStage, GroupAssessmentStage
+)
 
 
 class GroupActivitityXmlTest(TestCase):
-    def _assert_stage_name_and_type(self, stage, expected_title, expected_type):
+    def _assert_stage_name_and_type(self, stage, expected_title, expected_class):
         self.assertEqual(stage.title, expected_title)
-        self.assertEqual(stage.type, expected_type)
+        self.assertIsInstance(stage, expected_class)
 
     def _assert_stage_start_and_end_date(self, stage, expected_open, expected_close):
         self.assertEqual(stage.open_date, expected_open)
         self.assertEqual(stage.close_date, expected_close)
 
-    def _assert_resources_submissions_and_grading(self, stage, resources=0, submissions=0, grading_criteria=0):
-        self.assertEqual(len(list(stage.resources)), resources)
-        self.assertEqual(len(list(stage.submissions)), submissions)
-        self.assertEqual(len(list(stage.grading_criteria)), grading_criteria)
+    def _assert_resources_submissions_and_grading(self, stage, resources=None, submissions=None, grading_criteria=None):
+        def _check(attr_name, expected):
+            if expected is not None:
+                attr_value = getattr(stage, attr_name)
+                self.assertEqual(len(list(attr_value)), expected)
+            else:
+                self.assertFalse(hasattr(stage, attr_name))
+
+        _check('resources', resources)
+        _check('submissions', submissions)
+        _check('grading_criteria', grading_criteria)
 
     def _assert_stage_sections(self, stage, normal=0,
                                peer_review=0, group_review=0, peer_assessment=0, group_assessment=0):
@@ -56,12 +66,12 @@ class GroupActivitityXmlTest(TestCase):
 
         overview, upload, team_review, group_review, team_assessment, group_assessment = stages
 
-        self._assert_stage_name_and_type(overview, "Overview", STAGE_TYPES.NORMAL)
-        self._assert_stage_name_and_type(upload, "Upload", STAGE_TYPES.UPLOAD)
-        self._assert_stage_name_and_type(team_review, "Review Team", STAGE_TYPES.PEER_REVIEW)
-        self._assert_stage_name_and_type(group_review, "Review Group", STAGE_TYPES.GROUP_REVIEW)
-        self._assert_stage_name_and_type(team_assessment, "Evaluate Team Feedback", STAGE_TYPES.PEER_ASSESSMENT)
-        self._assert_stage_name_and_type(group_assessment, "Evaluate Group Feedback", STAGE_TYPES.GROUP_ASSESSMENT)
+        self._assert_stage_name_and_type(overview, "Overview", BasicStage)
+        self._assert_stage_name_and_type(upload, "Upload", SubmissionStage)
+        self._assert_stage_name_and_type(team_review, "Review Team", PeerReviewStage)
+        self._assert_stage_name_and_type(group_review, "Review Group", GroupReviewStage)
+        self._assert_stage_name_and_type(team_assessment, "Evaluate Team Feedback", PeerAssessmentStage)
+        self._assert_stage_name_and_type(group_assessment, "Evaluate Group Feedback", GroupAssessmentStage)
 
         self._assert_stage_start_and_end_date(overview, None, None)
         self._assert_stage_start_and_end_date(upload, None, date(2014, 5, 24))
@@ -70,14 +80,13 @@ class GroupActivitityXmlTest(TestCase):
         self._assert_stage_start_and_end_date(team_assessment, date(2014, 6, 20), None)
         self._assert_stage_start_and_end_date(group_assessment, date(2014, 6, 20), None)
 
-        self._assert_resources_submissions_and_grading(overview, resources=2, submissions=0, grading_criteria=0)
+        self._assert_resources_submissions_and_grading(overview, resources=2, submissions=None, grading_criteria=0)
         self._assert_resources_submissions_and_grading(upload, resources=1, submissions=3, grading_criteria=1)
-        self._assert_resources_submissions_and_grading(team_review, resources=0, submissions=0, grading_criteria=0)
-        self._assert_resources_submissions_and_grading(group_review, resources=0, submissions=0, grading_criteria=0)
+        self._assert_resources_submissions_and_grading(team_review, resources=0, submissions=None, grading_criteria=0)
+        self._assert_resources_submissions_and_grading(group_review, resources=0, submissions=None, grading_criteria=0)
 
         self.assertEqual(list(overview.resources), resource_data[:2])
 
-        self.assertNotEqual(overview.content, None)
         self.assertEqual(textwrap.dedent(overview.content_html), textwrap.dedent(
             """
             <p>Html Description Blah Blah Blah<span>Additional info</span></p>

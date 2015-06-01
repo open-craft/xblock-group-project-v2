@@ -3,7 +3,6 @@
   <hr/>
 {% endif %}
 
-<!-- This will likely go to Project Navigator.Resources -->
 {% if activity_stage.resources %}
   <div class="group_resources">
     <h4>Resources</h4>
@@ -16,21 +15,19 @@
   <hr/>
 {% endif %}
 
-{% if activity_stage.submissions %}
-  <div class="group_submissions">
-    <h4>Current Uploads</h4>
-    {% if activity_stage.has_submissions %}
-      {% for file_link in activity_stage.submissions %}
-        {% if file_link.location %}
-          <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }} - {{ file_link.submission_date }}){% endif %}</a></div>
-        {% endif %}
-      {% endfor %}
-    {% elif not activity_stage.upload_dialog %}
-        <div class="submissions_message">No submissions have been uploaded for this group</div>
-    {% endif %}
-  </div>
-  <hr/>
-{% endif %}
+<div class="group_submissions">
+  <h4>Current Uploads</h4>
+  {% if activity_stage.has_submissions %}
+    {% for file_link in activity_stage.submissions %}
+      {% if file_link.location %}
+        <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }} - {{ file_link.submission_date }}){% endif %}</a></div>
+      {% endif %}
+    {% endfor %}
+  {% else %}
+      <div class="submissions_message">No submissions have been uploaded for this group</div>
+  {% endif %}
+</div>
+<hr/>
 
 <!-- This will likely go to Project Navigator.Uploads -->
 {% if activity_stage.is_upload_available %}
@@ -42,10 +39,8 @@
         <i class="fa fa-times-circle"></i>
       </div>
       {% if activity_stage.upload_html %}
-        {% autoescape off %}
-          {{ activity_stage.upload_html }}
-          <hr />
-        {% endautoescape %}
+        {{ activity_stage.upload_html|safe }}
+        <hr />
       {% endif %}
       <form class="uploader">
         {% for file_link in activity_stage.submissions %}
@@ -73,32 +68,3 @@
     </div>
   </div>
 {% endif %}
-
-{% autoescape off %}
-  {% if activity_stage.type == 'peer_review' or activity_stage.type == 'group_review' %}
-    <form class="{{ activity_stage.feedback_parameters.form_class }}" action="{{ activity_stage.feedback_parameters.form_action }}" method="POST">
-      <input type="hidden" class="{{ activity_stage.feedback_parameters.input_id }}" name="{{ activity_stage.feedback_parameters.input_id }}" value="" />
-      {% if activity_stage.type == 'group_review' %}
-        <div class="other_submissions"><a href="#" class="view_other_submissions">View team submissions</a></div>
-      {% endif %}
-      {% if activity_stage.questions %}
-        {% for activity_question in activity_stage.questions %}
-          {{ activity_question.render }}
-        {% endfor %}
-        <hr/>
-      {% endif %}
-      <button class="submit" {% if activity_stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
-    </form>
-  {% endif %}
-
-  {% if activity_stage.type == 'peer_assessment' or activity_stage.type == 'group_assessment' %}
-    <div class="feedback_stage {{activity_stage.type}}">
-      {% if activity_stage.assessments %}
-        {% for activity_assessment in activity_stage.assessments %}
-          {{ activity_assessment.render }}
-        {% endfor %}
-        <hr/>
-      {% endif %}
-    </div>
-  {% endif %}
-{% endautoescape %}
