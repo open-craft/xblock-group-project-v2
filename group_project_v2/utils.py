@@ -78,4 +78,3 @@ def build_date_field(json_date_string_value):
 
 def format_date(date_value):
     return date_value.strftime("%m/%d/%Y")  # TODO: not l10n friendly
-
