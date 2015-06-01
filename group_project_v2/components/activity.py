@@ -45,7 +45,7 @@ class GroupActivity(object):
     @property
     def grade_questions(self):
         return list(itertools.chain(
-            *[stage.grade_questions for stage in self.activity_stages]
+            *[getattr(stage, 'grade_questions', ()) for stage in self.activity_stages]
         ))
 
     def update_submission_data(self, submission_map):

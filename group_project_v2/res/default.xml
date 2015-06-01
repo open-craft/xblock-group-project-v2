@@ -214,7 +214,6 @@
     <content>
       <h1>FEEDBACK</h1>
       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-      <div><a class="view_feedback">View Team Feedback</a></div>
     </content>
     <assessment id="assess_peer_q1">
       <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
@@ -251,7 +250,6 @@
     <content>
       <h1>FEEDBACK</h1>
       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-      <div><a class="view_feedback">View Cohort Feedback</a></div>
     </content>
     <assessment id="assess_other_team_comments">
       <label>General:</label>
