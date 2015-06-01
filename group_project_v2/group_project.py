@@ -21,6 +21,7 @@ from django.utils.translation import ugettext as _
 from xblock.core import XBlock
 from xblock.fields import Scope, String, Dict, Float, Integer
 from xblock.fragment import Fragment
+from xblock.validation import ValidationMessage
 
 from StringIO import StringIO
 
@@ -509,6 +510,18 @@ class GroupActivityXBlock(XBlock):
         return {
             'result': 'success',
         }
+
+    def validate(self):
+        """
+        Validates the state of this XBlock except for individual field values.
+        """
+        validation = super(GroupActivityXBlock, self).validate()
+        group_activity = self.get_group_activity()
+        errors = group_activity.validate()
+        for error in errors:
+            validation.add(ValidationMessage(error.type, error.text))
+
+        return validation
 
     @XBlock.json_handler
     def submit_peer_feedback(self, submissions, suffix=''):
