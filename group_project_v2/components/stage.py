@@ -3,7 +3,9 @@ import abc
 from datetime import date
 
 from group_project_v2.components.review import GroupActivityQuestion, GroupActivityAssessment
-from group_project_v2.utils import DottableDict, render_template, parse_date, inner_html, outer_html, format_date
+from group_project_v2.utils import (
+    DottableDict, render_template, parse_date, inner_html, outer_html, format_date, gettext as _
+)
 
 
 class StageType(object):
@@ -13,6 +15,20 @@ class StageType(object):
     PEER_ASSESSMENT = 'peer_assessment'
     GROUP_REVIEW = 'group_review'
     GROUP_ASSESSMENT = 'group_assessment'
+
+
+# TODO: use XBlock.ValidationMessage when stages become actual XBlocks
+class StageValidationMessage(object):
+    """
+    This class intentionally duplicates XBlock.ValidationMessage in order to remove dependency on XBlock
+    form this module
+    """
+    WARNING = 'warning'
+    ERROR = 'error'
+
+    def __init__(self, message_type, message_text):
+        self.type = message_type
+        self.text = message_text
 
 
 class BaseGroupActivityStage(object):
@@ -99,6 +115,22 @@ class BaseGroupActivityStage(object):
     def render(self):
         return self._render(self.HTML_TEMPLATE)
 
+    def validate(self):
+        violations = []
+        if not self.id:
+            violations.append(StageValidationMessage(
+                StageValidationMessage.WARNING,
+                _(u'Stage "{stage_title}" have no id'.format(stage_title=self.title)))
+            )
+
+        if not self.title:
+            violations.append(StageValidationMessage(
+                StageValidationMessage.WARNING,
+                _(u'Stage with id {stage_id} have no title'.format(stage_id=self.id)))
+            )
+
+        return violations
+
 
 class BasicStage(BaseGroupActivityStage):
     HTML_TEMPLATE = 'templates/html/stages/text.html'
@@ -122,8 +154,7 @@ class SubmissionStage(BaseGroupActivityStage):
 
     @property
     def submissions(self):
-        # need to be a list to support "if activity_stage.resources" check in templates
-        return self._submissions
+        return tuple(self._submissions)
 
     @property
     def upload_html(self):
@@ -136,6 +167,19 @@ class SubmissionStage(BaseGroupActivityStage):
     @property
     def has_submissions(self):
         return any([getattr(submission, 'location', None) for submission in self.submissions])
+
+    def validate(self):
+        violations = super(SubmissionStage, self).validate()
+
+        if not self.submissions:
+            violations.append(StageValidationMessage(
+                StageValidationMessage.ERROR,
+                _(u"Submissions are not specified for {class_name} '{stage_title}'").format(
+                    class_name=self.__class__.__name__, stage_title=self.title
+                )
+            ))
+
+        return violations
 
 
 class ReviewBaseStage(BaseGroupActivityStage):
@@ -164,6 +208,19 @@ class ReviewBaseStage(BaseGroupActivityStage):
     def grade_header_html(self):
         return inner_html(self._grade_header)
 
+    def validate(self):
+        violations = super(ReviewBaseStage, self).validate()
+
+        if not self.questions:
+            violations.append(StageValidationMessage(
+                StageValidationMessage.ERROR,
+                _(u"Questions are not specified for {class_name} '{stage_title}'").format(
+                    class_name=self.__class__.__name__, stage_title=self.title
+                )
+            ))
+
+        return violations
+
 
 class PeerReviewStage(ReviewBaseStage):
     HTML_TEMPLATE = 'templates/html/stages/peer_review.html'
@@ -189,6 +246,19 @@ class AssessmentBaseStage(BaseGroupActivityStage):
     @property
     def assessments(self):
         return tuple(self._assessments)
+
+    def validate(self):
+        violations = super(AssessmentBaseStage, self).validate()
+
+        if not self.assessments:
+            violations.append(StageValidationMessage(
+                StageValidationMessage.ERROR,
+                _(u"Assessments are not specified for {class_name} '{stage_title}'").format(
+                    class_name=self.__class__.__name__, stage_title=self.title
+                )
+            ))
+
+        return violations
 
 
 class PeerAssessmentStage(AssessmentBaseStage):

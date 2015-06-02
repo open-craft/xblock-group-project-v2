@@ -1,16 +1,18 @@
-import itertools
-import xml.etree.ElementTree as ET
-from datetime import date
 import copy
 import json
+import itertools
+import xml.etree.ElementTree as ET
+
+from collections import Counter
+from datetime import date
 
 from django.template.loader import render_to_string
 from pkg_resources import resource_filename
 
-from ..utils import inner_html, outer_html, build_date_field, render_template, DottableDict, format_date
+from ..utils import inner_html, outer_html, build_date_field, render_template, DottableDict, format_date, gettext as _
 from ..project_api import build_date_field
 
-from .stage import GroupActivityStageFactory
+from .stage import GroupActivityStageFactory, StageValidationMessage
 
 
 class GroupActivity(object):
@@ -134,3 +136,22 @@ class GroupActivity(object):
     def import_xml_string(cls, xml, grading_override=False):
         doc_tree = ET.fromstring(xml)
         return cls(doc_tree, grading_override)
+
+    def _validate(self):
+        violations = []
+
+        ids_count = Counter([stage.id for stage in self.activity_stages])
+        for stage_id, count in ids_count.iteritems():
+            if count > 1:
+                violations.append(StageValidationMessage(
+                    StageValidationMessage.WARNING,
+                    _(u"Duplicate stage ids: {stage_id} appeared {count} times").format(stage_id=stage_id, count=count)
+                ))
+
+        return violations
+
+    def validate(self):
+        return itertools.chain(
+            self._validate(),
+            *[stage.validate() for stage in self.activity_stages]
+        )
