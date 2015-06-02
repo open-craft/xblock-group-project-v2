@@ -41,11 +41,10 @@
     <content>
       <h1>Evaluate Team Members' Performance</h1>
       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat</p>
-      <div class="centered">
-        <span class="peers"/>
-      </div>
-      <h4>Evaluate <span class="username">this teammate</span></h4>
     </content>
+    <grade_header>
+      <h4>Evaluate <span class="username">this teammate</span></h4>
+    </grade_header>
     <question id="peer_score">
       <label>Did <span class="username">this teammate</span> lorem mit dolor sit amet, consectetur adipisicing elit?</label>
       <answer small="true">
@@ -87,9 +86,6 @@
     <content>
       <h1>Evaluate Project Submissions</h1>
       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat</p>
-      <div class="centered">
-        <span class="other_groups"/>
-      </div>
     </content>
     <question id="other_team_comments">
       <label/>
@@ -218,7 +214,6 @@
     <content>
       <h1>FEEDBACK</h1>
       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-      <div><a class="view_feedback">View Team Feedback</a></div>
     </content>
     <assessment id="assess_peer_q1">
       <label>Q: Did username lorem mit dolor sit amet, consectetur adipisicing elit?</label>
@@ -255,7 +250,6 @@
     <content>
       <h1>FEEDBACK</h1>
       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-      <div><a class="view_feedback">View Cohort Feedback</a></div>
     </content>
     <assessment id="assess_other_team_comments">
       <label>General:</label>

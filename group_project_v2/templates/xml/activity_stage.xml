@@ -34,4 +34,16 @@
       </answer>
     </assessment>
   {% endfor %}
+  <resources>
+    {% for document in documents %}
+      <document title='{{ document.title }}'{% ifnotequal document.grading_criteria None %} grading_criteria='true'{% endifnotequal %}{% ifnotequal document.description None %} description='{{ document.description }}'{% endifnotequal %}>
+        {{ document.location }}
+      </document>
+    {% endfor %}
+  </resources>
+  <submissions>
+    {% for document in group_activity.submissions %}
+      <document {% ifnotequal document.description None %}description='{{ document.description }}' {% endifnotequal %}title='{{ document.title }}'></document>
+    {% endfor %}
+  </submissions>
 </activitystage>

@@ -1,0 +1,31 @@
+{% if activity_stage.content_html %}
+  {{ activity_stage.content_html|safe }}
+  <hr/>
+{% endif %}
+
+{% if activity_stage.resources %}
+  <div class="group_resources">
+    <h4>Resources</h4>
+    {% for file_link in activity_stage.resources %}
+      {% if file_link.location %}
+        <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }} - {{ file_link.submission_date }}){% endif %}</a></div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <hr/>
+{% endif %}
+
+<div class="centered"><span class="peers"></span></div>
+
+{% if activity_stage.grade_header_html %}
+  {{ activity_stage.grade_header_html|safe }}
+{% endif %}
+
+<form class="peer_review" action="submit_peer_feedback" method="POST">
+  <input type="hidden" class="peer_id" name="peer_id" value="" />
+  {% for activity_question in activity_stage.questions %}
+    {{ activity_question.render|safe }}
+  {% endfor %}
+  <hr/>
+  <button class="submit" {% if activity_stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
+</form>
