@@ -1,1 +1,1 @@
-from .group_project import GroupActivityXBlock
+from .group_project import GroupProjectXBlock, GroupActivityXBlock

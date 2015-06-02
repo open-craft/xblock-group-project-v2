@@ -14,6 +14,8 @@ from lxml import etree
 from xml.etree import ElementTree as ET
 from pkg_resources import resource_filename
 
+from StringIO import StringIO
+
 from django.conf import settings
 from django.utils import html
 from django.utils.translation import ugettext as _
@@ -23,7 +25,8 @@ from xblock.fields import Scope, String, Dict, Float, Integer
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
-from StringIO import StringIO
+from xblockutils.resources import ResourceLoader
+from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
 from .utils import render_template, load_resource
 
@@ -45,6 +48,7 @@ except:
 # Globals ###########################################################
 
 log = logging.getLogger(__name__)
+loader = ResourceLoader(__name__)
 
 
 # Classes ###########################################################
@@ -65,6 +69,34 @@ class OutsiderDisallowedError(Exception):
         return u"Outsider Denied Access: {}".format(self.value)
 
 
+class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin):
+    display_name = String(
+        display_name="Display Name",
+        help="This is a name of the project",
+        scope=Scope.settings,
+        default="Group Project V2"
+    )
+
+    editable_fields = ('display_name', )
+    has_score = False
+    has_children = True
+
+    def student_view(self, context):
+        fragment = Fragment()
+        self.render_children(context, fragment, can_reorder=False, can_add=False)
+        return fragment
+
+    def author_edit_view(self, context):
+        """
+        Add some HTML to the author view that allows authors to add child blocks.
+        """
+        fragment = Fragment()
+        self.render_children(context, fragment, can_reorder=True, can_add=False)
+        fragment.add_content(loader.render_template('templates/html/group_project_add_buttons.html', {}))
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
+        return fragment
+
+
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
 class GroupActivityXBlock(XBlock):
@@ -75,7 +107,7 @@ class GroupActivityXBlock(XBlock):
         display_name="Display Name",
         help="This name appears in the horizontal navigation at the top of the page.",
         scope=Scope.settings,
-        default="Group Project V2"
+        default="Group Project Activity"
     )
 
     weight = Float(
@@ -253,15 +285,15 @@ class GroupActivityXBlock(XBlock):
 
         fragment = Fragment()
         fragment.add_content(
-            render_template('/templates/html/group_project.html', context))
-        fragment.add_css(load_resource('public/css/group_project.css'))
+            render_template('/templates/html/group_activity.html', context))
+        fragment.add_css(load_resource('public/css/group_activity.css'))
 
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.ui.widget.js'))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.fileupload.js'))
         fragment.add_javascript_url(
             self.runtime.local_resource_url(self, 'public/js/vendor/jquery.iframe-transport.js'))
 
-        fragment.add_javascript(load_resource('public/js/group_project.js'))
+        fragment.add_javascript(load_resource('public/js/group_activity.js'))
 
         fragment.initialize_js('GroupProjectBlock')
 
@@ -272,15 +304,15 @@ class GroupActivityXBlock(XBlock):
         Editing view in Studio
         """
         fragment = Fragment()
-        fragment.add_content(render_template('/templates/html/group_project_edit.html', {
+        fragment.add_content(render_template('/templates/html/group_activity_edit.html', {
             'self': self,
         }))
-        fragment.add_css(load_resource('public/css/group_project_edit.css'))
+        fragment.add_css(load_resource('public/css/group_activity_edit.css'))
 
         fragment.add_javascript(
-            load_resource('public/js/group_project_edit.js'))
+            load_resource('public/js/group_activity_edit.js'))
 
-        fragment.initialize_js('GroupProjectEditBlock')
+        fragment.initialize_js('GroupActivityEditBlock')
 
         return fragment
 

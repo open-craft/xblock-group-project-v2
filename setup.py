@@ -23,14 +23,18 @@ def package_data(pkg, root_list):
 
 setup(
     name='xblock-group-project-v2',
-    version='0.1',
+    version='0.2',
     description='XBlock - Group Project V2',
     packages=['group_project_v2'],
     install_requires=[
         'XBlock',
+        'xblock-utils',
     ],
     entry_points={
-        'xblock.v1': 'group-project-v2 = group_project_v2:GroupActivityXBlock',
+        'xblock.v1': [
+            'group-project-v2 = group_project_v2:GroupProjectXBlock',
+            'group-project-v2-activity = group_project_v2:GroupActivityXBlock',
+        ]
     },
     package_data=package_data("group_project_v2", ["static", "templates", "public", "res"]),
 )
