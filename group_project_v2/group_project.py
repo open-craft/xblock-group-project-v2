@@ -30,7 +30,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContain
 
 from .utils import render_template, load_resource
 
-from components.activity import GroupActivity
+from components import GroupActivity, PeerReviewStage, GroupReviewStage
 from .project_api import ProjectAPI
 from .upload_file import UploadFile
 from .api_error import ApiError
@@ -357,8 +357,8 @@ class GroupActivityXBlock(XBlock):
 
         def get_user_grade_value_list(user_id):
             user_grades = []
-            for question_id in group_activity.grade_questions:
-                user_value = review_item_map.get(make_key(question_id, user_id), None)
+            for question in group_activity.grade_questions:
+                user_value = review_item_map.get(make_key(question.id, user_id), None)
                 if user_value is None:
                     # if any are incomplete, we consider the whole set to be unusable
                     return None
@@ -434,8 +434,7 @@ class GroupActivityXBlock(XBlock):
 
     def evaluations_complete(self):
         group_activity = self.get_group_activity()
-        peer_review_stages = [stage for stage in group_activity.activity_stages if
-                              stage.peer_reviews]
+        peer_review_stages = [stage for stage in group_activity.activity_stages if isinstance(stage, PeerReviewStage)]
         peer_review_questions = []
         for peer_review_stage in peer_review_stages:
                 peer_review_questions.extend([
@@ -464,8 +463,7 @@ class GroupActivityXBlock(XBlock):
 
     def grading_complete(self):
         group_activity = self.get_group_activity()
-        group_review_stages = [stage for stage in group_activity.activity_stages if
-                               stage.other_group_reviews]
+        group_review_stages = [stage for stage in group_activity.activity_stages if isinstance(stage, GroupReviewStage)]
         group_review_questions = []
         for group_review_stage in group_review_stages:
             group_review_questions.extend([q.id for q in group_review_stage.questions if q.required])
