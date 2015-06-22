@@ -12,7 +12,7 @@ from pkg_resources import resource_filename
 from ..utils import inner_html, outer_html, build_date_field, render_template, DottableDict, format_date, gettext as _
 from ..project_api import build_date_field
 
-from .stage import GroupActivityStageFactory, StageValidationMessage
+from .stage import GroupActivityStageFactory, GroupReviewStage, StageValidationMessage
 
 
 class GroupActivity(object):
@@ -102,7 +102,7 @@ class GroupActivity(object):
             prev_step = ac.id
 
             if self.grading_override:
-                if ac.other_group_reviews:
+                if isinstance(ac, GroupReviewStage):
                     default_stage = ac.id
             elif ac.open_date and ac.open_date <= date.today():
                 default_stage = ac.id

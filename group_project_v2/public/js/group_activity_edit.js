@@ -1,4 +1,4 @@
-function GroupProjectEditBlock(runtime, element) {
+function GroupActivityEditBlock(runtime, element) {
     var xmlEditorTextarea = $('.block-xml-editor', element),
         xmlEditor = CodeMirror.fromTextArea(xmlEditorTextarea[0], {mode: 'xml', lineWrapping: true});
 

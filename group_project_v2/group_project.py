@@ -14,6 +14,8 @@ from lxml import etree
 from xml.etree import ElementTree as ET
 from pkg_resources import resource_filename
 
+from StringIO import StringIO
+
 from django.conf import settings
 from django.utils import html
 from django.utils.translation import ugettext as _
@@ -23,11 +25,12 @@ from xblock.fields import Scope, String, Dict, Float, Integer
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
-from StringIO import StringIO
+from xblockutils.resources import ResourceLoader
+from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
 from .utils import render_template, load_resource
 
-from components.activity import GroupActivity
+from components import GroupActivity, PeerReviewStage, GroupReviewStage
 from .project_api import ProjectAPI
 from .upload_file import UploadFile
 from .api_error import ApiError
@@ -45,6 +48,7 @@ except:
 # Globals ###########################################################
 
 log = logging.getLogger(__name__)
+loader = ResourceLoader(__name__)
 
 
 # Classes ###########################################################
@@ -65,6 +69,34 @@ class OutsiderDisallowedError(Exception):
         return u"Outsider Denied Access: {}".format(self.value)
 
 
+class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin):
+    display_name = String(
+        display_name="Display Name",
+        help="This is a name of the project",
+        scope=Scope.settings,
+        default="Group Project V2"
+    )
+
+    editable_fields = ('display_name', )
+    has_score = False
+    has_children = True
+
+    def student_view(self, context):
+        fragment = Fragment()
+        self.render_children(context, fragment, can_reorder=False, can_add=False)
+        return fragment
+
+    def author_edit_view(self, context):
+        """
+        Add some HTML to the author view that allows authors to add child blocks.
+        """
+        fragment = Fragment()
+        self.render_children(context, fragment, can_reorder=True, can_add=False)
+        fragment.add_content(loader.render_template('templates/html/group_project_add_buttons.html', {}))
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
+        return fragment
+
+
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
 class GroupActivityXBlock(XBlock):
@@ -75,7 +107,7 @@ class GroupActivityXBlock(XBlock):
         display_name="Display Name",
         help="This name appears in the horizontal navigation at the top of the page.",
         scope=Scope.settings,
-        default="Group Project V2"
+        default="Group Project Activity"
     )
 
     weight = Float(
@@ -253,15 +285,15 @@ class GroupActivityXBlock(XBlock):
 
         fragment = Fragment()
         fragment.add_content(
-            render_template('/templates/html/group_project.html', context))
-        fragment.add_css(load_resource('public/css/group_project.css'))
+            render_template('/templates/html/group_activity.html', context))
+        fragment.add_css(load_resource('public/css/group_activity.css'))
 
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.ui.widget.js'))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.fileupload.js'))
         fragment.add_javascript_url(
             self.runtime.local_resource_url(self, 'public/js/vendor/jquery.iframe-transport.js'))
 
-        fragment.add_javascript(load_resource('public/js/group_project.js'))
+        fragment.add_javascript(load_resource('public/js/group_activity.js'))
 
         fragment.initialize_js('GroupProjectBlock')
 
@@ -272,15 +304,15 @@ class GroupActivityXBlock(XBlock):
         Editing view in Studio
         """
         fragment = Fragment()
-        fragment.add_content(render_template('/templates/html/group_project_edit.html', {
+        fragment.add_content(render_template('/templates/html/group_activity_edit.html', {
             'self': self,
         }))
-        fragment.add_css(load_resource('public/css/group_project_edit.css'))
+        fragment.add_css(load_resource('public/css/group_activity_edit.css'))
 
         fragment.add_javascript(
-            load_resource('public/js/group_project_edit.js'))
+            load_resource('public/js/group_activity_edit.js'))
 
-        fragment.initialize_js('GroupProjectEditBlock')
+        fragment.initialize_js('GroupActivityEditBlock')
 
         return fragment
 
@@ -325,8 +357,8 @@ class GroupActivityXBlock(XBlock):
 
         def get_user_grade_value_list(user_id):
             user_grades = []
-            for question_id in group_activity.grade_questions:
-                user_value = review_item_map.get(make_key(question_id, user_id), None)
+            for question in group_activity.grade_questions:
+                user_value = review_item_map.get(make_key(question.id, user_id), None)
                 if user_value is None:
                     # if any are incomplete, we consider the whole set to be unusable
                     return None
@@ -402,8 +434,7 @@ class GroupActivityXBlock(XBlock):
 
     def evaluations_complete(self):
         group_activity = self.get_group_activity()
-        peer_review_stages = [stage for stage in group_activity.activity_stages if
-                              stage.peer_reviews]
+        peer_review_stages = [stage for stage in group_activity.activity_stages if isinstance(stage, PeerReviewStage)]
         peer_review_questions = []
         for peer_review_stage in peer_review_stages:
                 peer_review_questions.extend([
@@ -432,8 +463,7 @@ class GroupActivityXBlock(XBlock):
 
     def grading_complete(self):
         group_activity = self.get_group_activity()
-        group_review_stages = [stage for stage in group_activity.activity_stages if
-                               stage.other_group_reviews]
+        group_review_stages = [stage for stage in group_activity.activity_stages if isinstance(stage, GroupReviewStage)]
         group_review_questions = []
         for group_review_stage in group_review_stages:
             group_review_questions.extend([q.id for q in group_review_stage.questions if q.required])

@@ -1,4 +1,6 @@
-.wrapper-comp-settings .list-input.settings-list .field.comp-setting-entry input.edit-ta-graded{
-  height: inherit;
-  padding-bottom: 20px;
+/* Custom appearance for our "Add" buttons */
+.xblock[data-block-type=group-project-v2] .add-xblock-component .new-component .new-component-type .add-xblock-component-button {
+  width: 200px;
+  height: 30px;
+  line-height: 30px;
 }
