@@ -25,10 +25,9 @@ from xblock.fields import Scope, String, Dict, Float, Integer
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
-from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
-from .utils import render_template, load_resource
+from .utils import loader, render_template, load_resource
 
 from components import GroupActivity, PeerReviewStage, GroupReviewStage
 from .project_api import ProjectAPI
@@ -48,8 +47,6 @@ except:
 # Globals ###########################################################
 
 log = logging.getLogger(__name__)
-loader = ResourceLoader(__name__)
-
 
 # Classes ###########################################################
 

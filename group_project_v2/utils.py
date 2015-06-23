@@ -11,14 +11,15 @@ from datetime import date, datetime
 import xml.etree.ElementTree as ET
 
 from django.template import Context, Template
-
+from xblockutils.resources import ResourceLoader
 
 # Globals ###########################################################
 
 log = logging.getLogger(__name__)
-
+loader = ResourceLoader(__name__)
 
 # Functions #########################################################
+
 
 # TODO: use xblock-utils ResourceLoader
 def load_resource(resource_path):
