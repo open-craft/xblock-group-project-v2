@@ -1,14 +1,30 @@
-.group-project-navigator-xblock-wrapper .group-project-navigator-views {
+.group-project-navigator-wrapper {
+    border: 1px solid #ccc;
+}
+
+.group-project-navigator-header {
+    background-color: #66a5b5;
+    text-transform: uppercase;
+    color: white;
+    padding: 8px 6px;
+    font-size: 16px;
+}
+
+.group-project-navigator-header .marker {
+    float: right;
+}
+
+.group-project-navigator-views {
     overflow: auto;
-    padding-right: 4px;
+    padding: 0 5px;
     height: 400px;
 }
 
-.group-project-navigator-xblock-wrapper .group-project-navigator-view {
+.group-project-navigator-view {
     display: none;
 }
 
-.group-project-navigator-xblock-wrapper .group-project-navigator-view-selector li {
+.group-project-navigator-view-selector li {
     display: inline-block;
     list-style: none;
     padding: 0.7em 2em;
@@ -23,7 +39,7 @@
     text-decoration: none;
 }
 
-.group-project-navigator-xblock-wrapper .group-project-navigator-view-selector li.active {
+.group-project-navigator-view-selector li.active {
     background-color: #555;
     color: #eee;
 }

@@ -33,16 +33,17 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
             child = self.runtime.get_block(child_id)
             # child_fragment = child.render('student_view', context)
             child_fragment = child.student_view(context)
+            child_selector_fragment = child.selector_view(context)
 
             fragment.add_frag_resources(child_fragment)
             children_items.append({
                 'type': child.type,
-                'display_name': child.display_name_with_default,
-                'content': child_fragment.content
+                'content': child_fragment.content,
+                'selector': child_selector_fragment.content
             })
 
         fragment.add_content(
-            loader.render_template('templates/html/group_project_navigator.html', {'children': children_items})
+            loader.render_template('templates/html/project_navigator/project_navigator.html', {'children': children_items})
         )
         fragment.add_css_url(
             self.runtime.local_resource_url(self.group_project, 'public/css/group_project_navigator.css')
@@ -65,14 +66,29 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
         """
         fragment = Fragment()
         self.render_children(context, fragment, can_reorder=True, can_add=False)
-        fragment.add_content(loader.render_template('templates/html/group_project_navigator_add_buttons.html', {}))
+        fragment.add_content(loader.render_template('templates/html/project_navigator/add_buttons.html', {}))
         fragment.add_css_url(self.runtime.local_resource_url(self.group_project, 'public/css/group_project_edit.css'))
         return fragment
 
 
-class NavigationViewXBlock(XBlock):
-    display_name_with_default = u"Navigation"
+class ProjectNavigatorViewXBlockBase(XBlock):
+    type = None
+    icon = None
+    selector_text = None
+
+    def selector_view(self, context):
+        fragment = Fragment()
+        context = {'type': self.type}
+        for attribute in ['icon', 'selector_text']:
+            if getattr(self, attribute, None) is not None:
+                context[attribute] = getattr(self, attribute)
+        fragment.add_content(loader.render_template('templates/html/project_navigator/view_selector.html', context))
+        return fragment
+
+
+class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.NAVIGATION
+    icon = u"fa-bars"
 
     def student_view(self, context):
         fragment = Fragment()
@@ -80,9 +96,9 @@ class NavigationViewXBlock(XBlock):
         return fragment
 
 
-class ResourcesViewXBlock(XBlock):
-    display_name_with_default = u"Resources"
+class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.RESOURCES
+    icon = u"fa-files-o"
 
     def student_view(self, context):
         fragment = Fragment()
@@ -90,9 +106,9 @@ class ResourcesViewXBlock(XBlock):
         return fragment
 
 
-class SubmissionsViewXBlock(XBlock):
-    display_name_with_default = u"Submissions"
+class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.SUBMISSIONS
+    icon = u"fa-upload"
 
     def student_view(self, context):
         fragment = Fragment()
@@ -100,9 +116,9 @@ class SubmissionsViewXBlock(XBlock):
         return fragment
 
 
-class AskTAViewXBlock(XBlock):
-    display_name_with_default = u"Ask a TA"
+class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.ASK_TA
+    selector_text = u"TA"
 
     def student_view(self, context):
         fragment = Fragment()

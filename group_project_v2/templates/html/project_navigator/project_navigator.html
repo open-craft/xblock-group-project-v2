@@ -1,4 +1,10 @@
-<div class="group-project-navigator-xblock-wrapper">
+{% load i18n %}
+
+<div class="group-project-navigator-wrapper">
+  <div class="group-project-navigator-header">
+    {% trans "Project Navigator" %}
+    <span class="marker fa-map-marker"></span>
+  </div>
   <div class="group-project-navigator-views">
     {% for child in children %}
     <div class="group-project-navigator-view {{ child.type }}" data-view-type="{{ child.type }}">
@@ -8,7 +14,7 @@
   </div>
   <ol class="group-project-navigator-view-selector">
     {% for child in children %}
-    <li class="view-selector-item" data-view-type="{{ child.type }}">{{ child.display_name}}</li>
+      {{ child.selector|safe}}
     {% endfor %}
   </ol>
 </div>
