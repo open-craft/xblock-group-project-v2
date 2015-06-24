@@ -1,13 +1,21 @@
 from xblock.core import XBlock
-from xblock.fields import Scope, String, Dict, Float, Integer
 from xblock.fragment import Fragment
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin
 
-from ..utils import loader
+from ..utils import loader, load_resource
+
+
+class ViewTypes(object):
+    NAVIGATION = 'navigation'
+    RESOURCES = 'resources'
+    SUBMISSIONS = 'submissions'
+    ASK_TA = 'ask-ta'
 
 
 class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
+    INITIAL_VIEW = ViewTypes.NAVIGATION
+
     display_name_with_default = "Group Project Navigator"
 
     editable = False
@@ -39,6 +47,8 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
         fragment.add_css_url(
             self.runtime.local_resource_url(self.group_project, 'public/css/group_project_navigator.css')
         )
+        fragment.add_javascript(load_resource('public/js/project_navigator.js'))
+        fragment.initialize_js("GroupProjectNavigatorBlock")
 
         return fragment
 
@@ -61,8 +71,8 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
 
 
 class NavigationViewXBlock(XBlock):
-    display_name_with_default = "Navigation View"
-    type = "navigation"
+    display_name_with_default = u"Navigation"
+    type = ViewTypes.NAVIGATION
 
     def student_view(self, context):
         fragment = Fragment()
@@ -71,8 +81,8 @@ class NavigationViewXBlock(XBlock):
 
 
 class ResourcesViewXBlock(XBlock):
-    display_name_with_default = "Resources View"
-    type = "resources"
+    display_name_with_default = u"Resources"
+    type = ViewTypes.RESOURCES
 
     def student_view(self, context):
         fragment = Fragment()
@@ -81,8 +91,8 @@ class ResourcesViewXBlock(XBlock):
 
 
 class SubmissionsViewXBlock(XBlock):
-    display_name_with_default = "Submissions View"
-    type = "submissions"
+    display_name_with_default = u"Submissions"
+    type = ViewTypes.SUBMISSIONS
 
     def student_view(self, context):
         fragment = Fragment()
@@ -91,8 +101,8 @@ class SubmissionsViewXBlock(XBlock):
 
 
 class AskTAViewXBlock(XBlock):
-    display_name_with_default = "Ask a TA View"
-    type = "ask-ta"
+    display_name_with_default = u"Ask a TA"
+    type = ViewTypes.ASK_TA
 
     def student_view(self, context):
         fragment = Fragment()

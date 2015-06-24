@@ -1,14 +1,14 @@
 <div class="group-project-navigator-xblock-wrapper">
   <div class="group-project-navigator-views">
     {% for child in children %}
-    <div class="group-project-navigator-view {{ child.type }}">
+    <div class="group-project-navigator-view {{ child.type }}" data-view-type="{{ child.type }}">
       {{ child.content|safe }}
     </div>
     {% endfor %}
   </div>
   <ol class="group-project-navigator-view-selector">
     {% for child in children %}
-    <li class="view-selector-item" data-type="{{ child.type }}">{{ child.display_name}}</li>
+    <li class="view-selector-item" data-view-type="{{ child.type }}">{{ child.display_name}}</li>
     {% endfor %}
   </ol>
 </div>
