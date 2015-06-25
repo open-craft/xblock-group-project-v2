@@ -1,4 +1,3 @@
-from collections import defaultdict
 from xblock.core import XBlock
 from xblock.fragment import Fragment
 
@@ -85,7 +84,7 @@ class ProjectNavigatorViewXBlockBase(XBlock):
 
     def selector_view(self, context):
         fragment = Fragment()
-        context = {'type': self.type}
+        context = {'type': self.type, 'display_name': self.display_name_with_default}
         for attribute in ['icon', 'selector_text']:
             if getattr(self, attribute, None) is not None:
                 context[attribute] = getattr(self, attribute)
@@ -97,6 +96,7 @@ class ProjectNavigatorViewXBlockBase(XBlock):
 class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.NAVIGATION
     icon = u"fa-bars"
+    display_name_with_default = u"Navigation"
 
     ICONS_MAP = {
         StageState.NOT_STARTED: u'',
@@ -150,6 +150,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
 class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.RESOURCES
     icon = u"fa-files-o"
+    display_name_with_default = u"Resources"
 
     def student_view(self, context):
         fragment = Fragment()
@@ -160,6 +161,7 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
 class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.SUBMISSIONS
     icon = u"fa-upload"
+    display_name_with_default = u"Submissions"
 
     def student_view(self, context):
         fragment = Fragment()
@@ -170,6 +172,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
 class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.ASK_TA
     selector_text = u"TA"
+    display_name_with_default = u"Ask a TA"
 
     def student_view(self, context):
         fragment = Fragment()
