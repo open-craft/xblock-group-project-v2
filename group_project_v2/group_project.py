@@ -30,7 +30,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContain
 from .utils import loader, render_template, load_resource
 
 from components import GroupActivity, PeerReviewStage, GroupReviewStage
-from .project_api import ProjectAPI
+from .project_api import project_api
 from .upload_file import UploadFile
 from .api_error import ApiError
 
@@ -171,14 +171,7 @@ class GroupActivityXBlock(XBlock):
 
     @property  # lazy
     def project_api(self):
-        if self._project_api is None:
-            # Looks like it's an issue, but technically it's not; this code runs in LMS, so 127.0.0.1 is always correct
-            # location for API server, as it's basically executed in a neighbour thread/process/whatever.
-            api_server = "http://127.0.0.1:8000"
-            if hasattr(settings, 'API_LOOPBACK_ADDRESS'):
-                api_server = settings.API_LOOPBACK_ADDRESS
-            self._project_api = ProjectAPI(api_server)
-        return self._project_api
+        return project_api
 
     @property
     def user_id(self):
@@ -559,7 +552,9 @@ class GroupActivityXBlock(XBlock):
     def submit_peer_feedback(self, submissions, suffix=''):
         try:
             peer_id = submissions["peer_id"]
+            stage = submissions['stage_id']
             del submissions["peer_id"]
+            del submissions['stage_id']
 
             # Then something like this needs to happen
             self.project_api.submit_peer_review_items(
@@ -571,7 +566,7 @@ class GroupActivityXBlock(XBlock):
             )
 
             if self.evaluations_complete():
-                self.mark_complete_stage(self.user_id, "evaluation")
+                self.mark_complete_stage(self.user_id, stage)
 
         except Exception as e:
             return {

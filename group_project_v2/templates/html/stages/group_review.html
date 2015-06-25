@@ -23,6 +23,7 @@
 
 <form class="other_group_review" action="submit_other_group_feedback" method="POST">
   <input type="hidden" class="group_id" name="group_id" value="" />
+  <input type="hidden" class="stage_id" name="stage_id" value="{{activity_stage.id}}" />
   <div class="other_submissions"><a href="#" class="view_other_submissions">View team submissions</a></div>
   {% for activity_question in activity_stage.questions %}
     {{ activity_question.render|safe }}

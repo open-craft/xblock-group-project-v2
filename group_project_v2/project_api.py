@@ -2,6 +2,7 @@
 import json
 import datetime
 from urllib import urlencode
+from django.conf import settings
 
 from group_project_v2.utils import build_date_field
 from .json_requests import GET, POST, PUT, DELETE
@@ -430,6 +431,33 @@ class ProjectAPI(object):
         return json.loads(response.read())
 
     @api_error_protect
+    def get_stage_completions(self, course_id, content_id, stage_id):
+        qs_params = {
+            "content_id": content_id,
+            "stage": stage_id
+        }
+
+        response = GET(
+            '{}/{}/{}/completions/?{}'.format(
+                self._api_server_address,
+                COURSES_API,
+                course_id,
+                urlencode(qs_params)
+            )
+        )
+
+        return json.loads(response.read())['results']
+
+    def get_stage_state(self, course_id, content_id, user_id, stage):
+        user_workgroup = self.get_user_workgroup_for_course(user_id, course_id)
+        users_in_group = {user['id'] for user in user_workgroup['users']}
+
+        stage_completions = self.get_stage_completions(course_id, content_id, stage)
+        completed_users = {completion['user_id'] for completion in stage_completions}
+
+        return users_in_group, completed_users
+
+    @api_error_protect
     def get_user_roles_for_course(self, user_id, course_id):
         qs_params = {
             "user_id": user_id,
@@ -444,3 +472,11 @@ class ProjectAPI(object):
         )
 
         return json.loads(response.read())
+
+
+# Looks like it's an issue, but technically it's not; this code runs in LMS, so 127.0.0.1 is always correct
+# location for API server, as it's basically executed in a neighbour thread/process/whatever.
+api_server = "http://127.0.0.1:8000"
+if hasattr(settings, 'API_LOOPBACK_ADDRESS'):
+    api_server = settings.API_LOOPBACK_ADDRESS
+project_api = ProjectAPI(api_server)

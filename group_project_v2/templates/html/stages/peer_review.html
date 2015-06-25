@@ -23,6 +23,7 @@
 
 <form class="peer_review" action="submit_peer_feedback" method="POST">
   <input type="hidden" class="peer_id" name="peer_id" value="" />
+  <input type="hidden" class="stage_id" name="stage_id" value="{{activity_stage.id}}" />
   {% for activity_question in activity_stage.questions %}
     {{ activity_question.render|safe }}
   {% endfor %}

@@ -4,6 +4,7 @@ from xblock.fragment import Fragment
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin
 from group_project_v2.components.stage import StageState
+from group_project_v2.project_api import project_api
 
 from ..utils import loader, load_resource
 
@@ -92,18 +93,34 @@ class ProjectNavigatorViewXBlockBase(XBlock):
         return fragment
 
 
+@XBlock.needs('user')
 class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.NAVIGATION
     icon = u"fa-bars"
 
     ICONS_MAP = {
-        StageState.NOT_STARTED: None,
+        StageState.NOT_STARTED: u'',
         StageState.INCOMPLETE: u'fa-circle',
         StageState.COMPLETED: u'fa-check-circle'
     }
 
-    def get_stage_state(self, stage):
-        return StageState.COMPLETED
+    def get_stage_state(self, activity_id, stage):
+        user_service = self.runtime.service(self, 'user')
+        user_id = user_service.get_current_user().opt_attrs.get('edx-platform.user_id', None)
+
+        users_in_group, completed_users = project_api.get_stage_state(
+            self.course_id,
+            activity_id,
+            user_id,
+            stage.id
+        )
+
+        if users_in_group == completed_users:
+            return StageState.COMPLETED
+        if completed_users:
+            return StageState.INCOMPLETE
+        else:
+            return StageState.NOT_STARTED
 
     def student_view(self, context):
         navigation_map = []
@@ -111,7 +128,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
         for activity in self.navigator.group_project.activities:
             stages_data = []
             for stage in activity.get_group_activity().activity_stages:
-                stage_state = self.get_stage_state(stage)
+                stage_state = self.get_stage_state(activity.scope_ids.usage_id, stage)
                 data = {'stage': stage, 'state': stage_state}
                 if stage_state in self.ICONS_MAP:
                     data['icon'] = self.ICONS_MAP[stage_state]
