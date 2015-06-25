@@ -37,5 +37,9 @@ function GroupProjectNavigatorBlock(runtime, element) {
         switch_to_view(view_type);
     });
 
+    $(".group-project-navigator-view-close").click(function(){
+        switch_to_view(initial_view);
+    });
+
     switch_to_view(initial_view);
 }
