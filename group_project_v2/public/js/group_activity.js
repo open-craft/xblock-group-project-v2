@@ -213,7 +213,6 @@ function GroupProjectBlock(runtime, element) {
     var step_map = JSON.parse($('.step_map', element).html());
 
     $(document).on('select_stage', function (target, selected_step_id) {
-        debugger;
         $('.activity_section').hide();
 
         // NOTE: use of ids specified by designer here
@@ -417,4 +416,7 @@ function GroupProjectBlock(runtime, element) {
             }
         })
     }
+    // TODO: a bit hacky solution to allow directly to stages
+    // Remove when stages become actual XBlocks and jump_to_id supports jumping to children
+    $(document).trigger('activity_initialized', element);
 }
