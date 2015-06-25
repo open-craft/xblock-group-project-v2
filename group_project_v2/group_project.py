@@ -93,6 +93,11 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
         return fragment
 
+    @property
+    def activities(self):
+        all_children = self.get_children()
+        return [child for child in all_children if isinstance(child, GroupActivityXBlock)]
+
 
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')

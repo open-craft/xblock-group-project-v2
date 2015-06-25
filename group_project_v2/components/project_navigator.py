@@ -1,7 +1,9 @@
+from collections import defaultdict
 from xblock.core import XBlock
 from xblock.fragment import Fragment
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin
+from group_project_v2.components.stage import StageState
 
 from ..utils import loader, load_resource
 
@@ -76,6 +78,10 @@ class ProjectNavigatorViewXBlockBase(XBlock):
     icon = None
     selector_text = None
 
+    @property
+    def navigator(self):
+        return self.get_parent()
+
     def selector_view(self, context):
         fragment = Fragment()
         context = {'type': self.type}
@@ -90,9 +96,37 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.NAVIGATION
     icon = u"fa-bars"
 
+    ICONS_MAP = {
+        StageState.NOT_STARTED: None,
+        StageState.INCOMPLETE: u'fa-circle',
+        StageState.COMPLETED: u'fa-check-circle'
+    }
+
+    def get_stage_state(self, stage):
+        return StageState.COMPLETED
+
     def student_view(self, context):
+        navigation_map = []
+
+        for activity in self.navigator.group_project.activities:
+            stages_data = []
+            for stage in activity.get_group_activity().activity_stages:
+                stage_state = self.get_stage_state(stage)
+                data = {'stage': stage, 'state': stage_state}
+                if stage_state in self.ICONS_MAP:
+                    data['icon'] = self.ICONS_MAP[stage_state]
+                stages_data.append(data)
+
+            navigation_map.append({
+                'id': activity.scope_ids.usage_id,
+                'display_name': activity.display_name,
+                'stages': stages_data
+            })
+
         fragment = Fragment()
-        fragment.add_content(u"I'm navigator")
+        context = {'navigation_map': navigation_map}
+        fragment.add_content(loader.render_template("templates/html/project_navigator/navigation_view.html", context))
+
         return fragment
 
 

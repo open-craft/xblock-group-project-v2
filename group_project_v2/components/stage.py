@@ -1,4 +1,3 @@
-import copy
 import abc
 from datetime import date
 
@@ -15,6 +14,12 @@ class StageType(object):
     PEER_ASSESSMENT = 'peer_assessment'
     GROUP_REVIEW = 'group_review'
     GROUP_ASSESSMENT = 'group_assessment'
+
+
+class StageState(object):
+    NOT_STARTED = 'not_started'
+    INCOMPLETE = 'incomplete'
+    COMPLETED = 'completed'
 
 
 # TODO: use XBlock.ValidationMessage when stages become actual XBlocks
@@ -134,10 +139,12 @@ class BaseGroupActivityStage(object):
 
 class BasicStage(BaseGroupActivityStage):
     HTML_TEMPLATE = 'templates/html/stages/text.html'
+    type = u'Text'
 
 
 class SubmissionStage(BaseGroupActivityStage):
     HTML_TEMPLATE = 'templates/html/stages/upload.html'
+    type = u'Task'
 
     def __init__(self, doc_tree, grading_override):
         super(SubmissionStage, self).__init__(doc_tree, grading_override)
@@ -184,6 +191,7 @@ class SubmissionStage(BaseGroupActivityStage):
 
 class ReviewBaseStage(BaseGroupActivityStage):
     __metaclass__ = abc.ABCMeta
+    type = u'Grade'
 
     def __init__(self, doc_tree, grading_override):
         super(ReviewBaseStage, self).__init__(doc_tree, grading_override)
@@ -232,6 +240,7 @@ class GroupReviewStage(ReviewBaseStage):
 
 class AssessmentBaseStage(BaseGroupActivityStage):
     __metaclass__ = abc.ABCMeta
+    type = u'Evaluation'
 
     HTML_TEMPLATE = 'templates/html/stages/peer_assessment.html'
 
