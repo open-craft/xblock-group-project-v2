@@ -1,0 +1,72 @@
+.group-project-submissions-view .group-project-submissions {
+    padding: 8px 0;
+}
+
+.uploader .file-progress-box {
+    background-color: transparent;
+    width: 86%;
+    height: 5px;
+    visibility: hidden;
+}
+
+.uploader .file-progress-box .file-progress {
+    background-color: #cccccc;
+    width: 13%;
+    height: 5px;
+}
+
+.uploader .file-progress-box .file-progress.complete {
+    background-color: #999999;
+}
+
+.uploader .file-progress-box .file-progress.failed {
+    background-color: #B85433;
+}
+
+.uploader .xblock-reveal.reveal-modal.open {
+    max-height: 80%;
+    overflow: auto;
+    padding-bottom: 0;
+}
+
+.uploader .upload_item {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.uploader .upload_item .upload_title {
+    margin-bottom: 5px;
+}
+
+.uploader .upload_item input[type=text] {
+    width: 84%;
+    display: inline-block;
+    background-color: transparent;
+    color: #3384ca;
+    margin-bottom: 0;
+    height: 30px;
+}
+
+.uploader .upload_item label {
+    width: 30px;
+    display: inline-block;
+    text-align: right;
+}
+
+.uploader .upload_item label span {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    line-height: 30px;
+    margin-bottom: 0;
+}
+
+.uploader .upload_item .description {
+    font-size: 11px;
+    font-style: italic;
+}
+
+.uploader .upload_item .upload_item_data {
+    font-size: 12px;
+    color: #8f8f8f;
+}

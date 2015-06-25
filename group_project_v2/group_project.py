@@ -799,17 +799,6 @@ class GroupActivityXBlock(XBlock):
 
         return webob.response.Response(body=json.dumps({"html": html_output}))
 
-    @XBlock.handler
-    def refresh_submission_links(self, request, suffix=''):
-        group_activity = self.get_group_activity()
-
-        group_activity.update_submission_data(
-            self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup['id'])
-        )
-        html_output = render_template('/templates/html/submission_links.html', {"group_activity": group_activity})
-
-        return webob.response.Response(body=json.dumps({"html": html_output}))
-
     def get_courseware_info(self, courseware_parent_info_service):
         activity_name = self.display_name
         activity_location = None

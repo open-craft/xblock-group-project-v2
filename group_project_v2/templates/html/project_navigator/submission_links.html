@@ -1,0 +1,38 @@
+{% load i18n %}
+{% for activity in submissions_map %}
+  <div class="group-project-activity-wrapper">
+    <div class="group-project-activity-header">{{ activity.display_name }}</div>
+    <div class="group-project-submissions">
+      {% if activity.submissions_required %}
+        <form class="uploader">
+          <input type="hidden" name="activity_id" class="activity_id" value="{{ activity.id }}"/>
+          {% for stage in activity.stages %}
+            {% for file_link in stage.submissions %}
+              <div class="upload_item">
+                <div class="upload_title">{{ file_link.title }}:</div>
+                <input class="{{ file_link.id }}_name" placeholder="Browse your computer to upload file..." disabled="disabled" type="text" {% if file_link.file_name %}value="{{ file_link.file_name }}" data-original-value="{{ file_link.file_name }}"{% endif %}/>
+                <label for="{{ file_link.id }}">
+                  <span class="side button tiny radius {{ file_link.id }}_label fa-paperclip"></span>
+                </label>
+                <input style="display:none;" class="file_upload" name="{{ file_link.id }}" id="{{ file_link.id }}" type="file" />
+                {% if file_link.description %}
+                  <div class="description">{{ file_link.description }}</div>
+                {% endif %}
+                <div class="{{ file_link.id }}_progress_box file-progress-box">
+                  <div class="{{ file_link.id }}_progress file-progress"></div>
+                </div>
+                {% if file_link.location %}
+                  <div class="upload_item_data">
+                    {% trans "Uploaded by" %} Unknown on {{ file_link.submission_date }}
+                  </div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          {% endfor %}
+        </form>
+      {% else %}
+        <div>{% trans "No uploads required for this activity" %}</div>
+      {% endif %}
+    </div>
+  </div>
+{% endfor %}

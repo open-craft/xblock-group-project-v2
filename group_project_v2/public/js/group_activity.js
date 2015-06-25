@@ -291,74 +291,6 @@ function GroupProjectBlock(runtime, element) {
     $(document).trigger("steps_available", step_map);
     $(document).trigger("select_stage", step_map["default"]);
 
-    var upload_form = $('.upload_form', element).appendTo($(document.body));
-    var failed_uploads = [];
-
-    // TODO: extract class/object?
-    var upload_data = {
-        dataType: 'json',
-        url: runtime.handlerUrl(element, "upload_submission"),
-        formData: [
-            {
-                name: 'csrfmiddlewaretoken',
-                value: $.cookie('csrftoken')
-            }
-        ],
-        add: function (e, data) {
-            var target_form = $(e.target);
-            $('.' + data.paramName + '_name', target_form).val(data.files[0].name);
-            $('.' + data.paramName + '_label', target_form).text("Update");
-            $('.' + data.paramName + '_progress', target_form).css({width: '0%'}).removeClass('complete failed');
-            $('.' + data.paramName + '_progress_box', target_form).css({visibility: 'visible'});
-
-            $(document).one('perform_uploads', function (ev) {
-                data.submit();
-            });
-
-            // enable upload button & reset progress
-            $('.do_upload', upload_form).prop('disabled', false).css('cursor', 'pointer');
-        },
-        progress: function (e, data) {
-            var target_form = $(e.target);
-            var percentage = parseInt(data.loaded / data.total * 100, 10);
-            $('.' + data.paramName + '_progress', target_form).css('width', percentage + '%');
-        },
-        done: function (e, data) {
-            var target_form = $(e.target);
-            $('.' + data.paramName + '_progress', target_form).css('width', '100%').addClass('complete');
-            var input = $('.' + data.paramName + '_name', target_form);
-            input.attr('data-original-value', input.val());
-        },
-        stop: function (e) {
-            $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'not-allowed');
-            $('.group_submissions', element).empty();
-            $.ajax({
-                url: runtime.handlerUrl(element, "refresh_submission_links"),
-                dataType: 'json',
-                success: function (data) {
-                    $('.group_submissions', element).html(data.html);
-                },
-                error: function (data) {
-                    show_message('We encountered an error.');
-                }
-            });
-
-            if (failed_uploads.length <= 0) {
-                setTimeout(function () {
-                    upload_form.hide();
-                }, 1000);
-            }
-            failed_uploads = [];
-        },
-        fail: function (e, data) {
-            var target_form = $(e.target);
-            $('.' + data.paramName + '_progress', target_form).css('width', '100%').addClass('failed');
-            failed_uploads.push(data.files[0].name);
-            var message = data.jqXHR.responseJSON ? data.jqXHR.responseJSON.message : data.jqXHR.responseText;
-            target_form.prop('title', message);
-        }
-    };
-
     var review_submissions_dialog = $('.review_submissions_dialog', element).appendTo($(document.body));
     $('.view_other_submissions', element).on('click', function () {
         var $content = $('.other_submission_links', review_submissions_dialog);
@@ -379,43 +311,17 @@ function GroupProjectBlock(runtime, element) {
     });
     $('.close_review_dialog', review_submissions_dialog).on('click', function () {
         review_submissions_dialog.hide();
-    });
 
-    if ($.fn.fileupload) {
-        $('.uploader', upload_form).fileupload(upload_data);
 
-        $('.cancel_upload', upload_form).on('click', function () {
-            upload_form.hide();
-        });
-        $('.do_upload', upload_form).on('click', function () {
-            $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'wait');
-            $(document).trigger('perform_uploads');
-        });
+    // Activate the first peer, or the first group if no peers
+    $(function () {
+        var select_from = $('.select_peer, .select_group');
+        if (select_from.length > 0) {
+            select_from[0].click();
+        }
+    }) });
 
-        $('.show_upload_form', element).on('click', function () {
-            // upload button initially disabled
-            $('.do_upload', upload_form).prop('disabled', true).css('cursor', 'not-allowed');
-            $('.file-progress-box', upload_form).css('visibility', 'hidden');
-            $('.file-progress', upload_form).removeClass('complete failed');
 
-            // reset file input fields
-            var fields = upload_form.find('.upload_item input');
-            fields.each(function (i, v) {
-                var field = $(v);
-                field.val(field.attr('data-original-value'));
-            });
-
-            upload_form.show();
-        });
-
-        // Activate the first peer, or the first group if no peers
-        $(function () {
-            var select_from = $('.select_peer, .select_group');
-            if (select_from.length > 0) {
-                select_from[0].click();
-            }
-        })
-    }
     // TODO: a bit hacky solution to allow directly to stages
     // Remove when stages become actual XBlocks and jump_to_id supports jumping to children
     $(document).trigger('activity_initialized', element);

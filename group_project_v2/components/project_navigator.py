@@ -1,4 +1,6 @@
 import itertools
+import json
+import webob
 from xblock.core import XBlock
 from xblock.fragment import Fragment
 
@@ -6,7 +8,7 @@ from xblockutils.studio_editable import StudioContainerXBlockMixin
 from group_project_v2.components.stage import StageState
 from group_project_v2.project_api import project_api
 
-from ..utils import loader, load_resource, gettext as _
+from ..utils import loader, gettext as _
 
 
 class ViewTypes(object):
@@ -34,7 +36,7 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
         children_items = []
         for child_id in self.children:
             child = self.runtime.get_block(child_id)
-            child_fragment = child.student_view(context)
+            child_fragment = child.render('student_view', context)
 
             item = {
                 'type': child.type,
@@ -56,10 +58,12 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
                 {'children': children_items}
             )
         )
-        fragment.add_css_url(
-            self.runtime.local_resource_url(self.group_project, 'public/css/group_project_navigator.css')
-        )
-        fragment.add_javascript(load_resource('public/js/project_navigator/project_navigator.js'))
+        fragment.add_css_url(self.runtime.local_resource_url(
+            self.group_project, 'public/css/project_navigator/project_navigator.css'
+        ))
+        fragment.add_javascript_url(self.runtime.local_resource_url(
+            self.group_project, 'public/js/project_navigator/project_navigator.js'
+        ))
         fragment.initialize_js("GroupProjectNavigatorBlock")
 
         return fragment
@@ -182,15 +186,62 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
 
 
 # pylint-disable=no-init
+@XBlock.needs('user')
 class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.SUBMISSIONS
     icon = u"fa-upload"
     display_name_with_default = _(u"Submissions")
 
+    def _get_submissions_map(self):
+        submissions_map = []
+        for activity in self.navigator.group_project.activities:
+            group_activity = activity.get_group_activity()
+            group_activity.update_submission_data(
+                project_api.get_latest_workgroup_submissions_by_id(activity.workgroup["id"])
+            )
+            stages = [stage for stage in group_activity.activity_stages if stage.submissions_stage]
+            submissions_required = any(True for stage in stages if len(stage.submissions) > 0)
+            submissions_map.append({
+                'id': activity.scope_ids.usage_id,
+                'display_name': activity.display_name,
+                'submissions_required': submissions_required,
+                'stages': stages,
+            })
+
+        return submissions_map
+
     def student_view(self, context):  # pylint: disable=unused-argument
         fragment = Fragment()
-        fragment.add_content(u"I'm submissions")
+        # FIXME: should have used `include` in template, but it can't find the template: likely resource loader does
+        # not know how to do that
+        submission_links = loader.render_template(
+            "templates/html/project_navigator/submission_links.html",
+            {'submissions_map': self._get_submissions_map()}
+        )
+
+        context = {'view': self, 'submission_links': submission_links}
+        fragment.add_content(loader.render_template("templates/html/project_navigator/submissions_view.html", context))
+        fragment.add_css_url(self.runtime.local_resource_url(
+            self.navigator.group_project, "public/css/project_navigator/submissions_view.css"
+        ))
+        fragment.add_javascript_url(self.runtime.local_resource_url(
+            self.navigator.group_project, "public/js/project_navigator/submissions_view.js"
+        ))
+        fragment.initialize_js("GroupProjectNavigatorSubmissionsView")
         return fragment
+
+    @XBlock.handler
+    def refresh_submission_links(self, request, suffix=''):
+        html_output = loader.render_template(
+            '/templates/html/project_navigator/submission_links.html',
+            {"submissions_map": self._get_submissions_map()}
+        )
+
+        return webob.response.Response(body=json.dumps({"html": html_output}))
+
+    @XBlock.handler
+    def upload_submission(self, request, suffix=''):
+        pass
 
 
 # pylint-disable=no-init

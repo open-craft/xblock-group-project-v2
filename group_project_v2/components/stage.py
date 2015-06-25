@@ -39,6 +39,8 @@ class StageValidationMessage(object):
 class BaseGroupActivityStage(object):
     __metaclass__ = abc.ABCMeta
 
+    submissions_stage = False
+
     XML_TEMPLATE = 'templates/xml/activity_stage.xml'
     HTML_TEMPLATE = 'templates/html/stages/text.html'
 
@@ -145,6 +147,8 @@ class BasicStage(BaseGroupActivityStage):
 class SubmissionStage(BaseGroupActivityStage):
     HTML_TEMPLATE = 'templates/html/stages/upload.html'
     type = u'Task'
+
+    submissions_stage = True
 
     def __init__(self, doc_tree, grading_override):
         super(SubmissionStage, self).__init__(doc_tree, grading_override)
