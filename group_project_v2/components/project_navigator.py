@@ -34,14 +34,20 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
         for child_id in self.children:
             child = self.runtime.get_block(child_id)
             child_fragment = child.student_view(context)
-            child_selector_fragment = child.selector_view(context)
 
-            fragment.add_frag_resources(child_fragment)
-            children_items.append({
+            item = {
                 'type': child.type,
                 'content': child_fragment.content,
-                'selector': child_selector_fragment.content
-            })
+            }
+
+            fragment.add_frag_resources(child_fragment)
+
+            if not child.skip_selector:
+                child_selector_fragment = child.selector_view(context)
+                item['selector'] = child_selector_fragment.content
+                fragment.add_frag_resources(child_selector_fragment)
+
+            children_items.append(item)
 
         fragment.add_content(
             loader.render_template(
@@ -79,6 +85,7 @@ class ProjectNavigatorViewXBlockBase(XBlock):
     type = None
     icon = None
     selector_text = None
+    skip_selector = False
 
     @property
     def navigator(self):
@@ -99,6 +106,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.NAVIGATION
     icon = u"fa-bars"
     display_name_with_default = _(u"Navigation")
+    skip_selector = True
 
     ICONS_MAP = {
         StageState.NOT_STARTED: u'',
