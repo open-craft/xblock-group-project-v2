@@ -42,10 +42,6 @@
   &.next{ padding-left: 10px; }
 }
 
-.group-project-xblock-wrapper .revealer.selected{
-  color: #dddddd;
-}
-
 .group-project-xblock-wrapper button.submit{
   float: right;
 }

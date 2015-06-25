@@ -213,10 +213,7 @@ function GroupProjectBlock(runtime, element) {
     var step_map = JSON.parse($('.step_map', element).html());
 
     $(document).on('select_stage', function (target, selected_step_id) {
-        // Hide show correct content
-        $('.revealer').removeClass('selected');
-        $(this).addClass('selected');
-
+        debugger;
         $('.activity_section').hide();
 
         // NOTE: use of ids specified by designer here
@@ -248,13 +245,6 @@ function GroupProjectBlock(runtime, element) {
                     }).attr('href', '#');
             }
         }
-    });
-
-    $('.revealer').on('click', function (ev) {
-        $(document).trigger('select_stage', $(this).attr('id'));
-
-        ev.preventDefault();
-        return false;
     });
 
     $('.view_feedback').on('click', function (ev) {

@@ -1,17 +1,6 @@
 {% load i18n %}
 {% autoescape off %}
 <div class="group-project-xblock-wrapper">
-  <nav>
-    Steps
-    <ul>
-      {% for activity_stage in group_activity.activity_stages %}
-        <li>
-          <a href="#" class="revealer" id="{{ activity_stage.id }}">{{ activity_stage.name }}</a>
-        </li>
-      {% endfor %}
-    </ul>
-  </nav>
-
   {% for activity_stage in group_activity.activity_stages %}
     <div id="activity_{{ activity_stage.id }}" class="activity_section">
     {% if activity_stage.grading_override %}
