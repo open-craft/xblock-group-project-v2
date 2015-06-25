@@ -1,0 +1,25 @@
+{% load i18n %}
+<div class="group-project-resources-view">
+  <div class="group-project-navigator-view-header">
+    <span class="group-project-navigator-view-title">{{ view.display_name_with_default }}</span>
+    <span class="group-project-navigator-view-close fa-times"></span>
+  </div>
+  {% for activity in resources_map %}
+  <div class="group-project-activity-wrapper">
+    <div class="group-project-activity-header">{{ activity.display_name }}</div>
+    <ul class="group-project-resources">
+    {% for stage in activity.stages %}
+      {% for file_link in stage.resources %}
+        {% if file_link.location %}
+          <li>
+            <a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">
+              {{ file_link.title }}{% if file_link.description %}: <span class="group-project-navigator-grey-text">{{ file_link.description }}</span>{% endif %}
+            </a>
+          </li>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+</div>

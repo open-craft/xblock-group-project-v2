@@ -140,7 +140,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
             })
 
         fragment = Fragment()
-        context = {'navigation_map': navigation_map}
+        context = {'view': self, 'navigation_map': navigation_map}
         fragment.add_content(loader.render_template("templates/html/project_navigator/navigation_view.html", context))
 
         return fragment
@@ -152,8 +152,17 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     display_name_with_default = _(u"Resources")
 
     def student_view(self, context):
+        resources_map = []
+        for activity in self.navigator.group_project.activities:
+            resources_map.append({
+                'id': activity.scope_ids.usage_id,
+                'display_name': activity.display_name,
+                'stages': activity.get_group_activity().activity_stages
+            })
+
         fragment = Fragment()
-        fragment.add_content(u"I'm resources")
+        context = {'view': self, 'resources_map': resources_map}
+        fragment.add_content(loader.render_template("templates/html/project_navigator/resources_view.html", context))
         return fragment
 
 

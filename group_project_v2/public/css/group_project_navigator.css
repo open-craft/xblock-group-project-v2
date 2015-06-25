@@ -47,16 +47,36 @@
     color: #eee;
 }
 
-.group-project-navigation-view .group-project-activity-header {
+.group-project-navigator-view ul {
+    padding: 0 8px;
+    margin: 0;
+}
+
+.group-project-navigator-view .group-project-navigator-view-header {
+    padding: 8px 10px;
+}
+
+.group-project-navigator-view .group-project-navigator-view-title {
+    color: #66a5b5;
+    font-size: 16px;
+}
+
+.group-project-navigator-view .group-project-navigator-view-close {
+    color: #e5ebee;
+    font-size: 16px;
+    float: right;
+    cursor: pointer;
+}
+
+.group-project-navigator-view .group-project-navigator-grey-text {
+    color: #8f8f8f;
+}
+
+.group-project-navigator-view .group-project-activity-header {
     text-transform: uppercase;
     background-color: #ddd;
     padding: 4px 8px;
     margin-bottom: 4px;
-}
-
-.group-project-navigation-view .group-project-activity-stages {
-    padding: 0 8px;
-    margin: 0;
 }
 
 .group-project-navigation-view .group-project-stage {
@@ -80,6 +100,6 @@
     color: #b7d432;
 }
 
-.group-project-navigation-view .group-project-stage-title {
-    color: #8f8f8f;
+.group-project-resources-view .group-project-activity-stages li {
+    list-style: none;
 }
