@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-
+# TODO: lots of broad except clauses - disabled in pylint, but might make sense to clean them up
 # Imports ###########################################################
 
 import logging
@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 import pytz
 
 from lxml import etree
-from xml.etree import ElementTree as ET
 from pkg_resources import resource_filename
 
 from StringIO import StringIO
@@ -40,15 +39,16 @@ if ALLOWED_OUTSIDER_ROLES is None:
 
 try:
     from edx_notifications.data import NotificationMessage
-except:
+except ImportError:
     # Notifications is an optional runtime configuration, so it may not be available for import
     pass
 
 # Globals ###########################################################
 
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 # Classes ###########################################################
+
 
 def make_key(*args):
     return ":".join([str(a) for a in args])
@@ -99,6 +99,8 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
         return [child for child in all_children if isinstance(child, GroupActivityXBlock)]
 
 
+# TODO: enable and fix these violations
+# pylint: disable=unused-argument,invalid-name,bare-except
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
 class GroupActivityXBlock(XBlock):
@@ -432,9 +434,9 @@ class GroupActivityXBlock(XBlock):
         peer_review_stages = [stage for stage in group_activity.activity_stages if isinstance(stage, PeerReviewStage)]
         peer_review_questions = []
         for peer_review_stage in peer_review_stages:
-                peer_review_questions.extend([
-                    question.id for question in peer_review_stage.questions if question.required
-                ])
+            peer_review_questions.extend([
+                question.id for question in peer_review_stage.questions if question.required
+            ])
 
         group_peer_items = self.project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
         my_feedback = {
@@ -536,7 +538,7 @@ class GroupActivityXBlock(XBlock):
             'result': 'success',
         }
 
-    def validate(self):
+    def validate(self):  # pylint: disable=super-on-old-class
         """
         Validates the state of this XBlock except for individual field values.
         """
@@ -568,7 +570,7 @@ class GroupActivityXBlock(XBlock):
             if self.evaluations_complete():
                 self.mark_complete_stage(self.user_id, stage)
 
-        except Exception as e:
+        except Exception as e:   # pylint: disable=broad-except
             return {
                 'result': 'error',
                 'msg': e.message,
@@ -617,7 +619,7 @@ class GroupActivityXBlock(XBlock):
             if self.is_group_member and self.grading_complete():
                 self.mark_complete_stage(self.user_id, "grade")
 
-        except Exception as e:
+        except Exception as e:   # pylint: disable=broad-except
             return {
                 'result': 'error',
                 'msg': e.message,
@@ -723,7 +725,7 @@ class GroupActivityXBlock(XBlock):
             for uf in upload_files:
                 try:
                     uf.save_file()
-                except Exception as save_file_error:
+                except Exception as save_file_error:    # pylint: disable=broad-except
                     original_message = save_file_error.message if hasattr(save_file_error, "message") else ""
                     save_file_error.message = _("Error storing file {} - {}").format(uf.file.name, original_message)
                     raise
@@ -746,7 +748,7 @@ class GroupActivityXBlock(XBlock):
                         }
                     )
                     at_least_one_success = True
-                except Exception as save_record_error:
+                except Exception as save_record_error:  # pylint: disable=broad-except
                     original_message = save_record_error.message if hasattr(save_record_error, "message") else ""
                     save_record_error.message = _("Error recording file information {} - {}").format(uf.file.name,
                                                                                                      original_message)
@@ -769,7 +771,7 @@ class GroupActivityXBlock(XBlock):
             if group_activity.has_all_submissions:
                 self.update_upload_complete()
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             log.exception(e)
             failure_code = 500
             if isinstance(e, ApiError):
@@ -836,7 +838,7 @@ class GroupActivityXBlock(XBlock):
                 project_name = project_courseware_info['display_name']
                 project_location = project_courseware_info['location']
 
-        except Exception, ex:
+        except Exception, ex:  # pylint: disable=broad-except
             # Can't look this up then log and just use the default
             # which is our display_name
             log.exception(ex)
@@ -905,7 +907,7 @@ class GroupActivityXBlock(XBlock):
                 workgroup_user_ids,
                 msg
             )
-        except Exception, ex:
+        except Exception, ex:  # pylint: disable=broad-except
             # While we *should* send notification, if there is some
             # error here, we don't want to blow the whole thing up.
             # So log it and continue....
@@ -956,7 +958,7 @@ class GroupActivityXBlock(XBlock):
                 },
                 msg
             )
-        except Exception, ex:
+        except Exception, ex:  # pylint: disable=broad-except
             # While we *should* send notification, if there is some
             # error here, we don't want to blow the whole thing up.
             # So log it and continue....
@@ -1080,13 +1082,13 @@ class GroupActivityXBlock(XBlock):
                             'coming-due'
                         )
 
-        except Exception, ex:
+        except Exception, ex:  # pylint: disable=broad-except
             log.exception(ex)
 
     def get_group_activity(self):
         return GroupActivity.import_xml_string(self.data, self.is_admin_grader)
 
-    def on_before_studio_delete(self, course_id, services):
+    def on_before_studio_delete(self, course_id, services):  # pylint: disable=unused-argument
         """
         A hook into when this xblock is deleted in Studio, for xblocks to do any lifecycle
         management
@@ -1114,5 +1116,5 @@ class GroupActivityXBlock(XBlock):
                         self._get_stage_timer_name(stage, 'coming-due')
                     )
 
-        except Exception, ex:
+        except Exception, ex:  # pylint: disable=broad-except
             log.exception(ex)

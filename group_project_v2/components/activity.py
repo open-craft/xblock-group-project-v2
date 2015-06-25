@@ -6,10 +6,7 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from datetime import date
 
-from django.template.loader import render_to_string
-from pkg_resources import resource_filename
-
-from ..utils import inner_html, outer_html, build_date_field, render_template, DottableDict, format_date, gettext as _
+from ..utils import render_template, DottableDict, format_date, gettext as _
 from ..project_api import build_date_field
 
 from .stage import GroupActivityStageFactory, GroupReviewStage, StageValidationMessage
@@ -88,29 +85,29 @@ class GroupActivity(object):
         ordered_list = []
         prev_step = None
         default_stage = self.activity_stages[0].id
-        for ac in self.activity_stages:
-            step_map[ac.id] = {
+        for activity in self.activity_stages:
+            step_map[activity.id] = {
                 "prev": prev_step,
-                "name": ac.name,
+                "name": activity.name,
             }
-            if not ac.is_open:
-                step_map[ac.id]["restrict_message"] = "{} closed until {}".format(
-                    ac.name,
-                    ac.formatted_open_date
+            if not activity.is_open:
+                step_map[activity.id]["restrict_message"] = "{} closed until {}".format(
+                    activity.name,
+                    activity.formatted_open_date
                 )
-            ordered_list.append(ac.id)
-            prev_step = ac.id
+            ordered_list.append(activity.id)
+            prev_step = activity.id
 
             if self.grading_override:
-                if isinstance(ac, GroupReviewStage):
-                    default_stage = ac.id
-            elif ac.open_date and ac.open_date <= date.today():
-                default_stage = ac.id
+                if isinstance(activity, GroupReviewStage):
+                    default_stage = activity.id
+            elif activity.open_date and activity.open_date <= date.today():
+                default_stage = activity.id
 
         next_step = None
-        for ac in reversed(self.activity_stages):
-            step_map[ac.id]["next"] = next_step
-            next_step = ac.id
+        for activity in reversed(self.activity_stages):
+            step_map[activity.id]["next"] = next_step
+            next_step = activity.id
 
         step_map["ordered_list"] = ordered_list
         step_map["default"] = default_stage

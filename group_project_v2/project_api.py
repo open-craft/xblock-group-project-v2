@@ -1,6 +1,5 @@
 ''' API calls with respect group projects'''
 import json
-import datetime
 from urllib import urlencode
 from django.conf import settings
 
@@ -26,6 +25,7 @@ COURSES_API = '/'.join([API_PREFIX, 'courses'])
 # * Service isolation - it should be used only through some other (not existent yet) class that would ALWAYS do
 # post-processing in order to isolate clients from response format changes. As of now, if format changes
 # virtually every method in group_project might be affected.
+# pylint: disable=invalid-name
 class ProjectAPI(object):
     _api_server_address = None
 

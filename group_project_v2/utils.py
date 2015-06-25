@@ -15,8 +15,8 @@ from xblockutils.resources import ResourceLoader
 
 # Globals ###########################################################
 
-log = logging.getLogger(__name__)
-loader = ResourceLoader(__name__)
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
 
 # Functions #########################################################
 

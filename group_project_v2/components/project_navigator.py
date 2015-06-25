@@ -44,7 +44,10 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
             })
 
         fragment.add_content(
-            loader.render_template('templates/html/project_navigator/project_navigator.html', {'children': children_items})
+            loader.render_template(
+                'templates/html/project_navigator/project_navigator.html',
+                {'children': children_items}
+            )
         )
         fragment.add_css_url(
             self.runtime.local_resource_url(self.group_project, 'public/css/group_project_navigator.css')
@@ -121,7 +124,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
         else:
             return StageState.NOT_STARTED
 
-    def student_view(self, context):
+    def student_view(self, context):  # pylint: disable=unused-argument
         navigation_map = []
 
         for activity in self.navigator.group_project.activities:
@@ -151,7 +154,7 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     icon = u"fa-files-o"
     display_name_with_default = _(u"Resources")
 
-    def student_view(self, context):
+    def student_view(self, context):  # pylint: disable=unused-argument
         resources_map = []
         for activity in self.navigator.group_project.activities:
             resources_map.append({
@@ -166,23 +169,25 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
         return fragment
 
 
+# pylint-disable=no-init
 class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.SUBMISSIONS
     icon = u"fa-upload"
     display_name_with_default = _(u"Submissions")
 
-    def student_view(self, context):
+    def student_view(self, context):  # pylint: disable=unused-argument
         fragment = Fragment()
         fragment.add_content(u"I'm submissions")
         return fragment
 
 
+# pylint-disable=no-init
 class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.ASK_TA
     selector_text = u"TA"
     display_name_with_default = _(u"Ask a TA")
 
-    def student_view(self, context):
+    def student_view(self, context):  # pylint: disable=unused-argument
         fragment = Fragment()
         fragment.add_content(u"I'm ask a TA")
         return fragment

@@ -3,7 +3,7 @@ from datetime import date
 
 from group_project_v2.components.review import GroupActivityQuestion, GroupActivityAssessment
 from group_project_v2.utils import (
-    DottableDict, render_template, parse_date, inner_html, outer_html, format_date, gettext as _
+    DottableDict, render_template, parse_date, inner_html, format_date, gettext as _
 )
 
 
@@ -49,7 +49,7 @@ class BaseGroupActivityStage(object):
         self.open_date = None
         self.close_date = None
 
-        self.id = doc_tree.get("id")
+        self.id = doc_tree.get("id")  # pylint: disable=invalid-name
         self.title = doc_tree.get("title")
         self._content = doc_tree.find("./content")
 
@@ -284,8 +284,8 @@ class GroupActivityStageFactory(object):
     _default_stage_class = BasicStage
 
     @classmethod
-    def register(cls, type, stage_class):
-        cls._type_map[type] = stage_class
+    def register(cls, stage_type, stage_class):
+        cls._type_map[stage_type] = stage_class
 
     @classmethod
     def create(cls, xml_node, grading_override):
