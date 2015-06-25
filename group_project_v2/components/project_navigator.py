@@ -5,7 +5,7 @@ from xblockutils.studio_editable import StudioContainerXBlockMixin
 from group_project_v2.components.stage import StageState
 from group_project_v2.project_api import project_api
 
-from ..utils import loader, load_resource
+from ..utils import loader, load_resource, gettext as _
 
 
 class ViewTypes(object):
@@ -18,7 +18,7 @@ class ViewTypes(object):
 class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
     INITIAL_VIEW = ViewTypes.NAVIGATION
 
-    display_name_with_default = "Group Project Navigator"
+    display_name_with_default = _(u"Group Project Navigator")
 
     editable = False
     has_score = False
@@ -33,7 +33,6 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
         children_items = []
         for child_id in self.children:
             child = self.runtime.get_block(child_id)
-            # child_fragment = child.render('student_view', context)
             child_fragment = child.student_view(context)
             child_selector_fragment = child.selector_view(context)
 
@@ -96,7 +95,7 @@ class ProjectNavigatorViewXBlockBase(XBlock):
 class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.NAVIGATION
     icon = u"fa-bars"
-    display_name_with_default = u"Navigation"
+    display_name_with_default = _(u"Navigation")
 
     ICONS_MAP = {
         StageState.NOT_STARTED: u'',
@@ -150,7 +149,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
 class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.RESOURCES
     icon = u"fa-files-o"
-    display_name_with_default = u"Resources"
+    display_name_with_default = _(u"Resources")
 
     def student_view(self, context):
         fragment = Fragment()
@@ -161,7 +160,7 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
 class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.SUBMISSIONS
     icon = u"fa-upload"
-    display_name_with_default = u"Submissions"
+    display_name_with_default = _(u"Submissions")
 
     def student_view(self, context):
         fragment = Fragment()
@@ -172,7 +171,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
 class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.ASK_TA
     selector_text = u"TA"
-    display_name_with_default = u"Ask a TA"
+    display_name_with_default = _(u"Ask a TA")
 
     def student_view(self, context):
         fragment = Fragment()
