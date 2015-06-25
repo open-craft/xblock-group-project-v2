@@ -50,7 +50,7 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
         fragment.add_css_url(
             self.runtime.local_resource_url(self.group_project, 'public/css/group_project_navigator.css')
         )
-        fragment.add_javascript(load_resource('public/js/project_navigator.js'))
+        fragment.add_javascript(load_resource('public/js/project_navigator/project_navigator.js'))
         fragment.initialize_js("GroupProjectNavigatorBlock")
 
         return fragment
