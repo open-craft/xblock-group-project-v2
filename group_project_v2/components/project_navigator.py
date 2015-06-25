@@ -1,3 +1,4 @@
+import itertools
 from xblock.core import XBlock
 from xblock.fragment import Fragment
 
@@ -165,10 +166,13 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     def student_view(self, context):  # pylint: disable=unused-argument
         resources_map = []
         for activity in self.navigator.group_project.activities:
+            resources = list(itertools.chain(*[
+                stage.resources for stage in activity.get_group_activity().activity_stages
+            ]))
             resources_map.append({
                 'id': activity.scope_ids.usage_id,
                 'display_name': activity.display_name,
-                'stages': activity.get_group_activity().activity_stages
+                'resources': resources,
             })
 
         fragment = Fragment()

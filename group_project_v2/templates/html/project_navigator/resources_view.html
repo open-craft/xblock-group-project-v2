@@ -8,17 +8,19 @@
   <div class="group-project-activity-wrapper">
     <div class="group-project-activity-header">{{ activity.display_name }}</div>
     <ul class="group-project-resources">
-    {% for stage in activity.stages %}
-      {% for file_link in stage.resources %}
-        {% if file_link.location %}
-          <li>
-            <a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">
-              {{ file_link.title }}{% if file_link.description %}: <span class="group-project-navigator-grey-text">{{ file_link.description }}</span>{% endif %}
-            </a>
-          </li>
-        {% endif %}
-      {% endfor %}
-    {% endfor %}
+      {% if activity.resources %}
+          {% for file_link in activity.resources %}
+            {% if file_link.location %}
+              <li>
+                <a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">
+                  {{ file_link.title }}{% if file_link.description %}: <span class="group-project-navigator-grey-text">{{ file_link.description }}</span>{% endif %}
+                </a>
+              </li>
+            {% endif %}
+          {% endfor %}
+      {% else %}
+        <div class="group-project-navigator-grey-text">{% trans "No resources for this activity" %}</div>
+      {% endif %}
     </ul>
   </div>
   {% endfor %}
