@@ -8,7 +8,11 @@
         <li class="group-project-stage">
           <span class="group-project-stage-state {{ stage_data.state }} {{stage_data.icon}}"></span>
           <span class="group-project-stage-type">
-            <a href="?actid={{ activity.id }}&select_stage={{ stage_data.stage.id }}" title="{{ stage_data.stage.title }}" data-activate="{{ stage_data.stage.id }}">{{ stage_data.stage.type }}</a>
+            <a href="?actid={{ activity.id }}&select_stage={{ stage_data.stage.id }}" title="{{ stage_data.stage.title }}"
+               data-stage-id="{{ stage_data.stage.id }}" data-activity-id="{{ activity.id }}"
+            >
+              {{ stage_data.stage.type }}
+            </a>
           </span>
           <span class="group-project-stage-title">{{ stage_data.stage.title }}</span>
           <span class="highlight">
