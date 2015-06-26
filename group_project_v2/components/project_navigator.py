@@ -124,12 +124,6 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     display_name_with_default = _(u"Navigation")
     skip_selector = True
 
-    ICONS_MAP = {
-        StageState.NOT_STARTED: u'',
-        StageState.INCOMPLETE: u'fa-circle',
-        StageState.COMPLETED: u'fa-check-circle'
-    }
-
     def get_stage_state(self, activity_id, stage):
         user_service = self.runtime.service(self, 'user')
         user_id = user_service.get_current_user().opt_attrs.get('edx-platform.user_id', None)
@@ -155,10 +149,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
             stages_data = []
             for stage in activity.get_group_activity().activity_stages:
                 stage_state = self.get_stage_state(activity.scope_ids.usage_id, stage)
-                data = {'stage': stage, 'state': stage_state}
-                if stage_state in self.ICONS_MAP:
-                    data['icon'] = self.ICONS_MAP[stage_state]
-                stages_data.append(data)
+                stages_data.append({'stage': stage, 'state': stage_state})
 
             navigation_map.append({
                 'id': activity.scope_ids.usage_id,
@@ -169,6 +160,10 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
         fragment = Fragment()
         context = {'view': self, 'navigation_map': navigation_map}
         fragment.add_content(loader.render_template("templates/html/project_navigator/navigation_view.html", context))
+        fragment.add_javascript_url(self.runtime.local_resource_url(
+            self.navigator.group_project, "public/js/project_navigator/navigation_view.js"
+        ))
+        fragment.initialize_js("GroupProjectNavigatorNavigationView")
 
         return fragment
 

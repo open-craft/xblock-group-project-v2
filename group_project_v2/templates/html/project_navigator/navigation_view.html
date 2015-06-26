@@ -1,12 +1,12 @@
 {% load i18n %}
 <div class="group-project-navigation-view">
   {% for activity in navigation_map %}
-  <div class="group-project-activity-wrapper">
+  <div class="group-project-activity-wrapper" data-activity-id="{{ activity.id }}">
     <div class="group-project-activity-header">{{ activity.display_name }}</div>
     <ul class="group-project-activity-stages">
       {% for stage_data in activity.stages %}
-        <li class="group-project-stage">
-          <span class="group-project-stage-state {{ stage_data.state }} {{stage_data.icon}}"></span>
+        <li class="group-project-stage" data-stage-id="{{ stage_data.stage.id }}">
+          <span class="group-project-stage-state {{ stage_data.state }}"></span>
           <span class="group-project-stage-type">
             <a href="?actid={{ activity.id }}&select_stage={{ stage_data.stage.id }}" title="{{ stage_data.stage.title }}"
                data-stage-id="{{ stage_data.stage.id }}" data-activity-id="{{ activity.id }}"
