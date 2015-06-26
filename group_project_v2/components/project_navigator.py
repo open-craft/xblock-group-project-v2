@@ -277,6 +277,14 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
                 for u in target_activity.workgroup["users"]:
                     target_activity.mark_complete_stage(u["id"], target_stage.id)
 
+                response_data["new_stage_states"] = [
+                    {
+                        "activity_id": activity_id,
+                        "stage_id": stage_id,
+                        "state": StageState.COMPLETED
+                    }
+                ]
+
         except Exception as e:  # pylint: disable=broad-except
             log.exception(e)
             failure_code = 500

@@ -9,10 +9,21 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
             $('.' + data.paramName + '_progress', target_form).css({width: '0%'}).removeClass('complete failed');
             $('.' + data.paramName + '_progress_box', target_form).css({visibility: 'visible'});
 
-            data.formData = getFormData();
+            data.formData = getFormData(target_form);
 
             $(document).one('perform_uploads', function (ev) {
-                data.submit();
+                 data.submit()
+                    .success(function (data, textStatus, jqXHR) {
+                        if (data.new_stage_states) {
+                            for (var i=0; i<data.new_stage_states.length; i++) {
+                                var new_state = data.new_stage_states[i];
+                                $(document).trigger(
+                                    "group_project_v2.project_navigator.stage_status_update",
+                                    [new_state.activity_id, new_state.stage_id, new_state.state]
+                                );
+                            }
+                        }
+                    });
             });
 
             $(document).trigger('perform_uploads');
