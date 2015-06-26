@@ -1,14 +1,21 @@
 import itertools
 import json
+import logging
 import webob
 from xblock.core import XBlock
 from xblock.fragment import Fragment
+from opaque_keys.edx.locator import BlockUsageLocator
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin
+from group_project_v2.api_error import ApiError
 from group_project_v2.components.stage import StageState
 from group_project_v2.project_api import project_api
+from group_project_v2.upload_file import UploadFile
 
 from ..utils import loader, gettext as _
+
+
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class ViewTypes(object):
@@ -73,7 +80,11 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
         Child blocks can override this to add a custom preview shown to authors in Studio when
         not editing this block's children.
         """
-        return self.student_view(context)
+        # Can't use student view as it fails with 404 if new activity is added after project navigator:
+        # throws 404 because navigation view searches for completions for all available activities.
+        # Draft activity is visible to nav view, but not to completions api, resulting in 404.
+        # Anyway, it looks like it needs some other studio preview representation
+        return Fragment()
 
     def author_edit_view(self, context):
         """
@@ -130,7 +141,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
             stage.id
         )
 
-        if users_in_group == completed_users:
+        if users_in_group <= completed_users:
             return StageState.COMPLETED
         if completed_users:
             return StageState.INCOMPLETE
@@ -187,6 +198,7 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
 
 # pylint-disable=no-init
 @XBlock.needs('user')
+@XBlock.wants('notifications')
 class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.SUBMISSIONS
     icon = u"fa-upload"
@@ -216,7 +228,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         # not know how to do that
         submission_links = loader.render_template(
             "templates/html/project_navigator/submission_links.html",
-            {'submissions_map': self._get_submissions_map()}
+            {'course_id': self.course_id, 'submissions_map': self._get_submissions_map()}
         )
 
         context = {'view': self, 'submission_links': submission_links}
@@ -239,9 +251,104 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
 
         return webob.response.Response(body=json.dumps({"html": html_output}))
 
+    # TODO: When Stages become XBlocks this method should become a handler on SubmissionsStage XBlock
     @XBlock.handler
     def upload_submission(self, request, suffix=''):
-        pass
+        activity_id, stage_id = request.POST['activity_id'], request.POST['stage_id']
+        target_activity = self.runtime.get_block(BlockUsageLocator.from_string(activity_id))
+
+        response_data = {"message": _("File(s) successfully submitted")}
+        failure_code = 0
+        try:
+            group_activity = target_activity.get_group_activity()
+
+            context = {
+                "user_id": target_activity.user_id,
+                "group_id": target_activity.workgroup['id'],
+                "project_api": project_api,
+                "course_id": target_activity.course_id
+            }
+
+            upload_files = self.persist_and_submit_files(target_activity, group_activity, context, request.params)
+
+            response_data.update({uf.submission_id: uf.file_url for uf in upload_files})
+
+            group_activity.update_submission_data(
+                project_api.get_latest_workgroup_submissions_by_id(target_activity.workgroup['id'])
+            )
+
+            target_stage = [stage for stage in group_activity.activity_stages if stage.id == stage_id][0]
+            if target_stage.has_all_submissions:
+                for u in target_activity.workgroup["users"]:
+                    target_activity.mark_complete_stage(u["id"], target_stage.id)
+
+        except Exception as e:  # pylint: disable=broad-except
+            log.exception(e)
+            failure_code = 500
+            if isinstance(e, ApiError):
+                failure_code = e.code
+            if not hasattr(e, "message"):
+                e.message = _("Error uploading at least one file")
+            response_data.update({"message": e.message})
+
+        response = webob.response.Response(body=json.dumps(response_data))
+        if failure_code:
+            response.status_code = failure_code
+
+        return response
+
+    def send_file_upload_notification(self):
+        # See if the xBlock Notification Service is available, and - if so -
+        # dispatch a notification to the entire workgroup that a file has been uploaded
+        # Note that the NotificationService can be disabled, so it might not be available
+        # in the list of services
+        notifications_service = self.runtime.service(self, 'notifications')
+        if notifications_service:
+            self.fire_file_upload_notification(notifications_service)
+
+    def persist_and_submit_files(self, target_activity, group_activity, context, request_parameters):
+        upload_files = [
+            UploadFile(request_parameters[submission.id].file, submission.id, context)
+            for submission in group_activity.submissions if submission.id in request_parameters
+        ]
+
+        # Save the files first
+        for uf in upload_files:
+            try:
+                uf.save_file()
+            except Exception as save_file_error:  # pylint: disable=broad-except
+                original_message = save_file_error.message if hasattr(save_file_error, "message") else ""
+                save_file_error.message = _("Error storing file {} - {}").format(uf.file.name, original_message)
+                raise
+
+        # They all got saved... note the submissions
+        at_least_one_success = False
+        for uf in upload_files:
+            try:
+                uf.submit()
+                # Emit analytics event...
+                self.runtime.publish(
+                    self,
+                    "group_activity.received_submission",
+                    {
+                        "submission_id": uf.submission_id,
+                        "filename": uf.file.name,
+                        "content_id": target_activity.content_id,
+                        "group_id": target_activity.workgroup['id'],
+                        "user_id": target_activity.user_id,
+                    }
+                )
+                at_least_one_success = True
+            except Exception as save_record_error:  # pylint: disable=broad-except
+                original_message = save_record_error.message if hasattr(save_record_error, "message") else ""
+                save_record_error.message = _("Error recording file information {} - {}").format(uf.file.name,
+                                                                                                 original_message)
+                raise
+
+            if at_least_one_success:
+                self.send_file_upload_notification()
+
+        return upload_files
 
 
 # pylint-disable=no-init

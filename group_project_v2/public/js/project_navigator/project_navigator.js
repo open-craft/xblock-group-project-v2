@@ -1,6 +1,5 @@
 function GroupProjectNavigatorBlock(runtime, element) {
-    //const initial_view = 'navigation';
-    const initial_view = 'submissions';
+    const initial_view = 'navigation';
     const selector_item_query = ".group-project-navigator-view-selector .view-selector-item";
 
     var view_elements = $(".group-project-navigator-view", element),

@@ -192,6 +192,11 @@ class SubmissionStage(BaseGroupActivityStage):
 
         return violations
 
+    @property
+    def has_all_submissions(self):
+        uploaded_submissions = [s for s in self.submissions if hasattr(s, 'location') and s.location]
+        return len(uploaded_submissions) == len(list(self.submissions))
+
 
 class ReviewBaseStage(BaseGroupActivityStage):
     __metaclass__ = abc.ABCMeta

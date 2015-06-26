@@ -325,9 +325,18 @@ class ProjectAPI(object):
     def get_latest_workgroup_submissions_by_id(self, group_id):
         submission_list = self.get_workgroup_submissions(group_id)
 
+        user_details_cache = {}
+
+        def get_user_details(user_id):
+            if user_id not in user_details_cache:
+                user_details_cache[user_id] = self.get_user_details(submission['user'])
+            return user_details_cache[user_id]
+
         submissions_by_id = {}
         for submission in submission_list:
             submission_id = submission['document_id']
+            if submission['user']:
+                submission[u'user_details'] = get_user_details(submission['user'])
             if submission_id in submissions_by_id:
                 last_modified = build_date_field(submissions_by_id[submission_id]["modified"])
                 this_modified = build_date_field(submission["modified"])

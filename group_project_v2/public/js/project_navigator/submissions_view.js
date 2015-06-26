@@ -3,17 +3,13 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
     var upload_data = {
         dataType: 'json',
         url: runtime.handlerUrl(element, "upload_submission"),
-        formData: [
-            {
-                name: 'csrfmiddlewaretoken',
-                value: $.cookie('csrftoken')
-            }
-        ],
         add: function (e, data) {
             var target_form = $(e.target);
             $('.' + data.paramName + '_name', target_form).val(data.files[0].name);
             $('.' + data.paramName + '_progress', target_form).css({width: '0%'}).removeClass('complete failed');
             $('.' + data.paramName + '_progress_box', target_form).css({visibility: 'visible'});
+
+            data.formData = getFormData();
 
             $(document).one('perform_uploads', function (ev) {
                 data.submit();
@@ -32,27 +28,6 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
             var input = $('.' + data.paramName + '_name', target_form);
             input.attr('data-original-value', input.val());
         },
-        stop: function (e) {
-            $('.do_upload', element).prop('disabled', true).css('cursor', 'not-allowed');
-            $('.group_submissions', element).empty();
-            $.ajax({
-                url: runtime.handlerUrl(element, "refresh_submission_links"),
-                dataType: 'json',
-                success: function (data) {
-                    $('.submission-links-wrapper', element).html(data.html);
-                },
-                error: function (data) {
-                    console.log(data);
-                }
-            });
-
-            if (failed_uploads.length <= 0) {
-                setTimeout(function () {
-                    element.hide();
-                }, 1000);
-            }
-            failed_uploads = [];
-        },
         fail: function (e, data) {
             var target_form = $(e.target);
             $('.' + data.paramName + '_progress', target_form).css('width', '100%').addClass('failed');
@@ -62,8 +37,30 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
         }
     };
 
+    function getFormData(form) {
+        var result = [
+            {
+                name: 'csrfmiddlewaretoken',
+                value: $.cookie('csrftoken')
+            }
+        ];
+        var additional_fields = ['activity_id', 'stage_id'];
+
+        for (var i=0; i< additional_fields.length; i++) {
+            var parameter_name = additional_fields[i],
+                $field_input = $('.'+parameter_name, form);
+
+            if ($field_input) {
+                result.push({
+                    name: parameter_name,
+                    value: $field_input.val()
+                });
+            }
+        }
+        return result;
+    }
+
     if ($.fn.fileupload) {
-        debugger;
         $('.uploader', element).fileupload(upload_data);
 
         $('.cancel_upload', element).on('click', function () {

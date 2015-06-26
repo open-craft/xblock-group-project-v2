@@ -54,9 +54,12 @@ class GroupActivity(object):
 
         for submission in self.submissions:
             if submission["id"] in submission_map:
-                submission["location"] = submission_map[submission["id"]]["document_url"]
-                submission["file_name"] = submission_map[submission["id"]]["document_filename"]
-                submission["submission_date"] = formatted_date(submission_map[submission["id"]]["modified"])
+                new_submission_data = submission_map[submission["id"]]
+                submission["location"] = new_submission_data["document_url"]
+                submission["file_name"] = new_submission_data["document_filename"]
+                submission["submission_date"] = formatted_date(new_submission_data["modified"])
+                if "user_details" in new_submission_data:
+                    submission["user_details"] = new_submission_data["user_details"]
 
     @property
     def export_xml(self):
