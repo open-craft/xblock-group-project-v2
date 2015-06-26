@@ -11,7 +11,15 @@
             {% for file_link in stage.submissions %}
               <div class="upload_item">
                 <div class="upload_title">{{ file_link.title }}:</div>
-                <input class="{{ file_link.id }}_name" placeholder="Browse your computer to upload file..." disabled="disabled" type="text" {% if file_link.file_name %}value="{{ file_link.file_name }}" data-original-value="{{ file_link.file_name }}"{% endif %}/>
+                <div class="upload_item_wrapper" {% if file_link.location %} data-location="{{ file_link.location }}" {% endif %}>
+                  <input
+                    class="{{ file_link.id }}_name" placeholder="Browse your computer to upload file..."
+                    disabled="disabled" type="text"
+                    {% if file_link.file_name %}
+                      value="{{ file_link.file_name }}" data-original-value="{{ file_link.file_name }}"
+                    {% endif %}
+                  />
+                </div>
                 <label for="{{ file_link.id }}">
                   <span class="side button tiny radius {{ file_link.id }}_label fa-paperclip"></span>
                 </label>

@@ -266,7 +266,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
 
             upload_files = self.persist_and_submit_files(target_activity, group_activity, context, request.params)
 
-            response_data.update({uf.submission_id: uf.file_url for uf in upload_files})
+            response_data["submissions"] = {uf.submission_id: uf.file_url for uf in upload_files}
 
             group_activity.update_submission_data(
                 project_api.get_latest_workgroup_submissions_by_id(target_activity.workgroup['id'])

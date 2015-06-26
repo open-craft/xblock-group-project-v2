@@ -39,8 +39,7 @@
 }
 
 .uploader .upload_item input[type=text] {
-    width: 84%;
-    display: inline-block;
+    width: 100%;
     background-color: transparent;
     color: #3384ca;
     margin-bottom: 0;
@@ -69,4 +68,15 @@
 .uploader .upload_item .upload_item_data {
     font-size: 12px;
     color: #8f8f8f;
+}
+
+.uploader .upload_item .upload_item_wrapper {
+    width: 83%;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+.uploader .upload_item .upload_item_wrapper[data-location] {
+    cursor: pointer;
 }

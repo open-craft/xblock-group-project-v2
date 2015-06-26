@@ -5,7 +5,7 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
         url: runtime.handlerUrl(element, "upload_submission"),
         add: function (e, data) {
             var target_form = $(e.target);
-            $('.' + data.paramName + '_name', target_form).val(data.files[0].name);
+            $('.' + data.paramName + '_name', target_form).text(data.files[0].name);
             $('.' + data.paramName + '_progress', target_form).css({width: '0%'}).removeClass('complete failed');
             $('.' + data.paramName + '_progress_box', target_form).css({visibility: 'visible'});
 
@@ -21,6 +21,14 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
                                     "group_project_v2.project_navigator.stage_status_update",
                                     [new_state.activity_id, new_state.stage_id, new_state.state]
                                 );
+                            }
+                        }
+
+                        if (data.submissions) {
+                            for (var submission_id in data.submissions) {
+                                if (!data.submissions.hasOwnProperty(submission_id)) return;
+                                var location = data.submissions[submission_id];
+                                $('#' + data.paramName + '_wrapper', target_form).data('location', location);
                             }
                         }
                     });
@@ -70,6 +78,13 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
         }
         return result;
     }
+
+    $(".upload_item_wrapper", element).click(function(){
+        var location = $(this).data('location');
+        if (location) {
+            window.open(location);
+        }
+    });
 
     if ($.fn.fileupload) {
         $('.uploader', element).fileupload(upload_data);
