@@ -1,6 +1,7 @@
 import itertools
 import json
 import logging
+from lazy.lazy import lazy
 import webob
 from xblock.core import XBlock
 from xblock.fragment import Fragment
@@ -34,7 +35,7 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
     has_score = False
     has_children = True
 
-    @property
+    @lazy
     def group_project(self):
         return self.get_parent()
 
@@ -103,9 +104,37 @@ class ProjectNavigatorViewXBlockBase(XBlock):
     selector_text = None
     skip_selector = False
 
-    @property
+    TEMPLATE_BASE = "templates/html/project_navigator/"
+    CSS_BASE = "public/css/project_navigator/"
+    JS_BASE = "public/js/project_navigator/"
+
+    template = None
+    css_file = None
+    js_file = None
+    initialize_js_function = None
+
+    @lazy
     def navigator(self):
         return self.get_parent()
+
+    def render_student_view(self, context):
+        fragment = Fragment()
+        fragment.add_content(loader.render_template(self.TEMPLATE_BASE + self.template, context))
+
+        if self.css_file:
+            fragment.add_css_url(self.runtime.local_resource_url(
+                self.navigator.group_project, self.CSS_BASE + self.css_file
+            ))
+
+        if self.js_file:
+            fragment.add_javascript_url(self.runtime.local_resource_url(
+                self.navigator.group_project, self.JS_BASE + self.js_file
+            ))
+
+        if self.initialize_js_function:
+            fragment.initialize_js(self.initialize_js_function)
+
+        return fragment
 
     def selector_view(self, context):
         fragment = Fragment()
@@ -123,6 +152,11 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     icon = u"fa-bars"
     display_name_with_default = _(u"Navigation")
     skip_selector = True
+
+    template = "navigation_view.html"
+    css_file = "navigation_view.css"
+    js_file = "navigation_view.js"
+    initialize_js_function = "GroupProjectNavigatorNavigationView"
 
     def get_stage_state(self, activity_id, stage):
         user_service = self.runtime.service(self, 'user')
@@ -157,24 +191,19 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
                 'stages': stages_data
             })
 
-        fragment = Fragment()
         context = {'view': self, 'navigation_map': navigation_map}
-        fragment.add_content(loader.render_template("templates/html/project_navigator/navigation_view.html", context))
-        fragment.add_javascript_url(self.runtime.local_resource_url(
-            self.navigator.group_project, "public/js/project_navigator/navigation_view.js"
-        ))
-        fragment.add_css_url(self.runtime.local_resource_url(
-            self.navigator.group_project, "public/css/project_navigator/navigation_view.css"
-        ))
-        fragment.initialize_js("GroupProjectNavigatorNavigationView")
-
-        return fragment
+        return self.render_student_view(context)
 
 
 class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.RESOURCES
     icon = u"fa-files-o"
     display_name_with_default = _(u"Resources")
+
+    template = "resources_view.html"
+    css_file = "resources_view.css"
+    js_file = "resources_view.js"
+    initialize_js_function = "GroupProjectNavigatorResourcesView"
 
     def student_view(self, context):  # pylint: disable=unused-argument
         resources_map = []
@@ -188,17 +217,8 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
                 'resources': resources,
             })
 
-        fragment = Fragment()
         context = {'view': self, 'resources_map': resources_map}
-        fragment.add_content(loader.render_template("templates/html/project_navigator/resources_view.html", context))
-        fragment.add_javascript_url(self.runtime.local_resource_url(
-            self.navigator.group_project, "public/js/project_navigator/resources_view.js"
-        ))
-        fragment.add_css_url(self.runtime.local_resource_url(
-            self.navigator.group_project, "public/css/project_navigator/resources_view.css"
-        ))
-        fragment.initialize_js("GroupProjectNavigatorResourcesView")
-        return fragment
+        return self.render_student_view(context)
 
 
 # pylint-disable=no-init
@@ -208,6 +228,11 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.SUBMISSIONS
     icon = u"fa-upload"
     display_name_with_default = _(u"Submissions")
+
+    template = "submissions_view.html"
+    css_file = "submissions_view.css"
+    js_file = "submissions_view.js"
+    initialize_js_function = "GroupProjectNavigatorSubmissionsView"
 
     def _get_submissions_map(self):
         submissions_map = []
@@ -228,7 +253,6 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         return submissions_map
 
     def student_view(self, context):  # pylint: disable=unused-argument
-        fragment = Fragment()
         # FIXME: should have used `include` in template, but it can't find the template: likely resource loader does
         # not know how to do that
         submission_links = loader.render_template(
@@ -237,15 +261,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         )
 
         context = {'view': self, 'submission_links': submission_links}
-        fragment.add_content(loader.render_template("templates/html/project_navigator/submissions_view.html", context))
-        fragment.add_css_url(self.runtime.local_resource_url(
-            self.navigator.group_project, "public/css/project_navigator/submissions_view.css"
-        ))
-        fragment.add_javascript_url(self.runtime.local_resource_url(
-            self.navigator.group_project, "public/js/project_navigator/submissions_view.js"
-        ))
-        fragment.initialize_js("GroupProjectNavigatorSubmissionsView")
-        return fragment
+        return self.render_student_view(context)
 
     @XBlock.handler
     def refresh_submission_links(self, request, suffix=''):  # pylint: disable=unused-argument
@@ -375,16 +391,12 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     selector_text = u"TA"
     display_name_with_default = _(u"Ask a TA")
 
+    template = "ask_ta_view.html"
+    css_file = "ask_ta_view.css"
+    js_file = "ask_ta_view.js"
+    initialize_js_function = "GroupProjectNavigatorAskTAView"
+
     def student_view(self, context):  # pylint: disable=unused-argument
-        fragment = Fragment()
         img_url = self.runtime.local_resource_url(self.navigator.group_project, "public/img/ask_ta.png")
         context = {'view': self, 'course_id': self.course_id, 'img_url': img_url}
-        fragment.add_content(loader.render_template("templates/html/project_navigator/ask_ta_view.html", context))
-        fragment.add_css_url(self.runtime.local_resource_url(
-            self.navigator.group_project, "public/css/project_navigator/ask_ta_view.css"
-        ))
-        fragment.add_javascript_url(self.runtime.local_resource_url(
-            self.navigator.group_project, "public/js/project_navigator/ask_ta_view.js"
-        ))
-        fragment.initialize_js("GroupProjectNavigatorAskTAView")
-        return fragment
+        return self.render_student_view(context)
