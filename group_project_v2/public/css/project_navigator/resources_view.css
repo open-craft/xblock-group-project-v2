@@ -1,3 +1,7 @@
+.group-project-resources-view .group-project-activity-stages li {
+    list-style: none;
+}
+
 .group-project-resources-view .player-modal {
     position: fixed;
     top: 50% !important;

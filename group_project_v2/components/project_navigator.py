@@ -163,6 +163,9 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
         fragment.add_javascript_url(self.runtime.local_resource_url(
             self.navigator.group_project, "public/js/project_navigator/navigation_view.js"
         ))
+        fragment.add_css_url(self.runtime.local_resource_url(
+            self.navigator.group_project, "public/css/project_navigator/navigation_view.css"
+        ))
         fragment.initialize_js("GroupProjectNavigatorNavigationView")
 
         return fragment
