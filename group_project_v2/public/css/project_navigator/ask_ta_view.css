@@ -1,0 +1,11 @@
+.group-project-ask-ta-view input[type=submit] {
+    float: right;
+}
+
+.group-project-ask-ta-view .group-project-ask-ta-label img {
+    margin: 5px 0;
+}
+
+.group-project-ask-ta-view form textarea {
+    height: 95px;
+}

@@ -1,0 +1,20 @@
+{% load i18n %}
+<div class="group-project-ask-ta-view">
+  <div class="group-project-navigator-view-header">
+    <span class="group-project-navigator-view-title">{{ view.display_name_with_default }}</span>
+    <span class="group-project-navigator-view-close fa-times"></span>
+  </div>
+  <div class="group-project-ask-ta-label">
+    <img src="{{ img_url }}"/>
+    <div>
+      {% trans "Send any questions or messages to your TA , and they'll get back to you promptly." %}
+    </div>
+  </div>
+  <form class="contact-ta-form" action="/courses/{{course_id}}/teaching_assistant" method="POST">
+    <div class="error"></div>
+    <input type="hidden" class="csrfmiddlewaretoken" name="csrfmiddlewaretoken" value="">
+    <input type="hidden" class="contact-from" name="contact-from" value="group-work">
+    <textarea placeholder='{% trans "Enter your message for the TA here" %}' name="ta_message"></textarea>
+    <input class="button radius small" type="submit" value='{% trans "Submit" %}' disabled="disabled">
+  </form>
+</div>

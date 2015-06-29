@@ -367,5 +367,14 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
 
     def student_view(self, context):  # pylint: disable=unused-argument
         fragment = Fragment()
-        fragment.add_content(u"I'm ask a TA")
+        img_url = self.runtime.local_resource_url(self.navigator.group_project, "public/img/ask_ta.png")
+        context = {'view': self, 'course_id': self.course_id, 'img_url': img_url}
+        fragment.add_content(loader.render_template("templates/html/project_navigator/ask_ta_view.html", context))
+        fragment.add_css_url(self.runtime.local_resource_url(
+            self.navigator.group_project, "public/css/project_navigator/ask_ta_view.css"
+        ))
+        fragment.add_javascript_url(self.runtime.local_resource_url(
+            self.navigator.group_project, "public/js/project_navigator/ask_ta_view.js"
+        ))
+        fragment.initialize_js("GroupProjectNavigatorAskTAView")
         return fragment
