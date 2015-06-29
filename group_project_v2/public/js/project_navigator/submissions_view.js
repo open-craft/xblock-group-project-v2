@@ -5,7 +5,7 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
         url: runtime.handlerUrl(element, "upload_submission"),
         add: function (e, data) {
             var target_form = $(e.target);
-            $('.' + data.paramName + '_name', target_form).text(data.files[0].name);
+            $('.' + data.paramName + '_name', target_form).val(data.files[0].name);
             $('.' + data.paramName + '_progress', target_form).css({width: '0%'}).removeClass('complete failed');
             $('.' + data.paramName + '_progress_box', target_form).css({visibility: 'visible'});
 
@@ -28,7 +28,9 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
                             for (var submission_id in data.submissions) {
                                 if (!data.submissions.hasOwnProperty(submission_id)) return;
                                 var location = data.submissions[submission_id];
-                                $('#' + data.paramName + '_wrapper', target_form).data('location', location);
+                                $('.' + submission_id + '_name', target_form).parent(".upload_item_wrapper")
+                                    .data('location', location)
+                                    .attr('data-location', location); // need to set attr here as there are css rules for [data-location] attribute
                             }
                         }
                     });
