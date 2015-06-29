@@ -22,6 +22,15 @@ class StageState(object):
     COMPLETED = 'completed'
 
 
+class ResourceType(object):
+    NORMAL = 'normal'
+    OOYALA_VIDEO = 'ooyala'
+
+
+class ImproperlyConfiguredActivityException(Exception):
+    pass
+
+
 # TODO: use XBlock.ValidationMessage when stages become actual XBlocks
 class StageValidationMessage(object):
     """
@@ -63,10 +72,14 @@ class BaseGroupActivityStage(object):
 
         # import resources
         for document in doc_tree.findall("./resources/document"):
+            doc_type = document.get("type", ResourceType.NORMAL)
+            if doc_type not in (ResourceType.NORMAL, ResourceType.OOYALA_VIDEO):
+                raise ImproperlyConfiguredActivityException("Unknown resource type %s" % doc_type)
             self._resources.append(DottableDict({
                 "title": document.get("title"),
                 "description": document.get("description"),
                 "location": document.text,
+                "type": doc_type,
                 "grading_criteria": document.get("grading_criteria") == "true"
             }))
 

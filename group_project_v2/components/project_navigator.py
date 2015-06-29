@@ -188,6 +188,13 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
         fragment = Fragment()
         context = {'view': self, 'resources_map': resources_map}
         fragment.add_content(loader.render_template("templates/html/project_navigator/resources_view.html", context))
+        fragment.add_javascript_url(self.runtime.local_resource_url(
+            self.navigator.group_project, "public/js/project_navigator/resources_view.js"
+        ))
+        fragment.add_css_url(self.runtime.local_resource_url(
+            self.navigator.group_project, "public/css/project_navigator/resources_view.css"
+        ))
+        fragment.initialize_js("GroupProjectNavigatorResourcesView")
         return fragment
 
 
