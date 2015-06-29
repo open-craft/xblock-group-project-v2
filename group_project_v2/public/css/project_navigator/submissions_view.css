@@ -4,7 +4,7 @@
 
 .uploader .file-progress-box {
     background-color: transparent;
-    width: 86%;
+    width: 83%;
     height: 5px;
     visibility: hidden;
 }
@@ -50,6 +50,7 @@
     width: 30px;
     display: inline-block;
     text-align: right;
+    vertical-align: top;
 }
 
 .uploader .upload_item label span {
@@ -77,6 +78,6 @@
     padding: 0;
 }
 
-.uploader .upload_item .upload_item_wrapper[data-location] {
+.uploader .upload_item .upload_item_wrapper[data-location] input[type=text] {
     cursor: pointer;
 }
