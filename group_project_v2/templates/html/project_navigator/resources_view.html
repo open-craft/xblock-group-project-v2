@@ -16,8 +16,9 @@
                   title="{{ file_link.description }}" target="_blank"
                   {% if file_link.type == "ooyala" %} data-video='{{ file_link.location }}' {% else %} href="{{ file_link.location }}" {% endif %}
                 >
-                  {{ file_link.title }}{% if file_link.description %}: <span class="group-project-navigator-grey-text">{{ file_link.description }}</span>{% endif %}
+                  {{ file_link.title }}
                 </a>
+                {% if file_link.description %}: {{ file_link.description }}{% endif %}
               </li>
             {% endif %}
           {% endfor %}
