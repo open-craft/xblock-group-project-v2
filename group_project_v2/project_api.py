@@ -329,7 +329,7 @@ class ProjectAPI(object):
 
         def get_user_details(user_id):
             if user_id not in user_details_cache:
-                user_details_cache[user_id] = self.get_user_details(submission['user'])
+                user_details_cache[user_id] = self.get_user_details(user_id)
             return user_details_cache[user_id]
 
         submissions_by_id = {}

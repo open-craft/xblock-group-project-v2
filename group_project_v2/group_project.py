@@ -30,7 +30,6 @@ from .utils import loader, render_template, load_resource
 
 from components import GroupActivity, PeerReviewStage, GroupReviewStage
 from .project_api import project_api
-from .upload_file import UploadFile
 from .api_error import ApiError
 
 ALLOWED_OUTSIDER_ROLES = getattr(settings, "ALLOWED_OUTSIDER_ROLES", None)
