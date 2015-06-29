@@ -1,5 +1,18 @@
 function GroupProjectNavigatorSubmissionsView(runtime, element) {
     var failed_uploads = [];
+    var current_upload = null;
+    var $action_buttons = $(".action_buttons", element);
+
+    function setCurrentUpload(uploadXHR) {
+        current_upload = uploadXHR;
+        $action_buttons.css('visibility', 'visible');
+    }
+
+    function clearCurentUpload(){
+        current_upload = null;
+        $action_buttons.css('visibility', 'hidden');
+    }
+
     var upload_data = {
         dataType: 'json',
         url: runtime.handlerUrl(element, "upload_submission"),
@@ -12,7 +25,8 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
             data.formData = getFormData(target_form);
 
             $(document).one('perform_uploads', function (ev) {
-                 data.submit()
+                var uploadXHR = data.submit();
+                uploadXHR
                     .success(function (data, textStatus, jqXHR) {
                         if (data.new_stage_states) {
                             for (var i=0; i<data.new_stage_states.length; i++) {
@@ -34,6 +48,8 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
                             }
                         }
                     });
+
+                setCurrentUpload(uploadXHR);
             });
 
             $(document).trigger('perform_uploads');
@@ -48,6 +64,7 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
             $('.' + data.paramName + '_progress', target_form).css('width', '100%').addClass('complete');
             var input = $('.' + data.paramName + '_name', target_form);
             input.attr('data-original-value', input.val());
+            clearCurentUpload();
         },
         fail: function (e, data) {
             var target_form = $(e.target);
@@ -55,6 +72,7 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
             failed_uploads.push(data.files[0].name);
             var message = data.jqXHR.responseJSON ? data.jqXHR.responseJSON.message : data.jqXHR.responseText;
             target_form.prop('title', message);
+            clearCurentUpload();
         }
     };
 
@@ -92,7 +110,10 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
         $('.uploader', element).fileupload(upload_data);
 
         $('.cancel_upload', element).on('click', function () {
-            element.hide();
+            if (current_upload) {
+                current_upload.abort();
+                clearCurentUpload();
+            }
         });
 
         $('.show_upload_form', element).on('click', function () {

@@ -2,6 +2,11 @@
     padding: 8px 0;
 }
 
+.group-project-submissions-view .action_buttons {
+    /* should not be visible by default, but still consume space to avoid resizing view - hence using visibility, not display*/
+    visibility: hidden;
+}
+
 .uploader .file-progress-box {
     background-color: transparent;
     width: 83%;
