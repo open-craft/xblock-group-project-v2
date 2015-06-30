@@ -162,14 +162,12 @@ class ProjectNavigatorViewXBlockBase(XBlock):
 
         return fragment
 
-    def author_view(self, context):  # pylint: disable=unused-argument
+    def author_view(self, context):
         """
         Studio Preview view
         """
-        # Can't use student view as it fails with 404 if new activity is added after project navigator:
-        # throws 404 because navigation view searches for completions for all available activities.
-        # Draft activity is visible to nav view, but not to completions api, resulting in 404.
-        # Anyway, it looks like it needs some other studio preview representation
+        # Can't use student view as it they usually result in sending some requests to api - this is costly and often
+        # crash entire XBlock in studio due to 404 response codes
         return Fragment()
 
     def selector_view(self, context):  # pylint: disable=unused-argument
