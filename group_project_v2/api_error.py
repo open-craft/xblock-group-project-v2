@@ -1,8 +1,11 @@
+import logging
 import json
 from urllib2 import HTTPError
 
 from django.utils.translation import ugettext as _
 
+
+log = logging.getLogger(__name__)
 
 ERROR_CODE_MESSAGES = {}
 
@@ -52,7 +55,7 @@ def api_error_protect(func):
             return func(*args, **kwargs)
         except HTTPError as http_error:
             api_error = ApiError(http_error, ERROR_CODE_MESSAGES.get(func, None))
-            print "Error calling {}: {}".format(func, api_error)
+            log.exception("Error calling %s: %s", func, api_error)
             raise api_error
 
     return call_api_method

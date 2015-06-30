@@ -1,3 +1,4 @@
+import logging
 import mimetypes
 import hashlib
 
@@ -6,8 +7,8 @@ from django.core.files.storage import default_storage
 
 from django.conf import settings
 
-# TODO: replace TRACE and print with logging
-TRACE = True
+
+log = logging.getLogger(__name__)
 
 
 class UploadFile(object):
@@ -59,13 +60,11 @@ class UploadFile(object):
     def save_file(self):
         path = self._file_storage_path()
         if not default_storage.exists(path):
-            if TRACE:
-                print "Storing to {}".format(path)
+            log.debug("Storing to %s", path)
             default_storage.save(path, File(self.file))
-            if TRACE:
-                print "Successfully stored file to {}".format(path)
-        elif TRACE:
-            print "File already stored at {}".format(path)
+            log.debug("Successfully stored file to %s", path)
+        else:
+            log.debug("File already stored at %s", path)
 
     def submit(self):
         submit_hash = {
