@@ -8,7 +8,7 @@ from django.core.files.storage import default_storage
 from django.conf import settings
 
 
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class UploadFile(object):

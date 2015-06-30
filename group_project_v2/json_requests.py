@@ -27,15 +27,13 @@ def trace_request_information(func):
     Decorator which will trace information
     """
     def make_request(*args, **kwargs):
-        # log information about the request
-        log_template = "Sending %s request to %s"
-        log_args = [func.__name__, args[0]]
-
+        """
+        Logs information about request and response
+        """
         if len(args) > 1:
-            log_template += "with data %s"
-            log_args.append(args[1])
-
-        log.debug(log_template, *log_args)
+            log.debug("Sending %s request to %s with data %s", func.__name__, args[0], args[1])
+        else:
+            log.debug("Sending %s request to %s", func.__name__, args[0])
 
         response = func(*args, **kwargs)
 

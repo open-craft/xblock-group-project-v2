@@ -166,7 +166,7 @@ class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):
 
         return fragment
 
-    def author_view(self, context):
+    def author_view(self, context):  # pylint: disable=unused-argument
         """
         Studio Preview view
         """

@@ -1,24 +1,14 @@
 # -*- coding: utf-8 -*-
-#
-
-# Imports ###########################################################
-
 import logging
-import pkg_resources
-
 from datetime import date, datetime
-
 import xml.etree.ElementTree as ET
 
-from django.template import Context, Template
 from xblockutils.resources import ResourceLoader
 
-# Globals ###########################################################
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
 
-# Functions #########################################################
 
 class DottableDict(dict):
     def __init__(self, *args, **kwargs):
