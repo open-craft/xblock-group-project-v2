@@ -244,10 +244,9 @@ class GroupActivityXBlock(XBlock):
             return error_fragment
 
         user_id = self.user_id
-        group_activity = self.get_group_activity()
 
         try:
-            group_activity.update_submission_data(
+            self.group_activity.update_submission_data(
                 project_api.get_latest_workgroup_submissions_by_id(workgroup["id"])
             )
         except ApiError:
@@ -272,7 +271,7 @@ class GroupActivityXBlock(XBlock):
             assess_groups = [workgroup]
 
         context = {
-            "group_activity": group_activity,
+            "group_activity": self.group_activity,
             "team_members": json.dumps(team_members),
             "assess_groups": json.dumps(assess_groups),
             "ta_graded": (self.group_reviews_required_count < 1),
@@ -346,11 +345,9 @@ class GroupActivityXBlock(XBlock):
         group_reviewer_ids = [user["id"] for user in project_api.get_workgroup_reviewers(group_id)]
         admin_reviewer_ids = [reviewer_id for reviewer_id in all_reviewer_ids if reviewer_id not in group_reviewer_ids]
 
-        group_activity = self.get_group_activity()
-
         def get_user_grade_value_list(user_id):
             user_grades = []
-            for question in group_activity.grade_questions:
+            for question in self.group_activity.grade_questions:
                 user_value = review_item_map.get(make_key(question.id, user_id), None)
                 if user_value is None:
                     # if any are incomplete, we consider the whole set to be unusable
@@ -371,7 +368,7 @@ class GroupActivityXBlock(XBlock):
             ]
             admin_grader_count = len(admin_reviewer_grades)
             if admin_grader_count > 1:
-                for idx in range(len(group_activity.grade_questions)):
+                for idx in range(len(self.group_activity.grade_questions)):
                     admin_provided_grades.append(mean([adm[idx] for adm in admin_reviewer_grades]))
             elif admin_grader_count > 0:  # which actually means admin_grader_count == 1
                 admin_provided_grades = admin_reviewer_grades[0]
@@ -426,8 +423,9 @@ class GroupActivityXBlock(XBlock):
             self.mark_complete_stage(u["id"], None)
 
     def evaluations_complete(self):
-        group_activity = self.get_group_activity()
-        peer_review_stages = [stage for stage in group_activity.activity_stages if isinstance(stage, PeerReviewStage)]
+        peer_review_stages = [
+            stage for stage in self.group_activity.activity_stages if isinstance(stage, PeerReviewStage)
+        ]
         peer_review_questions = []
         for peer_review_stage in peer_review_stages:
             peer_review_questions.extend([
@@ -455,8 +453,9 @@ class GroupActivityXBlock(XBlock):
         return True
 
     def grading_complete(self):
-        group_activity = self.get_group_activity()
-        group_review_stages = [stage for stage in group_activity.activity_stages if isinstance(stage, GroupReviewStage)]
+        group_review_stages = [
+            stage for stage in self.group_activity.activity_stages if isinstance(stage, GroupReviewStage)
+        ]
         group_review_questions = []
         for group_review_stage in group_review_stages:
             group_review_questions.extend([q.id for q in group_review_stage.questions if q.required])
@@ -539,8 +538,7 @@ class GroupActivityXBlock(XBlock):
         Validates the state of this XBlock except for individual field values.
         """
         validation = super(GroupActivityXBlock, self).validate()
-        group_activity = self.get_group_activity()
-        errors = group_activity.validate()
+        errors = self.group_activity.validate()
         for error in errors:
             validation.add(ValidationMessage(error.type, error.text))
 
@@ -599,8 +597,7 @@ class GroupActivityXBlock(XBlock):
                 submissions
             )
 
-            group_activity = self.get_group_activity()
-            for question_id in group_activity.grade_questions:
+            for question_id in self.group_activity.grade_questions:
                 if question_id in submissions:
                     # Emit analytics event...
                     self.runtime.publish(
@@ -720,15 +717,14 @@ class GroupActivityXBlock(XBlock):
 
     @XBlock.handler
     def other_submission_links(self, request, suffix=''):
-        group_activity = self.get_group_activity()
         group_id = request.GET["group_id"]
 
         # TODO: this update_submission_data is common as well - might make sense to extract a method
-        group_activity.update_submission_data(
+        self.group_activity.update_submission_data(
             project_api.get_latest_workgroup_submissions_by_id(group_id)
         )
         html_output = loader.render_template(
-            '/templates/html/review_submissions.html', {"group_activity": group_activity}
+            '/templates/html/review_submissions.html', {"group_activity": self.group_activity}
         )
 
         return webob.response.Response(body=json.dumps({"html": html_output}))
@@ -960,20 +956,18 @@ class GroupActivityXBlock(XBlock):
         try:
             log.info('GroupActivityXBlock.on_published() on location = {}'.format(self.location))
 
-            group_activity = self.get_group_activity()
-
             # see if we are running in an environment which has Notifications enabled
             notifications_service = services.get('notifications')
             if notifications_service:
                 # set (or update) Notification timed message based on
                 # the current key dates
-                for stage in group_activity.activity_stages:
+                for stage in self.group_activity.activity_stages:
 
                     # if the stage has a opening date, then send a msg then
                     if stage.open_date:
                         self._set_activity_timed_notification(
                             course_id,
-                            group_activity,
+                            self.group_activity,
                             u'open-edx.xblock.group-project.stage-open',
                             stage,
                             datetime.combine(stage.open_date, datetime.min.time()),
@@ -986,7 +980,7 @@ class GroupActivityXBlock(XBlock):
                     if stage.close_date:
                         self._set_activity_timed_notification(
                             course_id,
-                            group_activity,
+                            self.group_activity,
                             u'open-edx.xblock.group-project.stage-due',
                             stage,
                             datetime.combine(stage.close_date, datetime.min.time()),
@@ -998,7 +992,7 @@ class GroupActivityXBlock(XBlock):
                         # and also send a notice 3 days earlier
                         self._set_activity_timed_notification(
                             course_id,
-                            group_activity,
+                            self.group_activity,
                             u'open-edx.xblock.group-project.stage-due',
                             stage,
                             datetime.combine(stage.close_date, datetime.min.time()),
@@ -1010,7 +1004,8 @@ class GroupActivityXBlock(XBlock):
         except Exception, ex:  # pylint: disable=broad-except
             log.exception(ex)
 
-    def get_group_activity(self):
+    @lazy
+    def group_activity(self):
         return GroupActivity.import_xml_string(self.data, self.is_admin_grader)
 
     def on_before_studio_delete(self, course_id, services):  # pylint: disable=unused-argument
@@ -1021,14 +1016,12 @@ class GroupActivityXBlock(XBlock):
         log.info('GroupActivityXBlock.on_before_delete() on location = {}'.format(self.location))
 
         try:
-            group_activity = self.get_group_activity()
-
             # see if we are running in an environment which has Notifications enabled
             notifications_service = services.get('notifications')
             if notifications_service:
                 # If we are being delete, then we should remove any NotificationTimers that
                 # may have been registered before
-                for stage in group_activity.activity_stages:
+                for stage in self.group_activity.activity_stages:
                     notifications_service.cancel_timed_notification(
                         self._get_stage_timer_name(stage, 'open')
                     )

@@ -230,7 +230,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
 
         for activity in self.navigator.group_project.activities:
             stages_data = []
-            for stage in activity.get_group_activity().activity_stages:
+            for stage in activity.group_activity.activity_stages:
                 stage_state = self.get_stage_state(activity.scope_ids.usage_id, stage)
                 stages_data.append({'stage': stage, 'state': stage_state})
 
@@ -264,7 +264,7 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
         resources_map = []
         for activity in self.navigator.group_project.activities:
             resources = list(itertools.chain(*[
-                stage.resources for stage in activity.get_group_activity().activity_stages
+                stage.resources for stage in activity.group_activity.activity_stages
             ]))
             resources_map.append({
                 'id': activity.scope_ids.usage_id,
@@ -299,7 +299,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         """
         submissions_map = []
         for activity in self.navigator.group_project.activities:
-            group_activity = activity.get_group_activity()
+            group_activity = activity.group_activity
             group_activity.update_submission_data(
                 project_api.get_latest_workgroup_submissions_by_id(activity.workgroup["id"])
             )
@@ -340,7 +340,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         response_data = {"message": _("File(s) successfully submitted")}
         failure_code = 0
         try:
-            group_activity = target_activity.get_group_activity()
+            group_activity = target_activity.group_activity
 
             context = {
                 "user_id": target_activity.user_id,
