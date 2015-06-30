@@ -37,6 +37,7 @@ class ProjectAPI(object):
     # send_request(GET, WORKGROUP_API, group_id, 'preferences', querystring=urlencode(qs_params))
     # send_request(PUT, PEER_REVIEW_API, question_data['id'], data=question_data)
 
+    @api_error_protect
     def get_user_preferences(self, user_id):
         """ gets users preferences information """
         response = GET(
