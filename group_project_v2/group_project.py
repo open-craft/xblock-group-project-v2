@@ -246,9 +246,7 @@ class GroupActivityXBlock(XBlock):
         user_id = self.user_id
 
         try:
-            self.group_activity.update_submission_data(
-                project_api.get_latest_workgroup_submissions_by_id(workgroup["id"])
-            )
+            self.group_activity.update_submission_data(workgroup["id"])
         except ApiError:
             pass
 
@@ -689,10 +687,7 @@ class GroupActivityXBlock(XBlock):
     def other_submission_links(self, request, suffix=''):
         group_id = request.GET["group_id"]
 
-        # TODO: this update_submission_data is common as well - might make sense to extract a method
-        self.group_activity.update_submission_data(
-            project_api.get_latest_workgroup_submissions_by_id(group_id)
-        )
+        self.group_activity.update_submission_data(group_id)
         html_output = loader.render_template(
             '/templates/html/review_submissions.html', {"group_activity": self.group_activity}
         )
