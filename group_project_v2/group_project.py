@@ -6,6 +6,7 @@
 import logging
 import textwrap
 import json
+from lazy.lazy import lazy
 import webob
 from datetime import datetime, timedelta
 import pytz
@@ -175,11 +176,7 @@ class GroupActivityXBlock(XBlock):
                 anonymous_student_id).id
         return self._known_real_user_ids[anonymous_student_id]
 
-    @property  # lazy
-    def project_api(self):
-        return project_api
-
-    @property
+    @lazy
     def user_id(self):
         try:
             return self.real_user_id(self.xmodule_runtime.anonymous_student_id)
@@ -188,30 +185,26 @@ class GroupActivityXBlock(XBlock):
 
     _workgroup = None
 
-    @property  # lazy
+    @lazy
     def workgroup(self):
-        if self._workgroup is None:
-            try:
-                user_prefs = project_api.get_user_preferences(self.user_id)
+        try:
+            user_prefs = project_api.get_user_preferences(self.user_id)
 
-                if "TA_REVIEW_WORKGROUP" in user_prefs:
-                    self._confirm_outsider_allowed()
-                    self._workgroup = project_api.get_workgroup_by_id(user_prefs["TA_REVIEW_WORKGROUP"])
-                else:
-                    self._workgroup = project_api.get_user_workgroup_for_course(
-                        self.user_id,
-                        self.course_id
-                    )
-            except OutsiderDisallowedError:
-                raise
-            except ApiError as exception:
-                log.exception(exception)
-                self._workgroup = {
-                    "id": "0",
-                    "users": [],
-                }
+            if "TA_REVIEW_WORKGROUP" in user_prefs:
+                self._confirm_outsider_allowed()
+                result = project_api.get_workgroup_by_id(user_prefs["TA_REVIEW_WORKGROUP"])
+            else:
+                result = project_api.get_user_workgroup_for_course(self.user_id, self.course_id)
+        except OutsiderDisallowedError:
+            raise
+        except ApiError as exception:
+            log.exception(exception)
+            result = {
+                "id": "0",
+                "users": [],
+            }
 
-        return self._workgroup
+        return result
 
     @property
     def is_group_member(self):
