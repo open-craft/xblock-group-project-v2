@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from datetime import date
 
-from ..utils import render_template, DottableDict, format_date, gettext as _
+from ..utils import loader, DottableDict, format_date, gettext as _
 from ..project_api import build_date_field
 
 from .stage import GroupActivityStageFactory, GroupReviewStage, StageValidationMessage
@@ -75,7 +75,7 @@ class GroupActivity(object):
             "group_activity": self
         }
 
-        return render_template('/templates/xml/group_activity.xml', data)
+        return loader.render_template('/templates/xml/group_activity.xml', data)
 
     @property
     def submission_json(self):

@@ -3,7 +3,7 @@ from datetime import date
 
 from group_project_v2.components.review import GroupActivityQuestion, GroupActivityAssessment
 from group_project_v2.utils import (
-    DottableDict, render_template, parse_date, inner_html, format_date, gettext as _
+    DottableDict, loader, parse_date, inner_html, format_date, gettext as _
 )
 
 
@@ -125,7 +125,7 @@ class BaseGroupActivityStage(object):
         return (self.close_date is not None) and (self.close_date < date.today())
 
     def _render(self, template):
-        return render_template(template, {"activity_stage": self})
+        return loader.render_template(template, {"activity_stage": self})
 
     @property
     def export_xml(self):
