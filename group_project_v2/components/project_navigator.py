@@ -309,9 +309,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         submissions_map = []
         for activity in self.navigator.group_project.activities:
             group_activity = activity.group_activity
-            group_activity.update_submission_data(
-                project_api.get_latest_workgroup_submissions_by_id(activity.workgroup["id"])
-            )
+            group_activity.update_submission_data(activity.workgroup["id"])
             stages = [stage for stage in group_activity.activity_stages if stage.submissions_stage]
             submissions_required = any(True for stage in stages if len(stage.submissions) > 0)
             submissions_map.append({
@@ -364,9 +362,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
                 uploaded_file.submission_id: uploaded_file.file_url for uploaded_file in upload_files
             }
 
-            group_activity.update_submission_data(
-                project_api.get_latest_workgroup_submissions_by_id(target_activity.workgroup['id'])
-            )
+            group_activity.update_submission_data(target_activity.workgroup['id'])
 
             target_stage = [stage for stage in group_activity.activity_stages if stage.id == stage_id][0]
             if target_stage.has_all_submissions:

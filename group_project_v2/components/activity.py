@@ -7,7 +7,7 @@ from collections import Counter
 from datetime import date
 
 from ..utils import loader, DottableDict, format_date, gettext as _
-from ..project_api import build_date_field
+from ..project_api import build_date_field, project_api
 
 from .stage import GroupActivityStageFactory, GroupReviewStage, StageValidationMessage
 
@@ -47,7 +47,9 @@ class GroupActivity(object):
             *[getattr(stage, 'grade_questions', ()) for stage in self.activity_stages]
         ))
 
-    def update_submission_data(self, submission_map):
+    def update_submission_data(self, group_id):
+
+        submission_map = project_api.get_latest_workgroup_submissions_by_id(group_id)
 
         def formatted_date(iso_date_value):
             return format_date(build_date_field(iso_date_value))
