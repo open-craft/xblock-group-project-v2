@@ -282,11 +282,6 @@ class GroupActivityXBlock(XBlock):
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_activity.css'))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/group_activity.js'))
 
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.ui.widget.js'))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.fileupload.js'))
-        fragment.add_javascript_url(
-            self.runtime.local_resource_url(self, 'public/js/vendor/jquery.iframe-transport.js'))
-
         fragment.initialize_js('GroupProjectBlock')
 
         return fragment
@@ -296,13 +291,9 @@ class GroupActivityXBlock(XBlock):
         Editing view in Studio
         """
         fragment = Fragment()
-        fragment.add_content(loader.render_template('/templates/html/group_activity_edit.html', {
-            'self': self,
-        }))
+        fragment.add_content(loader.render_template('/templates/html/group_activity_edit.html', {'self': self}))
         fragment.add_css(loader.load_unicode('public/css/group_activity_edit.css'))
-
-        fragment.add_javascript(
-            loader.load_unicode('public/js/group_activity_edit.js'))
+        fragment.add_javascript(loader.load_unicode('public/js/group_activity_edit.js'))
 
         fragment.initialize_js('GroupActivityEditBlock')
 

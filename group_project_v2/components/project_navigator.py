@@ -130,6 +130,7 @@ class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):
     css_file = None
     js_file = None
     initialize_js_function = None
+    additional_js_files = ()
 
     has_author_view = True
 
@@ -159,6 +160,9 @@ class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):
 
         if self.initialize_js_function:
             fragment.initialize_js(self.initialize_js_function)
+
+        for js_file in self.additional_js_files:
+            fragment.add_javascript_url(self.runtime.local_resource_url(self.navigator.group_project, js_file))
 
         return fragment
 
@@ -292,6 +296,11 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     css_file = "submissions_view.css"
     js_file = "submissions_view.js"
     initialize_js_function = "GroupProjectNavigatorSubmissionsView"
+    additional_js_files = (
+        'public/js/vendor/jquery.ui.widget.js',
+        'public/js/vendor/jquery.fileupload.js',
+        'public/js/vendor/jquery.iframe-transport.js'
+    )
 
     def _get_submissions_map(self):
         """
