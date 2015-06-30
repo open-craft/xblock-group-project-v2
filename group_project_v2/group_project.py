@@ -26,7 +26,7 @@ from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
-from .utils import loader, render_template, load_resource
+from .utils import loader
 
 from components import GroupActivity, PeerReviewStage, GroupReviewStage
 from .project_api import project_api
@@ -239,8 +239,8 @@ class GroupActivityXBlock(XBlock):
         except OutsiderDisallowedError as ode:
             error_fragment = Fragment()
             error_fragment.add_content(
-                render_template('/templates/html/loading_error.html', {'error_message': unicode(ode)}))
-            error_fragment.add_javascript(load_resource('public/js/group_project_error.js'))
+                loader.render_template('/templates/html/loading_error.html', {'error_message': unicode(ode)}))
+            error_fragment.add_javascript(loader.load_unicode('public/js/group_project_error.js'))
             error_fragment.initialize_js('GroupProjectError')
             return error_fragment
 
@@ -281,15 +281,15 @@ class GroupActivityXBlock(XBlock):
 
         fragment = Fragment()
         fragment.add_content(
-            render_template('/templates/html/group_activity.html', context))
-        fragment.add_css(load_resource('public/css/group_activity.css'))
+            loader.render_template('/templates/html/group_activity.html', context))
+        fragment.add_css(loader.load_unicode('public/css/group_activity.css'))
 
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.ui.widget.js'))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.fileupload.js'))
         fragment.add_javascript_url(
             self.runtime.local_resource_url(self, 'public/js/vendor/jquery.iframe-transport.js'))
 
-        fragment.add_javascript(load_resource('public/js/group_activity.js'))
+        fragment.add_javascript(loader.load_unicode('public/js/group_activity.js'))
 
         fragment.initialize_js('GroupProjectBlock')
 
@@ -300,13 +300,13 @@ class GroupActivityXBlock(XBlock):
         Editing view in Studio
         """
         fragment = Fragment()
-        fragment.add_content(render_template('/templates/html/group_activity_edit.html', {
+        fragment.add_content(loader.render_template('/templates/html/group_activity_edit.html', {
             'self': self,
         }))
-        fragment.add_css(load_resource('public/css/group_activity_edit.css'))
+        fragment.add_css(loader.load_unicode('public/css/group_activity_edit.css'))
 
         fragment.add_javascript(
-            load_resource('public/js/group_activity_edit.js'))
+            loader.load_unicode('public/js/group_activity_edit.js'))
 
         fragment.initialize_js('GroupActivityEditBlock')
 
@@ -712,7 +712,9 @@ class GroupActivityXBlock(XBlock):
         group_activity.update_submission_data(
             self.project_api.get_latest_workgroup_submissions_by_id(group_id)
         )
-        html_output = render_template('/templates/html/review_submissions.html', {"group_activity": group_activity})
+        html_output = loader.render_template(
+            '/templates/html/review_submissions.html', {"group_activity": group_activity}
+        )
 
         return webob.response.Response(body=json.dumps({"html": html_output}))
 
