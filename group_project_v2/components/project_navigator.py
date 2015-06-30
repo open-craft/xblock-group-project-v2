@@ -1,3 +1,6 @@
+"""
+This module contains Project Navigator XBlock and it's children view XBlocks
+"""
 import itertools
 import json
 import logging
@@ -20,6 +23,9 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class ViewTypes(object):
+    """
+    View type constants
+    """
     NAVIGATION = 'navigation'
     RESOURCES = 'resources'
     SUBMISSIONS = 'submissions'
@@ -27,6 +33,10 @@ class ViewTypes(object):
 
 
 class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
+    """
+    XBlock that provides basic layout and switching between children XBlocks (views)
+    Should only be added as a child to GroupProjectXBlock
+    """
     INITIAL_VIEW = ViewTypes.NAVIGATION
 
     display_name_with_default = _(u"Group Project Navigator")
@@ -37,9 +47,15 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
 
     @lazy
     def group_project(self):
+        """
+        Reference to parent XBlock
+        """
         return self.get_parent()
 
     def student_view(self, context):
+        """
+        Student view
+        """
         fragment = Fragment()
         children_items = []
         for child_id in self.children:
@@ -78,8 +94,7 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
 
     def author_preview_view(self, context):
         """
-        Child blocks can override this to add a custom preview shown to authors in Studio when
-        not editing this block's children.
+        Studio Preview view
         """
         # Can't use student view as it fails with 404 if new activity is added after project navigator:
         # throws 404 because navigation view searches for completions for all available activities.
@@ -89,7 +104,7 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
 
     def author_edit_view(self, context):
         """
-        Add some HTML to the author view that allows authors to add child blocks.
+        Studio edit view
         """
         fragment = Fragment()
         self.render_children(context, fragment, can_reorder=True, can_add=False)
@@ -99,6 +114,9 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
 
 
 class ProjectNavigatorViewXBlockBase(XBlock):
+    """
+    Base class for Project Navigator children XBlocks (views)
+    """
     type = None
     icon = None
     selector_text = None
@@ -115,9 +133,15 @@ class ProjectNavigatorViewXBlockBase(XBlock):
 
     @lazy
     def navigator(self):
+        """
+        Reference to Project Navigator Block
+        """
         return self.get_parent()
 
     def render_student_view(self, context):
+        """
+        Common code to render student view
+        """
         fragment = Fragment()
         fragment.add_content(loader.render_template(self.TEMPLATE_BASE + self.template, context))
 
@@ -136,7 +160,10 @@ class ProjectNavigatorViewXBlockBase(XBlock):
 
         return fragment
 
-    def selector_view(self, context):
+    def selector_view(self, context):  # pylint: disable=unused-argument
+        """
+        Selector view - this view is used by GroupProjectNavigatorXBlock to render selector buttons
+        """
         fragment = Fragment()
         context = {'type': self.type, 'display_name': self.display_name_with_default}
         for attribute in ['icon', 'selector_text']:
@@ -148,6 +175,10 @@ class ProjectNavigatorViewXBlockBase(XBlock):
 
 @XBlock.needs('user')
 class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
+    """
+    Navigation View XBlock - displays Group Project Activities and Stages, completion state and links to navigate to
+    any stage in Group Project
+    """
     type = ViewTypes.NAVIGATION
     icon = u"fa-bars"
     display_name_with_default = _(u"Navigation")
@@ -159,6 +190,9 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     initialize_js_function = "GroupProjectNavigatorNavigationView"
 
     def get_stage_state(self, activity_id, stage):
+        """
+        Gets stage completion state
+        """
         user_service = self.runtime.service(self, 'user')
         user_id = user_service.get_current_user().opt_attrs.get('edx-platform.user_id', None)
 
@@ -177,6 +211,9 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
             return StageState.NOT_STARTED
 
     def student_view(self, context):  # pylint: disable=unused-argument
+        """
+        Student view
+        """
         navigation_map = []
 
         for activity in self.navigator.group_project.activities:
@@ -196,6 +233,9 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
 
 
 class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
+    """
+    Resources view XBlock - displays Resources links grouped by Activity
+    """
     type = ViewTypes.RESOURCES
     icon = u"fa-files-o"
     display_name_with_default = _(u"Resources")
@@ -206,6 +246,9 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     initialize_js_function = "GroupProjectNavigatorResourcesView"
 
     def student_view(self, context):  # pylint: disable=unused-argument
+        """
+        Student view
+        """
         resources_map = []
         for activity in self.navigator.group_project.activities:
             resources = list(itertools.chain(*[
@@ -225,6 +268,10 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
 @XBlock.needs('user')
 @XBlock.wants('notifications')
 class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
+    """
+    Submissions View - displays submissions grouped by Activity. Allows uploading new files and downloading
+    earlier uploads
+    """
     type = ViewTypes.SUBMISSIONS
     icon = u"fa-upload"
     display_name_with_default = _(u"Submissions")
@@ -235,6 +282,9 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     initialize_js_function = "GroupProjectNavigatorSubmissionsView"
 
     def _get_submissions_map(self):
+        """
+        Walks Group Project and builds a map of activities and submissions
+        """
         submissions_map = []
         for activity in self.navigator.group_project.activities:
             group_activity = activity.get_group_activity()
@@ -253,7 +303,10 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         return submissions_map
 
     def student_view(self, context):  # pylint: disable=unused-argument
-        # FIXME: should have used `include` in template, but it can't find the template: likely resource loader does
+        """
+        Student view
+        """
+        # TODO: should have used `include` in template, but it can't find the template: resource loader does
         # not know how to do that
         submission_links = loader.render_template(
             "templates/html/project_navigator/submission_links.html",
@@ -263,18 +316,12 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         context = {'view': self, 'submission_links': submission_links}
         return self.render_student_view(context)
 
-    @XBlock.handler
-    def refresh_submission_links(self, request, suffix=''):  # pylint: disable=unused-argument
-        html_output = loader.render_template(
-            '/templates/html/project_navigator/submission_links.html',
-            {"submissions_map": self._get_submissions_map()}
-        )
-
-        return webob.response.Response(body=json.dumps({"html": html_output}))
-
     # TODO: When Stages become XBlocks this method should become a handler on SubmissionsStage XBlock
     @XBlock.handler
     def upload_submission(self, request, suffix=''):  # pylint: disable=unused-argument
+        """
+        Handles submission upload and marks stage as completed if all submissions in stage have uploads.
+        """
         activity_id, stage_id = request.POST['activity_id'], request.POST['stage_id']
         target_activity = self.runtime.get_block(BlockUsageLocator.from_string(activity_id))
 
@@ -329,6 +376,9 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         return response
 
     def send_file_upload_notification(self):
+        """
+        Helper method to emit notifications service event for submission upload
+        """
         # See if the xBlock Notification Service is available, and - if so -
         # dispatch a notification to the entire workgroup that a file has been uploaded
         # Note that the NotificationService can be disabled, so it might not be available
@@ -338,6 +388,9 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
             self.fire_file_upload_notification(notifications_service)
 
     def persist_and_submit_files(self, target_activity, group_activity, context, request_parameters):
+        """
+        Saves uploaded files to their permanent location, sends them to submissions backend and emits submission events
+        """
         upload_files = [
             UploadFile(request_parameters[submission.id].file, submission.id, context)
             for submission in group_activity.submissions if submission.id in request_parameters
@@ -387,6 +440,9 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
 
 # pylint-disable=no-init
 class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
+    """
+    Ask a TA view - displays  a form to send message to Teaching Assistant
+    """
     type = ViewTypes.ASK_TA
     selector_text = u"TA"
     display_name_with_default = _(u"Ask a TA")
@@ -397,6 +453,9 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     initialize_js_function = "GroupProjectNavigatorAskTAView"
 
     def student_view(self, context):  # pylint: disable=unused-argument
+        """
+        Student view
+        """
         img_url = self.runtime.local_resource_url(self.navigator.group_project, "public/img/ask_ta.png")
         context = {'view': self, 'course_id': self.course_id, 'img_url': img_url}
         return self.render_student_view(context)
