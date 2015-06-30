@@ -29,7 +29,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContain
 
 from .utils import loader
 
-from components import GroupActivity, PeerReviewStage, GroupReviewStage
+from components import GroupActivity
 from .project_api import project_api
 from .api_error import ApiError
 
@@ -413,12 +413,9 @@ class GroupActivityXBlock(XBlock):
         for u in workgroup["users"]:
             self.mark_complete_stage(u["id"], None)
 
-    def _get_review_questions(self, stage_type):
-        stages = [stage for stage in self.group_activity.activity_stages if isinstance(stage, stage_type)]
-        questions = []
-        for stage in stages:
-            questions.extend([question for question in stage.questions if question.required])
-        return questions
+    def _get_review_questions(self, stage_id):
+        stage = [stage for stage in self.group_activity.activity_stages if stage.id == stage_id][0]
+        return [question for question in stage.questions if question.required]
 
     def _check_review_complete(self, items_to_grade, review_questions, review_items, review_item_key):
         my_feedback = {
@@ -435,15 +432,15 @@ class GroupActivityXBlock(XBlock):
 
         return True
 
-    def evaluations_complete(self):
-        peer_review_questions = self._get_review_questions(PeerReviewStage)
+    def peer_review_complete(self, stage_id):
+        peer_review_questions = self._get_review_questions(stage_id)
         peers_to_review = [user for user in self.workgroup["users"] if user["id"] != self.user_id]
         peer_review_items = project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
 
         return self._check_review_complete(peers_to_review, peer_review_questions, peer_review_items, "user")
 
-    def grading_complete(self):
-        group_review_questions = self._get_review_questions(GroupReviewStage)
+    def group_review_complete(self, stage_id):
+        group_review_questions = self._get_review_questions(stage_id)
         groups_to_review = project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
 
         group_review_items = []
@@ -532,7 +529,7 @@ class GroupActivityXBlock(XBlock):
                 submissions,
             )
 
-            if self.evaluations_complete():
+            if self.peer_review_complete(stage_id):
                 self.mark_complete_stage(self.user_id, stage_id)
 
         except ApiError as exception:
@@ -559,7 +556,9 @@ class GroupActivityXBlock(XBlock):
     def submit_other_group_feedback(self, submissions, suffix=''):
         try:
             group_id = submissions["group_id"]
+            stage_id = submissions["stage_id"]
             del submissions["group_id"]
+            del submissions["stage_id"]
 
             project_api.submit_workgroup_review_items(
                 self.xmodule_runtime.anonymous_student_id,
@@ -589,8 +588,8 @@ class GroupActivityXBlock(XBlock):
                 self.assign_grade_to_group(group_id, grade_value)
                 self.graded_and_complete(group_id)
 
-            if self.is_group_member and self.grading_complete():
-                self.mark_complete_stage(self.user_id, "grade")
+            if self.is_group_member and self.group_review_complete(stage_id):
+                self.mark_complete_stage(self.user_id, stage_id)
 
         except ApiError as exception:
             message = exception.message
