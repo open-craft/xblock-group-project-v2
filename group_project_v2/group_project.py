@@ -408,66 +408,46 @@ class GroupActivityXBlock(XBlock):
         for u in workgroup["users"]:
             self.mark_complete_stage(u["id"], None)
 
-    def evaluations_complete(self):
-        peer_review_stages = [
-            stage for stage in self.group_activity.activity_stages if isinstance(stage, PeerReviewStage)
-        ]
-        peer_review_questions = []
-        for peer_review_stage in peer_review_stages:
-            peer_review_questions.extend([
-                question.id for question in peer_review_stage.questions if question.required
-            ])
+    def _get_review_questions(self, stage_type):
+        stages = [stage for stage in self.group_activity.activity_stages if isinstance(stage, stage_type)]
+        questions = []
+        for stage in stages:
+            questions.extend([question for question in stage.questions if question.required])
+        return questions
 
-        group_peer_items = project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
+    def _check_review_complete(self, items_to_grade, review_questions, review_items, review_item_key):
         my_feedback = {
-            make_key(peer_review_item["user"], peer_review_item["question"]): peer_review_item["answer"]
-            for peer_review_item in group_peer_items
+            make_key(peer_review_item[review_item_key], peer_review_item["question"]): peer_review_item["answer"]
+            for peer_review_item in review_items
             if peer_review_item['reviewer'] == self.xmodule_runtime.anonymous_student_id
         }
-        my_peers = [user for user in self.workgroup["users"] if user["id"] != self.user_id]
 
-        for peer in my_peers:
-            for question_id in peer_review_questions:
-                k = make_key(peer["id"], question_id)
-                if k not in my_feedback:
-                    return False
-                if my_feedback[k] is None:
-                    return False
-                if my_feedback[k] == '':
+        for item in items_to_grade:
+            for question in review_questions:
+                key = make_key(item["id"], question.id)
+                if my_feedback.get(key, None) in (None, ''):
                     return False
 
         return True
+
+    def evaluations_complete(self):
+        peer_review_questions = self._get_review_questions(PeerReviewStage)
+        peers_to_review = [user for user in self.workgroup["users"] if user["id"] != self.user_id]
+        peer_review_items = project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
+
+        return self._check_review_complete(peers_to_review, peer_review_questions, peer_review_items, "user")
 
     def grading_complete(self):
-        group_review_stages = [
-            stage for stage in self.group_activity.activity_stages if isinstance(stage, GroupReviewStage)
-        ]
-        group_review_questions = []
-        for group_review_stage in group_review_stages:
-            group_review_questions.extend([q.id for q in group_review_stage.questions if q.required])
+        group_review_questions = self._get_review_questions(GroupReviewStage)
+        groups_to_review = project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
 
         group_review_items = []
-        assess_groups = project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
-        for assess_group in assess_groups:
+        for assess_group in groups_to_review:
             group_review_items.extend(
-                project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id))
-        my_feedback = {
-            make_key(peer_review_item["workgroup"], peer_review_item["question"]): peer_review_item["answer"]
-            for peer_review_item in group_review_items
-            if peer_review_item['reviewer'] == self.xmodule_runtime.anonymous_student_id
-        }
+                project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id)
+            )
 
-        for assess_group in assess_groups:
-            for question_id in group_review_questions:
-                key = make_key(assess_group["id"], question_id)
-                if key not in my_feedback:
-                    return False
-                if my_feedback[key] is None:
-                    return False
-                if my_feedback[key] == '':
-                    return False
-
-        return True
+        return self._check_review_complete(groups_to_review, group_review_questions, group_review_items, "workgroup")
 
     @XBlock.json_handler
     def studio_submit(self, submissions, suffix=''):
@@ -534,7 +514,7 @@ class GroupActivityXBlock(XBlock):
     def submit_peer_feedback(self, submissions, suffix=''):
         try:
             peer_id = submissions["peer_id"]
-            stage = submissions['stage_id']
+            stage_id = submissions['stage_id']
             del submissions["peer_id"]
             del submissions['stage_id']
 
@@ -548,7 +528,7 @@ class GroupActivityXBlock(XBlock):
             )
 
             if self.evaluations_complete():
-                self.mark_complete_stage(self.user_id, stage)
+                self.mark_complete_stage(self.user_id, stage_id)
 
         except ApiError as exception:
             message = exception.message
