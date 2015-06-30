@@ -7,43 +7,43 @@
     visibility: hidden;
 }
 
-.uploader .file-progress-box {
+.group-project-submissions-view .uploader .file-progress-box {
     background-color: transparent;
     width: 83%;
     height: 5px;
     visibility: hidden;
 }
 
-.uploader .file-progress-box .file-progress {
+.group-project-submissions-view .uploader .file-progress-box .file-progress {
     background-color: #cccccc;
     width: 13%;
     height: 5px;
 }
 
-.uploader .file-progress-box .file-progress.complete {
+.group-project-submissions-view .uploader .file-progress-box .file-progress.complete {
     background-color: #999999;
 }
 
-.uploader .file-progress-box .file-progress.failed {
+.group-project-submissions-view .uploader .file-progress-box .file-progress.failed {
     background-color: #B85433;
 }
 
-.uploader .xblock-reveal.reveal-modal.open {
+.group-project-submissions-view .uploader .xblock-reveal.reveal-modal.open {
     max-height: 80%;
     overflow: auto;
     padding-bottom: 0;
 }
 
-.uploader .upload_item {
+.group-project-submissions-view .uploader .upload_item {
     font-size: 14px;
     margin-bottom: 10px;
 }
 
-.uploader .upload_item .upload_title {
+.group-project-submissions-view .uploader .upload_item .upload_title {
     margin-bottom: 5px;
 }
 
-.uploader .upload_item input[type=text] {
+.group-project-submissions-view .uploader .upload_item input[type=text] {
     width: 100%;
     background-color: transparent;
     color: #3384ca;
@@ -51,14 +51,14 @@
     height: 30px;
 }
 
-.uploader .upload_item label {
+.group-project-submissions-view .uploader .upload_item label {
     width: 30px;
     display: inline-block;
     text-align: right;
     vertical-align: top;
 }
 
-.uploader .upload_item label span {
+.group-project-submissions-view .uploader .upload_item label span {
     width: 30px;
     height: 30px;
     padding: 0;
@@ -66,23 +66,23 @@
     margin-bottom: 0;
 }
 
-.uploader .upload_item .description {
+.group-project-submissions-view .uploader .upload_item .description {
     font-size: 11px;
     font-style: italic;
 }
 
-.uploader .upload_item .upload_item_data {
+.group-project-submissions-view .uploader .upload_item .upload_item_data {
     font-size: 12px;
     color: #8f8f8f;
 }
 
-.uploader .upload_item .upload_item_wrapper {
+.group-project-submissions-view .uploader .upload_item .upload_item_wrapper {
     width: 83%;
     display: inline-block;
     margin: 0;
     padding: 0;
 }
 
-.uploader .upload_item .upload_item_wrapper[data-location] input[type=text] {
+.group-project-submissions-view .uploader .upload_item .upload_item_wrapper[data-location] input[type=text] {
     cursor: pointer;
 }
