@@ -2,24 +2,24 @@
 // into separate functions and make this function call them
 function GroupProjectBlock(runtime, element) {
 
-    var get_from_node = function (selector, default_value) {
+    function get_from_node(selector, default_value) {
         var the_node = $(selector, element);
         return (the_node.length > 0) ? the_node.html() : default_value;
-    };
+    }
     var DATA_PRESENT_SUBMIT = get_from_node('.data-present-button-text', 'Resubmit');
     var NO_DATA_PRESENT_SUBMIT = get_from_node('.no-data-button-text', 'Submit');
 
     var message_box = $('.message', element).appendTo($(document.body));
     message_box.on('click', '.button, .close-box', function () {
         message_box.hide();
-    })
+    });
 
-    var show_message = function (msg) {
+    function show_message(msg) {
         message_box.find('.message_text').html(msg);
         message_box.show();
     }
 
-    var mean = function (value_array) {
+    function mean(value_array) {
         var sum = 0;
         var count = value_array.length;
         if (count < 1) {
@@ -33,9 +33,10 @@ function GroupProjectBlock(runtime, element) {
         return sum / count;
     }
 
-    var load_data_into_form = function (form_node, data_for_form) {
+    function load_data_into_form(form_node, data_for_form) {
         form_node.find('.answer').val(null);
-        for (data_item in data_for_form) {
+        for (var data_item in data_for_form) {
+            if (!data_for_form.hasOwnProperty(data_item)) continue;
             form_node.find('button.submit').html(DATA_PRESENT_SUBMIT);
             // NOTE: use of ids specified by designer here
             var $form_item = form_node.find("#" + data_item);
@@ -44,11 +45,12 @@ function GroupProjectBlock(runtime, element) {
         validate_form_answers(form_node);
     }
 
-    var load_my_feedback_data = function (section_node, data) {
+    function load_my_feedback_data(section_node, data) {
         // Clean existing values
         $('.feedback-data', section_node).remove();
 
-        for (data_item in data) {
+        for (var data_item in data) {
+            if (!data.hasOwnProperty(data_item)) continue;
             // either a place witin to list it or the outer location
             var fill_field = $('#list_' + data_item, section_node);
             if (fill_field.length < 1) {
@@ -70,7 +72,7 @@ function GroupProjectBlock(runtime, element) {
         }
     }
 
-    var _load_data = function (handler_name, args, form_node, post_data_fn) {
+    function _load_data(handler_name, args, form_node, post_data_fn) {
         $('.group-project-xblock-wrapper', element).addClass('waiting');
         form_node.find('.editable').attr('disabled', 'disabled');
         form_node.find('.answer').val(null);
@@ -101,11 +103,11 @@ function GroupProjectBlock(runtime, element) {
         });
     }
 
-    var load_data_for_peer = function (peer_id) {
+    function load_data_for_peer(peer_id) {
         _load_data('load_peer_feedback', 'peer_id=' + peer_id, $('.peer_review', element), load_data_into_form);
     }
 
-    var load_data_for_other_group = function (group_id) {
+    function load_data_for_other_group(group_id) {
         _load_data('load_other_group_feedback', 'group_id=' + group_id, $('.other_group_review', element), load_data_into_form);
     }
 
@@ -114,8 +116,8 @@ function GroupProjectBlock(runtime, element) {
         var $form = $(this);
 
         $form.find(':submit').prop('disabled', true);
-        items = $form.serializeArray();
-        data = {}
+        var items = $form.serializeArray();
+        var data = {};
         $.each(items, function (i, v) {
             data[v.name] = v.value;
         });
@@ -155,7 +157,7 @@ function GroupProjectBlock(runtime, element) {
         pn.append(pi);
 
         return pn;
-    }
+    };
 
     // .peers is placeholder elem to inject list of peers to - it must be present in project XML if peer review is enabled
     for (var i = 0; i < peers.length; ++i) {
@@ -170,19 +172,20 @@ function GroupProjectBlock(runtime, element) {
         gn.append(gi);
 
         return gn;
-    }
+    };
 
     // .other_groups is placeholder elem to inject list of groups to - it must be present in project XML if group review is enabled
     for (var i = 0; i < groups.length; ++i) {
         $('.other_groups', element).append(group_node(groups[i]));
     }
 
-    var validate_form_answers = function (form_node) {
+    function validate_form_answers(form_node) {
         var answers = form_node.find('.required .answer');
         var submitButton = form_node.find('button.submit');
-        var check_answered_total = function (answers, submitButton) {
-            // TODO: unintentional global variable answers_checked
-            var answers_total = answers_checked = 0;
+
+        function check_answered_total(answers, submitButton) {
+            var answers_total, answers_checked;
+            answers_total = answers_checked = 0;
             submitButton.attr('disabled', 'disabled');
             $.each(answers, function () {
                 if ($(this).is('textarea')) {
@@ -201,14 +204,14 @@ function GroupProjectBlock(runtime, element) {
             if (answers_total === answers_checked) {
                 submitButton.attr('disabled', false);
             }
-        };
+        }
 
         check_answered_total(answers, submitButton);
 
         answers.on('change keyup paste', function () {
             check_answered_total(answers, submitButton);
         });
-    };
+    }
 
     var step_map = JSON.parse($('.step_map', element).html());
 
@@ -217,33 +220,6 @@ function GroupProjectBlock(runtime, element) {
 
         // NOTE: use of ids specified by designer here
         $('#activity_' + selected_step_id).show();
-
-        // Update step makers
-        var step_pn = step_map[selected_step_id];
-        $('.page-to.previous, .page-to.next', element).attr('title', '').off('click').removeAttr('href');
-
-        // TODO: almost identical blocks: extract method
-        if (step_pn.prev) {
-            var prev = step_map[step_pn.prev];
-            $('.page-to.previous', element)
-                .attr('title', prev.name)
-                .on('click', function () {
-                    $("#" + step_pn.prev).click();
-                }).attr('href', '#');
-        }
-        if (step_pn.next) {
-            var next_step = step_map[step_pn.next];
-            if (next_step['restrict_message']) {
-                $('.page-to.next', element).attr('title', next_step['restrict_message']);
-            }
-            else {
-                $('.page-to.next', element)
-                    .attr('title', next_step.name)
-                    .on('click', function () {
-                        $("#" + step_pn["next"]).click();
-                    }).attr('href', '#');
-            }
-        }
     });
 
     $('.view_feedback').on('click', function (ev) {
@@ -313,13 +289,14 @@ function GroupProjectBlock(runtime, element) {
         review_submissions_dialog.hide();
 
 
-    // Activate the first peer, or the first group if no peers
-    $(function () {
-        var select_from = $('.select_peer, .select_group');
-        if (select_from.length > 0) {
-            select_from[0].click();
-        }
-    }) });
+        // Activate the first peer, or the first group if no peers
+        $(function () {
+            var select_from = $('.select_peer, .select_group');
+            if (select_from.length > 0) {
+                select_from[0].click();
+            }
+        })
+    });
 
 
     // TODO: a bit hacky solution to allow directly to stages
