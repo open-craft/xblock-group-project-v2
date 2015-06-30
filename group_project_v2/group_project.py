@@ -104,7 +104,7 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
 
 
 # TODO: enable and fix these violations
-# pylint: disable=unused-argument,invalid-name,bare-except
+# pylint: disable=unused-argument,invalid-name
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
 class GroupActivityXBlock(XBlock):
@@ -183,7 +183,7 @@ class GroupActivityXBlock(XBlock):
     def user_id(self):
         try:
             return self.real_user_id(self.xmodule_runtime.anonymous_student_id)
-        except:
+        except Exception:  # pylint: disable=broad-except
             return None
 
     _workgroup = None
@@ -204,7 +204,8 @@ class GroupActivityXBlock(XBlock):
                     )
             except OutsiderDisallowedError:
                 raise
-            except:
+            except ApiError as exception:
+                log.exception(exception)
                 self._workgroup = {
                     "id": "0",
                     "users": [],
@@ -224,14 +225,14 @@ class GroupActivityXBlock(XBlock):
     def content_id(self):
         try:
             return unicode(self.scope_ids.usage_id)
-        except:
+        except Exception:  # pylint: disable=broad-except
             return self.id
 
     @property
     def course_id(self):
         try:
             return unicode(self.xmodule_runtime.course_id)
-        except:
+        except Exception:    # pylint: disable=broad-except
             return self.xmodule_runtime.course_id
 
     def student_view(self, context):
@@ -256,7 +257,7 @@ class GroupActivityXBlock(XBlock):
             group_activity.update_submission_data(
                 self.project_api.get_latest_workgroup_submissions_by_id(workgroup["id"])
             )
-        except:
+        except ApiError:
             pass
 
         if self.is_group_member:
@@ -266,12 +267,12 @@ class GroupActivityXBlock(XBlock):
                     for team_member in workgroup["users"]
                     if user_id != int(team_member["id"])
                 ]
-            except:
+            except ApiError:
                 team_members = []
 
             try:
                 assess_groups = self.project_api.get_workgroups_to_review(user_id, self.course_id, self.content_id)
-            except:
+            except ApiError:
                 assess_groups = []
         else:
             team_members = []
@@ -507,21 +508,21 @@ class GroupActivityXBlock(XBlock):
             try:
                 # not an integer, then default
                 max_score = int(max_score)
-            except:
+            except ValueError:
                 max_score = 100
 
         self.weight = max_score
 
         try:
             group_reviews_required_count = int(group_reviews_required_count)
-        except:
+        except ValueError:
             group_reviews_required_count = 3
 
         self.group_reviews_required_count = group_reviews_required_count
 
         try:
             user_review_count = int(user_review_count)
-        except:
+        except ValueError:
             user_review_count = 1
 
         self.user_review_count = user_review_count
@@ -572,10 +573,19 @@ class GroupActivityXBlock(XBlock):
             if self.evaluations_complete():
                 self.mark_complete_stage(self.user_id, stage)
 
-        except Exception as e:   # pylint: disable=broad-except
+        except ApiError as exception:
+            message = exception.message
+            log.exception(message)
             return {
                 'result': 'error',
-                'msg': e.message,
+                'msg': message,
+            }
+        except KeyError as exception:
+            message = "Missing required argument {}".format(exception.message)
+            log.exception(message)
+            return {
+                'result': 'error',
+                'msg': message,
             }
 
         return {
@@ -621,10 +631,19 @@ class GroupActivityXBlock(XBlock):
             if self.is_group_member and self.grading_complete():
                 self.mark_complete_stage(self.user_id, "grade")
 
-        except Exception as e:   # pylint: disable=broad-except
+        except ApiError as exception:
+            message = exception.message
+            log.exception(message)
             return {
                 'result': 'error',
-                'msg': e.message,
+                'msg': message,
+            }
+        except KeyError as exception:
+            message = "Missing required argument {}".format(exception.message)
+            log.exception(message)
+            return {
+                'result': 'error',
+                'msg': message,
             }
 
         return {
@@ -726,6 +745,8 @@ class GroupActivityXBlock(XBlock):
         activity_location = None
         stage_name = self.display_name
         stage_location = None
+        project_name = None
+        project_location = None
 
         try:
             if courseware_parent_info_service:
