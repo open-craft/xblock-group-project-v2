@@ -48,12 +48,12 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         if load_immediately:
             return self.go_to_view("student_view")
 
-    def get_stages_map(self):
+    def get_activities_map(self):
         group_project = self.load_root_xblock()
         runtime = group_project.runtime
         children = [runtime.get_block(child_id) for child_id in group_project.children]
         return {
-            child.display_name: child.scope_ids.usage_id
+            child.scope_ids.usage_id: child.display_name
             for child in children
             if isinstance(child, GroupActivityXBlock)
         }
@@ -64,16 +64,15 @@ class SingleScenarioTestSuite(BaseIntegrationTest):
 
     def setUp(self):
         super(SingleScenarioTestSuite, self).setUp()
-        scenario = self.load_scenario(self.scenario, load_immediately=True)
-        self.page = GroupProjectV2Page(self.browser, scenario)
-        self.stages_map = self.get_stages_map()
+        self.load_scenario(self.scenario)
+
+    def _prepare_page(self, view_name='student_view', student_id=1):
+        scenario = self.go_to_view(view_name=view_name, student_id=student_id)
+        self.page = GroupProjectElement(self.browser, scenario)
+        self.activities_map = self.get_activities_map()
 
 
-class GroupProjectV2Page(object):
-    """ Wrapper around group project xblock element providing helpers common actions """
-    ACTIVITY_CSS_SELECTOR = ".xblock-v1[data-block-type='group-project-v2-activity']"
-    STAGE_CSS_SELECTOR = "div.activity_stage"
-
+class BaseElement(object):
     def __init__(self, browser, element):
         self._browser = browser
         self._element = element
@@ -86,13 +85,47 @@ class GroupProjectV2Page(object):
     def element(self):
         return self._element
 
+
+class GroupProjectElement(BaseElement):
+    """ Wrapper around group project xblock element providing helpers common actions """
+    ACTIVITY_CSS_SELECTOR = ".xblock-v1[data-block-type='group-project-v2-activity']"
+
     @property
     def activities(self):
         elements = self._element.find_elements_by_css_selector(self.ACTIVITY_CSS_SELECTOR)
-        return elements
+        return [ActivityElement(self.browser, element) for element in elements]
+
+    def get_activity_by_id(self, activity_id):
+        activity_selector = self.ACTIVITY_CSS_SELECTOR+"[data-usage='{}']".format(activity_id)
+        activity_element = self._element.find_element_by_css_selector(activity_selector)
+        return ActivityElement(self.browser, activity_element)
 
     def find_stage(self, activity_id, stage_id):
         activity_selector = self.ACTIVITY_CSS_SELECTOR+"[data-usage='{}']".format(activity_id)
         stage_selector = "#activity_"+stage_id
         activity_element = self._element.find_element_by_css_selector(activity_selector)
         return activity_element.find_element_by_css_selector(stage_selector)
+
+
+class ActivityElement(BaseElement):
+    STAGE_CSS_SELECTOR = "div.activity_stage"
+
+    @property
+    def id(self):
+        return self._element.get_attribute('data-usage')
+
+    @property
+    def stages(self):
+        elements = self._element.find_elements_by_css_selector(self.STAGE_CSS_SELECTOR)
+        return [StageElement(self.browser, element) for element in elements]
+
+    def get_stage_by_id(self, stage_id):
+        stage_selector = self.STAGE_CSS_SELECTOR + "#activity_"+stage_id
+        stage_element = self._element.find_element_by_css_selector(stage_selector)
+        return StageElement(self.browser, stage_element)
+
+
+class StageElement(BaseElement):
+    @property
+    def id(self):
+        return self._element.get_attribute('id')
