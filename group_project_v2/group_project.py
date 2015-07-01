@@ -80,7 +80,11 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
 
     def student_view(self, context):
         fragment = Fragment()
-        self.render_children(context, fragment, can_reorder=False, can_add=False)
+        for child_id in self.children:
+            child = self.runtime.get_block(child_id)
+            rendered_child_fragment = child.render('student_view', context)
+            fragment.add_frag_resources(rendered_child_fragment)
+            fragment.add_content(rendered_child_fragment.content)
         return fragment
 
     def author_preview_view(self, context):
@@ -98,9 +102,9 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
         return fragment
 
-    @property
+    @lazy
     def activities(self):
-        all_children = self.get_children()
+        all_children = [self.runtime.get_block(child_id) for child_id in self.children]
         return [child for child in all_children if isinstance(child, GroupActivityXBlock)]
 
 
@@ -153,7 +157,8 @@ class GroupActivityXBlock(XBlock):
         display_name="",
         help="XML contents to display for this module",
         scope=Scope.content,
-        default=textwrap.dedent(default_xml)
+        default=textwrap.dedent(default_xml),
+        xml_node=True
     )
 
     has_score = True
