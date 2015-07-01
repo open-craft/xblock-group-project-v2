@@ -13,7 +13,7 @@ from opaque_keys.edx.locator import BlockUsageLocator
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
 from group_project_v2.api_error import ApiError
 from group_project_v2.components.stage import StageState
-from group_project_v2.project_api import project_api
+from group_project_v2 import project_api as project_api_module
 from group_project_v2.upload_file import UploadFile
 
 from ..utils import loader, gettext as _
@@ -73,6 +73,8 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
                 child_selector_fragment = child.selector_view(context)
                 item['selector'] = child_selector_fragment.content
                 fragment.add_frag_resources(child_selector_fragment)
+            else:
+                item['selector'] = ''
 
             children_items.append(item)
 
@@ -141,6 +143,10 @@ class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):
         """
         return self.get_parent()
 
+    @property
+    def course_id(self):
+        return getattr(self.runtime, 'course_id', 'all')
+
     def render_student_view(self, context):
         """
         Common code to render student view
@@ -183,6 +189,8 @@ class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):
         for attribute in ['icon', 'selector_text']:
             if getattr(self, attribute, None) is not None:
                 context[attribute] = getattr(self, attribute)
+            else:
+                context[attribute] = ''
         fragment.add_content(loader.render_template('templates/html/project_navigator/view_selector.html', context))
         return fragment
 
@@ -210,7 +218,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
         user_service = self.runtime.service(self, 'user')
         user_id = user_service.get_current_user().opt_attrs.get('edx-platform.user_id', None)
 
-        users_in_group, completed_users = project_api.get_stage_state(
+        users_in_group, completed_users = project_api_module.project_api.get_stage_state(
             self.course_id,
             activity_id,
             user_id,
@@ -352,7 +360,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
             context = {
                 "user_id": target_activity.user_id,
                 "group_id": target_activity.workgroup['id'],
-                "project_api": project_api,
+                "project_api": project_api_module.project_api,
                 "course_id": target_activity.course_id
             }
 

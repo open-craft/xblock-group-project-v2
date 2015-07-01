@@ -1,99 +1,100 @@
-<vertical_demo xmlns:opt="http://code.edx.org/xblock/option">
-  <group-project-v2>
+  <group-project-v2 xmlns:opt="http://code.edx.org/xblock/option">
     <group-project-v2-navigator>
       <group-project-v2-navigator-navigation />
       <group-project-v2-navigator-submissions />
       <group-project-v2-navigator-resources />
       <group-project-v2-navigator-ask-ta />
     </group-project-v2-navigator>
-    <group-project-v2-activity>
+    <group-project-v2-activity display_name="Activity 1">
       <opt:data>
-        <activitystage title="Overview">
-          <resources>
-            <document title="Issue Tree Template">http://download/file.doc</document>
-            <document title="Instructions" description="These are the instructions for this activity" grading_criteria="false">
-              http://download/file.doc
-            </document>
-            <document title="Video" type="ooyala">0123456789abcdef</document>
-          </resources>
-          <content>
-            <p>Html Description Blah Blah Blah<span>Additional info</span></p>
-            <p>Html Description Blah Blah Blah</p>
-            <p>Html Description Blah Blah Blah</p>
-            <p>Html Description Blah Blah Blah</p>
-          </content>
-        </activitystage>
-        <activitystage title="Upload" close="5/24/2014" type="upload">
-          <resources>
-            <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
-          </resources>
-          <submissions>
-            <document id="issue_tree" title="Issue Tree"/>
-            <document id="marketing_pitch" title="Marketing Pitch"/>
-            <document id="budget" title="Budget" description="xls budget plan"/>
-          </submissions>
-          <content>Html Description</content>
-        </activitystage>
+        <![CDATA[
+          <group_project schema_version='1'>
+            <activitystage title="Overview" id="overview">
+              <resources>
+                <document title="Issue Tree Template">http://download/file.doc</document>
+                <document title="Instructions" description="These are the instructions for this activity" grading_criteria="false">
+                  http://download/file.doc
+                </document>
+                <document title="Video" type="ooyala">0123456789abcdef</document>
+              </resources>
+              <content><p>I'm overview Stage</p></content>
+            </activitystage>
+            <activitystage title="Upload" close="5/24/2014" type="upload" id="upload">
+              <resources>
+                <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
+              </resources>
+              <submissions>
+                <document id="issue_tree" title="Issue Tree"/>
+                <document id="marketing_pitch" title="Marketing Pitch"/>
+                <document id="budget" title="Budget" description="xls budget plan"/>
+              </submissions>
+              <content>I'm upload stage</content>
+            </activitystage>
+          </group_project>
+        ]]>
       </opt:data>
     </group-project-v2-activity>
-    <group-project-v2-activity>
+    <group-project-v2-activity display_name="Activity 2">
       <opt:data>
-        <activitystage title="Review Team" open="5/24/2014" close="6/20/2014" type="peer_review">
-          <question id="score">
-            <label>How about that?</label>
-            <answer>
-              <input type="text" placeholder="answer here"/>
-            </answer>
-          </question>
-          <question id="q1">
-            <label>Where they helpful?</label>
-            <answer>
-              <select>
-                <option value="Y">Yes</option>
-                <option value="N">No</option>
-              </select>
-            </answer>
-          </question>
-          <question id="q2" required="false">
-            <label>General Comments</label>
-            <answer>
-              <textarea/>
-            </answer>
-          </question>
-        </activitystage>
-        <activitystage title="Review Group" open="5/24/2014" close="6/20/2014" type="group_review">
-          <question id="score">
-            <label>How about that?</label>
-            <answer>
-              <input type="text" placeholder="answer here"/>
-            </answer>
-          </question>
-          <question id="q1">
-            <label>Where they helpful?</label>
-            <answer>
-              <select>
-                <option value="Y">Yes</option>
-                <option value="N">No</option>
-              </select>
-            </answer>
-          </question>
-          <question id="q2">
-            <label>General Comments</label>
-            <answer>
-              <textarea/>
-            </answer>
-          </question>
-        </activitystage>
-        <activitystage title="Evaluate Team Feedback" open="6/20/2014" type="peer_assessment">
-          <content>aisjd saijd</content>
-            <questionresults id="q1"/>
-            <questionresults id="q2"/>
-            <questionresults id="q3"/>
-            <questionresults id="q4"/>
-            <questionresults id="score" summary="mean">{{summary}} (','.join({{values}}))</questionresults>
-        </activitystage>
-        <activitystage title="Evaluate Group Feedback" open="6/20/2014" type="group_assessment"/>
+        <![CDATA[
+        <group_project schema_version='1'>
+          <activitystage title="Review Team" open="5/24/2014" close="6/20/2014" type="peer_review" id="peer_review">
+            <question id="score">
+              <label>How about that?</label>
+              <answer>
+                <input type="text" placeholder="answer here"/>
+              </answer>
+            </question>
+            <question id="q1">
+              <label>Where they helpful?</label>
+              <answer>
+                <select>
+                  <option value="Y">Yes</option>
+                  <option value="N">No</option>
+                </select>
+              </answer>
+            </question>
+            <question id="q2" required="false">
+              <label>General Comments</label>
+              <answer>
+                <textarea/>
+              </answer>
+            </question>
+          </activitystage>
+          <activitystage title="Review Group" open="5/24/2014" close="6/20/2014" type="group_review" id="group_review">
+            <question id="score">
+              <label>How about that?</label>
+              <answer>
+                <input type="text" placeholder="answer here"/>
+              </answer>
+            </question>
+            <question id="q1">
+              <label>Where they helpful?</label>
+              <answer>
+                <select>
+                  <option value="Y">Yes</option>
+                  <option value="N">No</option>
+                </select>
+              </answer>
+            </question>
+            <question id="q2">
+              <label>General Comments</label>
+              <answer>
+                <textarea/>
+              </answer>
+            </question>
+          </activitystage>
+          <activitystage title="Evaluate Team Feedback" open="6/20/2014" type="peer_assessment" id="peer_assessment">
+            <content>aisjd saijd</content>
+              <questionresults id="q1"/>
+              <questionresults id="q2"/>
+              <questionresults id="q3"/>
+              <questionresults id="q4"/>
+              <questionresults id="score" summary="mean">{{summary}} (','.join({{values}}))</questionresults>
+          </activitystage>
+          <activitystage title="Evaluate Group Feedback" open="6/20/2014" type="group_assessment"  id="group_assessment"/>
+        </group_project>
+        ]]>
       </opt:data>
     </group-project-v2-activity>
   </group-project-v2>
-</vertical_demo>

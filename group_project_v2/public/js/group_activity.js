@@ -216,10 +216,12 @@ function GroupProjectBlock(runtime, element) {
     var step_map = JSON.parse($('.step_map', element).html());
 
     $(document).on('select_stage', function (target, selected_step_id) {
-        $('.activity_section').hide();
-
         // NOTE: use of ids specified by designer here
-        $('#activity_' + selected_step_id).show();
+        var stage = $('#activity_' + selected_step_id, element);
+        if (stage.length > 0) {
+            $('.activity_section', element).hide();
+            stage.show();
+        }
     });
 
     $('.view_feedback').on('click', function (ev) {
