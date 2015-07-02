@@ -39,13 +39,13 @@
         <![CDATA[
         <group_project schema_version='1'>
           <activitystage title="Review Team" open="5/24/2014" close="6/20/2014" type="peer_review" id="peer_review">
-            <question id="score">
+            <question id="peer_score">
               <label>How about that?</label>
               <answer>
                 <input type="text" placeholder="answer here"/>
               </answer>
             </question>
-            <question id="q1">
+            <question id="peer_q1">
               <label>Where they helpful?</label>
               <answer>
                 <select>
@@ -54,7 +54,7 @@
                 </select>
               </answer>
             </question>
-            <question id="q2" required="false">
+            <question id="peer_q2" required="false">
               <label>General Comments</label>
               <answer>
                 <textarea/>
@@ -62,13 +62,13 @@
             </question>
           </activitystage>
           <activitystage title="Review Group" open="5/24/2014" close="6/20/2014" type="group_review" id="group_review">
-            <question id="score">
+            <question id="group_score">
               <label>How about that?</label>
               <answer>
                 <input type="text" placeholder="answer here"/>
               </answer>
             </question>
-            <question id="q1">
+            <question id="group_q1">
               <label>Where they helpful?</label>
               <answer>
                 <select>
@@ -77,7 +77,7 @@
                 </select>
               </answer>
             </question>
-            <question id="q2">
+            <question id="group_q2">
               <label>General Comments</label>
               <answer>
                 <textarea/>
@@ -85,14 +85,17 @@
             </question>
           </activitystage>
           <activitystage title="Evaluate Team Feedback" open="6/20/2014" type="peer_assessment" id="peer_assessment">
-            <content>aisjd saijd</content>
-              <questionresults id="q1"/>
-              <questionresults id="q2"/>
-              <questionresults id="q3"/>
-              <questionresults id="q4"/>
-              <questionresults id="score" summary="mean">{{summary}} (','.join({{values}}))</questionresults>
+            <content>Peer Review results</content>
+            <assessment id="peer_q1"><answer><span id="mean_peer_q1"></span></answer></assessment>
+            <assessment id="peer_q2"><answer><span id="mean_peer_q2"></span></answer></assessment>
+            <assessment id="peer_score" summary="mean"><answer><span id="mean_peer_score"></span></answer></assessment>
           </activitystage>
-          <activitystage title="Evaluate Group Feedback" open="6/20/2014" type="group_assessment"  id="group_assessment"/>
+          <activitystage title="Evaluate Group Feedback" open="6/20/2014" type="group_assessment"  id="group_assessment">
+            <content>Group Review Results</content>
+            <assessment id="group_q1"><answer><span id="mean_group_q1"></span></answer></assessment>
+            <assessment id="group_q2"><answer><span id="mean_group_q2"></span></answer></assessment>
+            <assessment id="group_score" summary="mean"><answer><span id="mean_group_score"></span></answer></assessment>
+          </activitystage>
         </group_project>
         ]]>
       </opt:data>

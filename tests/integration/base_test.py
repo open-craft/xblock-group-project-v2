@@ -129,3 +129,19 @@ class StageElement(BaseElement):
     @property
     def id(self):
         return self._element.get_attribute('id')
+
+    @property
+    def title(self):
+        return self._element.find_element_by_tag('h1').text
+
+    @property
+    def open_close_label(self):
+        element = self._element.find_elements_by_css_selector('h1.highlight')
+        if element:
+            return element.text
+        else:
+            return None
+
+    @property
+    def content(self):
+        return self._element.find_element_by_css_selector('stage_content')

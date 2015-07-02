@@ -20,7 +20,7 @@
           {% endif %}
         {% endif %}
       </h1>
-      {{activity_stage.render|safe}}
+      <div class="stage_content">{{activity_stage.render|safe}}</div>
     {% else %}
       <h1>
         {{ activity_stage.title }}
