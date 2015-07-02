@@ -10,7 +10,7 @@ from xblock.core import XBlock
 from xblock.fragment import Fragment
 from opaque_keys.edx.locator import BlockUsageLocator
 
-from xblockutils.studio_editable import StudioContainerXBlockMixin
+from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
 from group_project_v2.api_error import ApiError
 from group_project_v2.components.stage import StageState
 from group_project_v2.project_api import project_api
@@ -113,7 +113,7 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
         return fragment
 
 
-class ProjectNavigatorViewXBlockBase(XBlock):
+class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):
     """
     Base class for Project Navigator children XBlocks (views)
     """

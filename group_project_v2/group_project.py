@@ -82,6 +82,11 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
         self.render_children(context, fragment, can_reorder=False, can_add=False)
         return fragment
 
+    def author_preview_view(self, context):
+        fragment = Fragment()
+        self.render_children(context, fragment, can_reorder=True, can_add=False)
+        return fragment
+
     def author_edit_view(self, context):
         """
         Add some HTML to the author view that allows authors to add child blocks.
@@ -280,16 +285,14 @@ class GroupActivityXBlock(XBlock):
         }
 
         fragment = Fragment()
-        fragment.add_content(
-            render_template('/templates/html/group_activity.html', context))
-        fragment.add_css(load_resource('public/css/group_activity.css'))
+        fragment.add_content(render_template('/templates/html/group_activity.html', context))
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_activity.css'))
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/group_activity.js'))
 
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.ui.widget.js'))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.fileupload.js'))
         fragment.add_javascript_url(
             self.runtime.local_resource_url(self, 'public/js/vendor/jquery.iframe-transport.js'))
-
-        fragment.add_javascript(load_resource('public/js/group_activity.js'))
 
         fragment.initialize_js('GroupProjectBlock')
 
