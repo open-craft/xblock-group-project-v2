@@ -17,7 +17,7 @@
                 </document>
                 <document title="Video" type="ooyala">0123456789abcdef</document>
               </resources>
-              <content><p>I'm overview Stage</p></content>
+              <content><p>I'm Overview Stage</p></content>
             </activitystage>
             <activitystage title="Upload" close="5/24/2014" type="upload" id="upload">
               <resources>
@@ -28,7 +28,7 @@
                 <document id="marketing_pitch" title="Marketing Pitch"/>
                 <document id="budget" title="Budget" description="xls budget plan"/>
               </submissions>
-              <content>I'm upload stage</content>
+              <content>I'm Upload Stage</content>
             </activitystage>
           </group_project>
         ]]>

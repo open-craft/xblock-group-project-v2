@@ -25,19 +25,24 @@ class TestRendering(SingleScenarioTestSuite):
         self._prepare_page()
 
         # For test purity, can't rely on navigation features to display other stages.
-        self.browser.execute_script("$('.activity_stage').show();")
+        self.browser.execute_script("$('.activity_section').show();")
 
         for activity in self.page.activities:
             for stage in activity.stages:
-                self.assertTrue(stage.is_displayed())  # precondition check - we just made them all visible
+                try:
+                    self.assertTrue(stage.is_displayed())  # precondition check - we just made them all visible
 
-                stage_data = XMLContents.Example1.STAGE_DATA[stage.id]
-                self.assertEqual(stage_data.title, stage_data['title'])
-                self.assertEqual(
-                    stage_data.open_close_label,
-                    get_open_close_label(stage_data['open_date'], stage_data['open_date'])
-                )
 
-                if stage_data['contents'] and stage_data['contents'] != XMLContents.COMPLEX_CONTENTS_SENTINEL:
-                    self.assertEqual(stage.content.get_attribute('innerHtml'), stage_data['contents'])
+                    stage_data = XMLContents.Example1.STAGE_DATA[stage.id]
+                    self.assertEqual(stage.title, stage_data['title'])
+                    self.assertEqual(
+                        stage.open_close_label,
+                        get_open_close_label(stage_data.get('open_date', None), stage_data.get('close_date', None))
+                    )
 
+                    if stage_data['contents'] and stage_data['contents'] != XMLContents.COMPLEX_CONTENTS_SENTINEL:
+                        self.assertEqual(stage.content.get_attribute('innerHTML').strip(), stage_data['contents'])
+
+                except AssertionError:
+                    print stage.id
+                    raise

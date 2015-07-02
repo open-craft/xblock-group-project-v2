@@ -1,4 +1,5 @@
 import textwrap
+from selenium.common.exceptions import NoSuchElementException
 
 from xblockutils.base_test import SeleniumXBlockTest
 
@@ -43,8 +44,14 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         Given the name of an XML file in the xml_templates folder, load it into the workbench.
         """
         params = params or {}
-        scenario = loader.render_template("xml/{}".format(xml_file), params)
-        self.set_scenario_xml(scenario)
+        scenario_xml = loader.render_template("xml/{}".format(xml_file), params)
+        return self.load_scenario_xml(scenario_xml, load_immediately)
+
+    def load_scenario_xml(self, scenario_xml, load_immediately=True):
+        """
+        Given the name of an XML file in the xml_templates folder, load it into the workbench.
+        """
+        self.set_scenario_xml(scenario_xml)
         if load_immediately:
             return self.go_to_view("student_view")
 
@@ -85,6 +92,13 @@ class BaseElement(object):
     def element(self):
         return self._element
 
+    def __getattr__(self, item):
+        if hasattr(self.__dict__, item):
+            return getattr(self.__dict__, item)
+        if hasattr(self.element, item):
+            return getattr(self.element, item)
+        return super(BaseElement, self).__getattribute__(item)
+
 
 class GroupProjectElement(BaseElement):
     """ Wrapper around group project xblock element providing helpers common actions """
@@ -108,7 +122,7 @@ class GroupProjectElement(BaseElement):
 
 
 class ActivityElement(BaseElement):
-    STAGE_CSS_SELECTOR = "div.activity_stage"
+    STAGE_CSS_SELECTOR = "div.activity_section"
 
     @property
     def id(self):
@@ -128,20 +142,20 @@ class ActivityElement(BaseElement):
 class StageElement(BaseElement):
     @property
     def id(self):
-        return self._element.get_attribute('id')
+        return self._element.get_attribute('id').replace('activity_', '')
 
     @property
     def title(self):
-        return self._element.find_element_by_tag('h1').text
+        return self._element.find_element_by_css_selector('h1 .stage_title').text
 
     @property
     def open_close_label(self):
-        element = self._element.find_elements_by_css_selector('h1.highlight')
-        if element:
+        try:
+            element = self._element.find_element_by_css_selector('h1 .highlight')
             return element.text
-        else:
+        except NoSuchElementException:
             return None
 
     @property
     def content(self):
-        return self._element.find_element_by_css_selector('stage_content')
+        return self._element.find_element_by_css_selector('.stage_content')

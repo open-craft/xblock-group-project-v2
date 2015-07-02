@@ -54,18 +54,18 @@ def get_open_close_label(open_date, close_date):
     if not open_date and not close_date:
         return None
 
-    today = datetime.datetime.today()
+    today = datetime.date.today()
     before_open = open_date and today < open_date
     after_close = close_date and today > close_date
 
-    if before_open:
-        label = "opens"
-    elif after_close:
-        label = "closed on"
-    else:
-        label = "due"
+    if open_date and before_open:
+        return "opens {date}".format(date=format_date(open_date))
+    elif close_date and after_close:
+        return "closed on {date}".format(date=format_date(close_date))
+    elif close_date:
+        return "due {date}".format(date=format_date(close_date))
 
-    return "{label} {date}".format(label=label, date=format_date(today))
+    return None
 
 
 COMPLEX_CONTENTS_SENTINEL = "complex_content"
@@ -80,33 +80,33 @@ class XMLContents(object):
         STAGE_DATA = {
             'overview': {
                 'title': 'Overview',
-                'contents': "<p>I'm overview Stage</p>",
+                'contents': "<p>I'm Overview Stage</p>",
             },
             'upload': {
                 'title': 'Upload',
                 'close_date': datetime.date(2014, 5, 24),
-                'contents': "<p>I'm overview Stage</p>",
+                'contents': "I'm Upload Stage",
             },
             'peer_review': {
                 'title': 'Review Team',
-                'open_data': datetime.date(2014, 5, 24),
+                'open_date': datetime.date(2014, 5, 24),
                 'close_date': datetime.date(2014, 6, 20),
-                "contents": COMPLEX_CONTENTS_SENTINEL,
+                'contents': COMPLEX_CONTENTS_SENTINEL,
             },
             'group_review': {
                 'title': 'Review Group',
-                'open_data': datetime.date(2014, 5, 24),
+                'open_date': datetime.date(2014, 5, 24),
                 'close_date': datetime.date(2014, 6, 20),
-                "contents": COMPLEX_CONTENTS_SENTINEL,
+                'contents': COMPLEX_CONTENTS_SENTINEL,
             },
             'peer_assessment': {
                 'title': 'Evaluate Team Feedback',
-                'open_data': datetime.date(2014, 6, 20),
-                "contents": COMPLEX_CONTENTS_SENTINEL,
+                'open_date': datetime.date(2014, 6, 20),
+                'contents': COMPLEX_CONTENTS_SENTINEL,
             },
             'group_assessment': {
                 'title': 'Evaluate Group Feedback',
-                'open_data': datetime.date(2014, 6, 20),
-                "contents": COMPLEX_CONTENTS_SENTINEL,
+                'open_date': datetime.date(2014, 6, 20),
+                'contents': COMPLEX_CONTENTS_SENTINEL,
             },
         }
