@@ -459,10 +459,16 @@ class ProjectAPI(object):
 
     def get_stage_state(self, course_id, content_id, user_id, stage):
         user_workgroup = self.get_user_workgroup_for_course(user_id, course_id)
-        users_in_group = {user['id'] for user in user_workgroup['users']}
+        if user_workgroup:
+            users_in_group = {user['id'] for user in user_workgroup['users']}
+        else:
+            users_in_group = set()
 
         stage_completions = self.get_stage_completions(course_id, content_id, stage)
-        completed_users = {completion['user_id'] for completion in stage_completions}
+        if stage_completions:
+            completed_users = {completion['user_id'] for completion in stage_completions}
+        else:
+            completed_users = set()
 
         return users_in_group, completed_users
 

@@ -131,6 +131,8 @@ class ProjectNavigatorViewXBlockBase(XBlock):
     js_file = None
     initialize_js_function = None
 
+    has_author_view = True
+
     @lazy
     def navigator(self):
         """
@@ -159,6 +161,16 @@ class ProjectNavigatorViewXBlockBase(XBlock):
             fragment.initialize_js(self.initialize_js_function)
 
         return fragment
+
+    def author_view(self, context):  # pylint: disable=unused-argument
+        """
+        Studio Preview view
+        """
+        # Can't use student view as it fails with 404 if new activity is added after project navigator:
+        # throws 404 because navigation view searches for completions for all available activities.
+        # Draft activity is visible to nav view, but not to completions api, resulting in 404.
+        # Anyway, it looks like it needs some other studio preview representation
+        return Fragment()
 
     def selector_view(self, context):  # pylint: disable=unused-argument
         """
@@ -203,9 +215,11 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
             stage.id
         )
 
+        if not users_in_group or not completed_users:
+            return StageState.NOT_STARTED
         if users_in_group <= completed_users:
             return StageState.COMPLETED
-        if completed_users:
+        if users_in_group & completed_users:
             return StageState.INCOMPLETE
         else:
             return StageState.NOT_STARTED
