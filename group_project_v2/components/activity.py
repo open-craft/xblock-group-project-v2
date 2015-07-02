@@ -80,11 +80,6 @@ class GroupActivity(object):
         return loader.render_template('/templates/xml/group_activity.xml', data)
 
     @property
-    def submission_json(self):
-        submission_dicts = [submission.__dict__ for submission in self.submissions]
-        return json.dumps(submission_dicts)
-
-    @property
     def step_map(self):
         step_map = {}
         ordered_list = []
