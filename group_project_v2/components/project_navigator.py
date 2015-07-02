@@ -130,6 +130,7 @@ class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):
     css_file = None
     js_file = None
     initialize_js_function = None
+    additional_js_files = ()
 
     has_author_view = True
 
@@ -160,16 +161,17 @@ class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):
         if self.initialize_js_function:
             fragment.initialize_js(self.initialize_js_function)
 
+        for js_file in self.additional_js_files:
+            fragment.add_javascript_url(self.runtime.local_resource_url(self.navigator.group_project, js_file))
+
         return fragment
 
     def author_view(self, context):  # pylint: disable=unused-argument
         """
         Studio Preview view
         """
-        # Can't use student view as it fails with 404 if new activity is added after project navigator:
-        # throws 404 because navigation view searches for completions for all available activities.
-        # Draft activity is visible to nav view, but not to completions api, resulting in 404.
-        # Anyway, it looks like it needs some other studio preview representation
+        # Can't use student view as it they usually result in sending some requests to api - this is costly and often
+        # crash entire XBlock in studio due to 404 response codes
         return Fragment()
 
     def selector_view(self, context):  # pylint: disable=unused-argument
@@ -232,7 +234,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
 
         for activity in self.navigator.group_project.activities:
             stages_data = []
-            for stage in activity.get_group_activity().activity_stages:
+            for stage in activity.group_activity.activity_stages:
                 stage_state = self.get_stage_state(activity.scope_ids.usage_id, stage)
                 stages_data.append({'stage': stage, 'state': stage_state})
 
@@ -266,7 +268,7 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
         resources_map = []
         for activity in self.navigator.group_project.activities:
             resources = list(itertools.chain(*[
-                stage.resources for stage in activity.get_group_activity().activity_stages
+                stage.resources for stage in activity.group_activity.activity_stages
             ]))
             resources_map.append({
                 'id': activity.scope_ids.usage_id,
@@ -294,6 +296,11 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     css_file = "submissions_view.css"
     js_file = "submissions_view.js"
     initialize_js_function = "GroupProjectNavigatorSubmissionsView"
+    additional_js_files = (
+        'public/js/vendor/jquery.ui.widget.js',
+        'public/js/vendor/jquery.fileupload.js',
+        'public/js/vendor/jquery.iframe-transport.js'
+    )
 
     def _get_submissions_map(self):
         """
@@ -301,10 +308,8 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         """
         submissions_map = []
         for activity in self.navigator.group_project.activities:
-            group_activity = activity.get_group_activity()
-            group_activity.update_submission_data(
-                project_api.get_latest_workgroup_submissions_by_id(activity.workgroup["id"])
-            )
+            group_activity = activity.group_activity
+            group_activity.update_submission_data(activity.workgroup["id"])
             stages = [stage for stage in group_activity.activity_stages if stage.submissions_stage]
             submissions_required = any(True for stage in stages if len(stage.submissions) > 0)
             submissions_map.append({
@@ -342,7 +347,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         response_data = {"message": _("File(s) successfully submitted")}
         failure_code = 0
         try:
-            group_activity = target_activity.get_group_activity()
+            group_activity = target_activity.group_activity
 
             context = {
                 "user_id": target_activity.user_id,
@@ -357,9 +362,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
                 uploaded_file.submission_id: uploaded_file.file_url for uploaded_file in upload_files
             }
 
-            group_activity.update_submission_data(
-                project_api.get_latest_workgroup_submissions_by_id(target_activity.workgroup['id'])
-            )
+            group_activity.update_submission_data(target_activity.workgroup['id'])
 
             target_stage = [stage for stage in group_activity.activity_stages if stage.id == stage_id][0]
             if target_stage.has_all_submissions:

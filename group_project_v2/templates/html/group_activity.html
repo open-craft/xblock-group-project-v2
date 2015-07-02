@@ -33,8 +33,7 @@
     </div>
   {% endfor %}
 
-  <!-- These 4 scripts contain json data - they are accessed using JSON.parse($('.peer_group', element).html()); -->
-  <script class="submission_json" type="application/json">{{ group_activity.submission_json }}</script>
+  <!-- These 3 scripts contain json data - they are accessed using JSON.parse($('.peer_group', element).html()); -->
   <script class="peer_group" type="application/json">{{ team_members }}</script>
   <script class="assess_groups" type="application/json">{{ assess_groups }}</script>
   <script class="step_map" type="application/json">{{ group_activity.step_map }}</script>

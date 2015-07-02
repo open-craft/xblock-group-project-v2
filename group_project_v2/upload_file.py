@@ -1,13 +1,14 @@
+import logging
 import mimetypes
 import hashlib
+from lazy.lazy import lazy
 
 from django.core.files import File
 from django.core.files.storage import default_storage
-
 from django.conf import settings
 
-# TODO: replace TRACE and print with logging
-TRACE = True
+
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class UploadFile(object):
@@ -24,7 +25,7 @@ class UploadFile(object):
         self.project_api = project_context["project_api"]
         self.course_id = project_context["course_id"]
 
-    @property  # TODO: lazy
+    @lazy
     def sha1(self):
         if self._sha1_hash is None:
             self.file.seek(0)
@@ -40,10 +41,9 @@ class UploadFile(object):
 
         return self._sha1_hash
 
-    @property  # TODO: lazy?
+    @property
     def file_url(self):
-        location = None
-        path = self._file_storage_path()
+        path = self.file_storage_path
 
         try:
             location = default_storage.url(path)
@@ -52,20 +52,18 @@ class UploadFile(object):
 
         return location
 
-    # TODO: lazy?
-    def _file_storage_path(self):
+    @property
+    def file_storage_path(self):
         return "group_work/{}/{}/{}".format(self.group_id, self.sha1, self.file.name)
 
     def save_file(self):
-        path = self._file_storage_path()
+        path = self.file_storage_path
         if not default_storage.exists(path):
-            if TRACE:
-                print "Storing to {}".format(path)
+            log.debug("Storing to %s", path)
             default_storage.save(path, File(self.file))
-            if TRACE:
-                print "Successfully stored file to {}".format(path)
-        elif TRACE:
-            print "File already stored at {}".format(path)
+            log.debug("Successfully stored file to %s", path)
+        else:
+            log.debug("File already stored at %s", path)
 
     def submit(self):
         submit_hash = {

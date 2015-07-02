@@ -1,10 +1,13 @@
-''' GET, POST, DELETE, PUT requests for json client '''
+""" GET, POST, DELETE, PUT requests for json client """
+import logging
 import urllib2 as url_access
 import json
 from django.conf import settings
 
 # nice to have capitalised names for familiar GET, POST, DELETE, PUT
 # pylint: disable=invalid-name
+
+log = logging.getLogger(__name__)
 
 JSON_HEADERS = {
     "Content-Type": "application/json",
@@ -18,24 +21,23 @@ if settings and hasattr(settings, "EDX_API_KEY"):
 
 TIMEOUT = 20
 
-TRACE = True
-
 
 def trace_request_information(func):
-    '''
+    """
     Decorator which will trace information
-    '''
-    # TODO: logging instead of print
+    """
     def make_request(*args, **kwargs):
-        # log information about the request
-        print "!!! {} request to {}".format(func.__name__, args[0])
-
+        """
+        Logs information about request and response
+        """
         if len(args) > 1:
-            print "!!! using data {}".format(args[1])
+            log.debug("Sending %s request to %s with data %s", func.__name__, args[0], args[1])
+        else:
+            log.debug("Sending %s request to %s", func.__name__, args[0])
 
         response = func(*args, **kwargs)
 
-        print "!!! Reponse code: {}".format(response.code)
+        log.debug("Response code: %s", response.code)
 
         return response
 
@@ -46,37 +48,33 @@ def json_headers():
     return JSON_HEADERS
 
 
+@trace_request_information
 def GET(url_path):
-    ''' GET request wrapper to json web server '''
+    """ GET request wrapper to json web server """
     url_request = url_access.Request(url=url_path, headers=json_headers())
     return url_access.urlopen(url=url_request, timeout=TIMEOUT)
 
 
+@trace_request_information
 def POST(url_path, data):
-    ''' POST request wrapper to json web server '''
+    """ POST request wrapper to json web server """
     url_request = url_access.Request(url=url_path, headers=json_headers())
     return url_access.urlopen(url_request, json.dumps(data), TIMEOUT)
 
 
+@trace_request_information
 def DELETE(url_path):
-    ''' DELETE request wrapper to json web server '''
+    """ DELETE request wrapper to json web server """
     opener = url_access.build_opener(url_access.HTTPHandler)
     request = url_access.Request(url=url_path, headers=json_headers())
     request.get_method = lambda: 'DELETE'
     return opener.open(request, None, TIMEOUT)
 
 
+@trace_request_information
 def PUT(url_path, data):
-    ''' PUT request wrapper to json web server '''
+    """ PUT request wrapper to json web server """
     opener = url_access.build_opener(url_access.HTTPHandler)
-    request = url_access.Request(
-        url=url_path, headers=json_headers(), data=json.dumps(data))
+    request = url_access.Request(url=url_path, headers=json_headers(), data=json.dumps(data))
     request.get_method = lambda: 'PUT'
     return opener.open(request, None, TIMEOUT)
-
-
-if TRACE:
-    GET = trace_request_information(GET)
-    POST = trace_request_information(POST)
-    DELETE = trace_request_information(DELETE)
-    PUT = trace_request_information(PUT)
