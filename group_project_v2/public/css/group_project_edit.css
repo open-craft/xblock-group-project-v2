@@ -1,6 +1,8 @@
 /* Custom appearance for our "Add" buttons */
-.xblock[data-block-type=group-project-v2] .add-xblock-component .new-component .new-component-type .add-xblock-component-button {
-  width: 200px;
-  height: 30px;
-  line-height: 30px;
+.xblock[data-block-type=group-project-v2] .add-xblock-component .new-component .new-component-type .add-xblock-component-button,
+.xblock[data-block-type=group-project-v2-navigator] .add-xblock-component .new-component .new-component-type .add-xblock-component-button
+{
+    width: 200px;
+    height: 30px;
+    line-height: 30px;
 }

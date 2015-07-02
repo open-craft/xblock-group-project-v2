@@ -1,8 +1,11 @@
+import logging
 import json
 from urllib2 import HTTPError
 
 from django.utils.translation import ugettext as _
 
+
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 ERROR_CODE_MESSAGES = {}
 
@@ -30,7 +33,7 @@ class ApiError(Exception):
         # Look in response content for specific message from api response
         try:
             self.content_dictionary = json.loads(thrown_error.read())
-        except:
+        except Exception:  # pylint: disable=broad-except
             self.content_dictionary = {}
 
         if "message" in self.content_dictionary:
@@ -50,9 +53,9 @@ def api_error_protect(func):
     def call_api_method(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except HTTPError as he:
-            api_error = ApiError(he, ERROR_CODE_MESSAGES.get(func, None))
-            print "Error calling {}: {}".format(func, api_error)
+        except HTTPError as http_error:
+            api_error = ApiError(http_error, ERROR_CODE_MESSAGES.get(func.__name__, None))
+            log.exception("Error calling %s: %s", func.__name__, api_error)
             raise api_error
 
     return call_api_method

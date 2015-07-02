@@ -5,6 +5,7 @@
       <document title="Instructions" description="These are the instructions for this activity" grading_criteria="false">
         http://download/file.doc
       </document>
+      <document title="Video" type="ooyala">0123456789abcdef</document>
     </resources>
     <content>
       <p>Html Description Blah Blah Blah<span>Additional info</span></p>

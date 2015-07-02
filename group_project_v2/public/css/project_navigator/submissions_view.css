@@ -1,0 +1,88 @@
+.group-project-submissions-view .group-project-submissions {
+    padding: 8px 0;
+}
+
+.group-project-submissions-view .action_buttons {
+    /* should not be visible by default, but still consume space to avoid resizing view - hence using visibility, not display*/
+    visibility: hidden;
+}
+
+.group-project-submissions-view .uploader .file-progress-box {
+    background-color: transparent;
+    width: 83%;
+    height: 5px;
+    visibility: hidden;
+}
+
+.group-project-submissions-view .uploader .file-progress-box .file-progress {
+    background-color: #cccccc;
+    width: 13%;
+    height: 5px;
+}
+
+.group-project-submissions-view .uploader .file-progress-box .file-progress.complete {
+    background-color: #999999;
+}
+
+.group-project-submissions-view .uploader .file-progress-box .file-progress.failed {
+    background-color: #B85433;
+}
+
+.group-project-submissions-view .uploader .xblock-reveal.reveal-modal.open {
+    max-height: 80%;
+    overflow: auto;
+    padding-bottom: 0;
+}
+
+.group-project-submissions-view .uploader .upload_item {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.group-project-submissions-view .uploader .upload_item .upload_title {
+    margin-bottom: 5px;
+}
+
+.group-project-submissions-view .uploader .upload_item input[type=text] {
+    width: 100%;
+    background-color: transparent;
+    color: #3384ca;
+    margin-bottom: 0;
+    height: 30px;
+}
+
+.group-project-submissions-view .uploader .upload_item label {
+    width: 30px;
+    display: inline-block;
+    text-align: right;
+    vertical-align: top;
+}
+
+.group-project-submissions-view .uploader .upload_item label span {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    line-height: 30px;
+    margin-bottom: 0;
+}
+
+.group-project-submissions-view .uploader .upload_item .description {
+    font-size: 11px;
+    font-style: italic;
+}
+
+.group-project-submissions-view .uploader .upload_item .upload_item_data {
+    font-size: 12px;
+    color: #8f8f8f;
+}
+
+.group-project-submissions-view .uploader .upload_item .upload_item_wrapper {
+    width: 83%;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+.group-project-submissions-view .uploader .upload_item .upload_item_wrapper[data-location] input[type=text] {
+    cursor: pointer;
+}

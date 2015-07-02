@@ -7,8 +7,8 @@ from unittest import TestCase
 from datetime import date
 from group_project_v2.components import GroupActivity, StageType
 from group_project_v2.components.stage import (
-    BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage, PeerAssessmentStage, GroupAssessmentStage
-)
+    BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage, PeerAssessmentStage, GroupAssessmentStage,
+    ResourceType)
 
 
 class GroupActivitityXmlTest(TestCase):
@@ -45,11 +45,16 @@ class GroupActivitityXmlTest(TestCase):
         grp_act = GroupActivity.import_xml_file('tests/xml/test.xml')
 
         resource_data = list(grp_act.resources)
-        self.assertEqual(len(resource_data), 3)
+        self.assertEqual(len(resource_data), 4)
         self.assertEqual(resource_data[0]["title"], "Issue Tree Template")
         self.assertEqual(resource_data[0]["description"], None)
         self.assertEqual(resource_data[0]["location"], "http://download/file.doc")
+        self.assertEqual(resource_data[0]["type"], ResourceType.NORMAL)
         self.assertEqual(resource_data[1]["description"], "These are the instructions for this activity")
+        self.assertEqual(resource_data[1]["type"], ResourceType.NORMAL)
+        self.assertEqual(resource_data[2]["title"], "Video")
+        self.assertEqual(resource_data[2]["location"], "0123456789abcdef")
+        self.assertEqual(resource_data[2]["type"], ResourceType.OOYALA_VIDEO)
 
         grading_criteria_data = list(grp_act.grading_criteria)
         self.assertEqual(len(grading_criteria_data), 1)
@@ -80,12 +85,12 @@ class GroupActivitityXmlTest(TestCase):
         self._assert_stage_start_and_end_date(team_assessment, date(2014, 6, 20), None)
         self._assert_stage_start_and_end_date(group_assessment, date(2014, 6, 20), None)
 
-        self._assert_resources_submissions_and_grading(overview, resources=2, submissions=None, grading_criteria=0)
+        self._assert_resources_submissions_and_grading(overview, resources=3, submissions=None, grading_criteria=0)
         self._assert_resources_submissions_and_grading(upload, resources=1, submissions=3, grading_criteria=1)
         self._assert_resources_submissions_and_grading(team_review, resources=0, submissions=None, grading_criteria=0)
         self._assert_resources_submissions_and_grading(group_review, resources=0, submissions=None, grading_criteria=0)
 
-        self.assertEqual(list(overview.resources), resource_data[:2])
+        self.assertEqual(list(overview.resources), resource_data[:3])
 
         self.assertEqual(textwrap.dedent(overview.content_html), textwrap.dedent(
             """

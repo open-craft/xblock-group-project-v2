@@ -6,11 +6,8 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from datetime import date
 
-from django.template.loader import render_to_string
-from pkg_resources import resource_filename
-
-from ..utils import inner_html, outer_html, build_date_field, render_template, DottableDict, format_date, gettext as _
-from ..project_api import build_date_field
+from ..utils import loader, DottableDict, format_date, gettext as _
+from ..project_api import build_date_field, project_api
 
 from .stage import GroupActivityStageFactory, GroupReviewStage, StageValidationMessage
 
@@ -50,16 +47,21 @@ class GroupActivity(object):
             *[getattr(stage, 'grade_questions', ()) for stage in self.activity_stages]
         ))
 
-    def update_submission_data(self, submission_map):
+    def update_submission_data(self, group_id):
+
+        submission_map = project_api.get_latest_workgroup_submissions_by_id(group_id)
 
         def formatted_date(iso_date_value):
             return format_date(build_date_field(iso_date_value))
 
         for submission in self.submissions:
             if submission["id"] in submission_map:
-                submission["location"] = submission_map[submission["id"]]["document_url"]
-                submission["file_name"] = submission_map[submission["id"]]["document_filename"]
-                submission["submission_date"] = formatted_date(submission_map[submission["id"]]["modified"])
+                new_submission_data = submission_map[submission["id"]]
+                submission["location"] = new_submission_data["document_url"]
+                submission["file_name"] = new_submission_data["document_filename"]
+                submission["submission_date"] = formatted_date(new_submission_data["modified"])
+                if "user_details" in new_submission_data:
+                    submission["user_details"] = new_submission_data["user_details"]
 
     @property
     def export_xml(self):
@@ -75,7 +77,7 @@ class GroupActivity(object):
             "group_activity": self
         }
 
-        return render_template('/templates/xml/group_activity.xml', data)
+        return loader.render_template('/templates/xml/group_activity.xml', data)
 
     @property
     def submission_json(self):
@@ -88,29 +90,29 @@ class GroupActivity(object):
         ordered_list = []
         prev_step = None
         default_stage = self.activity_stages[0].id
-        for ac in self.activity_stages:
-            step_map[ac.id] = {
+        for activity in self.activity_stages:
+            step_map[activity.id] = {
                 "prev": prev_step,
-                "name": ac.name,
+                "name": activity.name,
             }
-            if not ac.is_open:
-                step_map[ac.id]["restrict_message"] = "{} closed until {}".format(
-                    ac.name,
-                    ac.formatted_open_date
+            if not activity.is_open:
+                step_map[activity.id]["restrict_message"] = "{} closed until {}".format(
+                    activity.name,
+                    activity.formatted_open_date
                 )
-            ordered_list.append(ac.id)
-            prev_step = ac.id
+            ordered_list.append(activity.id)
+            prev_step = activity.id
 
             if self.grading_override:
-                if isinstance(ac, GroupReviewStage):
-                    default_stage = ac.id
-            elif ac.open_date and ac.open_date <= date.today():
-                default_stage = ac.id
+                if isinstance(activity, GroupReviewStage):
+                    default_stage = activity.id
+            elif activity.open_date and activity.open_date <= date.today():
+                default_stage = activity.id
 
         next_step = None
-        for ac in reversed(self.activity_stages):
-            step_map[ac.id]["next"] = next_step
-            next_step = ac.id
+        for activity in reversed(self.activity_stages):
+            step_map[activity.id]["next"] = next_step
+            next_step = activity.id
 
         step_map["ordered_list"] = ordered_list
         step_map["default"] = default_stage

@@ -1,10 +1,9 @@
-import copy
 import abc
 from datetime import date
 
 from group_project_v2.components.review import GroupActivityQuestion, GroupActivityAssessment
 from group_project_v2.utils import (
-    DottableDict, render_template, parse_date, inner_html, outer_html, format_date, gettext as _
+    DottableDict, loader, parse_date, inner_html, format_date, gettext as _
 )
 
 
@@ -15,6 +14,21 @@ class StageType(object):
     PEER_ASSESSMENT = 'peer_assessment'
     GROUP_REVIEW = 'group_review'
     GROUP_ASSESSMENT = 'group_assessment'
+
+
+class StageState(object):
+    NOT_STARTED = 'not_started'
+    INCOMPLETE = 'incomplete'
+    COMPLETED = 'completed'
+
+
+class ResourceType(object):
+    NORMAL = 'normal'
+    OOYALA_VIDEO = 'ooyala'
+
+
+class ImproperlyConfiguredActivityException(Exception):
+    pass
 
 
 # TODO: use XBlock.ValidationMessage when stages become actual XBlocks
@@ -34,6 +48,8 @@ class StageValidationMessage(object):
 class BaseGroupActivityStage(object):
     __metaclass__ = abc.ABCMeta
 
+    submissions_stage = False
+
     XML_TEMPLATE = 'templates/xml/activity_stage.xml'
     HTML_TEMPLATE = 'templates/html/stages/text.html'
 
@@ -44,7 +60,7 @@ class BaseGroupActivityStage(object):
         self.open_date = None
         self.close_date = None
 
-        self.id = doc_tree.get("id")
+        self.id = doc_tree.get("id")  # pylint: disable=invalid-name
         self.title = doc_tree.get("title")
         self._content = doc_tree.find("./content")
 
@@ -56,10 +72,14 @@ class BaseGroupActivityStage(object):
 
         # import resources
         for document in doc_tree.findall("./resources/document"):
+            doc_type = document.get("type", ResourceType.NORMAL)
+            if doc_type not in (ResourceType.NORMAL, ResourceType.OOYALA_VIDEO):
+                raise ImproperlyConfiguredActivityException("Unknown resource type %s" % doc_type)
             self._resources.append(DottableDict({
                 "title": document.get("title"),
                 "description": document.get("description"),
                 "location": document.text,
+                "type": doc_type,
                 "grading_criteria": document.get("grading_criteria") == "true"
             }))
 
@@ -105,7 +125,7 @@ class BaseGroupActivityStage(object):
         return (self.close_date is not None) and (self.close_date < date.today())
 
     def _render(self, template):
-        return render_template(template, {"activity_stage": self})
+        return loader.render_template(template, {"activity_stage": self})
 
     @property
     def export_xml(self):
@@ -134,10 +154,14 @@ class BaseGroupActivityStage(object):
 
 class BasicStage(BaseGroupActivityStage):
     HTML_TEMPLATE = 'templates/html/stages/text.html'
+    type = u'Text'
 
 
 class SubmissionStage(BaseGroupActivityStage):
     HTML_TEMPLATE = 'templates/html/stages/upload.html'
+    type = u'Task'
+
+    submissions_stage = True
 
     def __init__(self, doc_tree, grading_override):
         super(SubmissionStage, self).__init__(doc_tree, grading_override)
@@ -181,9 +205,15 @@ class SubmissionStage(BaseGroupActivityStage):
 
         return violations
 
+    @property
+    def has_all_submissions(self):
+        uploaded_submissions = [s for s in self.submissions if hasattr(s, 'location') and s.location]
+        return len(uploaded_submissions) == len(list(self.submissions))
+
 
 class ReviewBaseStage(BaseGroupActivityStage):
     __metaclass__ = abc.ABCMeta
+    type = u'Grade'
 
     def __init__(self, doc_tree, grading_override):
         super(ReviewBaseStage, self).__init__(doc_tree, grading_override)
@@ -232,6 +262,7 @@ class GroupReviewStage(ReviewBaseStage):
 
 class AssessmentBaseStage(BaseGroupActivityStage):
     __metaclass__ = abc.ABCMeta
+    type = u'Evaluation'
 
     HTML_TEMPLATE = 'templates/html/stages/peer_assessment.html'
 
@@ -275,8 +306,8 @@ class GroupActivityStageFactory(object):
     _default_stage_class = BasicStage
 
     @classmethod
-    def register(cls, type, stage_class):
-        cls._type_map[type] = stage_class
+    def register(cls, stage_type, stage_class):
+        cls._type_map[stage_type] = stage_class
 
     @classmethod
     def create(cls, xml_node, grading_override):

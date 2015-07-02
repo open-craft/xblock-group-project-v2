@@ -1,42 +1,13 @@
 # -*- coding: utf-8 -*-
-#
-
-# Imports ###########################################################
-
 import logging
-import pkg_resources
-
 from datetime import date, datetime
-
 import xml.etree.ElementTree as ET
 
-from django.template import Context, Template
+from xblockutils.resources import ResourceLoader
 
 
-# Globals ###########################################################
-
-log = logging.getLogger(__name__)
-
-
-# Functions #########################################################
-
-# TODO: use xblock-utils ResourceLoader
-def load_resource(resource_path):
-    """
-    Gets the content of a resource
-    """
-    resource_content = pkg_resources.resource_string(__name__, resource_path)
-    return unicode(resource_content)
-
-
-def render_template(template_path, context=None):
-    """
-    Evaluate a template by resource path, applying the provided context
-    """
-    context = context if context else {}
-    template_str = load_resource(template_path)
-    template = Template(template_str)
-    return template.render(Context(context))
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
 
 
 class DottableDict(dict):
@@ -77,7 +48,8 @@ def build_date_field(json_date_string_value):
 
 
 def format_date(date_value):
-    return date_value.strftime("%m/%d/%Y")  # TODO: not l10n friendly
+    fmt = "%B %d" if date_value.year == date.today().year else "%b %d %Y"
+    return date_value.strftime(fmt)  # TODO: not l10n friendly
 
 
 # Make '_' a no-op so we can scrape strings

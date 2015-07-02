@@ -3,18 +3,6 @@
   <hr/>
 {% endif %}
 
-{% if activity_stage.resources %}
-  <div class="group_resources">
-    <h4>Resources</h4>
-    {% for file_link in activity_stage.resources %}
-      {% if file_link.location %}
-        <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }} - {{ file_link.submission_date }}){% endif %}</a></div>
-      {% endif %}
-    {% endfor %}
-  </div>
-  <hr/>
-{% endif %}
-
 <div class="centered"><span class="other_groups"></span></div>
 
 {% if activity_stage.grade_header_html %}
@@ -23,6 +11,7 @@
 
 <form class="other_group_review" action="submit_other_group_feedback" method="POST">
   <input type="hidden" class="group_id" name="group_id" value="" />
+  <input type="hidden" class="stage_id" name="stage_id" value="{{activity_stage.id}}" />
   <div class="other_submissions"><a href="#" class="view_other_submissions">View team submissions</a></div>
   {% for activity_question in activity_stage.questions %}
     {{ activity_question.render|safe }}
