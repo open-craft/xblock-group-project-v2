@@ -17,6 +17,10 @@ KNOWN_USERS = {
     2: {
         "id": 2, "email": "jack@example.com", "is_active": True,
         "username": "Jack", "full_name": "Jack", "resources": []
+    },
+    3: {
+        "id": 3, "email": "jill@example.com", "is_active": True,
+        "username": "Jill", "full_name": "Jill", "resources": []
     }
 }
 
@@ -37,7 +41,8 @@ def get_mock_project_api():
         "groups": [],
         "users": [
             {"id": 1, "username": "Jane", "email": "jane@example.com"},
-            {"id": 2, "username": "Jack", "email": "jack@example.com"}
+            {"id": 2, "username": "Jack", "email": "jack@example.com"},
+            {"id": 3, "username": "Jill", "email": "jill@example.com"},
         ],
         "submissions": [],
         "workgroup_reviews": [],

@@ -1,10 +1,11 @@
 import textwrap
+
 import mock
-from selenium.common.exceptions import NoSuchElementException
 
 from xblockutils.base_test import SeleniumXBlockTest
 
 from group_project_v2.group_project import GroupActivityXBlock
+from tests.integration.page_elements import GroupProjectElement
 from tests.utils import loader, get_mock_project_api
 
 
@@ -92,85 +93,3 @@ class SingleScenarioTestSuite(BaseIntegrationTest):
         scenario = self.go_to_view(view_name=view_name, student_id=student_id)
         self.page = GroupProjectElement(self.browser, scenario)
         self.activities_map = self.get_activities_map()
-
-
-class BaseElement(object):
-    def __init__(self, browser, element):
-        self._browser = browser
-        self._element = element
-
-    @property
-    def browser(self):
-        return self._browser
-
-    @property
-    def element(self):
-        return self._element
-
-    def __getattr__(self, item):
-        if hasattr(self.__dict__, item):
-            return getattr(self.__dict__, item)
-        if hasattr(self.element, item):
-            return getattr(self.element, item)
-        return super(BaseElement, self).__getattribute__(item)
-
-
-class GroupProjectElement(BaseElement):
-    """ Wrapper around group project xblock element providing helpers common actions """
-    ACTIVITY_CSS_SELECTOR = ".xblock-v1[data-block-type='group-project-v2-activity']"
-
-    @property
-    def activities(self):
-        elements = self._element.find_elements_by_css_selector(self.ACTIVITY_CSS_SELECTOR)
-        return [ActivityElement(self.browser, element) for element in elements]
-
-    def get_activity_by_id(self, activity_id):
-        activity_selector = self.ACTIVITY_CSS_SELECTOR+"[data-usage='{}']".format(activity_id)
-        activity_element = self._element.find_element_by_css_selector(activity_selector)
-        return ActivityElement(self.browser, activity_element)
-
-    def find_stage(self, activity_id, stage_id):
-        activity_selector = self.ACTIVITY_CSS_SELECTOR+"[data-usage='{}']".format(activity_id)
-        stage_selector = "#activity_"+stage_id
-        activity_element = self._element.find_element_by_css_selector(activity_selector)
-        return activity_element.find_element_by_css_selector(stage_selector)
-
-
-class ActivityElement(BaseElement):
-    STAGE_CSS_SELECTOR = "div.activity_section"
-
-    @property
-    def id(self):
-        return self._element.get_attribute('data-usage')
-
-    @property
-    def stages(self):
-        elements = self._element.find_elements_by_css_selector(self.STAGE_CSS_SELECTOR)
-        return [StageElement(self.browser, element) for element in elements]
-
-    def get_stage_by_id(self, stage_id):
-        stage_selector = self.STAGE_CSS_SELECTOR + "#activity_"+stage_id
-        stage_element = self._element.find_element_by_css_selector(stage_selector)
-        return StageElement(self.browser, stage_element)
-
-
-class StageElement(BaseElement):
-    @property
-    def id(self):
-        return self._element.get_attribute('id').replace('activity_', '')
-
-    @property
-    def title(self):
-        return self._element.find_element_by_css_selector('h1 .stage_title').text
-
-    @property
-    def open_close_label(self):
-        try:
-            element = self._element.find_element_by_css_selector('h1 .highlight')
-            return element.text
-        except NoSuchElementException:
-            return None
-
-    @property
-    def content(self):
-        return self._element.find_element_by_css_selector('.stage_content')

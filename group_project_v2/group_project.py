@@ -177,10 +177,18 @@ class GroupActivityXBlock(XBlock):
         return self._known_real_user_ids[anonymous_student_id]
 
     @lazy
+    def anonymous_student_id(self):
+        try:
+            return self.runtime.anonymous_student_id
+        except AttributeError as exc:
+            log.exception("Runtime does not have anonymous_student_id attribute - trying user_id")
+            return self.runtime.user_id
+
+    @lazy
     # pylint: disable=broad-except
     def user_id(self):
         try:
-            return int(self.real_user_id(self.runtime.anonymous_student_id))
+            return int(self.real_user_id(self.anonymous_student_id))
         except Exception as exc:
             log.exception(exc)
             try:
@@ -426,7 +434,7 @@ class GroupActivityXBlock(XBlock):
         my_feedback = {
             make_key(peer_review_item[review_item_key], peer_review_item["question"]): peer_review_item["answer"]
             for peer_review_item in review_items
-            if peer_review_item['reviewer'] == self.xmodule_runtime.anonymous_student_id
+            if peer_review_item['reviewer'] == self.anonymous_student_id
         }
 
         for item in items_to_grade:
@@ -527,7 +535,7 @@ class GroupActivityXBlock(XBlock):
 
             # Then something like this needs to happen
             project_api.submit_peer_review_items(
-                self.xmodule_runtime.anonymous_student_id,
+                self.anonymous_student_id,
                 peer_id,
                 self.workgroup['id'],
                 self.content_id,
@@ -566,7 +574,7 @@ class GroupActivityXBlock(XBlock):
             del submissions["stage_id"]
 
             project_api.submit_workgroup_review_items(
-                self.xmodule_runtime.anonymous_student_id,
+                self.anonymous_student_id,
                 group_id,
                 self.content_id,
                 submissions
@@ -581,7 +589,7 @@ class GroupActivityXBlock(XBlock):
                         {
                             "question": question_id,
                             "answer": submissions[question_id],
-                            "reviewer_id": self.xmodule_runtime.anonymous_student_id,
+                            "reviewer_id": self.anonymous_student_id,
                             "is_admin_grader": self.is_admin_grader,
                             "group_id": group_id,
                             "content_id": self.content_id,
@@ -621,7 +629,7 @@ class GroupActivityXBlock(XBlock):
 
         peer_id = request.GET["peer_id"]
         feedback = project_api.get_peer_review_items(
-            self.xmodule_runtime.anonymous_student_id,
+            self.anonymous_student_id,
             peer_id,
             self.workgroup['id'],
             self.content_id,
@@ -638,7 +646,7 @@ class GroupActivityXBlock(XBlock):
         group_id = request.GET["group_id"]
 
         feedback = project_api.get_workgroup_review_items(
-            self.xmodule_runtime.anonymous_student_id,
+            self.anonymous_student_id,
             group_id,
             self.content_id
         )

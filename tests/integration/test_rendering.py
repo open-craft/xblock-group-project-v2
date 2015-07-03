@@ -1,4 +1,5 @@
-from tests.integration.base_test import SingleScenarioTestSuite, ActivityElement
+from tests.integration.base_test import SingleScenarioTestSuite
+from tests.integration.page_elements import ActivityElement
 from tests.utils import XMLContents, get_open_close_label
 
 
