@@ -300,6 +300,45 @@ class PeerReviewStageTest(BaseReviewStageTest):
             new_submissions
         )
 
+    def test_completion(self):
+        user_id = 1
+        other_users = set(KNOWN_USERS.keys()) - {user_id}
+        expected_submissions = {
+            "peer_score": "Very well",
+            "peer_q1": "Y",
+            "peer_q2": "Awesome"
+        }
+
+        stage_element = self.get_stage(self.go_to_view(student_id=user_id))
+
+        self.project_api_mock.get_peer_review_items_for_group.return_value=[
+            {
+                "question": question,
+                "answer": answer,
+                "workgroup": 1,
+                "user": peer_id,
+                "reviewer": str(user_id),
+                "content_id": self.activity_id,
+            }
+            for question, answer in expected_submissions.iteritems()
+            for peer_id in other_users
+        ]
+
+        peer = stage_element.peers[0]
+        peer.click()
+
+        questions = stage_element.form.questions
+        questions[0].control.fill_text(expected_submissions["peer_score"])
+        questions[1].control.select_option(expected_submissions["peer_q1"])
+        questions[2].control.fill_text(expected_submissions["peer_q2"])
+        stage_element.form.submit.click()
+
+        self.project_api_mock.mark_as_complete.assert_called_with(
+            'all',
+            self.activity_id,
+            user_id,
+            self.DEFAULT_STAGE_ID
+        )
 
 
 @ddt.ddt
@@ -323,8 +362,8 @@ class GroupReviewStageTest(BaseReviewStageTest):
             <label>Were they helpful?</label>
             <answer>
                 <select>
-                    <option value="Y">Yes</option>
-                    <option value="N">No</option>
+                    <option value="100">Yes</option>
+                    <option value="10">No</option>
                 </select>
             </answer>
         </question>
@@ -341,6 +380,7 @@ class GroupReviewStageTest(BaseReviewStageTest):
         self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=self.OTHER_GROUPS.values())
         self.project_api_mock.get_workgroup_review_items = mock.Mock(return_value={})
         self.project_api_mock.get_workgroup_review_items_for_group = mock.Mock(return_value={})
+        self.project_api_mock.get_workgroup_reviewers = mock.Mock(return_value = KNOWN_USERS.values())
 
         self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML))
 
@@ -383,7 +423,7 @@ class GroupReviewStageTest(BaseReviewStageTest):
 
         expected_submissions = {
             "group_score": "Very well",
-            "group_q1": "Y",
+            "group_q1": "100",
             "group_q2": "Awesome"
         }
 
@@ -408,7 +448,7 @@ class GroupReviewStageTest(BaseReviewStageTest):
         user_id = 1
         expected_submissions = {
             "group_score": "Very well",
-            "group_q1": "Y",
+            "group_q1": "100",
             "group_q2": "Awesome"
         }
 
@@ -436,7 +476,7 @@ class GroupReviewStageTest(BaseReviewStageTest):
 
         new_submissions = {
             "group_score": "Terrible",
-            "group_q1": "N",
+            "group_q1": "10",
             "group_q2": "Awful"
         }
 
@@ -452,4 +492,44 @@ class GroupReviewStageTest(BaseReviewStageTest):
             stage_element.form.group_id,
             self.activity_id,
             new_submissions
+        )
+
+    def test_completion(self):
+        user_id = 1
+        workgroups_to_review = self.OTHER_GROUPS.keys()
+        expected_submissions = {
+            "group_score": "Very well",
+            "group_q1": "100",
+            "group_q2": "200"
+        }
+
+        stage_element = self.get_stage(self.go_to_view(student_id=user_id))
+
+        self.project_api_mock.get_workgroup_review_items_for_group.return_value=[
+            {
+                "question": question,
+                "answer": answer,
+                "workgroup": group_id,
+                "reviewer": str(reviewer_id),
+                "content_id": self.activity_id,
+            }
+            for question, answer in expected_submissions.iteritems()
+            for group_id in workgroups_to_review
+            for reviewer_id in KNOWN_USERS.keys()
+        ]
+
+        groups = stage_element.groups[0]
+        groups.click()
+
+        questions = stage_element.form.questions
+        questions[0].control.fill_text(expected_submissions["group_score"])
+        questions[1].control.select_option(expected_submissions["group_q1"])
+        questions[2].control.fill_text(expected_submissions["group_q2"])
+        stage_element.form.submit.click()
+
+        self.project_api_mock.mark_as_complete.assert_called_with(
+            'all',
+            self.activity_id,
+            user_id,
+            self.DEFAULT_STAGE_ID
         )

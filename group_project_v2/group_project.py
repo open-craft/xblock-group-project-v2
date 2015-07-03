@@ -172,15 +172,18 @@ class GroupActivityXBlock(XBlock):
 
     def real_user_id(self, anonymous_student_id):
         if anonymous_student_id not in self._known_real_user_ids:
-            self._known_real_user_ids[anonymous_student_id] = self.xmodule_runtime.get_real_user(
-                anonymous_student_id).id
+            try:
+                self._known_real_user_ids[anonymous_student_id] = self.runtime.get_real_user(anonymous_student_id).id
+            except AttributeError:
+                # workbench support
+                self._known_real_user_ids[anonymous_student_id] = anonymous_student_id
         return self._known_real_user_ids[anonymous_student_id]
 
     @lazy
     def anonymous_student_id(self):
         try:
             return self.runtime.anonymous_student_id
-        except AttributeError as exc:
+        except AttributeError:
             log.exception("Runtime does not have anonymous_student_id attribute - trying user_id")
             return self.runtime.user_id
 
