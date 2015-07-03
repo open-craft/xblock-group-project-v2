@@ -48,7 +48,7 @@ def build_date_field(json_date_string_value):
 
 
 def format_date(date_value):
-    fmt = "%B %d" if date_value.year == date.today().year else "%b %d %Y"
+    fmt = "%b %d" if date_value.year == date.today().year else "%b %d %Y"
     return date_value.strftime(fmt)  # TODO: not l10n friendly
 
 

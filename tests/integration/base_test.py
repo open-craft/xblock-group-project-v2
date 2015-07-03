@@ -22,15 +22,17 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         """
         super(BaseIntegrationTest, self).setUp()
         self.project_api_mock = get_mock_project_api()
-        self._project_api_patchers = []
+        patchers = []
         for patch_location in self.PROJECT_API_PATCHES:
             patcher = mock.patch(patch_location, self.project_api_mock)
             patcher.start()
-            self._project_api_patchers.append(patcher)
+            patchers.append(patcher)
 
-    def tearDown(self):
-        for patcher in self._project_api_patchers:
-            patcher.stop()
+        def stop_patchers():
+            for patcher in patchers:
+                patcher.stop()
+
+        self.addCleanup(stop_patchers)
 
     def _add_external_features(self):
         """
