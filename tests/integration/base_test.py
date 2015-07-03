@@ -1,23 +1,36 @@
 import textwrap
+import mock
 from selenium.common.exceptions import NoSuchElementException
 
 from xblockutils.base_test import SeleniumXBlockTest
 
-import group_project_v2.project_api as project_api_module
 from group_project_v2.group_project import GroupActivityXBlock
 from tests.utils import loader, get_mock_project_api
 
 
 class BaseIntegrationTest(SeleniumXBlockTest):
     """ Base Integraition test class """
+    PROJECT_API_PATCHES = (
+        "group_project_v2.group_project.project_api",
+        "group_project_v2.components.activity.project_api",
+        "group_project_v2.components.project_navigator.project_api",
+    )
+
     def setUp(self):
         """
         Set Up method
         """
         super(BaseIntegrationTest, self).setUp()
         self.project_api_mock = get_mock_project_api()
-        # monkeypatching project_api
-        project_api_module.project_api = self.project_api_mock
+        self._project_api_patchers = []
+        for patch_location in self.PROJECT_API_PATCHES:
+            patcher = mock.patch(patch_location, self.project_api_mock)
+            patcher.start()
+            self._project_api_patchers.append(patcher)
+
+    def tearDown(self):
+        for patcher in self._project_api_patchers:
+            patcher.stop()
 
     def _add_external_features(self):
         """

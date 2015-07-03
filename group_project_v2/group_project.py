@@ -30,7 +30,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContain
 from .utils import loader
 
 from components import GroupActivity
-from group_project_v2 import project_api as project_api_module
+from group_project_v2.project_api import project_api
 from .api_error import ApiError
 
 ALLOWED_OUTSIDER_ROLES = getattr(settings, "ALLOWED_OUTSIDER_ROLES", None)
@@ -43,11 +43,8 @@ except ImportError:
     # Notifications is an optional runtime configuration, so it may not be available for import
     pass
 
-# Globals ###########################################################
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-# Classes ###########################################################
 
 
 def make_key(*args):
@@ -164,7 +161,7 @@ class GroupActivityXBlock(XBlock):
     has_score = True
 
     def _confirm_outsider_allowed(self):
-        granted_roles = [r["role"] for r in project_api_module.project_api.get_user_roles_for_course(self.user_id, self.course_id)]
+        granted_roles = [r["role"] for r in project_api.get_user_roles_for_course(self.user_id, self.course_id)]
         for allowed_role in ALLOWED_OUTSIDER_ROLES:
             if allowed_role in granted_roles:
                 return True
@@ -180,13 +177,16 @@ class GroupActivityXBlock(XBlock):
         return self._known_real_user_ids[anonymous_student_id]
 
     @lazy
+    # pylint: disable=broad-except
     def user_id(self):
         try:
             return int(self.real_user_id(self.runtime.anonymous_student_id))
-        except Exception:  # pylint: disable=broad-except
+        except Exception as exc:
+            log.exception(exc)
             try:
                 return int(self.runtime.user_id)
-            except:
+            except Exception as exc:
+                log.exception(exc)
                 return None
 
     _workgroup = None
@@ -194,13 +194,13 @@ class GroupActivityXBlock(XBlock):
     @lazy
     def workgroup(self):
         try:
-            user_prefs = project_api_module.project_api.get_user_preferences(self.user_id)
+            user_prefs = project_api.get_user_preferences(self.user_id)
 
             if "TA_REVIEW_WORKGROUP" in user_prefs:
                 self._confirm_outsider_allowed()
-                result = project_api_module.project_api.get_workgroup_by_id(user_prefs["TA_REVIEW_WORKGROUP"])
+                result = project_api.get_workgroup_by_id(user_prefs["TA_REVIEW_WORKGROUP"])
             else:
-                result = project_api_module.project_api.get_user_workgroup_for_course(self.user_id, self.course_id)
+                result = project_api.get_user_workgroup_for_course(self.user_id, self.course_id)
         except OutsiderDisallowedError:
             raise
         except ApiError as exception:
@@ -260,7 +260,7 @@ class GroupActivityXBlock(XBlock):
         if self.is_group_member:
             try:
                 team_members = [
-                    project_api_module.project_api.get_user_details(team_member["id"])
+                    project_api.get_user_details(team_member["id"])
                     for team_member in workgroup["users"]
                     if user_id != int(team_member["id"])
                 ]
@@ -268,7 +268,7 @@ class GroupActivityXBlock(XBlock):
                 team_members = []
 
             try:
-                assess_groups = project_api_module.project_api.get_workgroups_to_review(user_id, self.course_id, self.content_id)
+                assess_groups = project_api.get_workgroups_to_review(user_id, self.course_id, self.content_id)
             except ApiError:
                 assess_groups = []
         else:
@@ -305,7 +305,7 @@ class GroupActivityXBlock(XBlock):
         return fragment
 
     def assign_grade_to_group(self, group_id, grade_value):
-        project_api_module.project_api.set_group_grade(
+        project_api.set_group_grade(
             group_id,
             self.course_id,
             self.content_id,
@@ -332,13 +332,13 @@ class GroupActivityXBlock(XBlock):
             numeric_values = [float(v) for v in value_array]
             return float(sum(numeric_values) / len(numeric_values))
 
-        review_item_data = project_api_module.project_api.get_workgroup_review_items_for_group(group_id, self.content_id)
+        review_item_data = project_api.get_workgroup_review_items_for_group(group_id, self.content_id)
         review_item_map = {
             make_key(review_item['question'], self.real_user_id(review_item['reviewer'])): review_item['answer']
             for review_item in review_item_data
         }
         all_reviewer_ids = set([self.real_user_id(review_item['reviewer']) for review_item in review_item_data])
-        group_reviewer_ids = [user["id"] for user in project_api_module.project_api.get_workgroup_reviewers(group_id)]
+        group_reviewer_ids = [user["id"] for user in project_api.get_workgroup_reviewers(group_id)]
         admin_reviewer_ids = [reviewer_id for reviewer_id in all_reviewer_ids if reviewer_id not in group_reviewer_ids]
 
         def get_user_grade_value_list(user_id):
@@ -397,7 +397,7 @@ class GroupActivityXBlock(XBlock):
 
     def mark_complete_stage(self, user_id, stage):
         try:
-            project_api_module.project_api.mark_as_complete(
+            project_api.mark_as_complete(
                 self.course_id,
                 self.content_id,
                 user_id,
@@ -414,7 +414,7 @@ class GroupActivityXBlock(XBlock):
             self.mark_complete_stage(u["id"], "upload")
 
     def graded_and_complete(self, group_id):
-        workgroup = project_api_module.project_api.get_workgroup_by_id(group_id)
+        workgroup = project_api.get_workgroup_by_id(group_id)
         for u in workgroup["users"]:
             self.mark_complete_stage(u["id"], None)
 
@@ -440,18 +440,18 @@ class GroupActivityXBlock(XBlock):
     def peer_review_complete(self, stage_id):
         peer_review_questions = self._get_review_questions(stage_id)
         peers_to_review = [user for user in self.workgroup["users"] if user["id"] != self.user_id]
-        peer_review_items = project_api_module.project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
+        peer_review_items = project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
 
         return self._check_review_complete(peers_to_review, peer_review_questions, peer_review_items, "user")
 
     def group_review_complete(self, stage_id):
         group_review_questions = self._get_review_questions(stage_id)
-        groups_to_review = project_api_module.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
+        groups_to_review = project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
 
         group_review_items = []
         for assess_group in groups_to_review:
             group_review_items.extend(
-                project_api_module.project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id)
+                project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id)
             )
 
         return self._check_review_complete(groups_to_review, group_review_questions, group_review_items, "workgroup")
@@ -526,7 +526,7 @@ class GroupActivityXBlock(XBlock):
             del submissions['stage_id']
 
             # Then something like this needs to happen
-            project_api_module.project_api.submit_peer_review_items(
+            project_api.submit_peer_review_items(
                 self.xmodule_runtime.anonymous_student_id,
                 peer_id,
                 self.workgroup['id'],
@@ -565,7 +565,7 @@ class GroupActivityXBlock(XBlock):
             del submissions["group_id"]
             del submissions["stage_id"]
 
-            project_api_module.project_api.submit_workgroup_review_items(
+            project_api.submit_workgroup_review_items(
                 self.xmodule_runtime.anonymous_student_id,
                 group_id,
                 self.content_id,
@@ -620,7 +620,7 @@ class GroupActivityXBlock(XBlock):
     def load_peer_feedback(self, request, suffix=''):
 
         peer_id = request.GET["peer_id"]
-        feedback = project_api_module.project_api.get_peer_review_items(
+        feedback = project_api.get_peer_review_items(
             self.xmodule_runtime.anonymous_student_id,
             peer_id,
             self.workgroup['id'],
@@ -637,7 +637,7 @@ class GroupActivityXBlock(XBlock):
 
         group_id = request.GET["group_id"]
 
-        feedback = project_api_module.project_api.get_workgroup_review_items(
+        feedback = project_api.get_workgroup_review_items(
             self.xmodule_runtime.anonymous_student_id,
             group_id,
             self.content_id
@@ -652,7 +652,7 @@ class GroupActivityXBlock(XBlock):
     def load_my_peer_feedback(self, request, suffix=''):
 
         user_id = self.user_id
-        feedback = project_api_module.project_api.get_user_peer_review_items(
+        feedback = project_api.get_user_peer_review_items(
             user_id,
             self.workgroup['id'],
             self.content_id,
@@ -671,7 +671,7 @@ class GroupActivityXBlock(XBlock):
     @XBlock.handler
     def load_my_group_feedback(self, request, suffix=''):
         workgroup_id = self.workgroup['id']
-        feedback = project_api_module.project_api.get_workgroup_review_items_for_group(
+        feedback = project_api.get_workgroup_review_items_for_group(
             workgroup_id,
             self.content_id,
         )

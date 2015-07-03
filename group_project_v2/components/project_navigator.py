@@ -13,7 +13,7 @@ from opaque_keys.edx.locator import BlockUsageLocator
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
 from group_project_v2.api_error import ApiError
 from group_project_v2.components.stage import StageState
-from group_project_v2 import project_api as project_api_module
+from group_project_v2.project_api import project_api
 from group_project_v2.upload_file import UploadFile
 
 from ..utils import loader, gettext as _
@@ -218,7 +218,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
         user_service = self.runtime.service(self, 'user')
         user_id = user_service.get_current_user().opt_attrs.get('edx-platform.user_id', None)
 
-        users_in_group, completed_users = project_api_module.project_api.get_stage_state(
+        users_in_group, completed_users = project_api.get_stage_state(
             self.course_id,
             activity_id,
             user_id,
@@ -360,7 +360,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
             context = {
                 "user_id": target_activity.user_id,
                 "group_id": target_activity.workgroup['id'],
-                "project_api": project_api_module.project_api,
+                "project_api": project_api,
                 "course_id": target_activity.course_id
             }
 
