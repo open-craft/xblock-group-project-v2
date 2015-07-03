@@ -99,6 +99,10 @@ class ReviewStageElement(StageElement):
         peers = self.element.find_elements_by_css_selector(".peers .select_peer")
         return [self.make_element(element, ReviewObjectSelectorElement) for element in peers]
 
+    @property
+    def groups(self):
+        peers = self.element.find_elements_by_css_selector(".other_groups .select_group")
+        return [self.make_element(element, ReviewObjectSelectorElement) for element in peers]
 
 class ReviewObjectSelectorElement(BaseElement):
     @property

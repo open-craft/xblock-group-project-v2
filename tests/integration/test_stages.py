@@ -299,3 +299,162 @@ class PeerReviewStageTest(BaseReviewStageTest):
             self.activity_id,
             new_submissions
         )
+
+
+@ddt.ddt
+class GroupReviewStageTest(BaseReviewStageTest):
+    stage_type = StageType.GROUP_REVIEW
+    stage_element = ReviewStageElement
+
+    OTHER_GROUPS = {
+        2: {"id": 2, "name": "Group 2"},
+        3: {"id": 3, "name": "Group 3"},
+    }
+
+    STAGE_DATA_XML = textwrap.dedent("""
+        <question id="group_score">
+            <label>How about that?</label>
+            <answer>
+                <input type="text" placeholder="answer here"/>
+            </answer>
+        </question>
+        <question id="group_q1" grade="true">
+            <label>Were they helpful?</label>
+            <answer>
+                <select>
+                    <option value="Y">Yes</option>
+                    <option value="N">No</option>
+                </select>
+            </answer>
+        </question>
+        <question id="group_q2" required="false" grade="true">
+            <label>General Comments</label>
+            <answer>
+                <textarea/>
+            </answer>
+        </question>
+    """)
+
+    def setUp(self):
+        super(GroupReviewStageTest, self).setUp()
+        self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=self.OTHER_GROUPS.values())
+        self.project_api_mock.get_workgroup_review_items = mock.Mock(return_value={})
+        self.project_api_mock.get_workgroup_review_items_for_group = mock.Mock(return_value={})
+
+    def test_renderigng_questions(self):
+        scenario_xml = self.build_scenario_xml(self.STAGE_DATA_XML)
+        stage_element = self.get_stage(self.prepare_page(scenario_xml))
+
+        questions = stage_element.form.questions
+        self.assertEqual(questions[0].label, "How about that?")
+        self.assertEqual(questions[0].control.name, "group_score")
+        self.assertEqual(questions[0].control.tag_name, "input")
+        self.assertEqual(questions[0].control.placeholder, "answer here")
+        self.assertEqual(questions[0].control.type, "text")
+
+        self.assertEqual(questions[1].label, "Were they helpful?")
+        self.assertEqual(questions[1].control.name, "group_q1")
+        self.assertEqual(questions[1].control.tag_name, "select")
+        self.assertEqual(questions[1].control.options, {"Y": "Yes", "N": "No"})
+
+        self.assertEqual(questions[2].label, "General Comments")
+        self.assertEqual(questions[2].control.name, "group_q2")
+        self.assertEqual(questions[2].control.tag_name, "textarea")
+
+    def test_interaction(self):
+        scenario_xml = self.build_scenario_xml(self.STAGE_DATA_XML)
+        stage_element = self.get_stage(self.prepare_page(scenario_xml))
+
+        self.assertEqual(stage_element.form.group_id, '')
+
+        groups = stage_element.groups
+        self.assertEqual(len(groups), len(self.OTHER_GROUPS.keys()))
+        for group_id, group in zip(self.OTHER_GROUPS.keys(), groups):
+            group.click()
+            try:
+                self.assertEqual(stage_element.form.group_id, str(group_id))
+            except AssertionError:
+                import time; time.sleep(120)
+                raise
+
+    def test_submission(self):
+        user_id = 1
+        scenario_xml = self.build_scenario_xml(self.STAGE_DATA_XML)
+        stage_element = self.get_stage(self.prepare_page(scenario_xml, student_id=user_id))
+
+        groups = stage_element.groups[0]
+        groups.click()
+
+        expected_submissions = {
+            "group_score": "Very well",
+            "group_q1": "Y",
+            "group_q2": "Awesome"
+        }
+
+        questions = stage_element.form.questions
+        questions[0].control.fill_text(expected_submissions["group_score"])
+        questions[1].control.select_option(expected_submissions["group_q1"])
+        questions[2].control.fill_text(expected_submissions["group_q2"])
+
+        self.assertTrue(stage_element.form.submit.is_displayed())
+        self.assertEqual(stage_element.form.submit.text, "Submit")  # first time here - should read Submit
+
+        stage_element.form.submit.click()
+
+        self.project_api_mock.submit_workgroup_review_items.assert_called_with(
+            str(user_id),
+            stage_element.form.group_id,
+            self.activity_id,
+            expected_submissions
+        )
+
+    def test_persistence_and_resubmission(self):
+        user_id = 1
+        expected_submissions = {
+            "group_score": "Very well",
+            "group_q1": "Y",
+            "group_q2": "Awesome"
+        }
+
+        scenario_xml = self.build_scenario_xml(self.STAGE_DATA_XML)
+        self.project_api_mock.get_workgroup_review_items.return_value = [
+            {"question": question, "answer": answer}
+            for question, answer in expected_submissions.iteritems()
+        ]
+
+        stage_element = self.get_stage(self.prepare_page(scenario_xml, student_id=user_id))
+
+        group = stage_element.groups[0]
+        group.click()
+
+        # loading peer review items from project_api
+        self.project_api_mock.get_workgroup_review_items.assert_called_with(
+            str(user_id),
+            stage_element.form.group_id,
+            self.activity_id,
+        )
+
+        questions = stage_element.form.questions
+        self.assertEqual(questions[0].control.value, expected_submissions["group_score"])
+        self.assertEqual(questions[1].control.value, expected_submissions["group_q1"])
+        self.assertEqual(questions[2].control.value, expected_submissions["group_q2"])
+
+        new_submissions = {
+            "group_score": "Terrible",
+            "group_q1": "N",
+            "group_q2": "Awful"
+        }
+
+        questions[0].control.fill_text(new_submissions["group_score"])
+        questions[1].control.select_option(new_submissions["group_q1"])
+        questions[2].control.fill_text(new_submissions["group_q2"])
+
+        self.assertEqual(stage_element.form.submit.text, "Resubmit")
+        stage_element.form.submit.click()
+
+        self.project_api_mock.submit_workgroup_review_items.assert_called_with(
+            str(user_id),
+            stage_element.form.group_id,
+            self.activity_id,
+            new_submissions
+        )
