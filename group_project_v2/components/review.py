@@ -5,7 +5,7 @@ from group_project_v2.utils import outer_html, inner_html
 class GroupActivityQuestion(object):
     def __init__(self, doc_tree, stage):
 
-        self.id = doc_tree.get("id")
+        self.id = doc_tree.get("id")  # pylint: disable=invalid-name
         self.label = doc_tree.find("./label")
         answer_node = doc_tree.find("./answer")
         self.answer = answer_node[0]
@@ -74,7 +74,7 @@ class GroupActivityQuestion(object):
 class GroupActivityAssessment(object):
     def __init__(self, doc_tree):
 
-        self.id = doc_tree.get("id")
+        self.id = doc_tree.get("id")  # pylint: disable=invalid-name
         self.label = doc_tree.find("./label")
         answer_node = doc_tree.find("./answer")
         self.answer = answer_node[0]

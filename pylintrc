@@ -6,5 +6,15 @@ include-ids=yes
 max-line-length=120
 
 [MESSAGES CONTROL]
-disable=all
-enable=function-redefined,undefined-variable,unused-variable
+disable=
+ missing-docstring,no-self-use,no-member,no-init,
+ fixme,
+ locally-disabled,import-error,relative-import,
+ too-many-instance-attributes,too-many-locals,too-many-arguments,
+ too-few-public-methods,too-many-public-methods,too-many-ancestors,
+ too-many-branches,too-many-lines
+
+
+[OPTIONS]
+good-names=id
+

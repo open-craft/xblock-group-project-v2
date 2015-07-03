@@ -1,0 +1,28 @@
+.group-project-navigation-view .group-project-stage {
+    border-bottom: 1px solid #ccc;
+    padding-left: 18px;
+    list-style: none;
+}
+
+.group-project-navigation-view  .group-project-stage-state {
+    display: inline-block;
+    font-size: 16px;
+    margin-left: -18px;
+    width: 14px;
+}
+
+.group-project-navigation-view .group-project-stage-state.completed {
+    color: green;
+}
+
+.group-project-navigation-view .group-project-stage-state.completed:before {
+    content: "\f058";
+}
+
+.group-project-navigation-view .group-project-stage-state.incomplete {
+    color: #b7d432;
+}
+
+.group-project-navigation-view .group-project-stage-state.incomplete:before {
+    content: "\f111";
+}

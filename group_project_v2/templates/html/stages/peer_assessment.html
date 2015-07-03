@@ -3,18 +3,6 @@
   <hr/>
 {% endif %}
 
-{% if activity_stage.resources %}
-  <div class="group_resources">
-    <h4>Resources</h4>
-    {% for file_link in activity_stage.resources %}
-      {% if file_link.location %}
-        <div><a href="{{ file_link.location }}" title="{{ file_link.description }}" target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }} - {{ file_link.submission_date }}){% endif %}</a></div>
-      {% endif %}
-    {% endfor %}
-  </div>
-  <hr/>
-{% endif %}
-
 <div><a class="view_feedback" data-showid="team_feedback">View Team Feedback</a></div>
 
 <div class="feedback_stage peer_assessment">

@@ -18,6 +18,16 @@ def package_data(pkg, root_list):
 
     return {pkg: data}
 
+BLOCKS = [
+    'group-project-v2 = group_project_v2:GroupProjectXBlock',
+    'group-project-v2-activity = group_project_v2:GroupActivityXBlock',
+    'group-project-v2-navigator = group_project_v2.components.project_navigator:GroupProjectNavigatorXBlock',
+    'group-project-v2-navigator-navigation = group_project_v2.components.project_navigator:NavigationViewXBlock',
+    'group-project-v2-navigator-resources = group_project_v2.components.project_navigator:ResourcesViewXBlock',
+    'group-project-v2-navigator-submissions = group_project_v2.components.project_navigator:SubmissionsViewXBlock',
+    'group-project-v2-navigator-ask-ta = group_project_v2.components.project_navigator:AskTAViewXBlock',
+]
+
 
 # Main ##############################################################
 
@@ -31,10 +41,7 @@ setup(
         'xblock-utils',
     ],
     entry_points={
-        'xblock.v1': [
-            'group-project-v2 = group_project_v2:GroupProjectXBlock',
-            'group-project-v2-activity = group_project_v2:GroupActivityXBlock',
-        ]
+        'xblock.v1': BLOCKS
     },
     package_data=package_data("group_project_v2", ["static", "templates", "public", "res"]),
 )

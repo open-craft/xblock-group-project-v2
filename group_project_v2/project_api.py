@@ -1,7 +1,7 @@
 ''' API calls with respect group projects'''
 import json
-import datetime
 from urllib import urlencode
+from django.conf import settings
 
 from group_project_v2.utils import build_date_field
 from .json_requests import GET, POST, PUT, DELETE
@@ -25,6 +25,7 @@ COURSES_API = '/'.join([API_PREFIX, 'courses'])
 # * Service isolation - it should be used only through some other (not existent yet) class that would ALWAYS do
 # post-processing in order to isolate clients from response format changes. As of now, if format changes
 # virtually every method in group_project might be affected.
+# pylint: disable=invalid-name
 class ProjectAPI(object):
     _api_server_address = None
 
@@ -324,9 +325,18 @@ class ProjectAPI(object):
     def get_latest_workgroup_submissions_by_id(self, group_id):
         submission_list = self.get_workgroup_submissions(group_id)
 
+        user_details_cache = {}
+
+        def get_user_details(user_id):
+            if user_id not in user_details_cache:
+                user_details_cache[user_id] = self.get_user_details(user_id)
+            return user_details_cache[user_id]
+
         submissions_by_id = {}
         for submission in submission_list:
             submission_id = submission['document_id']
+            if submission['user']:
+                submission[u'user_details'] = get_user_details(submission['user'])
             if submission_id in submissions_by_id:
                 last_modified = build_date_field(submissions_by_id[submission_id]["modified"])
                 this_modified = build_date_field(submission["modified"])
@@ -430,6 +440,39 @@ class ProjectAPI(object):
         return json.loads(response.read())
 
     @api_error_protect
+    def get_stage_completions(self, course_id, content_id, stage_id):
+        qs_params = {
+            "content_id": content_id,
+            "stage": stage_id
+        }
+
+        response = GET(
+            '{}/{}/{}/completions/?{}'.format(
+                self._api_server_address,
+                COURSES_API,
+                course_id,
+                urlencode(qs_params)
+            )
+        )
+
+        return json.loads(response.read())['results']
+
+    def get_stage_state(self, course_id, content_id, user_id, stage):
+        user_workgroup = self.get_user_workgroup_for_course(user_id, course_id)
+        if user_workgroup:
+            users_in_group = {user['id'] for user in user_workgroup['users']}
+        else:
+            users_in_group = set()
+
+        stage_completions = self.get_stage_completions(course_id, content_id, stage)
+        if stage_completions:
+            completed_users = {completion['user_id'] for completion in stage_completions}
+        else:
+            completed_users = set()
+
+        return users_in_group, completed_users
+
+    @api_error_protect
     def get_user_roles_for_course(self, user_id, course_id):
         qs_params = {
             "user_id": user_id,
@@ -444,3 +487,11 @@ class ProjectAPI(object):
         )
 
         return json.loads(response.read())
+
+
+# Looks like it's an issue, but technically it's not; this code runs in LMS, so 127.0.0.1 is always correct
+# location for API server, as it's basically executed in a neighbour thread/process/whatever.
+api_server = "http://127.0.0.1:8000"
+if hasattr(settings, 'API_LOOPBACK_ADDRESS'):
+    api_server = settings.API_LOOPBACK_ADDRESS
+project_api = ProjectAPI(api_server)

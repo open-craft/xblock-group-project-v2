@@ -11,14 +11,15 @@ from datetime import date, datetime
 import xml.etree.ElementTree as ET
 
 from django.template import Context, Template
-
+from xblockutils.resources import ResourceLoader
 
 # Globals ###########################################################
 
-log = logging.getLogger(__name__)
-
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
 
 # Functions #########################################################
+
 
 # TODO: use xblock-utils ResourceLoader
 def load_resource(resource_path):
@@ -77,7 +78,8 @@ def build_date_field(json_date_string_value):
 
 
 def format_date(date_value):
-    return date_value.strftime("%m/%d/%Y")  # TODO: not l10n friendly
+    fmt = "%B %d" if date_value.year == date.today().year else "%b %d %Y"
+    return date_value.strftime(fmt)  # TODO: not l10n friendly
 
 
 # Make '_' a no-op so we can scrape strings

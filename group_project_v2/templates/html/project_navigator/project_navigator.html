@@ -1,0 +1,20 @@
+{% load i18n %}
+
+<div class="group-project-navigator-wrapper">
+  <div class="group-project-navigator-header">
+    {% trans "Project Navigator" %}
+    <span class="marker fa-map-marker"></span>
+  </div>
+  <div class="group-project-navigator-views">
+    {% for child in children %}
+    <div class="group-project-navigator-view {{ child.type }}" data-view-type="{{ child.type }}">
+      {{ child.content|safe }}
+    </div>
+    {% endfor %}
+  </div>
+  <ol class="group-project-navigator-view-selector">
+    {% for child in children %}
+      {{ child.selector|safe}}
+    {% endfor %}
+  </ol>
+</div>

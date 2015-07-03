@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-
+# TODO: lots of broad except clauses - disabled in pylint, but might make sense to clean them up
 # Imports ###########################################################
 
 import logging
@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 import pytz
 
 from lxml import etree
-from xml.etree import ElementTree as ET
 from pkg_resources import resource_filename
 
 from StringIO import StringIO
@@ -25,14 +24,12 @@ from xblock.fields import Scope, String, Dict, Float, Integer
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
-from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
-from .utils import render_template, load_resource
+from .utils import loader, render_template, load_resource
 
 from components import GroupActivity, PeerReviewStage, GroupReviewStage
-from .project_api import ProjectAPI
-from .upload_file import UploadFile
+from .project_api import project_api
 from .api_error import ApiError
 
 ALLOWED_OUTSIDER_ROLES = getattr(settings, "ALLOWED_OUTSIDER_ROLES", None)
@@ -41,17 +38,16 @@ if ALLOWED_OUTSIDER_ROLES is None:
 
 try:
     from edx_notifications.data import NotificationMessage
-except:
+except ImportError:
     # Notifications is an optional runtime configuration, so it may not be available for import
     pass
 
 # Globals ###########################################################
 
-log = logging.getLogger(__name__)
-loader = ResourceLoader(__name__)
-
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 # Classes ###########################################################
+
 
 def make_key(*args):
     return ":".join([str(a) for a in args])
@@ -86,6 +82,11 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
         self.render_children(context, fragment, can_reorder=False, can_add=False)
         return fragment
 
+    def author_preview_view(self, context):
+        fragment = Fragment()
+        self.render_children(context, fragment, can_reorder=True, can_add=False)
+        return fragment
+
     def author_edit_view(self, context):
         """
         Add some HTML to the author view that allows authors to add child blocks.
@@ -96,7 +97,14 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
         return fragment
 
+    @property
+    def activities(self):
+        all_children = self.get_children()
+        return [child for child in all_children if isinstance(child, GroupActivityXBlock)]
 
+
+# TODO: enable and fix these violations
+# pylint: disable=unused-argument,invalid-name,bare-except
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
 class GroupActivityXBlock(XBlock):
@@ -169,14 +177,7 @@ class GroupActivityXBlock(XBlock):
 
     @property  # lazy
     def project_api(self):
-        if self._project_api is None:
-            # Looks like it's an issue, but technically it's not; this code runs in LMS, so 127.0.0.1 is always correct
-            # location for API server, as it's basically executed in a neighbour thread/process/whatever.
-            api_server = "http://127.0.0.1:8000"
-            if hasattr(settings, 'API_LOOPBACK_ADDRESS'):
-                api_server = settings.API_LOOPBACK_ADDRESS
-            self._project_api = ProjectAPI(api_server)
-        return self._project_api
+        return project_api
 
     @property
     def user_id(self):
@@ -284,16 +285,14 @@ class GroupActivityXBlock(XBlock):
         }
 
         fragment = Fragment()
-        fragment.add_content(
-            render_template('/templates/html/group_activity.html', context))
-        fragment.add_css(load_resource('public/css/group_activity.css'))
+        fragment.add_content(render_template('/templates/html/group_activity.html', context))
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_activity.css'))
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/group_activity.js'))
 
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.ui.widget.js'))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/jquery.fileupload.js'))
         fragment.add_javascript_url(
             self.runtime.local_resource_url(self, 'public/js/vendor/jquery.iframe-transport.js'))
-
-        fragment.add_javascript(load_resource('public/js/group_activity.js'))
 
         fragment.initialize_js('GroupProjectBlock')
 
@@ -437,9 +436,9 @@ class GroupActivityXBlock(XBlock):
         peer_review_stages = [stage for stage in group_activity.activity_stages if isinstance(stage, PeerReviewStage)]
         peer_review_questions = []
         for peer_review_stage in peer_review_stages:
-                peer_review_questions.extend([
-                    question.id for question in peer_review_stage.questions if question.required
-                ])
+            peer_review_questions.extend([
+                question.id for question in peer_review_stage.questions if question.required
+            ])
 
         group_peer_items = self.project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
         my_feedback = {
@@ -541,7 +540,7 @@ class GroupActivityXBlock(XBlock):
             'result': 'success',
         }
 
-    def validate(self):
+    def validate(self):  # pylint: disable=super-on-old-class
         """
         Validates the state of this XBlock except for individual field values.
         """
@@ -557,7 +556,9 @@ class GroupActivityXBlock(XBlock):
     def submit_peer_feedback(self, submissions, suffix=''):
         try:
             peer_id = submissions["peer_id"]
+            stage = submissions['stage_id']
             del submissions["peer_id"]
+            del submissions['stage_id']
 
             # Then something like this needs to happen
             self.project_api.submit_peer_review_items(
@@ -569,9 +570,9 @@ class GroupActivityXBlock(XBlock):
             )
 
             if self.evaluations_complete():
-                self.mark_complete_stage(self.user_id, "evaluation")
+                self.mark_complete_stage(self.user_id, stage)
 
-        except Exception as e:
+        except Exception as e:   # pylint: disable=broad-except
             return {
                 'result': 'error',
                 'msg': e.message,
@@ -620,7 +621,7 @@ class GroupActivityXBlock(XBlock):
             if self.is_group_member and self.grading_complete():
                 self.mark_complete_stage(self.user_id, "grade")
 
-        except Exception as e:
+        except Exception as e:   # pylint: disable=broad-except
             return {
                 'result': 'error',
                 'msg': e.message,
@@ -706,88 +707,6 @@ class GroupActivityXBlock(XBlock):
         return webob.response.Response(body=json.dumps(results))
 
     @XBlock.handler
-    def upload_submission(self, request, suffix=''):
-        response_data = {"message": _("File(s) successfully submitted")}
-        failure_code = 0
-        try:
-            group_activity = self.get_group_activity()
-
-            context = {
-                "user_id": self.user_id,
-                "group_id": self.workgroup['id'],
-                "project_api": self.project_api,
-                "course_id": self.course_id
-            }
-
-            upload_files = [UploadFile(request.params[submission.id].file, submission.id, context)
-                            for submission in group_activity.submissions if submission.id in request.params]
-
-            # Save the files first
-            for uf in upload_files:
-                try:
-                    uf.save_file()
-                except Exception as save_file_error:
-                    original_message = save_file_error.message if hasattr(save_file_error, "message") else ""
-                    save_file_error.message = _("Error storing file {} - {}").format(uf.file.name, original_message)
-                    raise
-
-            # They all got saved... note the submissions
-            at_least_one_success = False
-            for uf in upload_files:
-                try:
-                    uf.submit()
-                    # Emit analytics event...
-                    self.runtime.publish(
-                        self,
-                        "group_activity.received_submission",
-                        {
-                            "submission_id": uf.submission_id,
-                            "filename": uf.file.name,
-                            "content_id": self.content_id,
-                            "group_id": self.workgroup['id'],
-                            "user_id": self.user_id,
-                        }
-                    )
-                    at_least_one_success = True
-                except Exception as save_record_error:
-                    original_message = save_record_error.message if hasattr(save_record_error, "message") else ""
-                    save_record_error.message = _("Error recording file information {} - {}").format(uf.file.name,
-                                                                                                     original_message)
-                    raise
-
-            if at_least_one_success:
-                # See if the xBlock Notification Service is available, and - if so -
-                # dispatch a notification to the entire workgroup that a file has been uploaded
-                # Note that the NotificationService can be disabled, so it might not be available
-                # in the list of services
-                notifications_service = self.runtime.service(self, 'notifications')
-                if notifications_service:
-                    self.fire_file_upload_notification(notifications_service)
-
-            response_data.update({uf.submission_id: uf.file_url for uf in upload_files})
-
-            group_activity.update_submission_data(
-                self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup['id'])
-            )
-            if group_activity.has_all_submissions:
-                self.update_upload_complete()
-
-        except Exception as e:
-            log.exception(e)
-            failure_code = 500
-            if isinstance(e, ApiError):
-                failure_code = e.code
-            if not hasattr(e, "message"):
-                e.message = _("Error uploading at least one file")
-            response_data.update({"message": e.message})
-
-        response = webob.response.Response(body=json.dumps(response_data))
-        if failure_code:
-            response.status_code = failure_code
-
-        return response
-
-    @XBlock.handler
     def other_submission_links(self, request, suffix=''):
         group_activity = self.get_group_activity()
         group_id = request.GET["group_id"]
@@ -797,17 +716,6 @@ class GroupActivityXBlock(XBlock):
             self.project_api.get_latest_workgroup_submissions_by_id(group_id)
         )
         html_output = render_template('/templates/html/review_submissions.html', {"group_activity": group_activity})
-
-        return webob.response.Response(body=json.dumps({"html": html_output}))
-
-    @XBlock.handler
-    def refresh_submission_links(self, request, suffix=''):
-        group_activity = self.get_group_activity()
-
-        group_activity.update_submission_data(
-            self.project_api.get_latest_workgroup_submissions_by_id(self.workgroup['id'])
-        )
-        html_output = render_template('/templates/html/submission_links.html', {"group_activity": group_activity})
 
         return webob.response.Response(body=json.dumps({"html": html_output}))
 
@@ -839,7 +747,7 @@ class GroupActivityXBlock(XBlock):
                 project_name = project_courseware_info['display_name']
                 project_location = project_courseware_info['location']
 
-        except Exception, ex:
+        except Exception, ex:  # pylint: disable=broad-except
             # Can't look this up then log and just use the default
             # which is our display_name
             log.exception(ex)
@@ -908,7 +816,7 @@ class GroupActivityXBlock(XBlock):
                 workgroup_user_ids,
                 msg
             )
-        except Exception, ex:
+        except Exception, ex:  # pylint: disable=broad-except
             # While we *should* send notification, if there is some
             # error here, we don't want to blow the whole thing up.
             # So log it and continue....
@@ -959,7 +867,7 @@ class GroupActivityXBlock(XBlock):
                 },
                 msg
             )
-        except Exception, ex:
+        except Exception, ex:  # pylint: disable=broad-except
             # While we *should* send notification, if there is some
             # error here, we don't want to blow the whole thing up.
             # So log it and continue....
@@ -1083,13 +991,13 @@ class GroupActivityXBlock(XBlock):
                             'coming-due'
                         )
 
-        except Exception, ex:
+        except Exception, ex:  # pylint: disable=broad-except
             log.exception(ex)
 
     def get_group_activity(self):
         return GroupActivity.import_xml_string(self.data, self.is_admin_grader)
 
-    def on_before_studio_delete(self, course_id, services):
+    def on_before_studio_delete(self, course_id, services):  # pylint: disable=unused-argument
         """
         A hook into when this xblock is deleted in Studio, for xblocks to do any lifecycle
         management
@@ -1117,5 +1025,5 @@ class GroupActivityXBlock(XBlock):
                         self._get_stage_timer_name(stage, 'coming-due')
                     )
 
-        except Exception, ex:
+        except Exception, ex:  # pylint: disable=broad-except
             log.exception(ex)

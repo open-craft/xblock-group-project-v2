@@ -13,9 +13,9 @@ TRACE = True
 class UploadFile(object):
     _sha1_hash = None
 
-    def __init__(self, file, submission_id, project_context):  # group_id, user_id, project_api)
+    def __init__(self, file_stream, submission_id, project_context):  # group_id, user_id, project_api)
 
-        self.file = file
+        self.file = file_stream
         self.mimetype = mimetypes.guess_type(self.file.name)[0]
 
         self.submission_id = submission_id
