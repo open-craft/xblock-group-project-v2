@@ -1,5 +1,6 @@
 import ddt
 import textwrap
+from group_project_v2.components import StageType
 from tests.integration.base_test import BaseIntegrationTest, GroupProjectElement
 
 
@@ -10,7 +11,7 @@ class StageTestBase(BaseIntegrationTest):
                 <opt:data>
                     <![CDATA[
                         <group_activity schema_version='1'>
-                            <activitystage id="{id}" title="{title}">
+                            <activitystage id="{stage_id}" title="{title} type={stage_type}">
                                 {stage_data}
                             </activitystage>
                         </group_activity>
@@ -19,9 +20,12 @@ class StageTestBase(BaseIntegrationTest):
             </group-project-v2-activity>
         </group-project-v2>
     """)
+    stage_type = None
 
-    def build_scenario_xml(self, stage_data, id="stage_id", title="Stage Title"):
-        return self.PROJECT_TEMPLATE.format(id=id, title=title, stage_data=stage_data)
+    def build_scenario_xml(self, stage_data, stage_id="stage_id", title="Stage Title"):
+        return self.PROJECT_TEMPLATE.format(
+            stage_type=self.stage_type, stage_id=stage_id, title=title, stage_data=stage_data
+        )
 
     def prepare_page(self, scenario_xml, view_name='student_view', student_id=1):
         self.load_scenario_xml(scenario_xml)
@@ -38,6 +42,26 @@ class StageTestBase(BaseIntegrationTest):
 
 @ddt.ddt
 class NormalStageTest(StageTestBase):
+    stage_type = StageType.NORMAL
+
+    @ddt.data(
+        "I'm content",
+        "<p>I'm HTML content</p>",
+        '<div><p>More complex<span class="highlight">HTML content</span></p><p>Very complex indeed</p></div>'
+    )
+    def test_rendering(self, content):
+        stage_content_xml = "<content>{content}</content>".format(content=content)
+        scenario_xml = self.build_scenario_xml(stage_content_xml)
+
+        stage_element = self.get_stage(self.prepare_page(scenario_xml))
+        stage_content = stage_element.content.get_attribute('innerHTML').strip()
+        self.assertEqual(stage_content, content)
+
+
+@ddt.ddt
+class UploadStageTest(StageTestBase):
+    stage_type = StageType.UPLOAD
+
     @ddt.data(
         "I'm content",
         "<p>I'm HTML content</p>",
