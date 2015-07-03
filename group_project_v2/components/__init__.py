@@ -19,7 +19,6 @@ GroupActivity (paths relative to root element)
 - grading_override: Bool                            # if True - allows visiting stages after close date; used by TA
 * has_submissions: Bool                             # True if ANY submission uploaded
 * has_all_submissions: Bool                         # True if ALL submissions uploaded
-* submission_json: json                             # submissions serialized into json format
 * step_map: json
     {
         <stage_id>: { prev: prev_stage.id, name: stage.name, next: next_stage.id},
