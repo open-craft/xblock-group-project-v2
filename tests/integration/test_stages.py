@@ -28,9 +28,11 @@ class StageTestBase(BaseIntegrationTest):
     """)
     stage_type = None
 
+    DEFAULT_STAGE_ID = 'stage_id'
+
     stage_element = StageElement
 
-    def build_scenario_xml(self, stage_data, stage_id="stage_id", title="Stage Title", **kwargs):
+    def build_scenario_xml(self, stage_data, stage_id=DEFAULT_STAGE_ID, title="Stage Title", **kwargs):
         stage_arguments = {'id': stage_id, 'title': title, 'type': self.stage_type}
         stage_arguments.update(kwargs)
         stage_args_str = " ".join(
@@ -39,16 +41,10 @@ class StageTestBase(BaseIntegrationTest):
 
         return self.PROJECT_TEMPLATE.format(stage_args=stage_args_str, stage_data=stage_data)
 
-    def prepare_page(self, scenario_xml, view_name='student_view', student_id=1):
-        self.load_scenario_xml(scenario_xml)
-        scenario = self.go_to_view(view_name=view_name, student_id=student_id)
+    def go_to_view(self, view_name='student_view', student_id=1):
+        scenario = super(StageTestBase, self).go_to_view(view_name=view_name, student_id=student_id)
         self.page = GroupProjectElement(self.browser, scenario)
         self.activities_map = self.get_activities_map()
-        return self.page
-
-    def reload_page(self, view_name='student_view', student_id=1):
-        scenario = self.go_to_view(view_name=view_name, student_id=student_id)
-        self.page = GroupProjectElement(self.browser, scenario)
         return self.page
 
     def get_stage(self, group_project):
@@ -59,6 +55,9 @@ class StageTestBase(BaseIntegrationTest):
         self.assertTrue(stage_element.is_displayed())
         return stage_element
 
+    def dismiss_message(self):
+        button = self.browser.find_element_by_css_selector("div.message div.action_buttons button")
+        button.click()
 
 @ddt.ddt
 class CommonStageTest(StageTestBase):
@@ -93,8 +92,9 @@ class CommonStageTest(StageTestBase):
 
         with freeze_time(mock_now):
             scenario_xml = self.build_scenario_xml("", **kwargs)
+            self.load_scenario_xml(scenario_xml)
 
-            stage_element = self.get_stage(self.prepare_page(scenario_xml))
+            stage_element = self.get_stage(self.go_to_view())
             self.assertEqual(stage_element.open_close_label, expected_label)
 
 
@@ -109,9 +109,9 @@ class NormalStageTest(StageTestBase):
     )
     def test_rendering(self, content):
         stage_content_xml = "<content>{content}</content>".format(content=content)
-        scenario_xml = self.build_scenario_xml(stage_content_xml)
+        self.load_scenario_xml(self.build_scenario_xml(stage_content_xml))
 
-        stage_element = self.get_stage(self.prepare_page(scenario_xml))
+        stage_element = self.get_stage(self.go_to_view())
         stage_content = stage_element.content.get_attribute('innerHTML').strip()
         self.assertEqual(stage_content, content)
 
@@ -128,8 +128,9 @@ class UploadStageTest(StageTestBase):
     def test_rendering(self, content):
         stage_content_xml = "<content>{content}</content>".format(content=content)
         scenario_xml = self.build_scenario_xml(stage_content_xml)
+        self.load_scenario_xml(scenario_xml)
 
-        stage_element = self.get_stage(self.prepare_page(scenario_xml))
+        stage_element = self.get_stage(self.go_to_view())
         stage_content = stage_element.content.get_attribute('innerHTML').strip()
         self.assertEqual(stage_content, content)
 
@@ -181,9 +182,10 @@ class PeerReviewStageTest(BaseReviewStageTest):
         self.project_api_mock.get_peer_review_items = mock.Mock(return_value={})
         self.project_api_mock.get_peer_review_items_for_group = mock.Mock(return_value={})
 
+        self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML))
+
     def test_rendering_questions(self):
-        scenario_xml = self.build_scenario_xml(self.STAGE_DATA_XML)
-        stage_element = self.get_stage(self.prepare_page(scenario_xml))
+        stage_element = self.get_stage(self.go_to_view())
 
         questions = stage_element.form.questions
         self.assertEqual(questions[0].label, "How about that?")
@@ -203,9 +205,9 @@ class PeerReviewStageTest(BaseReviewStageTest):
 
     @ddt.data(*KNOWN_USERS.keys())
     def test_interaction(self, user_id):
+        stage_element = self.get_stage(self.go_to_view(student_id=user_id))
+
         other_users = set(KNOWN_USERS.keys()) - {user_id}
-        scenario_xml = self.build_scenario_xml(self.STAGE_DATA_XML)
-        stage_element = self.get_stage(self.prepare_page(scenario_xml, student_id=user_id))
 
         self.assertEqual(stage_element.form.peer_id, '')
 
@@ -218,8 +220,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
 
     @ddt.data(*KNOWN_USERS.keys())
     def test_submission(self, user_id):
-        scenario_xml = self.build_scenario_xml(self.STAGE_DATA_XML)
-        stage_element = self.get_stage(self.prepare_page(scenario_xml, student_id=user_id))
+        stage_element = self.get_stage(self.go_to_view(student_id=user_id))
 
         peer = stage_element.peers[0]
         peer.click()
@@ -255,13 +256,12 @@ class PeerReviewStageTest(BaseReviewStageTest):
             "peer_q2": "Awesome"
         }
 
-        scenario_xml = self.build_scenario_xml(self.STAGE_DATA_XML)
         self.project_api_mock.get_peer_review_items.return_value = [
             {"question": question, "answer": answer}
             for question, answer in expected_submissions.iteritems()
         ]
 
-        stage_element = self.get_stage(self.prepare_page(scenario_xml, student_id=user_id))
+        stage_element = self.get_stage(self.go_to_view(student_id=user_id))
 
         peer = stage_element.peers[0]
         peer.click()
@@ -299,6 +299,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
             self.activity_id,
             new_submissions
         )
+
 
 
 @ddt.ddt
@@ -341,9 +342,10 @@ class GroupReviewStageTest(BaseReviewStageTest):
         self.project_api_mock.get_workgroup_review_items = mock.Mock(return_value={})
         self.project_api_mock.get_workgroup_review_items_for_group = mock.Mock(return_value={})
 
+        self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML))
+
     def test_renderigng_questions(self):
-        scenario_xml = self.build_scenario_xml(self.STAGE_DATA_XML)
-        stage_element = self.get_stage(self.prepare_page(scenario_xml))
+        stage_element = self.get_stage(self.go_to_view())
 
         questions = stage_element.form.questions
         self.assertEqual(questions[0].label, "How about that?")
@@ -362,8 +364,7 @@ class GroupReviewStageTest(BaseReviewStageTest):
         self.assertEqual(questions[2].control.tag_name, "textarea")
 
     def test_interaction(self):
-        scenario_xml = self.build_scenario_xml(self.STAGE_DATA_XML)
-        stage_element = self.get_stage(self.prepare_page(scenario_xml))
+        stage_element = self.get_stage(self.go_to_view())
 
         self.assertEqual(stage_element.form.group_id, '')
 
@@ -371,16 +372,11 @@ class GroupReviewStageTest(BaseReviewStageTest):
         self.assertEqual(len(groups), len(self.OTHER_GROUPS.keys()))
         for group_id, group in zip(self.OTHER_GROUPS.keys(), groups):
             group.click()
-            try:
-                self.assertEqual(stage_element.form.group_id, str(group_id))
-            except AssertionError:
-                import time; time.sleep(120)
-                raise
+            self.assertEqual(stage_element.form.group_id, str(group_id))
 
     def test_submission(self):
         user_id = 1
-        scenario_xml = self.build_scenario_xml(self.STAGE_DATA_XML)
-        stage_element = self.get_stage(self.prepare_page(scenario_xml, student_id=user_id))
+        stage_element = self.get_stage(self.go_to_view(student_id=user_id))
 
         groups = stage_element.groups[0]
         groups.click()
@@ -416,13 +412,12 @@ class GroupReviewStageTest(BaseReviewStageTest):
             "group_q2": "Awesome"
         }
 
-        scenario_xml = self.build_scenario_xml(self.STAGE_DATA_XML)
         self.project_api_mock.get_workgroup_review_items.return_value = [
             {"question": question, "answer": answer}
             for question, answer in expected_submissions.iteritems()
         ]
 
-        stage_element = self.get_stage(self.prepare_page(scenario_xml, student_id=user_id))
+        stage_element = self.get_stage(self.go_to_view(student_id=user_id))
 
         group = stage_element.groups[0]
         group.click()
