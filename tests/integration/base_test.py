@@ -92,4 +92,3 @@ class SingleScenarioTestSuite(BaseIntegrationTest):
     def _prepare_page(self, view_name='student_view', student_id=1):
         scenario = self.go_to_view(view_name=view_name, student_id=student_id)
         self.page = GroupProjectElement(self.browser, scenario)
-        self.activities_map = self.get_activities_map()

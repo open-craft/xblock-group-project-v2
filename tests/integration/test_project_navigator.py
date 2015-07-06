@@ -71,10 +71,11 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
         self._prepare_page()
 
         nav_view = self.page.project_navigator.get_view_by_type(ViewTypes.NAVIGATION, NavigationViewElement)
+        activities_map = self.get_activities_map()
 
         def assert_stage(stage, activity_name, stage_id, stage_title, stage_state):
             activity_id = [
-                act_id for act_id, act_name in self.activities_map.iteritems() if act_name == activity_name
+                act_id for act_id, act_name in activities_map.iteritems() if act_name == activity_name
             ][0]
             self.assertEqual(stage.activity_id, activity_id)
             self.assertEqual(stage.stage_id, stage_id)

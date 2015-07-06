@@ -44,7 +44,6 @@ class StageTestBase(BaseIntegrationTest):
     def go_to_view(self, view_name='student_view', student_id=1):
         scenario = super(StageTestBase, self).go_to_view(view_name=view_name, student_id=student_id)
         self.page = GroupProjectElement(self.browser, scenario)
-        self.activities_map = self.get_activities_map()
         return self.page
 
     def get_stage(self, group_project):

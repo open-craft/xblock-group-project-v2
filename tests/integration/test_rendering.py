@@ -14,8 +14,10 @@ class TestRendering(SingleScenarioTestSuite):
             "Activity 2": "group_assessment"
         }
 
+        activities_map = self.get_activities_map()
+
         for activity in self.page.activities:
-            activity_name = self.activities_map[activity.id]
+            activity_name = activities_map[activity.id]
             visible_stage_id = expected_visible_stages[activity_name]
 
             for stage in activity.stages:
