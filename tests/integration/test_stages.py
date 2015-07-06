@@ -397,7 +397,7 @@ class GroupReviewStageTest(BaseReviewStageTest):
         self.assertEqual(questions[1].label, "Were they helpful?")
         self.assertEqual(questions[1].control.name, "group_q1")
         self.assertEqual(questions[1].control.tag_name, "select")
-        self.assertEqual(questions[1].control.options, {"Y": "Yes", "N": "No"})
+        self.assertEqual(questions[1].control.options, {"100": "Yes", "10": "No"})
 
         self.assertEqual(questions[2].label, "General Comments")
         self.assertEqual(questions[2].control.name, "group_q2")
