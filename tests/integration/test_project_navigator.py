@@ -2,7 +2,7 @@ import mock
 from group_project_v2.components.project_navigator import ViewTypes
 from group_project_v2.components.stage import StageState
 from tests.integration.base_test import SingleScenarioTestSuite
-from tests.integration.page_elements import NavigationViewElement
+from tests.integration.page_elements import NavigationViewElement, ResourcesViewElement
 
 
 class TestProjectNavigatorViews(SingleScenarioTestSuite):
@@ -91,3 +91,30 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
             stage.navigate_to()
             stage_content = self.page.get_activity_by_id(stage.activity_id).get_stage_by_id(stage.stage_id)
             self.assertTrue(stage_content.is_displayed())
+
+    def test_resources_view(self):
+        self._prepare_page()
+
+        resoures_view = self.page.project_navigator.get_view_by_type(ViewTypes.RESOURCES, ResourcesViewElement)
+        self.page.project_navigator.get_view_selector_by_type(ViewTypes.RESOURCES).click()
+
+        activities = resoures_view.activity_resources
+        self.assertEqual(activities[0].activity_name, "Activity 1".upper())
+        self.assertEqual(activities[1].activity_name, "Activity 2".upper())
+
+        self.assertEqual(activities[1].resources, [])
+
+        activity1_resources = activities[0].resources
+        self.assertEqual(len(activity1_resources), 4)
+        self.assertEqual(activity1_resources[0].url, "http://download/file.doc")
+        self.assertEqual(activity1_resources[0].title, "Issue Tree Template")
+
+        self.assertEqual(activity1_resources[1].url, "http://download/other_file.doc")
+        self.assertEqual(activity1_resources[1].title, "Instructions")
+
+        self.assertEqual(activity1_resources[2].video_id, "0123456789abcdef")
+        self.assertEqual(activity1_resources[2].title, "Video")
+
+        self.assertEqual(activity1_resources[3].url, "http://download/mygrading.html")
+        self.assertEqual(activity1_resources[3].title, "Grading Criteria")
+

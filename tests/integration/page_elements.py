@@ -30,14 +30,18 @@ class BaseElement(object):
         return element_type(self.browser, dom_element)
 
 
+    def make_elements(self, css_selector, element_type):
+        elements = self.element.find_elements_by_css_selector(css_selector)
+        return [self.make_element(elem, element_type) for elem in elements]
+
+
 class GroupProjectElement(BaseElement):
     """ Wrapper around group project xblock element providing helpers common actions """
     ACTIVITY_CSS_SELECTOR = ".xblock-v1[data-block-type='group-project-v2-activity']"
 
     @property
     def activities(self):
-        elements = self.element.find_elements_by_css_selector(self.ACTIVITY_CSS_SELECTOR)
-        return [self.make_element(element, ActivityElement) for element in elements]
+        return self.make_elements(self.ACTIVITY_CSS_SELECTOR, ActivityElement)
 
     @property
     def project_navigator(self):
@@ -67,8 +71,7 @@ class ActivityElement(BaseElement):
 
     @property
     def stages(self):
-        elements = self.element.find_elements_by_css_selector(self.STAGE_CSS_SELECTOR)
-        return [self.make_element(element, StageElement) for element in elements]
+        return self.make_elements(self.STAGE_CSS_SELECTOR, StageElement)
 
     def get_stage_by_id(self, stage_id):
         stage_selector = self.STAGE_CSS_SELECTOR + "#activity_"+stage_id
@@ -105,13 +108,11 @@ class ReviewStageElement(StageElement):
     
     @property
     def peers(self):
-        peers = self.element.find_elements_by_css_selector(".peers .select_peer")
-        return [self.make_element(element, ReviewObjectSelectorElement) for element in peers]
+        return self.make_elements(".peers .select_peer", ReviewObjectSelectorElement)
 
     @property
     def groups(self):
-        peers = self.element.find_elements_by_css_selector(".other_groups .select_group")
-        return [self.make_element(element, ReviewObjectSelectorElement) for element in peers]
+        return self.make_elements(".other_groups .select_group", ReviewObjectSelectorElement)
 
 class ReviewObjectSelectorElement(BaseElement):
     @property
@@ -137,10 +138,7 @@ class ReviewFormElement(BaseElement):
 
     @property
     def questions(self):
-        return [
-            self.make_element(element, ReviewQuestionElement)
-            for element in self.element.find_elements_by_css_selector(".question")
-        ]
+        return self.make_elements(".question", ReviewQuestionElement)
 
     @property
     def submit(self):
@@ -184,13 +182,11 @@ class InputControl(BaseElement):
 class ProjectNavigatorElement(BaseElement):
     @lazy
     def views(self):
-        elements = self.find_elements_by_css_selector(".group-project-navigator-view")
-        return [self.make_element(element, ProjectNavigatorViewElement) for element in elements]
+        return self.make_elements(".group-project-navigator-view", ProjectNavigatorViewElement)
 
     @lazy
     def view_selectors(self):
-        elements = self.element.find_elements_by_css_selector(".view-selector-item")
-        return [self.make_element(element, ProjectNavigatorViewSelectorElement) for element in elements]
+        return self.make_elements(".view-selector-item", ProjectNavigatorViewSelectorElement)
 
     def get_view_by_type(self, target_type, view_element_class=None):
         view_element_class = view_element_class if view_element_class else ProjectNavigatorViewElement
@@ -224,8 +220,13 @@ class ProjectNavigatorViewSelectorElement(BaseElement):
 class NavigationViewElement(ProjectNavigatorViewElement):
     @property
     def stages(self):
-        stage_elements = self.element.find_elements_by_css_selector(".group-project-stage")
-        return [self.make_element(elem, StageItemElement) for elem in stage_elements]
+        return self.make_elements(".group-project-stage", StageItemElement)
+
+
+class ResourcesViewElement(ProjectNavigatorViewElement):
+    @property
+    def activity_resources(self):
+        return self.make_elements(".group-project-activity-wrapper", ProjectNavigatorResourcesActivityElement)
 
 
 class StageItemElement(BaseElement):
@@ -253,6 +254,36 @@ class StageItemElement(BaseElement):
         assert(len(intersection)) == 1
         return intersection.pop()
 
-
     def navigate_to(self):
         self.stage_link.click()
+
+
+class ProjectNavigatorViewActivityElement(BaseElement):
+    @property
+    def activity_name(self):
+        return self.find_element_by_css_selector(".group-project-activity-header").text.strip()
+
+
+class ProjectNavigatorResourcesActivityElement(ProjectNavigatorViewActivityElement):
+    @property
+    def resources(self):
+        resource_elements = self.element.find_elements_by_css_selector("ul.group-project-resources li")
+        return [self.make_element(elem, ResourceLinkElement) for elem in resource_elements]
+
+
+class ResourceLinkElement(BaseElement):
+    def __init__(self, browser, element):
+        super(ResourceLinkElement, self).__init__(browser, element)
+        self.resource_link = self.element.find_element_by_css_selector("a")
+
+    @property
+    def title(self):
+        return self.resource_link.text.strip()
+
+    @property
+    def url(self):
+        return self.resource_link.get_attribute("href")
+
+    @property
+    def video_id(self):
+        return self.resource_link.get_attribute("data-video")

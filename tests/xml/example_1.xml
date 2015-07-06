@@ -13,7 +13,7 @@
               <resources>
                 <document title="Issue Tree Template">http://download/file.doc</document>
                 <document title="Instructions" description="These are the instructions for this activity" grading_criteria="false">
-                  http://download/file.doc
+                  http://download/other_file.doc
                 </document>
                 <document title="Video" type="ooyala">0123456789abcdef</document>
               </resources>
