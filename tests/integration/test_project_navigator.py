@@ -1,8 +1,10 @@
 import mock
+from selenium.webdriver.support.wait import WebDriverWait
 from group_project_v2.components.project_navigator import ViewTypes
 from group_project_v2.components.stage import StageState
 from tests.integration.base_test import SingleScenarioTestSuite
-from tests.integration.page_elements import NavigationViewElement, ResourcesViewElement
+from tests.integration.page_elements import NavigationViewElement, ResourcesViewElement, SubmissionsViewElement
+from tests.utils import KNOWN_USERS
 
 
 class TestProjectNavigatorViews(SingleScenarioTestSuite):
@@ -98,7 +100,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
         resoures_view = self.page.project_navigator.get_view_by_type(ViewTypes.RESOURCES, ResourcesViewElement)
         self.page.project_navigator.get_view_selector_by_type(ViewTypes.RESOURCES).click()
 
-        activities = resoures_view.activity_resources
+        activities = resoures_view.activities
         self.assertEqual(activities[0].activity_name, "Activity 1".upper())
         self.assertEqual(activities[1].activity_name, "Activity 2".upper())
 
@@ -118,3 +120,41 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
         self.assertEqual(activity1_resources[3].url, "http://download/mygrading.html")
         self.assertEqual(activity1_resources[3].title, "Grading Criteria")
 
+    def test_submissions_view(self):
+        issue_tree_loc = self.live_server_url+"/issue_tree_location"
+        self.project_api_mock.get_latest_workgroup_submissions_by_id = mock.Mock(return_value={
+            "issue_tree": {
+                "id": "issue_tree", "document_url": issue_tree_loc,
+                "document_filename": "issue_tree.doc", "modified": "2014-05-22T11:44:14Z",
+                "user_details": {"id": "1", "full_name": KNOWN_USERS[1]['full_name']}
+            }
+        })
+
+        self._prepare_page()
+
+        submissions_view = self.page.project_navigator.get_view_by_type(ViewTypes.SUBMISSIONS, SubmissionsViewElement)
+        self.page.project_navigator.get_view_selector_by_type(ViewTypes.SUBMISSIONS).click()
+
+        activities = submissions_view.activities
+        self.assertEqual(activities[0].activity_name, "Activity 1".upper())
+        self.assertEqual(activities[1].activity_name, "Activity 2".upper())
+
+        self.assertEqual(activities[1].submissions, [])
+
+        activity1_submissions = activities[0].submissions
+        issue_tree, marketing_pitch, budget = activity1_submissions
+
+        self.assertEqual(issue_tree.title, "Issue Tree")
+        self.assertEqual(issue_tree.file_location, issue_tree_loc)
+        self.assertEqual(
+            issue_tree.uploaded_by,
+            "Uploaded by {user} on {date}".format(user=KNOWN_USERS[1]['full_name'], date="May 22 2014")
+        )
+
+        self.assertEqual(marketing_pitch.title, "Marketing Pitch")
+        self.assertEqual(marketing_pitch.file_location, None)
+        self.assertEqual(marketing_pitch.uploaded_by, None)
+
+        self.assertEqual(budget.title, "Budget")
+        self.assertEqual(budget.file_location, None)
+        self.assertEqual(budget.uploaded_by, None)

@@ -87,7 +87,7 @@ class SingleScenarioTestSuite(BaseIntegrationTest):
 
     def setUp(self):
         super(SingleScenarioTestSuite, self).setUp()
-        self.load_scenario(self.scenario)
+        self.load_scenario(self.scenario, load_immediately=False)
 
     def _prepare_page(self, view_name='student_view', student_id=1):
         scenario = self.go_to_view(view_name=view_name, student_id=student_id)

@@ -199,6 +199,12 @@ class ProjectNavigatorElement(BaseElement):
 
 
 class ProjectNavigatorViewElement(BaseElement):
+    activity_element_type = None
+
+    @property
+    def activities(self):
+        return self.make_elements(".group-project-activity-wrapper", self.activity_element_type)
+
     @property
     def type(self):
         return self.get_attribute("data-view-type")
@@ -223,10 +229,30 @@ class NavigationViewElement(ProjectNavigatorViewElement):
         return self.make_elements(".group-project-stage", StageItemElement)
 
 
-class ResourcesViewElement(ProjectNavigatorViewElement):
+class ProjectNavigatorViewActivityElement(BaseElement):
     @property
-    def activity_resources(self):
-        return self.make_elements(".group-project-activity-wrapper", ProjectNavigatorResourcesActivityElement)
+    def activity_name(self):
+        return self.find_element_by_css_selector(".group-project-activity-header").text.strip()
+
+
+class ProjectNavigatorResourcesActivityElement(ProjectNavigatorViewActivityElement):
+    @property
+    def resources(self):
+        resource_elements = self.element.find_elements_by_css_selector("ul.group-project-resources li")
+        return [self.make_element(elem, ResourceLinkElement) for elem in resource_elements]
+
+
+class ProjectNavigatorSubmissionsActivityElement(ProjectNavigatorViewActivityElement):
+    @property
+    def submissions(self):
+        return self.make_elements(".group-project-submissions .upload_item", SubmissionUploadItemElement)
+
+class ResourcesViewElement(ProjectNavigatorViewElement):
+    activity_element_type = ProjectNavigatorResourcesActivityElement
+
+
+class SubmissionsViewElement(ProjectNavigatorViewElement):
+    activity_element_type = ProjectNavigatorSubmissionsActivityElement
 
 
 class StageItemElement(BaseElement):
@@ -258,19 +284,6 @@ class StageItemElement(BaseElement):
         self.stage_link.click()
 
 
-class ProjectNavigatorViewActivityElement(BaseElement):
-    @property
-    def activity_name(self):
-        return self.find_element_by_css_selector(".group-project-activity-header").text.strip()
-
-
-class ProjectNavigatorResourcesActivityElement(ProjectNavigatorViewActivityElement):
-    @property
-    def resources(self):
-        resource_elements = self.element.find_elements_by_css_selector("ul.group-project-resources li")
-        return [self.make_element(elem, ResourceLinkElement) for elem in resource_elements]
-
-
 class ResourceLinkElement(BaseElement):
     def __init__(self, browser, element):
         super(ResourceLinkElement, self).__init__(browser, element)
@@ -287,3 +300,25 @@ class ResourceLinkElement(BaseElement):
     @property
     def video_id(self):
         return self.resource_link.get_attribute("data-video")
+
+
+class SubmissionUploadItemElement(BaseElement):
+    @property
+    def title(self):
+        return self.find_element_by_css_selector(".upload_title").text.strip()[:-1]  # last char is always a semicolon
+
+    @property
+    def file_location(self):
+        return self.find_element_by_css_selector(".upload_item_wrapper").get_attribute("data-location")
+
+    @property
+    def uploaded_by(self):
+        try:
+            return self.element.find_element_by_css_selector(".upload_item_data").text.strip()
+        except NoSuchElementException:
+            return None
+
+    def upload_file(self, location):
+        upload_item = self.element.find_element_by_css_selector(".file_upload")
+        upload_item.clear()
+        upload_item.send_keys(location)
