@@ -1,5 +1,7 @@
+from lazy.lazy import lazy
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.select import Select
+from group_project_v2.components.stage import StageState
 
 __author__ = 'e.kolpakov'
 
@@ -36,6 +38,13 @@ class GroupProjectElement(BaseElement):
     def activities(self):
         elements = self.element.find_elements_by_css_selector(self.ACTIVITY_CSS_SELECTOR)
         return [self.make_element(element, ActivityElement) for element in elements]
+
+    @property
+    def project_navigator(self):
+        return self.make_element(
+            self.element.find_element_by_css_selector("[data-block-type='group-project-v2-navigator']"),
+            ProjectNavigatorElement
+        )
 
     def get_activity_by_id(self, activity_id):
         activity_selector = self.ACTIVITY_CSS_SELECTOR+"[data-usage='{}']".format(activity_id)
@@ -170,3 +179,80 @@ class InputControl(BaseElement):
             return {option.get_attribute('value'): option.text for option in options}
         else:
             return None
+
+
+class ProjectNavigatorElement(BaseElement):
+    @lazy
+    def views(self):
+        elements = self.find_elements_by_css_selector(".group-project-navigator-view")
+        return [self.make_element(element, ProjectNavigatorViewElement) for element in elements]
+
+    @lazy
+    def view_selectors(self):
+        elements = self.element.find_elements_by_css_selector(".view-selector-item")
+        return [self.make_element(element, ProjectNavigatorViewSelectorElement) for element in elements]
+
+    def get_view_by_type(self, target_type, view_element_class=None):
+        view_element_class = view_element_class if view_element_class else ProjectNavigatorViewElement
+        css_selector = ".group-project-navigator-view[data-view-type='{}']".format(target_type)
+        element = self.find_element_by_css_selector(css_selector)
+        return self.make_element(element, view_element_class)
+
+    def get_view_selector_by_type(self, target_type):
+        return [view_selector for view_selector in self.view_selectors if view_selector.type == target_type][0]
+
+
+class ProjectNavigatorViewElement(BaseElement):
+    @property
+    def type(self):
+        return self.get_attribute("data-view-type")
+
+    def close_view(self):
+        try:
+            close_button = self.element.find_element_by_css_selector(".group-project-navigator-view-close")
+            close_button.click()
+        except NoSuchElementException:
+            raise AssertionError("View cannot be closed")
+
+
+class ProjectNavigatorViewSelectorElement(BaseElement):
+    @property
+    def type(self):
+        return self.get_attribute("data-view-type")
+
+
+class NavigationViewElement(ProjectNavigatorViewElement):
+    @property
+    def stages(self):
+        stage_elements = self.element.find_elements_by_css_selector(".group-project-stage")
+        return [self.make_element(elem, StageItemElement) for elem in stage_elements]
+
+
+class StageItemElement(BaseElement):
+    def __init__(self, browser, element):
+        super(StageItemElement, self).__init__(browser, element)
+        self.stage_link = element.find_element_by_css_selector(".group-project-stage-type a")
+
+    @property
+    def stage_id(self):
+        return self.get_attribute("data-stage-id")
+
+    @property
+    def activity_id(self):
+        return self.stage_link.get_attribute("data-activity-id")
+
+    @property
+    def title(self):
+        return self.find_element_by_css_selector(".group-project-stage-title").text.strip()
+
+    @property
+    def state(self):
+        classes = set(self.find_element_by_css_selector(".group-project-stage-state").get_attribute("class").split())
+        state_classes = {StageState.COMPLETED, StageState.INCOMPLETE, StageState.NOT_STARTED}
+        intersection = (classes & state_classes)
+        assert(len(intersection)) == 1
+        return intersection.pop()
+
+
+    def navigate_to(self):
+        self.stage_link.click()
