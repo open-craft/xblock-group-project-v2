@@ -1,15 +1,13 @@
 from collections import OrderedDict
-import copy
 from datetime import date
 from lazy.lazy import lazy
 from xblock.core import XBlock
-from xblock.fields import Scope, String, DateTime
+from xblock.fields import Scope, String, DateTime, Boolean
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
-from group_project_v2.components.review import GroupActivityQuestion, GroupActivityAssessment, \
-    GroupProjectReviewQuestionXBlock, GroupProjectReviewAssessmentXBlock
+from group_project_v2.components.review import GroupProjectReviewQuestionXBlock, GroupProjectReviewAssessmentXBlock
 from group_project_v2.utils import loader, inner_html, format_date, gettext as _
 
 
@@ -33,38 +31,65 @@ class ResourceType(object):
     OOYALA_VIDEO = 'ooyala'
 
 
-class ImproperlyConfiguredActivityException(Exception):
-    pass
-
-
-class ResourceXBlock(XBlock, StudioEditableXBlockMixin):
+class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin):
     CATEGORY = "group-project-v2-resource"
 
+    display_name = String(
+        display_name=_(u"Display Name"),
+        help=_(U"This is a name of the resource"),
+        scope=Scope.settings,
+        default="Group Project V2 Resource"
+    )
+
+    description = String(
+        display_name=_(u"Resource Description"),
+        scope=Scope.settings
+    )
+
+    resource_location = String(
+        display_name=_(u"Resource location"),
+        help=_(u"A url to download/view the resource"),
+        scope=Scope.settings,
+    )
+
+    grading_criteria = Boolean(
+        display_name=_(u"Grading criteria?"),
+        help=_(u"If true, resource will be treated as grading criteria"),
+        scope=Scope.settings,
+        default=False
+    )
+
+    editable_fields = ('display_name', 'description', 'resource_location', 'grading_criteria')
+
     def student_view(self, context):
         return Fragment()
-    # for document in doc_tree.findall("./resources/document"):
-    #     doc_type = document.get("type", ResourceType.NORMAL)
-    #     if doc_type not in (ResourceType.NORMAL, ResourceType.OOYALA_VIDEO):
-    #         raise ImproperlyConfiguredActivityException("Unknown resource type %s" % doc_type)
-    #     self._resources.append(DottableDict({
-    #         "title": document.get("title"),
-    #         "description": document.get("description"),
-    #         "location": document.text,
-    #         "type": doc_type,
-    #         "grading_criteria": document.get("grading_criteria") == "true"
-    #     }))
 
-class SubmissionXBlock(XBlock, StudioEditableXBlockMixin):
+
+class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin):
     CATEGORY = "group-project-v2-submission"
 
+    display_name = String(
+        display_name=_(u"Display Name"),
+        help=_(U"This is a name of the submission"),
+        scope=Scope.settings,
+        default="Group Project V2 Submission"
+    )
+
+    description = String(
+        display_name=_(u"Resource Description"),
+        scope=Scope.settings
+    )
+
+    upload_id = String(
+        display_name=_(u"Upload ID"),
+        help=_(U"This string is used as an identifier for an upload. "
+               U"Submissions sharing the same Upload ID will be updated simultaneously"),
+    )
+
+    editable_fields = ('display_name', 'description', 'upload_id')
+
     def student_view(self, context):
         return Fragment()
-    # for document in doc_tree.findall("./submissions/document"):
-    #     self._submissions.append(DottableDict({
-    #         "id": document.get("id"),
-    #         "title": document.get("title"),
-    #         "description": document.get("description"),
-    #     }))
 
 
 class BaseGroupActivityStage(XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin):
@@ -97,7 +122,7 @@ class BaseGroupActivityStage(XBlock, StudioEditableXBlockMixin, StudioContainerX
 
     COMMON_ALLOWED_BLOCKS = OrderedDict([
         ("html", _(u"HTML")),
-        (ResourceXBlock.CATEGORY, _(u"Resource"))
+        (GroupProjectResourceXBlock.CATEGORY, _(u"Resource"))
     ])
     STAGE_SPECIFIC_ALLOWED_BLOCKS = {}
 
@@ -121,7 +146,7 @@ class BaseGroupActivityStage(XBlock, StudioEditableXBlockMixin, StudioContainerX
 
     @property
     def resources(self):
-        return self._get_children_by_category(ResourceXBlock.CATEGORY)
+        return self._get_children_by_category(GroupProjectResourceXBlock.CATEGORY)
 
     @property
     def grading_criteria(self):
@@ -191,12 +216,12 @@ class SubmissionStage(BaseGroupActivityStage):
 
     submissions_stage = True
     STAGE_SPECIFIC_ALLOWED_BLOCKS = OrderedDict([
-        (SubmissionXBlock.CATEGORY, _(u"Submission"))
+        (GroupProjectSubmissionXBlock.CATEGORY, _(u"Submission"))
     ])
 
     @property
     def submissions(self):
-        return self._get_children_by_category(SubmissionXBlock.CATEGORY)
+        return self._get_children_by_category(GroupProjectSubmissionXBlock.CATEGORY)
 
     @property
     def is_upload_available(self):

@@ -30,8 +30,8 @@ BLOCKS = [
     'group-project-v2-stage-peer-assessment = group_project_v2.stage:PeerAssessmentStage',
     'group-project-v2-stage-group-assessment = group_project_v2.stage:GroupAssessmentStage',
 
-    'group-project-v2-resource = group_project_v2.stage:ResourceXBlock',
-    'group-project-v2-submission = group_project_v2.stage:SubmissionXBlock',
+    'group-project-v2-resource = group_project_v2.stage:GroupProjectResourceXBlock',
+    'group-project-v2-submission = group_project_v2.stage:GroupProjectSubmissionXBlock',
 
     'group-project-v2-review-question = group_project_v2.components.review:GroupProjectReviewQuestionXBlock',
     'group-project-v2-review-assessment = group_project_v2.components.review:GroupProjectReviewAssessmentXBlock',
