@@ -30,6 +30,8 @@ class StageTestBase(BaseIntegrationTest):
         </group-project-v2>
     """)
     stage_type = None
+    page = None
+    activity_id = None
 
     DEFAULT_STAGE_ID = 'stage_id'
 
@@ -74,6 +76,7 @@ class StageTestBase(BaseIntegrationTest):
         button = self.browser.find_element_by_css_selector("div.message div.action_buttons button")
         button.click()
 
+
 @ddt.ddt
 class CommonStageTest(StageTestBase):
     """
@@ -109,7 +112,7 @@ class CommonStageTest(StageTestBase):
             kwargs['close'] = close_date.strftime(date_format)
 
         with freeze_time(mock_now):
-            scenario_xml = self.build_scenario_xml("", **kwargs)
+            scenario_xml = self.build_scenario_xml("", **kwargs)  # pylint: disable=star-args
             self.load_scenario_xml(scenario_xml)
 
             stage_element = self.get_stage(self.go_to_view())
@@ -160,7 +163,7 @@ class BaseReviewStageTest(StageTestBase):
 
     def setUp(self):
         super(BaseReviewStageTest, self).setUp()
-        self.project_api_mock.get_workgroups_to_review.return_value=self.workgroups_to_review
+        self.project_api_mock.get_workgroups_to_review.return_value = self.workgroups_to_review
 
 
 @ddt.ddt
@@ -221,7 +224,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
         self.assertEqual(questions[2].control.name, "peer_q2")
         self.assertEqual(questions[2].control.tag_name, "textarea")
 
-    @ddt.data(*KNOWN_USERS.keys())
+    @ddt.data(*KNOWN_USERS.keys())  # pylint: disable=star-args
     def test_interaction(self, user_id):
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
 
@@ -236,7 +239,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
             peer.click()
             self.assertEqual(stage_element.form.peer_id, str(user_id))
 
-    @ddt.data(*KNOWN_USERS.keys())
+    @ddt.data(*KNOWN_USERS.keys())  # pylint: disable=star-args
     def test_submission(self, user_id):
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
 
@@ -329,7 +332,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
 
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
 
-        self.project_api_mock.get_peer_review_items_for_group.return_value=[
+        self.project_api_mock.get_peer_review_items_for_group.return_value = [
             {
                 "question": question,
                 "answer": answer,
@@ -398,7 +401,7 @@ class GroupReviewStageTest(BaseReviewStageTest):
         self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=self.OTHER_GROUPS.values())
         self.project_api_mock.get_workgroup_review_items = mock.Mock(return_value={})
         self.project_api_mock.get_workgroup_review_items_for_group = mock.Mock(return_value={})
-        self.project_api_mock.get_workgroup_reviewers = mock.Mock(return_value = KNOWN_USERS.values())
+        self.project_api_mock.get_workgroup_reviewers = mock.Mock(return_value=KNOWN_USERS.values())
 
         self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML))
 
@@ -523,7 +526,7 @@ class GroupReviewStageTest(BaseReviewStageTest):
 
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
 
-        self.project_api_mock.get_workgroup_review_items_for_group.return_value=[
+        self.project_api_mock.get_workgroup_review_items_for_group.return_value = [
             {
                 "question": question,
                 "answer": answer,

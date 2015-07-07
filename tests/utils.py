@@ -1,5 +1,4 @@
 import datetime
-import textwrap
 from mock import Mock
 from xblockutils.resources import ResourceLoader
 from group_project_v2.api_error import ApiError
@@ -7,7 +6,7 @@ from group_project_v2.api_error import ApiError
 import group_project_v2.project_api as project_api_module
 from group_project_v2.utils import format_date
 
-loader = ResourceLoader(__name__)
+loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
 
 KNOWN_USERS = {
     1: {
@@ -37,6 +36,7 @@ WORKGROUP = {
         "workgroup_reviews": [],
         "peer_reviews": []
     }
+
 
 def _get_user_details(user_id):
     if user_id not in KNOWN_USERS:
@@ -78,6 +78,7 @@ def get_open_close_label(open_date, close_date):
 
 
 COMPLEX_CONTENTS_SENTINEL = "complex_content"
+
 
 class XMLContents(object):
     COMPLEX_CONTENTS_SENTINEL = COMPLEX_CONTENTS_SENTINEL

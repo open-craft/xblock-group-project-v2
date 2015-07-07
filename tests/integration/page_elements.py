@@ -140,7 +140,7 @@ class ReviewStageElement(StageElement):
     @property
     def form(self):
         return self.make_element(self.find_element_by_tag_name('form'), ReviewFormElement)
-    
+
     @property
     def peers(self):
         return self.make_elements(".peers .select_peer", ReviewObjectSelectorElement)

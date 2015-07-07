@@ -90,6 +90,7 @@ class SingleScenarioTestSuite(BaseIntegrationTest):
     Helper class for single scenario tests
     """
     scenario = None
+    page = None
 
     def setUp(self):
         """

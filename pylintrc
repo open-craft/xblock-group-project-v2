@@ -4,6 +4,7 @@ include-ids=yes
 
 [FORMAT]
 max-line-length=120
+symbols=yes
 
 [MESSAGES CONTROL]
 disable=
@@ -12,9 +13,11 @@ disable=
  locally-disabled,import-error,relative-import,
  too-many-instance-attributes,too-many-locals,too-many-arguments,
  too-few-public-methods,too-many-public-methods,too-many-ancestors,
- too-many-branches,too-many-lines
+ too-many-branches,too-many-lines,too-many-statements
 
 
 [OPTIONS]
-good-names=id
+good-names=id,log,loader,setUp
+method-rgx=_?[a-z_][a-z0-9_]{2,40}$
+method-name-hint=_?[a-z_][a-z0-9_]{2,40}$
 
