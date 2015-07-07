@@ -8,7 +8,7 @@ symbols=yes
 
 [MESSAGES CONTROL]
 disable=
- missing-docstring,no-self-use,no-member,no-init,
+ missing-docstring,no-member,no-init,
  fixme,
  locally-disabled,import-error,
  too-many-instance-attributes,too-many-locals,too-many-arguments,
