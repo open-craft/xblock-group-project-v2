@@ -1,5 +1,5 @@
+""" Base classes for integration tests """
 import textwrap
-
 import mock
 
 from xblockutils.base_test import SeleniumXBlockTest
@@ -72,6 +72,9 @@ class BaseIntegrationTest(SeleniumXBlockTest):
             return self.go_to_view("student_view")
 
     def get_activities_map(self):
+        """
+        Builds a map of activity ids to activity names.
+        """
         group_project = self.load_root_xblock()
         runtime = group_project.runtime
         children = [runtime.get_block(child_id) for child_id in group_project.children]
@@ -83,12 +86,21 @@ class BaseIntegrationTest(SeleniumXBlockTest):
 
 
 class SingleScenarioTestSuite(BaseIntegrationTest):
+    """
+    Helper class for single scenario tests
+    """
     scenario = None
 
     def setUp(self):
+        """
+        Set Up method
+        """
         super(SingleScenarioTestSuite, self).setUp()
         self.load_scenario(self.scenario, load_immediately=False)
 
     def _prepare_page(self, view_name='student_view', student_id=1):
+        """
+        Loads scenario page and returns top-level wrapper element
+        """
         scenario = self.go_to_view(view_name=view_name, student_id=student_id)
         self.page = GroupProjectElement(self.browser, scenario)

@@ -1,25 +1,52 @@
+"""
+This module contains classes representing various GroupProject page elements
+"""
 from lazy.lazy import lazy
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.select import Select
 from group_project_v2.components.stage import StageState
 
-__author__ = 'e.kolpakov'
-
 
 class BaseElement(object):
+    """
+    This is a lightweight adaptation of :class:`bok_choy.PageObject` class to operate with the following constraints:
+        * Most tests run on a single page
+        * There can be multiple instances of the same type of object on the same page.
+        * There are no urls to visit - subclasses represent page elements on the same page
+
+    As a result `url` and `visit` does not do anything, and `is_browser_on_page` check is virtually equivalent to
+    `NoSuchElementException` when locating the element.
+
+    Page queries (performed via `q` helper) have some drawbacks as well:
+        * They are performed in scope of the entire page
+        * There are no means of returning specific PageObject subclass from `q` query.
+
+    """
     def __init__(self, browser, element):
+        """
+        Initialization.
+        """
         self._browser = browser
         self._element = element
 
     @property
     def browser(self):
+        """
+        Returns selenium browser object (:class:`WebDriver`)
+        """
         return self._browser
 
     @property
     def element(self):
+        """
+        Returns dom element wrapper object (:class:`WebElement`)
+        """
         return self._element
 
     def __getattr__(self, item):
+        """
+        Returns instance attribute or self.element attribute, if any of those present
+        """
         if hasattr(self.__dict__, item):
             return getattr(self.__dict__, item)
         if hasattr(self.element, item):
@@ -27,16 +54,21 @@ class BaseElement(object):
         return super(BaseElement, self).__getattr__(item)
 
     def make_element(self, dom_element, element_type):
+        """
+        Wraps dom_element (:class:`WebElement`) into a BaseElement object of element_type class
+        """
         return element_type(self.browser, dom_element)
 
-
     def make_elements(self, css_selector, element_type):
+        """
+        Wraps DOM elements (:class:`WebElement`) matching css_selecotr into a BaseElement object of element_type class
+        """
         elements = self.element.find_elements_by_css_selector(css_selector)
         return [self.make_element(elem, element_type) for elem in elements]
 
 
 class GroupProjectElement(BaseElement):
-    """ Wrapper around group project xblock element providing helpers common actions """
+    """ Wrapper around group project xblock element """
     ACTIVITY_CSS_SELECTOR = ".xblock-v1[data-block-type='group-project-v2-activity']"
 
     @property
@@ -63,6 +95,7 @@ class GroupProjectElement(BaseElement):
 
 
 class ActivityElement(BaseElement):
+    """ Wrapper around group project activity xblock element """
     STAGE_CSS_SELECTOR = "div.activity_section"
 
     @property
@@ -80,6 +113,7 @@ class ActivityElement(BaseElement):
 
 
 class StageElement(BaseElement):
+    """ Base class for stage wrapper elements """
     @property
     def id(self):
         return self.element.get_attribute('id').replace('activity_', '')
@@ -102,6 +136,7 @@ class StageElement(BaseElement):
 
 
 class ReviewStageElement(StageElement):
+    """ Wrapper around group project review stage element """
     @property
     def form(self):
         return self.make_element(self.find_element_by_tag_name('form'), ReviewFormElement)
@@ -114,7 +149,9 @@ class ReviewStageElement(StageElement):
     def groups(self):
         return self.make_elements(".other_groups .select_group", ReviewObjectSelectorElement)
 
+
 class ReviewObjectSelectorElement(BaseElement):
+    """ Wrapper around review object selector elements """
     @property
     def name(self):
         return self.get_attribute('title')
@@ -199,6 +236,7 @@ class ProjectNavigatorElement(BaseElement):
 
 
 class ProjectNavigatorViewElement(BaseElement):
+    """ Base class for project navigator view content wrappers """
     activity_element_type = None
 
     @property
@@ -218,18 +256,14 @@ class ProjectNavigatorViewElement(BaseElement):
 
 
 class ProjectNavigatorViewSelectorElement(BaseElement):
+    """ Wrapper around view selectors in Project Navigator """
     @property
     def type(self):
         return self.get_attribute("data-view-type")
 
 
-class NavigationViewElement(ProjectNavigatorViewElement):
-    @property
-    def stages(self):
-        return self.make_elements(".group-project-stage", StageItemElement)
-
-
 class ProjectNavigatorViewActivityElement(BaseElement):
+    """ Represents activity block in Project Navigator activity-related views (resources, submissions, navigation) """
     @property
     def activity_name(self):
         return self.find_element_by_css_selector(".group-project-activity-header").text.strip()
@@ -246,6 +280,13 @@ class ProjectNavigatorSubmissionsActivityElement(ProjectNavigatorViewActivityEle
     @property
     def submissions(self):
         return self.make_elements(".group-project-submissions .upload_item", SubmissionUploadItemElement)
+
+
+class NavigationViewElement(ProjectNavigatorViewElement):
+    @property
+    def stages(self):
+        return self.make_elements(".group-project-stage", StageItemElement)
+
 
 class ResourcesViewElement(ProjectNavigatorViewElement):
     activity_element_type = ProjectNavigatorResourcesActivityElement

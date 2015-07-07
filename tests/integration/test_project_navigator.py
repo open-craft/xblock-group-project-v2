@@ -1,5 +1,9 @@
+"""
+Tests for project navigator and its views
+"""
+import logging
 import mock
-from selenium.webdriver.support.wait import WebDriverWait
+
 from group_project_v2.components.project_navigator import ViewTypes
 from group_project_v2.components.stage import StageState
 from tests.integration.base_test import SingleScenarioTestSuite
@@ -11,16 +15,26 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
     scenario = "example_1.xml"
 
     def _assert_view_visibility(self, project_navigator, available_views, visible_view):
+        """
+        Checks view visibility - only `visible_view` should be displayed, other views should be hidden
+        """
         hidden_views = set(available_views) - {visible_view}
         for view in hidden_views:
             try:
                 self.assertFalse(project_navigator.get_view_by_type(view).is_displayed())
             except AssertionError as exception:
+                logging.exception(exception)
                 raise AssertionError("View {view_name} should be hidden".format(view_name=view))
 
         self.assertTrue(project_navigator.get_view_by_type(visible_view).is_displayed())
 
     def _assert_view_switching(self, project_navigator, available_views, target_view):
+        """
+        Checks switching views:
+            * Finds view selector and clicks on it
+            * Asserts that target view is now visible
+            * Closes the view and asserts that default (navigation) view is displayed
+        """
         project_navigator.get_view_selector_by_type(target_view).click()
         self._assert_view_visibility(project_navigator, available_views, target_view)
         view = project_navigator.get_view_by_type(target_view)
@@ -28,6 +42,9 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
         self._assert_view_visibility(project_navigator, available_views, ViewTypes.NAVIGATION)
 
     def test_views(self):
+        """
+        Tests view rendering and switching between views.
+        """
         self._prepare_page()
 
         available_views = {ViewTypes.NAVIGATION, ViewTypes.RESOURCES, ViewTypes.SUBMISSIONS, ViewTypes.ASK_TA}
@@ -52,6 +69,9 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
         self._assert_view_switching(project_navigator, available_views, ViewTypes.ASK_TA)
 
     def test_navigation_view(self):
+        """
+        Tests navigation view and stage navigation
+        """
         def stage_states(course_id, activity_id, user_id, stage_id):  # pylint: disable=argument-not-used
             users_in_group, completed_users = {1, 2}, {}  # default: two users in group and no one completed
             if stage_id == "overview":

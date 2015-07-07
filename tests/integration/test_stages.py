@@ -1,3 +1,6 @@
+"""
+Tests for stage contents and interaction
+"""
 import datetime
 import ddt
 import textwrap
@@ -33,6 +36,9 @@ class StageTestBase(BaseIntegrationTest):
     stage_element = StageElement
 
     def build_scenario_xml(self, stage_data, stage_id=DEFAULT_STAGE_ID, title="Stage Title", **kwargs):
+        """
+        Builds scenario XML with specified Stage parameters
+        """
         stage_arguments = {'id': stage_id, 'title': title, 'type': self.stage_type}
         stage_arguments.update(kwargs)
         stage_args_str = " ".join(
@@ -42,11 +48,18 @@ class StageTestBase(BaseIntegrationTest):
         return self.PROJECT_TEMPLATE.format(stage_args=stage_args_str, stage_data=stage_data)
 
     def go_to_view(self, view_name='student_view', student_id=1):
+        """
+        Navigates to the page `view_name` as specified student
+        Returns top-level Group Project element
+        """
         scenario = super(StageTestBase, self).go_to_view(view_name=view_name, student_id=student_id)
         self.page = GroupProjectElement(self.browser, scenario)
         return self.page
 
     def get_stage(self, group_project):
+        """
+        Returns stage element wrapper
+        """
         stage_element = group_project.activities[0].stages[0]
         self.activity_id = group_project.activities[0].id
         if self.stage_element != StageElement:
@@ -55,11 +68,17 @@ class StageTestBase(BaseIntegrationTest):
         return stage_element
 
     def dismiss_message(self):
+        """
+        Clicks on "Ok" button in popup message dialog
+        """
         button = self.browser.find_element_by_css_selector("div.message div.action_buttons button")
         button.click()
 
 @ddt.ddt
 class CommonStageTest(StageTestBase):
+    """
+    Tests common stage functionality
+    """
     stage_type = StageType.NORMAL
 
     @ddt.data(

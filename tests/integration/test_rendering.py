@@ -1,3 +1,6 @@
+"""
+High level rendering tests
+"""
 from tests.integration.base_test import SingleScenarioTestSuite
 from tests.integration.page_elements import ActivityElement
 from tests.utils import XMLContents, get_open_close_label
@@ -32,20 +35,14 @@ class TestRendering(SingleScenarioTestSuite):
 
         for activity in self.page.activities:
             for stage in activity.stages:
-                try:
-                    self.assertTrue(stage.is_displayed())  # precondition check - we just made them all visible
+                self.assertTrue(stage.is_displayed())  # precondition check - we just made them all visible
 
+                stage_data = XMLContents.Example1.STAGE_DATA[stage.id]
+                self.assertEqual(stage.title, stage_data['title'])
+                self.assertEqual(
+                    stage.open_close_label,
+                    get_open_close_label(stage_data.get('open_date', None), stage_data.get('close_date', None))
+                )
 
-                    stage_data = XMLContents.Example1.STAGE_DATA[stage.id]
-                    self.assertEqual(stage.title, stage_data['title'])
-                    self.assertEqual(
-                        stage.open_close_label,
-                        get_open_close_label(stage_data.get('open_date', None), stage_data.get('close_date', None))
-                    )
-
-                    if stage_data['contents'] and stage_data['contents'] != XMLContents.COMPLEX_CONTENTS_SENTINEL:
-                        self.assertEqual(stage.content.get_attribute('innerHTML').strip(), stage_data['contents'])
-
-                except AssertionError:
-                    print stage.id
-                    raise
+                if stage_data['contents'] and stage_data['contents'] != XMLContents.COMPLEX_CONTENTS_SENTINEL:
+                    self.assertEqual(stage.content.get_attribute('innerHTML').strip(), stage_data['contents'])
