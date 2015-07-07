@@ -6,10 +6,9 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from datetime import date
 
-from ..utils import loader, DottableDict, format_date, gettext as _
+from group_project_v2.utils import loader, DottableDict, format_date, gettext as _
 from group_project_v2.project_api import project_api, build_date_field
-
-from .stage import GroupActivityStageFactory, GroupReviewStage, StageValidationMessage
+from group_project_v2.components.stage import GroupActivityStageFactory, GroupReviewStage, StageValidationMessage
 
 
 class GroupActivity(object):

@@ -27,11 +27,10 @@ from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
-from .utils import loader
-
-from components import GroupActivity
+from group_project_v2.utils import loader
+from group_project_v2.components import GroupActivity
 from group_project_v2.project_api import project_api
-from .api_error import ApiError
+from group_project_v2.api_error import ApiError
 
 ALLOWED_OUTSIDER_ROLES = getattr(settings, "ALLOWED_OUTSIDER_ROLES", None)
 if ALLOWED_OUTSIDER_ROLES is None:

@@ -11,12 +11,12 @@ from xblock.fragment import Fragment
 from opaque_keys.edx.locator import BlockUsageLocator
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
+
 from group_project_v2.api_error import ApiError
 from group_project_v2.components.stage import StageState
 from group_project_v2.project_api import project_api
 from group_project_v2.upload_file import UploadFile
-
-from ..utils import loader, gettext as _
+from group_project_v2.utils import loader, gettext as _
 
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
