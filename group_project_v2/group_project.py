@@ -37,7 +37,7 @@ if ALLOWED_OUTSIDER_ROLES is None:
     ALLOWED_OUTSIDER_ROLES = ["assistant"]
 
 try:
-    from edx_notifications.data import NotificationMessage
+    from edx_notifications.data import NotificationMessage  # pylint: disable=import-error
 except ImportError:
     # Notifications is an optional runtime configuration, so it may not be available for import
     pass

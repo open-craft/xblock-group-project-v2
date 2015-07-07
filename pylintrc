@@ -10,7 +10,7 @@ symbols=yes
 disable=
  missing-docstring,no-member,
  fixme,
- locally-disabled,import-error,
+ locally-disabled,
  too-many-instance-attributes,too-many-locals,too-many-arguments,
  too-few-public-methods,too-many-public-methods,too-many-ancestors,
  too-many-branches,too-many-lines
