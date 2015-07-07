@@ -400,7 +400,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
 
         return response
 
-    def send_file_upload_notification(self):
+    def send_file_upload_notification(self, target_activity):
         """
         Helper method to emit notifications service event for submission upload
         """
@@ -410,7 +410,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         # in the list of services
         notifications_service = self.runtime.service(self, 'notifications')
         if notifications_service:
-            self.fire_file_upload_notification(notifications_service)
+            target_activity.fire_file_upload_notification(notifications_service)
 
     def persist_and_submit_files(self, target_activity, group_activity, context, request_parameters):
         """
@@ -458,7 +458,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
                 raise
 
         if at_least_one_success:
-            self.send_file_upload_notification()
+            self.send_file_upload_notification(target_activity)
 
         return upload_files
 
