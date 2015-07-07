@@ -8,9 +8,9 @@ from datetime import date
 
 from group_project_v2.utils import loader, DottableDict, format_date, gettext as _
 from group_project_v2.project_api import project_api, build_date_field
-from group_project_v2.components.stage import GroupActivityStageFactory, GroupReviewStage, StageValidationMessage
 
 
+# TODO: deprecated and broken - remove when all the useful code is moved into appropriate places
 class GroupActivity(object):
     def __init__(self, doc_tree, grading_override=False):
         self.activity_stages = []

@@ -57,8 +57,4 @@ GroupActivityAssessment (paths relative to //section/assessment)
 ---- small: Bool - ./answer[0]/@small                        # affects "answer" presentation - adds "side" class
 """
 from group_project_v2.components.activity import GroupActivity
-from group_project_v2.components.stage import (
-    BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage, PeerAssessmentStage, GroupAssessmentStage,
-    StageType
-)
 from group_project_v2.components.review import GroupActivityQuestion, GroupActivityAssessment

@@ -4,31 +4,27 @@
 # Imports ###########################################################
 
 import logging
-import textwrap
 import json
 from lazy.lazy import lazy
 import webob
 from datetime import datetime, timedelta
-import pytz
-
-from lxml import etree
-from pkg_resources import resource_filename
-
-from StringIO import StringIO
 
 from django.conf import settings
 from django.utils import html
 from django.utils.translation import ugettext as _
 
 from xblock.core import XBlock
-from xblock.fields import Scope, String, Dict, Float, Integer
+from xblock.fields import Scope, String, Float, Integer
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
 from group_project_v2.utils import loader
-from group_project_v2.components import GroupActivity
+from group_project_v2.stage import (
+    BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
+    PeerAssessmentStage, GroupAssessmentStage
+)
 from group_project_v2.project_api import project_api
 from group_project_v2.api_error import ApiError
 
@@ -108,7 +104,7 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
 # pylint: disable=unused-argument,invalid-name
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
-class GroupActivityXBlock(XBlock):
+class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin):
     """
     XBlock providing a group activity project for a group of students to collaborate upon
     """
@@ -141,23 +137,9 @@ class GroupActivityXBlock(XBlock):
         default=1
     )
 
-    item_state = Dict(
-        help="JSON payload for assessment values",
-        scope=Scope.user_state
-    )
-
-    with open(resource_filename(__name__, 'res/default.xml'), "r") as default_xml_file:
-        default_xml = default_xml_file.read()
-
-    data = String(
-        display_name="",
-        help="XML contents to display for this module",
-        scope=Scope.content,
-        default=textwrap.dedent(default_xml),
-        xml_node=True
-    )
-
+    editable_fields = ("display_name", "weight", "group_reviews_required_count", "user_review_count")
     has_score = True
+    has_children = True
 
     def _confirm_outsider_allowed(self):
         granted_roles = [r["role"] for r in project_api.get_user_roles_for_course(self.user_id, self.course_id)]
@@ -245,6 +227,17 @@ class GroupActivityXBlock(XBlock):
         except Exception:    # pylint: disable=broad-except
             return raw_course_id
 
+    @property
+    def allowed_nested_blocks(self):
+        return {
+            BasicStage.CATEGORY: _(u"Text Stage"),
+            SubmissionStage.CATEGORY: _(u"Submission Stage"),
+            PeerReviewStage.CATEGORY: _(u"Peer Review Stage"),
+            GroupReviewStage.CATEGORY: _(u"Group Review Stage"),
+            PeerAssessmentStage.CATEGORY: _(u"Peer Assessment Stage"),
+            GroupAssessmentStage.CATEGORY: _(u"Group Assessment Stage"),
+        }
+
     def student_view(self, context):
         """
         Player view, displayed to the student
@@ -301,17 +294,21 @@ class GroupActivityXBlock(XBlock):
 
         return fragment
 
-    def studio_view(self, context):
+    def author_preview_view(self, context):
+        fragment = Fragment()
+        self.render_children(context, fragment, can_reorder=True, can_add=False)
+        return fragment
+
+    def author_edit_view(self, context):
         """
-        Editing view in Studio
+        Add some HTML to the author view that allows authors to add child blocks.
         """
         fragment = Fragment()
-        fragment.add_content(loader.render_template('/templates/html/group_activity_edit.html', {'self': self}))
-        fragment.add_css(loader.load_unicode('public/css/group_activity_edit.css'))
-        fragment.add_javascript(loader.load_unicode('public/js/group_activity_edit.js'))
-
-        fragment.initialize_js('GroupActivityEditBlock')
-
+        self.render_children(context, fragment, can_reorder=True, can_add=False)
+        fragment.add_content(
+            loader.render_template('templates/html/add_buttons.html', {'child_blocks': self.allowed_nested_blocks})
+        )
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
         return fragment
 
     def assign_grade_to_group(self, group_id, grade_value):
@@ -466,66 +463,16 @@ class GroupActivityXBlock(XBlock):
 
         return self._check_review_complete(groups_to_review, group_review_questions, group_review_items, "workgroup")
 
-    @XBlock.json_handler
-    def studio_submit(self, submissions, suffix=''):
-
-        self.display_name = submissions['display_name']
-        xml_content = submissions['data']
-        max_score = submissions['max_score']
-        group_reviews_required_count = submissions['group_reviews_required_count']
-        user_review_count = submissions['user_review_count']
-
-        # TODO: Better use validations than using default values to mask errors
-        if not max_score:
-            # empty = default
-            max_score = 100
-        else:
+    def validate_field_data(self, validation, data):
+        should_be_ints = ('max_score', 'group_reviews_required_count', 'user_review_count')
+        for field_name in should_be_ints:
             try:
-                # not an integer, then default
-                max_score = int(max_score)
+                int(data[field_name])
             except ValueError:
-                max_score = 100
-
-        self.weight = max_score
-
-        try:
-            group_reviews_required_count = int(group_reviews_required_count)
-        except ValueError:
-            group_reviews_required_count = 3
-
-        self.group_reviews_required_count = group_reviews_required_count
-
-        try:
-            user_review_count = int(user_review_count)
-        except ValueError:
-            user_review_count = 1
-
-        self.user_review_count = user_review_count
-
-        try:
-            etree.parse(StringIO(xml_content))
-            self.data = xml_content
-
-        except etree.XMLSyntaxError as e:
-            return {
-                'result': 'error',
-                'message': e.message
-            }
-
-        return {
-            'result': 'success',
-        }
-
-    def validate(self):  # pylint: disable=super-on-old-class
-        """
-        Validates the state of this XBlock except for individual field values.
-        """
-        validation = super(GroupActivityXBlock, self).validate()
-        errors = self.group_activity.validate()
-        for error in errors:
-            validation.add(ValidationMessage(error.type, error.text))
-
-        return validation
+                message = _(u"{field_name} must be integer, {field_value} given").format(
+                    field_name=field_name, field_value=data[field_name]
+                )
+                validation.add(ValidationMessage(ValidationMessage.ERROR, message))
 
     @XBlock.json_handler
     def submit_peer_feedback(self, submissions, suffix=''):
@@ -985,10 +932,6 @@ class GroupActivityXBlock(XBlock):
 
         except Exception, ex:  # pylint: disable=broad-except
             log.exception(ex)
-
-    @lazy
-    def group_activity(self):
-        return GroupActivity.import_xml_string(self.data, self.is_admin_grader)
 
     def on_before_studio_delete(self, course_id, services):  # pylint: disable=unused-argument
         """

@@ -20,7 +20,22 @@ def package_data(pkg, root_list):
 
 BLOCKS = [
     'group-project-v2 = group_project_v2:GroupProjectXBlock',
+
     'group-project-v2-activity = group_project_v2:GroupActivityXBlock',
+
+    'group-project-v2-stage-basic = group_project_v2.stage:BasicStage',
+    'group-project-v2-stage-submission = group_project_v2.stage:SubmissionStage',
+    'group-project-v2-stage-peer-review = group_project_v2.stage:PeerReviewStage',
+    'group-project-v2-stage-group-review = group_project_v2.stage:GroupReviewStage',
+    'group-project-v2-stage-peer-assessment = group_project_v2.stage:PeerAssessmentStage',
+    'group-project-v2-stage-group-assessment = group_project_v2.stage:GroupAssessmentStage',
+
+    'group-project-v2-resource = group_project_v2.stage:ResourceXBlock',
+    'group-project-v2-submission = group_project_v2.stage:SubmissionXBlock',
+
+    'group-project-v2-review-question = group_project_v2.components.review:GroupProjectReviewQuestionXBlock',
+    'group-project-v2-review-assessment = group_project_v2.components.review:GroupProjectReviewAssessmentXBlock',
+
     'group-project-v2-navigator = group_project_v2.components.project_navigator:GroupProjectNavigatorXBlock',
     'group-project-v2-navigator-navigation = group_project_v2.components.project_navigator:NavigationViewXBlock',
     'group-project-v2-navigator-resources = group_project_v2.components.project_navigator:ResourcesViewXBlock',

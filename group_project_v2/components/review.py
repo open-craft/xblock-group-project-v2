@@ -1,6 +1,13 @@
 import copy
+from xblock.core import XBlock
+from xblockutils.studio_editable import StudioEditableXBlockMixin
 from group_project_v2.utils import outer_html, inner_html
 
+class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin):
+    CATEGORY = "group-project-v2-review-question"
+
+class GroupProjectReviewAssessmentXBlock(XBlock, StudioEditableXBlockMixin):
+    CATEGORY = "group-project-v2-review-assessment"
 
 class GroupActivityQuestion(object):
     def __init__(self, doc_tree, stage):
