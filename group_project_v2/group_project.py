@@ -170,6 +170,10 @@ class GroupActivityXBlock(XBlock, ChildrenNavigationXBlockMixin, StudioEditableX
             log.exception("Runtime does not have anonymous_student_id attribute - trying user_id")
             return self.runtime.user_id
 
+    @property
+    def id(self):
+        return self.scope_ids.usage_id
+
     @lazy
     # pylint: disable=broad-except
     def user_id(self):

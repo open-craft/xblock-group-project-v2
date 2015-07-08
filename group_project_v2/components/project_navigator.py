@@ -319,37 +319,35 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         'public/js/vendor/jquery.iframe-transport.js'
     )
 
-    def _get_submissions_map(self):
-        """
-        Walks Group Project and builds a map of activities and submissions
-        """
-        submissions_map = []
-        for activity in self.navigator.group_project.activities:
-            activity.update_submission_data(activity.workgroup["id"])
-            stages = [stage for stage in activity.stages if stage.submissions_stage]
-            submissions_required = any(True for stage in stages if len(stage.submissions) > 0)
-            submissions_map.append({
-                'id': activity.scope_ids.usage_id,
-                'display_name': activity.display_name,
-                'submissions_required': submissions_required,
-                'stages': stages,
-            })
-
-        return submissions_map
-
     def student_view(self, context):  # pylint: disable=unused-argument
         """
         Student view
         """
         # TODO: should have used `include` in template, but it can't find the template: resource loader does
         # not know how to do that
-        submission_links = loader.render_template(
-            "templates/html/project_navigator/submission_links.html",
-            {'course_id': self.course_id, 'submissions_map': self._get_submissions_map()}
-        )
+        submissions_map = []
+        stage_fragments = []
+        for activity in self.navigator.group_project.activities:
+            activity.update_submission_data(activity.workgroup["id"])
+            stages = [stage for stage in activity.stages if stage.submissions_stage]
+            stage_frags = [stage.render('project_navigator_submissions_view', context) for stage in stages]
+            stage_fragments.extend(stage_frags)
 
-        context = {'view': self, 'submission_links': submission_links}
-        return self.render_student_view(context)
+            submissions_required = any(True for stage in stages if len(stage.submissions) > 0)
+            submissions_map.append({
+                'id': activity.scope_ids.usage_id,
+                'display_name': activity.display_name,
+                'submissions_required': submissions_required,
+                'stage_contents': [frag.content for frag in stage_frags],
+            })
+
+        context = {'view': self, 'submissions_map': submissions_map}
+
+        fragment = self.render_student_view(context)
+        for resource_fragment in stage_fragments:
+            fragment.add_frag_resources(resource_fragment)
+
+        return fragment
 
     # TODO: When Stages become XBlocks this method should become a handler on SubmissionsStage XBlock
     @XBlock.handler

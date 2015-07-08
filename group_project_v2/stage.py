@@ -69,12 +69,15 @@ class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin):
 
     def project_navigator_view(self, context):
         fragment = Fragment()
-        fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, {'resource': self}))
+        render_context = {'resource': self}
+        render_context.update(context)
+        fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
         return fragment
 
 
 class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin):
     CATEGORY = "group-project-v2-submission"
+    PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/project_navigator/submission_xblock_view.html'
 
     display_name = String(
         display_name=_(u"Display Name"),
@@ -98,6 +101,13 @@ class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin):
 
     def student_view(self, context):
         return Fragment()
+
+    def project_navigator_view(self, context):
+        fragment = Fragment()
+        render_context = {'submission': self, 'upload': None}  # FIXME: fetch upload data from project_api
+        render_context.update(context)
+        fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
+        return fragment
 
 
 class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
@@ -255,6 +265,26 @@ class SubmissionStage(BaseGroupActivityStage):
     def has_all_submissions(self):
         uploaded_submissions = [s for s in self.submissions if hasattr(s, 'location') and s.location]
         return len(uploaded_submissions) == len(list(self.submissions))
+
+    def project_navigator_submissions_view(self, context):
+        fragment = Fragment()
+
+        submisison_frargments = [sub.render('project_navigator_view', context) for sub in self.submissions]
+
+        context = {
+            'stage': self,
+            'activity_id': self.activity.id,
+            'submissions': [frag.content for frag in submisison_frargments]
+        }
+        fragment.add_content(loader.render_template(
+            "templates/html/project_navigator/submission_stage_xblock_view.html",
+            context
+        ))
+
+        for frag in submisison_frargments:
+            fragment.add_frag_resources(frag)
+
+        return fragment
 
 
 class ReviewBaseStage(BaseGroupActivityStage):

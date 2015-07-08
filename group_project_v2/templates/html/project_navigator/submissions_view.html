@@ -1,10 +1,24 @@
+{% load i18n %}
 <div class="group-project-submissions-view">
   <div class="group-project-navigator-view-header">
     <span class="group-project-navigator-view-title">{{ view.display_name_with_default }}</span>
     <span class="group-project-navigator-view-close fa-times"></span>
   </div>
   <div class="submission-links-wrapper">
-    {{submission_links|safe}}
+    {% for activity in submissions_map %}
+      <div class="group-project-activity-wrapper">
+        <div class="group-project-activity-header">{{ activity.display_name }}</div>
+        <div class="group-project-submissions">
+          {% if activity.submissions_required %}
+            {% for stage_content in activity.stage_contents %}
+              {{ stage_content|safe }}
+            {% endfor %}
+          {% else %}
+            <div>{% trans "No uploads required for this activity" %}</div>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
   </div>
   <div class="action_buttons">
     <a href="#" class="cancel_upload">Cancel upload</a>
