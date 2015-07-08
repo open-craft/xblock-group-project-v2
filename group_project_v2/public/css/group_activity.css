@@ -15,10 +15,6 @@
     display: none;
 }
 
-.group-project-xblock-wrapper .activity_section:first-of-type {
-    display: block;
-}
-
 .group-project-xblock-wrapper .activity_section ul {
     margin-left: 30px;
 }

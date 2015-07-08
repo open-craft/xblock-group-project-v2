@@ -4,6 +4,7 @@ from datetime import date, datetime
 import xml.etree.ElementTree as ET
 from lazy.lazy import lazy
 from xblock.core import XBlock
+from xblock.fragment import Fragment
 
 from xblockutils.resources import ResourceLoader
 
@@ -59,14 +60,20 @@ def gettext(text):
     return text
 
 
-class ChildrenNavigationXBlockMixin(XBlock):
-    @lazy
-    def parent(self):
-        return self.get_parent()
-
+class ChildrenNavigationXBlockMixin(object):
     @lazy
     def _children(self):
         return [self.runtime.get_block(child_id) for child_id in self.children]
 
     def _get_children_by_category(self, child_category):
         return [child for child in self.children if child.category == child_category]
+
+    def get_children_fragment(self, context, view='student_view'):
+        fragment = Fragment()
+
+        for child in self._children:
+            child_fragment = child.render(view, context)
+            fragment.add_frag_resources(child_fragment)
+            fragment.add_content(child_fragment.content)
+
+        return fragment

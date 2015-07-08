@@ -115,7 +115,7 @@ class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
         scope=Scope.settings
     )
 
-    HTML_TEMPLATE = 'templates/html/stages/text.html'
+    STAGE_WRAPPER_TEMPLATE = 'templates/html/stages/stage_wrapper.html'
 
     editable_fields = ('display_name', 'open_date', 'close_date')
     has_children = True
@@ -140,7 +140,7 @@ class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
 
     @lazy
     def activity(self):
-        return self.parent
+        return self.get_parent()
 
     @property
     def resources(self):
@@ -173,20 +173,23 @@ class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
         return (self.close_date is not None) and (self.close_date < date.today())
 
     def student_view(self, context):
-        fragment = Fragment()
-        children_content = []
-        for child in self._children:
-            child_fragment = child.render('student_view', context)
-            fragment.add_frag_resources(child_fragment)
-            children_content.append(child_fragment.content)
+        stage_fragment = self.get_stage_content_fragment(context)
 
-        render_context = {"activity_stage": self, 'children_content': children_content}
-        return loader.render_template(self.HTML_TEMPLATE, render_context)
+        fragment = Fragment()
+        fragment.add_frag_resources(stage_fragment)
+        render_context = {
+            'stage': self, 'stage_content': stage_fragment.content,
+            "ta_graded": self.activity.group_reviews_required_count
+        }
+        fragment.add_content(loader.render_template(self.STAGE_WRAPPER_TEMPLATE, render_context))
+
+        return fragment
+
+    def get_stage_content_fragment(self, context):
+        return self.get_children_fragment(context)
 
     def author_preview_view(self, context):
-        fragment = Fragment()
-        self.render_children(context, fragment, can_reorder=True, can_add=False)
-        return fragment
+        return self.student_view(context)
 
     def author_edit_view(self, context):
         """
@@ -202,13 +205,11 @@ class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
 
 
 class BasicStage(BaseGroupActivityStage):
-    HTML_TEMPLATE = 'templates/html/stages/text.html'
     type = u'Text'
     CATEGORY = 'group-project-v2-stage-basic'
 
 
 class SubmissionStage(BaseGroupActivityStage):
-    HTML_TEMPLATE = 'templates/html/stages/upload.html'
     type = u'Task'
     CATEGORY = 'group-project-v2-stage-submission'
 
@@ -279,12 +280,12 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
 
 class PeerReviewStage(ReviewBaseStage):
-    HTML_TEMPLATE = 'templates/html/stages/peer_review.html'
+    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
     CATEGORY = 'group-project-v2-stage-peer-review'
 
 
 class GroupReviewStage(ReviewBaseStage):
-    HTML_TEMPLATE = 'templates/html/stages/group_review.html'
+    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_review.html'
     CATEGORY = 'group-project-v2-stage-group-review'
 
 
@@ -315,11 +316,11 @@ class AssessmentBaseStage(BaseGroupActivityStage):
 
 
 class PeerAssessmentStage(AssessmentBaseStage):
-    HTML_TEMPLATE = 'templates/html/stages/peer_assessment.html'
+    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_assessment.html'
     CATEGORY = 'group-project-v2-stage-peer-assessment'
 
 
 class GroupAssessmentStage(AssessmentBaseStage):
-    HTML_TEMPLATE = 'templates/html/stages/group_assessment.html'
+    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_assessment.html'
     CATEGORY = 'group-project-v2-stage-group-assessment'
 

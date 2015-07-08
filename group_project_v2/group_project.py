@@ -5,10 +5,11 @@
 
 import logging
 import json
+import itertools
 from lazy.lazy import lazy
 import pytz
 import webob
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from django.conf import settings
 from django.utils import html
@@ -256,6 +257,22 @@ class GroupActivityXBlock(XBlock, ChildrenNavigationXBlockMixin, StudioEditableX
         #         if "user_details" in new_submission_data:
         #             submission["user_details"] = new_submission_data["user_details"]
 
+    def _get_initialization_data(self):
+        return {
+            "default_stage_id": unicode(self._get_default_stage_id())
+        }
+
+    def _get_default_stage_id(self):
+        default_stage_id = self.stages[0].id
+        for stage in self.stages:
+            if self.is_admin_grader:
+                if isinstance(stage, GroupReviewStage):
+                    default_stage_id = stage.id
+            elif stage.open_date and stage.open_date <= date.today():
+                default_stage_id = stage.id
+
+        return default_stage_id
+
     def student_view(self, context):
         """
         Player view, displayed to the student
@@ -296,14 +313,20 @@ class GroupActivityXBlock(XBlock, ChildrenNavigationXBlockMixin, StudioEditableX
             team_members = []
             assess_groups = [workgroup]
 
+        fragment = Fragment()
+        stage_contents = []
+        for stage in self.stages:
+            stage_fragment = stage.render('student_view', context)
+            fragment.add_frag_resources(stage_fragment)
+            stage_contents.append(stage_fragment.content)
+
         context = {
-            "group_activity": self,
+            "stage_contents": stage_contents,
+            "initialization_data": json.dumps(self._get_initialization_data()),
             "team_members": json.dumps(team_members),
             "assess_groups": json.dumps(assess_groups),
-            "ta_graded": (self.group_reviews_required_count < 1),
         }
 
-        fragment = Fragment()
         fragment.add_content(loader.render_template('/templates/html/group_activity.html', context))
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_activity.css'))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/group_activity.js'))

@@ -1,41 +1,14 @@
 {% load i18n %}
 {% autoescape off %}
 <div class="group-project-xblock-wrapper">
-  {% for activity_stage in group_activity.stages %}
-    <div id="activity_{{ activity_stage.id }}" class="activity_section">
-    {% if activity_stage.grading_override %}
-      <div class="grading_override {% if ta_graded %}ta_graded{% endif %}">
-        <span class="default_message">Grading View</span>
-        <span class="custom_message"></span>
-      </div>
-    {% endif %}
-    {% if activity_stage.is_open %}
-      <h1>
-        <span class="stage_title">{{ activity_stage.display_name }}</span>
-        {% if activity_stage.close_date %}
-          {% if activity_stage.is_closed %}
-            <span class="highlight">closed on {{ activity_stage.formatted_close_date }}</span>
-          {% else %}
-            <span class="highlight">due {{ activity_stage.formatted_close_date }}</span>
-          {% endif %}
-        {% endif %}
-      </h1>
-      <div class="stage_content">{{activity_stage.render|safe}}</div>
-    {% else %}
-      <h1>
-        {{ activity_stage.title }}
-        {% if activity_stage.open_date %}
-          <span class="highlight">opens {{ activity_stage.formatted_open_date }}</span>
-        {% endif %}
-      </h1>
-      <div class="error">This stage has not yet been opened</div>
-    {% endif %}
-    </div>
+  {% for stage_content in stage_contents %}
+    {{ stage_content|safe }}
   {% endfor %}
 
   <!-- These 3 scripts contain json data - they are accessed using JSON.parse($('.peer_group', element).html()); -->
   <script class="peer_group" type="application/json">{{ team_members }}</script>
   <script class="assess_groups" type="application/json">{{ assess_groups }}</script>
+  <script class="initialization_data" type="application/json">{{ initialization_data }}</script>
 
   <div class="message">
     <div class="modal-bg"></div>

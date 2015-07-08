@@ -213,9 +213,10 @@ function GroupProjectBlock(runtime, element) {
         });
     }
 
-    $(document).on('select_stage', function (target, selected_step_id) {
-        // NOTE: use of ids specified by designer here
-        var stage = $('#activity_' + selected_step_id, element);
+    // TODO: does not include activity_id - might need fixing when all activities are displayed simultaneously
+    $(document).on('select_stage', function (target, selected_stage_id) {
+        // can't use $('#'+selected_stage_id) as selected_stage_id contains slashes
+        var stage = $("[id='"+selected_stage_id+"']", element);
         if (stage.length > 0) {
             $('.activity_section', element).hide();
             stage.show();
@@ -293,6 +294,11 @@ function GroupProjectBlock(runtime, element) {
             }
         })
     });
+
+    var initialization_data = JSON.parse($('.initialization_data', element).html());
+    if (initialization_data && initialization_data.default_stage_id) {
+        $(document).trigger('select_stage', initialization_data.default_stage_id);
+    }
 
 
     // TODO: a bit hacky solution to allow directly to stages
