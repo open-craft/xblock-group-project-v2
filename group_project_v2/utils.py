@@ -2,6 +2,8 @@
 import logging
 from datetime import date, datetime
 import xml.etree.ElementTree as ET
+from lazy.lazy import lazy
+from xblock.core import XBlock
 
 from xblockutils.resources import ResourceLoader
 
@@ -55,3 +57,16 @@ def format_date(date_value):
 # Make '_' a no-op so we can scrape strings
 def gettext(text):
     return text
+
+
+class ChildrenNavigationXBlockMixin(XBlock):
+    @lazy
+    def parent(self):
+        return self.get_parent()
+
+    @lazy
+    def _children(self):
+        return [self.runtime.get_block(child_id) for child_id in self.children]
+
+    def _get_children_by_category(self, child_category):
+        return [child for child in self.children if child.category == child_category]

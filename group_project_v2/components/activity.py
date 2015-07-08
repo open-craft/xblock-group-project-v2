@@ -46,22 +46,6 @@ class GroupActivity(object):
             *[getattr(stage, 'grade_questions', ()) for stage in self.activity_stages]
         ))
 
-    def update_submission_data(self, group_id):
-
-        submission_map = project_api.get_latest_workgroup_submissions_by_id(group_id)
-
-        def formatted_date(iso_date_value):
-            return format_date(build_date_field(iso_date_value))
-
-        for submission in self.submissions:
-            if submission["id"] in submission_map:
-                new_submission_data = submission_map[submission["id"]]
-                submission["location"] = new_submission_data["document_url"]
-                submission["file_name"] = new_submission_data["document_filename"]
-                submission["submission_date"] = formatted_date(new_submission_data["modified"])
-                if "user_details" in new_submission_data:
-                    submission["user_details"] = new_submission_data["user_details"]
-
     @property
     def export_xml(self):
 

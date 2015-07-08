@@ -1,6 +1,6 @@
 {% load i18n %}
-{% if group_activity.has_submissions %}
-  {% for file_link in group_activity.submissions %}
+{% if submissions %}
+  {% for file_link in submissions %}
     {% if file_link.location %}
       <div><a href="{{ file_link.location }}"{% if file_link.description %} title="{{ file_link.description }}"{% endif %} target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }} - {{ file_link.submission_date }}){% endif %}</a></div>
     {% else %}

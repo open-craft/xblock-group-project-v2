@@ -1,7 +1,7 @@
 {% load i18n %}
 {% autoescape off %}
 <div class="group-project-xblock-wrapper">
-  {% for activity_stage in group_activity.activity_stages %}
+  {% for activity_stage in group_activity.stages %}
     <div id="activity_{{ activity_stage.id }}" class="activity_section">
     {% if activity_stage.grading_override %}
       <div class="grading_override {% if ta_graded %}ta_graded{% endif %}">
@@ -11,7 +11,7 @@
     {% endif %}
     {% if activity_stage.is_open %}
       <h1>
-        <span class="stage_title">{{ activity_stage.title }}</span>
+        <span class="stage_title">{{ activity_stage.display_name }}</span>
         {% if activity_stage.close_date %}
           {% if activity_stage.is_closed %}
             <span class="highlight">closed on {{ activity_stage.formatted_close_date }}</span>
@@ -36,7 +36,6 @@
   <!-- These 3 scripts contain json data - they are accessed using JSON.parse($('.peer_group', element).html()); -->
   <script class="peer_group" type="application/json">{{ team_members }}</script>
   <script class="assess_groups" type="application/json">{{ assess_groups }}</script>
-  <script class="step_map" type="application/json">{{ group_activity.step_map }}</script>
 
   <div class="message">
     <div class="modal-bg"></div>

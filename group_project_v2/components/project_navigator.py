@@ -242,7 +242,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
 
         for activity in self.navigator.group_project.activities:
             stages_data = []
-            for stage in activity.group_activity.activity_stages:
+            for stage in activity.stages:
                 stage_state = self.get_stage_state(activity.scope_ids.usage_id, stage)
                 stages_data.append({'stage': stage, 'state': stage_state})
 
@@ -276,7 +276,7 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
         resources_map = []
         for activity in self.navigator.group_project.activities:
             resources = list(itertools.chain(*[
-                stage.resources for stage in activity.group_activity.activity_stages
+                stage.resources for stage in activity.stages
             ]))
             resources_map.append({
                 'id': activity.scope_ids.usage_id,
@@ -316,9 +316,8 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         """
         submissions_map = []
         for activity in self.navigator.group_project.activities:
-            group_activity = activity.group_activity
-            group_activity.update_submission_data(activity.workgroup["id"])
-            stages = [stage for stage in group_activity.activity_stages if stage.submissions_stage]
+            activity.update_submission_data(activity.workgroup["id"])
+            stages = [stage for stage in activity.stages if stage.submissions_stage]
             submissions_required = any(True for stage in stages if len(stage.submissions) > 0)
             submissions_map.append({
                 'id': activity.scope_ids.usage_id,
@@ -355,8 +354,6 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         response_data = {"message": _("File(s) successfully submitted")}
         failure_code = 0
         try:
-            group_activity = target_activity.group_activity
-
             context = {
                 "user_id": target_activity.user_id,
                 "group_id": target_activity.workgroup['id'],
@@ -364,15 +361,15 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
                 "course_id": target_activity.course_id
             }
 
-            upload_files = self.persist_and_submit_files(target_activity, group_activity, context, request.params)
+            upload_files = self.persist_and_submit_files(target_activity, target_activity, context, request.params)
 
             response_data["submissions"] = {
                 uploaded_file.submission_id: uploaded_file.file_url for uploaded_file in upload_files
             }
 
-            group_activity.update_submission_data(target_activity.workgroup['id'])
+            target_activity.update_submission_data(target_activity.workgroup['id'])
 
-            target_stage = [stage for stage in group_activity.activity_stages if stage.id == stage_id][0]
+            target_stage = [stage for stage in target_activity.stages if stage.id == stage_id][0]
             if target_stage.has_all_submissions:
                 for user in target_activity.workgroup["users"]:
                     target_activity.mark_complete_stage(user["id"], target_stage.id)
@@ -412,13 +409,13 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         if notifications_service:
             target_activity.fire_file_upload_notification(notifications_service)
 
-    def persist_and_submit_files(self, target_activity, group_activity, context, request_parameters):
+    def persist_and_submit_files(self, target_activity, activity, context, request_parameters):
         """
         Saves uploaded files to their permanent location, sends them to submissions backend and emits submission events
         """
         upload_files = [
             UploadFile(request_parameters[submission.id].file, submission.id, context)
-            for submission in group_activity.submissions if submission.id in request_parameters
+            for submission in activity.submissions if submission.id in request_parameters
         ]
 
         # Save the files first
@@ -440,7 +437,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
                 # Emit analytics event...
                 self.runtime.publish(
                     self,
-                    "group_activity.received_submission",
+                    "activity.received_submission",
                     {
                         "submission_id": uploaded_file.submission_id,
                         "filename": uploaded_file.file.name,

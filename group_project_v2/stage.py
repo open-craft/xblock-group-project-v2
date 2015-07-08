@@ -8,7 +8,7 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
 from group_project_v2.components.review import GroupProjectReviewQuestionXBlock, GroupProjectReviewAssessmentXBlock
-from group_project_v2.utils import loader, inner_html, format_date, gettext as _
+from group_project_v2.utils import loader, inner_html, format_date, gettext as _, ChildrenNavigationXBlockMixin
 
 
 class StageType(object):
@@ -92,7 +92,8 @@ class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin):
         return Fragment()
 
 
-class BaseGroupActivityStage(XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin):
+class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
+                             StudioEditableXBlockMixin, StudioContainerXBlockMixin):
     submissions_stage = False
 
     display_name = String(
@@ -126,6 +127,10 @@ class BaseGroupActivityStage(XBlock, StudioEditableXBlockMixin, StudioContainerX
     ])
     STAGE_SPECIFIC_ALLOWED_BLOCKS = {}
 
+    @property
+    def id(self):
+        return self.scope_ids.usage_id
+
     @lazy
     def allowed_nested_blocks(self):
         blocks = OrderedDict()
@@ -135,14 +140,7 @@ class BaseGroupActivityStage(XBlock, StudioEditableXBlockMixin, StudioContainerX
 
     @lazy
     def activity(self):
-        return self.get_parent()
-
-    @lazy
-    def _children(self):
-        return [self.runtime.get_block(child_id) for child_id in self.children]
-
-    def _get_children_by_category(self, child_category):
-        return [child for child in self.children if child.category == child_category]
+        return self.parent
 
     @property
     def resources(self):

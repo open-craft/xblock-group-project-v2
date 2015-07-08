@@ -6,6 +6,7 @@
 import logging
 import json
 from lazy.lazy import lazy
+import pytz
 import webob
 from datetime import datetime, timedelta
 
@@ -20,7 +21,7 @@ from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
-from group_project_v2.utils import loader
+from group_project_v2.utils import loader, format_date, build_date_field, ChildrenNavigationXBlockMixin
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
     PeerAssessmentStage, GroupAssessmentStage
@@ -104,7 +105,7 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
 # pylint: disable=unused-argument,invalid-name
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
-class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin):
+class GroupActivityXBlock(XBlock, ChildrenNavigationXBlockMixin, StudioEditableXBlockMixin, StudioContainerXBlockMixin):
     """
     XBlock providing a group activity project for a group of students to collaborate upon
     """
@@ -238,6 +239,23 @@ class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlo
             GroupAssessmentStage.CATEGORY: _(u"Group Assessment Stage"),
         }
 
+    @property
+    def stages(self):
+        return self._children
+
+    def update_submission_data(self, group_id):
+        pass
+        # submission_map = project_api.get_latest_workgroup_submissions_by_id(group_id)
+        #
+        # for submission in self.submissions:
+        #     if submission["id"] in submission_map:
+        #         new_submission_data = submission_map[submission["id"]]
+        #         submission["location"] = new_submission_data["document_url"]
+        #         submission["file_name"] = new_submission_data["document_filename"]
+        #         submission["submission_date"] = format_date(build_date_field(new_submission_data["modified"]))
+        #         if "user_details" in new_submission_data:
+        #             submission["user_details"] = new_submission_data["user_details"]
+
     def student_view(self, context):
         """
         Player view, displayed to the student
@@ -256,7 +274,7 @@ class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlo
         user_id = self.user_id
 
         try:
-            self.group_activity.update_submission_data(workgroup["id"])
+            self.update_submission_data(workgroup["id"])
         except ApiError:
             pass
 
@@ -279,7 +297,7 @@ class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlo
             assess_groups = [workgroup]
 
         context = {
-            "group_activity": self.group_activity,
+            "group_activity": self,
             "team_members": json.dumps(team_members),
             "assess_groups": json.dumps(assess_groups),
             "ta_graded": (self.group_reviews_required_count < 1),
@@ -333,6 +351,12 @@ class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlo
         if notifications_service:
             self.fire_grades_posted_notification(group_id, notifications_service)
 
+    @property
+    def grade_questions(self):
+        return list(itertools.chain(
+            *[getattr(stage, 'grade_questions', ()) for stage in self.activity_stages]
+        ))
+
     def calculate_grade(self, group_id):
 
         def mean(value_array):
@@ -350,7 +374,7 @@ class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlo
 
         def get_user_grade_value_list(user_id):
             user_grades = []
-            for question in self.group_activity.grade_questions:
+            for question in self.grade_questions:
                 user_value = review_item_map.get(make_key(question.id, user_id), None)
                 if user_value is None:
                     # if any are incomplete, we consider the whole set to be unusable
@@ -371,7 +395,7 @@ class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlo
             ]
             admin_grader_count = len(admin_reviewer_grades)
             if admin_grader_count > 1:
-                for idx in range(len(self.group_activity.grade_questions)):
+                for idx in range(len(self.grade_questions)):
                     admin_provided_grades.append(mean([adm[idx] for adm in admin_reviewer_grades]))
             elif admin_grader_count > 0:  # which actually means admin_grader_count == 1
                 admin_provided_grades = admin_reviewer_grades[0]
@@ -426,7 +450,7 @@ class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlo
             self.mark_complete_stage(u["id"], None)
 
     def _get_review_questions(self, stage_id):
-        stage = [stage for stage in self.group_activity.activity_stages if stage.id == stage_id][0]
+        stage = [stage for stage in self.stages if stage.id == stage_id][0]
         return [question for question in stage.questions if question.required]
 
     def _check_review_complete(self, items_to_grade, review_questions, review_items, review_item_key):
@@ -529,7 +553,7 @@ class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlo
                 submissions
             )
 
-            for question_id in self.group_activity.grade_questions:
+            for question_id in self.grade_questions:
                 if question_id in submissions:
                     # Emit analytics event...
                     self.runtime.publish(
@@ -651,10 +675,9 @@ class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlo
     def other_submission_links(self, request, suffix=''):
         group_id = request.GET["group_id"]
 
-        self.group_activity.update_submission_data(group_id)
-        html_output = loader.render_template(
-            '/templates/html/review_submissions.html', {"group_activity": self.group_activity}
-        )
+        self.update_submission_data(group_id)
+        context = {'submissions': self.submissions}
+        html_output = loader.render_template('/templates/html/review_submissions.html', context)
 
         return webob.response.Response(body=json.dumps({"html": html_output}))
 
@@ -821,7 +844,7 @@ class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlo
             timer_name_suffix=timer_name_suffix
         )
 
-    def _set_activity_timed_notification(self, course_id, activity, msg_type, stage, activity_date, send_at_date,
+    def _set_activity_timed_notification(self, course_id, msg_type, stage, activity_date, send_at_date,
                                          services, timer_name_suffix):
 
         stage_name = stage.name
@@ -890,13 +913,12 @@ class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlo
             if notifications_service:
                 # set (or update) Notification timed message based on
                 # the current key dates
-                for stage in self.group_activity.activity_stages:
+                for stage in self.stages:
 
                     # if the stage has a opening date, then send a msg then
                     if stage.open_date:
                         self._set_activity_timed_notification(
                             course_id,
-                            self.group_activity,
                             u'open-edx.xblock.group-project.stage-open',
                             stage,
                             datetime.combine(stage.open_date, datetime.min.time()),
@@ -909,7 +931,6 @@ class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlo
                     if stage.close_date:
                         self._set_activity_timed_notification(
                             course_id,
-                            self.group_activity,
                             u'open-edx.xblock.group-project.stage-due',
                             stage,
                             datetime.combine(stage.close_date, datetime.min.time()),
@@ -921,7 +942,6 @@ class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlo
                         # and also send a notice 3 days earlier
                         self._set_activity_timed_notification(
                             course_id,
-                            self.group_activity,
                             u'open-edx.xblock.group-project.stage-due',
                             stage,
                             datetime.combine(stage.close_date, datetime.min.time()),
@@ -946,7 +966,7 @@ class GroupActivityXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlo
             if notifications_service:
                 # If we are being delete, then we should remove any NotificationTimers that
                 # may have been registered before
-                for stage in self.group_activity.activity_stages:
+                for stage in self.stages:
                     notifications_service.cancel_timed_notification(
                         self._get_stage_timer_name(stage, 'open')
                     )

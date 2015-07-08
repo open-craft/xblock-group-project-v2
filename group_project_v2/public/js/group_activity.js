@@ -213,8 +213,6 @@ function GroupProjectBlock(runtime, element) {
         });
     }
 
-    var step_map = JSON.parse($('.step_map', element).html());
-
     $(document).on('select_stage', function (target, selected_step_id) {
         // NOTE: use of ids specified by designer here
         var stage = $('#activity_' + selected_step_id, element);
@@ -264,10 +262,6 @@ function GroupProjectBlock(runtime, element) {
         ev.preventDefault();
         return false;
     });
-
-    // activate the first step
-    $(document).trigger("steps_available", step_map);
-    $(document).trigger("select_stage", step_map["default"]);
 
     var review_submissions_dialog = $('.review_submissions_dialog', element).appendTo($(document.body));
     $('.view_other_submissions', element).on('click', function () {
