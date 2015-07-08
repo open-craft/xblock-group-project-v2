@@ -66,7 +66,7 @@ class ChildrenNavigationXBlockMixin(object):
         return [self.runtime.get_block(child_id) for child_id in self.children]
 
     def _get_children_by_category(self, child_category):
-        return [child for child in self.children if child.category == child_category]
+        return [child for child in self._children if child.category == child_category]
 
     def get_children_fragment(self, context, view='student_view'):
         fragment = Fragment()

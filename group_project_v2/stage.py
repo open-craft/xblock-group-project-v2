@@ -35,6 +35,8 @@ class ResourceType(object):
 class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin):
     CATEGORY = "group-project-v2-resource"
 
+    PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/project_navigator/resource_xblock_view.html'
+
     display_name = String(
         display_name=_(u"Display Name"),
         help=_(U"This is a name of the resource"),
@@ -64,6 +66,11 @@ class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin):
 
     def student_view(self, context):
         return Fragment()
+
+    def project_navigator_view(self, context):
+        fragment = Fragment()
+        fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, {'resource': self}))
+        return fragment
 
 
 class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin):

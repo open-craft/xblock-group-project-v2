@@ -7,25 +7,13 @@
   {% for activity in resources_map %}
   <div class="group-project-activity-wrapper">
     <div class="group-project-activity-header">{{ activity.display_name }}</div>
-    <ul class="group-project-resources">
-      {% if activity.resources %}
-          {% for file_link in activity.resources %}
-            {% if file_link.location %}
-              <li>
-                <a
-                  title="{{ file_link.description }}" target="_blank"
-                  {% if file_link.type == "ooyala" %} data-video='{{ file_link.location }}' {% else %} href="{{ file_link.location }}" {% endif %}
-                >
-                  {{ file_link.title }}
-                </a>
-                {% if file_link.description %}: {{ file_link.description }}{% endif %}
-              </li>
-            {% endif %}
-          {% endfor %}
-      {% else %}
-        <div class="group-project-navigator-grey-text">{% trans "No resources for this activity" %}</div>
-      {% endif %}
-    </ul>
+    {% if activity.resources %}
+      <ul class="group-project-resources">
+        {% for resource_view in activity.resources %}<li>{{ resource_view|safe }}</li>{% endfor %}
+      </ul>
+    {% else %}
+      <div class="group-project-navigator-grey-text">{% trans "No resources for this activity" %}</div>
+    {% endif %}
   </div>
   {% endfor %}
   <div class="player-modal reveal-modal medium">
