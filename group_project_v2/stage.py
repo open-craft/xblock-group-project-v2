@@ -9,6 +9,7 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
 from group_project_v2.components.review import GroupProjectReviewQuestionXBlock, GroupProjectReviewAssessmentXBlock
+from group_project_v2.project_api import project_api
 from group_project_v2.utils import loader, inner_html, format_date, gettext as _, ChildrenNavigationXBlockMixin
 
 
@@ -219,6 +220,37 @@ class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
             loader.render_template('templates/html/add_buttons.html', {'child_blocks': self.allowed_nested_blocks})
         )
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
+        return fragment
+
+    def get_stage_state(self):
+        """
+        Gets stage completion state
+        """
+        users_in_group, completed_users = project_api.get_stage_state(
+            self.activity.course_id,
+            self.activity.id,
+            self.activity.user_id,
+            self.id
+        )
+
+        if not users_in_group or not completed_users:
+            return StageState.NOT_STARTED
+        if users_in_group <= completed_users:
+            return StageState.COMPLETED
+        if users_in_group & completed_users:
+            return StageState.INCOMPLETE
+        else:
+            return StageState.NOT_STARTED
+
+    def navigation_view(self, context):
+        fragment = Fragment()
+        rendering_context = {
+            'stage': self,
+            'activity_id': self.activity.id,
+            'stage_state': self.get_stage_state()
+        }
+        rendering_context.update(context)
+        fragment.add_content(loader.render_template("templates/html/stages/navigation_view.html", rendering_context))
         return fragment
 
 

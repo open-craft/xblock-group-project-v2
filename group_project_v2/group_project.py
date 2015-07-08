@@ -102,11 +102,29 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
         return [child for child in all_children if isinstance(child, GroupActivityXBlock)]
 
 
+class ActivityNavigationViewMixin(object):
+    def navigation_view(self, context):
+        fragment = Fragment()
+
+        stage_contents = []
+        for child in self.stages:
+            child_fragment = child.render('navigation_view', context)
+            fragment.add_frag_resources(child_fragment)
+            stage_contents.append(child_fragment.content)
+
+        context = {'activity': self, 'stage_contents': stage_contents}
+        fragment.add_content(loader.render_template("templates/html/activity/navigation_view.html", context))
+
+        return fragment
+
+
 # TODO: enable and fix these violations
 # pylint: disable=unused-argument,invalid-name
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
-class GroupActivityXBlock(XBlock, ChildrenNavigationXBlockMixin, StudioEditableXBlockMixin, StudioContainerXBlockMixin):
+class GroupActivityXBlock(XBlock, ChildrenNavigationXBlockMixin,
+                          StudioEditableXBlockMixin, StudioContainerXBlockMixin,
+                          ActivityNavigationViewMixin):
     """
     XBlock providing a group activity project for a group of students to collaborate upon
     """
@@ -332,7 +350,7 @@ class GroupActivityXBlock(XBlock, ChildrenNavigationXBlockMixin, StudioEditableX
             "assess_groups": json.dumps(assess_groups),
         }
 
-        fragment.add_content(loader.render_template('/templates/html/group_activity.html', context))
+        fragment.add_content(loader.render_template('/templates/html/activity/student_view.html', context))
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_activity.css'))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/group_activity.js'))
 

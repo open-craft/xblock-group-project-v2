@@ -1,0 +1,8 @@
+<div class="group-project-activity-wrapper" data-activity-id="{{ activity.id }}">
+  <div class="group-project-activity-header">{{ activity.display_name }}</div>
+  <ul class="group-project-activity-stages">
+    {% for stage_content in stage_contents %}
+      {{ stage_content|safe }}
+    {% endfor %}
+  </ul>
+</div>

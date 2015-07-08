@@ -147,7 +147,7 @@ class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):
     def course_id(self):
         return getattr(self.runtime, 'course_id', 'all')
 
-    def render_student_view(self, context):
+    def render_student_view(self, context, add_resources_from=None):
         """
         Common code to render student view
         """
@@ -169,6 +169,10 @@ class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):
 
         for js_file in self.additional_js_files:
             fragment.add_javascript_url(self.runtime.local_resource_url(self.navigator.group_project, js_file))
+
+        if add_resources_from:
+            for frag in add_resources_from:
+                fragment.add_frag_resources(frag)
 
         return fragment
 
@@ -211,49 +215,17 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     js_file = "navigation_view.js"
     initialize_js_function = "GroupProjectNavigatorNavigationView"
 
-    def get_stage_state(self, activity_id, stage):
-        """
-        Gets stage completion state
-        """
-        user_service = self.runtime.service(self, 'user')
-        user_id = user_service.get_current_user().opt_attrs.get('edx-platform.user_id', None)
-
-        users_in_group, completed_users = project_api.get_stage_state(
-            self.course_id,
-            activity_id,
-            user_id,
-            stage.id
-        )
-
-        if not users_in_group or not completed_users:
-            return StageState.NOT_STARTED
-        if users_in_group <= completed_users:
-            return StageState.COMPLETED
-        if users_in_group & completed_users:
-            return StageState.INCOMPLETE
-        else:
-            return StageState.NOT_STARTED
-
     def student_view(self, context):  # pylint: disable=unused-argument
         """
         Student view
         """
-        navigation_map = []
-
+        activity_fragments = []
         for activity in self.navigator.group_project.activities:
-            stages_data = []
-            for stage in activity.stages:
-                stage_state = self.get_stage_state(activity.scope_ids.usage_id, stage)
-                stages_data.append({'stage': stage, 'state': stage_state})
+            activity_fragment = activity.render("navigation_view", context)
+            activity_fragments.append(activity_fragment)
 
-            navigation_map.append({
-                'id': activity.scope_ids.usage_id,
-                'display_name': activity.display_name,
-                'stages': stages_data
-            })
-
-        context = {'view': self, 'navigation_map': navigation_map}
-        return self.render_student_view(context)
+        context = {'view': self, 'activity_contents': [frag.content for frag in activity_fragments]}
+        return self.render_student_view(context, activity_fragments)
 
 
 class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
