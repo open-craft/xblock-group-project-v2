@@ -265,10 +265,11 @@ class GroupActivityXBlock(XBlock, ChildrenNavigationXBlockMixin, StudioEditableX
     def _get_default_stage_id(self):
         default_stage_id = self.stages[0].id
         for stage in self.stages:
+            # TODO: this will likely need some other way to select target stage, or could be removed altogether
             if self.is_admin_grader:
                 if isinstance(stage, GroupReviewStage):
                     default_stage_id = stage.id
-            elif stage.open_date and stage.open_date <= date.today():
+            elif stage.is_open:
                 default_stage_id = stage.id
 
         return default_stage_id

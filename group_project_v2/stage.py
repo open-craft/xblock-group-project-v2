@@ -1,6 +1,7 @@
 from collections import OrderedDict
-from datetime import date
+from datetime import datetime
 from lazy.lazy import lazy
+import pytz
 from xblock.core import XBlock
 from xblock.fields import Scope, String, DateTime, Boolean
 from xblock.fragment import Fragment
@@ -160,7 +161,7 @@ class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
 
     @property
     def is_open(self):
-        return (self.open_date is None) or (self.open_date <= date.today())
+        return (self.open_date is None) or (self.open_date <= datetime.utcnow().replace(tzinfo=pytz.UTC))
 
     @property
     def is_closed(self):
@@ -170,7 +171,7 @@ class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
         if self.activity.is_admin_grader:
             return False
 
-        return (self.close_date is not None) and (self.close_date < date.today())
+        return (self.close_date is not None) and (self.close_date < datetime.utcnow().replace(tzinfo=pytz.UTC))
 
     def student_view(self, context):
         stage_fragment = self.get_stage_content_fragment(context)
