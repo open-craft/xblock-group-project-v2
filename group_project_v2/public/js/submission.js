@@ -55,7 +55,7 @@ function GroupProjectSubmissionBlock(runtime, element) {
 
                         uploadComplete(jqXHR);
                     })
-                    .fail(function (data, textStatus, jqXHR) {
+                    .fail(function (jqXHR, textStatus, errorThrown) {
                         uploadFailed(jqXHR);
                     });
 
