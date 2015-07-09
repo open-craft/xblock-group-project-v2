@@ -255,8 +255,6 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
 
 
 # pylint-disable=no-init
-@XBlock.needs('user')
-@XBlock.wants('notifications')
 class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     """
     Submissions View - displays submissions grouped by Activity. Allows uploading new files and downloading
@@ -287,123 +285,6 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
 
         context = {'view': self, 'activity_contents': [frag.content for frag in activity_fragments]}
         return self.render_student_view(context, activity_fragments)
-
-    # TODO: When Stages become XBlocks this method should become a handler on SubmissionsStage XBlock
-    @XBlock.handler
-    def upload_submission(self, request, suffix=''):  # pylint: disable=unused-argument
-        """
-        Handles submission upload and marks stage as completed if all submissions in stage have uploads.
-        """
-        activity_id, stage_id = request.POST['activity_id'], request.POST['stage_id']
-        target_activity = self.runtime.get_block(BlockUsageLocator.from_string(activity_id))
-
-        response_data = {"message": _("File(s) successfully submitted")}
-        failure_code = 0
-        try:
-            context = {
-                "user_id": target_activity.user_id,
-                "group_id": target_activity.workgroup['id'],
-                "project_api": project_api,
-                "course_id": target_activity.course_id
-            }
-
-            upload_files = self.persist_and_submit_files(target_activity, target_activity, context, request.params)
-
-            response_data["submissions"] = {
-                uploaded_file.submission_id: uploaded_file.file_url for uploaded_file in upload_files
-            }
-
-            target_activity.update_submission_data(target_activity.workgroup['id'])
-
-            target_stage = [stage for stage in target_activity.stages if stage.id == stage_id][0]
-            if target_stage.has_all_submissions:
-                for user in target_activity.workgroup["users"]:
-                    target_activity.mark_complete_stage(user["id"], target_stage.id)
-
-                response_data["new_stage_states"] = [
-                    {
-                        "activity_id": activity_id,
-                        "stage_id": stage_id,
-                        "state": StageState.COMPLETED
-                    }
-                ]
-
-        except Exception as exception:  # pylint: disable=broad-except
-            log.exception(exception)
-            failure_code = 500
-            if isinstance(exception, ApiError):
-                failure_code = exception.code
-            if not hasattr(exception, "message"):
-                exception.message = _("Error uploading at least one file")
-            response_data.update({"message": exception.message})
-
-        response = webob.response.Response(body=json.dumps(response_data))
-        if failure_code:
-            response.status_code = failure_code
-
-        return response
-
-    def send_file_upload_notification(self, target_activity):
-        """
-        Helper method to emit notifications service event for submission upload
-        """
-        # See if the xBlock Notification Service is available, and - if so -
-        # dispatch a notification to the entire workgroup that a file has been uploaded
-        # Note that the NotificationService can be disabled, so it might not be available
-        # in the list of services
-        notifications_service = self.runtime.service(self, 'notifications')
-        if notifications_service:
-            target_activity.fire_file_upload_notification(notifications_service)
-
-    def persist_and_submit_files(self, target_activity, activity, context, request_parameters):
-        """
-        Saves uploaded files to their permanent location, sends them to submissions backend and emits submission events
-        """
-        upload_files = [
-            UploadFile(request_parameters[submission.id].file, submission.id, context)
-            for submission in activity.submissions if submission.id in request_parameters
-        ]
-
-        # Save the files first
-        for uploaded_file in upload_files:
-            try:
-                uploaded_file.save_file()
-            except Exception as save_file_error:  # pylint: disable=broad-except
-                original_message = save_file_error.message if hasattr(save_file_error, "message") else ""
-                save_file_error.message = _("Error storing file {} - {}").format(
-                    uploaded_file.file.name, original_message
-                )
-                raise
-
-        # They all got saved... note the submissions
-        at_least_one_success = False
-        for uploaded_file in upload_files:
-            try:
-                uploaded_file.submit()
-                # Emit analytics event...
-                self.runtime.publish(
-                    self,
-                    "activity.received_submission",
-                    {
-                        "submission_id": uploaded_file.submission_id,
-                        "filename": uploaded_file.file.name,
-                        "content_id": target_activity.content_id,
-                        "group_id": target_activity.workgroup['id'],
-                        "user_id": target_activity.user_id,
-                    }
-                )
-                at_least_one_success = True
-            except Exception as save_record_error:  # pylint: disable=broad-except
-                original_message = save_record_error.message if hasattr(save_record_error, "message") else ""
-                save_record_error.message = _("Error recording file information {} - {}").format(
-                    uploaded_file.file.name, original_message
-                )
-                raise
-
-        if at_least_one_success:
-            self.send_file_upload_notification(target_activity)
-
-        return upload_files
 
 
 # pylint-disable=no-init

@@ -142,7 +142,7 @@ class ActivitySubmissionsViewMixin(object):
 
         target_stages = [stage for stage in self.stages if isinstance(stage, SubmissionStage)]
 
-        has_submissions = any([bool(stage.submissions) for stage in target_stages])
+        has_submissions = any([stage.has_submissions for stage in target_stages])
 
         stage_contents = []
         for child in target_stages:
