@@ -306,19 +306,6 @@ class GroupActivityXBlock(
     def stages(self):
         return self._children
 
-    def update_submission_data(self, group_id):
-        pass
-        # submission_map = project_api.get_latest_workgroup_submissions_by_id(group_id)
-        #
-        # for submission in self.submissions:
-        #     if submission["id"] in submission_map:
-        #         new_submission_data = submission_map[submission["id"]]
-        #         submission["location"] = new_submission_data["document_url"]
-        #         submission["file_name"] = new_submission_data["document_filename"]
-        #         submission["submission_date"] = format_date(build_date_field(new_submission_data["modified"]))
-        #         if "user_details" in new_submission_data:
-        #             submission["user_details"] = new_submission_data["user_details"]
-
     def _get_initialization_data(self):
         return {
             "default_stage_id": unicode(self._get_default_stage_id())
@@ -352,11 +339,6 @@ class GroupActivityXBlock(
             return error_fragment
 
         user_id = self.user_id
-
-        try:
-            self.update_submission_data(workgroup["id"])
-        except ApiError:
-            pass
 
         if self.is_group_member:
             try:
@@ -512,23 +494,13 @@ class GroupActivityXBlock(
 
         return group_grade
 
-    def mark_complete_stage(self, user_id, stage):
+    def mark_complete_stage(self, user_id, stage_id):
         try:
-            project_api.mark_as_complete(
-                self.course_id,
-                self.content_id,
-                user_id,
-                stage
-            )
+            project_api.mark_as_complete(self.course_id, self.content_id, user_id, stage_id)
         except ApiError as e:
-            # 409 indicates that the completion record already existed
-            # That's ok in this case
+            # 409 indicates that the completion record already existed. That's ok in this case
             if e.code != 409:
                 raise
-
-    def update_upload_complete(self):
-        for u in self.workgroup["users"]:
-            self.mark_complete_stage(u["id"], "upload")
 
     def graded_and_complete(self, group_id):
         workgroup = project_api.get_workgroup_by_id(group_id)
@@ -757,16 +729,6 @@ class GroupActivityXBlock(
             results["final_grade"] = [final_grade]
 
         return webob.response.Response(body=json.dumps(results))
-
-    @XBlock.handler
-    def other_submission_links(self, request, suffix=''):
-        group_id = request.GET["group_id"]
-
-        self.update_submission_data(group_id)
-        context = {'submissions': self.submissions}
-        html_output = loader.render_template('/templates/html/review_submissions.html', context)
-
-        return webob.response.Response(body=json.dumps({"html": html_output}))
 
     def get_courseware_info(self, courseware_parent_info_service):
         activity_name = self.display_name

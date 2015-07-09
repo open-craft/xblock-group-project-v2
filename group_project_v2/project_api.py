@@ -420,14 +420,14 @@ class ProjectAPI(object):
         return reviewers
 
     @api_error_protect
-    def mark_as_complete(self, course_id, content_id, user_id, stage=None):
+    def mark_as_complete(self, course_id, content_id, user_id, stage_id=None):
         completion_data = {
             "content_id": content_id,
             "user_id": user_id,
         }
 
-        if stage is not None:
-            completion_data["stage"] = stage
+        if stage_id is not None:
+            completion_data["stage"] = str(stage_id)
 
         response = POST(
             '{}/{}/{}/completions/'.format(

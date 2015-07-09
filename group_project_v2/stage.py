@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 from datetime import datetime
 import json
 import logging
@@ -15,8 +15,8 @@ from group_project_v2.api_error import ApiError
 from group_project_v2.review import GroupProjectReviewQuestionXBlock, GroupProjectReviewAssessmentXBlock
 from group_project_v2.project_api import project_api
 from group_project_v2.upload_file import UploadFile
-from group_project_v2.utils import loader, inner_html, format_date, gettext as _, ChildrenNavigationXBlockMixin
-
+from group_project_v2.utils import loader, inner_html, format_date, gettext as _, ChildrenNavigationXBlockMixin, \
+    build_date_field
 
 log = logging.getLogger(__name__)
 
@@ -84,6 +84,9 @@ class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin):
         return fragment
 
 
+SubmissionUpload = namedtuple("SubmissionUpload", "location file_name submission_date user_details")
+
+
 @XBlock.needs('user')
 @XBlock.wants('notifications')
 class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin):
@@ -108,16 +111,29 @@ class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin):
                U"Submissions sharing the same Upload ID will be updated simultaneously"),
     )
 
+    editable_fields = ('display_name', 'description', 'upload_id')
+
     @lazy
     def stage(self):
         return self.get_parent()
 
+    def get_upload(self, group_id):
+        submission_map = project_api.get_latest_workgroup_submissions_by_id(group_id)
+        submission_data = submission_map.get(self.upload_id, None)
+
+        if submission_data is None:
+            return None
+
+        return SubmissionUpload(
+            submission_data["document_url"],
+            submission_data["document_filename"],
+            format_date(build_date_field(submission_data["modified"])),
+            submission_data.get("user_details", None)
+        )
+
     @property
     def upload(self):
-        # FIXME: fetch upload data from project_api
-        return None
-
-    editable_fields = ('display_name', 'description', 'upload_id')
+        return self.get_upload(self.stage.activity.workgroup["id"])
 
     def student_view(self, context):
         return Fragment()
@@ -155,16 +171,14 @@ class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin):
                 uploaded_file.submission_id: uploaded_file.file_url
             }
 
-            target_activity.update_submission_data(target_activity.workgroup['id'])
-
             if self.stage.has_all_submissions:
                 for user in target_activity.workgroup["users"]:
-                    target_activity.mark_complete_stage(user["id"], self.stage.id)
+                    self.stage.mark_complete(user["id"])
 
                 response_data["new_stage_states"] = [
                     {
-                        "activity_id": target_activity.id,
-                        "stage_id": stage_id,
+                        "activity_id": str(target_activity.id),
+                        "stage_id": str(stage_id),
                         "state": StageState.COMPLETED
                     }
                 ]
@@ -342,6 +356,14 @@ class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
         return fragment
 
+    def mark_complete(self, user_id):
+        try:
+            project_api.mark_as_complete(self.activity.course_id, self.activity.content_id, user_id, self.id)
+        except ApiError as e:
+            # 409 indicates that the completion record already existed # That's ok in this case
+            if e.code != 409:
+                raise
+
     def get_stage_state(self):
         """
         Gets stage completion state
@@ -484,6 +506,17 @@ class PeerReviewStage(ReviewBaseStage):
 class GroupReviewStage(ReviewBaseStage):
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_review.html'
     CATEGORY = 'group-project-v2-stage-group-review'
+
+    @XBlock.handler
+    def other_submission_links(self, request, suffix=''):
+        pass
+        # group_id = request.GET["group_id"]
+        #
+        # self.update_submission_data(group_id)
+        # context = {'submissions': self.submissions}
+        # html_output = loader.render_template('/templates/html/review_submissions.html', context)
+        #
+        # return webob.response.Response(body=json.dumps({"html": html_output}))
 
 
 class AssessmentBaseStage(BaseGroupActivityStage):
