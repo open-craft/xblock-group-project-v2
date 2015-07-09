@@ -84,6 +84,7 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
     def author_preview_view(self, context):
         fragment = Fragment()
         self.render_children(context, fragment, can_reorder=True, can_add=False)
+        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/group_project_preview.css"))
         return fragment
 
     def author_edit_view(self, context):
@@ -249,6 +250,11 @@ class GroupActivityXBlock(
 
     @lazy
     def workgroup(self):
+        fallback_result = {
+            "id": "0",
+            "users": [],
+        }
+
         try:
             user_prefs = project_api.get_user_preferences(self.user_id)
 
@@ -261,12 +267,9 @@ class GroupActivityXBlock(
             raise
         except ApiError as exception:
             log.exception(exception)
-            result = {
-                "id": "0",
-                "users": [],
-            }
+            result = None
 
-        return result
+        return result if result is not None else fallback_result
 
     @property
     def is_group_member(self):

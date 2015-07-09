@@ -36,7 +36,11 @@ def outer_html(node):
     if node is None:
         return None
 
-    return ET.tostring(node, 'utf-8', 'html').strip()
+    html = ET.tostring(node, 'utf-8', 'html').strip()
+    if len(node.findall('./*')) == 0 and html.index('>') == len(html) - 1:
+        html = html[:-1] + ' />'
+
+    return html
 
 
 def build_date_field(json_date_string_value):
