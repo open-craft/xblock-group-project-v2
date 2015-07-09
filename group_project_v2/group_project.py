@@ -554,13 +554,14 @@ class GroupActivityXBlock(
         return self._check_review_complete(groups_to_review, group_review_questions, group_review_items, "workgroup")
 
     def validate_field_data(self, validation, data):
-        should_be_ints = ('max_score', 'group_reviews_required_count', 'user_review_count')
+        super(GroupActivityXBlock, self).validate_field_data(validation, data)
+        should_be_ints = ('weight', 'group_reviews_required_count', 'user_review_count')
         for field_name in should_be_ints:
             try:
-                int(data[field_name])
-            except ValueError:
+                int(getattr(data, field_name))
+            except (TypeError, ValueError):
                 message = _(u"{field_name} must be integer, {field_value} given").format(
-                    field_name=field_name, field_value=data[field_name]
+                    field_name=field_name, field_value=getattr(data, field_name)
                 )
                 validation.add(ValidationMessage(ValidationMessage.ERROR, message))
 
