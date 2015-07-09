@@ -118,13 +118,33 @@ class ActivityNavigationViewMixin(object):
         return fragment
 
 
+class ActivityResourcesViewMixin(object):
+    def resources_view(self, context):
+        fragment = Fragment()
+
+        has_resources = any([bool(stage.resources) for stage in self.stages])
+
+        stage_contents = []
+        for child in self.stages:
+            child_fragment = child.render('resources_view', context)
+            fragment.add_frag_resources(child_fragment)
+            stage_contents.append(child_fragment.content)
+
+        context = {'activity': self, 'stage_contents': stage_contents, 'has_resources': has_resources}
+        fragment.add_content(loader.render_template("templates/html/activity/resources_view.html", context))
+
+        return fragment
+
+
+
 # TODO: enable and fix these violations
 # pylint: disable=unused-argument,invalid-name
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
-class GroupActivityXBlock(XBlock, ChildrenNavigationXBlockMixin,
-                          StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-                          ActivityNavigationViewMixin):
+class GroupActivityXBlock(
+    XBlock, ChildrenNavigationXBlockMixin,StudioEditableXBlockMixin, StudioContainerXBlockMixin,
+    ActivityNavigationViewMixin, ActivityResourcesViewMixin
+):
     """
     XBlock providing a group activity project for a group of students to collaborate upon
     """

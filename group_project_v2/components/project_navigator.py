@@ -245,28 +245,13 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
         """
         Student view
         """
-        resources_map = []
-        resource_fragments = []
+        activity_fragments = []
         for activity in self.navigator.group_project.activities:
-            resources = list(itertools.chain(*[
-                stage.resources for stage in activity.stages
+            activity_fragment = activity.render("resources_view", context)
+            activity_fragments.append(activity_fragment)
 
-            ]))
-            fragments = [res.render('project_navigator_view', context) for res in resources]
-            resource_fragments.extend(fragments)
-
-            resources_map.append({
-                'id': activity.scope_ids.usage_id,
-                'display_name': activity.display_name,
-                'resources': [fragment.content for fragment in fragments],
-            })
-
-        context = {'view': self, 'resources_map': resources_map}
-        fragment = self.render_student_view(context)
-        for resource_fragment in resource_fragments:
-            fragment.add_frag_resources(resource_fragment)
-
-        return fragment
+        context = {'view': self, 'activity_contents': [frag.content for frag in activity_fragments]}
+        return self.render_student_view(context, activity_fragments)
 
 
 # pylint-disable=no-init

@@ -4,23 +4,7 @@
     <span class="group-project-navigator-view-title">{{ view.display_name_with_default }}</span>
     <span class="group-project-navigator-view-close fa-times"></span>
   </div>
-  {% for activity in resources_map %}
-  <div class="group-project-activity-wrapper">
-    <div class="group-project-activity-header">{{ activity.display_name }}</div>
-    {% if activity.resources %}
-      <ul class="group-project-resources">
-        {% for resource_view in activity.resources %}<li>{{ resource_view|safe }}</li>{% endfor %}
-      </ul>
-    {% else %}
-      <div class="group-project-navigator-grey-text">{% trans "No resources for this activity" %}</div>
-    {% endif %}
+  <div class="group-project-navigator-view-content">
+    {% for activity_content in activity_contents %}{{ activity_content|safe }}{% endfor %}
   </div>
-  {% endfor %}
-  <div class="player-modal reveal-modal medium">
-    <div class="close-reveal-modal">
-      <span class="fa-times-circle"></span>
-    </div>
-    <div class="player-wrapper"></div>
-  </div>
-  <div class="player-modal-bg"></div>
 </div>

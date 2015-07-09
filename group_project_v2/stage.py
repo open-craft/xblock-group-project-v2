@@ -68,7 +68,7 @@ class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin):
     def student_view(self, context):
         return Fragment()
 
-    def project_navigator_view(self, context):
+    def resources_view(self, context):
         fragment = Fragment()
         render_context = {'resource': self}
         render_context.update(context)
@@ -251,6 +251,20 @@ class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
         }
         rendering_context.update(context)
         fragment.add_content(loader.render_template("templates/html/stages/navigation_view.html", rendering_context))
+        return fragment
+
+    def resources_view(self, context):
+        fragment = Fragment()
+
+        resource_contents = []
+        for resource in self.resources:
+            resource_fragment = resource.render('resources_view', context)
+            fragment.add_frag_resources(resource_fragment)
+            resource_contents.append(resource_fragment.content)
+
+        context = {'activity': self, 'resource_contents': resource_contents}
+        fragment.add_content(loader.render_template("templates/html/stages/resources_view.html", context))
+
         return fragment
 
 
