@@ -11,7 +11,7 @@
     {% endif %}
     {% if activity_stage.is_open %}
       <h1>
-        {{ activity_stage.title }}
+        <span class="stage_title">{{ activity_stage.title }}</span>
         {% if activity_stage.close_date %}
           {% if activity_stage.is_closed %}
             <span class="highlight">closed on {{ activity_stage.formatted_close_date }}</span>
@@ -20,7 +20,7 @@
           {% endif %}
         {% endif %}
       </h1>
-      {{activity_stage.render|safe}}
+      <div class="stage_content">{{activity_stage.render|safe}}</div>
     {% else %}
       <h1>
         {{ activity_stage.title }}

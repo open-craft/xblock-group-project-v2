@@ -43,5 +43,5 @@ setup(
     entry_points={
         'xblock.v1': BLOCKS
     },
-    package_data=package_data("group_project_v2", ["static", "templates", "public", "res"]),
+    package_data=package_data("group_project_v2", ["templates", "public", "res"]),
 )

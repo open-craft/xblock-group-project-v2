@@ -1,11 +1,10 @@
 # from django.test import TestCase
 # from django import settings
 
-import sys
 import textwrap
 from unittest import TestCase
 from datetime import date
-from group_project_v2.components import GroupActivity, StageType
+from group_project_v2.components import GroupActivity
 from group_project_v2.components.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage, PeerAssessmentStage, GroupAssessmentStage,
     ResourceType)
@@ -40,7 +39,7 @@ class GroupActivitityXmlTest(TestCase):
         self.assertEqual(len(stage.peer_assessment_sections), peer_assessment)
         self.assertEqual(len(stage.other_group_assessment_sections), group_assessment)
 
-
+    # pylint: disable=too-many-statements
     def test_read_from_xml(self):
         grp_act = GroupActivity.import_xml_file('tests/xml/test.xml')
 

@@ -4,17 +4,20 @@ include-ids=yes
 
 [FORMAT]
 max-line-length=120
+symbols=yes
 
 [MESSAGES CONTROL]
 disable=
- missing-docstring,no-self-use,no-member,no-init,
+ missing-docstring,no-member,
  fixme,
- locally-disabled,import-error,relative-import,
+ locally-disabled,
  too-many-instance-attributes,too-many-locals,too-many-arguments,
  too-few-public-methods,too-many-public-methods,too-many-ancestors,
  too-many-branches,too-many-lines
 
 
 [OPTIONS]
-good-names=id
+good-names=id,log,loader,setUp
+method-rgx=_?[a-z_][a-z0-9_]{2,40}$
+method-name-hint=_?[a-z_][a-z0-9_]{2,40}$
 

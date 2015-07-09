@@ -1,0 +1,103 @@
+  <group-project-v2 xmlns:opt="http://code.edx.org/xblock/option">
+    <group-project-v2-navigator>
+      <group-project-v2-navigator-navigation />
+      <group-project-v2-navigator-submissions />
+      <group-project-v2-navigator-resources />
+      <group-project-v2-navigator-ask-ta />
+    </group-project-v2-navigator>
+    <group-project-v2-activity display_name="Activity 1">
+      <opt:data>
+        <![CDATA[
+          <group_project schema_version='1'>
+            <activitystage title="Overview" id="overview">
+              <resources>
+                <document title="Issue Tree Template">http://download/file.doc</document>
+                <document title="Instructions" description="These are the instructions for this activity" grading_criteria="false">
+                  http://download/other_file.doc
+                </document>
+                <document title="Video" type="ooyala">0123456789abcdef</document>
+              </resources>
+              <content><p>I'm Overview Stage</p></content>
+            </activitystage>
+            <activitystage title="Upload" close="5/24/2014" type="upload" id="upload">
+              <resources>
+                <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
+              </resources>
+              <submissions>
+                <document id="issue_tree" title="Issue Tree"/>
+                <document id="marketing_pitch" title="Marketing Pitch"/>
+                <document id="budget" title="Budget" description="xls budget plan"/>
+              </submissions>
+              <content>I'm Upload Stage</content>
+            </activitystage>
+          </group_project>
+        ]]>
+      </opt:data>
+    </group-project-v2-activity>
+    <group-project-v2-activity display_name="Activity 2">
+      <opt:data>
+        <![CDATA[
+        <group_project schema_version='1'>
+          <activitystage title="Review Team" open="5/24/2014" close="6/20/2014" type="peer_review" id="peer_review">
+            <question id="peer_score">
+              <label>How about that?</label>
+              <answer>
+                <input type="text" placeholder="answer here"/>
+              </answer>
+            </question>
+            <question id="peer_q1">
+              <label>Where they helpful?</label>
+              <answer>
+                <select>
+                  <option value="Y">Yes</option>
+                  <option value="N">No</option>
+                </select>
+              </answer>
+            </question>
+            <question id="peer_q2" required="false">
+              <label>General Comments</label>
+              <answer>
+                <textarea/>
+              </answer>
+            </question>
+          </activitystage>
+          <activitystage title="Review Group" open="5/24/2014" close="6/20/2014" type="group_review" id="group_review">
+            <question id="group_score">
+              <label>How about that?</label>
+              <answer>
+                <input type="text" placeholder="answer here"/>
+              </answer>
+            </question>
+            <question id="group_q1">
+              <label>Where they helpful?</label>
+              <answer>
+                <select>
+                  <option value="Y">Yes</option>
+                  <option value="N">No</option>
+                </select>
+              </answer>
+            </question>
+            <question id="group_q2">
+              <label>General Comments</label>
+              <answer>
+                <textarea/>
+              </answer>
+            </question>
+          </activitystage>
+          <activitystage title="Evaluate Team Feedback" open="6/20/2014" type="peer_assessment" id="peer_assessment">
+            <content>Peer Review results</content>
+            <assessment id="peer_q1"><answer><span id="mean_peer_q1"></span></answer></assessment>
+            <assessment id="peer_q2"><answer><span id="mean_peer_q2"></span></answer></assessment>
+            <assessment id="peer_score" summary="mean"><answer><span id="mean_peer_score"></span></answer></assessment>
+          </activitystage>
+          <activitystage title="Evaluate Group Feedback" open="6/20/2014" type="group_assessment"  id="group_assessment">
+            <content>Group Review Results</content>
+            <assessment id="group_q1"><answer><span id="mean_group_q1"></span></answer></assessment>
+            <assessment id="group_q2"><answer><span id="mean_group_q2"></span></answer></assessment>
+            <assessment id="group_score" summary="mean"><answer><span id="mean_group_score"></span></answer></assessment>
+          </activitystage>
+        </group_project>
+        ]]>
+      </opt:data>
+    </group-project-v2-activity>
+  </group-project-v2>

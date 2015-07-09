@@ -56,9 +56,9 @@ GroupActivityAssessment (paths relative to //section/assessment)
 ---- answer: etree.Element = ./answer[0]                     # should contain single HTML input control
 ---- small: Bool - ./answer[0]/@small                        # affects "answer" presentation - adds "side" class
 """
-from activity import GroupActivity
-from stage import (
+from group_project_v2.components.activity import GroupActivity
+from group_project_v2.components.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage, PeerAssessmentStage, GroupAssessmentStage,
     StageType
 )
-from review import GroupActivityQuestion, GroupActivityAssessment
+from group_project_v2.components.review import GroupActivityQuestion, GroupActivityAssessment

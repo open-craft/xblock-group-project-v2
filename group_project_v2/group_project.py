@@ -27,27 +27,23 @@ from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
-from .utils import loader
-
-from components import GroupActivity
-from .project_api import project_api
-from .api_error import ApiError
+from group_project_v2.utils import loader
+from group_project_v2.components import GroupActivity
+from group_project_v2.project_api import project_api
+from group_project_v2.api_error import ApiError
 
 ALLOWED_OUTSIDER_ROLES = getattr(settings, "ALLOWED_OUTSIDER_ROLES", None)
 if ALLOWED_OUTSIDER_ROLES is None:
     ALLOWED_OUTSIDER_ROLES = ["assistant"]
 
 try:
-    from edx_notifications.data import NotificationMessage
+    from edx_notifications.data import NotificationMessage  # pylint: disable=import-error
 except ImportError:
     # Notifications is an optional runtime configuration, so it may not be available for import
     pass
 
-# Globals ###########################################################
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-# Classes ###########################################################
 
 
 def make_key(*args):
@@ -80,7 +76,11 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
 
     def student_view(self, context):
         fragment = Fragment()
-        self.render_children(context, fragment, can_reorder=False, can_add=False)
+        for child_id in self.children:
+            child = self.runtime.get_block(child_id)
+            rendered_child_fragment = child.render('student_view', context)
+            fragment.add_frag_resources(rendered_child_fragment)
+            fragment.add_content(rendered_child_fragment.content)
         return fragment
 
     def author_preview_view(self, context):
@@ -98,9 +98,9 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
         return fragment
 
-    @property
+    @lazy
     def activities(self):
-        all_children = self.get_children()
+        all_children = [self.runtime.get_block(child_id) for child_id in self.children]
         return [child for child in all_children if isinstance(child, GroupActivityXBlock)]
 
 
@@ -153,12 +153,11 @@ class GroupActivityXBlock(XBlock):
         display_name="",
         help="XML contents to display for this module",
         scope=Scope.content,
-        default=textwrap.dedent(default_xml)
+        default=textwrap.dedent(default_xml),
+        xml_node=True
     )
 
     has_score = True
-
-    _project_api = None
 
     def _confirm_outsider_allowed(self):
         granted_roles = [r["role"] for r in project_api.get_user_roles_for_course(self.user_id, self.course_id)]
@@ -172,16 +171,33 @@ class GroupActivityXBlock(XBlock):
 
     def real_user_id(self, anonymous_student_id):
         if anonymous_student_id not in self._known_real_user_ids:
-            self._known_real_user_ids[anonymous_student_id] = self.xmodule_runtime.get_real_user(
-                anonymous_student_id).id
+            try:
+                self._known_real_user_ids[anonymous_student_id] = self.runtime.get_real_user(anonymous_student_id).id
+            except AttributeError:
+                # workbench support
+                self._known_real_user_ids[anonymous_student_id] = anonymous_student_id
         return self._known_real_user_ids[anonymous_student_id]
 
     @lazy
+    def anonymous_student_id(self):
+        try:
+            return self.runtime.anonymous_student_id
+        except AttributeError:
+            log.exception("Runtime does not have anonymous_student_id attribute - trying user_id")
+            return self.runtime.user_id
+
+    @lazy
+    # pylint: disable=broad-except
     def user_id(self):
         try:
-            return self.real_user_id(self.xmodule_runtime.anonymous_student_id)
-        except Exception:  # pylint: disable=broad-except
-            return None
+            return int(self.real_user_id(self.anonymous_student_id))
+        except Exception as exc:
+            log.exception(exc)
+            try:
+                return int(self.runtime.user_id)
+            except Exception as exc:
+                log.exception(exc)
+                return None
 
     _workgroup = None
 
@@ -223,10 +239,11 @@ class GroupActivityXBlock(XBlock):
 
     @property
     def course_id(self):
+        raw_course_id = getattr(self.runtime, 'course_id', 'all')
         try:
-            return unicode(self.xmodule_runtime.course_id)
+            return unicode(raw_course_id)
         except Exception:    # pylint: disable=broad-except
-            return self.xmodule_runtime.course_id
+            return raw_course_id
 
     def student_view(self, context):
         """
@@ -419,7 +436,7 @@ class GroupActivityXBlock(XBlock):
         my_feedback = {
             make_key(peer_review_item[review_item_key], peer_review_item["question"]): peer_review_item["answer"]
             for peer_review_item in review_items
-            if peer_review_item['reviewer'] == self.xmodule_runtime.anonymous_student_id
+            if peer_review_item['reviewer'] == self.anonymous_student_id
         }
 
         for item in items_to_grade:
@@ -520,7 +537,7 @@ class GroupActivityXBlock(XBlock):
 
             # Then something like this needs to happen
             project_api.submit_peer_review_items(
-                self.xmodule_runtime.anonymous_student_id,
+                self.anonymous_student_id,
                 peer_id,
                 self.workgroup['id'],
                 self.content_id,
@@ -559,7 +576,7 @@ class GroupActivityXBlock(XBlock):
             del submissions["stage_id"]
 
             project_api.submit_workgroup_review_items(
-                self.xmodule_runtime.anonymous_student_id,
+                self.anonymous_student_id,
                 group_id,
                 self.content_id,
                 submissions
@@ -574,7 +591,7 @@ class GroupActivityXBlock(XBlock):
                         {
                             "question": question_id,
                             "answer": submissions[question_id],
-                            "reviewer_id": self.xmodule_runtime.anonymous_student_id,
+                            "reviewer_id": self.anonymous_student_id,
                             "is_admin_grader": self.is_admin_grader,
                             "group_id": group_id,
                             "content_id": self.content_id,
@@ -614,7 +631,7 @@ class GroupActivityXBlock(XBlock):
 
         peer_id = request.GET["peer_id"]
         feedback = project_api.get_peer_review_items(
-            self.xmodule_runtime.anonymous_student_id,
+            self.anonymous_student_id,
             peer_id,
             self.workgroup['id'],
             self.content_id,
@@ -631,7 +648,7 @@ class GroupActivityXBlock(XBlock):
         group_id = request.GET["group_id"]
 
         feedback = project_api.get_workgroup_review_items(
-            self.xmodule_runtime.anonymous_student_id,
+            self.anonymous_student_id,
             group_id,
             self.content_id
         )

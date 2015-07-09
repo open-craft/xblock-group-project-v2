@@ -11,12 +11,12 @@ from xblock.fragment import Fragment
 from opaque_keys.edx.locator import BlockUsageLocator
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
+
 from group_project_v2.api_error import ApiError
 from group_project_v2.components.stage import StageState
 from group_project_v2.project_api import project_api
 from group_project_v2.upload_file import UploadFile
-
-from ..utils import loader, gettext as _
+from group_project_v2.utils import loader, gettext as _
 
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -73,6 +73,8 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
                 child_selector_fragment = child.selector_view(context)
                 item['selector'] = child_selector_fragment.content
                 fragment.add_frag_resources(child_selector_fragment)
+            else:
+                item['selector'] = ''
 
             children_items.append(item)
 
@@ -141,6 +143,10 @@ class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):
         """
         return self.get_parent()
 
+    @property
+    def course_id(self):
+        return getattr(self.runtime, 'course_id', 'all')
+
     def render_student_view(self, context):
         """
         Common code to render student view
@@ -166,7 +172,7 @@ class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):
 
         return fragment
 
-    def author_view(self, context):  # pylint: disable=unused-argument
+    def author_view(self, context):  # pylint: disable=unused-argument, no-self-use
         """
         Studio Preview view
         """
@@ -183,6 +189,8 @@ class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):
         for attribute in ['icon', 'selector_text']:
             if getattr(self, attribute, None) is not None:
                 context[attribute] = getattr(self, attribute)
+            else:
+                context[attribute] = ''
         fragment.add_content(loader.render_template('templates/html/project_navigator/view_selector.html', context))
         return fragment
 
@@ -392,7 +400,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
 
         return response
 
-    def send_file_upload_notification(self):
+    def send_file_upload_notification(self, target_activity):
         """
         Helper method to emit notifications service event for submission upload
         """
@@ -402,7 +410,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         # in the list of services
         notifications_service = self.runtime.service(self, 'notifications')
         if notifications_service:
-            self.fire_file_upload_notification(notifications_service)
+            target_activity.fire_file_upload_notification(notifications_service)
 
     def persist_and_submit_files(self, target_activity, group_activity, context, request_parameters):
         """
@@ -450,7 +458,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
                 raise
 
         if at_least_one_success:
-            self.send_file_upload_notification()
+            self.send_file_upload_notification(target_activity)
 
         return upload_files
 
