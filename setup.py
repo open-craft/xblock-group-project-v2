@@ -19,9 +19,9 @@ def package_data(pkg, root_list):
     return {pkg: data}
 
 BLOCKS = [
-    'group-project-v2 = group_project_v2:GroupProjectXBlock',
+    'group-project-v2 = group_project_v2.group_project:GroupProjectXBlock',
 
-    'group-project-v2-activity = group_project_v2:GroupActivityXBlock',
+    'group-project-v2-activity = group_project_v2.group_project:GroupActivityXBlock',
 
     'group-project-v2-stage-basic = group_project_v2.stage:BasicStage',
     'group-project-v2-stage-submission = group_project_v2.stage:SubmissionStage',
@@ -33,14 +33,14 @@ BLOCKS = [
     'group-project-v2-resource = group_project_v2.stage:GroupProjectResourceXBlock',
     'group-project-v2-submission = group_project_v2.stage:GroupProjectSubmissionXBlock',
 
-    'group-project-v2-review-question = group_project_v2.components.review:GroupProjectReviewQuestionXBlock',
-    'group-project-v2-review-assessment = group_project_v2.components.review:GroupProjectReviewAssessmentXBlock',
+    'group-project-v2-review-question = group_project_v2.review:GroupProjectReviewQuestionXBlock',
+    'group-project-v2-review-assessment = group_project_v2.review:GroupProjectReviewAssessmentXBlock',
 
-    'group-project-v2-navigator = group_project_v2.components.project_navigator:GroupProjectNavigatorXBlock',
-    'group-project-v2-navigator-navigation = group_project_v2.components.project_navigator:NavigationViewXBlock',
-    'group-project-v2-navigator-resources = group_project_v2.components.project_navigator:ResourcesViewXBlock',
-    'group-project-v2-navigator-submissions = group_project_v2.components.project_navigator:SubmissionsViewXBlock',
-    'group-project-v2-navigator-ask-ta = group_project_v2.components.project_navigator:AskTAViewXBlock',
+    'group-project-v2-navigator = group_project_v2.project_navigator:GroupProjectNavigatorXBlock',
+    'group-project-v2-navigator-navigation = group_project_v2.project_navigator:NavigationViewXBlock',
+    'group-project-v2-navigator-resources = group_project_v2.project_navigator:ResourcesViewXBlock',
+    'group-project-v2-navigator-submissions = group_project_v2.project_navigator:SubmissionsViewXBlock',
+    'group-project-v2-navigator-ask-ta = group_project_v2.project_navigator:AskTAViewXBlock',
 ]
 
 

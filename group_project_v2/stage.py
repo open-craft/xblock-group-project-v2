@@ -12,7 +12,7 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 from group_project_v2.api_error import ApiError
 
-from group_project_v2.components.review import GroupProjectReviewQuestionXBlock, GroupProjectReviewAssessmentXBlock
+from group_project_v2.review import GroupProjectReviewQuestionXBlock, GroupProjectReviewAssessmentXBlock
 from group_project_v2.project_api import project_api
 from group_project_v2.upload_file import UploadFile
 from group_project_v2.utils import loader, inner_html, format_date, gettext as _, ChildrenNavigationXBlockMixin

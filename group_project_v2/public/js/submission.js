@@ -92,7 +92,6 @@ function GroupProjectSubmissionBlock(runtime, element) {
     });
 
     if ($.fn.fileupload) {
-        debugger;
         $('.uploader', element).fileupload(upload_data);
     }
 }

@@ -1,21 +1,13 @@
 """
 This module contains Project Navigator XBlock and it's children view XBlocks
 """
-import itertools
-import json
 import logging
 from lazy.lazy import lazy
-import webob
 from xblock.core import XBlock
 from xblock.fragment import Fragment
-from opaque_keys.edx.locator import BlockUsageLocator
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
 
-from group_project_v2.api_error import ApiError
-from group_project_v2.stage import StageState
-from group_project_v2.project_api import project_api
-from group_project_v2.upload_file import UploadFile
 from group_project_v2.utils import loader, gettext as _
 
 
