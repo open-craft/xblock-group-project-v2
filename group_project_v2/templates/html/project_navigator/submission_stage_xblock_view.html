@@ -1,7 +1,0 @@
-<form class="uploader">
-  <input type="hidden" name="activity_id" class="activity_id" value="{{ activity_id }}"/>
-  <input type="hidden" name="stage_id" class="stage_id" value="{{ stage.id }}"/>
-  {% for submission_content in submissions %}
-    {{ submission_content|safe }}
-  {% endfor %}
-</form>

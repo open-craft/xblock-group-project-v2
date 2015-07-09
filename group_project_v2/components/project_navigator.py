@@ -280,31 +280,13 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         """
         Student view
         """
-        # TODO: should have used `include` in template, but it can't find the template: resource loader does
-        # not know how to do that
-        submissions_map = []
-        stage_fragments = []
+        activity_fragments = []
         for activity in self.navigator.group_project.activities:
-            activity.update_submission_data(activity.workgroup["id"])
-            stages = [stage for stage in activity.stages if stage.submissions_stage]
-            stage_frags = [stage.render('project_navigator_submissions_view', context) for stage in stages]
-            stage_fragments.extend(stage_frags)
+            activity_fragment = activity.render("submissions_view", context)
+            activity_fragments.append(activity_fragment)
 
-            submissions_required = any(True for stage in stages if len(stage.submissions) > 0)
-            submissions_map.append({
-                'id': activity.scope_ids.usage_id,
-                'display_name': activity.display_name,
-                'submissions_required': submissions_required,
-                'stage_contents': [frag.content for frag in stage_frags],
-            })
-
-        context = {'view': self, 'submissions_map': submissions_map}
-
-        fragment = self.render_student_view(context)
-        for resource_fragment in stage_fragments:
-            fragment.add_frag_resources(resource_fragment)
-
-        return fragment
+        context = {'view': self, 'activity_contents': [frag.content for frag in activity_fragments]}
+        return self.render_student_view(context, activity_fragments)
 
     # TODO: When Stages become XBlocks this method should become a handler on SubmissionsStage XBlock
     @XBlock.handler

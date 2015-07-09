@@ -136,6 +136,26 @@ class ActivityResourcesViewMixin(object):
         return fragment
 
 
+class ActivitySubmissionsViewMixin(object):
+    def submissions_view(self, context):
+        fragment = Fragment()
+
+        target_stages = [stage for stage in self.stages if isinstance(stage, SubmissionStage)]
+
+        has_submissions = any([bool(stage.submissions) for stage in target_stages])
+
+        stage_contents = []
+        for child in target_stages:
+            child_fragment = child.render('submissions_view', context)
+            fragment.add_frag_resources(child_fragment)
+            stage_contents.append(child_fragment.content)
+
+        context = {'activity': self, 'stage_contents': stage_contents, 'has_submissions': has_submissions}
+        fragment.add_content(loader.render_template("templates/html/activity/submissions_view.html", context))
+
+        return fragment
+
+
 
 # TODO: enable and fix these violations
 # pylint: disable=unused-argument,invalid-name
@@ -143,7 +163,7 @@ class ActivityResourcesViewMixin(object):
 @XBlock.wants('courseware_parent_info')
 class GroupActivityXBlock(
     XBlock, ChildrenNavigationXBlockMixin,StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-    ActivityNavigationViewMixin, ActivityResourcesViewMixin
+    ActivityNavigationViewMixin, ActivityResourcesViewMixin, ActivitySubmissionsViewMixin
 ):
     """
     XBlock providing a group activity project for a group of students to collaborate upon

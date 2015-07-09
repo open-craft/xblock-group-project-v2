@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="upload_item">
+<div class="uploader">
   <div class="upload_title">{{ submission.display_name }}:</div>
   <div class="upload_item_wrapper" {% if upload.location %} data-location="{{ upload.location }}" {% endif %}>
     <input
@@ -11,14 +11,14 @@
     />
   </div>
   <label for="{{ submission.upload_id }}">
-    <span class="side button tiny radius {{ submission.id }}_label fa-paperclip"></span>
+    <span class="side button tiny radius {{ submission.upload_id }}_label fa-paperclip"></span>
   </label>
   <input style="display:none;" class="file_upload" name="{{ submission.upload_id }}" id="{{ submission.upload_id }}" type="file" />
   {% if submission.description %}
     <div class="description">{{ submission.description }}</div>
   {% endif %}
-  <div class="{{ submission.id }}_progress_box file-progress-box">
-    <div class="{{ submission.id }}_progress file-progress"></div>
+  <div class="{{ submission.upload_id }}_progress_box file-progress-box">
+    <div class="{{ submission.upload_id }}_progress file-progress"></div>
   </div>
   {% if upload.location %}
     <div class="upload_item_data">
