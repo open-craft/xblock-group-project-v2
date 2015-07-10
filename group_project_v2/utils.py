@@ -77,3 +77,7 @@ def format_date(date_value):
 # Make '_' a no-op so we can scrape strings
 def gettext(text):
     return text
+
+
+def make_key(*args):
+    return ":".join([str(a) for a in args])

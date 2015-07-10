@@ -1,5 +1,4 @@
-<form class="review peer_review" action="submit_peer_feedback" method="POST">
-  <input type="hidden" class="stage_id" name="stage_id" value="{{stage.id}}" />
+<form class="review peer_review" data-review-type="peer_review" action="submit_peer_feedback" method="POST">
   {{ children_content|safe }}
   <hr/>
   <button class="submit" {% if stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>

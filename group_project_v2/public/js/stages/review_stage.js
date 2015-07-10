@@ -9,6 +9,7 @@ function ReviewStageXBlock(runtime, element) {
     var NO_DATA_PRESENT_SUBMIT = gettext('Submit');
 
     var $form = $("form.review",  element);
+    var is_peer_review = $form.data('review-type') == 'peer_review';
     var message_box = $(".message"); // searching globally - not a typo: message box is created at group project level
 
     function show_message(msg) {
@@ -89,7 +90,7 @@ function ReviewStageXBlock(runtime, element) {
                     }
                 }
                 else {
-                    load_data_into_form($form, data);
+                    load_data_into_form(data);
                 }
             },
             error: function (data) {
@@ -101,7 +102,6 @@ function ReviewStageXBlock(runtime, element) {
         });
     }
 
-    debugger;
     $('.select_peer,.select_group').on('click', function (ev) {
         var $this = $(this);
         var is_peer = $this.hasClass('select_peer');
@@ -110,18 +110,15 @@ function ReviewStageXBlock(runtime, element) {
 
         var load_operation = load_data_for_peer;
         var operation_name = 'load_data_for_peer';
-        var id_field_selector = '.peer_id';
         if (is_peer) {
             $('.username', element).text($this.data('username'));
         }
         else {
-            id_field_selector = '.group_id';
             load_operation = load_data_for_other_group;
             operation_name = 'load_data_for_other_group';
             $('.other_submission_links', element).empty().hide();
         }
 
-        $(id_field_selector, element).attr('value', $this.data('id'));
         load_operation($this.data('id'));
 
         $(document).trigger('data_loaded', {operation: operation_name, data_for: $this.data('id')});
@@ -138,6 +135,7 @@ function ReviewStageXBlock(runtime, element) {
         $.each(items, function (i, v) {
             data[v.name] = v.value;
         });
+        data["review_subject_id"] = $("ul.review_subjects li.selected", $form).data('id');
 
         $.ajax({
             type: $form.attr('method'),

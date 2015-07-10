@@ -23,7 +23,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContain
 
 from group_project_v2.mixins import ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin, \
     WorkgroupAwareXBlockMixin
-from group_project_v2.utils import loader, OutsiderDisallowedError
+from group_project_v2.utils import loader, OutsiderDisallowedError, make_key
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
     PeerAssessmentStage, GroupAssessmentStage
@@ -39,10 +39,6 @@ except ImportError:
 
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-
-def make_key(*args):
-    return ":".join([str(a) for a in args])
 
 
 class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin):
@@ -483,46 +479,6 @@ class GroupActivityXBlock(
                     field_name=field_name, field_value=getattr(data, field_name)
                 )
                 validation.add(ValidationMessage(ValidationMessage.ERROR, message))
-
-    @XBlock.json_handler
-    def submit_peer_feedback(self, submissions, suffix=''):
-        try:
-            peer_id = submissions["peer_id"]
-            stage_id = submissions['stage_id']
-            del submissions["peer_id"]
-            del submissions['stage_id']
-
-            # Then something like this needs to happen
-            project_api.submit_peer_review_items(
-                self.anonymous_student_id,
-                peer_id,
-                self.workgroup['id'],
-                self.content_id,
-                submissions,
-            )
-
-            if self.peer_review_complete(stage_id):
-                self.mark_complete_stage(self.user_id, stage_id)
-
-        except ApiError as exception:
-            message = exception.message
-            log.exception(message)
-            return {
-                'result': 'error',
-                'msg': message,
-            }
-        except KeyError as exception:
-            message = "Missing required argument {}".format(exception.message)
-            log.exception(message)
-            return {
-                'result': 'error',
-                'msg': message,
-            }
-
-        return {
-            'result': 'success',
-            'msg': _('Thanks for your feedback'),
-        }
 
     @XBlock.json_handler
     def submit_other_group_feedback(self, submissions, suffix=''):

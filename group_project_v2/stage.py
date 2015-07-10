@@ -23,7 +23,7 @@ from group_project_v2.stage_components import (
     StageState
 )
 from group_project_v2.project_api import project_api
-from group_project_v2.utils import loader, format_date, gettext as _
+from group_project_v2.utils import loader, format_date, gettext as _, make_key
 
 log = logging.getLogger(__name__)
 
@@ -299,6 +299,10 @@ class ReviewBaseStage(BaseGroupActivityStage):
         return self._get_children_by_category(GroupProjectReviewQuestionXBlock.CATEGORY)
 
     @property
+    def required_questions(self):
+        return [question for question in self.questions if question.required]
+
+    @property
     def grade_questions(self):
         return (question for question in self._questions if question.grade)
 
@@ -326,6 +330,21 @@ class ReviewBaseStage(BaseGroupActivityStage):
         fragment.initialize_js("ReviewStageXBlock")
         return fragment
 
+    def _check_review_complete(self, items_to_grade, review_questions, review_items, review_item_key):
+        my_feedback = {
+            make_key(peer_review_item[review_item_key], peer_review_item["question"]): peer_review_item["answer"]
+            for peer_review_item in review_items
+            if peer_review_item['reviewer'] == self.anonymous_student_id
+        }
+
+        for item in items_to_grade:
+            for question in review_questions:
+                key = make_key(item["id"], question.id)
+                if my_feedback.get(key, None) in (None, ''):
+                    return False
+
+        return True
+
 
 class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
@@ -338,6 +357,12 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
             (PeerSelectorXBlock.CATEGORY, _(u"Teammate selector"))
         ]))
         return blocks
+
+    def is_review_complete(self):
+        peers_to_review = [user for user in self.workgroup["users"] if user["id"] != self.user_id]
+        peer_review_items = project_api.get_peer_review_items_for_group(self.workgroup['id'], self.activity.content_id)
+
+        return self._check_review_complete(peers_to_review, self.required_questions, peer_review_items, "user")
 
     @XBlock.handler
     def load_peer_feedback(self, request, suffix=''):
@@ -354,6 +379,44 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
         results = {pi['question']: pi['answer'] for pi in feedback}
 
         return webob.response.Response(body=json.dumps(results))
+
+    @XBlock.json_handler
+    def submit_peer_feedback(self, submissions, suffix=''):
+        try:
+            peer_id = submissions["review_subject_id"]
+            del submissions["review_subject_id"]
+
+            # Then something like this needs to happen
+            project_api.submit_peer_review_items(
+                self.anonymous_student_id,
+                peer_id,
+                self.workgroup['id'],
+                self.activity.content_id,
+                submissions,
+            )
+
+            if self.is_review_complete():
+                self.mark_complete(self.user_id)
+
+        except ApiError as exception:
+            message = exception.message
+            log.exception(message)
+            return {
+                'result': 'error',
+                'msg': message,
+            }
+        except KeyError as exception:
+            message = "Missing required argument {}".format(exception.message)
+            log.exception(message)
+            return {
+                'result': 'error',
+                'msg': message,
+            }
+
+        return {
+            'result': 'success',
+            'msg': _('Thanks for your feedback'),
+        }
 
 
 class GroupReviewStage(ReviewBaseStage):

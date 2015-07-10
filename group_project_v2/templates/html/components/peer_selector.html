@@ -6,7 +6,7 @@
 
   <div>
     {% if demo %}<div>{% trans "Demo contents" %}</div>{% endif %}
-    <ul class="peers">
+    <ul class="peers review_subjects">
       {% for peer in peers %}
       <li class="select_peer {% cycle 'odd' 'even' %}" title="{{ peer.username }}" data-id="{{ peer.id }}" data-username="{{ peer.username }}">
         {% comment %}
