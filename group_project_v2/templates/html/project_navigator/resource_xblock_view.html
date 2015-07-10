@@ -1,4 +1,6 @@
 <div class="resource_link">
-  <a title="{{ resource.description }}" target="_blank" href="{{ resource.location }}">{{ resource.display_name }}</a>
+  <a {% if resource.description %} title="{{ resource.description }}"{% endif %} target="_blank" href="{{ resource.location }}">
+    {{ resource.display_name }}
+  </a>
   {% if resource.description %}: {{ resource.description }}{% endif %}
 </div>

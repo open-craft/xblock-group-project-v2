@@ -76,6 +76,9 @@ class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin):
     def student_view(self, context):
         return Fragment()
 
+    def author_view(self, context):
+        return self.resources_view(context)
+
     def resources_view(self, context):
         fragment = Fragment()
         render_context = {'resource': self}
