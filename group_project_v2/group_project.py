@@ -9,7 +9,7 @@ import itertools
 from lazy.lazy import lazy
 import pytz
 import webob
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.utils import html
@@ -22,7 +22,7 @@ from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
-from group_project_v2.utils import loader, format_date, build_date_field, ChildrenNavigationXBlockMixin
+from group_project_v2.utils import loader, ChildrenNavigationXBlockMixin
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
     PeerAssessmentStage, GroupAssessmentStage
@@ -326,13 +326,44 @@ class GroupActivityXBlock(
 
         return default_stage_id
 
+    @property
+    def team_members(self):
+        """
+        Returns teammates to review. May throw `class`: OutsiderDisallowedError
+        """
+        if not self.is_group_member:
+            return []
+
+        try:
+            return [
+                project_api.get_user_details(team_member["id"])
+                for team_member in self.workgroup["users"]
+                if self.user_id != int(team_member["id"])
+            ]
+        except ApiError:
+            return []
+
+    @property
+    def review_groups(self):
+        """
+        Returns groups to review. May throw `class`: OutsiderDisallowedError
+        """
+        if not self.is_group_member:
+            return self.workgroup
+
+        try:
+            return project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
+        except ApiError:
+            return []
+
     def student_view(self, context):
         """
         Player view, displayed to the student
         """
 
         try:
-            workgroup = self.workgroup
+            team_members = self.team_members
+            review_groups = self.review_groups
         except OutsiderDisallowedError as ode:
             error_fragment = Fragment()
             error_fragment.add_content(
@@ -340,26 +371,6 @@ class GroupActivityXBlock(
             error_fragment.add_javascript(loader.load_unicode('public/js/group_project_error.js'))
             error_fragment.initialize_js('GroupProjectError')
             return error_fragment
-
-        user_id = self.user_id
-
-        if self.is_group_member:
-            try:
-                team_members = [
-                    project_api.get_user_details(team_member["id"])
-                    for team_member in workgroup["users"]
-                    if user_id != int(team_member["id"])
-                ]
-            except ApiError:
-                team_members = []
-
-            try:
-                assess_groups = project_api.get_workgroups_to_review(user_id, self.course_id, self.content_id)
-            except ApiError:
-                assess_groups = []
-        else:
-            team_members = []
-            assess_groups = [workgroup]
 
         fragment = Fragment()
         stage_contents = []
@@ -372,7 +383,7 @@ class GroupActivityXBlock(
             "stage_contents": stage_contents,
             "initialization_data": json.dumps(self._get_initialization_data()),
             "team_members": json.dumps(team_members),
-            "assess_groups": json.dumps(assess_groups),
+            "assess_groups": json.dumps(review_groups),
         }
 
         fragment.add_content(loader.render_template('/templates/html/activity/student_view.html', context))

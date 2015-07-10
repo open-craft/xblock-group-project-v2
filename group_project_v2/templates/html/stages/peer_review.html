@@ -1,20 +1,6 @@
-{% if activity_stage.content_html %}
-  {{ activity_stage.content_html|safe }}
-  <hr/>
-{% endif %}
-
-<div class="centered"><span class="peers"></span></div>
-
-{% if activity_stage.grade_header_html %}
-  {{ activity_stage.grade_header_html|safe }}
-{% endif %}
-
 <form class="peer_review" action="submit_peer_feedback" method="POST">
-  <input type="hidden" class="peer_id" name="peer_id" value="" />
-  <input type="hidden" class="stage_id" name="stage_id" value="{{activity_stage.id}}" />
-  {% for activity_question in activity_stage.questions %}
-    {{ activity_question.render|safe }}
-  {% endfor %}
+  <input type="hidden" class="stage_id" name="stage_id" value="{{stage.id}}" />
+  {{ children_content|safe }}
   <hr/>
-  <button class="submit" {% if activity_stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
+  <button class="submit" {% if stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
 </form>

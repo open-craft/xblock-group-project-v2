@@ -30,11 +30,11 @@ BLOCKS = [
     'group-project-v2-stage-peer-assessment = group_project_v2.stage:PeerAssessmentStage',
     'group-project-v2-stage-group-assessment = group_project_v2.stage:GroupAssessmentStage',
 
-    'group-project-v2-resource = group_project_v2.stage:GroupProjectResourceXBlock',
-    'group-project-v2-submission = group_project_v2.stage:GroupProjectSubmissionXBlock',
-
-    'group-project-v2-review-question = group_project_v2.review:GroupProjectReviewQuestionXBlock',
-    'group-project-v2-review-assessment = group_project_v2.review:GroupProjectReviewAssessmentXBlock',
+    'group-project-v2-resource = group_project_v2.stage_components:GroupProjectResourceXBlock',
+    'group-project-v2-submission = group_project_v2.stage_components:GroupProjectSubmissionXBlock',
+    'group-project-v2-peer-selector = group_project_v2.stage_components:PeerSelectorXBlock',
+    'group-project-v2-review-question = group_project_v2.stage_components:GroupProjectReviewQuestionXBlock',
+    'group-project-v2-review-assessment = group_project_v2.stage_components:GroupProjectReviewAssessmentXBlock',
 
     'group-project-v2-navigator = group_project_v2.project_navigator:GroupProjectNavigatorXBlock',
     'group-project-v2-navigator-navigation = group_project_v2.project_navigator:NavigationViewXBlock',

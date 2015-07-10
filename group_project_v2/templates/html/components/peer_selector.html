@@ -1,0 +1,24 @@
+{% load i18n %}
+<div class="peer_selector">
+  <div class="review_selector_header">
+    {% trans "Please click on the teammates to review their performance" %}
+  </div>
+
+  <div>
+    {% if demo %}<div>{% trans "Demo contents" %}</div>{% endif %}
+    <ul class="peers">
+      {% for peer in peers %}
+      <li class="select_peer {% cycle 'odd' 'even' %}" title="{{ peer.username }}" data-id="{{ peer.id }}" data-username="{{ peer.username }}">
+        {% comment %}
+          FIXME: Slightly not a11y friendly: if language have different rules for writing up index numbers.
+          Should be something more like _("Teammate {index_number}:").format(index_number=number)
+        {% endcomment %}
+        <span class="review_subject_label">{% trans "Teammate" %} {{ forloop.counter }}:</span>
+        <a href={{course_id}}/discussion/forum/users/{{ peer.id }}>{{ peer.full_name}}</a>
+        <span class="review_evaluating_now">{% trans "Evaluating below" %}</span>
+        <img class="avatar" {% if peer.avatar_url %} src="{{peer.avatar_url }}" {% endif %}/>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>

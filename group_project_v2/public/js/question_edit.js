@@ -1,5 +1,4 @@
 function GroupProjectQuestionEdit(runtime, element) {
-    debugger;
     StudioEditableXBlockMixin(runtime, element);
     var CodeMirrorAvailable = (typeof CodeMirror !== 'undefined'); // Studio includes CodeMirror
     var xmlEditorTextarea = $('div.wrapper-comp-setting [data-field-name="question_content"]', element)[0];

@@ -144,26 +144,6 @@ function GroupProjectBlock(runtime, element) {
         return false;
     });
 
-    var peers = JSON.parse($('.peer_group', element).html());
-    var peer_node = function (peer) {
-        var pn = $('<a class="select_peer" />');
-        var pi = $('<img class="avatar" />');
-        if (peer.avatar_url) {
-            pi.attr('src', peer.avatar_url);
-        }
-        pn.attr('title', peer.username);
-        pn.data('id', peer.id);
-        pn.data('username', peer.username)
-        pn.append(pi);
-
-        return pn;
-    };
-
-    // .peers is placeholder elem to inject list of peers to - it must be present in project XML if peer review is enabled
-    for (var i = 0; i < peers.length; ++i) {
-        $('.peers', element).append(peer_node(peers[i]));
-    }
-
     var groups = JSON.parse($('.assess_groups', element).html());
     var group_node = function (group) {
         var gn = $('<a class="select_group" />');
