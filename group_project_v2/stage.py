@@ -339,7 +339,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
         for item in items_to_grade:
             for question in review_questions:
-                key = make_key(item["id"], question.id)
+                key = make_key(item["id"], question.question_id)
                 if my_feedback.get(key, None) in (None, ''):
                     return False
 
