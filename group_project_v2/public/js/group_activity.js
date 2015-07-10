@@ -33,18 +33,6 @@ function GroupProjectBlock(runtime, element) {
         return sum / count;
     }
 
-    function load_data_into_form(form_node, data_for_form) {
-        form_node.find('.answer').val(null);
-        for (var data_item in data_for_form) {
-            if (!data_for_form.hasOwnProperty(data_item)) continue;
-            form_node.find('button.submit').html(DATA_PRESENT_SUBMIT);
-            // NOTE: use of ids specified by designer here
-            var $form_item = form_node.find("#" + data_item);
-            $form_item.val(data_for_form[data_item]);
-        }
-        validate_form_answers(form_node);
-    }
-
     function load_my_feedback_data(section_node, data) {
         // Clean existing values
         $('.feedback-data', section_node).remove();
@@ -103,47 +91,6 @@ function GroupProjectBlock(runtime, element) {
         });
     }
 
-    function load_data_for_peer(peer_id) {
-        _load_data('load_peer_feedback', 'peer_id=' + peer_id, $('.peer_review', element), load_data_into_form);
-    }
-
-    function load_data_for_other_group(group_id) {
-        _load_data('load_other_group_feedback', 'group_id=' + group_id, $('.other_group_review', element), load_data_into_form);
-    }
-
-    $('form.peer_review, form.other_group_review', element).on('submit', function (ev) {
-        ev.preventDefault();
-        var $form = $(this);
-
-        $form.find(':submit').prop('disabled', true);
-        var items = $form.serializeArray();
-        var data = {};
-        $.each(items, function (i, v) {
-            data[v.name] = v.value;
-        });
-
-        $.ajax({
-            type: $form.attr('method'),
-            url: runtime.handlerUrl(element, $form.attr('action')),
-            data: JSON.stringify(data),
-            success: function (data) {
-                var msg = 'Thanks for your feedback!';
-                if (data.msg) {
-                    msg = data.msg;
-                }
-                show_message(msg);
-            },
-            error: function (data) {
-                show_message('We encountered an error saving your feedback.');
-            },
-            complete: function (data) {
-                $form.find(':submit').prop('disabled', false).html(DATA_PRESENT_SUBMIT);
-            }
-        });
-
-        return false;
-    });
-
     var groups = JSON.parse($('.assess_groups', element).html());
     var group_node = function (group) {
         var gn = $('<a class="select_group" />');
@@ -159,39 +106,6 @@ function GroupProjectBlock(runtime, element) {
         $('.other_groups', element).append(group_node(groups[i]));
     }
 
-    function validate_form_answers(form_node) {
-        var answers = form_node.find('.required .answer');
-        var submitButton = form_node.find('button.submit');
-
-        function check_answered_total(answers, submitButton) {
-            var answers_total, answers_checked;
-            answers_total = answers_checked = 0;
-            submitButton.attr('disabled', 'disabled');
-            $.each(answers, function () {
-                if ($(this).is('textarea')) {
-                    answers_total += 1;
-                    if ($(this).val() !== '') {
-                        answers_checked += 1;
-                    }
-                }
-                else if ($(this).is('select')) {
-                    answers_total += 1;
-                    if ($(this).find('option:selected').attr('value') !== '') {
-                        answers_checked += 1;
-                    }
-                }
-            });
-            if (answers_total === answers_checked) {
-                submitButton.attr('disabled', false);
-            }
-        }
-
-        check_answered_total(answers, submitButton);
-
-        answers.on('change keyup paste', function () {
-            check_answered_total(answers, submitButton);
-        });
-    }
 
     // TODO: does not include activity_id - might need fixing when all activities are displayed simultaneously
     $(document).on('select_stage', function (target, selected_stage_id) {
@@ -217,63 +131,7 @@ function GroupProjectBlock(runtime, element) {
         return false;
     });
 
-    $('.select_peer,.select_group').on('click', function (ev) {
-        var $this = $(this);
-        var is_peer = $this.hasClass('select_peer');
-        $('.select_peer,.select_group').removeClass('selected'); // removing selection from other peers/groups. NOT a bug
-        $this.addClass('selected');
 
-        var load_operation = load_data_for_peer;
-        var operation_name = 'load_data_for_peer';
-        var id_field_selector = '.peer_id';
-        if (is_peer) {
-            $('.username', element).text($this.data('username'));
-        }
-        else {
-            id_field_selector = '.group_id';
-            load_operation = load_data_for_other_group;
-            operation_name = 'load_data_for_other_group';
-            $('.other_submission_links', element).empty().hide();
-        }
-
-        $(id_field_selector, element).attr('value', $this.data('id'));
-        load_operation($this.data('id'));
-
-        $(document).trigger('data_loaded', {operation: operation_name, data_for: $this.data('id')});
-        ev.preventDefault();
-        return false;
-    });
-
-    var review_submissions_dialog = $('.review_submissions_dialog', element).appendTo($(document.body));
-    $('.view_other_submissions', element).on('click', function () {
-        var $content = $('.other_submission_links', review_submissions_dialog);
-        $content.empty().hide();
-        var selected_group_id = $('.select_group.selected').data("id");
-        $.ajax({
-            url: runtime.handlerUrl(element, "other_submission_links"),
-            data: {group_id: selected_group_id},
-            dataType: 'json',
-            success: function (data) {
-                $content.html(data.html).show();
-                review_submissions_dialog.show();
-            },
-            error: function (data) {
-                show_message('We encountered an error.');
-            }
-        });
-    });
-    $('.close_review_dialog', review_submissions_dialog).on('click', function () {
-        review_submissions_dialog.hide();
-
-
-        // Activate the first peer, or the first group if no peers
-        $(function () {
-            var select_from = $('.select_peer, .select_group');
-            if (select_from.length > 0) {
-                select_from[0].click();
-            }
-        })
-    });
 
     var initialization_data = JSON.parse($('.initialization_data', element).html());
     if (initialization_data && initialization_data.default_stage_id) {

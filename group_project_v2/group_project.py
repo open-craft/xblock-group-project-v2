@@ -11,7 +11,6 @@ import pytz
 import webob
 from datetime import datetime, timedelta
 
-from django.conf import settings
 from django.utils import html
 from django.utils.translation import ugettext as _
 
@@ -22,17 +21,15 @@ from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
-from group_project_v2.utils import loader, ChildrenNavigationXBlockMixin
+from group_project_v2.mixins import ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin, \
+    WorkgroupAwareXBlockMixin
+from group_project_v2.utils import loader, OutsiderDisallowedError
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
     PeerAssessmentStage, GroupAssessmentStage
 )
 from group_project_v2.project_api import project_api
 from group_project_v2.api_error import ApiError
-
-ALLOWED_OUTSIDER_ROLES = getattr(settings, "ALLOWED_OUTSIDER_ROLES", None)
-if ALLOWED_OUTSIDER_ROLES is None:
-    ALLOWED_OUTSIDER_ROLES = ["assistant"]
 
 try:
     from edx_notifications.data import NotificationMessage  # pylint: disable=import-error
@@ -46,18 +43,6 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 def make_key(*args):
     return ":".join([str(a) for a in args])
-
-
-class OutsiderDisallowedError(Exception):
-    def __init__(self, detail):
-        self.value = detail
-        super(OutsiderDisallowedError, self).__init__()
-
-    def __str__(self):
-        return "Outsider Denied Access: {}".format(self.value)
-
-    def __unicode__(self):
-        return u"Outsider Denied Access: {}".format(self.value)
 
 
 class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin):
@@ -164,6 +149,7 @@ class ActivitySubmissionsViewMixin(object):
 @XBlock.wants('courseware_parent_info')
 class GroupActivityXBlock(
     XBlock, ChildrenNavigationXBlockMixin,StudioEditableXBlockMixin, StudioContainerXBlockMixin,
+    CourseAwareXBlockMixin, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin,
     ActivityNavigationViewMixin, ActivityResourcesViewMixin, ActivitySubmissionsViewMixin
 ):
     """
@@ -202,74 +188,9 @@ class GroupActivityXBlock(
     has_score = True
     has_children = True
 
-    def _confirm_outsider_allowed(self):
-        granted_roles = [r["role"] for r in project_api.get_user_roles_for_course(self.user_id, self.course_id)]
-        for allowed_role in ALLOWED_OUTSIDER_ROLES:
-            if allowed_role in granted_roles:
-                return True
-
-        raise OutsiderDisallowedError("User does not have an allowed role")
-
-    _known_real_user_ids = {}
-
-    def real_user_id(self, anonymous_student_id):
-        if anonymous_student_id not in self._known_real_user_ids:
-            try:
-                self._known_real_user_ids[anonymous_student_id] = self.runtime.get_real_user(anonymous_student_id).id
-            except AttributeError:
-                # workbench support
-                self._known_real_user_ids[anonymous_student_id] = anonymous_student_id
-        return self._known_real_user_ids[anonymous_student_id]
-
-    @lazy
-    def anonymous_student_id(self):
-        try:
-            return self.runtime.anonymous_student_id
-        except AttributeError:
-            log.exception("Runtime does not have anonymous_student_id attribute - trying user_id")
-            return self.runtime.user_id
-
     @property
     def id(self):
         return self.scope_ids.usage_id
-
-    @lazy
-    # pylint: disable=broad-except
-    def user_id(self):
-        try:
-            return int(self.real_user_id(self.anonymous_student_id))
-        except Exception as exc:
-            log.exception(exc)
-            try:
-                return int(self.runtime.user_id)
-            except Exception as exc:
-                log.exception(exc)
-                return None
-
-    _workgroup = None
-
-    @lazy
-    def workgroup(self):
-        fallback_result = {
-            "id": "0",
-            "users": [],
-        }
-
-        try:
-            user_prefs = project_api.get_user_preferences(self.user_id)
-
-            if "TA_REVIEW_WORKGROUP" in user_prefs:
-                self._confirm_outsider_allowed()
-                result = project_api.get_workgroup_by_id(user_prefs["TA_REVIEW_WORKGROUP"])
-            else:
-                result = project_api.get_user_workgroup_for_course(self.user_id, self.course_id)
-        except OutsiderDisallowedError:
-            raise
-        except ApiError as exception:
-            log.exception(exception)
-            result = None
-
-        return result if result is not None else fallback_result
 
     @property
     def is_group_member(self):
@@ -285,14 +206,6 @@ class GroupActivityXBlock(
             return unicode(self.scope_ids.usage_id)
         except Exception:  # pylint: disable=broad-except
             return self.id
-
-    @property
-    def course_id(self):
-        raw_course_id = getattr(self.runtime, 'course_id', 'all')
-        try:
-            return unicode(raw_course_id)
-        except Exception:    # pylint: disable=broad-except
-            return raw_course_id
 
     @property
     def allowed_nested_blocks(self):
@@ -669,22 +582,6 @@ class GroupActivityXBlock(
             'result': 'success',
             'msg': _('Thanks for your feedback'),
         }
-
-    @XBlock.handler
-    def load_peer_feedback(self, request, suffix=''):
-
-        peer_id = request.GET["peer_id"]
-        feedback = project_api.get_peer_review_items(
-            self.anonymous_student_id,
-            peer_id,
-            self.workgroup['id'],
-            self.content_id,
-        )
-
-        # pivot the data to show question -> answer
-        results = {pi['question']: pi['answer'] for pi in feedback}
-
-        return webob.response.Response(body=json.dumps(results))
 
     @XBlock.handler
     def load_other_group_feedback(self, request, suffix=''):

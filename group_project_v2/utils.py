@@ -1,14 +1,31 @@
 # -*- coding: utf-8 -*-
 import logging
 from datetime import date, datetime
+from django.conf import settings
 import xml.etree.ElementTree as ET
-from lazy.lazy import lazy
 
 from xblockutils.resources import ResourceLoader
 
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
+
+
+ALLOWED_OUTSIDER_ROLES = getattr(settings, "ALLOWED_OUTSIDER_ROLES", None)
+if ALLOWED_OUTSIDER_ROLES is None:
+    ALLOWED_OUTSIDER_ROLES = ["assistant"]
+
+
+class OutsiderDisallowedError(Exception):
+    def __init__(self, detail):
+        self.value = detail
+        super(OutsiderDisallowedError, self).__init__()
+
+    def __str__(self):
+        return "Outsider Denied Access: {}".format(self.value)
+
+    def __unicode__(self):
+        return u"Outsider Denied Access: {}".format(self.value)
 
 
 class DottableDict(dict):
@@ -60,12 +77,3 @@ def format_date(date_value):
 # Make '_' a no-op so we can scrape strings
 def gettext(text):
     return text
-
-
-class ChildrenNavigationXBlockMixin(object):
-    @lazy
-    def _children(self):
-        return [self.runtime.get_block(child_id) for child_id in self.children]
-
-    def _get_children_by_category(self, child_category):
-        return [child for child in self._children if child.category == child_category]

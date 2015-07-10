@@ -1,27 +1,29 @@
 from collections import OrderedDict
 from datetime import datetime
+import json
 import logging
 
 from lazy.lazy import lazy
 import pytz
+import webob
+
 from xblock.core import XBlock
-
 from xblock.fields import Scope, String, DateTime
-
 from xblock.fragment import Fragment
-
 from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
 from group_project_v2.api_error import ApiError
+from group_project_v2.mixins import ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin, \
+    WorkgroupAwareXBlockMixin
 from group_project_v2.stage_components import (
     PeerSelectorXBlock, GroupProjectReviewQuestionXBlock, GroupProjectReviewAssessmentXBlock,
     GroupProjectResourceXBlock, GroupProjectSubmissionXBlock,
     StageState
 )
 from group_project_v2.project_api import project_api
-from group_project_v2.utils import loader, format_date, gettext as _, ChildrenNavigationXBlockMixin
+from group_project_v2.utils import loader, format_date, gettext as _
 
 log = logging.getLogger(__name__)
 
@@ -40,8 +42,10 @@ class ResourceType(object):
     OOYALA_VIDEO = 'ooyala'
 
 
-class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
-                             StudioEditableXBlockMixin, StudioContainerXBlockMixin):
+class BaseGroupActivityStage(
+    XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
+    CourseAwareXBlockMixin, ChildrenNavigationXBlockMixin, UserAwareXBlockMixin
+):
     submissions_stage = False
 
     display_name = String(
@@ -127,6 +131,8 @@ class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
             "ta_graded": self.activity.group_reviews_required_count
         }
         fragment.add_content(loader.render_template(self.STAGE_WRAPPER_TEMPLATE, render_context))
+        if stage_fragment.js_init_fn:
+            fragment.initialize_js(stage_fragment.js_init_fn)
 
         return fragment
 
@@ -161,7 +167,7 @@ class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
 
     def mark_complete(self, user_id):
         try:
-            project_api.mark_as_complete(self.activity.course_id, self.activity.content_id, user_id, self.id)
+            project_api.mark_as_complete(self.course_id, self.activity.content_id, user_id, self.id)
         except ApiError as e:
             # 409 indicates that the completion record already existed # That's ok in this case
             if e.code != 409:
@@ -172,9 +178,9 @@ class BaseGroupActivityStage(XBlock, ChildrenNavigationXBlockMixin,
         Gets stage completion state
         """
         users_in_group, completed_users = project_api.get_stage_state(
-            self.activity.course_id,
+            self.course_id,
             self.activity.id,
-            self.activity.user_id,
+            self.user_id,
             self.id
         )
 
@@ -316,10 +322,12 @@ class ReviewBaseStage(BaseGroupActivityStage):
         fragment.add_frag_resources(children_fragment)
         render_context = {'stage': self, 'children_content': children_fragment.content}
         fragment.add_content(loader.render_template(self.STAGE_CONTENT_TEMPLATE, render_context))
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/stages/review_stage.js"))
+        fragment.initialize_js("ReviewStageXBlock")
         return fragment
 
 
-class PeerReviewStage(ReviewBaseStage):
+class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
     CATEGORY = 'group-project-v2-stage-peer-review'
 
@@ -330,6 +338,22 @@ class PeerReviewStage(ReviewBaseStage):
             (PeerSelectorXBlock.CATEGORY, _(u"Teammate selector"))
         ]))
         return blocks
+
+    @XBlock.handler
+    def load_peer_feedback(self, request, suffix=''):
+
+        peer_id = request.GET["peer_id"]
+        feedback = project_api.get_peer_review_items(
+            self.anonymous_student_id,
+            peer_id,
+            self.workgroup['id'],
+            self.activity.content_id,
+        )
+
+        # pivot the data to show question -> answer
+        results = {pi['question']: pi['answer'] for pi in feedback}
+
+        return webob.response.Response(body=json.dumps(results))
 
 
 class GroupReviewStage(ReviewBaseStage):
