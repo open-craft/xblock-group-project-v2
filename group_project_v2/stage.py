@@ -92,6 +92,10 @@ class BaseGroupActivityStage(
         return self.get_parent()
 
     @property
+    def content_id(self):
+        return self.activity.content_id
+
+    @property
     def resources(self):
         return self._get_children_by_category(GroupProjectResourceXBlock.CATEGORY)
 
@@ -167,7 +171,7 @@ class BaseGroupActivityStage(
 
     def mark_complete(self, user_id):
         try:
-            project_api.mark_as_complete(self.course_id, self.activity.content_id, user_id, self.id)
+            project_api.mark_as_complete(self.course_id, self.content_id, user_id, self.id)
         except ApiError as e:
             # 409 indicates that the completion record already existed # That's ok in this case
             if e.code != 409:
@@ -313,7 +317,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
     @property
     def grade_questions(self):
-        return (question for question in self._questions if question.grade)
+        return (question for question in self.questions if question.grade)
 
     def validate(self):
         violations = super(ReviewBaseStage, self).validate()
@@ -375,7 +379,7 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
 
     def is_review_complete(self):
         peers_to_review = [user for user in self.workgroup["users"] if user["id"] != self.user_id]
-        peer_review_items = project_api.get_peer_review_items_for_group(self.workgroup['id'], self.activity.content_id)
+        peer_review_items = project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
 
         return self._check_review_complete(peers_to_review, self.required_questions, peer_review_items, "user")
 
@@ -387,7 +391,7 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
             self.anonymous_student_id,
             peer_id,
             self.workgroup['id'],
-            self.activity.content_id,
+            self.content_id,
         )
 
         results = self._pivot_feedback(feedback)
@@ -405,7 +409,7 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
                 self.anonymous_student_id,
                 peer_id,
                 self.workgroup['id'],
-                self.activity.content_id,
+                self.content_id,
                 submissions,
             )
 
@@ -445,6 +449,17 @@ class GroupReviewStage(ReviewBaseStage):
         ]))
         return blocks
 
+    def is_review_complete(self):
+        groups_to_review = project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
+
+        group_review_items = []
+        for assess_group in groups_to_review:
+            group_review_items.extend(
+                project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id)
+            )
+
+        return self._check_review_complete(groups_to_review, self.required_questions, group_review_items, "workgroup")
+
     @XBlock.handler
     def other_submission_links(self, request, suffix=''):
         group_id = request.GET["group_id"]
@@ -471,12 +486,66 @@ class GroupReviewStage(ReviewBaseStage):
         feedback = project_api.get_workgroup_review_items(
             self.anonymous_student_id,
             group_id,
-            self.activity.content_id
+            self.content_id
         )
 
         results = self._pivot_feedback(feedback)
 
         return webob.response.Response(body=json.dumps(results))
+
+    @XBlock.json_handler
+    def submit_other_group_feedback(self, submissions, suffix=''):
+        try:
+            group_id = submissions["review_subject_id"]
+            del submissions["review_subject_id"]
+
+            project_api.submit_workgroup_review_items(
+                self.anonymous_student_id,
+                group_id,
+                self.content_id,
+                submissions
+            )
+
+            for question_id in self.grade_questions:
+                if question_id in submissions:
+                    # Emit analytics event...
+                    self.runtime.publish(
+                        self,
+                        "group_activity.received_grade_question_score",
+                        {
+                            "question": question_id,
+                            "answer": submissions[question_id],
+                            "reviewer_id": self.anonymous_student_id,
+                            "is_admin_grader": self.is_admin_grader,
+                            "group_id": group_id,
+                            "content_id": self.content_id,
+                        }
+                    )
+
+            self.activity.calculate_and_send_grade(group_id)
+
+            if self.activity.is_group_member and self.is_review_complete():
+                self.mark_complete(self.user_id)
+
+        except ApiError as exception:
+            message = exception.message
+            log.exception(message)
+            return {
+                'result': 'error',
+                'msg': message,
+            }
+        except KeyError as exception:
+            message = "Missing required argument {}".format(exception.message)
+            log.exception(message)
+            return {
+                'result': 'error',
+                'msg': message,
+            }
+
+        return {
+            'result': 'success',
+            'msg': _('Thanks for your feedback'),
+        }
 
 
 class AssessmentBaseStage(BaseGroupActivityStage):

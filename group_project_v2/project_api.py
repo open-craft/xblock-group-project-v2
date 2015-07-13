@@ -281,7 +281,7 @@ class ProjectAPI(object):
     @api_error_protect
     def set_group_grade(self, group_id, course_id, activity_id, grade_value, max_grade):
         grade_data = {
-            "course_id": course_id,
+            "course_id": unicode(course_id),
             "content_id": activity_id,
             "grade": grade_value,
             "max_grade": max_grade,

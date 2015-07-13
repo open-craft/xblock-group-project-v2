@@ -345,8 +345,17 @@ class GroupActivityXBlock(
     @property
     def grade_questions(self):
         return list(itertools.chain(
-            *[getattr(stage, 'grade_questions', ()) for stage in self.activity_stages]
+            *[getattr(stage, 'grade_questions', ()) for stage in self.stages]
         ))
+
+    def calculate_and_send_grade(self, group_id):
+        grade_value = self.calculate_grade(group_id)
+        if grade_value:
+            self.assign_grade_to_group(group_id, grade_value)
+
+            workgroup = project_api.get_workgroup_by_id(group_id)
+            for u in workgroup["users"]:
+                self.mark_complete(u["id"])
 
     def calculate_grade(self, group_id):
 
@@ -366,7 +375,7 @@ class GroupActivityXBlock(
         def get_user_grade_value_list(user_id):
             user_grades = []
             for question in self.grade_questions:
-                user_value = review_item_map.get(make_key(question.id, user_id), None)
+                user_value = review_item_map.get(make_key(question.question_id, user_id), None)
                 if user_value is None:
                     # if any are incomplete, we consider the whole set to be unusable
                     return None
@@ -417,56 +426,13 @@ class GroupActivityXBlock(
 
         return group_grade
 
-    def mark_complete_stage(self, user_id, stage_id):
+    def mark_complete(self, user_id):
         try:
-            project_api.mark_as_complete(self.course_id, self.content_id, user_id, stage_id)
+            project_api.mark_as_complete(self.course_id, self.content_id, user_id)
         except ApiError as e:
             # 409 indicates that the completion record already existed. That's ok in this case
             if e.code != 409:
                 raise
-
-    def graded_and_complete(self, group_id):
-        workgroup = project_api.get_workgroup_by_id(group_id)
-        for u in workgroup["users"]:
-            self.mark_complete_stage(u["id"], None)
-
-    def _get_review_questions(self, stage_id):
-        stage = [stage for stage in self.stages if stage.id == stage_id][0]
-        return [question for question in stage.questions if question.required]
-
-    def _check_review_complete(self, items_to_grade, review_questions, review_items, review_item_key):
-        my_feedback = {
-            make_key(peer_review_item[review_item_key], peer_review_item["question"]): peer_review_item["answer"]
-            for peer_review_item in review_items
-            if peer_review_item['reviewer'] == self.anonymous_student_id
-        }
-
-        for item in items_to_grade:
-            for question in review_questions:
-                key = make_key(item["id"], question.id)
-                if my_feedback.get(key, None) in (None, ''):
-                    return False
-
-        return True
-
-    def peer_review_complete(self, stage_id):
-        peer_review_questions = self._get_review_questions(stage_id)
-        peers_to_review = [user for user in self.workgroup["users"] if user["id"] != self.user_id]
-        peer_review_items = project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
-
-        return self._check_review_complete(peers_to_review, peer_review_questions, peer_review_items, "user")
-
-    def group_review_complete(self, stage_id):
-        group_review_questions = self._get_review_questions(stage_id)
-        groups_to_review = project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
-
-        group_review_items = []
-        for assess_group in groups_to_review:
-            group_review_items.extend(
-                project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id)
-            )
-
-        return self._check_review_complete(groups_to_review, group_review_questions, group_review_items, "workgroup")
 
     def validate_field_data(self, validation, data):
         super(GroupActivityXBlock, self).validate_field_data(validation, data)
@@ -479,65 +445,6 @@ class GroupActivityXBlock(
                     field_name=field_name, field_value=getattr(data, field_name)
                 )
                 validation.add(ValidationMessage(ValidationMessage.ERROR, message))
-
-    @XBlock.json_handler
-    def submit_other_group_feedback(self, submissions, suffix=''):
-        try:
-            group_id = submissions["group_id"]
-            stage_id = submissions["stage_id"]
-            del submissions["group_id"]
-            del submissions["stage_id"]
-
-            project_api.submit_workgroup_review_items(
-                self.anonymous_student_id,
-                group_id,
-                self.content_id,
-                submissions
-            )
-
-            for question_id in self.grade_questions:
-                if question_id in submissions:
-                    # Emit analytics event...
-                    self.runtime.publish(
-                        self,
-                        "group_activity.received_grade_question_score",
-                        {
-                            "question": question_id,
-                            "answer": submissions[question_id],
-                            "reviewer_id": self.anonymous_student_id,
-                            "is_admin_grader": self.is_admin_grader,
-                            "group_id": group_id,
-                            "content_id": self.content_id,
-                        }
-                    )
-
-            grade_value = self.calculate_grade(group_id)
-            if grade_value:
-                self.assign_grade_to_group(group_id, grade_value)
-                self.graded_and_complete(group_id)
-
-            if self.is_group_member and self.group_review_complete(stage_id):
-                self.mark_complete_stage(self.user_id, stage_id)
-
-        except ApiError as exception:
-            message = exception.message
-            log.exception(message)
-            return {
-                'result': 'error',
-                'msg': message,
-            }
-        except KeyError as exception:
-            message = "Missing required argument {}".format(exception.message)
-            log.exception(message)
-            return {
-                'result': 'error',
-                'msg': message,
-            }
-
-        return {
-            'result': 'success',
-            'msg': _('Thanks for your feedback'),
-        }
 
     @XBlock.handler
     def load_my_peer_feedback(self, request, suffix=''):

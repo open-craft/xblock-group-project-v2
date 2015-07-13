@@ -13,6 +13,6 @@
   </div>
 {% else %}
   <div class="no_submission"{% if submission.description %} title="{{ submission.description }}"{% endif %}>
-    {{ upload.title }} ({% trans "This file has not been submitted by this group" %})
+    {{ submission.display_name }} ({% trans "This file has not been submitted by this group" %})
   </div>
 {% endif %}
