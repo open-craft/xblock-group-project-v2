@@ -7,6 +7,7 @@ from xblock.core import XBlock
 from xblock.fragment import Fragment
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
+from group_project_v2.mixins import XBlockWithComponentsMixin
 
 from group_project_v2.utils import loader, gettext as _
 
@@ -24,7 +25,7 @@ class ViewTypes(object):
     ASK_TA = 'ask-ta'
 
 
-class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
+class GroupProjectNavigatorXBlock(XBlockWithComponentsMixin, StudioContainerXBlockMixin, XBlock):
     """
     XBlock that provides basic layout and switching between children XBlocks (views)
     Should only be added as a child to GroupProjectXBlock
@@ -43,6 +44,15 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
         Reference to parent XBlock
         """
         return self.get_parent()
+
+    @property
+    def allowed_nested_blocks(self):  # pylint: disable=no-self-use
+        return {
+            "group-project-v2-navigator-navigation": _(u"Navigation View"),
+            "group-project-v2-navigator-resources": _(u"Resources View"),
+            "group-project-v2-navigator-submissions": _(u"Submissions View"),
+            "group-project-v2-navigator-ask-ta": _(u"Ask a TA View"),
+        }
 
     def student_view(self, context):
         """
@@ -95,16 +105,6 @@ class GroupProjectNavigatorXBlock(StudioContainerXBlockMixin, XBlock):
         # Draft activity is visible to nav view, but not to completions api, resulting in 404.
         # Anyway, it looks like it needs some other studio preview representation
         return Fragment()
-
-    def author_edit_view(self, context):
-        """
-        Studio edit view
-        """
-        fragment = Fragment()
-        self.render_children(context, fragment, can_reorder=True, can_add=False)
-        fragment.add_content(loader.render_template('templates/html/project_navigator/add_buttons.html', {}))
-        fragment.add_css_url(self.runtime.local_resource_url(self.group_project, 'public/css/group_project_edit.css'))
-        return fragment
 
 
 class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):

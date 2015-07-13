@@ -86,6 +86,7 @@ def make_key(*args):
 def mean(value_array):
     if not value_array:
         return None
+
     try:
         numeric_values = [float(v) for v in value_array]
         return float(sum(numeric_values) / len(numeric_values))

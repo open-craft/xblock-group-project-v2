@@ -22,7 +22,7 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
 from group_project_v2.mixins import ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin, \
-    WorkgroupAwareXBlockMixin
+    WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin
 from group_project_v2.utils import loader, OutsiderDisallowedError, make_key
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
@@ -41,7 +41,7 @@ except ImportError:
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin):
+class GroupProjectXBlock(XBlock, XBlockWithComponentsMixin, StudioEditableXBlockMixin, StudioContainerXBlockMixin):
     display_name = String(
         display_name="Display Name",
         help="This is a name of the project",
@@ -52,6 +52,13 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
     editable_fields = ('display_name', )
     has_score = False
     has_children = True
+
+    @property
+    def allowed_nested_blocks(self):  # pylint: disable=no-self-use
+        return {
+            "group-project-v2-activity": _(u"Group Project Activity"),
+            "group-project-v2-navigator": _(u"Group Project Navigator"),
+        }
 
     def student_view(self, context):
         fragment = Fragment()
@@ -66,16 +73,6 @@ class GroupProjectXBlock(XBlock, StudioEditableXBlockMixin, StudioContainerXBloc
         fragment = Fragment()
         self.render_children(context, fragment, can_reorder=True, can_add=False)
         fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/group_project_preview.css"))
-        return fragment
-
-    def author_edit_view(self, context):
-        """
-        Add some HTML to the author view that allows authors to add child blocks.
-        """
-        fragment = Fragment()
-        self.render_children(context, fragment, can_reorder=True, can_add=False)
-        fragment.add_content(loader.render_template('templates/html/group_project_add_buttons.html', {}))
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
         return fragment
 
     @lazy
@@ -138,14 +135,13 @@ class ActivitySubmissionsViewMixin(object):
         return fragment
 
 
-
 # TODO: enable and fix these violations
 # pylint: disable=unused-argument,invalid-name
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
 class GroupActivityXBlock(
-    XBlock, ChildrenNavigationXBlockMixin,StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-    CourseAwareXBlockMixin, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin,
+    XBlock, XBlockWithComponentsMixin, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
+    ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin,
     ActivityNavigationViewMixin, ActivityResourcesViewMixin, ActivitySubmissionsViewMixin
 ):
     """
@@ -204,7 +200,7 @@ class GroupActivityXBlock(
             return self.id
 
     @property
-    def allowed_nested_blocks(self):
+    def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return {
             BasicStage.CATEGORY: _(u"Text Stage"),
             SubmissionStage.CATEGORY: _(u"Submission Stage"),
@@ -318,18 +314,6 @@ class GroupActivityXBlock(
     def author_preview_view(self, context):
         fragment = Fragment()
         self.render_children(context, fragment, can_reorder=True, can_add=False)
-        return fragment
-
-    def author_edit_view(self, context):
-        """
-        Add some HTML to the author view that allows authors to add child blocks.
-        """
-        fragment = Fragment()
-        self.render_children(context, fragment, can_reorder=True, can_add=False)
-        fragment.add_content(
-            loader.render_template('templates/html/add_buttons.html', {'child_blocks': self.allowed_nested_blocks})
-        )
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
         return fragment
 
     def assign_grade_to_group(self, group_id, grade_value):

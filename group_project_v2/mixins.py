@@ -1,9 +1,10 @@
 import logging
 from lazy.lazy import lazy
+from xblock.fragment import Fragment
 
 from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import project_api
-from group_project_v2.utils import OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES
+from group_project_v2.utils import OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES, loader
 
 log = logging.getLogger(__name__)
 
@@ -92,3 +93,21 @@ class WorkgroupAwareXBlockMixin(object):
             result = None
 
         return result if result is not None else fallback_result
+
+
+class XBlockWithComponentsMixin(object):
+    @property
+    def allowed_nested_blocks(self):  # pylint: disable=no-self-use
+        return None
+
+    def author_edit_view(self, context):
+        """
+        Add some HTML to the author view that allows authors to add child blocks.
+        """
+        fragment = Fragment()
+        self.render_children(context, fragment, can_reorder=True, can_add=False)
+        fragment.add_content(
+            loader.render_template('templates/html/add_buttons.html', {'child_blocks': self.allowed_nested_blocks})
+        )
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
+        return fragment

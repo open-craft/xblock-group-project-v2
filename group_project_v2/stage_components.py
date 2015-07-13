@@ -1,11 +1,9 @@
-from collections import namedtuple, defaultdict
-import copy
+from collections import namedtuple
 from django.utils import html
 import json
 from lazy.lazy import lazy
 import logging
-import xml.etree.ElementTree as ET
-from opaque_keys.edx.locator import BlockUsageLocator
+from xml.etree import ElementTree
 import webob
 
 from xblock.core import XBlock
@@ -98,8 +96,8 @@ class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin):
 
     def render_content(self):
         try:
-            answer_node = ET.fromstring(self.question_content)
-        except ET.ParseError as exception:
+            answer_node = ElementTree.fromstring(self.question_content)
+        except ElementTree.ParseError as exception:
             log.exception(exception)
             return ""
 
@@ -127,12 +125,13 @@ class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin):
             question_classes.append(self.question_css_classes)
 
         fragment = Fragment()
-        context = {
+        render_context = {
             'question': self,
             'question_classes': " ".join(question_classes),
             'question_content': self.render_content()
         }
-        fragment.add_content(loader.render_template("templates/html/components/review_question.html", context))
+        render_context.update(context)
+        fragment.add_content(loader.render_template("templates/html/components/review_question.html", render_context))
         return fragment
 
     def studio_view(self, context):
@@ -148,7 +147,6 @@ class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin):
         fragment = self.student_view(context)
         fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/question_edit.css"))
         return fragment
-
 
 
 class GroupProjectBaseAssessmentXBlock(XBlock, StudioEditableXBlockMixin):
@@ -202,10 +200,16 @@ class GroupProjectBaseAssessmentXBlock(XBlock, StudioEditableXBlockMixin):
 
         fragment = Fragment()
         title = self.question.assessment_title if self.question.assessment_title else self.question.title
-        context = {'assessment': self, 'question_title': title, 'feedback': feedback}
+        render_context = {'assessment': self, 'question_title': title, 'feedback': feedback}
         if self.show_mean:
-            context['mean'] = "{0:.1f}".format(mean(feedback))
-        fragment.add_content(loader.render_template("templates/html/components/review_assessment.html", context))
+            try:
+                render_context['mean'] = "{0:.1f}".format(mean(feedback))
+            except ValueError as exc:
+                log.warn(exc)
+                render_context['mean'] = None
+
+        render_context.update(context)
+        fragment.add_content(loader.render_template("templates/html/components/review_assessment.html", render_context))
         return fragment
 
     def author_view(self, context):
@@ -245,57 +249,6 @@ class GroupProjectGroupAssessmentXBlock(
         return [item for item in all_feedback if item["question"] == self.question_id]
 
 
-class GroupActivityAssessment(object):
-    def __init__(self, doc_tree):
-
-        self.id = doc_tree.get("id")  # pylint: disable=invalid-name
-        self.label = doc_tree.find("./label")
-        answer_node = doc_tree.find("./answer")
-        self.answer = answer_node[0]
-        self.small = (answer_node.get("small", "false") == "true")
-
-    @property
-    def render(self):
-        answer_node = copy.deepcopy(self.answer)
-        answer_node.set('name', self.id)
-        answer_node.set('id', self.id)
-        answer_classes = ['answer']
-        if self.small:
-            answer_classes.append('side')
-        current_class = answer_node.get('class')
-        if current_class:
-            answer_classes.append(current_class)
-        answer_node.set('class', ' '.join(answer_classes))
-
-        label_node = copy.deepcopy(self.label)
-        label_node.set('for', self.id)
-        current_class = label_node.get('class')
-        label_classes = ['prompt']
-        if current_class:
-            label_classes.append(current_class)
-        if self.small:
-            label_classes.append('side')
-        label_node.set('class', ' '.join(label_classes))
-
-        # TODO: this exactly matches answer_html property below
-        ans_html = outer_html(answer_node)
-        if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html) - 1:
-            ans_html = ans_html[:-1] + ' />'
-
-        return "{}{}".format(
-            outer_html(label_node),
-            ans_html,
-        )
-
-    @property
-    def answer_html(self):
-        html = outer_html(self.answer)
-        if len(self.answer.findall('./*')) < 1 and html.index('>') == len(html) - 1:
-            html = html[:-1] + ' />'
-
-        return html
-
-
 class PeerSelectorXBlock(XBlock):
     CATEGORY = "group-project-v2-peer-selector"
     display_name_with_default = _(u"Teammate selector XBlock")
@@ -326,9 +279,10 @@ class PeerSelectorXBlock(XBlock):
             'demo': True,
             'peers': fake_peers
         }
+        render_context.update(context)
         return self.student_view(render_context)
 
-    def studio_view(self, context):
+    def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
         fragment = Fragment()
         fragment.add_content(NO_EDITABLE_SETTINGS)
         return fragment
@@ -364,9 +318,10 @@ class GroupSelectorXBlock(XBlock):
             'demo': True,
             'groups': fake_groups
         }
+        render_context.update(context)
         return self.student_view(render_context)
 
-    def studio_view(self, context):
+    def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
         fragment = Fragment()
         fragment.add_content(NO_EDITABLE_SETTINGS)
         return fragment
@@ -404,7 +359,7 @@ class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin):
 
     editable_fields = ('display_name', 'description', 'resource_location', 'grading_criteria')
 
-    def student_view(self, context):
+    def student_view(self, context):  # pylint: disable=unused-argument, no-self-use
         return Fragment()
 
     def author_view(self, context):
@@ -417,7 +372,7 @@ class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin):
         fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
         return fragment
 
-
+# pylint: disable=invalid-name
 SubmissionUpload = namedtuple("SubmissionUpload", "location file_name submission_date user_details")
 
 
@@ -470,7 +425,7 @@ class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin):
     def upload(self):
         return self.get_upload(self.stage.activity.workgroup["id"])
 
-    def student_view(self, context):
+    def student_view(self, context):  # pylint: disable=unused-argument, no-self-use
         return Fragment()
 
     def submissions_view(self, context):

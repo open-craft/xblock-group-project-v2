@@ -16,7 +16,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContain
 
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin, \
-    WorkgroupAwareXBlockMixin
+    WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin
 from group_project_v2.stage_components import (
     PeerSelectorXBlock, GroupSelectorXBlock,
     GroupProjectReviewQuestionXBlock, GroupProjectPeerAssessmentXBlock, GroupProjectGroupAssessmentXBlock,
@@ -44,7 +44,7 @@ class ResourceType(object):
 
 
 class BaseGroupActivityStage(
-    XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
+    XBlock, XBlockWithComponentsMixin, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
     CourseAwareXBlockMixin, ChildrenNavigationXBlockMixin, UserAwareXBlockMixin
 ):
     submissions_stage = False
@@ -79,7 +79,7 @@ class BaseGroupActivityStage(
         return self.scope_ids.usage_id
 
     @property
-    def allowed_nested_blocks(self):
+    def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         """
         This property outputs an ordered dictionary of allowed nested XBlocks in form of block_category: block_caption.
         """
@@ -162,24 +162,12 @@ class BaseGroupActivityStage(
     def get_stage_content_fragment(self, context, view='student_view'):
         return self.render_children_fragment(context, view=view)
 
-    def author_edit_view(self, context):
-        """
-        Add some HTML to the author view that allows authors to add child blocks.
-        """
-        fragment = Fragment()
-        self.render_children(context, fragment, can_reorder=True, can_add=False)
-        fragment.add_content(
-            loader.render_template('templates/html/add_buttons.html', {'child_blocks': self.allowed_nested_blocks})
-        )
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
-        return fragment
-
     def mark_complete(self, user_id):
         try:
             project_api.mark_as_complete(self.course_id, self.content_id, user_id, self.id)
-        except ApiError as e:
+        except ApiError as exc:
             # 409 indicates that the completion record already existed # That's ok in this case
-            if e.code != 409:
+            if exc.code != 409:
                 raise
 
     def get_stage_state(self):
@@ -363,7 +351,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
         return True
 
-    def _pivot_feedback(self, feedback):
+    def _pivot_feedback(self, feedback):  # pylint: disable=no-self-use
         """
         Pivots the feedback to show question -> answer
         """
@@ -405,7 +393,7 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
         return violations
 
     @XBlock.handler
-    def load_peer_feedback(self, request, suffix=''):
+    def load_peer_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
 
         peer_id = request.GET["peer_id"]
         feedback = project_api.get_peer_review_items(
@@ -420,7 +408,7 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
         return webob.response.Response(body=json.dumps(results))
 
     @XBlock.json_handler
-    def submit_peer_feedback(self, submissions, suffix=''):
+    def submit_peer_feedback(self, submissions, suffix=''):  # pylint: disable=unused-argument
         try:
             peer_id = submissions["review_subject_id"]
             del submissions["review_subject_id"]
@@ -482,7 +470,7 @@ class GroupReviewStage(ReviewBaseStage):
         return self._check_review_complete(groups_to_review, self.required_questions, group_review_items, "workgroup")
 
     @XBlock.handler
-    def other_submission_links(self, request, suffix=''):
+    def other_submission_links(self, request, suffix=''):  # pylint: disable=unused-argument
         group_id = request.GET["group_id"]
 
         target_stages = [stage for stage in self.activity.stages if stage.submissions_stage]
@@ -500,7 +488,7 @@ class GroupReviewStage(ReviewBaseStage):
         return webob.response.Response(body=json.dumps({"html": html_output}))
 
     @XBlock.handler
-    def load_other_group_feedback(self, request, suffix=''):
+    def load_other_group_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
 
         group_id = request.GET["group_id"]
 
@@ -515,7 +503,7 @@ class GroupReviewStage(ReviewBaseStage):
         return webob.response.Response(body=json.dumps(results))
 
     @XBlock.json_handler
-    def submit_other_group_feedback(self, submissions, suffix=''):
+    def submit_other_group_feedback(self, submissions, suffix=''):  # pylint: disable=unused-argument
         try:
             group_id = submissions["review_subject_id"]
             del submissions["review_subject_id"]
@@ -635,4 +623,3 @@ class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
         render_context = {'stage': self, 'children_content': children_fragment.content, 'final_grade': final_grade}
         fragment.add_content(loader.render_template(self.STAGE_CONTENT_TEMPLATE, render_context))
         return fragment
-
