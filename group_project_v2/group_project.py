@@ -218,6 +218,18 @@ class GroupActivityXBlock(
     def stages(self):
         return self._children
 
+    @property
+    def questions(self):
+        return list(itertools.chain(
+            *[getattr(stage, 'questions', ()) for stage in self.stages]
+        ))
+
+    @property
+    def grade_questions(self):
+        return list(itertools.chain(
+            *[getattr(stage, 'grade_questions', ()) for stage in self.stages]
+        ))
+
     def _get_initialization_data(self):
         return {
             "default_stage_id": unicode(self._get_default_stage_id())
@@ -341,12 +353,6 @@ class GroupActivityXBlock(
         notifications_service = self.runtime.service(self, 'notifications')
         if notifications_service:
             self.fire_grades_posted_notification(group_id, notifications_service)
-
-    @property
-    def grade_questions(self):
-        return list(itertools.chain(
-            *[getattr(stage, 'grade_questions', ()) for stage in self.stages]
-        ))
 
     def calculate_and_send_grade(self, group_id):
         grade_value = self.calculate_grade(group_id)

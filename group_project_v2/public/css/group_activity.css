@@ -86,29 +86,43 @@
     line-height: 1.6;
 }
 
-.group-project-xblock-wrapper .quote {
-    line-height: 1.5em;
-    font-style: italic;
+.group-project-xblock-wrapper .group-project-assessment-answers {
     padding-left: 15px;
 }
 
-.group-project-xblock-wrapper .quote:before, .group-project-xblock-wrapper .quote:after {
+.group-project-xblock-wrapper .group-project-answer {
+    margin: 8px 0;
+}
+
+.group-project-xblock-wrapper .group-project-answer.quote {
+    line-height: 1.5em;
+    font-style: italic;
+    color: #9e9e9e;
+}
+
+.group-project-xblock-wrapper .group-project-answer.quote:before,
+.group-project-xblock-wrapper .group-project-answer.quote:after {
     content: '"';
 }
 
-.group-project-xblock-wrapper .comma {
+.group-project-xblock-wrapper .group-project-answer-wrapper {
+    color: #cccccc;
+}
+
+
+.group-project-xblock-wrapper .group-project-answer.comma {
     display: inline;
 }
 
-.group-project-xblock-wrapper .comma:before {
+.group-project-xblock-wrapper .group-project-answer.comma:before {
     content: ', ';
 }
 
-.group-project-xblock-wrapper .comma:after {
+.group-project-xblock-wrapper .group-project-answer.comma:after {
     content: '';
 }
 
-.group-project-xblock-wrapper .comma:first-child:before {
+.group-project-xblock-wrapper .group-project-answer.comma:first-child:before {
     content: '';
 }
 
@@ -200,4 +214,18 @@
 .group-project-xblock-wrapper.waiting input,
 .group-project-xblock-wrapper.waiting a {
     cursor: wait !important;
+}
+
+.group-project-xblock-wrapper .group-project-question-title {
+    font-weight: 600;
+    display: block;
+    margin-top: 10px;
+}
+
+.group-project-xblock-wrapper .group-project-answer-mean {
+    text-transform: uppercase;
+}
+
+.group-project-xblock-wrapper .group-project-answer {
+    display: block;
 }

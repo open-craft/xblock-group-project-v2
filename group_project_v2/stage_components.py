@@ -1,25 +1,27 @@
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 import copy
+from django.utils import html
 import json
 from lazy.lazy import lazy
 import logging
 import xml.etree.ElementTree as ET
+from opaque_keys.edx.locator import BlockUsageLocator
 import webob
 
 from xblock.core import XBlock
-from xblock.fields import String, UNIQUE_ID, Boolean, Scope
+from xblock.fields import String, Boolean, Scope, UNIQUE_ID
 from xblock.fragment import Fragment
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
 from group_project_v2.api_error import ApiError
+from group_project_v2.mixins import UserAwareXBlockMixin, WorkgroupAwareXBlockMixin
 from group_project_v2.project_api import project_api
 from group_project_v2.upload_file import UploadFile
 
-from group_project_v2.utils import outer_html, inner_html, gettext as _, loader, format_date, build_date_field
-
+from group_project_v2.utils import outer_html, gettext as _, loader, format_date, build_date_field, mean
 
 log = logging.getLogger(__name__)
-NO_EDITABLE_SETTINGS = _(u"This XBlock does not contain any editable settigns")
+NO_EDITABLE_SETTINGS = _(u"This XBlock does not contain any editable settings")
 
 
 class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin):
@@ -27,76 +29,72 @@ class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin):
 
     @property
     def display_name_with_default(self):
-        return _(u"Review Question {question_id}").format(question_id=self.question_id)
+        return _(u"Review Question {title}").format(title=self.title)
 
     question_id = String(
         display_name=_(u"Question ID"),
-        default=UNIQUE_ID
+        default=UNIQUE_ID,
+        scope=Scope.content
+    )
+
+    title = String(
+        display_name=_(u"Question text"),
+        default="",
+        scope=Scope.content
     )
 
     # Label could be an HTML child XBlock, content could be a XBlock encapsulating HTML input/select/textarea
     # unfortunately, there aren't any XBlocks for HTML controls, hence reusing GP V1 approach
-    question_label = String(
-        display_name=_(u"Question label"),
-        default="",
-        multiline_editor="html"
+    assessment_title = String(
+        display_name=_(u"Assessment question text"),
+        help=_(u"Overrides question title when displayed in assessment mode"),
+        default=None,
+        scope=Scope.content
     )
 
     question_content = String(
         display_name=_(u"Question content"),
         help=_(u"HTML control"),
         default="",
+        scope=Scope.content,
         multiline_editor="xml"
     )
 
     required = Boolean(
         display_name=_(u"Required"),
-        default=False
+        default=False,
+        scope=Scope.content
     )
 
     grade = Boolean(
         display_name=_(u"Grading"),
         help=_(u"IF True, answers to this question will be used to calculate student grade for Group Project."),
-        default=False
+        default=False,
+        scope=Scope.content
     )
 
     single_line = Boolean(
         display_name=_(u"Single line"),
         help=_(u"If True question label and content will be displayed on single line, allowing for more compact layout."
                u"Only affects presentation."),
-        default=False
+        default=False,
+        scope=Scope.content
     )
 
     question_css_classes = String(
         display_name=_(u"CSS classes"),
-        help=_(u"CSS classes to be set on question element. Only affects presentation.")
+        help=_(u"CSS classes to be set on question element. Only affects presentation."),
+        scope=Scope.content
     )
 
     editable_fields = (
-        "question_id", "question_label", "question_content", "required", "grade", "single_line", "question_css_classes"
+        "question_id", "title", "assessment_title", "question_content", "required", "grade", "single_line",
+        "question_css_classes"
     )
 
     @lazy
     def stage(self):
         return self.get_parent()
-
-    def render_label(self):
-        try:
-            label_node = ET.fromstring(self.question_label)
-        except ET.ParseError as exception:
-            log.exception(exception)
-            return ""
-
-        if len(inner_html(label_node)) > 0:
-            label_node.set('for', self.question_id)
-            current_class = label_node.get('class')
-            label_classes = ['prompt']
-            if current_class:
-                label_classes.append(current_class)
-            if self.single_line:
-                label_classes.append('side')
-            label_node.set('class', ' '.join(label_classes))
-        return outer_html(label_node)
 
     def render_content(self):
         try:
@@ -130,9 +128,9 @@ class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin):
 
         fragment = Fragment()
         context = {
-            "question_classes": " ".join(question_classes),
-            "question_label": self.render_label(),
-            "question_content": self.render_content
+            'question': self,
+            'question_classes': " ".join(question_classes),
+            'question_content': self.render_content()
         }
         fragment.add_content(loader.render_template("templates/html/components/review_question.html", context))
         return fragment
@@ -152,76 +150,97 @@ class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin):
         return fragment
 
 
-class GroupProjectReviewAssessmentXBlock(XBlock, StudioEditableXBlockMixin):
-    CATEGORY = "group-project-v2-review-assessment"
 
-class GroupActivityQuestion(object):
-    def __init__(self, doc_tree, stage):
+class GroupProjectBaseAssessmentXBlock(XBlock, StudioEditableXBlockMixin):
+    question_id = String(
+        display_name=_(u"Question"),
+        help=_(u"Question to be assessed"),
+        scope=Scope.content
+    )
 
-        self.id = doc_tree.get("id")  # pylint: disable=invalid-name
-        self.label = doc_tree.find("./label")
-        answer_node = doc_tree.find("./answer")
-        self.answer = answer_node[0]
-        self.small = (answer_node.get("small", "false") == "true")
-        self.stage = stage
-        self.required = (doc_tree.get("required", "true") == "true")
-        designer_class = doc_tree.get("class")
-        self.question_classes = ["question"]
-        self.grade = doc_tree.get("grade") == "true"
+    show_mean = Boolean(
+        display_name=_(u"Show mean value"),
+        help=_(u"If True, converts review answers to numbers and calculates mean value"),
+        default=False,
+        scope=Scope.content
+    )
 
-        if self.required:
-            self.question_classes.append("required")
-        if designer_class:
-            self.question_classes.append(designer_class)
+    editable_fields = ("question_id", "show_mean")
 
     @property
-    def render(self):
-        answer_node = copy.deepcopy(self.answer)
-        answer_node.set('name', self.id)
-        answer_node.set('id', self.id)
-        current_class = answer_node.get('class')
-        answer_classes = ['answer']
-        if current_class:
-            answer_classes.append(current_class)
-        if self.small:
-            answer_classes.append('side')
-        if self.stage.is_closed:
-            answer_node.set('disabled', 'disabled')
+    def display_name_with_default(self):
+        if self.question:
+            return _(u'Review Assessment for question "{question_title}"').format(question_title=self.question.title)
         else:
-            answer_classes.append('editable')
-        answer_node.set('class', ' '.join(answer_classes))
+            return _(u"Review Assessment")
 
-        # TODO: this exactly matches answer_html property below
-        ans_html = outer_html(answer_node)
-        if len(answer_node.findall('./*')) < 1 and ans_html.index('>') == len(ans_html) - 1:
-            ans_html = ans_html[:-1] + ' />'
+    @lazy
+    def stage(self):
+        return self.get_parent()
 
-        label_html = ''
-        label_node = copy.deepcopy(self.label)
-        if len(inner_html(label_node)) > 0:
-            label_node.set('for', self.id)
-            current_class = label_node.get('class')
-            label_classes = ['prompt']
-            if current_class:
-                label_classes.append(current_class)
-            if self.small:
-                label_classes.append('side')
-            label_node.set('class', ' '.join(label_classes))
-            label_html = outer_html(label_node)
+    @lazy
+    def question(self):
+        matching_questions = [
+            question for question in self.stage.activity.questions if question.question_id == self.question_id
+        ]
+        if len(matching_questions) > 1:
+            raise ValueError("Question ID is not unique")
+        if not matching_questions:
+            return None
 
-        return '<div class="{}">{}{}</div>'.format(
-            ' '.join(self.question_classes),
-            label_html,
-            ans_html,
+        return matching_questions[0]
+
+    def student_view(self, context):
+        if self.question is None:
+            raise ValueError("No question selected")
+
+        raw_feedback = self.get_feedback()
+
+        feedback = []
+        for item in raw_feedback:
+            feedback.append(html.escape(item['answer']))
+
+        fragment = Fragment()
+        title = self.question.assessment_title if self.question.assessment_title else self.question.title
+        context = {'assessment': self, 'question_title': title, 'feedback': feedback}
+        if self.show_mean:
+            context['mean'] = mean(feedback)
+        fragment.add_content(loader.render_template("templates/html/components/review_assessment.html", context))
+        return fragment
+
+    def author_view(self, context):
+        if self.question:
+            return self.student_view(context)
+
+        fragment = Fragment()
+        fragment.add_content(_(u"Question is not selected"))
+        return fragment
+
+
+class GroupProjectPeerAssessmentXBlock(
+    GroupProjectBaseAssessmentXBlock, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin
+):
+    CATEGORY = "group-project-v2-peer-assessment"
+
+    def get_feedback(self):
+        all_feedback = project_api.get_user_peer_review_items(
+            self.user_id,
+            self.workgroup['id'],
+            self.stage.content_id,
         )
 
-    @property
-    def answer_html(self):
-        html = outer_html(self.answer)
-        if len(self.answer.findall('./*')) < 1 and html.index('>') == len(html) - 1:
-            html = html[:-1] + ' />'
+        return [item for item in all_feedback if item["question"] == self.question_id]
 
-        return html
+
+class GroupProjectGroupAssessmentXBlock(GroupProjectBaseAssessmentXBlock, WorkgroupAwareXBlockMixin):
+    CATEGORY = "group-project-v2-group-assessment"
+
+    def get_feedback(self):
+        all_feedback = project_api.get_workgroup_review_items_for_group(
+            self.workgroup['id'],
+            self.stage.content_id,
+        )
+        return [item for item in all_feedback if item["question"] == self.question_id]
 
 
 class GroupActivityAssessment(object):

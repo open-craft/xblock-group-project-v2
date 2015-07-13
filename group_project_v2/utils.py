@@ -81,3 +81,14 @@ def gettext(text):
 
 def make_key(*args):
     return ":".join([str(a) for a in args])
+
+
+def mean(value_array):
+    if not value_array:
+        return None
+    try:
+        numeric_values = [float(v) for v in value_array]
+        return float(sum(numeric_values) / len(numeric_values))
+    except (ValueError, TypeError, ZeroDivisionError) as exc:
+        log.warning(exc.message)
+        return None

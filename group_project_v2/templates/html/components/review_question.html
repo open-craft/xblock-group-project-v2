@@ -1,4 +1,6 @@
 <div class="{{ question_classes }}">
-  {{ question_label|safe }}
+  <label for="{{ question.question_id }}" class="group-project-question-title prompt {% if question.single_line %}side{% endif %}">
+    {{ question.title }}
+  </label>
   {{ question_content|safe }}
 </div>

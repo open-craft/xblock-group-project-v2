@@ -18,10 +18,11 @@ from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin, \
     WorkgroupAwareXBlockMixin
 from group_project_v2.stage_components import (
-    PeerSelectorXBlock, GroupProjectReviewQuestionXBlock, GroupProjectReviewAssessmentXBlock,
+    PeerSelectorXBlock, GroupSelectorXBlock,
+    GroupProjectReviewQuestionXBlock, GroupProjectPeerAssessmentXBlock, GroupProjectGroupAssessmentXBlock,
     GroupProjectResourceXBlock, GroupProjectSubmissionXBlock,
-    StageState,
-    GroupSelectorXBlock)
+    StageState
+)
 from group_project_v2.project_api import project_api
 from group_project_v2.utils import loader, format_date, gettext as _, make_key
 
@@ -51,7 +52,7 @@ class BaseGroupActivityStage(
     display_name = String(
         display_name=_(u"Display Name"),
         help=_(U"This is a name of the stage"),
-        scope=Scope.settings,
+        scope=Scope.content,
         default="Group Project V2 Stage"
     )
 
@@ -125,8 +126,8 @@ class BaseGroupActivityStage(
 
         return (self.close_date is not None) and (self.close_date < datetime.utcnow().replace(tzinfo=pytz.UTC))
 
-    def student_view(self, context):
-        stage_fragment = self.get_stage_content_fragment(context)
+    def _view_render(self, context, view='student_view'):
+        stage_fragment = self.get_stage_content_fragment(context, view)
 
         fragment = Fragment()
         fragment.add_frag_resources(stage_fragment)
@@ -140,22 +141,26 @@ class BaseGroupActivityStage(
 
         return fragment
 
+    def student_view(self, context):
+        return self._view_render(context)
+
+    def author_preview_view(self, context):
+        return self._view_render(context, "author_view")
+
     def render_children_fragment(self, context, children=None, view='student_view'):
         to_render = children if children else self._children
         fragment = Fragment()
 
         for child in to_render:
-            child_fragment = child.render(view, context)
+            view_to_render = view if hasattr(child, view) else 'student_view'
+            child_fragment = child.render(view_to_render, context)
             fragment.add_frag_resources(child_fragment)
             fragment.add_content(child_fragment.content)
 
         return fragment
 
-    def get_stage_content_fragment(self, context):
-        return self.render_children_fragment(context)
-
-    def author_preview_view(self, context):
-        return self.student_view(context)
+    def get_stage_content_fragment(self, context, view='student_view'):
+        return self.render_children_fragment(context, view=view)
 
     def author_edit_view(self, context):
         """
@@ -332,7 +337,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
         return violations
 
-    def get_stage_content_fragment(self, context):
+    def get_stage_content_fragment(self, context, view='student_view'):
         children_fragment = self.render_children_fragment(context)
 
         fragment = Fragment()
@@ -566,18 +571,6 @@ class GroupReviewStage(ReviewBaseStage):
 
 class AssessmentBaseStage(BaseGroupActivityStage):
     type = u'Evaluation'
-    HTML_TEMPLATE = 'templates/html/stages/peer_assessment.html'
-
-    def allowed_nested_blocks(self):
-        blocks = super(AssessmentBaseStage, self).allowed_nested_blocks
-        blocks.update(OrderedDict([
-            (GroupProjectReviewAssessmentXBlock.CATEGORY, _(u"Review Question"))
-        ]))
-        return blocks
-
-    @property
-    def assessments(self):
-        return self._get_children_by_category(GroupProjectReviewAssessmentXBlock.CATEGORY)
 
     def validate(self):
         violations = super(AssessmentBaseStage, self).validate()
@@ -597,8 +590,30 @@ class PeerAssessmentStage(AssessmentBaseStage):
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_assessment.html'
     CATEGORY = 'group-project-v2-stage-peer-assessment'
 
+    def allowed_nested_blocks(self):
+        blocks = super(AssessmentBaseStage, self).allowed_nested_blocks
+        blocks.update(OrderedDict([
+            (GroupProjectPeerAssessmentXBlock.CATEGORY, _(u"Review Assessment"))
+        ]))
+        return blocks
+
+    @property
+    def assessments(self):
+        return self._get_children_by_category(GroupProjectPeerAssessmentXBlock.CATEGORY)
+
 
 class GroupAssessmentStage(AssessmentBaseStage):
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_assessment.html'
     CATEGORY = 'group-project-v2-stage-group-assessment'
+
+    def allowed_nested_blocks(self):
+        blocks = super(AssessmentBaseStage, self).allowed_nested_blocks
+        blocks.update(OrderedDict([
+            (GroupProjectGroupAssessmentXBlock.CATEGORY, _(u"Review Assessment"))
+        ]))
+        return blocks
+
+    @property
+    def assessments(self):
+        return self._get_children_by_category(GroupProjectGroupAssessmentXBlock.CATEGORY)
 
