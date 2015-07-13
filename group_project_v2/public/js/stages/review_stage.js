@@ -8,6 +8,9 @@ function ReviewStageXBlock(runtime, element) {
     var DATA_PRESENT_SUBMIT = gettext('Resubmit');
     var NO_DATA_PRESENT_SUBMIT = gettext('Submit');
 
+    var SELECT_PEER_TO_REVIEW = gettext("Please select Teammate to review");
+    var SELECT_GROUP_TO_REVIEW = gettext("Please select Group to review");
+
     var $form = $("form.review",  element);
     var is_peer_review = $form.data('review-type') == 'peer_review';
     var message_box = $(".message"); // searching globally - not a typo: message box is created at group project level
@@ -137,6 +140,12 @@ function ReviewStageXBlock(runtime, element) {
         });
         data["review_subject_id"] = $("ul.review_subjects li.selected", $form).data('id');
 
+        if (!data["review_subject_id"]) {
+            var message = is_peer_review ? SELECT_PEER_TO_REVIEW : SELECT_GROUP_TO_REVIEW;
+            show_message(message);
+            return;
+        }
+
         $.ajax({
             type: $form.attr('method'),
             url: runtime.handlerUrl(element, $form.attr('action')),
@@ -160,8 +169,10 @@ function ReviewStageXBlock(runtime, element) {
     $('.view_other_submissions', element).on('click', function () {
         var $content = $('.other_submission_links', review_submissions_dialog);
         $content.empty().hide();
-        debugger;
         var selected_group_id = $(this).parents(".select_group").data("id");
+        if (!selected_group_id) {
+            return;
+        }
         $.ajax({
             url: runtime.handlerUrl(element, "other_submission_links"),
             data: {group_id: selected_group_id},
