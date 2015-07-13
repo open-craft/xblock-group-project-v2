@@ -45,10 +45,6 @@
     float: right;
 }
 
-.group-project-xblock-wrapper .feedback_stage {
-    display: none;
-}
-
 .group-project-xblock-wrapper .other_submissions {
     float: right;
     position: relative;
@@ -228,4 +224,10 @@
 
 .group-project-xblock-wrapper .group-project-answer {
     display: block;
+}
+
+.group-project-xblock-wrapper .group-project-final-grade {
+    float:right;
+    margin-top: 10px;
+    text-transform: uppercase;
 }

@@ -601,8 +601,17 @@ class PeerAssessmentStage(AssessmentBaseStage):
     def assessments(self):
         return self._get_children_by_category(GroupProjectPeerAssessmentXBlock.CATEGORY)
 
+    def get_stage_content_fragment(self, context, view='student_view'):
+        children_fragment = self.render_children_fragment(context)
 
-class GroupAssessmentStage(AssessmentBaseStage):
+        fragment = Fragment()
+        fragment.add_frag_resources(children_fragment)
+        render_context = {'stage': self, 'children_content': children_fragment.content}
+        fragment.add_content(loader.render_template(self.STAGE_CONTENT_TEMPLATE, render_context))
+        return fragment
+
+
+class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_assessment.html'
     CATEGORY = 'group-project-v2-stage-group-assessment'
 
@@ -616,4 +625,14 @@ class GroupAssessmentStage(AssessmentBaseStage):
     @property
     def assessments(self):
         return self._get_children_by_category(GroupProjectGroupAssessmentXBlock.CATEGORY)
+
+    def get_stage_content_fragment(self, context, view='student_view'):
+        children_fragment = self.render_children_fragment(context)
+
+        fragment = Fragment()
+        fragment.add_frag_resources(children_fragment)
+        final_grade = self.activity.calculate_grade(self.workgroup['id'])
+        render_context = {'stage': self, 'children_content': children_fragment.content, 'final_grade': final_grade}
+        fragment.add_content(loader.render_template(self.STAGE_CONTENT_TEMPLATE, render_context))
+        return fragment
 

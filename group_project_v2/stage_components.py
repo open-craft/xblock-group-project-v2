@@ -204,7 +204,7 @@ class GroupProjectBaseAssessmentXBlock(XBlock, StudioEditableXBlockMixin):
         title = self.question.assessment_title if self.question.assessment_title else self.question.title
         context = {'assessment': self, 'question_title': title, 'feedback': feedback}
         if self.show_mean:
-            context['mean'] = mean(feedback)
+            context['mean'] = "{0:.1f}".format(mean(feedback))
         fragment.add_content(loader.render_template("templates/html/components/review_assessment.html", context))
         return fragment
 
@@ -232,7 +232,9 @@ class GroupProjectPeerAssessmentXBlock(
         return [item for item in all_feedback if item["question"] == self.question_id]
 
 
-class GroupProjectGroupAssessmentXBlock(GroupProjectBaseAssessmentXBlock, WorkgroupAwareXBlockMixin):
+class GroupProjectGroupAssessmentXBlock(
+    GroupProjectBaseAssessmentXBlock, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin
+):
     CATEGORY = "group-project-v2-group-assessment"
 
     def get_feedback(self):

@@ -1,12 +1,8 @@
-{% if activity_stage.content_html %}
-  {{ activity_stage.content_html|safe }}
-  <hr/>
-{% endif %}
-<div><a class="view_feedback" data-showid="cohort_feedback">View Cohort Feedback</a></div>
-
+{% load i18n %}
 <div class="feedback_stage group_assessment">
-  {% for activity_assessment in activity_stage.assessments %}
-    {{ activity_assessment.render|safe }}
-  {% endfor %}
-  <hr/>
+  {{ children_content|safe }}
 </div>
+
+<hr/>
+
+<div class="highlight group-project-final-grade">{% trans "Final Grade:" %} {{ final_grade }}</div>

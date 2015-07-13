@@ -1,13 +1,3 @@
-{% if activity_stage.content_html %}
-  {{ activity_stage.content_html|safe }}
-  <hr/>
-{% endif %}
-
-<div><a class="view_feedback" data-showid="team_feedback">View Team Feedback</a></div>
-
 <div class="feedback_stage peer_assessment">
-  {% for activity_assessment in activity_stage.assessments %}
-    {{ activity_assessment.render|safe }}
-  {% endfor %}
-  <hr/>
+  {{ children_content|safe }}
 </div>
