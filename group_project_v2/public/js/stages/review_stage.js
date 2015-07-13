@@ -102,7 +102,7 @@ function ReviewStageXBlock(runtime, element) {
         });
     }
 
-    $('.select_peer,.select_group').on('click', function (ev) {
+    $('.select_peer,.select_group', element).on('click', function (ev) {
         var $this = $(this);
         var is_peer = $this.hasClass('select_peer');
         $('.select_peer,.select_group').removeClass('selected'); // removing selection from other peers/groups. NOT a bug
@@ -160,7 +160,8 @@ function ReviewStageXBlock(runtime, element) {
     $('.view_other_submissions', element).on('click', function () {
         var $content = $('.other_submission_links', review_submissions_dialog);
         $content.empty().hide();
-        var selected_group_id = $('.select_group.selected').data("id");
+        debugger;
+        var selected_group_id = $(this).parents(".select_group").data("id");
         $.ajax({
             url: runtime.handlerUrl(element, "other_submission_links"),
             data: {group_id: selected_group_id},

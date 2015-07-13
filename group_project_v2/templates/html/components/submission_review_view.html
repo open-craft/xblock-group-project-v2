@@ -1,43 +1,18 @@
 {% load i18n %}
-<div class="uploader">
-  <div class="upload_title">{{ submission.display_name }}:</div>
-  <div class="upload_item_wrapper" {% if upload.location %} data-location="{{ upload.location }}" {% endif %}>
-    <input
-      class="{{ submission.upload_id }}_name" placeholder="Browse your computer to upload file..."
-      disabled="disabled" type="text"
-      {% if upload.file_name %}
-        value="{{ upload.file_name }}" data-original-value="{{ upload.file_name }}"
-      {% endif %}
-    />
-  </div>
-  <label for="{{ submission.upload_id }}">
-    <span class="side button tiny radius {{ submission.upload_id }}_label fa-paperclip"></span>
-  </label>
-  <input style="display:none;" class="file_upload" name="{{ submission.upload_id }}" id="{{ submission.upload_id }}" type="file" />
-  {% if submission.description %}
-    <div class="description">{{ submission.description }}</div>
-  {% endif %}
-  <div class="{{ submission.upload_id }}_progress_box file-progress-box">
-    <div class="{{ submission.upload_id }}_progress file-progress"></div>
-  </div>
-  {% if upload.location %}
-    <div class="upload_item_data">
-      {% trans "Uploaded by" %}
-      <a href="{{course_id}}/discussion/forum/users/{{ upload.user_details.id }}">{{ upload.user_details.full_name }}</a>
-      on {{ upload.submission_date }}
-    </div>
-  {% endif %}
-</div>
-
-{% load i18n %}
-{% if upload %}
-  {% for file_link in group_activity.submissions %}
-    {% if file_link.location %}
-      <div><a href="{{ file_link.location }}"{% if file_link.description %} title="{{ file_link.description }}"{% endif %} target="_blank">{{ file_link.title }}{% if file_link.file_name %} ({{ file_link.file_name }} - {{ file_link.submission_date }}){% endif %}</a></div>
-    {% else %}
-      <div class="no_submission"{% if file_link.description %} title="{{ file_link.description }}"{% endif %}>{{ file_link.title }} ({% trans "This file has not been submitted by this group" %})</div>
+{% if upload and upload.location %}
+  <div>
+    <a href="{{ upload.location }}"{% if submission.description %} title="{{ submission.description }}"{% endif %} target="_blank">{{ submission.display_name }}</a>
+    {% if upload.file_name %}
+      ({{ upload.file_name }}) -
+      <span class="upload_item_data">
+        {% trans "Uploaded by" %}
+        <a href="{{course_id}}/discussion/forum/users/{{ upload.user_details.id }}">{{ upload.user_details.full_name }}</a>
+        on {{ upload.submission_date }})
+      </span>
     {% endif %}
-  {% endfor %}
+  </div>
 {% else %}
-  <div class="submissions_message">{% trans "No submissions have been uploaded for this group" %}</div>
+  <div class="no_submission"{% if submission.description %} title="{{ submission.description }}"{% endif %}>
+    {{ upload.title }} ({% trans "This file has not been submitted by this group" %})
+  </div>
 {% endif %}

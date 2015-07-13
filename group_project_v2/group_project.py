@@ -540,22 +540,6 @@ class GroupActivityXBlock(
         }
 
     @XBlock.handler
-    def load_other_group_feedback(self, request, suffix=''):
-
-        group_id = request.GET["group_id"]
-
-        feedback = project_api.get_workgroup_review_items(
-            self.anonymous_student_id,
-            group_id,
-            self.content_id
-        )
-
-        # pivot the data to show question -> answer
-        results = {ri['question']: ri['answer'] for ri in feedback}
-
-        return webob.response.Response(body=json.dumps(results))
-
-    @XBlock.handler
     def load_my_peer_feedback(self, request, suffix=''):
 
         user_id = self.user_id

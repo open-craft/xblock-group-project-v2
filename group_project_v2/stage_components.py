@@ -461,11 +461,14 @@ class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin):
         fragment.initialize_js("GroupProjectSubmissionBlock")
         return fragment
 
-    def review_view(self, context):
+    def submission_review_view(self, context):
+        group_id = context.get('group_id', self.stage.activity.workgroup["id"])
         fragment = Fragment()
-        render_context = {'submission': self, 'upload': self.upload}
+        render_context = {'submission': self, 'upload': self.get_upload(group_id)}
         render_context.update(context)
         fragment.add_content(loader.render_template(self.REVIEW_VIEW_TEMPLATE, render_context))
+        # NOTE: adding js/css likely won't work here, as the result of this view is added as an HTML to an existing DOM
+        # element
         return fragment
 
     @XBlock.handler

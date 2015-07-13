@@ -1,6 +1,6 @@
 {% load i18n %}
 <h4>{{ stage.display_name }}</h4>
-{% if has_submissions %}
+{% if submission_contents %}
   <ul class="group-project-submissions review-view">
     {% for submission_content in submission_contents %}<li>{{ submission_content|safe }}</li>{% endfor %}
   </ul>

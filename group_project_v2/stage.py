@@ -271,10 +271,10 @@ class SubmissionStage(BaseGroupActivityStage):
         fragment = Fragment()
 
         submission_contents = []
-        for resource in self.submissions:
-            resource_fragment = resource.render(child_view, context)
-            fragment.add_frag_resources(resource_fragment)
-            submission_contents.append(resource_fragment.content)
+        for submission in self.submissions:
+            submission_fragment = submission.render(child_view, context)
+            fragment.add_frag_resources(submission_fragment)
+            submission_contents.append(submission_fragment.content)
 
         context = {'stage': self, 'submission_contents': submission_contents}
         fragment.add_content(loader.render_template(template, context))
@@ -285,6 +285,7 @@ class SubmissionStage(BaseGroupActivityStage):
         return self._render_view('submissions_view', "templates/html/stages/submissions_view.html", context)
 
     def review_submissions_view(self, context):
+        # transparently passing group_id via context
         return self._render_view(
             'submission_review_view', "templates/html/stages/submissions_review_view.html", context
         )
@@ -353,6 +354,12 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
         return True
 
+    def _pivot_feedback(self, feedback):
+        """
+        Pivots the feedback to show question -> answer
+        """
+        return {pi['question']: pi['answer'] for pi in feedback}
+
 
 class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
@@ -383,8 +390,7 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
             self.activity.content_id,
         )
 
-        # pivot the data to show question -> answer
-        results = {pi['question']: pi['answer'] for pi in feedback}
+        results = self._pivot_feedback(feedback)
 
         return webob.response.Response(body=json.dumps(results))
 
@@ -443,11 +449,34 @@ class GroupReviewStage(ReviewBaseStage):
     def other_submission_links(self, request, suffix=''):
         group_id = request.GET["group_id"]
 
-        self.update_submission_data(group_id)
-        context = {'submissions': self.submissions}
-        html_output = loader.render_template('/templates/html/review_submissions.html', context)
+        target_stages = [stage for stage in self.activity.stages if stage.submissions_stage]
+
+        submission_stage_contents = []
+        for stage in target_stages:
+            stage_fragment = stage.render('review_submissions_view', {'group_id': group_id})
+            submission_stage_contents.append(stage_fragment.content)
+
+        context = {'block': self, 'submission_stage_contents': submission_stage_contents}
+        html_output = loader.render_template(
+            '/templates/html/stages/stages_group_review_other_team_submissions.html', context
+        )
 
         return webob.response.Response(body=json.dumps({"html": html_output}))
+
+    @XBlock.handler
+    def load_other_group_feedback(self, request, suffix=''):
+
+        group_id = request.GET["group_id"]
+
+        feedback = project_api.get_workgroup_review_items(
+            self.anonymous_student_id,
+            group_id,
+            self.activity.content_id
+        )
+
+        results = self._pivot_feedback(feedback)
+
+        return webob.response.Response(body=json.dumps(results))
 
 
 class AssessmentBaseStage(BaseGroupActivityStage):
