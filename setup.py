@@ -33,6 +33,7 @@ BLOCKS = [
     'group-project-v2-resource = group_project_v2.stage_components:GroupProjectResourceXBlock',
     'group-project-v2-submission = group_project_v2.stage_components:GroupProjectSubmissionXBlock',
     'group-project-v2-peer-selector = group_project_v2.stage_components:PeerSelectorXBlock',
+    'group-project-v2-group-selector = group_project_v2.stage_components:GroupSelectorXBlock',
     'group-project-v2-review-question = group_project_v2.stage_components:GroupProjectReviewQuestionXBlock',
     'group-project-v2-review-assessment = group_project_v2.stage_components:GroupProjectReviewAssessmentXBlock',
 

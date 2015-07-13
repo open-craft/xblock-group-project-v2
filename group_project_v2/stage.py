@@ -20,8 +20,8 @@ from group_project_v2.mixins import ChildrenNavigationXBlockMixin, UserAwareXBlo
 from group_project_v2.stage_components import (
     PeerSelectorXBlock, GroupProjectReviewQuestionXBlock, GroupProjectReviewAssessmentXBlock,
     GroupProjectResourceXBlock, GroupProjectSubmissionXBlock,
-    StageState
-)
+    StageState,
+    GroupSelectorXBlock)
 from group_project_v2.project_api import project_api
 from group_project_v2.utils import loader, format_date, gettext as _, make_key
 
@@ -267,19 +267,27 @@ class SubmissionStage(BaseGroupActivityStage):
     def has_all_submissions(self):
         return all(submission.upload is not None for submission in self.submissions)
 
-    def submissions_view(self, context):
+    def _render_view(self, child_view, template, context):
         fragment = Fragment()
 
         submission_contents = []
         for resource in self.submissions:
-            resource_fragment = resource.render('submissions_view', context)
+            resource_fragment = resource.render(child_view, context)
             fragment.add_frag_resources(resource_fragment)
             submission_contents.append(resource_fragment.content)
 
         context = {'stage': self, 'submission_contents': submission_contents}
-        fragment.add_content(loader.render_template("templates/html/stages/submissions_view.html", context))
+        fragment.add_content(loader.render_template(template, context))
 
         return fragment
+
+    def submissions_view(self, context):
+        return self._render_view('submissions_view', "templates/html/stages/submissions_view.html", context)
+
+    def review_submissions_view(self, context):
+        return self._render_view(
+            'submission_review_view', "templates/html/stages/submissions_review_view.html", context
+        )
 
 
 class ReviewBaseStage(BaseGroupActivityStage):
@@ -423,16 +431,23 @@ class GroupReviewStage(ReviewBaseStage):
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_review.html'
     CATEGORY = 'group-project-v2-stage-group-review'
 
+    @property
+    def allowed_nested_blocks(self):
+        blocks = super(GroupReviewStage, self).allowed_nested_blocks
+        blocks.update(OrderedDict([
+            (GroupSelectorXBlock.CATEGORY, _(u"Group selector"))
+        ]))
+        return blocks
+
     @XBlock.handler
     def other_submission_links(self, request, suffix=''):
-        pass
-        # group_id = request.GET["group_id"]
-        #
-        # self.update_submission_data(group_id)
-        # context = {'submissions': self.submissions}
-        # html_output = loader.render_template('/templates/html/review_submissions.html', context)
-        #
-        # return webob.response.Response(body=json.dumps({"html": html_output}))
+        group_id = request.GET["group_id"]
+
+        self.update_submission_data(group_id)
+        context = {'submissions': self.submissions}
+        html_output = loader.render_template('/templates/html/review_submissions.html', context)
+
+        return webob.response.Response(body=json.dumps({"html": html_output}))
 
 
 class AssessmentBaseStage(BaseGroupActivityStage):

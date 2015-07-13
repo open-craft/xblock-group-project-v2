@@ -292,7 +292,7 @@ class PeerSelectorXBlock(XBlock):
         fragment = Fragment()
         render_context = {'selector': self, 'peers': self.peers}
         render_context.update(context)
-        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/peer_selector.css"))
+        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/review_subject_selector.css"))
         fragment.add_content(loader.render_template(self.STUDENT_TEMPLATE, render_context))
         return fragment
 
@@ -313,10 +313,48 @@ class PeerSelectorXBlock(XBlock):
         return fragment
 
 
+class GroupSelectorXBlock(XBlock):
+    CATEGORY = "group-project-v2-group-selector"
+    display_name_with_default = _(u"Group selector XBlock")
+    STUDENT_TEMPLATE = "templates/html/components/group_selector.html"
+
+    @property
+    def stage(self):
+        return self.get_parent()
+
+    @property
+    def groups(self):
+        return self.stage.activity.review_groups
+
+    def student_view(self, context):
+        fragment = Fragment()
+        render_context = {'selector': self, 'groups': self.groups}
+        render_context.update(context)
+        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/review_subject_selector.css"))
+        fragment.add_content(loader.render_template(self.STUDENT_TEMPLATE, render_context))
+        return fragment
+
+    def author_view(self, context):
+        fake_groups = [
+            {"id": 1},
+            {"id": 2},
+        ]
+        render_context = {
+            'demo': True,
+            'groups': fake_groups
+        }
+        return self.student_view(render_context)
+
+    def studio_view(self, context):
+        fragment = Fragment()
+        fragment.add_content(NO_EDITABLE_SETTINGS)
+        return fragment
+
+
 class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin):
     CATEGORY = "group-project-v2-resource"
 
-    PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/project_navigator/resource_xblock_view.html'
+    PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/project_navigator/resource.html'
 
     display_name = String(
         display_name=_(u"Display Name"),
@@ -366,7 +404,8 @@ SubmissionUpload = namedtuple("SubmissionUpload", "location file_name submission
 @XBlock.wants('notifications')
 class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin):
     CATEGORY = "group-project-v2-submission"
-    PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/project_navigator/submission_xblock_view.html'
+    PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/submission_navigator_view.html'
+    REVIEW_VIEW_TEMPLATE = 'templates/html/components/submission_review_view.html'
 
     display_name = String(
         display_name=_(u"Display Name"),
@@ -420,6 +459,13 @@ class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin):
         fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/submission.js'))
         fragment.initialize_js("GroupProjectSubmissionBlock")
+        return fragment
+
+    def review_view(self, context):
+        fragment = Fragment()
+        render_context = {'submission': self, 'upload': self.upload}
+        render_context.update(context)
+        fragment.add_content(loader.render_template(self.REVIEW_VIEW_TEMPLATE, render_context))
         return fragment
 
     @XBlock.handler

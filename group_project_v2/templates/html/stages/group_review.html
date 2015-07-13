@@ -1,21 +1,19 @@
-{% if activity_stage.content_html %}
-  {{ activity_stage.content_html|safe }}
+{% load i18n %}
+<form class="review other_group_review" data-review-type="group_review" action="submit_other_group_feedback" method="POST">
+  {{ children_content|safe }}
   <hr/>
-{% endif %}
-
-<div class="centered"><span class="other_groups"></span></div>
-
-{% if activity_stage.grade_header_html %}
-  {{ activity_stage.grade_header_html|safe }}
-{% endif %}
-
-<form class="other_group_review" action="submit_other_group_feedback" method="POST">
-  <input type="hidden" class="group_id" name="group_id" value="" />
-  <input type="hidden" class="stage_id" name="stage_id" value="{{activity_stage.id}}" />
-  <div class="other_submissions"><a href="#" class="view_other_submissions">View team submissions</a></div>
-  {% for activity_question in activity_stage.questions %}
-    {{ activity_question.render|safe }}
-  {% endfor %}
-  <hr/>
-  <button class="submit" {% if activity_stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
+  <button class="submit" {% if stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
 </form>
+
+
+<div class="review_submissions_dialog">
+  <div class="modal-bg"></div>
+  <div class="xblock-reveal reveal-modal open small">
+    <div class="close-box close_review_dialog">
+      <i class="fa fa-times-circle"></i>
+    </div>
+    <div class="title">{% trans "Group Submission" %}</div>
+    <div>{% trans "Please review the file(s) below to evaluate the group's work." %}</div>
+    <div class="other_submission_links"></div>
+  </div>
+</div>
