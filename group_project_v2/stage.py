@@ -317,7 +317,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
     @property
     def grade_questions(self):
-        return (question for question in self.questions if question.grade)
+        return [question for question in self.questions if question.grade]
 
     def validate(self):
         violations = super(ReviewBaseStage, self).validate()
@@ -382,6 +382,22 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
         peer_review_items = project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
 
         return self._check_review_complete(peers_to_review, self.required_questions, peer_review_items, "user")
+
+    def validate(self):
+        violations = super(PeerReviewStage, self).validate()
+
+        # Technically, nothing prevents us from allowing graded peer review questions. The only reason why
+        # they are considered not supported is that GroupActivityXBlock.calculate_grade does not
+        # take them into account.
+        if self.grade_questions:
+            violations.add(ValidationMessage(
+                ValidationMessage.ERROR,
+                _(u"Grade questions are not supported for {class_name} '{stage_title}'").format(
+                    class_name=self.__class__.__name__, stage_title=self.display_name
+                )
+            ))
+
+        return violations
 
     @XBlock.handler
     def load_peer_feedback(self, request, suffix=''):
