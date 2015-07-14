@@ -51,10 +51,10 @@ class GroupProjectNavigatorXBlock(
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return {
-            "gp-v2-navigator-navigation": _(u"Navigation View"),
-            "gp-v2-navigator-resources": _(u"Resources View"),
-            "gp-v2-navigator-submissions": _(u"Submissions View"),
-            "gp-v2-navigator-ask-ta": _(u"Ask a TA View"),
+            NavigationViewXBlock.CATEGORY: _(u"Navigation View"),
+            ResourcesViewXBlock.CATEGORY: _(u"Resources View"),
+            SubmissionsViewXBlock.CATEGORY: _(u"Submissions View"),
+            AskTAViewXBlock.CATEGORY: _(u"Ask a TA View"),
         }
 
     def student_view(self, context):
@@ -206,7 +206,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     Navigation View XBlock - displays Group Project Activities and Stages, completion state and links to navigate to
     any stage in Group Project
     """
-    CATEGORY = 'group-project-v2-navigator-navigation'
+    CATEGORY = "gp-v2-navigator-navigation"
     type = ViewTypes.NAVIGATION
     icon = u"fa-bars"
     display_name_with_default = _(u"Navigation")
@@ -234,6 +234,7 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     """
     Resources view XBlock - displays Resources links grouped by Activity
     """
+    CATEGORY = "gp-v2-navigator-resources"
     type = ViewTypes.RESOURCES
     icon = u"fa-files-o"
     display_name_with_default = _(u"Resources")
@@ -262,6 +263,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     Submissions View - displays submissions grouped by Activity. Allows uploading new files and downloading
     earlier uploads
     """
+    CATEGORY = "gp-v2-navigator-submissions"
     type = ViewTypes.SUBMISSIONS
     icon = u"fa-upload"
     display_name_with_default = _(u"Submissions")
@@ -294,6 +296,7 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     """
     Ask a TA view - displays  a form to send message to Teaching Assistant
     """
+    CATEGORY = "gp-v2-navigator-ask-ta"
     type = ViewTypes.ASK_TA
     selector_text = u"TA"
     display_name_with_default = _(u"Ask a TA")
