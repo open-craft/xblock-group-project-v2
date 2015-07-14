@@ -13,6 +13,7 @@ function GroupProjectCompletionStage(runtime, element) {
     }
 
     $(".group-project-completion-checkmark", element).click(function(ev) {
+        var checkbox = this;
         ev.preventDefault();
         if (!$(this)[0].checked) {
             return false;
@@ -30,8 +31,8 @@ function GroupProjectCompletionStage(runtime, element) {
                     return;
                 }
 
-                $(this).prop('checked', 'checked');
-                $(this).prop('disabled', 'disabled');
+                $(checkbox).prop('checked', true);
+                $(checkbox).prop('disabled', true);
 
                 if (data.new_stage_states) {
                     for (var i = 0; i < data.new_stage_states.length; i++) {
