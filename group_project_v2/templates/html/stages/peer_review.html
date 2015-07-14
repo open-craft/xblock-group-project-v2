@@ -1,5 +1,5 @@
 <form class="review peer_review" data-review-type="peer_review" action="submit_review" method="POST">
-  {{ children_content|safe }}
+  {% for children_content in children_contents %}{{ children_content|safe }}{% endfor %}
   <hr/>
   <button class="submit" {% if stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
 </form>

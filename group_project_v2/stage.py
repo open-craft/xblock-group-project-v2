@@ -70,6 +70,7 @@ class BaseGroupActivityStage(
     )
 
     STAGE_WRAPPER_TEMPLATE = 'templates/html/stages/stage_wrapper.html'
+    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/default_view.html'
 
     editable_fields = ('display_name', 'open_date', 'close_date')
     has_children = True
@@ -145,18 +146,28 @@ class BaseGroupActivityStage(
         # if we use student_view or author_view Studio will wrap it in HTML that we don't want in the preview
         return self._view_render(context, "preview_view")
 
-    def render_children_fragment(self, context, view='student_view'):
-        fragment = Fragment()
-
+    def render_children_fragments(self, context, view='student_view'):
+        children_fragments = []
         for child in self._children:
             child_fragment = self._render_child_fragment(child, context, view)
-            fragment.add_frag_resources(child_fragment)
-            fragment.add_content(child_fragment.content)
+            children_fragments.append(child_fragment)
 
-        return fragment
+        return children_fragments
 
     def get_stage_content_fragment(self, context, view='student_view'):
-        return self.render_children_fragment(context, view=view)
+        fragment = Fragment()
+        children_fragments = self.render_children_fragments(context, view=view)
+        render_context = {
+            'stage': self,
+            'children_contents': [frag.content for frag in children_fragments]
+        }
+
+        for frag in children_fragments:
+            fragment.add_frag_resources(frag)
+
+        render_context.update(context)
+        fragment.add_content(loader.render_template(self.STAGE_CONTENT_TEMPLATE, render_context))
+        return fragment
 
     def mark_complete(self, user_id):
         try:
@@ -211,14 +222,12 @@ class BaseGroupActivityStage(
 
         return fragment
 
-    def _get_new_stage_state_component(self):
-        return [
-            {
-                "activity_id": str(self.activity.id),
-                "stage_id": str(self.id),
-                "state": self.get_stage_state()
-            }
-        ]
+    def get_new_stage_state_data(self):
+        return {
+            "activity_id": str(self.activity.id),
+            "stage_id": str(self.id),
+            "state": self.get_stage_state()
+        }
 
 
 class BasicStage(BaseGroupActivityStage):
@@ -309,7 +318,6 @@ class SubmissionStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
 
 class ReviewBaseStage(BaseGroupActivityStage):
     type = u'Grade'
-    STAGE_CONTENT_TEMPLATE = None
 
     @property
     def allowed_nested_blocks(self):
@@ -345,12 +353,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
         return violations
 
     def get_stage_content_fragment(self, context, view='student_view'):
-        children_fragment = self.render_children_fragment(context, view=view)
-
-        fragment = Fragment()
-        fragment.add_frag_resources(children_fragment)
-        render_context = {'stage': self, 'children_content': children_fragment.content}
-        fragment.add_content(loader.render_template(self.STAGE_CONTENT_TEMPLATE, render_context))
+        fragment = super(ReviewBaseStage, self).get_stage_content_fragment(context, view)
         fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/stages/review_stage.js"))
         fragment.initialize_js("ReviewStageXBlock")
         return fragment
@@ -390,7 +393,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
         return {
             'result': 'success',
             'msg': _('Thanks for your feedback'),
-            'new_stage_states': self._get_new_stage_state_component()
+            'new_stage_states': [self.get_new_stage_state_data()]
         }
 
     def do_submit_review(self, submissions):
@@ -582,15 +585,6 @@ class PeerAssessmentStage(AssessmentBaseStage):
     def assessments(self):
         return self._get_children_by_category(GroupProjectPeerAssessmentXBlock.CATEGORY)
 
-    def get_stage_content_fragment(self, context, view='student_view'):
-        children_fragment = self.render_children_fragment(context, view=view)
-
-        fragment = Fragment()
-        fragment.add_frag_resources(children_fragment)
-        render_context = {'stage': self, 'children_content': children_fragment.content}
-        fragment.add_content(loader.render_template(self.STAGE_CONTENT_TEMPLATE, render_context))
-        return fragment
-
 
 class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
     type = u'Grade'
@@ -610,11 +604,8 @@ class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
         return self._get_children_by_category(GroupProjectGroupAssessmentXBlock.CATEGORY)
 
     def get_stage_content_fragment(self, context, view='student_view'):
-        children_fragment = self.render_children_fragment(context, view=view)
-
-        fragment = Fragment()
-        fragment.add_frag_resources(children_fragment)
-        final_grade = self.activity.calculate_grade(self.workgroup['id'])
-        render_context = {'stage': self, 'children_content': children_fragment.content, 'final_grade': final_grade}
-        fragment.add_content(loader.render_template(self.STAGE_CONTENT_TEMPLATE, render_context))
-        return fragment
+        context_extension = {
+            'final_grade': self.activity.calculate_grade(self.workgroup['id'])
+        }
+        context_extension.update(context)
+        return super(GroupAssessmentStage, self).get_stage_content_fragment(context_extension, view)
