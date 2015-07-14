@@ -13,8 +13,9 @@ class BaseIntegrationTest(SeleniumXBlockTest):
     """ Base Integraition test class """
     PROJECT_API_PATCHES = (
         "group_project_v2.group_project.project_api",
-        "group_project_v2.activity.project_api",
-        "group_project_v2.project_navigator.project_api",
+        "group_project_v2.mixins.project_api",
+        "group_project_v2.stage.project_api",
+        "group_project_v2.stage_components.project_api",
     )
 
     def setUp(self):
