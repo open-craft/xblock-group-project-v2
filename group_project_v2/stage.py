@@ -275,7 +275,7 @@ class CompletionStage(BaseGroupActivityStage):
             self.completed = True
             return {
                 'result': 'success',
-                'msg': _('Thanks for your feedback'),
+                'msg': _('Stage completed!'),
                 'new_stage_states': [self.get_new_stage_state_data()]
             }
         except ApiError as exception:
