@@ -243,7 +243,7 @@ class BaseGroupActivityStage(
 
 
 class BasicStage(BaseGroupActivityStage):
-    CATEGORY = 'group-project-v2-stage-basic'
+    CATEGORY = 'gp-v2-stage-basic'
 
     STAGE_TYPE = _(u'Text')
 
@@ -260,7 +260,7 @@ class CompletionStage(BaseGroupActivityStage):
         scope=Scope.user_state
     )
 
-    CATEGORY = 'group-project-v2-stage-completion'
+    CATEGORY = 'gp-v2-stage-completion'
     STAGE_CONTENT_TEMPLATE = "templates/html/stages/completion.html"
 
     STAGE_TYPE = _(u'Completion')
@@ -291,7 +291,7 @@ class CompletionStage(BaseGroupActivityStage):
 
 
 class SubmissionStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
-    CATEGORY = 'group-project-v2-stage-submission'
+    CATEGORY = 'gp-v2-stage-submission'
 
     STAGE_TYPE = _(u'Task')
 
@@ -445,7 +445,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
 
 class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
-    CATEGORY = 'group-project-v2-stage-peer-review'
+    CATEGORY = 'gp-v2-stage-peer-review'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
 
     @property
@@ -507,7 +507,7 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
 
 
 class GroupReviewStage(ReviewBaseStage):
-    CATEGORY = 'group-project-v2-stage-group-review'
+    CATEGORY = 'gp-v2-stage-group-review'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_review.html'
 
     @property
@@ -613,7 +613,7 @@ class AssessmentBaseStage(BaseGroupActivityStage):
 
 
 class PeerAssessmentStage(AssessmentBaseStage):
-    CATEGORY = 'group-project-v2-stage-peer-assessment'
+    CATEGORY = 'gp-v2-stage-peer-assessment'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_assessment.html'
 
     type = u'Evaluation'
@@ -631,7 +631,7 @@ class PeerAssessmentStage(AssessmentBaseStage):
 
 
 class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
-    CATEGORY = 'group-project-v2-stage-group-assessment'
+    CATEGORY = 'gp-v2-stage-group-assessment'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_assessment.html'
 
     STAGE_TYPE = _(u'Grade')

@@ -19,31 +19,31 @@ def package_data(pkg, root_list):
     return {pkg: data}
 
 BLOCKS = [
-    'group-project-v2 = group_project_v2.group_project:GroupProjectXBlock',
+    'gp-v2-project = group_project_v2.group_project:GroupProjectXBlock',
 
-    'group-project-v2-activity = group_project_v2.group_project:GroupActivityXBlock',
+    'gp-v2-activity = group_project_v2.group_project:GroupActivityXBlock',
 
-    'group-project-v2-stage-basic = group_project_v2.stage:BasicStage',
-    'group-project-v2-stage-completion = group_project_v2.stage:CompletionStage',
-    'group-project-v2-stage-submission = group_project_v2.stage:SubmissionStage',
-    'group-project-v2-stage-peer-review = group_project_v2.stage:PeerReviewStage',
-    'group-project-v2-stage-group-review = group_project_v2.stage:GroupReviewStage',
-    'group-project-v2-stage-peer-assessment = group_project_v2.stage:PeerAssessmentStage',
-    'group-project-v2-stage-group-assessment = group_project_v2.stage:GroupAssessmentStage',
+    'gp-v2-stage-basic = group_project_v2.stage:BasicStage',
+    'gp-v2-stage-completion = group_project_v2.stage:CompletionStage',
+    'gp-v2-stage-submission = group_project_v2.stage:SubmissionStage',
+    'gp-v2-stage-peer-review = group_project_v2.stage:PeerReviewStage',
+    'gp-v2-stage-group-review = group_project_v2.stage:GroupReviewStage',
+    'gp-v2-stage-peer-assessment = group_project_v2.stage:PeerAssessmentStage',
+    'gp-v2-stage-group-assessment = group_project_v2.stage:GroupAssessmentStage',
 
-    'group-project-v2-resource = group_project_v2.stage_components:GroupProjectResourceXBlock',
-    'group-project-v2-submission = group_project_v2.stage_components:GroupProjectSubmissionXBlock',
-    'group-project-v2-peer-selector = group_project_v2.stage_components:PeerSelectorXBlock',
-    'group-project-v2-group-selector = group_project_v2.stage_components:GroupSelectorXBlock',
-    'group-project-v2-review-question = group_project_v2.stage_components:GroupProjectReviewQuestionXBlock',
-    'group-project-v2-peer-assessment = group_project_v2.stage_components:GroupProjectPeerAssessmentXBlock',
-    'group-project-v2-group-assessment = group_project_v2.stage_components:GroupProjectGroupAssessmentXBlock',
+    'gp-v2-resource = group_project_v2.stage_components:GroupProjectResourceXBlock',
+    'gp-v2-submission = group_project_v2.stage_components:GroupProjectSubmissionXBlock',
+    'gp-v2-peer-selector = group_project_v2.stage_components:PeerSelectorXBlock',
+    'gp-v2-group-selector = group_project_v2.stage_components:GroupSelectorXBlock',
+    'gp-v2-review-question = group_project_v2.stage_components:GroupProjectReviewQuestionXBlock',
+    'gp-v2-peer-assessment = group_project_v2.stage_components:GroupProjectPeerAssessmentXBlock',
+    'gp-v2-group-assessment = group_project_v2.stage_components:GroupProjectGroupAssessmentXBlock',
 
-    'group-project-v2-navigator = group_project_v2.project_navigator:GroupProjectNavigatorXBlock',
-    'group-project-v2-navigator-navigation = group_project_v2.project_navigator:NavigationViewXBlock',
-    'group-project-v2-navigator-resources = group_project_v2.project_navigator:ResourcesViewXBlock',
-    'group-project-v2-navigator-submissions = group_project_v2.project_navigator:SubmissionsViewXBlock',
-    'group-project-v2-navigator-ask-ta = group_project_v2.project_navigator:AskTAViewXBlock',
+    'gp-v2-navigator = group_project_v2.project_navigator:GroupProjectNavigatorXBlock',
+    'gp-v2-navigator-navigation = group_project_v2.project_navigator:NavigationViewXBlock',
+    'gp-v2-navigator-resources = group_project_v2.project_navigator:ResourcesViewXBlock',
+    'gp-v2-navigator-submissions = group_project_v2.project_navigator:SubmissionsViewXBlock',
+    'gp-v2-navigator-ask-ta = group_project_v2.project_navigator:AskTAViewXBlock',
 ]
 
 

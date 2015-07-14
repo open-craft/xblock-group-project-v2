@@ -54,7 +54,7 @@ class GroupProjectXBlock(
         default="Group Project V2"
     )
 
-    CATEGORY = "group-project-v2"
+    CATEGORY = "gp-v2-project"
 
     editable_fields = ('display_name', )
     has_score = False
@@ -191,7 +191,7 @@ class GroupActivityXBlock(
         default=1
     )
 
-    CATEGORY = "group-project-v2-activity"
+    CATEGORY = "gp-v2-activity"
 
     editable_fields = ("display_name", "weight", "group_reviews_required_count", "user_review_count")
     has_score = True

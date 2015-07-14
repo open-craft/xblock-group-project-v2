@@ -32,7 +32,7 @@ class GroupProjectNavigatorXBlock(
     XBlock that provides basic layout and switching between children XBlocks (views)
     Should only be added as a child to GroupProjectXBlock
     """
-    CATEGORY = "group-project-v2-navigator"
+    CATEGORY = "gp-v2-navigator"
     INITIAL_VIEW = ViewTypes.NAVIGATION
 
     display_name_with_default = _(u"Group Project Navigator")
@@ -51,10 +51,10 @@ class GroupProjectNavigatorXBlock(
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return {
-            "group-project-v2-navigator-navigation": _(u"Navigation View"),
-            "group-project-v2-navigator-resources": _(u"Resources View"),
-            "group-project-v2-navigator-submissions": _(u"Submissions View"),
-            "group-project-v2-navigator-ask-ta": _(u"Ask a TA View"),
+            "gp-v2-navigator-navigation": _(u"Navigation View"),
+            "gp-v2-navigator-resources": _(u"Resources View"),
+            "gp-v2-navigator-submissions": _(u"Submissions View"),
+            "gp-v2-navigator-ask-ta": _(u"Ask a TA View"),
         }
 
     def student_view(self, context):

@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 
 
 class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
-    CATEGORY = "group-project-v2-review-question"
+    CATEGORY = "gp-v2-review-question"
 
     @property
     def display_name_with_default(self):
@@ -239,7 +239,7 @@ class GroupProjectBaseAssessmentXBlock(
 class GroupProjectPeerAssessmentXBlock(
     GroupProjectBaseAssessmentXBlock, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
 ):
-    CATEGORY = "group-project-v2-peer-assessment"
+    CATEGORY = "gp-v2-peer-assessment"
 
     def get_feedback(self):
         all_feedback = self.project_api.get_user_peer_review_items(
@@ -254,7 +254,7 @@ class GroupProjectPeerAssessmentXBlock(
 class GroupProjectGroupAssessmentXBlock(
     GroupProjectBaseAssessmentXBlock, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
 ):
-    CATEGORY = "group-project-v2-group-assessment"
+    CATEGORY = "gp-v2-group-assessment"
 
     def get_feedback(self):
         all_feedback = self.project_api.get_workgroup_review_items_for_group(
@@ -265,7 +265,7 @@ class GroupProjectGroupAssessmentXBlock(
 
 
 class PeerSelectorXBlock(XBlock, XBlockWithPreviewMixin):
-    CATEGORY = "group-project-v2-peer-selector"
+    CATEGORY = "gp-v2-peer-selector"
     display_name_with_default = _(u"Teammate selector XBlock")
     STUDENT_TEMPLATE = "templates/html/components/peer_selector.html"
 
@@ -304,7 +304,7 @@ class PeerSelectorXBlock(XBlock, XBlockWithPreviewMixin):
 
 
 class GroupSelectorXBlock(XBlock, XBlockWithPreviewMixin):
-    CATEGORY = "group-project-v2-group-selector"
+    CATEGORY = "gp-v2-group-selector"
     display_name_with_default = _(u"Group selector XBlock")
     STUDENT_TEMPLATE = "templates/html/components/group_selector.html"
 
@@ -343,7 +343,7 @@ class GroupSelectorXBlock(XBlock, XBlockWithPreviewMixin):
 
 
 class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
-    CATEGORY = "group-project-v2-resource"
+    CATEGORY = "gp-v2-resource"
 
     PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/project_navigator/resource.html'
 
@@ -394,7 +394,7 @@ SubmissionUpload = namedtuple("SubmissionUpload", "location file_name submission
 @XBlock.needs('user')
 @XBlock.wants('notifications')
 class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
-    CATEGORY = "group-project-v2-submission"
+    CATEGORY = "gp-v2-submission"
     PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/submission_navigator_view.html'
     REVIEW_VIEW_TEMPLATE = 'templates/html/components/submission_review_view.html'
 
