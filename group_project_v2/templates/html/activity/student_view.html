@@ -5,9 +5,7 @@
     {{ stage_content|safe }}
   {% endfor %}
 
-  <!-- These 3 scripts contain json data - they are accessed using JSON.parse($('.peer_group', element).html()); -->
-  <script class="peer_group" type="application/json">{{ team_members }}</script>
-  <script class="assess_groups" type="application/json">{{ assess_groups }}</script>
+  <!-- This script contain json data - it is accessed using JSON.parse($('.initialization_data', element).html()); -->
   <script class="initialization_data" type="application/json">{{ initialization_data }}</script>
 
   <div class="message">
