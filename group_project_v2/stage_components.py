@@ -468,8 +468,6 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
         Handles submission upload and marks stage as completed if all submissions in stage have uploads.
         """
         target_activity = self.stage.activity
-        stage_id = self.stage.id
-
         response_data = {"message": _("File(s) successfully submitted")}
         failure_code = 0
         try:
@@ -482,18 +480,13 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
 
             uploaded_file = self.persist_and_submit_file(target_activity, context, request.params[self.upload_id].file)
 
-            response_data["submissions"] = {
-                uploaded_file.submission_id: uploaded_file.file_url
-            }
+            response_data["submissions"] = {uploaded_file.submission_id: uploaded_file.file_url}
 
-            if self.stage.has_all_submissions:
-                for user in target_activity.workgroup["users"]:
-                    self.stage.mark_complete(user["id"])
-
+            if self.stage.check_submissions_and_send_completion:
                 response_data["new_stage_states"] = [
                     {
                         "activity_id": str(target_activity.id),
-                        "stage_id": str(stage_id),
+                        "stage_id": str(self.stage.id),
                         "state": StageState.COMPLETED
                     }
                 ]

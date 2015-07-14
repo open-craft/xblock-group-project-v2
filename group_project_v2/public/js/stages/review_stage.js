@@ -153,6 +153,16 @@ function ReviewStageXBlock(runtime, element) {
             success: function (data) {
                 var msg = (data.msg) ? data.msg : gettext('Thanks for your feedback!');
                 show_message(msg);
+
+                if (data.new_stage_states) {
+                    for (var i=0; i<data.new_stage_states.length; i++) {
+                        var new_state = data.new_stage_states[i];
+                        $(document).trigger(
+                            "group_project_v2.project_navigator.stage_status_update",
+                            [new_state.activity_id, new_state.stage_id, new_state.state]
+                        );
+                    }
+                }
             },
             error: function (data) {
                 show_message(gettext('We encountered an error saving your feedback.'));
