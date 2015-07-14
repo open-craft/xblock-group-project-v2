@@ -566,6 +566,8 @@ class AssessmentBaseStage(BaseGroupActivityStage):
 
 
 class PeerAssessmentStage(AssessmentBaseStage):
+    type = u'Evaluation'
+
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_assessment.html'
     CATEGORY = 'group-project-v2-stage-peer-assessment'
 
@@ -591,6 +593,8 @@ class PeerAssessmentStage(AssessmentBaseStage):
 
 
 class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
+    type = u'Grade'
+
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_assessment.html'
     CATEGORY = 'group-project-v2-stage-group-assessment'
 
