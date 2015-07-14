@@ -1,6 +1,6 @@
 {% load i18n %}
 <form class="review other_group_review" data-review-type="group_review" action="submit_review" method="POST">
-  {% for children_content in children_contents %}{{ children_content|safe }}{% endfor %}
+  {% for child_content in children_contents %}{{ child_content|safe }}{% endfor %}
   <hr/>
   <button class="submit" {% if stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
 </form>

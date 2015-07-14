@@ -482,8 +482,8 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
 
             response_data["submissions"] = {uploaded_file.submission_id: uploaded_file.file_url}
 
-            if self.stage.check_submissions_and_send_completion:
-                response_data["new_stage_states"] = [self.stage.get_new_stage_state_data()]
+            self.stage.check_submissions_and_mark_complete()
+            response_data["new_stage_states"] = [self.stage.get_new_stage_state_data()]
 
         except Exception as exception:  # pylint: disable=broad-except
             log.exception(exception)
