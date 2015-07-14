@@ -48,8 +48,6 @@ class BaseGroupActivityStage(
     XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
     CourseAwareXBlockMixin, ChildrenNavigationXBlockMixin, UserAwareXBlockMixin
 ):
-    submissions_stage = False
-
     display_name = String(
         display_name=_(u"Display Name"),
         help=_(U"This is a name of the stage"),
@@ -69,12 +67,19 @@ class BaseGroupActivityStage(
         scope=Scope.settings
     )
 
-    STAGE_WRAPPER_TEMPLATE = 'templates/html/stages/stage_wrapper.html'
-    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/default_view.html'
-
     editable_fields = ('display_name', 'open_date', 'close_date')
     has_children = True
     has_score = False  # TODO: Group project V1 are graded at activity level. Check if we need to follow that
+
+    CATEGORY = None
+    STAGE_WRAPPER_TEMPLATE = 'templates/html/stages/stage_wrapper.html'
+    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/default_view.html'
+
+    STAGE_TYPE = None
+    submissions_stage = False
+
+    js_file = None
+    js_init = None
 
     @property
     def id(self):
@@ -167,6 +172,13 @@ class BaseGroupActivityStage(
 
         render_context.update(context)
         fragment.add_content(loader.render_template(self.STAGE_CONTENT_TEMPLATE, render_context))
+
+        if self.js_file:
+            fragment.add_javascript_url(self.runtime.local_resource_url(self, self.js_file))
+
+        if self.js_init:
+            fragment.initialize_js(self.js_init)
+
         return fragment
 
     def mark_complete(self, user_id):
@@ -231,8 +243,9 @@ class BaseGroupActivityStage(
 
 
 class BasicStage(BaseGroupActivityStage):
-    type = u'Text'
     CATEGORY = 'group-project-v2-stage-basic'
+
+    STAGE_TYPE = _(u'Text')
 
     def student_view(self, context):
         fragment = super(BasicStage, self).student_view(context)
@@ -242,8 +255,9 @@ class BasicStage(BaseGroupActivityStage):
 
 
 class SubmissionStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
-    type = u'Task'
     CATEGORY = 'group-project-v2-stage-submission'
+
+    STAGE_TYPE = _(u'Task')
 
     submissions_stage = True
 
@@ -314,7 +328,10 @@ class SubmissionStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
 
 
 class ReviewBaseStage(BaseGroupActivityStage):
-    type = u'Grade'
+    STAGE_TYPE = _(u'Grade')
+
+    js_file = "public/js/stages/review_stage.js"
+    js_init = "GroupProjectReviewStage"
 
     @property
     def allowed_nested_blocks(self):
@@ -348,12 +365,6 @@ class ReviewBaseStage(BaseGroupActivityStage):
             ))
 
         return violations
-
-    def get_stage_content_fragment(self, context, view='student_view'):
-        fragment = super(ReviewBaseStage, self).get_stage_content_fragment(context, view)
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/stages/review_stage.js"))
-        fragment.initialize_js("ReviewStageXBlock")
-        return fragment
 
     def _check_review_complete(self, items_to_grade, review_questions, review_items, review_item_key):
         my_feedback = {
@@ -398,8 +409,8 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
 
 class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
-    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
     CATEGORY = 'group-project-v2-stage-peer-review'
+    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
 
     @property
     def allowed_nested_blocks(self):
@@ -460,8 +471,8 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
 
 
 class GroupReviewStage(ReviewBaseStage):
-    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_review.html'
     CATEGORY = 'group-project-v2-stage-group-review'
+    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_review.html'
 
     @property
     def allowed_nested_blocks(self):
@@ -542,7 +553,7 @@ class GroupReviewStage(ReviewBaseStage):
 
 
 class AssessmentBaseStage(BaseGroupActivityStage):
-    type = u'Evaluation'
+    STAGE_TYPE = _(u'Evaluation')
 
     def validate(self):
         violations = super(AssessmentBaseStage, self).validate()
@@ -566,10 +577,10 @@ class AssessmentBaseStage(BaseGroupActivityStage):
 
 
 class PeerAssessmentStage(AssessmentBaseStage):
-    type = u'Evaluation'
-
-    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_assessment.html'
     CATEGORY = 'group-project-v2-stage-peer-assessment'
+    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_assessment.html'
+
+    type = u'Evaluation'
 
     def allowed_nested_blocks(self):
         blocks = super(AssessmentBaseStage, self).allowed_nested_blocks
@@ -584,10 +595,10 @@ class PeerAssessmentStage(AssessmentBaseStage):
 
 
 class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
-    type = u'Grade'
-
-    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_assessment.html'
     CATEGORY = 'group-project-v2-stage-group-assessment'
+    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_assessment.html'
+
+    STAGE_TYPE = _(u'Grade')
 
     def allowed_nested_blocks(self):
         blocks = super(AssessmentBaseStage, self).allowed_nested_blocks

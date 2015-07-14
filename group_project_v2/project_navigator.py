@@ -32,7 +32,7 @@ class GroupProjectNavigatorXBlock(
     XBlock that provides basic layout and switching between children XBlocks (views)
     Should only be added as a child to GroupProjectXBlock
     """
-    CATEGORY = 'group-project-v2-navigator'
+    CATEGORY = "group-project-v2-navigator"
     INITIAL_VIEW = ViewTypes.NAVIGATION
 
     display_name_with_default = _(u"Group Project Navigator")
