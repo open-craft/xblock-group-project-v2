@@ -413,7 +413,6 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
             peer_id = submissions["review_subject_id"]
             del submissions["review_subject_id"]
 
-            # Then something like this needs to happen
             project_api.submit_peer_review_items(
                 self.anonymous_student_id,
                 peer_id,
