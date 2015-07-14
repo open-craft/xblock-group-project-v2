@@ -284,13 +284,10 @@ class SubmissionStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
     def has_all_submissions(self):
         return all(submission.upload is not None for submission in self.submissions)
 
-    def check_submissions_and_send_completion(self):
+    def check_submissions_and_mark_complete(self):
         if self.has_all_submissions:
             for user in self.workgroup["users"]:
-                self.stage.mark_complete(user["id"])
-            return True
-
-        return False
+                self.mark_complete(user["id"])
 
     def _render_view(self, child_view, template, context):
         fragment = Fragment()
