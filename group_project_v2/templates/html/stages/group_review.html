@@ -1,5 +1,5 @@
 {% load i18n %}
-<form class="review other_group_review" data-review-type="group_review" action="submit_other_group_feedback" method="POST">
+<form class="review other_group_review" data-review-type="group_review" action="submit_review" method="POST">
   {{ children_content|safe }}
   <hr/>
   <button class="submit" {% if stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
