@@ -453,48 +453,6 @@ class GroupActivityXBlock(
                 )
                 validation.add(ValidationMessage(ValidationMessage.ERROR, message))
 
-    @XBlock.handler
-    def load_my_peer_feedback(self, request, suffix=''):
-
-        user_id = self.user_id
-        feedback = self.project_api.get_user_peer_review_items(
-            user_id,
-            self.workgroup['id'],
-            self.content_id,
-        )
-
-        results = {}
-        for item in feedback:
-            # TODO: results could be defaultdict(list)
-            if item['question'] in results:
-                results[item['question']].append(html.escape(item['answer']))
-            else:
-                results[item['question']] = [html.escape(item['answer'])]
-
-        return webob.response.Response(body=json.dumps(results))
-
-    @XBlock.handler
-    def load_my_group_feedback(self, request, suffix=''):
-        workgroup_id = self.workgroup['id']
-        feedback = self.project_api.get_workgroup_review_items_for_group(
-            workgroup_id,
-            self.content_id,
-        )
-
-        results = {}
-        for item in feedback:
-            # TODO: results could be defaultdict(list)
-            if item['question'] in results:
-                results[item['question']].append(html.escape(item['answer']))
-            else:
-                results[item['question']] = [html.escape(item['answer'])]
-
-        final_grade = self.calculate_grade(workgroup_id)
-        if final_grade:
-            results["final_grade"] = [final_grade]
-
-        return webob.response.Response(body=json.dumps(results))
-
     def get_courseware_info(self, courseware_parent_info_service):
         activity_name = self.display_name
         activity_location = None
