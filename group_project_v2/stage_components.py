@@ -19,6 +19,9 @@ from group_project_v2.upload_file import UploadFile
 from group_project_v2.utils import outer_html, gettext as _, loader, format_date, build_date_field, mean, \
     NO_EDITABLE_SETTINGS
 
+from group_project_v2.utils import outer_html, gettext as _, loader, format_date, build_date_field, mean, \
+    outsider_disallowed_protected_view
+
 log = logging.getLogger(__name__)
 
 
@@ -192,6 +195,7 @@ class GroupProjectBaseAssessmentXBlock(
 
         return matching_questions[0]
 
+    @outsider_disallowed_protected_view
     def student_view(self, context):
         if self.question is None:
             raise ValueError("No question selected")
