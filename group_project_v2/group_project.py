@@ -2,6 +2,7 @@
 #
 # TODO: lots of broad except clauses - disabled in pylint, but might make sense to clean them up
 # Imports ###########################################################
+from collections import OrderedDict
 
 import logging
 import json
@@ -27,7 +28,7 @@ from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import loader, OutsiderDisallowedError, make_key
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
-    PeerAssessmentStage, GroupAssessmentStage
+    PeerAssessmentStage, GroupAssessmentStage,
 )
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.api_error import ApiError
@@ -53,6 +54,8 @@ class GroupProjectXBlock(
         default="Group Project V2"
     )
 
+    CATEGORY = "group-project-v2"
+
     editable_fields = ('display_name', )
     has_score = False
     has_children = True
@@ -60,8 +63,8 @@ class GroupProjectXBlock(
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return {
-            "group-project-v2-activity": _(u"Group Project Activity"),
-            "group-project-v2-navigator": _(u"Group Project Navigator"),
+            GroupActivityXBlock.CATEGORY: _(u"Group Project Activity"),
+            GroupProjectNavigatorXBlock.CATEGORY: _(u"Group Project Navigator"),
         }
 
     def student_view(self, context):
@@ -188,6 +191,8 @@ class GroupActivityXBlock(
         default=1
     )
 
+    CATEGORY = "group-project-v2-activity"
+
     editable_fields = ("display_name", "weight", "group_reviews_required_count", "user_review_count")
     has_score = True
     has_children = True
@@ -213,14 +218,14 @@ class GroupActivityXBlock(
 
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
-        return {
-            BasicStage.CATEGORY: _(u"Text Stage"),
-            SubmissionStage.CATEGORY: _(u"Submission Stage"),
-            PeerReviewStage.CATEGORY: _(u"Peer Review Stage"),
-            GroupReviewStage.CATEGORY: _(u"Group Review Stage"),
-            PeerAssessmentStage.CATEGORY: _(u"Peer Assessment Stage"),
-            GroupAssessmentStage.CATEGORY: _(u"Group Assessment Stage"),
-        }
+        return OrderedDict([
+            (BasicStage.CATEGORY, _(u"Text Stage")),
+            (SubmissionStage.CATEGORY, _(u"Submission Stage")),
+            (PeerReviewStage.CATEGORY, _(u"Peer Review Stage")),
+            (GroupReviewStage.CATEGORY, _(u"Group Review Stage")),
+            (PeerAssessmentStage.CATEGORY, _(u"Peer Assessment Stage")),
+            (GroupAssessmentStage.CATEGORY, _(u"Group Assessment Stage")),
+        ])
 
     @property
     def stages(self):
