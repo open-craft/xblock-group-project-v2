@@ -3,6 +3,7 @@ import logging
 from datetime import date, datetime
 from django.conf import settings
 import xml.etree.ElementTree as ET
+from xblock.fragment import Fragment
 
 from xblockutils.resources import ResourceLoader
 
@@ -93,6 +94,34 @@ def mean(value_array):
     except (ValueError, TypeError, ZeroDivisionError) as exc:
         log.warning(exc.message)
         return None
+
+
+def outsider_disallowed_protected_view(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except OutsiderDisallowedError as ode:
+            error_fragment = Fragment()
+            error_fragment.add_content(
+                loader.render_template('/templates/html/loading_error.html', {'error_message': unicode(ode)}))
+            error_fragment.add_javascript(loader.load_unicode('public/js/group_project_error.js'))
+            error_fragment.initialize_js('GroupProjectError')
+            return error_fragment
+
+    return wrapper
+
+
+def outsider_disallowed_protected_json_handler(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except OutsiderDisallowedError as ode:
+            return {
+                'result': 'error',
+                'message': ode.message
+            }
+
+    return wrapper
 
 
 NO_EDITABLE_SETTINGS = gettext(u"This XBlock does not contain any editable settings")
