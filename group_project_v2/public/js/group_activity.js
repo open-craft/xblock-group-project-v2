@@ -1,5 +1,3 @@
-// TODO: this function does way too much: might make sense to extract reviews, assessments, etc.
-// into separate functions and make this function call them
 function GroupProjectBlock(runtime, element) {
     var message_box = $('.message', element).appendTo($(document.body));
     message_box.on('click', '.button, .close-box', function () {
