@@ -28,7 +28,7 @@ from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import loader, OutsiderDisallowedError, make_key
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
-    PeerAssessmentStage, GroupAssessmentStage,
+    PeerAssessmentStage, GroupAssessmentStage, CompletionStage
 )
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.api_error import ApiError
@@ -220,6 +220,7 @@ class GroupActivityXBlock(
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return OrderedDict([
             (BasicStage.CATEGORY, _(u"Text Stage")),
+            (CompletionStage.CATEGORY, _(u"Completion Stage")),
             (SubmissionStage.CATEGORY, _(u"Submission Stage")),
             (PeerReviewStage.CATEGORY, _(u"Peer Review Stage")),
             (GroupReviewStage.CATEGORY, _(u"Group Review Stage")),

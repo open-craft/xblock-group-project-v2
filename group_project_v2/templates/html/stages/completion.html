@@ -1,0 +1,10 @@
+{% load i18n %}
+{% for child_content in children_contents %}{{ child_content|safe }}{% endfor %}
+<hr/>
+
+<form class="group-project-completion-form" action="stage_completed" method="POST">
+  <div class="group-project-completion-label">{{ completion_label}}</div>
+  <input type="checkbox" class="group-project-completion-checkmark" id="group-project-completion-checkmark"
+         {% if completed %}checked="'checked" disabled="disabled" {% endif %}>
+  <label for="group-project-completion-checkmark">{% trans "Yes, I have completed this task" %}</label>
+</form>

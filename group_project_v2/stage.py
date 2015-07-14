@@ -8,7 +8,7 @@ import pytz
 import webob
 
 from xblock.core import XBlock
-from xblock.fields import Scope, String, DateTime
+from xblock.fields import Scope, String, DateTime, Boolean
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
@@ -252,6 +252,42 @@ class BasicStage(BaseGroupActivityStage):
 
         self.mark_complete(self.user_id)
         return fragment
+
+
+class CompletionStage(BaseGroupActivityStage):
+    completed = Boolean(
+        display_name=_(u"Completed"),
+        scope=Scope.user_state
+    )
+
+    CATEGORY = 'group-project-v2-stage-completion'
+    STAGE_CONTENT_TEMPLATE = "templates/html/stages/completion.html"
+
+    STAGE_TYPE = _(u'Completion')
+
+    js_file = "public/js/stages/completion.js"
+    js_init = "GroupProjectCompletionStage"
+
+    @XBlock.json_handler
+    def stage_completed(self, data, suffix=''):  # pylint: disable=unused-argument
+        try:
+            self.mark_complete(self.user_id)
+            self.completed = True
+            return {
+                'result': 'success',
+                'msg': _('Thanks for your feedback'),
+                'new_stage_states': [self.get_new_stage_state_data()]
+            }
+        except ApiError as exception:
+            log.exception(exception.message)
+            return {'result': 'error', 'msg': exception.message}
+
+    def get_stage_content_fragment(self, context, view='student_view'):
+        extra_context = {
+            'completed': self.completed
+        }
+        extra_context.update(context)
+        return super(CompletionStage, self).get_stage_content_fragment(extra_context, view)
 
 
 class SubmissionStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):

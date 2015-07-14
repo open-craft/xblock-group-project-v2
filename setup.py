@@ -24,6 +24,7 @@ BLOCKS = [
     'group-project-v2-activity = group_project_v2.group_project:GroupActivityXBlock',
 
     'group-project-v2-stage-basic = group_project_v2.stage:BasicStage',
+    'group-project-v2-stage-completion = group_project_v2.stage:CompletionStage',
     'group-project-v2-stage-submission = group_project_v2.stage:SubmissionStage',
     'group-project-v2-stage-peer-review = group_project_v2.stage:PeerReviewStage',
     'group-project-v2-stage-group-review = group_project_v2.stage:GroupReviewStage',
