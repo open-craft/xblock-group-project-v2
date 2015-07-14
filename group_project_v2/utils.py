@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import functools
 import logging
 from datetime import date, datetime
 from django.conf import settings
@@ -97,6 +98,7 @@ def mean(value_array):
 
 
 def outsider_disallowed_protected_view(func):
+    @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -112,6 +114,7 @@ def outsider_disallowed_protected_view(func):
 
 
 def outsider_disallowed_protected_handler(func):
+    @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -120,6 +123,18 @@ def outsider_disallowed_protected_handler(func):
                 'result': 'error',
                 'message': ode.message
             }
+
+    return wrapper
+
+
+def key_error_protected_handler(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except KeyError as exception:
+            log.exception("Missing required argument {}".format(exception.message))
+            return {'result': 'error', 'msg': ("Missing required argument {}".format(exception.message))}
 
     return wrapper
 

@@ -26,7 +26,7 @@ from group_project_v2.stage_components import (
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.utils import (
     loader, format_date, gettext as _, make_key, outsider_disallowed_protected_view,
-    outsider_disallowed_protected_handler
+    outsider_disallowed_protected_handler, key_error_protected_handler
 )
 
 log = logging.getLogger(__name__)
@@ -430,15 +430,13 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
     @XBlock.json_handler
     @outsider_disallowed_protected_handler
+    @key_error_protected_handler
     def submit_review(self, submissions, context=''):  # pylint: disable=unused-argument
         try:
             self.do_submit_review(submissions)
         except ApiError as exception:
             log.exception(exception.message)
             return {'result': 'error', 'msg': exception.message}
-        except KeyError as exception:
-            log.exception("Missing required argument {}".format(exception.message))
-            return {'result': 'error', 'msg': ("Missing required argument {}".format(exception.message))}
 
         return {
             'result': 'success',
@@ -486,6 +484,7 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
 
     @XBlock.handler
     @outsider_disallowed_protected_handler
+    @key_error_protected_handler
     def load_peer_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
         feedback = self.project_api.get_peer_review_items(
             self.anonymous_student_id,
@@ -538,6 +537,7 @@ class GroupReviewStage(ReviewBaseStage):
 
     @XBlock.handler
     @outsider_disallowed_protected_handler
+    @key_error_protected_handler
     def other_submission_links(self, request, suffix=''):  # pylint: disable=unused-argument
         group_id = request.GET["group_id"]
 
@@ -557,6 +557,7 @@ class GroupReviewStage(ReviewBaseStage):
 
     @XBlock.handler
     @outsider_disallowed_protected_handler
+    @key_error_protected_handler
     def load_other_group_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
         group_id = request.GET["group_id"]
         feedback = self.project_api.get_workgroup_review_items(self.anonymous_student_id, group_id, self.content_id)
