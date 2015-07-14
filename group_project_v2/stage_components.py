@@ -9,6 +9,7 @@ import webob
 from xblock.core import XBlock
 from xblock.fields import String, Boolean, Scope, UNIQUE_ID
 from xblock.fragment import Fragment
+from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
 from group_project_v2.api_error import ApiError
@@ -89,6 +90,7 @@ class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin):
         "question_id", "title", "assessment_title", "question_content", "required", "grade", "single_line",
         "question_css_classes"
     )
+    has_author_view = True
 
     @lazy
     def stage(self):
@@ -164,6 +166,7 @@ class GroupProjectBaseAssessmentXBlock(XBlock, StudioEditableXBlockMixin):
     )
 
     editable_fields = ("question_id", "show_mean")
+    has_author_view = True
 
     @property
     def display_name_with_default(self):
@@ -211,6 +214,17 @@ class GroupProjectBaseAssessmentXBlock(XBlock, StudioEditableXBlockMixin):
         render_context.update(context)
         fragment.add_content(loader.render_template("templates/html/components/review_assessment.html", render_context))
         return fragment
+
+    def validate(self):
+        validation = super(GroupProjectBaseAssessmentXBlock, self).validate()
+
+        if self.question is None:
+            validation.add(ValidationMessage(
+                ValidationMessage.ERROR,
+                _(u"No question selected")
+            ))
+
+        return validation
 
     def author_view(self, context):
         if self.question:
