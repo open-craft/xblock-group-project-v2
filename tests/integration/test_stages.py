@@ -16,7 +16,7 @@ from tests.utils import KNOWN_USERS
 class StageTestBase(BaseIntegrationTest):
     PROJECT_TEMPLATE = textwrap.dedent("""
         <group-project-v2 xmlns:opt="http://code.edx.org/xblock/option">
-            <group-project-v2-activity display_name="Activity">
+            <gp-v2-activity display_name="Activity">
                 <opt:data>
                     <![CDATA[
                         <group_activity schema_version='1'>
@@ -26,7 +26,7 @@ class StageTestBase(BaseIntegrationTest):
                         </group_activity>
                     ]]>
                 </opt:data>
-            </group-project-v2-activity>
+            </gp-v2-activity>
         </group-project-v2>
     """)
     stage_type = None

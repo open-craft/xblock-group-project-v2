@@ -69,7 +69,7 @@ class BaseElement(object):
 
 class GroupProjectElement(BaseElement):
     """ Wrapper around group project xblock element """
-    ACTIVITY_CSS_SELECTOR = ".xblock-v1[data-block-type='group-project-v2-activity']"
+    ACTIVITY_CSS_SELECTOR = ".xblock-v1[data-block-type='gp-v2-activity']"
 
     @property
     def activities(self):
@@ -78,7 +78,7 @@ class GroupProjectElement(BaseElement):
     @property
     def project_navigator(self):
         return self.make_element(
-            self.element.find_element_by_css_selector("[data-block-type='group-project-v2-navigator']"),
+            self.element.find_element_by_css_selector("[data-block-type='gp-v2-navigator']"),
             ProjectNavigatorElement
         )
 
