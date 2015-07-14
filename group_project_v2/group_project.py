@@ -25,7 +25,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContain
 from group_project_v2.mixins import ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin, \
     WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
-from group_project_v2.utils import loader, OutsiderDisallowedError, make_key
+from group_project_v2.utils import loader, OutsiderDisallowedError, make_key, outsider_disallowed_protected_view
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
     PeerAssessmentStage, GroupAssessmentStage, CompletionStage
@@ -293,21 +293,11 @@ class GroupActivityXBlock(
         except ApiError:
             return []
 
+    @outsider_disallowed_protected_view
     def student_view(self, context):
         """
         Player view, displayed to the student
         """
-
-        try:
-            team_members = self.team_members
-            review_groups = self.review_groups
-        except OutsiderDisallowedError as ode:
-            error_fragment = Fragment()
-            error_fragment.add_content(
-                loader.render_template('/templates/html/loading_error.html', {'error_message': unicode(ode)}))
-            error_fragment.add_javascript(loader.load_unicode('public/js/group_project_error.js'))
-            error_fragment.initialize_js('GroupProjectError')
-            return error_fragment
 
         fragment = Fragment()
         stage_contents = []
@@ -319,8 +309,6 @@ class GroupActivityXBlock(
         context = {
             "stage_contents": stage_contents,
             "initialization_data": json.dumps(self._get_initialization_data()),
-            "team_members": json.dumps(team_members),
-            "assess_groups": json.dumps(review_groups),
         }
 
         fragment.add_content(loader.render_template('/templates/html/activity/student_view.html', context))

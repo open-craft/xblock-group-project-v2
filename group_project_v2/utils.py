@@ -111,7 +111,7 @@ def outsider_disallowed_protected_view(func):
     return wrapper
 
 
-def outsider_disallowed_protected_json_handler(func):
+def outsider_disallowed_protected_handler(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)

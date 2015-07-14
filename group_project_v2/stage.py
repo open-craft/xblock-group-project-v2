@@ -24,7 +24,10 @@ from group_project_v2.stage_components import (
     StageState
 )
 from group_project_v2.project_api import ProjectAPIXBlockMixin
-from group_project_v2.utils import loader, format_date, gettext as _, make_key
+from group_project_v2.utils import (
+    loader, format_date, gettext as _, make_key, outsider_disallowed_protected_view,
+    outsider_disallowed_protected_handler
+)
 
 log = logging.getLogger(__name__)
 
@@ -144,6 +147,7 @@ class BaseGroupActivityStage(
 
         return fragment
 
+    @outsider_disallowed_protected_view
     def student_view(self, context):
         return self._view_render(context)
 
@@ -269,6 +273,7 @@ class CompletionStage(BaseGroupActivityStage):
     js_init = "GroupProjectCompletionStage"
 
     @XBlock.json_handler
+    @outsider_disallowed_protected_handler
     def stage_completed(self, data, suffix=''):  # pylint: disable=unused-argument
         try:
             self.mark_complete(self.user_id)
@@ -424,6 +429,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
         return {pi['question']: pi['answer'] for pi in feedback}
 
     @XBlock.json_handler
+    @outsider_disallowed_protected_handler
     def submit_review(self, submissions, context=''):  # pylint: disable=unused-argument
         try:
             self.do_submit_review(submissions)
@@ -479,6 +485,7 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
         return violations
 
     @XBlock.handler
+    @outsider_disallowed_protected_handler
     def load_peer_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
         feedback = self.project_api.get_peer_review_items(
             self.anonymous_student_id,
@@ -530,6 +537,7 @@ class GroupReviewStage(ReviewBaseStage):
         return self._check_review_complete(groups_to_review, self.required_questions, group_review_items, "workgroup")
 
     @XBlock.handler
+    @outsider_disallowed_protected_handler
     def other_submission_links(self, request, suffix=''):  # pylint: disable=unused-argument
         group_id = request.GET["group_id"]
 
@@ -548,6 +556,7 @@ class GroupReviewStage(ReviewBaseStage):
         return webob.response.Response(body=json.dumps({"html": html_output}))
 
     @XBlock.handler
+    @outsider_disallowed_protected_handler
     def load_other_group_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
         group_id = request.GET["group_id"]
         feedback = self.project_api.get_workgroup_review_items(self.anonymous_student_id, group_id, self.content_id)

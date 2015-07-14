@@ -4,7 +4,10 @@ from xblock.exceptions import NoSuchViewError
 from xblock.fragment import Fragment
 
 from group_project_v2.api_error import ApiError
-from group_project_v2.utils import OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES, loader
+from group_project_v2.utils import (
+    OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES, loader,
+    outsider_disallowed_protected_view
+)
 
 log = logging.getLogger(__name__)
 
@@ -109,6 +112,7 @@ class XBlockWithComponentsMixin(object):
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return None
 
+    @outsider_disallowed_protected_view
     def author_edit_view(self, context):
         """
         Add some HTML to the author view that allows authors to add child blocks.
@@ -123,6 +127,7 @@ class XBlockWithComponentsMixin(object):
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
         return fragment
 
+    @outsider_disallowed_protected_view
     def author_preview_view(self, context):
         children_contents = []
 
