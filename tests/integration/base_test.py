@@ -5,6 +5,7 @@ import mock
 from xblockutils.base_test import SeleniumXBlockTest
 
 from group_project_v2.group_project import GroupActivityXBlock
+from group_project_v2.project_api import ProjectAPIXBlockMixin
 from tests.integration.page_elements import GroupProjectElement
 from tests.utils import loader, get_mock_project_api
 
@@ -12,10 +13,9 @@ from tests.utils import loader, get_mock_project_api
 class BaseIntegrationTest(SeleniumXBlockTest):
     """ Base Integraition test class """
     PROJECT_API_PATCHES = (
-        "group_project_v2.group_project.project_api",
-        "group_project_v2.mixins.project_api",
-        "group_project_v2.stage.project_api",
-        "group_project_v2.stage_components.project_api",
+        "group_project_v2.group_project.ProjectAPIXBlockMixin",
+        "group_project_v2.stage.ProjectAPIXBlockMixin",
+        "group_project_v2.stage_components.ProjectAPIXBlockMixin",
     )
 
     def setUp(self):
@@ -24,9 +24,12 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         """
         super(BaseIntegrationTest, self).setUp()
         self.project_api_mock = get_mock_project_api()
+        patch = mock.Mock(spec=ProjectAPIXBlockMixin)
+        patch.project_api = mock.PropertyMock(return_value=self.project_api_mock)
+
         patchers = []
         for patch_location in self.PROJECT_API_PATCHES:
-            patcher = mock.patch(patch_location, self.project_api_mock)
+            patcher = mock.patch(patch_location, patch)
             patcher.start()
             patchers.append(patcher)
 
