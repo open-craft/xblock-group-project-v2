@@ -1,0 +1,17 @@
+{% load i18n %}
+<div class="group-project-xblock-wrapper">
+  {{ activity_content|safe }}
+
+  <div class="message">
+    <div class="modal-bg"></div>
+    <div class="xblock-reveal reveal-modal open">
+      <div class="close-box">
+        <i class="fa fa-times-circle"></i>
+      </div>
+      <div class="message_text"></div>
+      <div class="action_buttons">
+        <button class="button radius small">{% trans "OK" %}</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -8,6 +8,8 @@ import logging
 import json
 import itertools
 from lazy.lazy import lazy
+from opaque_keys import InvalidKeyError
+from opaque_keys.edx.locator import BlockUsageLocator
 import pytz
 import webob
 from datetime import datetime, timedelta
@@ -16,6 +18,7 @@ from django.utils import html
 from django.utils.translation import ugettext as _
 
 from xblock.core import XBlock
+from xblock.exceptions import NoSuchUsage
 from xblock.fields import Scope, String, Float, Integer
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
@@ -67,21 +70,43 @@ class GroupProjectXBlock(
             GroupProjectNavigatorXBlock.CATEGORY: _(u"Group Project Navigator"),
         }
 
-    def student_view(self, context):
-        fragment = Fragment()
-        for child_id in self.children:
-            child = self.runtime.get_block(child_id)
-            if child.category == GroupProjectNavigatorXBlock.CATEGORY:
-                continue
-            rendered_child_fragment = child.render('student_view', context)
-            fragment.add_frag_resources(rendered_child_fragment)
-            fragment.add_content(rendered_child_fragment.content)
-        return fragment
-
     @lazy
     def activities(self):
         all_children = [self.runtime.get_block(child_id) for child_id in self.children]
         return [child for child in all_children if isinstance(child, GroupActivityXBlock)]
+
+    def _get_activity_to_display(self, target_stage_id):
+        try:
+            usage_id = BlockUsageLocator.from_string(target_stage_id)
+            stage = self.runtime.get_block(usage_id)
+            return stage.activity
+        except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
+            log.exception(exc)
+
+        return self.activities[0] if self.activities else None
+
+    def student_view(self, context):
+        target_stage_id = context.get('activate_block_id', None)
+        target_activity = self._get_activity_to_display(target_stage_id)
+
+        fragment = Fragment()
+
+        if not target_activity:
+            fragment.add_content(_(u"This Group Project does not contain any activities"))
+        else:
+            activity_fragment = target_activity.render('student_view', context)
+            fragment.add_frag_resources(activity_fragment)
+            render_context = {
+                'project': self,
+                'activity_content': activity_fragment.content
+            }
+            render_context.update(context)
+            fragment.add_content(loader.render_template("templates/html/group_project.html", render_context))
+
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/group_project.js'))
+        fragment.initialize_js("GroupProjectBlock")
+        return fragment
 
     def validate(self):
         validation = super(GroupProjectXBlock, self).validate()
@@ -244,24 +269,14 @@ class GroupActivityXBlock(
             *[getattr(stage, 'grade_questions', ()) for stage in self.stages]
         ))
 
-    def _get_initialization_data(self):
-        return {
-            "default_stage_id": unicode(self._get_default_stage_id())
-        }
+    def _get_stage_to_display(self, target_stage_id):
+        try:
+            usage_id = BlockUsageLocator.from_string(target_stage_id)
+            return self.runtime.get_block(usage_id)
+        except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
+            log.exception(exc)
 
-    def _get_default_stage_id(self):
-        if not self.stages:
-            return None
-        default_stage_id = self.stages[0].id
-        for stage in self.stages:
-            # TODO: this will likely need some other way to select target stage, or could be removed altogether
-            if self.is_admin_grader:
-                if isinstance(stage, GroupReviewStage):
-                    default_stage_id = stage.id
-            elif stage.is_open:
-                default_stage_id = stage.id
-
-        return default_stage_id
+        return self.stages[0] if self.stages else None
 
     @property
     def team_members(self):
@@ -300,22 +315,21 @@ class GroupActivityXBlock(
         """
 
         fragment = Fragment()
-        stage_contents = []
-        for stage in self.stages:
-            stage_fragment = stage.render('student_view', context)
+
+        target_stage_id = context.get('activate_block_id', None)
+        target_stage = self._get_stage_to_display(target_stage_id)
+
+        if not target_stage:
+            fragment.add_content(_(u"This Group Project Activity does not contain any stages"))
+        else:
+            stage_fragment = target_stage.render('student_view', context)
             fragment.add_frag_resources(stage_fragment)
-            stage_contents.append(stage_fragment.content)
-
-        context = {
-            "stage_contents": stage_contents,
-            "initialization_data": json.dumps(self._get_initialization_data()),
-        }
-
-        fragment.add_content(loader.render_template('/templates/html/activity/student_view.html', context))
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/group_activity.js'))
-
-        fragment.initialize_js('GroupProjectBlock')
+            render_context = {
+                'activity': self,
+                'stage_content': stage_fragment.content,
+            }
+            render_context.update(context)
+            fragment.add_content(loader.render_template('/templates/html/activity/student_view.html', render_context))
 
         return fragment
 
