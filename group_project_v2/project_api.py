@@ -109,7 +109,7 @@ class ProjectAPI(object):
         qs_params = {"course_id": course_id}
         workgroups_list = self.send_request(GET, (USERS_API, user_id, 'workgroups'), query_params=qs_params)
 
-        if workgroups_list['count'] < 1:
+        if not workgroups_list or workgroups_list['count'] < 1:
             return None
 
         return self.get_workgroup_by_id(workgroups_list['results'][0]['id'])
