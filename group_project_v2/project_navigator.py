@@ -9,8 +9,7 @@ from xblock.fragment import Fragment
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
 from group_project_v2.mixins import XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin
 
-from group_project_v2.utils import loader, gettext as _
-
+from group_project_v2.utils import loader, gettext as _, NO_EDITABLE_SETTINGS
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -96,6 +95,11 @@ class GroupProjectNavigatorXBlock(
         ))
         fragment.initialize_js("GroupProjectNavigatorBlock")
 
+        return fragment
+
+    def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
+        fragment = Fragment()
+        fragment.add_content(NO_EDITABLE_SETTINGS)
         return fragment
 
 

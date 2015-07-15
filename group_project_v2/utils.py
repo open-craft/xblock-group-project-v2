@@ -93,3 +93,6 @@ def mean(value_array):
     except (ValueError, TypeError, ZeroDivisionError) as exc:
         log.warning(exc.message)
         return None
+
+
+NO_EDITABLE_SETTINGS = gettext(u"This XBlock does not contain any editable settings")

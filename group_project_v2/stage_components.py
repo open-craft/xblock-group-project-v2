@@ -1,11 +1,11 @@
 from collections import namedtuple
-from django.utils import html
 import json
-from lazy.lazy import lazy
 import logging
 from xml.etree import ElementTree
-import webob
 
+from django.utils import html
+from lazy.lazy import lazy
+import webob
 from xblock.core import XBlock
 from xblock.fields import String, Boolean, Scope, UNIQUE_ID
 from xblock.fragment import Fragment
@@ -16,11 +16,10 @@ from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
 from group_project_v2.project_api import project_api
 from group_project_v2.upload_file import UploadFile
-
-from group_project_v2.utils import outer_html, gettext as _, loader, format_date, build_date_field, mean
+from group_project_v2.utils import outer_html, gettext as _, loader, format_date, build_date_field, mean, \
+    NO_EDITABLE_SETTINGS
 
 log = logging.getLogger(__name__)
-NO_EDITABLE_SETTINGS = _(u"This XBlock does not contain any editable settings")
 
 
 class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
