@@ -75,6 +75,10 @@ class WorkgroupAwareXBlockMixin(object):
     * CourseAwareXBlockMixin
     * ProjectAPIXBlockMixin
     """
+    @property
+    def is_group_member(self):
+        return self.user_id in [u["id"] for u in self.workgroup["users"]]
+
     def _confirm_outsider_allowed(self):
         granted_roles = [r["role"] for r in self.project_api.get_user_roles_for_course(self.user_id, self.course_id)]
         for allowed_role in ALLOWED_OUTSIDER_ROLES:

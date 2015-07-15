@@ -279,7 +279,7 @@ class PeerSelectorXBlock(XBlock, XBlockWithPreviewMixin):
 
     @property
     def peers(self):
-        return self.stage.activity.team_members
+        return self.stage.team_members
 
     def student_view(self, context):
         fragment = Fragment()
@@ -318,7 +318,7 @@ class GroupSelectorXBlock(XBlock, XBlockWithPreviewMixin):
 
     @property
     def groups(self):
-        return self.stage.activity.review_groups
+        return self.stage.review_groups
 
     def student_view(self, context):
         fragment = Fragment()
