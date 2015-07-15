@@ -16,7 +16,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContain
 
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin, \
-    WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin
+    WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin
 from group_project_v2.stage_components import (
     PeerSelectorXBlock, GroupSelectorXBlock,
     GroupProjectReviewQuestionXBlock, GroupProjectPeerAssessmentXBlock, GroupProjectGroupAssessmentXBlock,
@@ -44,7 +44,8 @@ class ResourceType(object):
 
 
 class BaseGroupActivityStage(
-    XBlock, XBlockWithComponentsMixin, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
+    XBlockWithPreviewMixin, XBlockWithComponentsMixin,
+    XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
     CourseAwareXBlockMixin, ChildrenNavigationXBlockMixin, UserAwareXBlockMixin
 ):
     submissions_stage = False
@@ -145,15 +146,14 @@ class BaseGroupActivityStage(
         return self._view_render(context)
 
     def author_preview_view(self, context):
-        return self._view_render(context, "author_view")
+        # if we use student_view or author_view Studio will wrap it in HTML that we don't want in the preview
+        return self._view_render(context, "preview_view")
 
-    def render_children_fragment(self, context, children=None, view='student_view'):
-        to_render = children if children else self._children
+    def render_children_fragment(self, context, view='student_view'):
         fragment = Fragment()
 
-        for child in to_render:
-            view_to_render = view if hasattr(child, view) else 'student_view'
-            child_fragment = child.render(view_to_render, context)
+        for child in self._children:
+            child_fragment = self._render_child_fragment(child, context, view)
             fragment.add_frag_resources(child_fragment)
             fragment.add_content(child_fragment.content)
 
@@ -326,7 +326,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
         return violations
 
     def get_stage_content_fragment(self, context, view='student_view'):
-        children_fragment = self.render_children_fragment(context)
+        children_fragment = self.render_children_fragment(context, view=view)
 
         fragment = Fragment()
         fragment.add_frag_resources(children_fragment)
@@ -589,7 +589,7 @@ class PeerAssessmentStage(AssessmentBaseStage):
         return self._get_children_by_category(GroupProjectPeerAssessmentXBlock.CATEGORY)
 
     def get_stage_content_fragment(self, context, view='student_view'):
-        children_fragment = self.render_children_fragment(context)
+        children_fragment = self.render_children_fragment(context, view=view)
 
         fragment = Fragment()
         fragment.add_frag_resources(children_fragment)
@@ -614,7 +614,7 @@ class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
         return self._get_children_by_category(GroupProjectGroupAssessmentXBlock.CATEGORY)
 
     def get_stage_content_fragment(self, context, view='student_view'):
-        children_fragment = self.render_children_fragment(context)
+        children_fragment = self.render_children_fragment(context, view=view)
 
         fragment = Fragment()
         fragment.add_frag_resources(children_fragment)

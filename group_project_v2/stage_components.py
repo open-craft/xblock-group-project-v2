@@ -13,7 +13,7 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import UserAwareXBlockMixin, WorkgroupAwareXBlockMixin
+from group_project_v2.mixins import UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
 from group_project_v2.project_api import project_api
 from group_project_v2.upload_file import UploadFile
 
@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 NO_EDITABLE_SETTINGS = _(u"This XBlock does not contain any editable settings")
 
 
-class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin):
+class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
     CATEGORY = "group-project-v2-review-question"
 
     @property
@@ -151,7 +151,7 @@ class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin):
         return fragment
 
 
-class GroupProjectBaseAssessmentXBlock(XBlock, StudioEditableXBlockMixin):
+class GroupProjectBaseAssessmentXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
     question_id = String(
         display_name=_(u"Question"),
         help=_(u"Question to be assessed"),
@@ -236,7 +236,7 @@ class GroupProjectBaseAssessmentXBlock(XBlock, StudioEditableXBlockMixin):
 
 
 class GroupProjectPeerAssessmentXBlock(
-    GroupProjectBaseAssessmentXBlock, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin
+    GroupProjectBaseAssessmentXBlock, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
 ):
     CATEGORY = "group-project-v2-peer-assessment"
 
@@ -251,7 +251,7 @@ class GroupProjectPeerAssessmentXBlock(
 
 
 class GroupProjectGroupAssessmentXBlock(
-    GroupProjectBaseAssessmentXBlock, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin
+    GroupProjectBaseAssessmentXBlock, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
 ):
     CATEGORY = "group-project-v2-group-assessment"
 
@@ -263,7 +263,7 @@ class GroupProjectGroupAssessmentXBlock(
         return [item for item in all_feedback if item["question"] == self.question_id]
 
 
-class PeerSelectorXBlock(XBlock):
+class PeerSelectorXBlock(XBlock, XBlockWithPreviewMixin):
     CATEGORY = "group-project-v2-peer-selector"
     display_name_with_default = _(u"Teammate selector XBlock")
     STUDENT_TEMPLATE = "templates/html/components/peer_selector.html"
@@ -302,7 +302,7 @@ class PeerSelectorXBlock(XBlock):
         return fragment
 
 
-class GroupSelectorXBlock(XBlock):
+class GroupSelectorXBlock(XBlock, XBlockWithPreviewMixin):
     CATEGORY = "group-project-v2-group-selector"
     display_name_with_default = _(u"Group selector XBlock")
     STUDENT_TEMPLATE = "templates/html/components/group_selector.html"
@@ -341,7 +341,7 @@ class GroupSelectorXBlock(XBlock):
         return fragment
 
 
-class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin):
+class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
     CATEGORY = "group-project-v2-resource"
 
     PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/project_navigator/resource.html'
@@ -392,7 +392,7 @@ SubmissionUpload = namedtuple("SubmissionUpload", "location file_name submission
 
 @XBlock.needs('user')
 @XBlock.wants('notifications')
-class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin):
+class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
     CATEGORY = "group-project-v2-submission"
     PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/submission_navigator_view.html'
     REVIEW_VIEW_TEMPLATE = 'templates/html/components/submission_review_view.html'

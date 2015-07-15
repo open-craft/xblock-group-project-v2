@@ -22,7 +22,7 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
 from group_project_v2.mixins import ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin, \
-    WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin
+    WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin
 from group_project_v2.utils import loader, OutsiderDisallowedError, make_key
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
@@ -41,7 +41,10 @@ except ImportError:
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-class GroupProjectXBlock(XBlock, XBlockWithComponentsMixin, StudioEditableXBlockMixin, StudioContainerXBlockMixin):
+class GroupProjectXBlock(
+    XBlockWithComponentsMixin, ChildrenNavigationXBlockMixin,
+    XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin
+):
     display_name = String(
         display_name="Display Name",
         help="This is a name of the project",
@@ -67,12 +70,6 @@ class GroupProjectXBlock(XBlock, XBlockWithComponentsMixin, StudioEditableXBlock
             rendered_child_fragment = child.render('student_view', context)
             fragment.add_frag_resources(rendered_child_fragment)
             fragment.add_content(rendered_child_fragment.content)
-        return fragment
-
-    def author_preview_view(self, context):
-        fragment = Fragment()
-        self.render_children(context, fragment, can_reorder=True, can_add=False)
-        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/group_project_preview.css"))
         return fragment
 
     @lazy
@@ -140,7 +137,8 @@ class ActivitySubmissionsViewMixin(object):
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
 class GroupActivityXBlock(
-    XBlock, XBlockWithComponentsMixin, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
+    XBlockWithPreviewMixin, XBlockWithComponentsMixin,
+    XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
     ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin,
     ActivityNavigationViewMixin, ActivityResourcesViewMixin, ActivitySubmissionsViewMixin
 ):
@@ -232,6 +230,8 @@ class GroupActivityXBlock(
         }
 
     def _get_default_stage_id(self):
+        if not self.stages:
+            return None
         default_stage_id = self.stages[0].id
         for stage in self.stages:
             # TODO: this will likely need some other way to select target stage, or could be removed altogether
@@ -310,11 +310,11 @@ class GroupActivityXBlock(
         fragment.initialize_js('GroupProjectBlock')
 
         return fragment
-
-    def author_preview_view(self, context):
-        fragment = Fragment()
-        self.render_children(context, fragment, can_reorder=True, can_add=False)
-        return fragment
+    #
+    # def author_preview_view(self, context):
+    #     fragment = Fragment()
+    #     self.render_children(context, fragment, can_reorder=True, can_add=False)
+    #     return fragment
 
     def assign_grade_to_group(self, group_id, grade_value):
         project_api.set_group_grade(

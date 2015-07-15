@@ -1,5 +1,6 @@
 import logging
 from lazy.lazy import lazy
+from xblock.exceptions import NoSuchViewError
 from xblock.fragment import Fragment
 
 from group_project_v2.api_error import ApiError
@@ -105,9 +106,47 @@ class XBlockWithComponentsMixin(object):
         Add some HTML to the author view that allows authors to add child blocks.
         """
         fragment = Fragment()
+
         self.render_children(context, fragment, can_reorder=True, can_add=False)
         fragment.add_content(
             loader.render_template('templates/html/add_buttons.html', {'child_blocks': self.allowed_nested_blocks})
         )
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
         return fragment
+
+    def author_preview_view(self, context):
+        children_contents = []
+
+        fragment = Fragment()
+        for child in self._children:
+            child_fragment = self._render_child_fragment(child, context, 'preview_view')
+            fragment.add_frag_resources(child_fragment)
+            children_contents.append(child_fragment.content)
+
+        render_context = {
+            'block': self,
+            'children_contents': children_contents
+        }
+        render_context.update(context)
+        fragment.add_content(loader.render_template("templates/html/default_preview_view.html", render_context))
+        return fragment
+
+    def _render_child_fragment(self, child, context, view='student_view'):
+        try:
+            child_fragment = child.render(view, context)
+        except NoSuchViewError:
+            if child.scope_ids.block_type == 'html' and getattr(self.runtime, 'is_author_mode', False):
+                # html block doesn't support preview_view, and if we use student_view Studio will wrap
+                # it in HTML that we don't want in the preview. So just render its HTML directly:
+                child_fragment = Fragment(child.data)
+            else:
+                child_fragment = child.render('student_view', context)
+
+        return child_fragment
+
+
+class XBlockWithPreviewMixin(object):
+    def preview_view(self, context):
+        view_to_render = 'author_view' if hasattr(self, 'author_view') else 'student_view'
+        renderer = getattr(self, view_to_render)
+        return renderer(context)

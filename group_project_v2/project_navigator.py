@@ -7,7 +7,7 @@ from xblock.core import XBlock
 from xblock.fragment import Fragment
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
-from group_project_v2.mixins import XBlockWithComponentsMixin
+from group_project_v2.mixins import XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin
 
 from group_project_v2.utils import loader, gettext as _
 
@@ -25,7 +25,9 @@ class ViewTypes(object):
     ASK_TA = 'ask-ta'
 
 
-class GroupProjectNavigatorXBlock(XBlockWithComponentsMixin, StudioContainerXBlockMixin, XBlock):
+class GroupProjectNavigatorXBlock(
+    ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin, StudioContainerXBlockMixin, XBlock
+):
     """
     XBlock that provides basic layout and switching between children XBlocks (views)
     Should only be added as a child to GroupProjectXBlock
@@ -96,18 +98,8 @@ class GroupProjectNavigatorXBlock(XBlockWithComponentsMixin, StudioContainerXBlo
 
         return fragment
 
-    def author_preview_view(self, context):
-        """
-        Studio Preview view
-        """
-        # Can't use student view as it fails with 404 if new activity is added after project navigator:
-        # throws 404 because navigation view searches for completions for all available activities.
-        # Draft activity is visible to nav view, but not to completions api, resulting in 404.
-        # Anyway, it looks like it needs some other studio preview representation
-        return Fragment()
 
-
-class ProjectNavigatorViewXBlockBase(XBlock, StudioEditableXBlockMixin):
+class ProjectNavigatorViewXBlockBase(XBlock, XBlockWithPreviewMixin, StudioEditableXBlockMixin):
     """
     Base class for Project Navigator children XBlocks (views)
     """
