@@ -17,6 +17,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContain
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin, \
     WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin
+from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
     PeerSelectorXBlock, GroupSelectorXBlock,
     GroupProjectReviewQuestionXBlock, GroupProjectPeerAssessmentXBlock, GroupProjectGroupAssessmentXBlock,
@@ -47,7 +48,7 @@ class ResourceType(object):
 
 
 class BaseGroupActivityStage(
-    XBlockWithPreviewMixin, XBlockWithComponentsMixin, ProjectAPIXBlockMixin,
+    XBlockWithPreviewMixin, XBlockWithComponentsMixin, ProjectAPIXBlockMixin, StageNotificationsMixin,
     XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
     CourseAwareXBlockMixin, ChildrenNavigationXBlockMixin, UserAwareXBlockMixin
 ):
@@ -368,7 +369,7 @@ class SubmissionStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
         )
 
 
-class ReviewBaseStage(BaseGroupActivityStage):
+class ReviewBaseStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
     STAGE_TYPE = _(u'Grade')
 
     js_file = "public/js/stages/review_stage.js"
@@ -448,7 +449,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
         pass
 
 
-class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
+class PeerReviewStage(ReviewBaseStage):
     CATEGORY = 'gp-v2-stage-peer-review'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
 
@@ -459,6 +460,23 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
             (PeerSelectorXBlock.CATEGORY, _(u"Teammate selector"))
         ]))
         return blocks
+
+    @property
+    def team_members(self):
+        """
+        Returns teammates to review. May throw `class`: OutsiderDisallowedError
+        """
+        if not self.is_group_member:
+            return []
+
+        try:
+            return [
+                self.project_api.get_user_details(team_member["id"])
+                for team_member in self.workgroup["users"]
+                if self.user_id != int(team_member["id"])
+            ]
+        except ApiError:
+            return []
 
     def is_review_complete(self):
         peers_to_review = [user for user in self.workgroup["users"] if user["id"] != self.user_id]
@@ -523,6 +541,19 @@ class GroupReviewStage(ReviewBaseStage):
             (GroupSelectorXBlock.CATEGORY, _(u"Group selector"))
         ]))
         return blocks
+
+    @property
+    def review_groups(self):
+        """
+        Returns groups to review. May throw `class`: OutsiderDisallowedError
+        """
+        if not self.is_group_member:
+            return self.workgroup
+
+        try:
+            return self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
+        except ApiError:
+            return []
 
     def is_review_complete(self):
         groups_to_review = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
@@ -594,7 +625,7 @@ class GroupReviewStage(ReviewBaseStage):
 
         self.activity.calculate_and_send_grade(group_id)
 
-        if self.activity.is_group_member and self.is_review_complete():
+        if self.is_group_member and self.is_review_complete():
             self.mark_complete(self.user_id)
 
 
