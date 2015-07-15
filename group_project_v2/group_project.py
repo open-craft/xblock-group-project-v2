@@ -23,6 +23,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContain
 
 from group_project_v2.mixins import ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin, \
     WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin
+from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import loader, OutsiderDisallowedError, make_key
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
@@ -76,6 +77,17 @@ class GroupProjectXBlock(
     def activities(self):
         all_children = [self.runtime.get_block(child_id) for child_id in self.children]
         return [child for child in all_children if isinstance(child, GroupActivityXBlock)]
+
+    def validate(self):
+        validation = super(GroupProjectXBlock, self).validate()
+
+        if not self.has_child_of_category(GroupProjectNavigatorXBlock.CATEGORY):
+            validation.add(ValidationMessage(
+                ValidationMessage.ERROR,
+                _(u"Group Project must contain Project Navigator Block")
+            ))
+
+        return validation
 
 
 class ActivityNavigationViewMixin(object):
@@ -310,11 +322,6 @@ class GroupActivityXBlock(
         fragment.initialize_js('GroupProjectBlock')
 
         return fragment
-    #
-    # def author_preview_view(self, context):
-    #     fragment = Fragment()
-    #     self.render_children(context, fragment, can_reorder=True, can_add=False)
-    #     return fragment
 
     def assign_grade_to_group(self, group_id, grade_value):
         project_api.set_group_grade(

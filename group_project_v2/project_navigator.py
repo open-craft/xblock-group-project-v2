@@ -5,6 +5,7 @@ import logging
 from lazy.lazy import lazy
 from xblock.core import XBlock
 from xblock.fragment import Fragment
+from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
 from group_project_v2.mixins import XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin
@@ -31,6 +32,7 @@ class GroupProjectNavigatorXBlock(
     XBlock that provides basic layout and switching between children XBlocks (views)
     Should only be added as a child to GroupProjectXBlock
     """
+    CATEGORY = 'group-project-v2-navigator'
     INITIAL_VIEW = ViewTypes.NAVIGATION
 
     display_name_with_default = _(u"Group Project Navigator")
@@ -101,6 +103,17 @@ class GroupProjectNavigatorXBlock(
         fragment = Fragment()
         fragment.add_content(NO_EDITABLE_SETTINGS)
         return fragment
+
+    def validate(self):
+        validation = super(GroupProjectNavigatorXBlock, self).validate()
+
+        if not self.has_child_of_category(NavigationViewXBlock.CATEGORY):
+            validation.add(ValidationMessage(
+                ValidationMessage.ERROR,
+                _(u"Project Navigator must contain Navigation view")
+            ))
+
+        return validation
 
 
 class ProjectNavigatorViewXBlockBase(XBlock, XBlockWithPreviewMixin, StudioEditableXBlockMixin):
@@ -193,6 +206,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     Navigation View XBlock - displays Group Project Activities and Stages, completion state and links to navigate to
     any stage in Group Project
     """
+    CATEGORY = 'group-project-v2-navigator-navigation'
     type = ViewTypes.NAVIGATION
     icon = u"fa-bars"
     display_name_with_default = _(u"Navigation")

@@ -18,6 +18,9 @@ class ChildrenNavigationXBlockMixin(object):
     def _get_children_by_category(self, child_category):
         return [child for child in self._children if child.category == child_category]
 
+    def has_child_of_category(self, child_category):
+        return any(child.block_type == child_category for child in self.children)
+
 
 class CourseAwareXBlockMixin(object):
     @property
