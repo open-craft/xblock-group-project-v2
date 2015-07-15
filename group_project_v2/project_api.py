@@ -44,7 +44,7 @@ class ProjectAPI(object):
         url_template = "{}/" + "{}/" * len(url_parts)
         url_parameters = [self._api_server_address]
         url_parameters.extend(url_parts)
-        url = url_template.format(*url_parameters)
+        url = url_template.format(*url_parameters)  # pylint: disable=star-args
         if no_trailing_slash:
             url = url[:-1]
 

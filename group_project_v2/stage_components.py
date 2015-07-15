@@ -150,7 +150,9 @@ class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin, XBlock
         return fragment
 
 
-class GroupProjectBaseAssessmentXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
+class GroupProjectBaseAssessmentXBlock(
+    XBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin
+):
     question_id = String(
         display_name=_(u"Question"),
         help=_(u"Question to be assessed"),
