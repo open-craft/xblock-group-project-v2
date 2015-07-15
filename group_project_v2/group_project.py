@@ -68,6 +68,8 @@ class GroupProjectXBlock(
         fragment = Fragment()
         for child_id in self.children:
             child = self.runtime.get_block(child_id)
+            if child.category == GroupProjectNavigatorXBlock.CATEGORY:
+                continue
             rendered_child_fragment = child.render('student_view', context)
             fragment.add_frag_resources(rendered_child_fragment)
             fragment.add_content(rendered_child_fragment.content)
