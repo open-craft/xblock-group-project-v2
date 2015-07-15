@@ -111,6 +111,7 @@ class XBlockWithComponentsMixin(object):
         fragment.add_content(
             loader.render_template('templates/html/add_buttons.html', {'child_blocks': self.allowed_nested_blocks})
         )
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
         return fragment
 
@@ -129,7 +130,8 @@ class XBlockWithComponentsMixin(object):
         }
         render_context.update(context)
         fragment.add_content(loader.render_template("templates/html/default_preview_view.html", render_context))
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_preview.css'))
         return fragment
 
     def _render_child_fragment(self, child, context, view='student_view'):

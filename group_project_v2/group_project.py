@@ -304,7 +304,7 @@ class GroupActivityXBlock(
         }
 
         fragment.add_content(loader.render_template('/templates/html/activity/student_view.html', context))
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_activity.css'))
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/group_activity.js'))
 
         fragment.initialize_js('GroupProjectBlock')
