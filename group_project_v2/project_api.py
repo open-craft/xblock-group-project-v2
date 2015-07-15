@@ -100,82 +100,6 @@ class ProjectAPI(object):
     def delete_workgroup_review_assessment(self, assessment_id):
         self.send_request(DELETE, (WORKGROUP_REVIEW_API, assessment_id))
 
-    # TODO: this method post-process api response: probably they should be moved outside of this class
-    def get_peer_review_items(self, reviewer_id, peer_id, group_id, content_id):
-        group_peer_items = self.get_peer_review_items_for_group(group_id, content_id)
-        return [pri for pri in group_peer_items if
-                pri['reviewer'] == reviewer_id and (pri['user'] == peer_id or pri['user'] == int(peer_id))]
-
-    # TODO: this method post-process api response: probably they should be moved outside of this class
-    def get_user_peer_review_items(self, user_id, group_id, content_id):
-        group_peer_items = self.get_peer_review_items_for_group(group_id, content_id)
-        return [pri for pri in group_peer_items if pri['user'] == user_id or pri['user'] == int(user_id)]
-
-    # TODO: this method pre-process api request: probably they should be moved outside of this class
-    def submit_peer_review_items(self, reviewer_id, peer_id, group_id, content_id, data):
-        # get any data already there
-        current_data = {pi['question']: pi for pi in
-                        self.get_peer_review_items(reviewer_id, peer_id, group_id, content_id)}
-        for k, v in data.iteritems():
-            if k in current_data:
-                question_data = current_data[k]
-
-                if question_data['answer'] != v:
-                    if len(v) > 0:
-                        # update with relevant data
-                        del question_data['created']
-                        del question_data['modified']
-                        question_data['answer'] = v
-
-                        self.update_peer_review_assessment(question_data)
-                    else:
-                        self.delete_peer_review_assessment(question_data['id'])
-
-            elif len(v) > 0:
-                question_data = {
-                    "question": k,
-                    "answer": v,
-                    "workgroup": group_id,
-                    "user": peer_id,
-                    "reviewer": reviewer_id,
-                    "content_id": content_id,
-                }
-                self.create_peer_review_assessment(question_data)
-
-    # TODO: this method post-process api response: probably they should be moved outside of this class
-    def get_workgroup_review_items(self, reviewer_id, group_id, content_id):
-        group_review_items = self.get_workgroup_review_items_for_group(group_id, content_id)
-        return [gri for gri in group_review_items if gri['reviewer'] == reviewer_id and gri['content_id'] == content_id]
-
-    # TODO: this method pre-process api request: probably they should be moved outside of this class
-    def submit_workgroup_review_items(self, reviewer_id, group_id, content_id, data):
-        # get any data already there
-        current_data = {ri['question']: ri for ri in self.get_workgroup_review_items(reviewer_id, group_id, content_id)}
-        for k, v in data.iteritems():
-            if k in current_data:
-                question_data = current_data[k]
-
-                if question_data['answer'] != v:
-                    if len(v) > 0:
-                        # update with relevant data
-                        del question_data['created']
-                        del question_data['modified']
-                        question_data['answer'] = v
-
-                        self.update_workgroup_review_assessment(question_data)
-                    else:
-                        self.delete_workgroup_review_assessment(question_data['id'])
-
-            elif len(v) > 0:
-                question_data = {
-                    "question": k,
-                    "answer": v,
-                    "workgroup": group_id,
-                    "reviewer": reviewer_id,
-                    "content_id": content_id,
-                }
-                self.create_workgroup_review_assessment(question_data)
-
     @api_error_protect
     def get_workgroup_by_id(self, group_id):
         return self.send_request(GET, (WORKGROUP_API, group_id))
@@ -216,32 +140,6 @@ class ProjectAPI(object):
     @api_error_protect
     def get_workgroup_submissions(self, group_id):
         return self.send_request(GET, (WORKGROUP_API, group_id, 'submissions'))
-
-    # TODO: this method post-process api response: probably they should be moved outside of this class
-    def get_latest_workgroup_submissions_by_id(self, group_id):
-        submission_list = self.get_workgroup_submissions(group_id)
-
-        user_details_cache = {}
-
-        def get_user_details(user_id):
-            if user_id not in user_details_cache:
-                user_details_cache[user_id] = self.get_user_details(user_id)
-            return user_details_cache[user_id]
-
-        submissions_by_id = {}
-        for submission in submission_list:
-            submission_id = submission['document_id']
-            if submission['user']:
-                submission[u'user_details'] = get_user_details(submission['user'])
-            if submission_id in submissions_by_id:
-                last_modified = build_date_field(submissions_by_id[submission_id]["modified"])
-                this_modified = build_date_field(submission["modified"])
-                if this_modified > last_modified:
-                    submissions_by_id[submission["document_id"]] = submission
-            else:
-                submissions_by_id[submission["document_id"]] = submission
-
-        return submissions_by_id
 
     @api_error_protect
     def get_review_assignment_groups(self, user_id, course_id, xblock_id):
@@ -326,6 +224,108 @@ class ProjectAPI(object):
         }
 
         return self.send_request(GET, (COURSES_API, course_id, 'roles'), query_params=qs_params)
+
+    # TODO: this method post-process api response: probably they should be moved outside of this class
+    def get_peer_review_items(self, reviewer_id, peer_id, group_id, content_id):
+        group_peer_items = self.get_peer_review_items_for_group(group_id, content_id)
+        return [pri for pri in group_peer_items if
+                pri['reviewer'] == reviewer_id and (pri['user'] == peer_id or pri['user'] == int(peer_id))]
+
+    # TODO: this method post-process api response: probably they should be moved outside of this class
+    def get_user_peer_review_items(self, user_id, group_id, content_id):
+        group_peer_items = self.get_peer_review_items_for_group(group_id, content_id)
+        return [pri for pri in group_peer_items if pri['user'] == user_id or pri['user'] == int(user_id)]
+
+    # TODO: this method pre-process api request: probably they should be moved outside of this class
+    def submit_peer_review_items(self, reviewer_id, peer_id, group_id, content_id, data):
+        # get any data already there
+        current_data = {pi['question']: pi for pi in
+                        self.get_peer_review_items(reviewer_id, peer_id, group_id, content_id)}
+        for k, v in data.iteritems():
+            if k in current_data:
+                question_data = current_data[k]
+
+                if question_data['answer'] != v:
+                    if len(v) > 0:
+                        # update with relevant data
+                        del question_data['created']
+                        del question_data['modified']
+                        question_data['answer'] = v
+
+                        self.update_peer_review_assessment(question_data)
+                    else:
+                        self.delete_peer_review_assessment(question_data['id'])
+
+            elif len(v) > 0:
+                question_data = {
+                    "question": k,
+                    "answer": v,
+                    "workgroup": group_id,
+                    "user": peer_id,
+                    "reviewer": reviewer_id,
+                    "content_id": content_id,
+                }
+                self.create_peer_review_assessment(question_data)
+
+    # TODO: this method post-process api response: probably they should be moved outside of this class
+    def get_workgroup_review_items(self, reviewer_id, group_id, content_id):
+        group_review_items = self.get_workgroup_review_items_for_group(group_id, content_id)
+        return [gri for gri in group_review_items if gri['reviewer'] == reviewer_id and gri['content_id'] == content_id]
+
+    # TODO: this method pre-process api request: probably they should be moved outside of this class
+    def submit_workgroup_review_items(self, reviewer_id, group_id, content_id, data):
+        # get any data already there
+        current_data = {ri['question']: ri for ri in self.get_workgroup_review_items(reviewer_id, group_id, content_id)}
+        for k, v in data.iteritems():
+            if k in current_data:
+                question_data = current_data[k]
+
+                if question_data['answer'] != v:
+                    if len(v) > 0:
+                        # update with relevant data
+                        del question_data['created']
+                        del question_data['modified']
+                        question_data['answer'] = v
+
+                        self.update_workgroup_review_assessment(question_data)
+                    else:
+                        self.delete_workgroup_review_assessment(question_data['id'])
+
+            elif len(v) > 0:
+                question_data = {
+                    "question": k,
+                    "answer": v,
+                    "workgroup": group_id,
+                    "reviewer": reviewer_id,
+                    "content_id": content_id,
+                }
+                self.create_workgroup_review_assessment(question_data)
+
+    # TODO: this method post-process api response: probably they should be moved outside of this class
+    def get_latest_workgroup_submissions_by_id(self, group_id):
+        submission_list = self.get_workgroup_submissions(group_id)
+
+        user_details_cache = {}
+
+        def get_user_details(user_id):
+            if user_id not in user_details_cache:
+                user_details_cache[user_id] = self.get_user_details(user_id)
+            return user_details_cache[user_id]
+
+        submissions_by_id = {}
+        for submission in submission_list:
+            submission_id = submission['document_id']
+            if submission['user']:
+                submission[u'user_details'] = get_user_details(submission['user'])
+            if submission_id in submissions_by_id:
+                last_modified = build_date_field(submissions_by_id[submission_id]["modified"])
+                this_modified = build_date_field(submission["modified"])
+                if this_modified > last_modified:
+                    submissions_by_id[submission["document_id"]] = submission
+            else:
+                submissions_by_id[submission["document_id"]] = submission
+
+        return submissions_by_id
 
 
 # Looks like it's an issue, but technically it's not; this code runs in LMS, so 127.0.0.1 is always correct
