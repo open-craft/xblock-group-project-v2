@@ -129,6 +129,7 @@ class XBlockWithComponentsMixin(object):
         }
         render_context.update(context)
         fragment.add_content(loader.render_template("templates/html/default_preview_view.html", render_context))
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
         return fragment
 
     def _render_child_fragment(self, child, context, view='student_view'):

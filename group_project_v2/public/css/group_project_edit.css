@@ -5,3 +5,7 @@
     height: 30px;
     line-height: 30px;
 }
+
+.message, .review_submissions_dialog {
+    display: none;
+}
