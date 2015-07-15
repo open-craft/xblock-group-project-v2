@@ -23,7 +23,7 @@ from group_project_v2.stage_components import (
     GroupProjectResourceXBlock, GroupProjectSubmissionXBlock,
     StageState
 )
-from group_project_v2.project_api import project_api
+from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.utils import loader, format_date, gettext as _, make_key
 
 log = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ class ResourceType(object):
 
 
 class BaseGroupActivityStage(
-    XBlockWithPreviewMixin, XBlockWithComponentsMixin,
+    XBlockWithPreviewMixin, XBlockWithComponentsMixin, ProjectAPIXBlockMixin,
     XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
     CourseAwareXBlockMixin, ChildrenNavigationXBlockMixin, UserAwareXBlockMixin
 ):
@@ -164,7 +164,7 @@ class BaseGroupActivityStage(
 
     def mark_complete(self, user_id):
         try:
-            project_api.mark_as_complete(self.course_id, self.content_id, user_id, self.id)
+            self.project_api.mark_as_complete(self.course_id, self.content_id, user_id, self.id)
         except ApiError as exc:
             # 409 indicates that the completion record already existed # That's ok in this case
             if exc.code != 409:
@@ -174,7 +174,7 @@ class BaseGroupActivityStage(
         """
         Gets stage completion state
         """
-        users_in_group, completed_users = project_api.get_stage_state(
+        users_in_group, completed_users = self.project_api.get_stage_state(
             self.course_id,
             self.activity.id,
             self.user_id,
@@ -372,7 +372,7 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
 
     def is_review_complete(self):
         peers_to_review = [user for user in self.workgroup["users"] if user["id"] != self.user_id]
-        peer_review_items = project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
+        peer_review_items = self.project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
 
         return self._check_review_complete(peers_to_review, self.required_questions, peer_review_items, "user")
 
@@ -396,7 +396,7 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
     def load_peer_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
 
         peer_id = request.GET["peer_id"]
-        feedback = project_api.get_peer_review_items(
+        feedback = self.project_api.get_peer_review_items(
             self.anonymous_student_id,
             peer_id,
             self.workgroup['id'],
@@ -413,7 +413,7 @@ class PeerReviewStage(ReviewBaseStage, WorkgroupAwareXBlockMixin):
             peer_id = submissions["review_subject_id"]
             del submissions["review_subject_id"]
 
-            project_api.submit_peer_review_items(
+            self.project_api.submit_peer_review_items(
                 self.anonymous_student_id,
                 peer_id,
                 self.workgroup['id'],
@@ -458,12 +458,12 @@ class GroupReviewStage(ReviewBaseStage):
         return blocks
 
     def is_review_complete(self):
-        groups_to_review = project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
+        groups_to_review = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
 
         group_review_items = []
         for assess_group in groups_to_review:
             group_review_items.extend(
-                project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id)
+                self.project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id)
             )
 
         return self._check_review_complete(groups_to_review, self.required_questions, group_review_items, "workgroup")
@@ -491,7 +491,7 @@ class GroupReviewStage(ReviewBaseStage):
 
         group_id = request.GET["group_id"]
 
-        feedback = project_api.get_workgroup_review_items(
+        feedback = self.project_api.get_workgroup_review_items(
             self.anonymous_student_id,
             group_id,
             self.content_id
@@ -507,7 +507,7 @@ class GroupReviewStage(ReviewBaseStage):
             group_id = submissions["review_subject_id"]
             del submissions["review_subject_id"]
 
-            project_api.submit_workgroup_review_items(
+            self.project_api.submit_workgroup_review_items(
                 self.anonymous_student_id,
                 group_id,
                 self.content_id,

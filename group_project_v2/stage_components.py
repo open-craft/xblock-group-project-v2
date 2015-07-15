@@ -14,7 +14,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin
 
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
-from group_project_v2.project_api import project_api
+from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.upload_file import UploadFile
 from group_project_v2.utils import outer_html, gettext as _, loader, format_date, build_date_field, mean, \
     NO_EDITABLE_SETTINGS
@@ -150,7 +150,7 @@ class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin, XBlock
         return fragment
 
 
-class GroupProjectBaseAssessmentXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
+class GroupProjectBaseAssessmentXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
     question_id = String(
         display_name=_(u"Question"),
         help=_(u"Question to be assessed"),
@@ -240,7 +240,7 @@ class GroupProjectPeerAssessmentXBlock(
     CATEGORY = "group-project-v2-peer-assessment"
 
     def get_feedback(self):
-        all_feedback = project_api.get_user_peer_review_items(
+        all_feedback = self.project_api.get_user_peer_review_items(
             self.user_id,
             self.workgroup['id'],
             self.stage.content_id,
@@ -255,7 +255,7 @@ class GroupProjectGroupAssessmentXBlock(
     CATEGORY = "group-project-v2-group-assessment"
 
     def get_feedback(self):
-        all_feedback = project_api.get_workgroup_review_items_for_group(
+        all_feedback = self.project_api.get_workgroup_review_items_for_group(
             self.workgroup['id'],
             self.stage.content_id,
         )
@@ -391,7 +391,7 @@ SubmissionUpload = namedtuple("SubmissionUpload", "location file_name submission
 
 @XBlock.needs('user')
 @XBlock.wants('notifications')
-class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
+class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
     CATEGORY = "group-project-v2-submission"
     PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/submission_navigator_view.html'
     REVIEW_VIEW_TEMPLATE = 'templates/html/components/submission_review_view.html'
@@ -421,7 +421,7 @@ class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin, XBlockWith
         return self.get_parent()
 
     def get_upload(self, group_id):
-        submission_map = project_api.get_latest_workgroup_submissions_by_id(group_id)
+        submission_map = self.project_api.get_latest_workgroup_submissions_by_id(group_id)
         submission_data = submission_map.get(self.upload_id, None)
 
         if submission_data is None:
@@ -474,7 +474,7 @@ class GroupProjectSubmissionXBlock(XBlock, StudioEditableXBlockMixin, XBlockWith
             context = {
                 "user_id": target_activity.user_id,
                 "group_id": target_activity.workgroup['id'],
-                "project_api": project_api,
+                "project_api": self.project_api,
                 "course_id": target_activity.course_id
             }
 

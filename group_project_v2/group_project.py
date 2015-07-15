@@ -29,7 +29,7 @@ from group_project_v2.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
     PeerAssessmentStage, GroupAssessmentStage
 )
-from group_project_v2.project_api import project_api
+from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.api_error import ApiError
 
 try:
@@ -149,7 +149,7 @@ class ActivitySubmissionsViewMixin(object):
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
 class GroupActivityXBlock(
-    XBlockWithPreviewMixin, XBlockWithComponentsMixin,
+    XBlockWithPreviewMixin, XBlockWithComponentsMixin, ProjectAPIXBlockMixin,
     XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
     ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin,
     ActivityNavigationViewMixin, ActivityResourcesViewMixin, ActivitySubmissionsViewMixin
@@ -265,7 +265,7 @@ class GroupActivityXBlock(
 
         try:
             return [
-                project_api.get_user_details(team_member["id"])
+                self.project_api.get_user_details(team_member["id"])
                 for team_member in self.workgroup["users"]
                 if self.user_id != int(team_member["id"])
             ]
@@ -281,7 +281,7 @@ class GroupActivityXBlock(
             return self.workgroup
 
         try:
-            return project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
+            return self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
         except ApiError:
             return []
 
@@ -324,7 +324,7 @@ class GroupActivityXBlock(
         return fragment
 
     def assign_grade_to_group(self, group_id, grade_value):
-        project_api.set_group_grade(
+        self.project_api.set_group_grade(
             group_id,
             self.course_id,
             self.content_id,
@@ -350,7 +350,7 @@ class GroupActivityXBlock(
         if grade_value:
             self.assign_grade_to_group(group_id, grade_value)
 
-            workgroup = project_api.get_workgroup_by_id(group_id)
+            workgroup = self.project_api.get_workgroup_by_id(group_id)
             for u in workgroup["users"]:
                 self.mark_complete(u["id"])
 
@@ -360,13 +360,13 @@ class GroupActivityXBlock(
             numeric_values = [float(v) for v in value_array]
             return float(sum(numeric_values) / len(numeric_values))
 
-        review_item_data = project_api.get_workgroup_review_items_for_group(group_id, self.content_id)
+        review_item_data = self.project_api.get_workgroup_review_items_for_group(group_id, self.content_id)
         review_item_map = {
             make_key(review_item['question'], self.real_user_id(review_item['reviewer'])): review_item['answer']
             for review_item in review_item_data
         }
         all_reviewer_ids = set([self.real_user_id(review_item['reviewer']) for review_item in review_item_data])
-        group_reviewer_ids = [user["id"] for user in project_api.get_workgroup_reviewers(group_id)]
+        group_reviewer_ids = [user["id"] for user in self.project_api.get_workgroup_reviewers(group_id)]
         admin_reviewer_ids = [reviewer_id for reviewer_id in all_reviewer_ids if reviewer_id not in group_reviewer_ids]
 
         def get_user_grade_value_list(user_id):
@@ -425,7 +425,7 @@ class GroupActivityXBlock(
 
     def mark_complete(self, user_id):
         try:
-            project_api.mark_as_complete(self.course_id, self.content_id, user_id)
+            self.project_api.mark_as_complete(self.course_id, self.content_id, user_id)
         except ApiError as e:
             # 409 indicates that the completion record already existed. That's ok in this case
             if e.code != 409:
@@ -447,7 +447,7 @@ class GroupActivityXBlock(
     def load_my_peer_feedback(self, request, suffix=''):
 
         user_id = self.user_id
-        feedback = project_api.get_user_peer_review_items(
+        feedback = self.project_api.get_user_peer_review_items(
             user_id,
             self.workgroup['id'],
             self.content_id,
@@ -466,7 +466,7 @@ class GroupActivityXBlock(
     @XBlock.handler
     def load_my_group_feedback(self, request, suffix=''):
         workgroup_id = self.workgroup['id']
-        feedback = project_api.get_workgroup_review_items_for_group(
+        feedback = self.project_api.get_workgroup_review_items_for_group(
             workgroup_id,
             self.content_id,
         )

@@ -4,7 +4,6 @@ from xblock.exceptions import NoSuchViewError
 from xblock.fragment import Fragment
 
 from group_project_v2.api_error import ApiError
-from group_project_v2.project_api import project_api
 from group_project_v2.utils import OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES, loader
 
 log = logging.getLogger(__name__)
@@ -67,8 +66,14 @@ class UserAwareXBlockMixin(object):
 
 
 class WorkgroupAwareXBlockMixin(object):
+    """
+    Gets current user workgroup. Should only be mixed to a class already having the following mixins:
+    * UserAwareXBlockMixin
+    * CourseAwareXBlockMixin
+    * ProjectAPIXBlockMixin
+    """
     def _confirm_outsider_allowed(self):
-        granted_roles = [r["role"] for r in project_api.get_user_roles_for_course(self.user_id, self.course_id)]
+        granted_roles = [r["role"] for r in self.project_api.get_user_roles_for_course(self.user_id, self.course_id)]
         for allowed_role in ALLOWED_OUTSIDER_ROLES:
             if allowed_role in granted_roles:
                 return True
@@ -83,13 +88,13 @@ class WorkgroupAwareXBlockMixin(object):
         }
 
         try:
-            user_prefs = project_api.get_user_preferences(self.user_id)
+            user_prefs = self.project_api.get_user_preferences(self.user_id)
 
             if "TA_REVIEW_WORKGROUP" in user_prefs:
                 self._confirm_outsider_allowed()
-                result = project_api.get_workgroup_by_id(user_prefs["TA_REVIEW_WORKGROUP"])
+                result = self.project_api.get_workgroup_by_id(user_prefs["TA_REVIEW_WORKGROUP"])
             else:
-                result = project_api.get_user_workgroup_for_course(self.user_id, self.course_id)
+                result = self.project_api.get_user_workgroup_for_course(self.user_id, self.course_id)
         except OutsiderDisallowedError:
             raise
         except ApiError as exception:
