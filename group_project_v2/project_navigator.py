@@ -82,6 +82,7 @@ class GroupProjectNavigatorXBlock(
             child_fragment = child.render('student_view', context)
 
             item = {
+                'id': str(child_id).replace("/", ";_"),
                 'type': child.type,
                 'content': child_fragment.content,
             }

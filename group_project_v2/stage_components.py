@@ -88,11 +88,11 @@ class StaticContentBaseXBlock(XBlock, XBlockWithPreviewMixin):
         if target_block is None:
             return Fragment()
 
-        selector_view_fragment = target_block.render('selector_view', context)
         render_context = {
             'block': self,
             'block_link': get_link_to_block(target_block),
             'block_text': self.TEXT_TEMPLATE.format(activity_name=activity.display_name),
+            'target_block_id': str(target_block.scope_ids.usage_id),
             'view_icon': target_block.icon
         }
         render_context.update(context)
@@ -106,7 +106,10 @@ class StaticContentBaseXBlock(XBlock, XBlockWithPreviewMixin):
 
 
 class SubmissionsStaticContentXBlock(StaticContentBaseXBlock):
+    DISPLAY_NAME = _(u"Submissions Help Text")
     CATEGORY = "gp-v2-static-submissions"
+
+    display_name_with_default = DISPLAY_NAME
 
     TARGET_PROJECT_NAVIGATOR_VIEW = ResourcesViewXBlock.CATEGORY
     TEXT_TEMPLATE = "You can upload (or replace) your file(s) before the due date in the project navigator panel" \
@@ -114,7 +117,10 @@ class SubmissionsStaticContentXBlock(StaticContentBaseXBlock):
 
 
 class GradeRubricStaticContentXBlock(StaticContentBaseXBlock):
+    DISPLAY_NAME = _(u"Grade Rubric Help Text")
     CATEGORY = "gp-v2-static-grade-rubric"
+
+    display_name_with_default = DISPLAY_NAME
 
     TARGET_PROJECT_NAVIGATOR_VIEW = ResourcesViewXBlock.CATEGORY
     TEXT_TEMPLATE = "The {activity_name} grading rubric is provided in the project navigator panel" \

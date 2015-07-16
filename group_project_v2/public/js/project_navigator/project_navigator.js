@@ -1,7 +1,7 @@
 function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
     const initial_view = 'navigation';
     const selector_item_query = ".group-project-navigator-view-selector .view-selector-item";
-    debugger;
+    const activate_project_nav_view_event = 'group_project_v2.project_navigator.activate_view';
 
     var view_elements = $(".group-project-navigator-view", element),
         views = {},
@@ -15,16 +15,6 @@ function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
 
         view_data.view.show();
         view_data.selector.addClass('active');
-    }
-
-    for (var i=0; i<=view_elements.length; i++) {
-        var view_element = $(view_elements[i]),
-            view_type = view_element.data("view-type");
-
-        views[view_type] = {
-            view: view_element,
-            selector: $(selector_item_query+"[data-view-type="+view_type+"]", element)
-        };
     }
 
     $(selector_item_query, element).click(function(e){
@@ -42,6 +32,24 @@ function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
     $(".group-project-navigator-view-close").click(function(){
         switch_to_view(initial_view);
     });
+
+    $(document).on(activate_project_nav_view_event, function(target, target_block_id) {
+        var escaped_block_id = target_block_id.replace(/\//g, ";_");
+        var target_block = $("[data-view-id='"+escaped_block_id+"']");
+        if (target_block) {
+            switch_to_view(target_block.data('view-type'));
+        }
+    });
+
+    for (var i=0; i<=view_elements.length; i++) {
+        var view_element = $(view_elements[i]),
+            view_type = view_element.data("view-type");
+
+        views[view_type] = {
+            view: view_element,
+            selector: $(selector_item_query+"[data-view-type="+view_type+"]", element)
+        };
+    }
 
     switch_to_view(selected_view);
 }
