@@ -4,6 +4,7 @@ import logging
 from datetime import date, datetime
 from django.conf import settings
 import xml.etree.ElementTree as ET
+import pytz
 from xblock.fragment import Fragment
 
 from xblockutils.resources import ResourceLoader
@@ -137,6 +138,19 @@ def key_error_protected_handler(func):
             return {'result': 'error', 'msg': ("Missing required argument {}".format(exception.message))}
 
     return wrapper
+
+
+def get_most_recently_opened_stage(stages):
+    most_recent, most_recent_open_date = None, datetime.min.replace(tzinfo=pytz.UTC)
+    for stage in stages:
+        if stage.available_now:
+            # if stage does not have open_date set it is always open. In such case, we take first of them
+            if stage.open_date is None and most_recent is None:
+                most_recent = stage
+            if stage.open_date is not None and stage.open_date > most_recent_open_date:
+                most_recent, most_recent_open_date = stage, stage.open_date
+
+    return most_recent, most_recent_open_date
 
 
 NO_EDITABLE_SETTINGS = gettext(u"This XBlock does not contain any editable settings")

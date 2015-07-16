@@ -27,7 +27,7 @@ from group_project_v2.mixins import (
 )
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
-from group_project_v2.utils import loader, make_key, outsider_disallowed_protected_view
+from group_project_v2.utils import loader, make_key, outsider_disallowed_protected_view, get_most_recently_opened_stage
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
     PeerAssessmentStage, GroupAssessmentStage, CompletionStage
@@ -76,7 +76,17 @@ class GroupProjectXBlock(
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 
+        if self.most_recently_opened_stage:
+            return self.most_recently_opened_stage.activity
+
         return self.activities[0] if self.activities else None
+
+    @property
+    def most_recently_opened_stage(self):
+        most_recent_stages = [activity.most_recently_opened_stage for activity in self.activities]
+
+        most_recent, _ = get_most_recently_opened_stage(most_recent_stages)
+        return most_recent
 
     def student_view(self, context):
         target_stage_id = context.get('activate_block_id', None)
@@ -188,6 +198,11 @@ class GroupActivityXBlock(
         return self._children
 
     @property
+    def most_recently_opened_stage(self):
+        most_recent, _ = get_most_recently_opened_stage(self.stages)
+        return most_recent
+
+    @property
     def questions(self):
         return list(itertools.chain(
             *[getattr(stage, 'questions', ()) for stage in self.stages]
@@ -205,6 +220,9 @@ class GroupActivityXBlock(
             return self.runtime.get_block(usage_id)
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
+
+        if self.most_recently_opened_stage:
+            return self.most_recently_opened_stage
 
         return self.stages[0] if self.stages else None
 
