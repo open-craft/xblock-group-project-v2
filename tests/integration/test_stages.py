@@ -7,10 +7,18 @@ import textwrap
 from freezegun import freeze_time
 import mock
 
-from group_project_v2.stage import StageType
 from tests.integration.base_test import BaseIntegrationTest
 from tests.integration.page_elements import GroupProjectElement, StageElement, ReviewStageElement
 from tests.utils import KNOWN_USERS
+
+
+class StageType(object):
+    NORMAL = 'normal'
+    UPLOAD = 'upload'
+    PEER_REVIEW = 'peer_review'
+    PEER_ASSESSMENT = 'peer_assessment'
+    GROUP_REVIEW = 'group_review'
+    GROUP_ASSESSMENT = 'group_assessment'
 
 
 class StageTestBase(BaseIntegrationTest):
