@@ -66,3 +66,12 @@
     float: right;
     margin-right: 5px;
 }
+
+.peer_selector .group-project-review-selector-no-review-subjects,
+.group_selector .group-project-review-selector-no-review-subjects {
+    font-size: 12px;
+    text-align: center;
+    color: black;
+    padding: 4px;
+    background-color: #f0f0f0;
+}
