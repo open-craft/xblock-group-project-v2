@@ -43,7 +43,7 @@ class StageState(object):
 class BaseGroupActivityStage(
     XBlockWithPreviewMixin, XBlockWithComponentsMixin, ProjectAPIXBlockMixin, StageNotificationsMixin,
     XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-    CourseAwareXBlockMixin, ChildrenNavigationXBlockMixin, UserAwareXBlockMixin
+    ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin
 ):
     display_name = String(
         display_name=_(u"Display Name"),
@@ -77,6 +77,9 @@ class BaseGroupActivityStage(
 
     js_file = None
     js_init = None
+
+    STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as it's not yet opened")
+    STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as it's closed")
 
     @property
     def id(self):
@@ -125,6 +128,10 @@ class BaseGroupActivityStage(
             return False
 
         return (self.close_date is not None) and (self.close_date < datetime.utcnow().replace(tzinfo=pytz.UTC))
+
+    @property
+    def available_now(self):
+        return self.is_open and not self.is_closed
 
     def _view_render(self, context, view='student_view'):
         stage_fragment = self.get_stage_content_fragment(context, view)
@@ -248,7 +255,9 @@ class BasicStage(BaseGroupActivityStage):
     def student_view(self, context):
         fragment = super(BasicStage, self).student_view(context)
 
-        self.mark_complete(self.user_id)
+        if self.available_now and not self.is_admin_grader:
+            self.mark_complete(self.user_id)
+
         return fragment
 
 
@@ -266,9 +275,15 @@ class CompletionStage(BaseGroupActivityStage):
     js_file = "public/js/stages/completion.js"
     js_init = "GroupProjectCompletionStage"
 
+    STAGE_ACTION = _(u"mark stage as complete")
+
     @XBlock.json_handler
     @outsider_disallowed_protected_handler
     def stage_completed(self, data, suffix=''):  # pylint: disable=unused-argument
+        if not self.available_now:
+            template = self.STAGE_NOT_OPEN_MESSAGE if not self.is_open else self.STAGE_CLOSED_MESSAGE
+            return {'result': 'error',  'msg': template.format(action=self.STAGE_ACTION)}
+
         try:
             self.mark_complete(self.user_id)
             self.completed = True
@@ -289,12 +304,14 @@ class CompletionStage(BaseGroupActivityStage):
         return super(CompletionStage, self).get_stage_content_fragment(extra_context, view)
 
 
-class SubmissionStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
+class SubmissionStage(BaseGroupActivityStage):
     CATEGORY = 'gp-v2-stage-submission'
 
     STAGE_TYPE = _(u'Task')
 
     submissions_stage = True
+
+    STAGE_ACTION = _(u"upload submission")
 
     @property
     def allowed_nested_blocks(self):
@@ -368,6 +385,8 @@ class ReviewBaseStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
     js_file = "public/js/stages/review_stage.js"
     js_init = "GroupProjectReviewStage"
 
+    STAGE_ACTION = _(u"save feedback")
+
     @property
     def allowed_nested_blocks(self):
         blocks = super(ReviewBaseStage, self).allowed_nested_blocks
@@ -426,6 +445,10 @@ class ReviewBaseStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
     def submit_review(self, submissions, context=''):  # pylint: disable=unused-argument
+        if not self.available_now:
+            reason = self.STAGE_NOT_OPEN_TEMPLATE if not self.is_open else self.STAGE_CLOSED_TEMPLATE
+            return {'result': 'error', 'msg': reason.format(action=self.STAGE_ACTION)}
+
         try:
             self.do_submit_review(submissions)
         except ApiError as exception:
@@ -519,7 +542,7 @@ class PeerReviewStage(ReviewBaseStage):
             submissions,
         )
 
-        if self.is_review_complete():
+        if self.is_review_complete() and self.is_group_member:
             self.mark_complete(self.user_id)
 
 
@@ -641,7 +664,9 @@ class AssessmentBaseStage(BaseGroupActivityStage):
     def student_view(self, context):
         fragment = super(AssessmentBaseStage, self).student_view(context)
 
-        self.mark_complete(self.user_id)
+        # TODO: should probably check for all reviews to be ready
+        if self.available_now and not self.is_admin_grader:
+            self.mark_complete(self.user_id)
 
         return fragment
 
