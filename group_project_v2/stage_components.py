@@ -469,6 +469,10 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
         """
         Handles submission upload and marks stage as completed if all submissions in stage have uploads.
         """
+        if not self.stage.available_now:
+            template = self.stage.STAGE_NOT_OPEN_MESSAGE if not self.stage.is_open else self.stage.STAGE_CLOSED_MESSAGE
+            return {'result': 'error',  'msg': template.format(action=self.stage.STAGE_ACTION)}
+
         target_activity = self.stage.activity
         response_data = {"message": _("File(s) successfully submitted")}
         failure_code = 0
