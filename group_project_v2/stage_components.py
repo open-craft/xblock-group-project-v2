@@ -15,7 +15,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
 from group_project_v2.project_api import ProjectAPIXBlockMixin
-from group_project_v2.project_navigator import ResourcesViewXBlock
+from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
 from group_project_v2.utils import NO_EDITABLE_SETTINGS, get_link_to_block
 from group_project_v2.utils import outer_html, gettext as _, loader, format_date, build_date_field, mean, \
@@ -111,7 +111,7 @@ class SubmissionsStaticContentXBlock(StaticContentBaseXBlock):
 
     display_name_with_default = DISPLAY_NAME
 
-    TARGET_PROJECT_NAVIGATOR_VIEW = ResourcesViewXBlock.CATEGORY
+    TARGET_PROJECT_NAVIGATOR_VIEW = SubmissionsViewXBlock.CATEGORY
     TEXT_TEMPLATE = "You can upload (or replace) your file(s) before the due date in the project navigator panel" \
                     " at right by clicking the upload button"
 
