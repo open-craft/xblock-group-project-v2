@@ -16,9 +16,7 @@ from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.upload_file import UploadFile
-from group_project_v2.utils import outer_html, gettext as _, loader, format_date, build_date_field, mean, \
-    NO_EDITABLE_SETTINGS
-
+from group_project_v2.utils import NO_EDITABLE_SETTINGS
 from group_project_v2.utils import outer_html, gettext as _, loader, format_date, build_date_field, mean, \
     outsider_disallowed_protected_view
 
@@ -549,9 +547,3 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
             activity.fire_file_upload_notification(notifications_service)
 
         return uploaded_file
-
-
-class StageState(object):
-    NOT_STARTED = 'not_started'
-    INCOMPLETE = 'incomplete'
-    COMPLETED = 'completed'

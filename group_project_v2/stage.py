@@ -15,14 +15,15 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin, \
+from group_project_v2.mixins import (
+    ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin,
     WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin
+)
 from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
     PeerSelectorXBlock, GroupSelectorXBlock,
     GroupProjectReviewQuestionXBlock, GroupProjectPeerAssessmentXBlock, GroupProjectGroupAssessmentXBlock,
-    GroupProjectResourceXBlock, GroupProjectSubmissionXBlock,
-    StageState
+    GroupProjectResourceXBlock, GroupProjectSubmissionXBlock
 )
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.utils import (
@@ -33,6 +34,12 @@ from group_project_v2.utils import (
 log = logging.getLogger(__name__)
 
 
+class StageState(object):
+    NOT_STARTED = 'not_started'
+    INCOMPLETE = 'incomplete'
+    COMPLETED = 'completed'
+
+
 class StageType(object):
     NORMAL = 'normal'
     UPLOAD = 'upload'
@@ -40,11 +47,6 @@ class StageType(object):
     PEER_ASSESSMENT = 'peer_assessment'
     GROUP_REVIEW = 'group_review'
     GROUP_ASSESSMENT = 'group_assessment'
-
-
-class ResourceType(object):
-    NORMAL = 'normal'
-    OOYALA_VIDEO = 'ooyala'
 
 
 class BaseGroupActivityStage(
