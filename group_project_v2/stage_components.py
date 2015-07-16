@@ -15,8 +15,9 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
 from group_project_v2.project_api import ProjectAPIXBlockMixin
+from group_project_v2.project_navigator import ResourcesViewXBlock
 from group_project_v2.upload_file import UploadFile
-from group_project_v2.utils import NO_EDITABLE_SETTINGS
+from group_project_v2.utils import NO_EDITABLE_SETTINGS, get_link_to_block
 from group_project_v2.utils import outer_html, gettext as _, loader, format_date, build_date_field, mean, \
     outsider_disallowed_protected_view
 
@@ -67,6 +68,58 @@ class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPr
         render_context.update(context)
         fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
         return fragment
+
+
+class StaticContentBaseXBlock(XBlock, XBlockWithPreviewMixin):
+    TARGET_PROJECT_NAVIGATOR_VIEW = None
+    TEXT_TEMPLATE = None
+
+    @lazy
+    def stage(self):
+        return self.get_parent()
+
+    def student_view(self, context):
+        activity = self.stage.activity
+        if activity.project.navigator is None:
+            return Fragment()
+
+        target_block = activity.project.navigator.get_child_of_category(self.TARGET_PROJECT_NAVIGATOR_VIEW)
+
+        if target_block is None:
+            return Fragment()
+
+        selector_view_fragment = target_block.render('selector_view', context)
+        render_context = {
+            'block': self,
+            'block_link': get_link_to_block(target_block),
+            'block_text': self.TEXT_TEMPLATE.format(activity_name=activity.display_name),
+            'view_icon': target_block.icon
+        }
+        render_context.update(context)
+
+        fragment = Fragment()
+        fragment.add_content(loader.render_template("templates/html/components/static_content.html", render_context))
+        return fragment
+
+    def studio_view(self):
+        return Fragment(NO_EDITABLE_SETTINGS)
+
+
+class SubmissionsStaticContentXBlock(StaticContentBaseXBlock):
+    CATEGORY = "gp-v2-static-submissions"
+
+    TARGET_PROJECT_NAVIGATOR_VIEW = ResourcesViewXBlock.CATEGORY
+    TEXT_TEMPLATE = "You can upload (or replace) your file(s) before the due date in the project navigator panel" \
+                    " at right by clicking the upload button"
+
+
+class GradeRubricStaticContentXBlock(StaticContentBaseXBlock):
+    CATEGORY = "gp-v2-static-grade-rubric"
+
+    TARGET_PROJECT_NAVIGATOR_VIEW = ResourcesViewXBlock.CATEGORY
+    TEXT_TEMPLATE = "The {activity_name} grading rubric is provided in the project navigator panel" \
+                    " at right by clicking the resources button"""
+
 
 # pylint: disable=invalid-name
 SubmissionUpload = namedtuple("SubmissionUpload", "location file_name submission_date user_details")

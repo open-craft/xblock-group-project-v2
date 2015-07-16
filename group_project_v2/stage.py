@@ -23,13 +23,13 @@ from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
     PeerSelectorXBlock, GroupSelectorXBlock,
     GroupProjectReviewQuestionXBlock, GroupProjectPeerAssessmentXBlock, GroupProjectGroupAssessmentXBlock,
-    GroupProjectResourceXBlock, GroupProjectSubmissionXBlock
-)
+    GroupProjectResourceXBlock, GroupProjectSubmissionXBlock, SubmissionsStaticContentXBlock,
+    GradeRubricStaticContentXBlock)
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.utils import (
     loader, format_date, gettext as _, make_key, outsider_disallowed_protected_view,
-    outsider_disallowed_protected_handler, key_error_protected_handler
-)
+    outsider_disallowed_protected_handler, key_error_protected_handler,
+    get_link_to_block)
 
 log = logging.getLogger(__name__)
 
@@ -219,7 +219,8 @@ class BaseGroupActivityStage(
         rendering_context = {
             'stage': self,
             'activity_id': self.activity.id,
-            'stage_state': self.get_stage_state()
+            'stage_state': self.get_stage_state(),
+            'block_link': get_link_to_block(self)
         }
         rendering_context.update(context)
         fragment.add_content(loader.render_template("templates/html/stages/navigation_view.html", rendering_context))
@@ -317,7 +318,8 @@ class SubmissionStage(BaseGroupActivityStage):
     def allowed_nested_blocks(self):
         blocks = super(SubmissionStage, self).allowed_nested_blocks
         blocks.update(OrderedDict([
-            (GroupProjectSubmissionXBlock.CATEGORY, _(u"Submission"))
+            (GroupProjectSubmissionXBlock.CATEGORY, _(u"Submission")),
+            (SubmissionsStaticContentXBlock.CATEGORY, _(u"Submissions Help Text"))
         ]))
         return blocks
 
@@ -391,7 +393,8 @@ class ReviewBaseStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
     def allowed_nested_blocks(self):
         blocks = super(ReviewBaseStage, self).allowed_nested_blocks
         blocks.update(OrderedDict([
-            (GroupProjectReviewQuestionXBlock.CATEGORY, _(u"Review Question"))
+            (GroupProjectReviewQuestionXBlock.CATEGORY, _(u"Review Question")),
+            (GradeRubricStaticContentXBlock.CATEGORY, _(u"Grade Rubric Help Text"))
         ]))
         return blocks
 
@@ -712,3 +715,14 @@ class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
         }
         context_extension.update(context)
         return super(GroupAssessmentStage, self).get_stage_content_fragment(context_extension, view)
+
+
+STAGE_TYPES = (
+    BasicStage.CATEGORY,
+    CompletionStage.CATEGORY,
+    SubmissionStage.CATEGORY,
+    PeerReviewStage.CATEGORY,
+    GroupReviewStage.CATEGORY,
+    PeerAssessmentStage.CATEGORY,
+    GroupAssessmentStage.CATEGORY
+)
