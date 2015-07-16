@@ -121,7 +121,7 @@ class BaseGroupActivityStage(
         # If this stage is being loaded for the purposes of a TA grading,
         # then we never close the stage - in this way a TA can impose any
         # action necessary even if it has been closed to the group members
-        if self.activity.is_admin_grader:
+        if not self.is_group_member:
             return False
 
         return (self.close_date is not None) and (self.close_date < datetime.utcnow().replace(tzinfo=pytz.UTC))

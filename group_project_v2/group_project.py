@@ -165,10 +165,6 @@ class GroupActivityXBlock(
         return self.scope_ids.usage_id
 
     @property
-    def is_admin_grader(self):
-        return not self.is_group_member
-
-    @property
     def content_id(self):
         try:
             return unicode(self.scope_ids.usage_id)
