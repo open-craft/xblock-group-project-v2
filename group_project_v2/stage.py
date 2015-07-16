@@ -40,15 +40,6 @@ class StageState(object):
     COMPLETED = 'completed'
 
 
-class StageType(object):
-    NORMAL = 'normal'
-    UPLOAD = 'upload'
-    PEER_REVIEW = 'peer_review'
-    PEER_ASSESSMENT = 'peer_assessment'
-    GROUP_REVIEW = 'group_review'
-    GROUP_ASSESSMENT = 'group_assessment'
-
-
 class BaseGroupActivityStage(
     XBlockWithPreviewMixin, XBlockWithComponentsMixin, ProjectAPIXBlockMixin, StageNotificationsMixin,
     XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
