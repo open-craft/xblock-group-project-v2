@@ -319,7 +319,7 @@ class SubmissionStage(BaseGroupActivityStage):
         blocks = super(SubmissionStage, self).allowed_nested_blocks
         blocks.update(OrderedDict([
             (GroupProjectSubmissionXBlock.CATEGORY, _(u"Submission")),
-            (SubmissionsStaticContentXBlock.CATEGORY, _(u"Submissions Help Text"))
+            (SubmissionsStaticContentXBlock.CATEGORY, SubmissionsStaticContentXBlock.DISPLAY_NAME)
         ]))
         return blocks
 
@@ -394,7 +394,7 @@ class ReviewBaseStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
         blocks = super(ReviewBaseStage, self).allowed_nested_blocks
         blocks.update(OrderedDict([
             (GroupProjectReviewQuestionXBlock.CATEGORY, _(u"Review Question")),
-            (GradeRubricStaticContentXBlock.CATEGORY, _(u"Grade Rubric Help Text"))
+            (GradeRubricStaticContentXBlock.CATEGORY, GradeRubricStaticContentXBlock.display_name_with_default)
         ]))
         return blocks
 
