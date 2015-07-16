@@ -175,8 +175,8 @@ class ProjectAPI(object):
 
         reviewers = []
         for review_assignment in review_assignments:
-            # stripping forward slash as we're adding it in send_request anyway
-            review_assignment_url = review_assignment["url"].lstrip("/")
+            # stripping slashes as we're adding it in send_request anyway
+            review_assignment_url = review_assignment["url"].strip("/")
             review_assignment_details = self.send_request(GET, (review_assignment_url, 'users'))
             reviewers.extend(review_assignment_details["users"])
 
