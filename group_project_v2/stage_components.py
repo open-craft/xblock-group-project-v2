@@ -23,6 +23,293 @@ from group_project_v2.utils import outer_html, gettext as _, loader, format_date
 log = logging.getLogger(__name__)
 
 
+class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
+    CATEGORY = "gp-v2-resource"
+
+    PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/project_navigator/resource.html'
+
+    display_name = String(
+        display_name=_(u"Display Name"),
+        help=_(U"This is a name of the resource"),
+        scope=Scope.settings,
+        default="Group Project V2 Resource"
+    )
+
+    description = String(
+        display_name=_(u"Resource Description"),
+        scope=Scope.settings
+    )
+
+    resource_location = String(
+        display_name=_(u"Resource location"),
+        help=_(u"A url to download/view the resource"),
+        scope=Scope.settings,
+    )
+
+    grading_criteria = Boolean(
+        display_name=_(u"Grading criteria?"),
+        help=_(u"If true, resource will be treated as grading criteria"),
+        scope=Scope.settings,
+        default=False
+    )
+
+    editable_fields = ('display_name', 'description', 'resource_location', 'grading_criteria')
+
+    def student_view(self, context):  # pylint: disable=unused-argument, no-self-use
+        return Fragment()
+
+    def author_view(self, context):
+        return self.resources_view(context)
+
+    def resources_view(self, context):
+        fragment = Fragment()
+        render_context = {'resource': self}
+        render_context.update(context)
+        fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
+        return fragment
+
+# pylint: disable=invalid-name
+SubmissionUpload = namedtuple("SubmissionUpload", "location file_name submission_date user_details")
+
+
+@XBlock.needs('user')
+@XBlock.wants('notifications')
+class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
+    CATEGORY = "gp-v2-submission"
+    PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/submission_navigator_view.html'
+    REVIEW_VIEW_TEMPLATE = 'templates/html/components/submission_review_view.html'
+
+    display_name = String(
+        display_name=_(u"Display Name"),
+        help=_(U"This is a name of the submission"),
+        scope=Scope.settings,
+        default="Group Project V2 Submission"
+    )
+
+    description = String(
+        display_name=_(u"Resource Description"),
+        scope=Scope.settings
+    )
+
+    upload_id = String(
+        display_name=_(u"Upload ID"),
+        help=_(U"This string is used as an identifier for an upload. "
+               U"Submissions sharing the same Upload ID will be updated simultaneously"),
+    )
+
+    editable_fields = ('display_name', 'description', 'upload_id')
+
+    @lazy
+    def stage(self):
+        return self.get_parent()
+
+    def get_upload(self, group_id):
+        submission_map = self.project_api.get_latest_workgroup_submissions_by_id(group_id)
+        submission_data = submission_map.get(self.upload_id, None)
+
+        if submission_data is None:
+            return None
+
+        return SubmissionUpload(
+            submission_data["document_url"],
+            submission_data["document_filename"],
+            format_date(build_date_field(submission_data["modified"])),
+            submission_data.get("user_details", None)
+        )
+
+    @property
+    def upload(self):
+        return self.get_upload(self.stage.activity.workgroup["id"])
+
+    def student_view(self, context):  # pylint: disable=unused-argument, no-self-use
+        return Fragment()
+
+    def submissions_view(self, context):
+        fragment = Fragment()
+        render_context = {'submission': self, 'upload': self.upload}
+        render_context.update(context)
+        fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/submission.js'))
+        fragment.initialize_js("GroupProjectSubmissionBlock")
+        return fragment
+
+    def submission_review_view(self, context):
+        group_id = context.get('group_id', self.stage.activity.workgroup["id"])
+        fragment = Fragment()
+        render_context = {'submission': self, 'upload': self.get_upload(group_id)}
+        render_context.update(context)
+        fragment.add_content(loader.render_template(self.REVIEW_VIEW_TEMPLATE, render_context))
+        # NOTE: adding js/css likely won't work here, as the result of this view is added as an HTML to an existing DOM
+        # element
+        return fragment
+
+    @XBlock.handler
+    def upload_submission(self, request, suffix=''):  # pylint: disable=unused-argument
+        """
+        Handles submission upload and marks stage as completed if all submissions in stage have uploads.
+        """
+        if not self.stage.available_now:
+            template = self.stage.STAGE_NOT_OPEN_MESSAGE if not self.stage.is_open else self.stage.STAGE_CLOSED_MESSAGE
+            return {'result': 'error',  'msg': template.format(action=self.stage.STAGE_ACTION)}
+
+        target_activity = self.stage.activity
+        response_data = {"message": _("File(s) successfully submitted")}
+        failure_code = 0
+        try:
+            context = {
+                "user_id": target_activity.user_id,
+                "group_id": target_activity.workgroup['id'],
+                "project_api": self.project_api,
+                "course_id": target_activity.course_id
+            }
+
+            uploaded_file = self.persist_and_submit_file(target_activity, context, request.params[self.upload_id].file)
+
+            response_data["submissions"] = {uploaded_file.submission_id: uploaded_file.file_url}
+
+            self.stage.check_submissions_and_mark_complete()
+            response_data["new_stage_states"] = [self.stage.get_new_stage_state_data()]
+
+        except Exception as exception:  # pylint: disable=broad-except
+            log.exception(exception)
+            failure_code = 500
+            if isinstance(exception, ApiError):
+                failure_code = exception.code
+            if not hasattr(exception, "message"):
+                exception.message = _("Error uploading at least one file")
+            response_data.update({"message": exception.message})
+
+        response = webob.response.Response(body=json.dumps(response_data))
+        if failure_code:
+            response.status_code = failure_code
+
+        return response
+
+    def persist_and_submit_file(self, activity, context, file_stream):
+        """
+        Saves uploaded files to their permanent location, sends them to submissions backend and emits submission events
+        """
+        uploaded_file = UploadFile(file_stream, self.upload_id, context)
+
+        # Save the files first
+        try:
+            uploaded_file.save_file()
+        except Exception as save_file_error:  # pylint: disable=broad-except
+            original_message = save_file_error.message if hasattr(save_file_error, "message") else ""
+            save_file_error.message = _("Error storing file {} - {}").format(uploaded_file.file.name, original_message)
+            raise
+
+        # It have been saved... note the submission
+        try:
+            uploaded_file.submit()
+            # Emit analytics event...
+            self.runtime.publish(
+                self,
+                "activity.received_submission",
+                {
+                    "submission_id": uploaded_file.submission_id,
+                    "filename": uploaded_file.file.name,
+                    "content_id": activity.content_id,
+                    "group_id": activity.workgroup['id'],
+                    "user_id": activity.user_id,
+                }
+            )
+        except Exception as save_record_error:  # pylint: disable=broad-except
+            original_message = save_record_error.message if hasattr(save_record_error, "message") else ""
+            save_record_error.message = _("Error recording file information {} - {}").format(
+                uploaded_file.file.name, original_message
+            )
+            raise
+
+        # See if the xBlock Notification Service is available, and - if so -
+        # dispatch a notification to the entire workgroup that a file has been uploaded
+        # Note that the NotificationService can be disabled, so it might not be available
+        # in the list of services
+        notifications_service = self.runtime.service(self, 'notifications')
+        if notifications_service:
+            activity.fire_file_upload_notification(notifications_service)
+
+        return uploaded_file
+
+
+class PeerSelectorXBlock(XBlock, XBlockWithPreviewMixin):
+    CATEGORY = "gp-v2-peer-selector"
+    display_name_with_default = _(u"Teammate selector XBlock")
+    STUDENT_TEMPLATE = "templates/html/components/peer_selector.html"
+
+    @property
+    def stage(self):
+        return self.get_parent()
+
+    @property
+    def peers(self):
+        return self.stage.team_members
+
+    def student_view(self, context):
+        fragment = Fragment()
+        render_context = {'selector': self, 'peers': self.peers}
+        render_context.update(context)
+        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/review_subject_selector.css"))
+        fragment.add_content(loader.render_template(self.STUDENT_TEMPLATE, render_context))
+        return fragment
+
+    def author_view(self, context):
+        fake_peers = [
+            {"id": 1, "username": "Jack"},
+            {"id": 2, "username": "Jill"},
+        ]
+        render_context = {
+            'demo': True,
+            'peers': fake_peers
+        }
+        render_context.update(context)
+        return self.student_view(render_context)
+
+    def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
+        fragment = Fragment()
+        fragment.add_content(NO_EDITABLE_SETTINGS)
+        return fragment
+
+
+class GroupSelectorXBlock(XBlock, XBlockWithPreviewMixin):
+    CATEGORY = "gp-v2-group-selector"
+    display_name_with_default = _(u"Group selector XBlock")
+    STUDENT_TEMPLATE = "templates/html/components/group_selector.html"
+
+    @property
+    def stage(self):
+        return self.get_parent()
+
+    @property
+    def groups(self):
+        return self.stage.review_groups
+
+    def student_view(self, context):
+        fragment = Fragment()
+        render_context = {'selector': self, 'groups': self.groups}
+        render_context.update(context)
+        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/review_subject_selector.css"))
+        fragment.add_content(loader.render_template(self.STUDENT_TEMPLATE, render_context))
+        return fragment
+
+    def author_view(self, context):
+        fake_groups = [
+            {"id": 1},
+            {"id": 2},
+        ]
+        render_context = {
+            'demo': True,
+            'groups': fake_groups
+        }
+        render_context.update(context)
+        return self.student_view(render_context)
+
+    def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
+        fragment = Fragment()
+        fragment.add_content(NO_EDITABLE_SETTINGS)
+        return fragment
+
+
 class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
     CATEGORY = "gp-v2-review-question"
 
@@ -264,290 +551,3 @@ class GroupProjectGroupAssessmentXBlock(
             self.stage.content_id,
         )
         return [item for item in all_feedback if item["question"] == self.question_id]
-
-
-class PeerSelectorXBlock(XBlock, XBlockWithPreviewMixin):
-    CATEGORY = "gp-v2-peer-selector"
-    display_name_with_default = _(u"Teammate selector XBlock")
-    STUDENT_TEMPLATE = "templates/html/components/peer_selector.html"
-
-    @property
-    def stage(self):
-        return self.get_parent()
-
-    @property
-    def peers(self):
-        return self.stage.team_members
-
-    def student_view(self, context):
-        fragment = Fragment()
-        render_context = {'selector': self, 'peers': self.peers}
-        render_context.update(context)
-        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/review_subject_selector.css"))
-        fragment.add_content(loader.render_template(self.STUDENT_TEMPLATE, render_context))
-        return fragment
-
-    def author_view(self, context):
-        fake_peers = [
-            {"id": 1, "username": "Jack"},
-            {"id": 2, "username": "Jill"},
-        ]
-        render_context = {
-            'demo': True,
-            'peers': fake_peers
-        }
-        render_context.update(context)
-        return self.student_view(render_context)
-
-    def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
-        fragment = Fragment()
-        fragment.add_content(NO_EDITABLE_SETTINGS)
-        return fragment
-
-
-class GroupSelectorXBlock(XBlock, XBlockWithPreviewMixin):
-    CATEGORY = "gp-v2-group-selector"
-    display_name_with_default = _(u"Group selector XBlock")
-    STUDENT_TEMPLATE = "templates/html/components/group_selector.html"
-
-    @property
-    def stage(self):
-        return self.get_parent()
-
-    @property
-    def groups(self):
-        return self.stage.review_groups
-
-    def student_view(self, context):
-        fragment = Fragment()
-        render_context = {'selector': self, 'groups': self.groups}
-        render_context.update(context)
-        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/review_subject_selector.css"))
-        fragment.add_content(loader.render_template(self.STUDENT_TEMPLATE, render_context))
-        return fragment
-
-    def author_view(self, context):
-        fake_groups = [
-            {"id": 1},
-            {"id": 2},
-        ]
-        render_context = {
-            'demo': True,
-            'groups': fake_groups
-        }
-        render_context.update(context)
-        return self.student_view(render_context)
-
-    def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
-        fragment = Fragment()
-        fragment.add_content(NO_EDITABLE_SETTINGS)
-        return fragment
-
-
-class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
-    CATEGORY = "gp-v2-resource"
-
-    PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/project_navigator/resource.html'
-
-    display_name = String(
-        display_name=_(u"Display Name"),
-        help=_(U"This is a name of the resource"),
-        scope=Scope.settings,
-        default="Group Project V2 Resource"
-    )
-
-    description = String(
-        display_name=_(u"Resource Description"),
-        scope=Scope.settings
-    )
-
-    resource_location = String(
-        display_name=_(u"Resource location"),
-        help=_(u"A url to download/view the resource"),
-        scope=Scope.settings,
-    )
-
-    grading_criteria = Boolean(
-        display_name=_(u"Grading criteria?"),
-        help=_(u"If true, resource will be treated as grading criteria"),
-        scope=Scope.settings,
-        default=False
-    )
-
-    editable_fields = ('display_name', 'description', 'resource_location', 'grading_criteria')
-
-    def student_view(self, context):  # pylint: disable=unused-argument, no-self-use
-        return Fragment()
-
-    def author_view(self, context):
-        return self.resources_view(context)
-
-    def resources_view(self, context):
-        fragment = Fragment()
-        render_context = {'resource': self}
-        render_context.update(context)
-        fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
-        return fragment
-
-# pylint: disable=invalid-name
-SubmissionUpload = namedtuple("SubmissionUpload", "location file_name submission_date user_details")
-
-
-@XBlock.needs('user')
-@XBlock.wants('notifications')
-class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
-    CATEGORY = "gp-v2-submission"
-    PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/submission_navigator_view.html'
-    REVIEW_VIEW_TEMPLATE = 'templates/html/components/submission_review_view.html'
-
-    display_name = String(
-        display_name=_(u"Display Name"),
-        help=_(U"This is a name of the submission"),
-        scope=Scope.settings,
-        default="Group Project V2 Submission"
-    )
-
-    description = String(
-        display_name=_(u"Resource Description"),
-        scope=Scope.settings
-    )
-
-    upload_id = String(
-        display_name=_(u"Upload ID"),
-        help=_(U"This string is used as an identifier for an upload. "
-               U"Submissions sharing the same Upload ID will be updated simultaneously"),
-    )
-
-    editable_fields = ('display_name', 'description', 'upload_id')
-
-    @lazy
-    def stage(self):
-        return self.get_parent()
-
-    def get_upload(self, group_id):
-        submission_map = self.project_api.get_latest_workgroup_submissions_by_id(group_id)
-        submission_data = submission_map.get(self.upload_id, None)
-
-        if submission_data is None:
-            return None
-
-        return SubmissionUpload(
-            submission_data["document_url"],
-            submission_data["document_filename"],
-            format_date(build_date_field(submission_data["modified"])),
-            submission_data.get("user_details", None)
-        )
-
-    @property
-    def upload(self):
-        return self.get_upload(self.stage.activity.workgroup["id"])
-
-    def student_view(self, context):  # pylint: disable=unused-argument, no-self-use
-        return Fragment()
-
-    def submissions_view(self, context):
-        fragment = Fragment()
-        render_context = {'submission': self, 'upload': self.upload}
-        render_context.update(context)
-        fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/submission.js'))
-        fragment.initialize_js("GroupProjectSubmissionBlock")
-        return fragment
-
-    def submission_review_view(self, context):
-        group_id = context.get('group_id', self.stage.activity.workgroup["id"])
-        fragment = Fragment()
-        render_context = {'submission': self, 'upload': self.get_upload(group_id)}
-        render_context.update(context)
-        fragment.add_content(loader.render_template(self.REVIEW_VIEW_TEMPLATE, render_context))
-        # NOTE: adding js/css likely won't work here, as the result of this view is added as an HTML to an existing DOM
-        # element
-        return fragment
-
-    @XBlock.handler
-    def upload_submission(self, request, suffix=''):  # pylint: disable=unused-argument
-        """
-        Handles submission upload and marks stage as completed if all submissions in stage have uploads.
-        """
-        if not self.stage.available_now:
-            template = self.stage.STAGE_NOT_OPEN_MESSAGE if not self.stage.is_open else self.stage.STAGE_CLOSED_MESSAGE
-            return {'result': 'error',  'msg': template.format(action=self.stage.STAGE_ACTION)}
-
-        target_activity = self.stage.activity
-        response_data = {"message": _("File(s) successfully submitted")}
-        failure_code = 0
-        try:
-            context = {
-                "user_id": target_activity.user_id,
-                "group_id": target_activity.workgroup['id'],
-                "project_api": self.project_api,
-                "course_id": target_activity.course_id
-            }
-
-            uploaded_file = self.persist_and_submit_file(target_activity, context, request.params[self.upload_id].file)
-
-            response_data["submissions"] = {uploaded_file.submission_id: uploaded_file.file_url}
-
-            self.stage.check_submissions_and_mark_complete()
-            response_data["new_stage_states"] = [self.stage.get_new_stage_state_data()]
-
-        except Exception as exception:  # pylint: disable=broad-except
-            log.exception(exception)
-            failure_code = 500
-            if isinstance(exception, ApiError):
-                failure_code = exception.code
-            if not hasattr(exception, "message"):
-                exception.message = _("Error uploading at least one file")
-            response_data.update({"message": exception.message})
-
-        response = webob.response.Response(body=json.dumps(response_data))
-        if failure_code:
-            response.status_code = failure_code
-
-        return response
-
-    def persist_and_submit_file(self, activity, context, file_stream):
-        """
-        Saves uploaded files to their permanent location, sends them to submissions backend and emits submission events
-        """
-        uploaded_file = UploadFile(file_stream, self.upload_id, context)
-
-        # Save the files first
-        try:
-            uploaded_file.save_file()
-        except Exception as save_file_error:  # pylint: disable=broad-except
-            original_message = save_file_error.message if hasattr(save_file_error, "message") else ""
-            save_file_error.message = _("Error storing file {} - {}").format(uploaded_file.file.name, original_message)
-            raise
-
-        # It have been saved... note the submission
-        try:
-            uploaded_file.submit()
-            # Emit analytics event...
-            self.runtime.publish(
-                self,
-                "activity.received_submission",
-                {
-                    "submission_id": uploaded_file.submission_id,
-                    "filename": uploaded_file.file.name,
-                    "content_id": activity.content_id,
-                    "group_id": activity.workgroup['id'],
-                    "user_id": activity.user_id,
-                }
-            )
-        except Exception as save_record_error:  # pylint: disable=broad-except
-            original_message = save_record_error.message if hasattr(save_record_error, "message") else ""
-            save_record_error.message = _("Error recording file information {} - {}").format(
-                uploaded_file.file.name, original_message
-            )
-            raise
-
-        # See if the xBlock Notification Service is available, and - if so -
-        # dispatch a notification to the entire workgroup that a file has been uploaded
-        # Note that the NotificationService can be disabled, so it might not be available
-        # in the list of services
-        notifications_service = self.runtime.service(self, 'notifications')
-        if notifications_service:
-            activity.fire_file_upload_notification(notifications_service)
-
-        return uploaded_file
