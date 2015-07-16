@@ -153,4 +153,11 @@ def get_most_recently_opened_stage(stages):
     return most_recent, most_recent_open_date
 
 
+def get_link_to_block(block):
+    usage_id = block.scope_ids.usage_id
+    return "/courses/{course_id}/jump_to_id/{block_id}".format(
+        course_id=usage_id.course_key, block_id=usage_id.block_id
+    )
+
+
 NO_EDITABLE_SETTINGS = gettext(u"This XBlock does not contain any editable settings")

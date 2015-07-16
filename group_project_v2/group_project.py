@@ -30,8 +30,8 @@ from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import loader, make_key, outsider_disallowed_protected_view, get_most_recently_opened_stage
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
-    PeerAssessmentStage, GroupAssessmentStage, CompletionStage
-)
+    PeerAssessmentStage, GroupAssessmentStage, CompletionStage,
+    STAGE_TYPES)
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.api_error import ApiError
 
@@ -68,11 +68,16 @@ class GroupProjectXBlock(
         all_children = [self.runtime.get_block(child_id) for child_id in self.children]
         return [child for child in all_children if isinstance(child, GroupActivityXBlock)]
 
+    @lazy
+    def navigator(self):
+        return self.get_child_of_category(GroupProjectNavigatorXBlock.CATEGORY)
+
     def _get_activity_to_display(self, target_stage_id):
         try:
             usage_id = BlockUsageLocator.from_string(target_stage_id)
-            stage = self.runtime.get_block(usage_id)
-            return stage.activity
+            if usage_id.block_type in STAGE_TYPES:
+                stage = self.runtime.get_block(usage_id)
+                return stage.activity
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 
@@ -175,6 +180,10 @@ class GroupActivityXBlock(
         return self.scope_ids.usage_id
 
     @property
+    def project(self):
+        return self.get_parent()
+
+    @property
     def content_id(self):
         try:
             return unicode(self.scope_ids.usage_id)
@@ -217,7 +226,8 @@ class GroupActivityXBlock(
     def _get_stage_to_display(self, target_stage_id):
         try:
             usage_id = BlockUsageLocator.from_string(target_stage_id)
-            return self.runtime.get_block(usage_id)
+            if usage_id.block_type in STAGE_TYPES:
+                return self.runtime.get_block(usage_id)
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 

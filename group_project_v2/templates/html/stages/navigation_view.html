@@ -2,9 +2,7 @@
 <li class="group-project-stage" data-stage-id="{{ stage.id }}">
   <span class="group-project-stage-state {{ stage_state }}"></span>
   <span class="group-project-stage-type">
-    <a href="/courses/{{ stage.course_id }}/jump_to_id/{{ stage.id.block_id }}" title="{{ stage.display_name }}"
-       data-stage-id="{{ stage.id }}" data-activity-id="{{ activity_id }}"
-    >
+    <a href="{{ block_link }}" title="{{ stage.display_name }}" data-stage-id="{{ stage.id }}" data-activity-id="{{ activity_id }}">
       {{ stage.STAGE_TYPE }}:
     </a>
   </span>

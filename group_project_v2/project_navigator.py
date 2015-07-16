@@ -3,7 +3,10 @@ This module contains Project Navigator XBlock and it's children view XBlocks
 """
 import logging
 from lazy.lazy import lazy
+from opaque_keys import InvalidKeyError
+from opaque_keys.edx.locator import BlockUsageLocator
 from xblock.core import XBlock
+from xblock.exceptions import NoSuchUsage
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
@@ -57,6 +60,17 @@ class GroupProjectNavigatorXBlock(
             AskTAViewXBlock.CATEGORY: _(u"Ask a TA View"),
         }
 
+    def _get_activated_view_type(self, activate_block_id):
+        try:
+            usage_id = BlockUsageLocator.from_string(activate_block_id)
+            if usage_id.block_type in PROJECT_NAVIGATOR_VIEW_TYPES:
+                block = self.runtime.get_block(usage_id)
+                return block.type
+        except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
+            log.exception(exc)
+
+        return ViewTypes.NAVIGATION
+
     def student_view(self, context):
         """
         Student view
@@ -83,6 +97,10 @@ class GroupProjectNavigatorXBlock(
 
             children_items.append(item)
 
+        js_parameters = {
+            'selected_view': self._get_activated_view_type(context.get('activate_block_id', None))
+        }
+
         fragment.add_content(
             loader.render_template(
                 'templates/html/project_navigator/project_navigator.html',
@@ -95,7 +113,7 @@ class GroupProjectNavigatorXBlock(
         fragment.add_javascript_url(self.runtime.local_resource_url(
             self.group_project, 'public/js/project_navigator/project_navigator.js'
         ))
-        fragment.initialize_js("GroupProjectNavigatorBlock")
+        fragment.initialize_js("GroupProjectNavigatorBlock", js_parameters)
 
         return fragment
 
@@ -313,3 +331,11 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
         img_url = self.runtime.local_resource_url(self.navigator.group_project, "public/img/ask_ta.png")
         context = {'view': self, 'course_id': self.course_id, 'img_url': img_url}
         return self.render_student_view(context)
+
+
+PROJECT_NAVIGATOR_VIEW_TYPES = (
+    NavigationViewXBlock.CATEGORY,
+    ResourcesViewXBlock.CATEGORY,
+    SubmissionsViewXBlock.CATEGORY,
+    AskTAViewXBlock.CATEGORY
+)

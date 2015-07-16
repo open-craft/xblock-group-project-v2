@@ -1,9 +1,11 @@
-function GroupProjectNavigatorBlock(runtime, element) {
+function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
     const initial_view = 'navigation';
     const selector_item_query = ".group-project-navigator-view-selector .view-selector-item";
+    debugger;
 
     var view_elements = $(".group-project-navigator-view", element),
-        views = {};
+        views = {},
+        selected_view = initialization_args.selected_view;
 
     function switch_to_view(target_view) {
         var view_data = views[target_view];
@@ -41,5 +43,5 @@ function GroupProjectNavigatorBlock(runtime, element) {
         switch_to_view(initial_view);
     });
 
-    switch_to_view(initial_view);
+    switch_to_view(selected_view);
 }
