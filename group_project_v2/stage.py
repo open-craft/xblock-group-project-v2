@@ -24,7 +24,7 @@ from group_project_v2.stage_components import (
     PeerSelectorXBlock, GroupSelectorXBlock,
     GroupProjectReviewQuestionXBlock, GroupProjectPeerAssessmentXBlock, GroupProjectGroupAssessmentXBlock,
     GroupProjectResourceXBlock, GroupProjectSubmissionXBlock, SubmissionsStaticContentXBlock,
-    GradeRubricStaticContentXBlock)
+    GradeRubricStaticContentXBlock, GroupProjectVideoResourceXBlock)
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.utils import (
     loader, format_date, gettext as _, make_key, outsider_disallowed_protected_view,
@@ -90,10 +90,15 @@ class BaseGroupActivityStage(
         """
         This property outputs an ordered dictionary of allowed nested XBlocks in form of block_category: block_caption.
         """
-        return OrderedDict([
+        blocks = OrderedDict([
             ("html", _(u"HTML")),
             (GroupProjectResourceXBlock.CATEGORY, _(u"Resource"))
         ])
+        if GroupProjectVideoResourceXBlock.is_available():
+            blocks.update(OrderedDict([
+                (GroupProjectVideoResourceXBlock.CATEGORY, _(u"Video Resource"))
+            ]))
+        return blocks
 
     @lazy
     def activity(self):
@@ -105,7 +110,9 @@ class BaseGroupActivityStage(
 
     @property
     def resources(self):
-        return self._get_children_by_category(GroupProjectResourceXBlock.CATEGORY)
+        return self._get_children_by_category(
+            GroupProjectResourceXBlock.CATEGORY, GroupProjectVideoResourceXBlock.CATEGORY
+        )
 
     @property
     def formatted_open_date(self):

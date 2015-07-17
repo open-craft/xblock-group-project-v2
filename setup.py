@@ -32,6 +32,7 @@ BLOCKS = [
     'gp-v2-stage-group-assessment = group_project_v2.stage:GroupAssessmentStage',
 
     'gp-v2-resource = group_project_v2.stage_components:GroupProjectResourceXBlock',
+    'gp-v2-video-resource = group_project_v2.stage_components:GroupProjectVideoResourceXBlock',
     'gp-v2-submission = group_project_v2.stage_components:GroupProjectSubmissionXBlock',
     'gp-v2-peer-selector = group_project_v2.stage_components:PeerSelectorXBlock',
     'gp-v2-group-selector = group_project_v2.stage_components:GroupSelectorXBlock',

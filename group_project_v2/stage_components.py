@@ -1,4 +1,4 @@
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 import json
 import logging
 from xml.etree import ElementTree
@@ -10,10 +10,11 @@ from xblock.core import XBlock
 from xblock.fields import String, Boolean, Scope, UNIQUE_ID
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
-from xblockutils.studio_editable import StudioEditableXBlockMixin
+from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
+from group_project_v2.mixins import UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin, \
+    XBlockWithComponentsMixin, ChildrenNavigationXBlockMixin
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
@@ -24,11 +25,7 @@ from group_project_v2.utils import outer_html, gettext as _, loader, format_date
 log = logging.getLogger(__name__)
 
 
-class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
-    CATEGORY = "gp-v2-resource"
-
-    PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/project_navigator/resource.html'
-
+class BaseGroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
     display_name = String(
         display_name=_(u"Display Name"),
         help=_(U"This is a name of the resource"),
@@ -40,6 +37,24 @@ class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPr
         display_name=_(u"Resource Description"),
         scope=Scope.settings
     )
+
+    editable_fields = ('display_name', 'description')
+
+    def student_view(self, context):  # pylint: disable=unused-argument, no-self-use
+        return Fragment()
+
+    def resources_view(self, context):
+        fragment = Fragment()
+        render_context = {'resource': self}
+        render_context.update(context)
+        fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
+        return fragment
+
+
+class GroupProjectResourceXBlock(BaseGroupProjectResourceXBlock):
+    CATEGORY = "gp-v2-resource"
+
+    PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/resource.html'
 
     resource_location = String(
         display_name=_(u"Resource location"),
@@ -56,18 +71,56 @@ class GroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPr
 
     editable_fields = ('display_name', 'description', 'resource_location', 'grading_criteria')
 
-    def student_view(self, context):  # pylint: disable=unused-argument, no-self-use
-        return Fragment()
-
     def author_view(self, context):
         return self.resources_view(context)
 
+
+class GroupProjectVideoResourceXBlock(
+    BaseGroupProjectResourceXBlock, XBlockWithComponentsMixin, StudioContainerXBlockMixin, ChildrenNavigationXBlockMixin
+):
+    CATEGORY = "gp-v2-video-resource"
+
+    PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/video_resource.html'
+
+    OOYALA_PLAYER_CATEGORY = "ooyala-player"
+
+    has_children = True
+
+    @classmethod
+    def is_available(cls):
+        try:
+            import ooyala_player
+            return True
+        except ImportError as exc:
+            msg = _(u"Can't import ooyala player XBlock: {message}").format(message=exc.message)
+            log.exception(msg)
+            return False
+
+    @property
+    def allowed_nested_blocks(self):
+        blocks = super(GroupProjectVideoResourceXBlock, self).allowed_nested_blocks
+        if not blocks:
+            blocks = OrderedDict()
+        if self.is_available():
+            blocks.update(OrderedDict([
+                (self.OOYALA_PLAYER_CATEGORY, _(u"Ooyala Player")),
+            ]))
+        return blocks
+
     def resources_view(self, context):
-        fragment = Fragment()
-        render_context = {'resource': self}
-        render_context.update(context)
-        fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
+        fragment = super(GroupProjectVideoResourceXBlock, self).resources_view(context)
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/components/video_resource.js"))
         return fragment
+
+    def validate(self):
+        validation = super(GroupProjectVideoResourceXBlock, self).validate()
+        if not self.has_child_of_category(self.OOYALA_PLAYER_CATEGORY):
+            validation.add(ValidationMessage(
+                ValidationMessage.ERROR,
+                _(u"Video Resource Block must contain ooyala video player block to operate properly")
+            ))
+
+        return validation
 
 
 class StaticContentBaseXBlock(XBlock, XBlockWithPreviewMixin):

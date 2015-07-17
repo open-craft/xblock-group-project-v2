@@ -1,0 +1,3 @@
+function VideoResourceXBlock(runtime, element) {
+
+}

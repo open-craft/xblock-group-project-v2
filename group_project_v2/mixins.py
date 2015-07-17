@@ -17,8 +17,8 @@ class ChildrenNavigationXBlockMixin(object):
     def _children(self):
         return [self.runtime.get_block(child_id) for child_id in self.children]
 
-    def _get_children_by_category(self, child_category):
-        return [child for child in self._children if child.category == child_category]
+    def _get_children_by_category(self, *child_categories):
+        return [child for child in self._children if child.category in child_categories]
 
     def get_child_of_category(self, child_category):
         candidates = [child for child in self._children if child.category == child_category]
