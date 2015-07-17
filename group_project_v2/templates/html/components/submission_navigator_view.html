@@ -1,0 +1,30 @@
+{% load i18n %}
+<div class="uploader">
+  <div class="upload_title">{{ submission.display_name }}:</div>
+  <div class="upload_item_wrapper" {% if upload.location %} data-location="{{ upload.location }}" {% endif %}>
+    <input
+      class="{{ submission.upload_id }}_name" placeholder="Browse your computer to upload file..."
+      disabled="disabled" type="text"
+      {% if upload.file_name %}
+        value="{{ upload.file_name }}" data-original-value="{{ upload.file_name }}"
+      {% endif %}
+    />
+  </div>
+  <label for="{{ submission.upload_id }}">
+    <span class="side button tiny radius {{ submission.upload_id }}_label fa-paperclip"></span>
+  </label>
+  <input style="display:none;" class="file_upload" name="{{ submission.upload_id }}" id="{{ submission.upload_id }}" type="file" />
+  {% if submission.description %}
+    <div class="description">{{ submission.description }}</div>
+  {% endif %}
+  <div class="{{ submission.upload_id }}_progress_box file-progress-box">
+    <div class="{{ submission.upload_id }}_progress file-progress"></div>
+  </div>
+  {% if upload.location %}
+    <div class="upload_item_data">
+      {% trans "Uploaded by" %}
+      <a href="{{course_id}}/discussion/forum/users/{{ upload.user_details.id }}">{{ upload.user_details.full_name }}</a>
+      on {{ upload.submission_date }}
+    </div>
+  {% endif %}
+</div>

@@ -1,0 +1,68 @@
+.peer_selector, .group_selector {
+    font-size: 11px;
+    color: #8f8f8f;
+    margin-bottom: 10px;
+}
+
+.peer_selector .review_selector_header,
+.group_selector.review_selector_header {
+    font-style: italic;
+}
+
+.group-project-xblock-wrapper .activity_section .peer_selector ul.peers,
+.group-project-xblock-wrapper .activity_section .group_selector ul.groups {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: block;
+    width: 100%;
+}
+
+.peer_selector ul.peers li.select_peer,
+.group_selector ul.groups li.select_group {
+    width: 100%;
+    background-color: #f0f0f0;
+    border: 0;
+    margin: 2px 0;
+    height: 24px;
+    padding-left: 10px;
+    cursor: pointer;
+}
+
+.peer_selector ul.peers li.select_peer.even,
+.group_selector ul.groups li.select_group.even {
+    background-color: #ffffff;
+}
+
+.peer_selector ul.peers li.select_peer .review_subject_label
+.group_selector ul.groups li.select_group .review_subject_label {
+    color: #888888;
+}
+
+.peer_selector ul.peers li.select_peer .review_evaluating_now,
+.group_selector ul.groups li.select_group .review_evaluating_now {
+    visibility: hidden;
+}
+
+.peer_selector ul.peers li.select_peer.selected .review_evaluating_now,
+.group_selector ul.groups li.select_group.selected .review_evaluating_now {
+    visibility: visible;
+}
+
+.peer_selector ul.peers li.select_peer.selected,
+.group_selector ul.groups li.select_group.selected {
+    background-color: #fffec9;
+}
+
+.peer_selector ul.peers li.select_peer img.avatar {
+    float: right;
+    background-size: 24px;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+}
+
+.group_selector ul.groups li.select_group div.other_submissions {
+    float: right;
+    margin-right: 5px;
+}

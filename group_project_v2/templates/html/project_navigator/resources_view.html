@@ -4,35 +4,7 @@
     <span class="group-project-navigator-view-title">{{ view.display_name_with_default }}</span>
     <span class="group-project-navigator-view-close fa-times"></span>
   </div>
-  {% for activity in resources_map %}
-  <div class="group-project-activity-wrapper">
-    <div class="group-project-activity-header">{{ activity.display_name }}</div>
-    <ul class="group-project-resources">
-      {% if activity.resources %}
-          {% for file_link in activity.resources %}
-            {% if file_link.location %}
-              <li>
-                <a
-                  title="{{ file_link.description }}" target="_blank"
-                  {% if file_link.type == "ooyala" %} data-video='{{ file_link.location }}' {% else %} href="{{ file_link.location }}" {% endif %}
-                >
-                  {{ file_link.title }}
-                </a>
-                {% if file_link.description %}: {{ file_link.description }}{% endif %}
-              </li>
-            {% endif %}
-          {% endfor %}
-      {% else %}
-        <div class="group-project-navigator-grey-text">{% trans "No resources for this activity" %}</div>
-      {% endif %}
-    </ul>
+  <div class="group-project-navigator-view-content">
+    {% for activity_content in activity_contents %}{{ activity_content|safe }}{% endfor %}
   </div>
-  {% endfor %}
-  <div class="player-modal reveal-modal medium">
-    <div class="close-reveal-modal">
-      <span class="fa-times-circle"></span>
-    </div>
-    <div class="player-wrapper"></div>
-  </div>
-  <div class="player-modal-bg"></div>
 </div>

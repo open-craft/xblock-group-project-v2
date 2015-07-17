@@ -4,8 +4,8 @@ Tests for project navigator and its views
 import logging
 import mock
 
-from group_project_v2.components.project_navigator import ViewTypes
-from group_project_v2.components.stage import StageState
+from group_project_v2.project_navigator import ViewTypes
+from group_project_v2.stage_components import StageState
 from tests.integration.base_test import SingleScenarioTestSuite
 from tests.integration.page_elements import NavigationViewElement, ResourcesViewElement, SubmissionsViewElement
 from tests.utils import KNOWN_USERS

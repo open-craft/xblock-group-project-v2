@@ -4,7 +4,7 @@ This module contains classes representing various GroupProject page elements
 from lazy.lazy import lazy
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.select import Select
-from group_project_v2.components.stage import StageState
+from group_project_v2.stage_components import StageState
 
 
 class BaseElement(object):

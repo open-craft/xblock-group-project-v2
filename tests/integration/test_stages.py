@@ -7,7 +7,7 @@ import textwrap
 from freezegun import freeze_time
 import mock
 
-from group_project_v2.components import StageType
+from group_project_v2.stage import StageType
 from tests.integration.base_test import BaseIntegrationTest
 from tests.integration.page_elements import GroupProjectElement, StageElement, ReviewStageElement
 from tests.utils import KNOWN_USERS

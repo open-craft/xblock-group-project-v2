@@ -1,32 +1,5 @@
-{% load i18n %}
 <div class="group-project-navigation-view">
-  {% for activity in navigation_map %}
-  <div class="group-project-activity-wrapper" data-activity-id="{{ activity.id }}">
-    <div class="group-project-activity-header">{{ activity.display_name }}</div>
-    <ul class="group-project-activity-stages">
-      {% for stage_data in activity.stages %}
-        <li class="group-project-stage" data-stage-id="{{ stage_data.stage.id }}">
-          <span class="group-project-stage-state {{ stage_data.state }}"></span>
-          <span class="group-project-stage-type">
-            <a href="?actid={{ activity.id }}&select_stage={{ stage_data.stage.id }}" title="{{ stage_data.stage.title }}"
-               data-stage-id="{{ stage_data.stage.id }}" data-activity-id="{{ activity.id }}"
-            >
-              {{ stage_data.stage.type }}
-            </a>
-          </span>
-          <span class="group-project-stage-title group-project-navigator-grey-text">{{ stage_data.stage.title }}</span>
-          <span class="highlight">
-          {% if stage_data.stage.close_date and stage_data.stage.is_closed %}
-            {% trans "Closed on" %} {{ stage_data.stage.formatted_close_date }}
-          {% elif stage_data.stage.close_date and stage_data.stage.is_open %}
-            {% trans "Due" %} {{ stage_data.stage.formatted_close_date }}
-          {% elif stage_data.stage.open_date and not stage_data.stage.is_open %}
-            {% trans "Available" %} {{ stage_data.stage.formatted_open_date }}
-          {% endif %}
-          </span>
-        </li>
-      {% endfor %}
-    </ul>
-  </div>
+  {% for activity_content in activity_contents %}
+    {{ activity_content|safe }}
   {% endfor %}
 </div>

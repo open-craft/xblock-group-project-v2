@@ -1,0 +1,28 @@
+{% load i18n %}
+<div id="{{ stage.id }}" class="activity_section">
+  {% if grading_override %}
+    <div class="grading_override {% if ta_graded %}ta_graded{% endif %}">
+      <span class="default_message">Grading View</span>
+      <span class="custom_message"></span>
+    </div>
+  {% endif %}
+  {% if stage.is_open %}
+    <h1>
+      <span class="stage_title">{{ stage.display_name }}</span>
+      {% if stage.close_date %}
+        {% if stage.is_closed %}
+          <span class="highlight">closed on {{ stage.formatted_close_date }}</span>
+        {% else %}
+          <span class="highlight">due {{ stage.formatted_close_date }}</span>
+        {% endif %}
+      {% endif %}
+    </h1>
+    <div class="stage_content">{{ stage_content|safe }}</div>
+  {% else %}
+    <h1>
+      {{ stage.display_name }}
+      {% if stage.open_date %}<span class="highlight">opens {{ stage.formatted_open_date }}</span>{% endif %}
+    </h1>
+    <div class="error">{% trans "This stage has not yet been opened" %}</div>
+  {% endif %}
+</div>
