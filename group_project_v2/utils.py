@@ -140,6 +140,18 @@ def key_error_protected_handler(func):
     return wrapper
 
 
+def log_and_suppress_exceptions(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as exc:
+            log.exception(exc)
+            return None
+
+    return wrapper
+
+
 def get_most_recently_opened_stage(stages):
     most_recent, most_recent_open_date = None, datetime.min.replace(tzinfo=pytz.UTC)
     for stage in stages:
