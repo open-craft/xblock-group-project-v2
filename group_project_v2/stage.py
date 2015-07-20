@@ -717,8 +717,9 @@ class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
         return self._get_children_by_category(GroupProjectGroupAssessmentXBlock.CATEGORY)
 
     def get_stage_content_fragment(self, context, view='student_view'):
+        final_grade = self.activity.calculate_grade(self.workgroup['id'])
         context_extension = {
-            'final_grade': self.activity.calculate_grade(self.workgroup['id'])
+            'final_grade': final_grade if final_grade is not None else _(u"N/A")
         }
         context_extension.update(context)
         return super(GroupAssessmentStage, self).get_stage_content_fragment(context_extension, view)

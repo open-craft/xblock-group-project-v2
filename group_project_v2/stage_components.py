@@ -622,7 +622,7 @@ class GroupProjectBaseAssessmentXBlock(
                 render_context['mean'] = "{0:.1f}".format(mean(feedback))
             except ValueError as exc:
                 log.warn(exc)
-                render_context['mean'] = None
+                render_context['mean'] = _(u"N/A")
 
         render_context.update(context)
         fragment.add_content(loader.render_template("templates/html/components/review_assessment.html", render_context))
