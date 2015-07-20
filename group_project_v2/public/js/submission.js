@@ -1,6 +1,8 @@
 function GroupProjectSubmissionBlock(runtime, element) {
-    var failed_uploads = [];
-    var current_upload = null;
+    // Set up gettext in case it isn't available in the client runtime:
+    if (typeof gettext == "undefined") {
+        window.gettext = function gettext_stub(string) { return string; };
+    }
 
     function uploadStarted(uploadXHR) {
         $(document).trigger('group_project_v2.submission.upload_started', uploadXHR);
@@ -12,6 +14,24 @@ function GroupProjectSubmissionBlock(runtime, element) {
 
     function uploadComplete(uploadXHR) {
         $(document).trigger('group_project_v2.submission.upload_complete', uploadXHR);
+    }
+
+    var message_box = $(".message"); // searching globally - not a typo: message box is created at group project level
+    function show_message(msg, title, title_css_class) {
+        message_box.find('.message_text').html(msg);
+        message_box.find('.message_title').html(title);
+        if (title_css_class) {
+            message_box.find('.message_title').addClass(title_css_class)
+        }
+        message_box.show();
+    }
+
+    function getMessageFromJson(jqXHR){
+        return jqXHR.responseJSON ? jqXHR.responseJSON.message : jqXHR.responseText;
+    }
+
+    function getMessageTitleFromJson(jqXHR, default_title){
+        return (jqXHR.responseJSON && jqXHR.responseJSON.title) ? jqXHR.responseJSON.title : default_title;
     }
 
     var upload_data = {
@@ -74,13 +94,17 @@ function GroupProjectSubmissionBlock(runtime, element) {
             $('.' + data.paramName + '_progress', target_form).css('width', '100%').addClass('complete');
             var input = $('.' + data.paramName + '_name', target_form);
             input.attr('data-original-value', input.val());
+            var message = getMessageFromJson(data.jqXHR),
+                title = getMessageTitleFromJson(data.jqXHR, gettext("Error"));
+            show_message(message, title);
         },
         fail: function (e, data) {
             var target_form = $(e.target);
             $('.' + data.paramName[0] + '_progress', target_form).css('width', '100%').addClass('failed');
-            failed_uploads.push(data.files[0].name);
-            var message = data.jqXHR.responseJSON ? data.jqXHR.responseJSON.message : data.jqXHR.responseText;
+            var message = getMessageFromJson(data.jqXHR),
+                title = getMessageTitleFromJson(data.jqXHR, gettext("Error"));
             target_form.prop('title', message);
+            show_message(message, title, 'error');
         }
     };
 

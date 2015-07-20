@@ -4,6 +4,9 @@ function GroupProjectBlock(runtime, element) {
     var message_box = $('.message', element).appendTo($(document.body));
     message_box.on('click', '.button, .close-box', function () {
         message_box.hide();
+        message_box.find('.message_text').html("");
+        message_box.find('.message_title').html("");
+        message_box.find('.message_title').removeClass().addClass("message_title");
     });
 
     $(".group-project-static-content-block .block-link").click(function(ev) {

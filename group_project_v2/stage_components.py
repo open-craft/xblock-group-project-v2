@@ -208,6 +208,15 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
 
     editable_fields = ('display_name', 'description', 'upload_id')
 
+    STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as stage is not yet opened")
+    STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as stage is closed")
+
+    SUCCESSFUL_UPLOAD_TITLE = _(u"Upload complete")
+    SUCCESSFUL_UPLOAD_MESSAGE_TPL = _(
+        u"Your deliverable have been successfully uploaded. You can attach an updated version of the "
+        u"deliverable by clicking the <span class='icon {icon}'></span> icon at any time before the deadline passes"
+    )
+
     @lazy
     def stage(self):
         return self.get_parent()
@@ -235,7 +244,7 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
 
     def submissions_view(self, context):
         fragment = Fragment()
-        render_context = {'submission': self, 'upload': self.upload}
+        render_context = {'submission': self, 'upload': self.upload, 'disabled': not self.stage.available_now}
         render_context.update(context)
         fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/submission.js'))
@@ -258,35 +267,40 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
         Handles submission upload and marks stage as completed if all submissions in stage have uploads.
         """
         if not self.stage.available_now:
-            template = self.stage.STAGE_NOT_OPEN_MESSAGE if not self.stage.is_open else self.stage.STAGE_CLOSED_MESSAGE
-            return {'result': 'error',  'msg': template.format(action=self.stage.STAGE_ACTION)}
+            template = self.STAGE_NOT_OPEN_TEMPLATE if not self.stage.is_open else self.STAGE_CLOSED_TEMPLATE
+            response_data = {'result': 'error', 'message': template.format(action=self.stage.STAGE_ACTION)}
+            failure_code = 422  # 422 = unprocessable entity
 
-        target_activity = self.stage.activity
-        response_data = {"message": _("File(s) successfully submitted")}
-        failure_code = 0
-        try:
-            context = {
-                "user_id": target_activity.user_id,
-                "group_id": target_activity.workgroup['id'],
-                "project_api": self.project_api,
-                "course_id": target_activity.course_id
+        else:
+            target_activity = self.stage.activity
+            response_data = {
+                "title": self.SUCCESSFUL_UPLOAD_TITLE,
+                "message": self.SUCCESSFUL_UPLOAD_MESSAGE_TPL.format(icon='fa-paperclip')
             }
+            failure_code = 0
+            try:
+                context = {
+                    "user_id": target_activity.user_id,
+                    "group_id": target_activity.workgroup['id'],
+                    "project_api": self.project_api,
+                    "course_id": target_activity.course_id
+                }
 
-            uploaded_file = self.persist_and_submit_file(target_activity, context, request.params[self.upload_id].file)
+                uploaded_file = self.persist_and_submit_file(target_activity, context, request.params[self.upload_id].file)
 
-            response_data["submissions"] = {uploaded_file.submission_id: uploaded_file.file_url}
+                response_data["submissions"] = {uploaded_file.submission_id: uploaded_file.file_url}
 
-            self.stage.check_submissions_and_mark_complete()
-            response_data["new_stage_states"] = [self.stage.get_new_stage_state_data()]
+                self.stage.check_submissions_and_mark_complete()
+                response_data["new_stage_states"] = [self.stage.get_new_stage_state_data()]
 
-        except Exception as exception:  # pylint: disable=broad-except
-            log.exception(exception)
-            failure_code = 500
-            if isinstance(exception, ApiError):
-                failure_code = exception.code
-            if not hasattr(exception, "message"):
-                exception.message = _("Error uploading at least one file")
-            response_data.update({"message": exception.message})
+            except Exception as exception:  # pylint: disable=broad-except
+                log.exception(exception)
+                failure_code = 500
+                if isinstance(exception, ApiError):
+                    failure_code = exception.code
+                if not hasattr(exception, "message"):
+                    exception.message = _("Error uploading at least one file")
+                response_data.update({"message": exception.message})
 
         response = webob.response.Response(body=json.dumps(response_data))
         if failure_code:
