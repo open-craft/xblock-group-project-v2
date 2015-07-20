@@ -152,17 +152,30 @@ def log_and_suppress_exceptions(func):
     return wrapper
 
 
-def get_most_recently_opened_stage(stages):
-    most_recent, most_recent_open_date = None, datetime.min.replace(tzinfo=pytz.UTC)
-    for stage in stages:
-        if stage.available_now:
-            # if stage does not have open_date set it is always open. In such case, we take first of them
-            if stage.open_date is None and most_recent is None:
-                most_recent = stage
-            if stage.open_date is not None and stage.open_date > most_recent_open_date:
-                most_recent, most_recent_open_date = stage, stage.open_date
+def get_default_stage(stages):
+    """
+    Gets "default" stage from collection of stages. "Default" stage is displayed if not particular stage
+    was requested. Rules for getting "default" stage are as follows:
+        1. If all the stages are not open - sequentially first
+        2. If all the stages are closed - sequentially last
+        3. If at least one stage is open and not closed - sequentially last opened and not closed
 
-    return most_recent, most_recent_open_date
+    """
+    if not stages:
+        return None
+
+    if all(not stage.is_open for stage in stages):
+        return stages[0]
+
+    if all(stage.is_closed for stage in stages):
+        return stages[-1]
+
+    last_opened = None
+    for stage in stages:
+        if stage.is_open and not stage.is_closed:
+            last_opened = stage
+
+    return last_opened
 
 
 def get_link_to_block(block):
