@@ -14,20 +14,19 @@ except ImportError:
 log = logging.getLogger(__name__)
 
 
-class BaseNotificationsMixin(object):
-    def _add_click_link_params(self, msg, course_id, location):
-        """
-        Adds in all the context parameters we'll need to generate a URL back to the website that will
-        present the new course announcement.
+def add_click_link_params(msg, course_id, location):
+    """
+    Adds in all the context parameters we'll need to generate a URL back to the website that will
+    present the new course announcement.
 
-        IMPORTANT: This can be changed to msg.add_click_link() if we have a particular URL that we wish to use.
-        In the initial use case, we need to make the link point to a different front end website so we need to
-        resolve these links at dispatch time
-        """
-        msg.add_click_link_params({'course_id': unicode(course_id), 'activity_location': unicode(location)})
+    IMPORTANT: This can be changed to msg.add_click_link() if we have a particular URL that we wish to use.
+    In the initial use case, we need to make the link point to a different front end website so we need to
+    resolve these links at dispatch time
+    """
+    msg.add_click_link_params({'course_id': unicode(course_id), 'activity_location': unicode(location)})
 
 
-class StageNotificationsMixin(BaseNotificationsMixin):
+class StageNotificationsMixin(object):
     def _get_stage_timer_name(self, timer_name_suffix):
         return '{location}-{timer_name_suffix}'.format(
             location=unicode(self.location),
@@ -54,7 +53,7 @@ class StageNotificationsMixin(BaseNotificationsMixin):
             }
         )
 
-        self._add_click_link_params(msg, course_id, self.activity.location)
+        add_click_link_params(msg, course_id, self.activity.location)
 
         notifications_service.publish_timed_notification(
             msg=msg,
@@ -128,7 +127,7 @@ class StageNotificationsMixin(BaseNotificationsMixin):
             notifications_service.cancel_timed_notification(self._get_stage_timer_name('coming-due'))
 
 
-class ActivityNotificationsMixin(BaseNotificationsMixin):
+class ActivityNotificationsMixin(object):
     # While we *should* send notification, if there is some error here, we don't want to blow the whole thing up.
     @log_and_suppress_exceptions
     def fire_file_upload_notification(self, notifications_service):
@@ -154,7 +153,7 @@ class ActivityNotificationsMixin(BaseNotificationsMixin):
             }
         )
         location = unicode(self.location) if self.location else ''
-        self._add_click_link_params(msg, unicode(self.course_id), location)
+        add_click_link_params(msg, unicode(self.course_id), location)
 
         # NOTE: We're not using Celery here since we are expecting that we
         # will have only a very small handful of workgroup users

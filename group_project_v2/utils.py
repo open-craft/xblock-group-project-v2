@@ -4,7 +4,7 @@ import logging
 from datetime import date, datetime
 from django.conf import settings
 import xml.etree.ElementTree as ET
-import pytz
+
 from xblock.fragment import Fragment
 
 from xblockutils.resources import ResourceLoader
@@ -145,7 +145,7 @@ def log_and_suppress_exceptions(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except Exception as exc:
+        except Exception as exc:  # pylint: disable=broad-except
             log.exception(exc)
             return None
 

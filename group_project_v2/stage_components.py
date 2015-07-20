@@ -1,4 +1,4 @@
-from collections import namedtuple, OrderedDict
+from collections import namedtuple
 import json
 import logging
 from xml.etree import ElementTree
@@ -10,17 +10,21 @@ from xblock.core import XBlock
 from xblock.fields import String, Boolean, Scope, UNIQUE_ID
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
-from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
+from xblockutils.studio_editable import StudioEditableXBlockMixin
 
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin, \
+from group_project_v2.mixins import (
+    UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin,
     XBlockWithComponentsMixin, ChildrenNavigationXBlockMixin
+)
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
 from group_project_v2.utils import NO_EDITABLE_SETTINGS, get_link_to_block
-from group_project_v2.utils import outer_html, gettext as _, loader, format_date, build_date_field, mean, \
+from group_project_v2.utils import (
+    outer_html, gettext as _, loader, format_date, build_date_field, mean,
     outsider_disallowed_protected_view
+)
 
 log = logging.getLogger(__name__)
 
@@ -93,7 +97,7 @@ class GroupProjectVideoResourceXBlock(
     @classmethod
     def is_available(cls):
         try:
-            import ooyala_player
+            import ooyala_player  # pylint:disable=import-error,unused-variable
             return True
         except ImportError as exc:
             msg = _(u"Can't import ooyala player XBlock: {message}").format(message=exc.message)
@@ -151,7 +155,7 @@ class StaticContentBaseXBlock(XBlock, XBlockWithPreviewMixin):
         fragment.add_content(loader.render_template("templates/html/components/static_content.html", render_context))
         return fragment
 
-    def studio_view(self):
+    def studio_view(self, context):  # pylint: disable=no-self-use,unused-argument
         return Fragment(NO_EDITABLE_SETTINGS)
 
 
