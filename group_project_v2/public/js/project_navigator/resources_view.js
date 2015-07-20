@@ -15,19 +15,18 @@ function GroupProjectNavigatorResourcesView(runtime, element) {
         modal_bg.hide();
     }
 
-    $('a[data-video]', element).on('click', function (e) {
+    $('a[data-video-id]', element).on('click', function (e) {
         e.preventDefault();
-        var video = $(e.currentTarget).data('video');
+        var video = $(e.currentTarget).data('video-id');
 
         player.append($('<div id="'+ooyala_player_target_element_id+'"/>'));
 
-        var ooyala = null;
         if (typeof OO === 'undefined') return;
-        if ($('body').hasClass('ie8')) {
-            ooyala = OO.Player.create(ooyala_player_target_element_id, video, {width: '740px', height: '425px'});
-        } else {
-            ooyala = OO.Player.create(ooyala_player_target_element_id, video, {width: '100%', height: '100%'});
-        }
+        // TODO: manually using ooyala - replace with Ooyala player XBlock when it's autostart setting is fixed
+        // and play-stop-destroy events are exposed.
+        var parameters = {width: '100%', height: '100%', autoplay: true};
+
+        var  ooyala = OO.Player.create(ooyala_player_target_element_id, video, parameters);
         modal.data('ooyala', ooyala);
         showPlayer();
     });

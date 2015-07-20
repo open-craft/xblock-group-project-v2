@@ -76,15 +76,19 @@ class GroupProjectResourceXBlock(BaseGroupProjectResourceXBlock):
 
 
 class GroupProjectVideoResourceXBlock(
-    BaseGroupProjectResourceXBlock, XBlockWithComponentsMixin, StudioContainerXBlockMixin, ChildrenNavigationXBlockMixin
+    BaseGroupProjectResourceXBlock, XBlockWithComponentsMixin, ChildrenNavigationXBlockMixin
 ):
     CATEGORY = "gp-v2-video-resource"
-
     PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/video_resource.html'
 
-    OOYALA_PLAYER_CATEGORY = "ooyala-player"
+    video_id = String(
+        display_name=_(u"Ooyala content ID"),
+        help=_(u"This is the Ooyala Content Identifier"),
+        default="Q1eXg5NzpKqUUzBm5WTIb6bXuiWHrRMi",
+        scope=Scope.content,
+    )
 
-    has_children = True
+    editable_fields = ('display_name', 'description', 'video_id')
 
     @classmethod
     def is_available(cls):
@@ -96,28 +100,21 @@ class GroupProjectVideoResourceXBlock(
             log.exception(msg)
             return False
 
-    @property
-    def allowed_nested_blocks(self):
-        blocks = super(GroupProjectVideoResourceXBlock, self).allowed_nested_blocks
-        if not blocks:
-            blocks = OrderedDict()
-        if self.is_available():
-            blocks.update(OrderedDict([
-                (self.OOYALA_PLAYER_CATEGORY, _(u"Ooyala Player")),
-            ]))
-        return blocks
-
     def resources_view(self, context):
-        fragment = super(GroupProjectVideoResourceXBlock, self).resources_view(context)
+        render_context = {'video_id': self.video_id}
+        render_context.update(context)
+        fragment = super(GroupProjectVideoResourceXBlock, self).resources_view(render_context)
         fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/components/video_resource.js"))
         return fragment
 
-    def validate(self):
-        validation = super(GroupProjectVideoResourceXBlock, self).validate()
-        if not self.has_child_of_category(self.OOYALA_PLAYER_CATEGORY):
+    def author_view(self, context):
+        return self.resources_view(context)
+
+    def validate_field_data(self, validation, data):
+        if not data.video_id:
             validation.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                _(u"Video Resource Block must contain ooyala video player block to operate properly")
+                _(u"Video Resource Block must contain Ooyala content ID")
             ))
 
         return validation
