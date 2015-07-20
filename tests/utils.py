@@ -24,18 +24,18 @@ KNOWN_USERS = {
 }
 
 WORKGROUP = {
-        "id": 1,
-        "name": "Group 1",
-        "project": 1,
-        "groups": [],
-        "users": [
-            {"id": user["id"], "username": user["username"], "email": user["email"]}
-            for user in KNOWN_USERS.values()
-        ],
-        "submissions": [],
-        "workgroup_reviews": [],
-        "peer_reviews": []
-    }
+    "id": 1,
+    "name": "Group 1",
+    "project": 1,
+    "groups": [],
+    "users": [
+        {"id": user["id"], "username": user["username"], "email": user["email"]}
+        for user in KNOWN_USERS.values()
+    ],
+    "submissions": [],
+    "workgroup_reviews": [],
+    "peer_reviews": []
+}
 
 
 def _get_user_details(user_id):

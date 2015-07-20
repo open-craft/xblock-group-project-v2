@@ -286,7 +286,9 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
                     "course_id": target_activity.course_id
                 }
 
-                uploaded_file = self.persist_and_submit_file(target_activity, context, request.params[self.upload_id].file)
+                uploaded_file = self.persist_and_submit_file(
+                    target_activity, context, request.params[self.upload_id].file
+                )
 
                 response_data["submissions"] = {uploaded_file.submission_id: uploaded_file.file_url}
 
