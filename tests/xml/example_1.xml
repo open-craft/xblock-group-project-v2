@@ -1,103 +1,115 @@
-  <group-project-v2 xmlns:opt="http://code.edx.org/xblock/option">
-    <group-project-v2-navigator>
-      <group-project-v2-navigator-navigation />
-      <group-project-v2-navigator-submissions />
-      <group-project-v2-navigator-resources />
-      <group-project-v2-navigator-ask-ta />
-    </group-project-v2-navigator>
-    <group-project-v2-activity display_name="Activity 1">
-      <opt:data>
-        <![CDATA[
-          <group_project schema_version='1'>
-            <activitystage title="Overview" id="overview">
-              <resources>
-                <document title="Issue Tree Template">http://download/file.doc</document>
-                <document title="Instructions" description="These are the instructions for this activity" grading_criteria="false">
-                  http://download/other_file.doc
-                </document>
-                <document title="Video" type="ooyala">0123456789abcdef</document>
-              </resources>
-              <content><p>I'm Overview Stage</p></content>
-            </activitystage>
-            <activitystage title="Upload" close="5/24/2014" type="upload" id="upload">
-              <resources>
-                <document title="Grading Criteria" grading_criteria="true">http://download/mygrading.html</document>
-              </resources>
-              <submissions>
-                <document id="issue_tree" title="Issue Tree"/>
-                <document id="marketing_pitch" title="Marketing Pitch"/>
-                <document id="budget" title="Budget" description="xls budget plan"/>
-              </submissions>
-              <content>I'm Upload Stage</content>
-            </activitystage>
-          </group_project>
-        ]]>
-      </opt:data>
-    </group-project-v2-activity>
-    <group-project-v2-activity display_name="Activity 2">
-      <opt:data>
-        <![CDATA[
-        <group_project schema_version='1'>
-          <activitystage title="Review Team" open="5/24/2014" close="6/20/2014" type="peer_review" id="peer_review">
-            <question id="peer_score">
-              <label>How about that?</label>
-              <answer>
-                <input type="text" placeholder="answer here"/>
-              </answer>
-            </question>
-            <question id="peer_q1">
-              <label>Where they helpful?</label>
-              <answer>
-                <select>
-                  <option value="Y">Yes</option>
-                  <option value="N">No</option>
-                </select>
-              </answer>
-            </question>
-            <question id="peer_q2" required="false">
-              <label>General Comments</label>
-              <answer>
-                <textarea/>
-              </answer>
-            </question>
-          </activitystage>
-          <activitystage title="Review Group" open="5/24/2014" close="6/20/2014" type="group_review" id="group_review">
-            <question id="group_score">
-              <label>How about that?</label>
-              <answer>
-                <input type="text" placeholder="answer here"/>
-              </answer>
-            </question>
-            <question id="group_q1">
-              <label>Where they helpful?</label>
-              <answer>
-                <select>
-                  <option value="Y">Yes</option>
-                  <option value="N">No</option>
-                </select>
-              </answer>
-            </question>
-            <question id="group_q2">
-              <label>General Comments</label>
-              <answer>
-                <textarea/>
-              </answer>
-            </question>
-          </activitystage>
-          <activitystage title="Evaluate Team Feedback" open="6/20/2014" type="peer_assessment" id="peer_assessment">
-            <content>Peer Review results</content>
-            <assessment id="peer_q1"><answer><span id="mean_peer_q1"></span></answer></assessment>
-            <assessment id="peer_q2"><answer><span id="mean_peer_q2"></span></answer></assessment>
-            <assessment id="peer_score" summary="mean"><answer><span id="mean_peer_score"></span></answer></assessment>
-          </activitystage>
-          <activitystage title="Evaluate Group Feedback" open="6/20/2014" type="group_assessment"  id="group_assessment">
-            <content>Group Review Results</content>
-            <assessment id="group_q1"><answer><span id="mean_group_q1"></span></answer></assessment>
-            <assessment id="group_q2"><answer><span id="mean_group_q2"></span></answer></assessment>
-            <assessment id="group_score" summary="mean"><answer><span id="mean_group_score"></span></answer></assessment>
-          </activitystage>
-        </group_project>
-        ]]>
-      </opt:data>
-    </group-project-v2-activity>
-  </group-project-v2>
+  <gp-v2-project xmlns:opt="http://code.edx.org/xblock/option">
+    <gp-v2-navigator>
+      <gp-v2-navigator-navigation />
+      <gp-v2-navigator-submissions />
+      <gp-v2-navigator-resources />
+      <gp-v2-navigator-ask-ta />
+    </gp-v2-navigator>
+    <gp-v2-activity display_name="Activity 1">
+      <gp-v2-stage-basic display_name="Overview">
+        <gp-v2-resource display_name="Issue Tree Template" resource_location="http://download/file.doc"/>
+        <gp-v2-resource display_name="Instructions" description="These are the instructions for this activity"
+                        grading_criteria="false" resource_location="http://download/other_file.doc"/>
+        <gp-v2-video-resource display_name="Video" video_id="0123456789abcdef"/>
+        <html><p>I'm Overview Stage</p></html>
+      </gp-v2-stage-basic>
+      <gp-v2-stage-submission display_name="Upload" close_date="2014-05-24T00:00:00Z">
+        <gp-v2-resource display_name="Grading Criteria" grading_criteria="true" resource_location="http://download/mygrading.html"/>
+        <gp-v2-submission upload_id="issue_tree" display_name="Issue Tree"/>
+        <gp-v2-submission upload_id="marketing_pitch" display_name="Marketing Pitch"/>
+        <gp-v2-submission upload_id="budget" display_name="Budget" description="xls budget plan"/>
+        <html>I'm Upload Stage</html>
+      </gp-v2-stage-submission>
+    </gp-v2-activity>
+    <gp-v2-activity display_name="Activity 2">
+      <gp-v2-stage-team-evaluation display_name="Review Team" open_date="2014-05-24T00:00:00Z" close_date="2014-06-20T00:00:00Z">
+        <gp-v2-peer-selector/>
+        <gp-v2-review-question question_id="peer_score" title="How about that?" required="true" single_line="true">
+          <opt:question_content>
+            <select>
+              <option value="">Rating</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+            </select>
+          </opt:question_content>
+        </gp-v2-review-question>
+        <gp-v2-review-question question_id="peer_q1" title="Were they helpful?" required="true" single_line="true">
+          <opt:question_content>
+            <select>
+              <option value="Y">Yes</option>
+              <option value="N">No</option>
+            </select>
+          </opt:question_content>
+        </gp-v2-review-question>
+        <gp-v2-review-question question_id="peer_q2" title="General Comments" required="false">
+          <opt:question_content>
+            <textarea/>
+          </opt:question_content>
+        </gp-v2-review-question>
+      </gp-v2-stage-team-evaluation>
+      <gp-v2-stage-peer-review display_name="Review Group" open_date="2014-05-24T00:00:00Z" close_date="2014-06-20T00:00:00Z">
+        <gp-v2-group-selector/>
+        <gp-v2-review-question question_id="group_score" title="How about that?" required="true" single_line="true">
+          <opt:question_content>
+            <select>
+              <option value="">Grade</option>
+              <option value="0">0</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="15">15</option>
+              <option value="20">20</option>
+              <option value="25">25</option>
+              <option value="30">30</option>
+              <option value="35">35</option>
+              <option value="40">40</option>
+              <option value="45">45</option>
+              <option value="50">50</option>
+              <option value="55">55</option>
+              <option value="60">60</option>
+              <option value="65">65</option>
+              <option value="70">70</option>
+              <option value="75">75</option>
+              <option value="80">80</option>
+              <option value="85">85</option>
+              <option value="90">90</option>
+              <option value="95">95</option>
+              <option value="100">100</option>
+            </select>
+          </opt:question_content>
+        </gp-v2-review-question>
+        <gp-v2-review-question question_id="group_q1" title="Were they helpful?" required="true" single_line="true">
+          <opt:question_content>
+            <select>
+              <option value="Y">Yes</option>
+              <option value="N">No</option>
+            </select>
+          </opt:question_content>
+        </gp-v2-review-question>
+        <gp-v2-review-question question_id="group_q2" title="General Comments" required="false">
+          <opt:question_content>
+            <textarea/>
+          </opt:question_content>
+        </gp-v2-review-question>
+      </gp-v2-stage-peer-review>
+      <gp-v2-stage-evaluation-display display_name="Evaluate Team Feedback" open_date="2014-06-20T00:00:00Z">
+        <html>Peer Review results</html>
+        <gp-v2-peer-assessment question_id="peer_q1"/>
+        <gp-v2-peer-assessment question_id="peer_q2"/>
+        <gp-v2-peer-assessment question_id="peer_score" show_mean="true"/>
+      </gp-v2-stage-evaluation-display>
+      <gp-v2-stage-grade-display display_name="Evaluate Group Feedback" open_date="2014-06-20T00:00:00Z">
+        <html>Group Review Results</html>
+        <gp-v2-group-assessment question_id="peer_q1"/>
+        <gp-v2-group-assessment question_id="peer_q2"/>
+        <gp-v2-group-assessment question_id="peer_score" show_mean="true"/>
+      </gp-v2-stage-grade-display>
+    </gp-v2-activity>
+  </gp-v2-project>

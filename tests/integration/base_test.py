@@ -1,6 +1,10 @@
 """ Base classes for integration tests """
 import textwrap
+from django.utils.safestring import mark_safe
 import mock
+from sample_xblocks.basic.content import HtmlBlock
+from xblock.core import XBlock
+from xblock.fields import String, Scope
 
 from xblockutils.base_test import SeleniumXBlockTest
 
@@ -8,6 +12,13 @@ from group_project_v2.group_project import GroupActivityXBlock
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from tests.integration.page_elements import GroupProjectElement
 from tests.utils import loader, get_mock_project_api
+
+
+class DummyHtmlXBlock(XBlock):
+    data = String(default=u"", scope=Scope.content)
+
+    def student_view(self):
+        return mark_safe(self.data)
 
 
 class BaseIntegrationTest(SeleniumXBlockTest):
@@ -18,10 +29,27 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         "group_project_v2.stage_components.ProjectAPIXBlockMixin",
     )
 
+    @classmethod
+    def setUpClass(cls):
+        super(BaseIntegrationTest, cls).setUpClass()
+        entry_point = mock.Mock(
+            dist=mock.Mock(key='xblock'),
+            load=mock.Mock(return_value=HtmlBlock),
+        )
+        entry_point.name = "html"
+        cls._extra_entry_points_record = ("html", entry_point)
+        XBlock.extra_entry_points.append(cls._extra_entry_points_record)
+
+    @classmethod
+    def tearDownClass(cls):
+        super(BaseIntegrationTest, cls).tearDownClass()
+        XBlock.extra_entry_points.remove(cls._extra_entry_points_record)
+
     def setUp(self):
         """
         Set Up method
         """
+
         super(BaseIntegrationTest, self).setUp()
         self.project_api_mock = get_mock_project_api()
         patch = mock.Mock(spec=ProjectAPIXBlockMixin)
@@ -38,6 +66,7 @@ class BaseIntegrationTest(SeleniumXBlockTest):
                 patcher.stop()
 
         self.addCleanup(stop_patchers)
+
 
     def _add_external_features(self):
         """

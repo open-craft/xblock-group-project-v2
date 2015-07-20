@@ -6,36 +6,22 @@ import ddt
 import textwrap
 from freezegun import freeze_time
 import mock
+from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage
 
 from tests.integration.base_test import BaseIntegrationTest
 from tests.integration.page_elements import GroupProjectElement, StageElement, ReviewStageElement
 from tests.utils import KNOWN_USERS
 
 
-class StageType(object):
-    NORMAL = 'normal'
-    UPLOAD = 'upload'
-    PEER_REVIEW = 'peer_review'
-    PEER_ASSESSMENT = 'peer_assessment'
-    GROUP_REVIEW = 'group_review'
-    GROUP_ASSESSMENT = 'group_assessment'
-
-
 class StageTestBase(BaseIntegrationTest):
     PROJECT_TEMPLATE = textwrap.dedent("""
-        <group-project-v2 xmlns:opt="http://code.edx.org/xblock/option">
+        <gp-v2-project xmlns:opt="http://code.edx.org/xblock/option">
             <gp-v2-activity display_name="Activity">
-                <opt:data>
-                    <![CDATA[
-                        <group_activity schema_version='1'>
-                            <activitystage {stage_args}>
-                                {stage_data}
-                            </activitystage>
-                        </group_activity>
-                    ]]>
-                </opt:data>
+                <{stage_type} {stage_args}>
+                    {stage_data}
+                </{stage_type}>
             </gp-v2-activity>
-        </group-project-v2>
+        </gp-v2-project>
     """)
     stage_type = None
     page = None
@@ -45,17 +31,20 @@ class StageTestBase(BaseIntegrationTest):
 
     stage_element = StageElement
 
-    def build_scenario_xml(self, stage_data, stage_id=DEFAULT_STAGE_ID, title="Stage Title", **kwargs):
+    def build_scenario_xml(self, stage_data, title="Stage Title", **kwargs):
         """
         Builds scenario XML with specified Stage parameters
         """
-        stage_arguments = {'id': stage_id, 'title': title, 'type': self.stage_type}
+        stage_arguments = {'display_name': title}
         stage_arguments.update(kwargs)
         stage_args_str = " ".join(
             ["{}='{}'".format(arg_name, arg_value) for arg_name, arg_value in stage_arguments.iteritems()]
         )
 
-        return self.PROJECT_TEMPLATE.format(stage_args=stage_args_str, stage_data=stage_data)
+        return self.PROJECT_TEMPLATE.format(
+            stage_type=self.stage_type.CATEGORY,
+            stage_args=stage_args_str, stage_data=stage_data
+        )
 
     def go_to_view(self, view_name='student_view', student_id=1):
         """
@@ -90,7 +79,7 @@ class CommonStageTest(StageTestBase):
     """
     Tests common stage functionality
     """
-    stage_type = StageType.NORMAL
+    stage_type = BasicStage
 
     @ddt.data(
         # no open and close date - should be empty
@@ -129,7 +118,7 @@ class CommonStageTest(StageTestBase):
 
 @ddt.ddt
 class NormalStageTest(StageTestBase):
-    stage_type = StageType.NORMAL
+    stage_type = BasicStage
 
     @ddt.data(
         "I'm content",
@@ -137,7 +126,7 @@ class NormalStageTest(StageTestBase):
         '<div><p>More complex<span class="highlight">HTML content</span></p><p>Very complex indeed</p></div>'
     )
     def test_rendering(self, content):
-        stage_content_xml = "<content>{content}</content>".format(content=content)
+        stage_content_xml = "<html>{content}</html>".format(content=content)
         self.load_scenario_xml(self.build_scenario_xml(stage_content_xml))
 
         stage_element = self.get_stage(self.go_to_view())
@@ -147,7 +136,7 @@ class NormalStageTest(StageTestBase):
 
 @ddt.ddt
 class UploadStageTest(StageTestBase):
-    stage_type = StageType.UPLOAD
+    stage_type = SubmissionStage
 
     @ddt.data(
         "I'm content",
@@ -155,7 +144,7 @@ class UploadStageTest(StageTestBase):
         '<div><p>More complex<span class="highlight">HTML content</span></p><p>Very complex indeed</p></div>'
     )
     def test_rendering(self, content):
-        stage_content_xml = "<content>{content}</content>".format(content=content)
+        stage_content_xml = "<html>{content}</html>".format(content=content)
         scenario_xml = self.build_scenario_xml(stage_content_xml)
         self.load_scenario_xml(scenario_xml)
 
@@ -176,34 +165,41 @@ class BaseReviewStageTest(StageTestBase):
 
 @ddt.ddt
 class PeerReviewStageTest(BaseReviewStageTest):
-    stage_type = StageType.PEER_REVIEW
+    stage_type = PeerReviewStage
     stage_element = ReviewStageElement
 
     STAGE_DATA_XML = textwrap.dedent("""
-        <grade_header>
-            <h4>Evaluate <span class="username">this teammate</span></h4>
-        </grade_header>
-        <question id="peer_score">
-            <label>How about that?</label>
-            <answer>
-                <input type="text" placeholder="answer here"/>
-            </answer>
-        </question>
-        <question id="peer_q1">
-            <label>Were they helpful?</label>
-            <answer>
-                <select>
-                    <option value="Y">Yes</option>
-                    <option value="N">No</option>
-                </select>
-            </answer>
-        </question>
-        <question id="peer_q2" required="false">
-            <label>General Comments</label>
-            <answer>
-                <textarea/>
-            </answer>
-        </question>
+        <gp-v2-peer-selector/>
+        <gp-v2-review-question question_id="peer_score" title="How about that?" required="true" single_line="true">
+          <opt:question_content>
+            <select>
+              <option value="">Rating</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+            </select>
+          </opt:question_content>
+        </gp-v2-review-question>
+        <gp-v2-review-question question_id="peer_q1" title="Were they helpful?" required="true" single_line="true">
+          <opt:question_content>
+            <select>
+              <option value="Y">Yes</option>
+              <option value="N">No</option>
+            </select>
+          </opt:question_content>
+        </gp-v2-review-question>
+        <gp-v2-review-question question_id="peer_q2" title="General Comments" required="false">
+          <opt:question_content>
+            <textarea/>
+          </opt:question_content>
+        </gp-v2-review-question>
     """)
 
     def setUp(self):
@@ -216,11 +212,14 @@ class PeerReviewStageTest(BaseReviewStageTest):
     def test_rendering_questions(self):
         stage_element = self.get_stage(self.go_to_view())
 
+        expected_options = {str(idx): idx for idx in xrange(1, 11)}
+        expected_options.update({"": "Rating"})
+
         questions = stage_element.form.questions
         self.assertEqual(questions[0].label, "How about that?")
         self.assertEqual(questions[0].control.name, "peer_score")
-        self.assertEqual(questions[0].control.tag_name, "input")
-        self.assertEqual(questions[0].control.placeholder, "answer here")
+        self.assertEqual(questions[0].control.tag_name, "select")
+        self.assertEqual(questions[0].control.options, expected_options)
         self.assertEqual(questions[0].control.type, "text")
 
         self.assertEqual(questions[1].label, "Were they helpful?")
@@ -255,7 +254,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
         peer.click()
 
         expected_submissions = {
-            "peer_score": "Very well",
+            "peer_score": "10",
             "peer_q1": "Y",
             "peer_q2": "Awesome"
         }
@@ -280,7 +279,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
     def test_persistence_and_resubmission(self):
         user_id = 1
         expected_submissions = {
-            "peer_score": "Very well",
+            "peer_score": "10",
             "peer_q1": "Y",
             "peer_q2": "Awesome"
         }
@@ -309,7 +308,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
         self.assertEqual(questions[2].control.value, expected_submissions["peer_q2"])
 
         new_submissions = {
-            "peer_score": "Terrible",
+            "peer_score": "2",
             "peer_q1": "N",
             "peer_q2": "Awful"
         }
@@ -333,7 +332,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
         user_id = 1
         other_users = set(KNOWN_USERS.keys()) - {user_id}
         expected_submissions = {
-            "peer_score": "Very well",
+            "peer_score": "10",
             "peer_q1": "Y",
             "peer_q2": "Awesome"
         }
@@ -372,7 +371,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
 
 @ddt.ddt
 class GroupReviewStageTest(BaseReviewStageTest):
-    stage_type = StageType.GROUP_REVIEW
+    stage_type = GroupReviewStage
     stage_element = ReviewStageElement
 
     OTHER_GROUPS = {
@@ -381,27 +380,48 @@ class GroupReviewStageTest(BaseReviewStageTest):
     }
 
     STAGE_DATA_XML = textwrap.dedent("""
-        <question id="group_score">
-            <label>How about that?</label>
-            <answer>
-                <input type="text" placeholder="answer here"/>
-            </answer>
-        </question>
-        <question id="group_q1" grade="true">
-            <label>Were they helpful?</label>
-            <answer>
-                <select>
-                    <option value="100">Yes</option>
-                    <option value="10">No</option>
-                </select>
-            </answer>
-        </question>
-        <question id="group_q2" required="false" grade="true">
-            <label>General Comments</label>
-            <answer>
-                <textarea/>
-            </answer>
-        </question>
+        <gp-v2-group-selector/>
+        <gp-v2-review-question question_id="group_score" title="How about that?" required="true" single_line="true">
+          <opt:question_content>
+            <select>
+              <option value="">Grade</option>
+              <option value="0">0</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="15">15</option>
+              <option value="20">20</option>
+              <option value="25">25</option>
+              <option value="30">30</option>
+              <option value="35">35</option>
+              <option value="40">40</option>
+              <option value="45">45</option>
+              <option value="50">50</option>
+              <option value="55">55</option>
+              <option value="60">60</option>
+              <option value="65">65</option>
+              <option value="70">70</option>
+              <option value="75">75</option>
+              <option value="80">80</option>
+              <option value="85">85</option>
+              <option value="90">90</option>
+              <option value="95">95</option>
+              <option value="100">100</option>
+            </select>
+          </opt:question_content>
+        </gp-v2-review-question>
+        <gp-v2-review-question question_id="group_q1" title="Were they helpful?" required="true" single_line="true">
+          <opt:question_content>
+            <select>
+              <option value="Y">Yes</option>
+              <option value="N">No</option>
+            </select>
+          </opt:question_content>
+        </gp-v2-review-question>
+        <gp-v2-review-question question_id="group_q2" title="General Comments" required="false">
+          <opt:question_content>
+            <textarea/>
+          </opt:question_content>
+        </gp-v2-review-question>
     """)
 
     def setUp(self):
@@ -416,11 +436,14 @@ class GroupReviewStageTest(BaseReviewStageTest):
     def test_renderigng_questions(self):
         stage_element = self.get_stage(self.go_to_view())
 
+        expected_options = {str(idx): idx for idx in xrange(0, 101, 5)}
+        expected_options.update({"": "Grade"})
+
         questions = stage_element.form.questions
         self.assertEqual(questions[0].label, "How about that?")
         self.assertEqual(questions[0].control.name, "group_score")
-        self.assertEqual(questions[0].control.tag_name, "input")
-        self.assertEqual(questions[0].control.placeholder, "answer here")
+        self.assertEqual(questions[0].control.tag_name, "select")
+        self.assertEqual(questions[0].control.placeholder, expected_options)
         self.assertEqual(questions[0].control.type, "text")
 
         self.assertEqual(questions[1].label, "Were they helpful?")
@@ -451,8 +474,8 @@ class GroupReviewStageTest(BaseReviewStageTest):
         groups.click()
 
         expected_submissions = {
-            "group_score": "Very well",
-            "group_q1": "100",
+            "group_score": "100",
+            "group_q1": "Y",
             "group_q2": "Awesome"
         }
 
@@ -476,8 +499,8 @@ class GroupReviewStageTest(BaseReviewStageTest):
     def test_persistence_and_resubmission(self):
         user_id = 1
         expected_submissions = {
-            "group_score": "Very well",
-            "group_q1": "100",
+            "group_score": "100",
+            "group_q1": "Y",
             "group_q2": "Awesome"
         }
 
@@ -504,8 +527,8 @@ class GroupReviewStageTest(BaseReviewStageTest):
         self.assertEqual(questions[2].control.value, expected_submissions["group_q2"])
 
         new_submissions = {
-            "group_score": "Terrible",
-            "group_q1": "10",
+            "group_score": "5",
+            "group_q1": "N",
             "group_q2": "Awful"
         }
 
@@ -527,8 +550,8 @@ class GroupReviewStageTest(BaseReviewStageTest):
         user_id = 1
         workgroups_to_review = self.OTHER_GROUPS.keys()
         expected_submissions = {
-            "group_score": "Very well",
-            "group_q1": "100",
+            "group_score": "100",
+            "group_q1": "Y",
             "group_q2": "200"
         }
 

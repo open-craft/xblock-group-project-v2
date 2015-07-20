@@ -86,6 +86,8 @@ class GroupProjectXBlock(
 
     @outsider_disallowed_protected_view
     def student_view(self, context):
+        context = context if context else {}  # workbench does not provide context at all
+
         fragment = Fragment()
         render_context = {
             'project': self,
