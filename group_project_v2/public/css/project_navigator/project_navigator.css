@@ -20,7 +20,7 @@
 
 .group-project-navigator-views {
     overflow: auto;
-    min-height: 400px;
+    height: 500px;
 }
 
 .group-project-navigator-view {
