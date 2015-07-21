@@ -15,7 +15,8 @@ log = logging.getLogger(__name__)
 class ChildrenNavigationXBlockMixin(object):
     @lazy
     def _children(self):
-        return [self.runtime.get_block(child_id) for child_id in self.children]
+        children = (self.runtime.get_block(child_id) for child_id in self.children)
+        return [child for child in children if child is not None]
 
     def _get_children_by_category(self, *child_categories):
         return [child for child in self._children if child.category in child_categories]
