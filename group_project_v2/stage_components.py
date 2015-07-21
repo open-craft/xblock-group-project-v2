@@ -251,7 +251,7 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
         render_context = {'submission': self, 'upload': self.upload, 'disabled': not self.stage.available_now}
         render_context.update(context)
         fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/submission.js'))
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/components/submission.js'))
         fragment.initialize_js("GroupProjectSubmissionBlock")
         return fragment
 
@@ -556,14 +556,14 @@ class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin, XBlock
         fragment = super(GroupProjectReviewQuestionXBlock, self).studio_view(context)
 
         # TODO: StudioEditableXBlockMixin should really support Codemirror XML editor
-        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/question_edit.css"))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/question_edit.js"))
+        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/question_edit.css"))
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/components/question_edit.js"))
         fragment.initialize_js("GroupProjectQuestionEdit")
         return fragment
 
     def author_view(self, context):
         fragment = self.student_view(context)
-        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/question_edit.css"))
+        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/question_edit.css"))
         return fragment
 
 
