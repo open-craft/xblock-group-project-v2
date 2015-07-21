@@ -200,4 +200,10 @@ function GroupProjectReviewStage(runtime, element) {
     $('.close_review_dialog', review_submissions_dialog).on('click', function () {
         review_submissions_dialog.hide();
     });
+
+    if ($('.select_peer.selected,.select_group.selected', element).length === 0) {
+        $form.find('.editable').attr('disabled', 'disabled');
+        $form.find('.answer').val(null);
+        $form.find('button.submit').attr('disabled', 'disabled');
+    }
 }
