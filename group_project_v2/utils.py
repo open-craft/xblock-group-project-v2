@@ -161,6 +161,7 @@ def get_default_stage(stages):
         3. If at least one stage is open and not closed - sequentially last opened and not closed
 
     """
+    stages = [stage for stage in stages if stage]
     if not stages:
         return None
 
