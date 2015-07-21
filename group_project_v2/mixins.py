@@ -181,3 +181,24 @@ class XBlockWithPreviewMixin(object):
         view_to_render = 'author_view' if hasattr(self, 'author_view') else 'student_view'
         renderer = getattr(self, view_to_render)
         return renderer(context)
+
+
+class XBlockWithUrlNameDisplayMixin(object):
+    @property
+    def url_name(self):
+        """
+        Get the url_name for this block. In Studio/LMS it is provided by a mixin, so we just
+        defer to super(). In the workbench or any other platform, we use the usage_id.
+        """
+        try:
+            return super(XBlockWithUrlNameDisplayMixin, self).url_name
+        except AttributeError:
+            return unicode(self.scope_ids.usage_id)
+
+    def get_url_name_fragment(self, caption):
+        fragment = Fragment()
+        fragment.add_content(loader.render_template(
+            "templates/html/url_name.html",
+            {'url_name': self.url_name, 'caption': caption}
+        ))
+        return fragment

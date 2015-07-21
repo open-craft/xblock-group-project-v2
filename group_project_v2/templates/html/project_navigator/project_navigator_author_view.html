@@ -1,0 +1,9 @@
+{% load i18n %}
+<div class="group-project-navigator-wrapper author-view">
+  <div class="group-project-navigator-header">
+    {% trans "Project Navigator" %}
+  </div>
+  {% for child_content in children_contents %}
+    <div class="group-project-navigator-view">{{ child_content|safe }}</div>
+   {% endfor %}
+</div>

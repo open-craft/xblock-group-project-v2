@@ -81,3 +81,8 @@
     margin: 0 -10px 4px -10px;
     color: #8e8e8e;
 }
+
+
+.group-project-navigator-wrapper.author-view .group-project-navigator-view {
+    display: block;
+}

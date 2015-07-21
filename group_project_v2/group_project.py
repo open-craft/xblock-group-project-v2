@@ -192,13 +192,12 @@ class GroupActivityXBlock(
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return OrderedDict([
-            (BasicStage.CATEGORY, _(u"Text Stage")),
-            (CompletionStage.CATEGORY, _(u"Completion Stage")),
-            (SubmissionStage.CATEGORY, _(u"Submission Stage")),
-            (PeerReviewStage.CATEGORY, _(u"Peer Review Stage")),
-            (GroupReviewStage.CATEGORY, _(u"Group Review Stage")),
-            (PeerAssessmentStage.CATEGORY, _(u"Peer Assessment Stage")),
-            (GroupAssessmentStage.CATEGORY, _(u"Group Assessment Stage")),
+            (stage_type.CATEGORY, stage_type.STAGE_TYPE_NAME)
+            for stage_type in (
+                BasicStage, CompletionStage, SubmissionStage,
+                PeerReviewStage, GroupReviewStage,
+                PeerAssessmentStage, GroupAssessmentStage
+            )
         ])
 
     @property

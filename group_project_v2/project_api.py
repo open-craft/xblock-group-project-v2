@@ -148,7 +148,8 @@ class ProjectAPI(object):
             "type": "reviewassignment",
             "data__xblock_id": xblock_id,
         }
-        return self.send_request(GET, (USERS_API, user_id, 'groups'), query_params=qs_params)["groups"]
+        response = self.send_request(GET, (USERS_API, user_id, 'groups'), query_params=qs_params)
+        return response.get("groups", {})
 
     @api_error_protect
     def get_workgroups_for_assignment(self, assignment_id):
@@ -202,7 +203,8 @@ class ProjectAPI(object):
             "content_id": content_id,
             "stage": stage_id
         }
-        return self.send_request(GET, (COURSES_API, course_id, 'completions'), query_params=qs_params)['results']
+        response = self.send_request(GET, (COURSES_API, course_id, 'completions'), query_params=qs_params)
+        return response.get('results', {})
 
     def get_stage_state(self, course_id, content_id, user_id, stage):
         user_workgroup = self.get_user_workgroup_for_course(user_id, course_id)

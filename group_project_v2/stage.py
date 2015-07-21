@@ -17,14 +17,16 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContain
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import (
     ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin,
-    WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin
+    WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin,
+    XBlockWithUrlNameDisplayMixin
 )
 from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
     PeerSelectorXBlock, GroupSelectorXBlock,
     GroupProjectReviewQuestionXBlock, GroupProjectPeerAssessmentXBlock, GroupProjectGroupAssessmentXBlock,
     GroupProjectResourceXBlock, GroupProjectSubmissionXBlock, SubmissionsStaticContentXBlock,
-    GradeRubricStaticContentXBlock, GroupProjectVideoResourceXBlock)
+    GradeRubricStaticContentXBlock, GroupProjectVideoResourceXBlock
+)
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.utils import (
     loader, format_date, gettext as _, make_key, outsider_disallowed_protected_view,
@@ -43,7 +45,8 @@ class StageState(object):
 class BaseGroupActivityStage(
     XBlockWithPreviewMixin, XBlockWithComponentsMixin, ProjectAPIXBlockMixin, StageNotificationsMixin,
     XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-    ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin
+    ChildrenNavigationXBlockMixin, XBlockWithUrlNameDisplayMixin,
+    CourseAwareXBlockMixin, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin
 ):
     display_name = String(
         display_name=_(u"Display Name"),
@@ -80,6 +83,8 @@ class BaseGroupActivityStage(
 
     STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as it's not yet opened")
     STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as it's closed")
+    STAGE_URL_NAME_TEMPLATE = _(u"url_name to link to this {stage_name}:")
+    STAGE_TYPE_NAME = _(u"Stage")
 
     @property
     def id(self):
@@ -140,6 +145,10 @@ class BaseGroupActivityStage(
     def available_now(self):
         return self.is_open and not self.is_closed
 
+    @property
+    def url_name_caption(self):
+        return self.STAGE_URL_NAME_TEMPLATE.format(stage_name=self.STAGE_TYPE_NAME)
+
     def _view_render(self, context, view='student_view'):
         stage_fragment = self.get_stage_content_fragment(context, view)
 
@@ -159,9 +168,22 @@ class BaseGroupActivityStage(
     def student_view(self, context):
         return self._view_render(context)
 
+    @outsider_disallowed_protected_view
     def author_preview_view(self, context):
         # if we use student_view or author_view Studio will wrap it in HTML that we don't want in the preview
-        return self._view_render(context, "preview_view")
+        fragment = self._view_render(context, "preview_view")
+        url_name_fragment = self.get_url_name_fragment(self.url_name_caption)
+        fragment.add_content(url_name_fragment.content)
+        fragment.add_frag_resources(url_name_fragment)
+        return fragment
+
+    @outsider_disallowed_protected_view
+    def author_edit_view(self, context):
+        fragment = super(BaseGroupActivityStage, self).author_edit_view(context)
+        url_name_fragment = self.get_url_name_fragment(self.url_name_caption)
+        fragment.add_content(url_name_fragment.content)
+        fragment.add_frag_resources(url_name_fragment)
+        return fragment
 
     def render_children_fragments(self, context, view='student_view'):
         children_fragments = []
@@ -259,6 +281,7 @@ class BasicStage(BaseGroupActivityStage):
     CATEGORY = 'gp-v2-stage-basic'
 
     STAGE_TYPE = _(u'Text')
+    STAGE_TYPE_NAME = _(u"Text Stage")
 
     def student_view(self, context):
         fragment = super(BasicStage, self).student_view(context)
@@ -279,6 +302,7 @@ class CompletionStage(BaseGroupActivityStage):
     STAGE_CONTENT_TEMPLATE = "templates/html/stages/completion.html"
 
     STAGE_TYPE = _(u'Completion')
+    STAGE_TYPE_NAME = _(u"Completion Stage")
 
     js_file = "public/js/stages/completion.js"
     js_init = "GroupProjectCompletionStage"
@@ -316,6 +340,7 @@ class SubmissionStage(BaseGroupActivityStage):
     CATEGORY = 'gp-v2-stage-submission'
 
     STAGE_TYPE = _(u'Task')
+    STAGE_TYPE_NAME = _(u"Submission Stage")
 
     submissions_stage = True
 
@@ -479,6 +504,8 @@ class PeerReviewStage(ReviewBaseStage):
     CATEGORY = 'gp-v2-stage-peer-review'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
 
+    STAGE_TYPE_NAME = _(u"Peer Review Stage")
+
     @property
     def allowed_nested_blocks(self):
         blocks = super(PeerReviewStage, self).allowed_nested_blocks
@@ -559,6 +586,8 @@ class PeerReviewStage(ReviewBaseStage):
 class GroupReviewStage(ReviewBaseStage):
     CATEGORY = 'gp-v2-stage-group-review'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_review.html'
+
+    STAGE_TYPE_NAME = _(u"Group Review Stage")
 
     @property
     def allowed_nested_blocks(self):
@@ -685,6 +714,8 @@ class PeerAssessmentStage(AssessmentBaseStage):
     CATEGORY = 'gp-v2-stage-peer-assessment'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_assessment.html'
 
+    STAGE_TYPE_NAME = _(u"Peer Assessment Stage")
+
     type = u'Evaluation'
 
     def allowed_nested_blocks(self):
@@ -704,6 +735,7 @@ class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_assessment.html'
 
     STAGE_TYPE = _(u'Grade')
+    STAGE_TYPE_NAME = _(u"Group Assessment Stage")
 
     def allowed_nested_blocks(self):
         blocks = super(AssessmentBaseStage, self).allowed_nested_blocks

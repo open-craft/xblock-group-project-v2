@@ -11,9 +11,10 @@ from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
-from group_project_v2.mixins import XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin
+from group_project_v2.mixins import XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin, \
+    XBlockWithUrlNameDisplayMixin
 
-from group_project_v2.utils import loader, gettext as _, NO_EDITABLE_SETTINGS
+from group_project_v2.utils import loader, gettext as _, NO_EDITABLE_SETTINGS, outsider_disallowed_protected_view
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -109,10 +110,10 @@ class GroupProjectNavigatorXBlock(
             )
         )
         fragment.add_css_url(self.runtime.local_resource_url(
-            self.group_project, 'public/css/project_navigator/project_navigator.css'
+            self, 'public/css/project_navigator/project_navigator.css'
         ))
         fragment.add_javascript_url(self.runtime.local_resource_url(
-            self.group_project, 'public/js/project_navigator/project_navigator.js'
+            self, 'public/js/project_navigator/project_navigator.js'
         ))
         fragment.initialize_js("GroupProjectNavigatorBlock", js_parameters)
 
@@ -121,6 +122,23 @@ class GroupProjectNavigatorXBlock(
     def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
         fragment = Fragment()
         fragment.add_content(NO_EDITABLE_SETTINGS)
+        return fragment
+
+    def author_view(self, context):  # pylint: disable=unused-argument, no-self-use
+        fragment = Fragment()
+        children_contents = []
+        for child in self._children:
+            child_fragment = child.render('preview_view', context)
+            fragment.add_frag_resources(child_fragment)
+            children_contents.append(child_fragment.content)
+
+        fragment.add_content(loader.render_template(
+            "templates/html/project_navigator/project_navigator_author_view.html",
+            {'navigator': self, 'children_contents': children_contents}
+        ))
+        fragment.add_css_url(self.runtime.local_resource_url(
+            self, 'public/css/project_navigator/project_navigator.css'
+        ))
         return fragment
 
     def validate(self):
@@ -135,7 +153,9 @@ class GroupProjectNavigatorXBlock(
         return validation
 
 
-class ProjectNavigatorViewXBlockBase(XBlock, XBlockWithPreviewMixin, StudioEditableXBlockMixin):
+class ProjectNavigatorViewXBlockBase(
+    XBlock, XBlockWithPreviewMixin, StudioEditableXBlockMixin, XBlockWithUrlNameDisplayMixin
+):
     """
     Base class for Project Navigator children XBlocks (views)
     """
@@ -166,6 +186,12 @@ class ProjectNavigatorViewXBlockBase(XBlock, XBlockWithPreviewMixin, StudioEdita
     @property
     def course_id(self):
         return getattr(self.runtime, 'course_id', 'all')
+
+    @property
+    def url_name_caption(self):
+        return _(u"url_name to link to this {project_navigator_view}:").format(
+            project_navigator_view=self.display_name_with_default
+        )
 
     def render_student_view(self, context, add_resources_from=None):
         """
@@ -200,9 +226,11 @@ class ProjectNavigatorViewXBlockBase(XBlock, XBlockWithPreviewMixin, StudioEdita
         """
         Studio Preview view
         """
-        # Can't use student view as it they usually result in sending some requests to api - this is costly and often
-        # crash entire XBlock in studio due to 404 response codes
-        return Fragment()
+        fragment = Fragment(self.display_name_with_default)
+        url_name_fragment = self.get_url_name_fragment(self.url_name_caption)
+        fragment.add_content(url_name_fragment.content)
+        fragment.add_frag_resources(url_name_fragment)
+        return fragment
 
     def selector_view(self, context):  # pylint: disable=unused-argument
         """
@@ -228,7 +256,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     CATEGORY = "gp-v2-navigator-navigation"
     type = ViewTypes.NAVIGATION
     icon = u"fa-bars"
-    display_name_with_default = _(u"Navigation")
+    display_name_with_default = _(u"Navigation View")
     skip_selector = True
 
     template = "navigation_view.html"
@@ -256,7 +284,7 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     CATEGORY = "gp-v2-navigator-resources"
     type = ViewTypes.RESOURCES
     icon = u"fa-files-o"
-    display_name_with_default = _(u"Resources")
+    display_name_with_default = _(u"Resources View")
 
     template = "resources_view.html"
     css_file = "resources_view.css"
@@ -285,7 +313,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     CATEGORY = "gp-v2-navigator-submissions"
     type = ViewTypes.SUBMISSIONS
     icon = u"fa-upload"
-    display_name_with_default = _(u"Submissions")
+    display_name_with_default = _(u"Submissions View")
 
     template = "submissions_view.html"
     css_file = "submissions_view.css"
@@ -318,7 +346,7 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     CATEGORY = "gp-v2-navigator-ask-ta"
     type = ViewTypes.ASK_TA
     selector_text = u"TA"
-    display_name_with_default = _(u"Ask a TA")
+    display_name_with_default = _(u"Ask a TA View")
 
     template = "ask_ta_view.html"
     css_file = "ask_ta_view.css"
