@@ -204,22 +204,16 @@ class ProjectAPI(object):
             "stage": stage_id
         }
         response = self.send_request(GET, (COURSES_API, course_id, 'completions'), query_params=qs_params)
-        return response.get('results', {})
+        return response.get('results', [])
 
-    def get_stage_state(self, course_id, content_id, user_id, stage):
-        user_workgroup = self.get_user_workgroup_for_course(user_id, course_id)
-        if user_workgroup:
-            users_in_group = {user['id'] for user in user_workgroup['users']}
-        else:
-            users_in_group = set()
-
+    def get_stage_state(self, course_id, content_id, stage):
         stage_completions = self.get_stage_completions(course_id, content_id, stage)
         if stage_completions:
             completed_users = {completion['user_id'] for completion in stage_completions}
         else:
             completed_users = set()
 
-        return users_in_group, completed_users
+        return completed_users
 
     @api_error_protect
     def get_user_roles_for_course(self, user_id, course_id):

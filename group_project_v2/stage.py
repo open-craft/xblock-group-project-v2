@@ -42,6 +42,12 @@ class StageState(object):
     COMPLETED = 'completed'
 
 
+class ReviewState(object):
+    NOT_STARTED = 'not_started'
+    INCOMPLETE = 'incomplete'
+    COMPLETED = 'completed'
+
+
 class BaseGroupActivityStage(
     XBlockWithPreviewMixin, XBlockWithComponentsMixin, ProjectAPIXBlockMixin, StageNotificationsMixin,
     XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
@@ -215,7 +221,8 @@ class BaseGroupActivityStage(
 
         return fragment
 
-    def mark_complete(self, user_id):
+    def mark_complete(self, user_id=None):
+        user_id = user_id if user_id is not None else self.user_id
         try:
             self.project_api.mark_as_complete(self.course_id, self.content_id, user_id, self.id)
         except ApiError as exc:
@@ -227,19 +234,10 @@ class BaseGroupActivityStage(
         """
         Gets stage completion state
         """
-        users_in_group, completed_users = self.project_api.get_stage_state(
-            self.course_id,
-            self.activity.id,
-            self.user_id,
-            self.id
-        )
+        completed_users = self.project_api.get_stage_state(self.course_id, self.activity.id, self.id)
 
-        if not users_in_group or not completed_users:
-            return StageState.NOT_STARTED
-        if users_in_group <= completed_users:
+        if self.user_id in completed_users:
             return StageState.COMPLETED
-        if users_in_group & completed_users:
-            return StageState.INCOMPLETE
         else:
             return StageState.NOT_STARTED
 
@@ -287,7 +285,7 @@ class BasicStage(BaseGroupActivityStage):
         fragment = super(BasicStage, self).student_view(context)
 
         if self.available_now and not self.is_admin_grader:
-            self.mark_complete(self.user_id)
+            self.mark_complete()
 
         return fragment
 
@@ -317,7 +315,7 @@ class CompletionStage(BaseGroupActivityStage):
             return {'result': 'error',  'msg': template.format(action=self.STAGE_ACTION)}
 
         try:
-            self.mark_complete(self.user_id)
+            self.mark_complete()
             self.completed = True
             return {
                 'result': 'success',
@@ -381,6 +379,10 @@ class SubmissionStage(BaseGroupActivityStage):
         return violations
 
     @property
+    def has_some_submissions(self):
+        return any(submission.upload is not None for submission in self.submissions)
+
+    @property
     def has_all_submissions(self):
         return all(submission.upload is not None for submission in self.submissions)
 
@@ -388,6 +390,14 @@ class SubmissionStage(BaseGroupActivityStage):
         if self.has_all_submissions:
             for user in self.workgroup["users"]:
                 self.mark_complete(user["id"])
+
+    def get_stage_state(self):
+        if self.has_all_submissions:
+            return StageState.COMPLETED
+        elif self.has_some_submissions:
+            return StageState.INCOMPLETE
+        else:
+            return StageState.NOT_STARTED
 
     def _render_view(self, child_view, template, context):
         fragment = Fragment()
@@ -455,20 +465,41 @@ class ReviewBaseStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
 
         return violations
 
-    def _check_review_complete(self, items_to_grade, review_questions, review_items, review_item_key):
+    def _check_review_status(self, items_to_grade, review_items, review_item_key):
         my_feedback = {
             make_key(peer_review_item[review_item_key], peer_review_item["question"]): peer_review_item["answer"]
             for peer_review_item in review_items
             if peer_review_item['reviewer'] == self.anonymous_student_id
         }
 
-        for item in items_to_grade:
-            for question in review_questions:
-                key = make_key(item["id"], question.question_id)
-                if my_feedback.get(key, None) in (None, ''):
-                    return False
+        required_keys = [
+            make_key(item["id"], question.question_id)
+            for item in items_to_grade
+            for question in self.required_questions
+        ]
+        has_all = True
+        has_some = False
 
-        return True
+        for key in required_keys:
+            has_answer = my_feedback.get(key, None) not in (None, '')
+            has_all = has_all and has_answer
+            has_some = has_some or has_answer
+
+        if has_all:
+            return ReviewState.COMPLETED
+        elif has_some:
+            return StageState.INCOMPLETE
+        else:
+            return StageState.NOT_STARTED
+
+    def get_stage_state(self):
+        review_status = self.review_status()
+        if review_status == ReviewState.COMPLETED:
+            return StageState.COMPLETED
+        elif review_status == ReviewState.INCOMPLETE:
+            return StageState.INCOMPLETE
+        else:
+            return StageState.NOT_STARTED
 
     def _pivot_feedback(self, feedback):  # pylint: disable=no-self-use
         """
@@ -486,6 +517,9 @@ class ReviewBaseStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
 
         try:
             self.do_submit_review(submissions)
+
+            if self.is_group_member and self.review_status() == ReviewState.COMPLETED:
+                self.mark_complete()
         except ApiError as exception:
             log.exception(exception.message)
             return {'result': 'error', 'msg': exception.message}
@@ -531,11 +565,11 @@ class PeerReviewStage(ReviewBaseStage):
         except ApiError:
             return []
 
-    def is_review_complete(self):
+    def review_status(self):
         peers_to_review = [user for user in self.workgroup["users"] if user["id"] != self.user_id]
         peer_review_items = self.project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
 
-        return self._check_review_complete(peers_to_review, self.required_questions, peer_review_items, "user")
+        return self._check_review_status(peers_to_review, peer_review_items, "user")
 
     def validate(self):
         violations = super(PeerReviewStage, self).validate()
@@ -579,9 +613,6 @@ class PeerReviewStage(ReviewBaseStage):
             submissions,
         )
 
-        if self.is_review_complete() and self.is_group_member:
-            self.mark_complete(self.user_id)
-
 
 class GroupReviewStage(ReviewBaseStage):
     CATEGORY = 'gp-v2-stage-group-review'
@@ -610,7 +641,7 @@ class GroupReviewStage(ReviewBaseStage):
         except ApiError:
             return []
 
-    def is_review_complete(self):
+    def review_status(self):
         groups_to_review = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
 
         group_review_items = []
@@ -619,7 +650,7 @@ class GroupReviewStage(ReviewBaseStage):
                 self.project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id)
             )
 
-        return self._check_review_complete(groups_to_review, self.required_questions, group_review_items, "workgroup")
+        return self._check_review_status(groups_to_review, group_review_items, "workgroup")
 
     @XBlock.handler
     @outsider_disallowed_protected_handler
@@ -680,9 +711,6 @@ class GroupReviewStage(ReviewBaseStage):
 
         self.activity.calculate_and_send_grade(group_id)
 
-        if self.is_group_member and self.is_review_complete():
-            self.mark_complete(self.user_id)
-
 
 class AssessmentBaseStage(BaseGroupActivityStage):
     STAGE_TYPE = _(u'Evaluation')
@@ -705,7 +733,7 @@ class AssessmentBaseStage(BaseGroupActivityStage):
 
         # TODO: should probably check for all reviews to be ready
         if self.available_now and not self.is_admin_grader:
-            self.mark_complete(self.user_id)
+            self.mark_complete()
 
         return fragment
 
