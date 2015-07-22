@@ -108,7 +108,6 @@ class GroupProjectVideoResourceXBlock(
         render_context = {'video_id': self.video_id}
         render_context.update(context)
         fragment = super(GroupProjectVideoResourceXBlock, self).resources_view(render_context)
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/components/video_resource.js"))
         return fragment
 
     def author_view(self, context):
