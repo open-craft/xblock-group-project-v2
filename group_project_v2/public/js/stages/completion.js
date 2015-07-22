@@ -5,7 +5,8 @@ function GroupProjectCompletionStage(runtime, element) {
     }
 
     var $form = $(".group-project-completion-form", element);
-    var message_box = $(".message"); // searching globally - not a typo: message box is created at group project level
+    var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
+    var message_box = $(".message", group_project_dom);
 
     function show_message(msg) {
         message_box.find('.message_text').html(msg);

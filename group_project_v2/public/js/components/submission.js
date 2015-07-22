@@ -16,7 +16,8 @@ function GroupProjectSubmissionBlock(runtime, element) {
         $(document).trigger('group_project_v2.submission.upload_complete', uploadXHR);
     }
 
-    var message_box = $(".message"); // searching globally - not a typo: message box is created at group project level
+    var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
+    var message_box = $(".message", group_project_dom);
     function show_message(msg, title, title_css_class) {
         message_box.find('.message_text').html(msg);
         message_box.find('.message_title').html(title);

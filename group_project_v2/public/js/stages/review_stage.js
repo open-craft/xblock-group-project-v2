@@ -2,7 +2,6 @@ function GroupProjectReviewStage(runtime, element) {
     // Set up gettext in case it isn't available in the client runtime:
     if (typeof gettext == "undefined") {
         window.gettext = function gettext_stub(string) { return string; };
-        window.ngettext = function ngettext_stub(strA, strB, n) { return n == 1 ? strA : strB; };
     }
 
     var DATA_PRESENT_SUBMIT = gettext('Resubmit');
@@ -13,7 +12,8 @@ function GroupProjectReviewStage(runtime, element) {
 
     var $form = $("form.review",  element);
     var is_peer_review = $form.data('review-type') == 'peer_review';
-    var message_box = $(".message"); // searching globally - not a typo: message box is created at group project level
+    var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
+    var message_box = $(".message", group_project_dom);
 
     function show_message(msg) {
         message_box.find('.message_text').html(msg);
