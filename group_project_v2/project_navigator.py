@@ -124,7 +124,7 @@ class GroupProjectNavigatorXBlock(
         fragment.add_content(NO_EDITABLE_SETTINGS)
         return fragment
 
-    def author_view(self, context):  # pylint: disable=unused-argument, no-self-use
+    def author_preview_view(self, context):  # pylint: disable=unused-argument, no-self-use
         fragment = Fragment()
         children_contents = []
         for child in self._children:
