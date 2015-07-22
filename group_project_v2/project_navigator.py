@@ -14,7 +14,7 @@ from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditab
 from group_project_v2.mixins import XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin, \
     XBlockWithUrlNameDisplayMixin
 
-from group_project_v2.utils import loader, gettext as _, NO_EDITABLE_SETTINGS, outsider_disallowed_protected_view
+from group_project_v2.utils import loader, gettext as _, NO_EDITABLE_SETTINGS
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 

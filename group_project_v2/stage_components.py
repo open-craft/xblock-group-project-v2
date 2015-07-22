@@ -13,10 +13,7 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import (
-    UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin,
-    XBlockWithComponentsMixin, ChildrenNavigationXBlockMixin
-)
+from group_project_v2.mixins import UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
@@ -79,9 +76,7 @@ class GroupProjectResourceXBlock(BaseGroupProjectResourceXBlock):
         return self.resources_view(context)
 
 
-class GroupProjectVideoResourceXBlock(
-    BaseGroupProjectResourceXBlock, XBlockWithComponentsMixin, ChildrenNavigationXBlockMixin
-):
+class GroupProjectVideoResourceXBlock(BaseGroupProjectResourceXBlock):
     CATEGORY = "gp-v2-video-resource"
     PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/video_resource.html'
 
@@ -96,13 +91,7 @@ class GroupProjectVideoResourceXBlock(
 
     @classmethod
     def is_available(cls):
-        try:
-            import ooyala_player  # pylint:disable=import-error,unused-variable
-            return True
-        except ImportError as exc:
-            msg = _(u"Can't import ooyala player XBlock: {message}").format(message=exc.message)
-            log.exception(msg)
-            return False
+        return True  # TODO: restore conditional availability when switched to use actual Ooyala XBlock
 
     def resources_view(self, context):
         render_context = {'video_id': self.video_id}
