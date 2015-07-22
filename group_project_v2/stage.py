@@ -97,6 +97,10 @@ class BaseGroupActivityStage(
         return self.scope_ids.usage_id
 
     @property
+    def display_name_with_default(self):
+        return self.STAGE_TYPE_NAME
+
+    @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         """
         This property outputs an ordered dictionary of allowed nested XBlocks in form of block_category: block_caption.
