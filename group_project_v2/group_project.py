@@ -368,7 +368,9 @@ class GroupActivityXBlock(
             for review_item in review_item_data
         }
         all_reviewer_ids = set([self.real_user_id(review_item['reviewer']) for review_item in review_item_data])
-        group_reviewer_ids = [user["id"] for user in self.project_api.get_workgroup_reviewers(group_id)]
+        group_reviewer_ids = [
+            user["id"] for user in self.project_api.get_workgroup_reviewers(group_id, self.content_id)
+        ]
         admin_reviewer_ids = [reviewer_id for reviewer_id in all_reviewer_ids if reviewer_id not in group_reviewer_ids]
 
         def get_user_grade_value_list(user_id):

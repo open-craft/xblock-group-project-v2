@@ -170,11 +170,13 @@ class ProjectAPI(object):
         return workgroup_assignments
 
     @api_error_protect
-    def get_workgroup_reviewers(self, group_id):
+    def get_workgroup_reviewers(self, group_id, content_id):
         review_assignments = self.send_request(GET, (WORKGROUP_API, group_id, 'groups'), no_trailing_slash=True)
 
         reviewers = []
         for review_assignment in review_assignments:
+            if review_assignment["data"]["xblock_id"] != content_id:
+                continue
             # stripping slashes as we're adding it in send_request anyway
             review_assignment_url = review_assignment["url"].strip("/")
             review_assignment_details = self.send_request(GET, (review_assignment_url, 'users'))
