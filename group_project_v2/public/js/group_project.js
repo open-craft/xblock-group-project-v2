@@ -1,7 +1,7 @@
 function GroupProjectBlock(runtime, element) {
     const activate_project_nav_view_event = 'group_project_v2.project_navigator.activate_view';
 
-    var message_box = $('.message', element).appendTo($(document.body));
+    var message_box = $('.message', element);
     message_box.on('click', '.button, .close-box', function () {
         message_box.hide();
         message_box.find('.message_text').html("");

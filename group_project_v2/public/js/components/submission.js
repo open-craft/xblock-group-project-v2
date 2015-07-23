@@ -16,7 +16,8 @@ function GroupProjectSubmissionBlock(runtime, element) {
         $(document).trigger('group_project_v2.submission.upload_complete', uploadXHR);
     }
 
-    var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
+    // TODO: restore `parents` query when/if project navigator is rendered as a child of Group Project XBlock
+    var group_project_dom = $(".group-project-xblock-wrapper");
     var message_box = $(".message", group_project_dom);
     function show_message(msg, title, title_css_class) {
         message_box.find('.message_text').html(msg);
