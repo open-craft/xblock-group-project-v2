@@ -236,7 +236,8 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
 
     def submissions_view(self, context):
         fragment = Fragment()
-        render_context = {'submission': self, 'upload': self.upload, 'disabled': not self.stage.available_now}
+        uploading_allowed = self.stage.available_now and self.stage.is_group_member
+        render_context = {'submission': self, 'upload': self.upload, 'disabled': not uploading_allowed}
         render_context.update(context)
         fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/components/submission.js'))
