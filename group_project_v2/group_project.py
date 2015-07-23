@@ -92,6 +92,7 @@ class GroupProjectXBlock(
 
         return get_default_stage(default_stages)
 
+    @outsider_disallowed_protected_view
     def student_view(self, context):
         target_stage_id = context.get('activate_block_id', None)
         target_activity = self._get_activity_to_display(target_stage_id)
@@ -190,6 +191,10 @@ class GroupActivityXBlock(
             return self.id
 
     @property
+    def is_ta_graded(self):
+        return self.group_reviews_required_count == 0
+
+    @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return OrderedDict([
             (stage_type.CATEGORY, stage_type.STAGE_TYPE_NAME)
@@ -258,6 +263,7 @@ class GroupActivityXBlock(
 
         return fragment
 
+    @outsider_disallowed_protected_view
     def navigation_view(self, context):
         fragment = Fragment()
 
@@ -272,6 +278,7 @@ class GroupActivityXBlock(
 
         return fragment
 
+    @outsider_disallowed_protected_view
     def resources_view(self, context):
         fragment = Fragment()
 
@@ -288,6 +295,7 @@ class GroupActivityXBlock(
 
         return fragment
 
+    @outsider_disallowed_protected_view
     def submissions_view(self, context):
         fragment = Fragment()
 

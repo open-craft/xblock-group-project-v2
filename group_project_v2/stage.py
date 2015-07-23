@@ -435,6 +435,8 @@ class ReviewBaseStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
 
     STAGE_ACTION = _(u"save feedback")
 
+    TA_GRADING_NOT_ALLOWED = _(u"TA grading is not allowed for this grade")
+
     @property
     def allowed_nested_blocks(self):
         blocks = super(ReviewBaseStage, self).allowed_nested_blocks
@@ -520,6 +522,9 @@ class ReviewBaseStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
             return {'result': 'error', 'msg': reason.format(action=self.STAGE_ACTION)}
 
         try:
+            if self.is_admin_grader and not self.activity.is_ta_graded:
+                return {'result': 'error', 'msg': self.TA_GRADING_NOT_ALLOWED}
+
             self.do_submit_review(submissions)
 
             if self.is_group_member and self.review_status() == ReviewState.COMPLETED:
@@ -638,7 +643,7 @@ class GroupReviewStage(ReviewBaseStage):
         Returns groups to review. May throw `class`: OutsiderDisallowedError
         """
         if not self.is_group_member:
-            return self.workgroup
+            return [self.workgroup]
 
         try:
             return self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
