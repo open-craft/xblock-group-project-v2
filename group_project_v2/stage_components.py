@@ -263,6 +263,10 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
             response_data = {'result': 'error', 'message': template.format(action=self.stage.STAGE_ACTION)}
             failure_code = 422  # 422 = unprocessable entity
 
+        elif not self.stage.is_group_member:
+            response_data = {'result': 'error', 'message': _(u"Only group members can upload files")}
+            failure_code = 403  # 403 - forbidden
+
         else:
             target_activity = self.stage.activity
             response_data = {
