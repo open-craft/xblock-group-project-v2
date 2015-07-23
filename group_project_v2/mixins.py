@@ -92,12 +92,11 @@ class WorkgroupAwareXBlockMixin(object):
         return not self.is_group_member
 
     def _confirm_outsider_allowed(self):
-        granted_roles = [r["role"] for r in self.project_api.get_user_roles_for_course(self.user_id, self.course_id)]
-        for allowed_role in ALLOWED_OUTSIDER_ROLES:
-            if allowed_role in granted_roles:
-                return True
+        granted_roles = {r["role"] for r in self.project_api.get_user_roles_for_course(self.user_id, self.course_id)}
+        allowed_roles = set(ALLOWED_OUTSIDER_ROLES)
 
-        raise OutsiderDisallowedError("User does not have an allowed role")
+        if not (allowed_roles & granted_roles):
+            raise OutsiderDisallowedError("User does not have an allowed role")
 
     @lazy
     def workgroup(self):
