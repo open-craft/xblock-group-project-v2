@@ -648,7 +648,7 @@ class GroupProjectBaseAssessmentXBlock(
 
 
 class GroupProjectPeerAssessmentXBlock(
-    GroupProjectBaseAssessmentXBlock, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
+    GroupProjectBaseAssessmentXBlock, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
 ):
     CATEGORY = "gp-v2-peer-assessment"
 
@@ -663,7 +663,7 @@ class GroupProjectPeerAssessmentXBlock(
 
 
 class GroupProjectGroupAssessmentXBlock(
-    GroupProjectBaseAssessmentXBlock, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
+    GroupProjectBaseAssessmentXBlock, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
 ):
     CATEGORY = "gp-v2-group-assessment"
 

@@ -18,7 +18,7 @@ from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import (
     ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin,
     WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin,
-    XBlockWithUrlNameDisplayMixin
+    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin
 )
 from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
@@ -49,10 +49,10 @@ class ReviewState(object):
 
 
 class BaseGroupActivityStage(
-    XBlockWithPreviewMixin, XBlockWithComponentsMixin, ProjectAPIXBlockMixin, StageNotificationsMixin,
+    XBlockWithPreviewMixin, XBlockWithComponentsMixin, StageNotificationsMixin,
     XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
     ChildrenNavigationXBlockMixin, XBlockWithUrlNameDisplayMixin,
-    CourseAwareXBlockMixin, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin
+    WorkgroupAwareXBlockMixin, AdminAccessControlXBlockMixin
 ):
     display_name = String(
         display_name=_(u"Display Name"),
@@ -125,6 +125,10 @@ class BaseGroupActivityStage(
     @lazy
     def activity(self):
         return self.get_parent()
+
+    @property
+    def allow_admin_grader_access(self):
+        return False
 
     @property
     def content_id(self):
@@ -434,7 +438,7 @@ class SubmissionStage(BaseGroupActivityStage):
         )
 
 
-class ReviewBaseStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
+class ReviewBaseStage(BaseGroupActivityStage):
     NAVIGATION_LABEL = _(u'Task')
 
     js_file = "public/js/stages/review_stage.js"
@@ -645,6 +649,10 @@ class PeerReviewStage(ReviewBaseStage):
         return blocks
 
     @property
+    def allow_admin_grader_access(self):
+        return True
+
+    @property
     def review_groups(self):
         """
         Returns groups to review. May throw `class`: OutsiderDisallowedError
@@ -774,7 +782,7 @@ class EvaluationDisplayStage(FeedbackDisplayBaseStage):
         return self._get_children_by_category(GroupProjectPeerAssessmentXBlock.CATEGORY)
 
 
-class GradeDisplayStage(FeedbackDisplayBaseStage, WorkgroupAwareXBlockMixin):
+class GradeDisplayStage(FeedbackDisplayBaseStage):
     CATEGORY = 'gp-v2-stage-grade-display'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_assessment.html'
 

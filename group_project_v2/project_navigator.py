@@ -12,7 +12,7 @@ from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
 from group_project_v2.mixins import XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin, \
-    XBlockWithUrlNameDisplayMixin
+    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin
 
 from group_project_v2.utils import loader, gettext as _, NO_EDITABLE_SETTINGS
 
@@ -79,19 +79,21 @@ class GroupProjectNavigatorXBlock(
         fragment = Fragment()
         children_items = []
         for child_id in self.children:
-            child = self.runtime.get_block(child_id)
-            child_fragment = child.render('student_view', context)
+            view = self.runtime.get_block(child_id)
+            if not view.available_to_current_user:
+                continue
+            child_fragment = view.render('student_view', context)
 
             item = {
                 'id': str(child_id).replace("/", ";_"),
-                'type': child.type,
+                'type': view.type,
                 'content': child_fragment.content,
             }
 
             fragment.add_frag_resources(child_fragment)
 
-            if not child.skip_selector:
-                child_selector_fragment = child.selector_view(context)
+            if not view.skip_selector:
+                child_selector_fragment = view.selector_view(context)
                 item['selector'] = child_selector_fragment.content
                 fragment.add_frag_resources(child_selector_fragment)
             else:
@@ -154,7 +156,8 @@ class GroupProjectNavigatorXBlock(
 
 
 class ProjectNavigatorViewXBlockBase(
-    XBlock, XBlockWithPreviewMixin, StudioEditableXBlockMixin, XBlockWithUrlNameDisplayMixin
+    XBlock, XBlockWithPreviewMixin, StudioEditableXBlockMixin, XBlockWithUrlNameDisplayMixin,
+    AdminAccessControlXBlockMixin
 ):
     """
     Base class for Project Navigator children XBlocks (views)
@@ -163,6 +166,7 @@ class ProjectNavigatorViewXBlockBase(
     icon = None
     selector_text = None
     skip_selector = False
+    show_to_admin_grader = False
 
     TEMPLATE_BASE = "templates/html/project_navigator/"
     CSS_BASE = "public/css/project_navigator/"
@@ -186,6 +190,14 @@ class ProjectNavigatorViewXBlockBase(
     @property
     def course_id(self):
         return getattr(self.runtime, 'course_id', 'all')
+
+    @property
+    def allow_admin_grader_access(self):
+        return False
+
+    @property
+    def is_admin_grader(self):
+        return self.navigator.group_project.is_admin_grader
 
     @property
     def url_name_caption(self):
@@ -258,11 +270,16 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     icon = u"fa fa-bars"
     display_name_with_default = _(u"Navigation View")
     skip_selector = True
+    show_to_admin_grader = True
 
     template = "navigation_view.html"
     css_file = "navigation_view.css"
     js_file = "navigation_view.js"
     initialize_js_function = "GroupProjectNavigatorNavigationView"
+
+    @property
+    def allow_admin_grader_access(self):
+        return True
 
     def student_view(self, context):  # pylint: disable=unused-argument
         """

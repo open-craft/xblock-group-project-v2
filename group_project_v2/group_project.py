@@ -32,7 +32,6 @@ from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
     STAGE_TYPES)
-from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.api_error import ApiError
 
 
@@ -40,7 +39,7 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class GroupProjectXBlock(
-    XBlockWithComponentsMixin, ChildrenNavigationXBlockMixin,
+    XBlockWithComponentsMixin, ChildrenNavigationXBlockMixin, WorkgroupAwareXBlockMixin,
     XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin
 ):
     display_name = String(
@@ -77,7 +76,8 @@ class GroupProjectXBlock(
             usage_id = BlockUsageLocator.from_string(target_stage_id)
             if usage_id.block_type in STAGE_TYPES:
                 stage = self.runtime.get_block(usage_id)
-                return stage.activity
+                if stage.available_to_current_user:
+                    return stage.activity
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 
@@ -133,9 +133,9 @@ class GroupProjectXBlock(
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
 class GroupActivityXBlock(
-    XBlockWithPreviewMixin, XBlockWithComponentsMixin, ProjectAPIXBlockMixin, ActivityNotificationsMixin,
+    XBlockWithPreviewMixin, XBlockWithComponentsMixin, ActivityNotificationsMixin,
     XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-    ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin, WorkgroupAwareXBlockMixin
+    ChildrenNavigationXBlockMixin, WorkgroupAwareXBlockMixin
 ):
     """
     XBlock providing a group activity project for a group of students to collaborate upon
@@ -210,8 +210,14 @@ class GroupActivityXBlock(
         return self._children
 
     @property
+    def available_stages(self):
+        for stage in self.stages:
+            if stage.available_to_current_user:
+                yield stage
+
+    @property
     def default_stage(self):
-        return get_default_stage(self.stages)
+        return get_default_stage(self.available_stages)
 
     @property
     def questions(self):
@@ -229,7 +235,9 @@ class GroupActivityXBlock(
         try:
             usage_id = BlockUsageLocator.from_string(target_stage_id)
             if usage_id.block_type in STAGE_TYPES:
-                return self.runtime.get_block(usage_id)
+                stage = self.runtime.get_block(usage_id)
+                if stage.available_to_current_user:
+                    return stage
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 
@@ -268,8 +276,8 @@ class GroupActivityXBlock(
         fragment = Fragment()
 
         stage_contents = []
-        for child in self.stages:
-            child_fragment = child.render('navigation_view', context)
+        for stage in self.available_stages:
+            child_fragment = stage.render('navigation_view', context)
             fragment.add_frag_resources(child_fragment)
             stage_contents.append(child_fragment.content)
 

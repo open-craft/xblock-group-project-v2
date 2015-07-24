@@ -4,6 +4,7 @@ from xblock.exceptions import NoSuchViewError
 from xblock.fragment import Fragment
 
 from group_project_v2.api_error import ApiError
+from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.utils import (
     OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES, loader,
     outsider_disallowed_protected_view
@@ -76,7 +77,7 @@ class UserAwareXBlockMixin(object):
         return self._known_real_user_ids[anonymous_student_id]
 
 
-class WorkgroupAwareXBlockMixin(object):
+class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin, ProjectAPIXBlockMixin):
     """
     Gets current user workgroup. Should only be mixed to a class already having the following mixins:
     * UserAwareXBlockMixin
@@ -202,3 +203,13 @@ class XBlockWithUrlNameDisplayMixin(object):
             {'url_name': self.url_name, 'caption': caption}
         ))
         return fragment
+
+
+class AdminAccessControlXBlockMixin(object):
+    @property
+    def allow_admin_grader_access(self):
+        return False
+
+    @property
+    def available_to_current_user(self):
+        return self.allow_admin_grader_access or not self.is_admin_grader
