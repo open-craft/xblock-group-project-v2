@@ -2,7 +2,7 @@
 <li class="group-project-stage" data-stage-id="{{ stage.id }}">
   <span class="group-project-stage-state {{ stage_state }}"></span>
   {% if not stage.hide_stage_label %}
-    <span class="group-project-stage-type group-project-navigator-grey-text">{{ stage.STAGE_TYPE }}:</span>
+    <span class="group-project-stage-type group-project-navigator-grey-text">{{ stage.NAVIGATION_LABEL }}:</span>
   {% endif %}
   <span class="group-project-stage-title group-project-navigator-grey-text">
     <a href="{{ block_link }}" title="{{ stage.display_name }}" data-stage-id="{{ stage.id }}" data-activity-id="{{ activity_id }}">

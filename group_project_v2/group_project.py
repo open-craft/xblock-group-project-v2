@@ -197,7 +197,7 @@ class GroupActivityXBlock(
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return OrderedDict([
-            (stage_type.CATEGORY, stage_type.STAGE_TYPE_NAME)
+            (stage_type.CATEGORY, stage_type.STUDIO_LABEL)
             for stage_type in (
                 BasicStage, CompletionStage, SubmissionStage,
                 PeerReviewStage, GroupReviewStage,

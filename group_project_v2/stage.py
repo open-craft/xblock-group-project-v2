@@ -83,13 +83,14 @@ class BaseGroupActivityStage(
     editable_fields = ('display_name', 'open_date', 'close_date', 'hide_stage_label')
     has_children = True
     has_score = False  # TODO: Group project V1 are graded at activity level. Check if we need to follow that
+    submissions_stage = False
 
     CATEGORY = None
     STAGE_WRAPPER_TEMPLATE = 'templates/html/stages/stage_wrapper.html'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/default_view.html'
 
-    STAGE_TYPE = None
-    submissions_stage = False
+    NAVIGATION_LABEL = None
+    STUDIO_LABEL = _(u"Stage")
 
     js_file = None
     js_init = None
@@ -97,7 +98,6 @@ class BaseGroupActivityStage(
     STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as it's not yet opened")
     STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as it's closed")
     STAGE_URL_NAME_TEMPLATE = _(u"url_name to link to this {stage_name}:")
-    STAGE_TYPE_NAME = _(u"Stage")
 
     @property
     def id(self):
@@ -105,7 +105,7 @@ class BaseGroupActivityStage(
 
     @property
     def display_name_with_default(self):
-        return u"{type_name} - {stage_name}".format(type_name=self.STAGE_TYPE_NAME, stage_name=self.display_name)
+        return u"{type_name} - {stage_name}".format(type_name=self.STUDIO_LABEL, stage_name=self.display_name)
 
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
@@ -164,7 +164,7 @@ class BaseGroupActivityStage(
 
     @property
     def url_name_caption(self):
-        return self.STAGE_URL_NAME_TEMPLATE.format(stage_name=self.STAGE_TYPE_NAME)
+        return self.STAGE_URL_NAME_TEMPLATE.format(stage_name=self.STUDIO_LABEL)
 
     def _view_render(self, context, view='student_view'):
         stage_fragment = self.get_stage_content_fragment(context, view)
@@ -289,8 +289,8 @@ class BaseGroupActivityStage(
 class BasicStage(BaseGroupActivityStage):
     CATEGORY = 'gp-v2-stage-basic'
 
-    STAGE_TYPE = _(u'Overview')
-    STAGE_TYPE_NAME = _(u"Overview Stage")
+    NAVIGATION_LABEL = _(u'Overview')
+    STUDIO_LABEL = _(u"Overview Stage")
 
     def student_view(self, context):
         fragment = super(BasicStage, self).student_view(context)
@@ -310,8 +310,8 @@ class CompletionStage(BaseGroupActivityStage):
     CATEGORY = 'gp-v2-stage-completion'
     STAGE_CONTENT_TEMPLATE = "templates/html/stages/completion.html"
 
-    STAGE_TYPE = _(u'Task')
-    STAGE_TYPE_NAME = _(u"Completion Stage")
+    NAVIGATION_LABEL = _(u'Task')
+    STUDIO_LABEL = _(u"Completion Stage")
 
     js_file = "public/js/stages/completion.js"
     js_init = "GroupProjectCompletionStage"
@@ -348,8 +348,8 @@ class CompletionStage(BaseGroupActivityStage):
 class SubmissionStage(BaseGroupActivityStage):
     CATEGORY = 'gp-v2-stage-submission'
 
-    STAGE_TYPE = _(u'Task')
-    STAGE_TYPE_NAME = _(u"Submission Stage")
+    NAVIGATION_LABEL = _(u'Task')
+    STUDIO_LABEL = _(u"Submission Stage")
 
     submissions_stage = True
 
@@ -435,7 +435,7 @@ class SubmissionStage(BaseGroupActivityStage):
 
 
 class ReviewBaseStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
-    STAGE_TYPE = _(u'Task')
+    NAVIGATION_LABEL = _(u'Task')
 
     js_file = "public/js/stages/review_stage.js"
     js_init = "GroupProjectReviewStage"
@@ -554,7 +554,7 @@ class PeerReviewStage(ReviewBaseStage):
     CATEGORY = 'gp-v2-stage-peer-review'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
 
-    STAGE_TYPE_NAME = _(u"Peer Review Stage")
+    STUDIO_LABEL = _(u"Peer Review Stage")
 
     @property
     def allowed_nested_blocks(self):
@@ -634,7 +634,7 @@ class GroupReviewStage(ReviewBaseStage):
     CATEGORY = 'gp-v2-stage-group-review'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_review.html'
 
-    STAGE_TYPE_NAME = _(u"Group Review Stage")
+    STUDIO_LABEL = _(u"Group Review Stage")
 
     @property
     def allowed_nested_blocks(self):
@@ -729,7 +729,7 @@ class GroupReviewStage(ReviewBaseStage):
 
 
 class AssessmentBaseStage(BaseGroupActivityStage):
-    STAGE_TYPE = _(u'Review')
+    NAVIGATION_LABEL = _(u'Review')
 
     def validate(self):
         violations = super(AssessmentBaseStage, self).validate()
@@ -758,7 +758,7 @@ class PeerAssessmentStage(AssessmentBaseStage):
     CATEGORY = 'gp-v2-stage-peer-assessment'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_assessment.html'
 
-    STAGE_TYPE_NAME = _(u"Peer Assessment Stage")
+    STUDIO_LABEL = _(u"Peer Assessment Stage")
 
     type = u'Evaluation'
 
@@ -778,8 +778,8 @@ class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
     CATEGORY = 'gp-v2-stage-group-assessment'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_assessment.html'
 
-    STAGE_TYPE = _(u'Review')
-    STAGE_TYPE_NAME = _(u"Group Assessment Stage")
+    NAVIGATION_LABEL = _(u'Review')
+    STUDIO_LABEL = _(u"Group Assessment Stage")
 
     def allowed_nested_blocks(self):
         blocks = super(AssessmentBaseStage, self).allowed_nested_blocks
