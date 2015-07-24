@@ -22,8 +22,7 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
 from group_project_v2.mixins import (
-    ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin,
-    WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin
+    ChildrenNavigationXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin,
 )
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
@@ -73,11 +72,12 @@ class GroupProjectXBlock(
 
     def _get_activity_to_display(self, target_stage_id):
         try:
-            usage_id = BlockUsageLocator.from_string(target_stage_id)
-            if usage_id.block_type in STAGE_TYPES:
-                stage = self.runtime.get_block(usage_id)
-                if stage.available_to_current_user:
-                    return stage.activity
+            if target_stage_id:
+                usage_id = BlockUsageLocator.from_string(target_stage_id)
+                if usage_id.block_type in STAGE_TYPES:
+                    stage = self.runtime.get_block(usage_id)
+                    if stage.available_to_current_user:
+                        return stage.activity
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 
@@ -233,11 +233,12 @@ class GroupActivityXBlock(
 
     def _get_stage_to_display(self, target_stage_id):
         try:
-            usage_id = BlockUsageLocator.from_string(target_stage_id)
-            if usage_id.block_type in STAGE_TYPES:
-                stage = self.runtime.get_block(usage_id)
-                if stage.available_to_current_user:
-                    return stage
+            if target_stage_id:
+                usage_id = BlockUsageLocator.from_string(target_stage_id)
+                if usage_id.block_type in STAGE_TYPES:
+                    stage = self.runtime.get_block(usage_id)
+                    if stage.available_to_current_user:
+                        return stage
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 
@@ -251,7 +252,6 @@ class GroupActivityXBlock(
         """
         Player view, displayed to the student
         """
-
         fragment = Fragment()
 
         target_stage_id = context.get('activate_block_id', None)
@@ -276,10 +276,13 @@ class GroupActivityXBlock(
         fragment = Fragment()
 
         stage_contents = []
-        for stage in self.available_stages:
-            child_fragment = stage.render('navigation_view', context)
-            fragment.add_frag_resources(child_fragment)
-            stage_contents.append(child_fragment.content)
+        # if ta_graded we're still showing the activity in Project Navigator, but it should not contain any stages,
+        # even those allowing TA grading
+        if not self.is_admin_grader or self.is_ta_graded:
+            for stage in self.available_stages:
+                child_fragment = stage.render('navigation_view', context)
+                fragment.add_frag_resources(child_fragment)
+                stage_contents.append(child_fragment.content)
 
         context = {'activity': self, 'stage_contents': stage_contents}
         fragment.add_content(loader.render_template("templates/html/activity/navigation_view.html", context))
