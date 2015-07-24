@@ -73,7 +73,14 @@ class BaseGroupActivityStage(
         scope=Scope.settings
     )
 
-    editable_fields = ('display_name', 'open_date', 'close_date')
+    hide_stage_label = Boolean(
+        display_name=_(u"Hide stage type label"),
+        help=_(u"If true, hides stage type label in Project Navigator"),
+        scope=Scope.settings,
+        default=False
+    )
+
+    editable_fields = ('display_name', 'open_date', 'close_date', 'hide_stage_label')
     has_children = True
     has_score = False  # TODO: Group project V1 are graded at activity level. Check if we need to follow that
 
@@ -98,7 +105,7 @@ class BaseGroupActivityStage(
 
     @property
     def display_name_with_default(self):
-        return self.STAGE_TYPE_NAME
+        return u"{type_name} - {stage_name}".format(type_name=self.STAGE_TYPE_NAME, stage_name=self.display_name)
 
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
@@ -282,8 +289,8 @@ class BaseGroupActivityStage(
 class BasicStage(BaseGroupActivityStage):
     CATEGORY = 'gp-v2-stage-basic'
 
-    STAGE_TYPE = _(u'Text')
-    STAGE_TYPE_NAME = _(u"Text Stage")
+    STAGE_TYPE = _(u'Overview')
+    STAGE_TYPE_NAME = _(u"Overview Stage")
 
     def student_view(self, context):
         fragment = super(BasicStage, self).student_view(context)
@@ -303,7 +310,7 @@ class CompletionStage(BaseGroupActivityStage):
     CATEGORY = 'gp-v2-stage-completion'
     STAGE_CONTENT_TEMPLATE = "templates/html/stages/completion.html"
 
-    STAGE_TYPE = _(u'Completion')
+    STAGE_TYPE = _(u'Task')
     STAGE_TYPE_NAME = _(u"Completion Stage")
 
     js_file = "public/js/stages/completion.js"
@@ -428,7 +435,7 @@ class SubmissionStage(BaseGroupActivityStage):
 
 
 class ReviewBaseStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
-    STAGE_TYPE = _(u'Grade')
+    STAGE_TYPE = _(u'Task')
 
     js_file = "public/js/stages/review_stage.js"
     js_init = "GroupProjectReviewStage"
@@ -722,7 +729,7 @@ class GroupReviewStage(ReviewBaseStage):
 
 
 class AssessmentBaseStage(BaseGroupActivityStage):
-    STAGE_TYPE = _(u'Evaluation')
+    STAGE_TYPE = _(u'Review')
 
     def validate(self):
         violations = super(AssessmentBaseStage, self).validate()
@@ -771,7 +778,7 @@ class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
     CATEGORY = 'gp-v2-stage-group-assessment'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_assessment.html'
 
-    STAGE_TYPE = _(u'Grade')
+    STAGE_TYPE = _(u'Review')
     STAGE_TYPE_NAME = _(u"Group Assessment Stage")
 
     def allowed_nested_blocks(self):
