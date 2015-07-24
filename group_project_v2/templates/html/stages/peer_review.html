@@ -1,4 +1,8 @@
 {% load i18n %}
+{% if stage.is_admin_grader %}
+<div class="grading_override ta_graded">{% trans "Grading View" %}</div>
+{% endif %}
+
 <form class="review other_group_review" data-review-type="group_review" action="submit_review" method="POST">
   {% for child_content in children_contents %}{{ child_content|safe }}{% endfor %}
   <hr/>
