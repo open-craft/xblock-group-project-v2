@@ -255,7 +255,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     """
     CATEGORY = "gp-v2-navigator-navigation"
     type = ViewTypes.NAVIGATION
-    icon = u"fa-bars"
+    icon = u"fa fa-bars"
     display_name_with_default = _(u"Navigation View")
     skip_selector = True
 
@@ -283,7 +283,7 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     """
     CATEGORY = "gp-v2-navigator-resources"
     type = ViewTypes.RESOURCES
-    icon = u"fa-files-o"
+    icon = u"fa fa-files-o"
     display_name_with_default = _(u"Resources View")
 
     template = "resources_view.html"
@@ -312,7 +312,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     """
     CATEGORY = "gp-v2-navigator-submissions"
     type = ViewTypes.SUBMISSIONS
-    icon = u"fa-upload"
+    icon = u"fa fa-upload"
     display_name_with_default = _(u"Submissions View")
 
     template = "submissions_view.html"

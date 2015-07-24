@@ -272,7 +272,7 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
             target_activity = self.stage.activity
             response_data = {
                 "title": self.SUCCESSFUL_UPLOAD_TITLE,
-                "message": self.SUCCESSFUL_UPLOAD_MESSAGE_TPL.format(icon='fa-paperclip')
+                "message": self.SUCCESSFUL_UPLOAD_MESSAGE_TPL.format(icon='fa fa-paperclip')
             }
             failure_code = 0
             try:
