@@ -29,8 +29,8 @@ from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import loader, make_key, outsider_disallowed_protected_view, get_default_stage
 from group_project_v2.stage import (
-    BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage,
-    PeerAssessmentStage, GroupAssessmentStage, CompletionStage,
+    BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
+    EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
     STAGE_TYPES)
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.api_error import ApiError
@@ -200,8 +200,8 @@ class GroupActivityXBlock(
             (stage_type.CATEGORY, stage_type.STUDIO_LABEL)
             for stage_type in (
                 BasicStage, CompletionStage, SubmissionStage,
-                PeerReviewStage, GroupReviewStage,
-                PeerAssessmentStage, GroupAssessmentStage
+                TeamEvaluationStage, PeerReviewStage,
+                EvaluationDisplayStage, GradeDisplayStage
             )
         ])
 

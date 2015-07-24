@@ -290,7 +290,7 @@ class BasicStage(BaseGroupActivityStage):
     CATEGORY = 'gp-v2-stage-basic'
 
     NAVIGATION_LABEL = _(u'Overview')
-    STUDIO_LABEL = _(u"Overview Stage")
+    STUDIO_LABEL = _(u"Overview")
 
     def student_view(self, context):
         fragment = super(BasicStage, self).student_view(context)
@@ -311,7 +311,7 @@ class CompletionStage(BaseGroupActivityStage):
     STAGE_CONTENT_TEMPLATE = "templates/html/stages/completion.html"
 
     NAVIGATION_LABEL = _(u'Task')
-    STUDIO_LABEL = _(u"Completion Stage")
+    STUDIO_LABEL = _(u"Completion")
 
     js_file = "public/js/stages/completion.js"
     js_init = "GroupProjectCompletionStage"
@@ -349,7 +349,7 @@ class SubmissionStage(BaseGroupActivityStage):
     CATEGORY = 'gp-v2-stage-submission'
 
     NAVIGATION_LABEL = _(u'Task')
-    STUDIO_LABEL = _(u"Submission Stage")
+    STUDIO_LABEL = _(u"Deliverable")
 
     submissions_stage = True
 
@@ -550,15 +550,15 @@ class ReviewBaseStage(BaseGroupActivityStage, WorkgroupAwareXBlockMixin):
         pass
 
 
-class PeerReviewStage(ReviewBaseStage):
-    CATEGORY = 'gp-v2-stage-peer-review'
+class TeamEvaluationStage(ReviewBaseStage):
+    CATEGORY = 'gp-v2-stage-team-evaluation'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
 
-    STUDIO_LABEL = _(u"Peer Review Stage")
+    STUDIO_LABEL = _(u"Team Evaluation")
 
     @property
     def allowed_nested_blocks(self):
-        blocks = super(PeerReviewStage, self).allowed_nested_blocks
+        blocks = super(TeamEvaluationStage, self).allowed_nested_blocks
         blocks.update(OrderedDict([
             (PeerSelectorXBlock.CATEGORY, _(u"Teammate selector"))
         ]))
@@ -588,7 +588,7 @@ class PeerReviewStage(ReviewBaseStage):
         return self._check_review_status(peers_to_review, peer_review_items, "user")
 
     def validate(self):
-        violations = super(PeerReviewStage, self).validate()
+        violations = super(TeamEvaluationStage, self).validate()
 
         # Technically, nothing prevents us from allowing graded peer review questions. The only reason why
         # they are considered not supported is that GroupActivityXBlock.calculate_grade does not
@@ -630,15 +630,15 @@ class PeerReviewStage(ReviewBaseStage):
         )
 
 
-class GroupReviewStage(ReviewBaseStage):
-    CATEGORY = 'gp-v2-stage-group-review'
+class PeerReviewStage(ReviewBaseStage):
+    CATEGORY = 'gp-v2-stage-peer-review'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_review.html'
 
-    STUDIO_LABEL = _(u"Group Review Stage")
+    STUDIO_LABEL = _(u"Peer Grading")
 
     @property
     def allowed_nested_blocks(self):
-        blocks = super(GroupReviewStage, self).allowed_nested_blocks
+        blocks = super(PeerReviewStage, self).allowed_nested_blocks
         blocks.update(OrderedDict([
             (GroupSelectorXBlock.CATEGORY, _(u"Group selector"))
         ]))
@@ -728,11 +728,11 @@ class GroupReviewStage(ReviewBaseStage):
         self.activity.calculate_and_send_grade(group_id)
 
 
-class AssessmentBaseStage(BaseGroupActivityStage):
+class FeedbackDisplayBaseStage(BaseGroupActivityStage):
     NAVIGATION_LABEL = _(u'Review')
 
     def validate(self):
-        violations = super(AssessmentBaseStage, self).validate()
+        violations = super(FeedbackDisplayBaseStage, self).validate()
 
         if not self.assessments:
             violations.add(ValidationMessage(
@@ -745,7 +745,7 @@ class AssessmentBaseStage(BaseGroupActivityStage):
         return violations
 
     def student_view(self, context):
-        fragment = super(AssessmentBaseStage, self).student_view(context)
+        fragment = super(FeedbackDisplayBaseStage, self).student_view(context)
 
         # TODO: should probably check for all reviews to be ready
         if self.available_now and not self.is_admin_grader:
@@ -754,16 +754,16 @@ class AssessmentBaseStage(BaseGroupActivityStage):
         return fragment
 
 
-class PeerAssessmentStage(AssessmentBaseStage):
-    CATEGORY = 'gp-v2-stage-peer-assessment'
+class EvaluationDisplayStage(FeedbackDisplayBaseStage):
+    CATEGORY = 'gp-v2-stage-evaluation-display'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_assessment.html'
 
-    STUDIO_LABEL = _(u"Peer Assessment Stage")
+    STUDIO_LABEL = _(u"Evaluation Display")
 
     type = u'Evaluation'
 
     def allowed_nested_blocks(self):
-        blocks = super(AssessmentBaseStage, self).allowed_nested_blocks
+        blocks = super(FeedbackDisplayBaseStage, self).allowed_nested_blocks
         blocks.update(OrderedDict([
             (GroupProjectPeerAssessmentXBlock.CATEGORY, _(u"Review Assessment"))
         ]))
@@ -774,15 +774,14 @@ class PeerAssessmentStage(AssessmentBaseStage):
         return self._get_children_by_category(GroupProjectPeerAssessmentXBlock.CATEGORY)
 
 
-class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
-    CATEGORY = 'gp-v2-stage-group-assessment'
+class GradeDisplayStage(FeedbackDisplayBaseStage, WorkgroupAwareXBlockMixin):
+    CATEGORY = 'gp-v2-stage-grade-display'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_assessment.html'
 
-    NAVIGATION_LABEL = _(u'Review')
-    STUDIO_LABEL = _(u"Group Assessment Stage")
+    STUDIO_LABEL = _(u"Grade Display")
 
     def allowed_nested_blocks(self):
-        blocks = super(AssessmentBaseStage, self).allowed_nested_blocks
+        blocks = super(FeedbackDisplayBaseStage, self).allowed_nested_blocks
         blocks.update(OrderedDict([
             (GroupProjectGroupAssessmentXBlock.CATEGORY, _(u"Review Assessment"))
         ]))
@@ -798,15 +797,15 @@ class GroupAssessmentStage(AssessmentBaseStage, WorkgroupAwareXBlockMixin):
             'final_grade': final_grade if final_grade is not None else _(u"N/A")
         }
         context_extension.update(context)
-        return super(GroupAssessmentStage, self).get_stage_content_fragment(context_extension, view)
+        return super(GradeDisplayStage, self).get_stage_content_fragment(context_extension, view)
 
 
 STAGE_TYPES = (
     BasicStage.CATEGORY,
     CompletionStage.CATEGORY,
     SubmissionStage.CATEGORY,
+    TeamEvaluationStage.CATEGORY,
     PeerReviewStage.CATEGORY,
-    GroupReviewStage.CATEGORY,
-    PeerAssessmentStage.CATEGORY,
-    GroupAssessmentStage.CATEGORY
+    EvaluationDisplayStage.CATEGORY,
+    GradeDisplayStage.CATEGORY
 )

@@ -26,10 +26,10 @@ BLOCKS = [
     'gp-v2-stage-basic = group_project_v2.stage:BasicStage',
     'gp-v2-stage-completion = group_project_v2.stage:CompletionStage',
     'gp-v2-stage-submission = group_project_v2.stage:SubmissionStage',
+    'gp-v2-stage-team-evaluation = group_project_v2.stage:TeamEvaluationStage',
     'gp-v2-stage-peer-review = group_project_v2.stage:PeerReviewStage',
-    'gp-v2-stage-group-review = group_project_v2.stage:GroupReviewStage',
-    'gp-v2-stage-peer-assessment = group_project_v2.stage:PeerAssessmentStage',
-    'gp-v2-stage-group-assessment = group_project_v2.stage:GroupAssessmentStage',
+    'gp-v2-stage-evaluation-display = group_project_v2.stage:EvaluationDisplayStage',
+    'gp-v2-stage-grade-display = group_project_v2.stage:GradeDisplayStage',
 
     'gp-v2-resource = group_project_v2.stage_components:GroupProjectResourceXBlock',
     'gp-v2-video-resource = group_project_v2.stage_components:GroupProjectVideoResourceXBlock',
@@ -54,7 +54,7 @@ BLOCKS = [
 
 setup(
     name='xblock-group-project-v2',
-    version='0.2',
+    version='0.3',
     description='XBlock - Group Project V2',
     packages=['group_project_v2'],
     install_requires=[
