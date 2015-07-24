@@ -79,10 +79,7 @@ class UserAwareXBlockMixin(object):
 
 class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin, ProjectAPIXBlockMixin):
     """
-    Gets current user workgroup. Should only be mixed to a class already having the following mixins:
-    * UserAwareXBlockMixin
-    * CourseAwareXBlockMixin
-    * ProjectAPIXBlockMixin
+    Gets current user workgroup, respecting TA review
     """
     @property
     def is_group_member(self):
