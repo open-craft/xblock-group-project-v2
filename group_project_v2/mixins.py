@@ -4,7 +4,11 @@ from xblock.exceptions import NoSuchViewError
 from xblock.fragment import Fragment
 
 from group_project_v2.api_error import ApiError
-from group_project_v2.utils import OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES, loader
+from group_project_v2.project_api import ProjectAPIXBlockMixin
+from group_project_v2.utils import (
+    OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES, loader,
+    outsider_disallowed_protected_view
+)
 
 log = logging.getLogger(__name__)
 
@@ -12,10 +16,18 @@ log = logging.getLogger(__name__)
 class ChildrenNavigationXBlockMixin(object):
     @lazy
     def _children(self):
-        return [self.runtime.get_block(child_id) for child_id in self.children]
+        children = (self.runtime.get_block(child_id) for child_id in self.children)
+        return [child for child in children if child is not None]
 
-    def _get_children_by_category(self, child_category):
-        return [child for child in self._children if child.category == child_category]
+    def _get_children_by_category(self, *child_categories):
+        return [child for child in self._children if child.category in child_categories]
+
+    def get_child_of_category(self, child_category):
+        candidates = [child for child in self._children if child.category == child_category]
+        if candidates:
+            return candidates[0]
+        else:
+            return None
 
     def has_child_of_category(self, child_category):
         return any(child.block_type == child_category for child in self.children)
@@ -65,20 +77,24 @@ class UserAwareXBlockMixin(object):
         return self._known_real_user_ids[anonymous_student_id]
 
 
-class WorkgroupAwareXBlockMixin(object):
+class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin, ProjectAPIXBlockMixin):
     """
-    Gets current user workgroup. Should only be mixed to a class already having the following mixins:
-    * UserAwareXBlockMixin
-    * CourseAwareXBlockMixin
-    * ProjectAPIXBlockMixin
+    Gets current user workgroup, respecting TA review
     """
-    def _confirm_outsider_allowed(self):
-        granted_roles = [r["role"] for r in self.project_api.get_user_roles_for_course(self.user_id, self.course_id)]
-        for allowed_role in ALLOWED_OUTSIDER_ROLES:
-            if allowed_role in granted_roles:
-                return True
+    @property
+    def is_group_member(self):
+        return self.user_id in [u["id"] for u in self.workgroup["users"]]
 
-        raise OutsiderDisallowedError("User does not have an allowed role")
+    @property
+    def is_admin_grader(self):
+        return not self.is_group_member
+
+    def _confirm_outsider_allowed(self):
+        granted_roles = {r["role"] for r in self.project_api.get_user_roles_for_course(self.user_id, self.course_id)}
+        allowed_roles = set(ALLOWED_OUTSIDER_ROLES)
+
+        if not (allowed_roles & granted_roles):
+            raise OutsiderDisallowedError("User does not have an allowed role")
 
     @lazy
     def workgroup(self):
@@ -109,6 +125,7 @@ class XBlockWithComponentsMixin(object):
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return None
 
+    @outsider_disallowed_protected_view
     def author_edit_view(self, context):
         """
         Add some HTML to the author view that allows authors to add child blocks.
@@ -123,6 +140,7 @@ class XBlockWithComponentsMixin(object):
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
         return fragment
 
+    @outsider_disallowed_protected_view
     def author_preview_view(self, context):
         children_contents = []
 
@@ -161,3 +179,34 @@ class XBlockWithPreviewMixin(object):
         view_to_render = 'author_view' if hasattr(self, 'author_view') else 'student_view'
         renderer = getattr(self, view_to_render)
         return renderer(context)
+
+
+class XBlockWithUrlNameDisplayMixin(object):
+    @property
+    def url_name(self):
+        """
+        Get the url_name for this block. In Studio/LMS it is provided by a mixin, so we just
+        defer to super(). In the workbench or any other platform, we use the usage_id.
+        """
+        try:
+            return super(XBlockWithUrlNameDisplayMixin, self).url_name
+        except AttributeError:
+            return unicode(self.scope_ids.usage_id)
+
+    def get_url_name_fragment(self, caption):
+        fragment = Fragment()
+        fragment.add_content(loader.render_template(
+            "templates/html/url_name.html",
+            {'url_name': self.url_name, 'caption': caption}
+        ))
+        return fragment
+
+
+class AdminAccessControlXBlockMixin(object):
+    @property
+    def allow_admin_grader_access(self):  # pylint: disable=no-self-use
+        return False
+
+    @property
+    def available_to_current_user(self):
+        return self.allow_admin_grader_access or not self.is_admin_grader

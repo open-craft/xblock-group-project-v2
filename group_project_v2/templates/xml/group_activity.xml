@@ -1,5 +1,0 @@
-<group_project schema_version='1'>
-  {% for activity_stage in group_activity.activity_stages %}
-    {{ activity_stage.export_xml }}
-  {% endfor %}
-</group_project>

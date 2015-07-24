@@ -6,18 +6,22 @@
 
   <div>
     {% if demo %}<div>{% trans "Demo contents" %}</div>{% endif %}
-    <ul class="groups review_subjects">
-      {% for group in groups %}
-      <li class="select_group {% cycle 'odd' 'even' %}" data-id="{{ group.id }}">
-        {% comment %}
-          FIXME: Slightly not a11y friendly: if language have different rules for writing up index numbers.
-          Should be something more like _("Group {index_number}:").format(index_number=number)
-        {% endcomment %}
-        <span class="review_subject_label">{% trans "Group" %} {{ forloop.counter }}:</span>
-        <span class="review_evaluating_now">{% trans "Evaluating below" %}</span>
-        <div class="other_submissions"><a href="#" class="view_other_submissions">View team submissions</a></div>
-      </li>
-      {% endfor %}
-    </ul>
+    {% if groups %}
+      <ul class="groups review_subjects">
+        {% for group in groups %}
+        <li class="select_group {% cycle 'odd' 'even' %}" data-id="{{ group.id }}">
+          {% comment %}
+            FIXME: Slightly not a11y friendly: if language have different rules for writing up index numbers.
+            Should be something more like _("Group {index_number}:").format(index_number=number)
+          {% endcomment %}
+          <span class="review_subject_label">{% trans "Group" %} {{ forloop.counter }}:</span>
+          <span class="review_evaluating_now">{% trans "Evaluating below" %}</span>
+          <div class="other_submissions"><a href="#" class="view_other_submissions">View team submissions</a></div>
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="group-project-review-selector-no-review-subjects">{% trans "No groups assigned for review" %}</div>
+    {% endif %}
   </div>
 </div>

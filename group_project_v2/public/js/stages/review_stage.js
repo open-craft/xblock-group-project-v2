@@ -1,8 +1,7 @@
-function ReviewStageXBlock(runtime, element) {
+function GroupProjectReviewStage(runtime, element) {
     // Set up gettext in case it isn't available in the client runtime:
     if (typeof gettext == "undefined") {
         window.gettext = function gettext_stub(string) { return string; };
-        window.ngettext = function ngettext_stub(strA, strB, n) { return n == 1 ? strA : strB; };
     }
 
     var DATA_PRESENT_SUBMIT = gettext('Resubmit');
@@ -13,7 +12,8 @@ function ReviewStageXBlock(runtime, element) {
 
     var $form = $("form.review",  element);
     var is_peer_review = $form.data('review-type') == 'peer_review';
-    var message_box = $(".message"); // searching globally - not a typo: message box is created at group project level
+    var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
+    var message_box = $(".message", group_project_dom);
 
     function show_message(msg) {
         message_box.find('.message_text').html(msg);
@@ -153,6 +153,16 @@ function ReviewStageXBlock(runtime, element) {
             success: function (data) {
                 var msg = (data.msg) ? data.msg : gettext('Thanks for your feedback!');
                 show_message(msg);
+
+                if (data.new_stage_states) {
+                    for (var i=0; i<data.new_stage_states.length; i++) {
+                        var new_state = data.new_stage_states[i];
+                        $(document).trigger(
+                            "group_project_v2.project_navigator.stage_status_update",
+                            [new_state.activity_id, new_state.stage_id, new_state.state]
+                        );
+                    }
+                }
             },
             error: function (data) {
                 show_message(gettext('We encountered an error saving your feedback.'));
@@ -190,4 +200,10 @@ function ReviewStageXBlock(runtime, element) {
     $('.close_review_dialog', review_submissions_dialog).on('click', function () {
         review_submissions_dialog.hide();
     });
+
+    if ($('.select_peer.selected,.select_group.selected', element).length === 0) {
+        $form.find('.editable').attr('disabled', 'disabled');
+        $form.find('.answer').val(null);
+        $form.find('button.submit').attr('disabled', 'disabled');
+    }
 }

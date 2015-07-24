@@ -1,6 +1,6 @@
 {% load i18n %}
 <div class="feedback_stage group_assessment">
-  {{ children_content|safe }}
+  {% for child_content in children_contents %}{{ child_content|safe }}{% endfor %}
 </div>
 
 <hr/>

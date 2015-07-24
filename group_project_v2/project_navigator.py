@@ -3,12 +3,16 @@ This module contains Project Navigator XBlock and it's children view XBlocks
 """
 import logging
 from lazy.lazy import lazy
+from opaque_keys import InvalidKeyError
+from opaque_keys.edx.locator import BlockUsageLocator
 from xblock.core import XBlock
+from xblock.exceptions import NoSuchUsage
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
-from group_project_v2.mixins import XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin
+from group_project_v2.mixins import XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin, \
+    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin
 
 from group_project_v2.utils import loader, gettext as _, NO_EDITABLE_SETTINGS
 
@@ -32,7 +36,7 @@ class GroupProjectNavigatorXBlock(
     XBlock that provides basic layout and switching between children XBlocks (views)
     Should only be added as a child to GroupProjectXBlock
     """
-    CATEGORY = 'group-project-v2-navigator'
+    CATEGORY = "gp-v2-navigator"
     INITIAL_VIEW = ViewTypes.NAVIGATION
 
     display_name_with_default = _(u"Group Project Navigator")
@@ -51,11 +55,22 @@ class GroupProjectNavigatorXBlock(
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return {
-            "group-project-v2-navigator-navigation": _(u"Navigation View"),
-            "group-project-v2-navigator-resources": _(u"Resources View"),
-            "group-project-v2-navigator-submissions": _(u"Submissions View"),
-            "group-project-v2-navigator-ask-ta": _(u"Ask a TA View"),
+            NavigationViewXBlock.CATEGORY: _(u"Navigation View"),
+            ResourcesViewXBlock.CATEGORY: _(u"Resources View"),
+            SubmissionsViewXBlock.CATEGORY: _(u"Submissions View"),
+            AskTAViewXBlock.CATEGORY: _(u"Ask a TA View"),
         }
+
+    def _get_activated_view_type(self, activate_block_id):
+        try:
+            usage_id = BlockUsageLocator.from_string(activate_block_id)
+            if usage_id.block_type in PROJECT_NAVIGATOR_VIEW_TYPES:
+                block = self.runtime.get_block(usage_id)
+                return block.type
+        except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
+            log.exception(exc)
+
+        return ViewTypes.NAVIGATION
 
     def student_view(self, context):
         """
@@ -64,24 +79,31 @@ class GroupProjectNavigatorXBlock(
         fragment = Fragment()
         children_items = []
         for child_id in self.children:
-            child = self.runtime.get_block(child_id)
-            child_fragment = child.render('student_view', context)
+            view = self.runtime.get_block(child_id)
+            if not view.available_to_current_user:
+                continue
+            child_fragment = view.render('student_view', context)
 
             item = {
-                'type': child.type,
+                'id': str(child_id).replace("/", ";_"),
+                'type': view.type,
                 'content': child_fragment.content,
             }
 
             fragment.add_frag_resources(child_fragment)
 
-            if not child.skip_selector:
-                child_selector_fragment = child.selector_view(context)
+            if not view.skip_selector:
+                child_selector_fragment = view.selector_view(context)
                 item['selector'] = child_selector_fragment.content
                 fragment.add_frag_resources(child_selector_fragment)
             else:
                 item['selector'] = ''
 
             children_items.append(item)
+
+        js_parameters = {
+            'selected_view': self._get_activated_view_type(context.get('activate_block_id', None))
+        }
 
         fragment.add_content(
             loader.render_template(
@@ -90,18 +112,35 @@ class GroupProjectNavigatorXBlock(
             )
         )
         fragment.add_css_url(self.runtime.local_resource_url(
-            self.group_project, 'public/css/project_navigator/project_navigator.css'
+            self, 'public/css/project_navigator/project_navigator.css'
         ))
         fragment.add_javascript_url(self.runtime.local_resource_url(
-            self.group_project, 'public/js/project_navigator/project_navigator.js'
+            self, 'public/js/project_navigator/project_navigator.js'
         ))
-        fragment.initialize_js("GroupProjectNavigatorBlock")
+        fragment.initialize_js("GroupProjectNavigatorBlock", js_parameters)
 
         return fragment
 
     def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
         fragment = Fragment()
         fragment.add_content(NO_EDITABLE_SETTINGS)
+        return fragment
+
+    def author_preview_view(self, context):  # pylint: disable=unused-argument, no-self-use
+        fragment = Fragment()
+        children_contents = []
+        for child in self._children:
+            child_fragment = child.render('preview_view', context)
+            fragment.add_frag_resources(child_fragment)
+            children_contents.append(child_fragment.content)
+
+        fragment.add_content(loader.render_template(
+            "templates/html/project_navigator/project_navigator_author_view.html",
+            {'navigator': self, 'children_contents': children_contents}
+        ))
+        fragment.add_css_url(self.runtime.local_resource_url(
+            self, 'public/css/project_navigator/project_navigator.css'
+        ))
         return fragment
 
     def validate(self):
@@ -116,7 +155,10 @@ class GroupProjectNavigatorXBlock(
         return validation
 
 
-class ProjectNavigatorViewXBlockBase(XBlock, XBlockWithPreviewMixin, StudioEditableXBlockMixin):
+class ProjectNavigatorViewXBlockBase(
+    XBlock, XBlockWithPreviewMixin, StudioEditableXBlockMixin, XBlockWithUrlNameDisplayMixin,
+    AdminAccessControlXBlockMixin
+):
     """
     Base class for Project Navigator children XBlocks (views)
     """
@@ -124,6 +166,7 @@ class ProjectNavigatorViewXBlockBase(XBlock, XBlockWithPreviewMixin, StudioEdita
     icon = None
     selector_text = None
     skip_selector = False
+    show_to_admin_grader = False
 
     TEMPLATE_BASE = "templates/html/project_navigator/"
     CSS_BASE = "public/css/project_navigator/"
@@ -147,6 +190,20 @@ class ProjectNavigatorViewXBlockBase(XBlock, XBlockWithPreviewMixin, StudioEdita
     @property
     def course_id(self):
         return getattr(self.runtime, 'course_id', 'all')
+
+    @property
+    def allow_admin_grader_access(self):
+        return False
+
+    @property
+    def is_admin_grader(self):
+        return self.navigator.group_project.is_admin_grader
+
+    @property
+    def url_name_caption(self):
+        return _(u"url_name to link to this {project_navigator_view}:").format(
+            project_navigator_view=self.display_name_with_default
+        )
 
     def render_student_view(self, context, add_resources_from=None):
         """
@@ -181,9 +238,11 @@ class ProjectNavigatorViewXBlockBase(XBlock, XBlockWithPreviewMixin, StudioEdita
         """
         Studio Preview view
         """
-        # Can't use student view as it they usually result in sending some requests to api - this is costly and often
-        # crash entire XBlock in studio due to 404 response codes
-        return Fragment()
+        fragment = Fragment(self.display_name_with_default)
+        url_name_fragment = self.get_url_name_fragment(self.url_name_caption)
+        fragment.add_content(url_name_fragment.content)
+        fragment.add_frag_resources(url_name_fragment)
+        return fragment
 
     def selector_view(self, context):  # pylint: disable=unused-argument
         """
@@ -206,16 +265,21 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     Navigation View XBlock - displays Group Project Activities and Stages, completion state and links to navigate to
     any stage in Group Project
     """
-    CATEGORY = 'group-project-v2-navigator-navigation'
+    CATEGORY = "gp-v2-navigator-navigation"
     type = ViewTypes.NAVIGATION
-    icon = u"fa-bars"
-    display_name_with_default = _(u"Navigation")
+    icon = u"fa fa-bars"
+    display_name_with_default = _(u"Navigation View")
     skip_selector = True
+    show_to_admin_grader = True
 
     template = "navigation_view.html"
     css_file = "navigation_view.css"
     js_file = "navigation_view.js"
     initialize_js_function = "GroupProjectNavigatorNavigationView"
+
+    @property
+    def allow_admin_grader_access(self):
+        return True
 
     def student_view(self, context):  # pylint: disable=unused-argument
         """
@@ -234,9 +298,10 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     """
     Resources view XBlock - displays Resources links grouped by Activity
     """
+    CATEGORY = "gp-v2-navigator-resources"
     type = ViewTypes.RESOURCES
-    icon = u"fa-files-o"
-    display_name_with_default = _(u"Resources")
+    icon = u"fa fa-files-o"
+    display_name_with_default = _(u"Resources View")
 
     template = "resources_view.html"
     css_file = "resources_view.css"
@@ -262,9 +327,10 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     Submissions View - displays submissions grouped by Activity. Allows uploading new files and downloading
     earlier uploads
     """
+    CATEGORY = "gp-v2-navigator-submissions"
     type = ViewTypes.SUBMISSIONS
-    icon = u"fa-upload"
-    display_name_with_default = _(u"Submissions")
+    icon = u"fa fa-upload"
+    display_name_with_default = _(u"Submissions View")
 
     template = "submissions_view.html"
     css_file = "submissions_view.css"
@@ -294,9 +360,10 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     """
     Ask a TA view - displays  a form to send message to Teaching Assistant
     """
+    CATEGORY = "gp-v2-navigator-ask-ta"
     type = ViewTypes.ASK_TA
     selector_text = u"TA"
-    display_name_with_default = _(u"Ask a TA")
+    display_name_with_default = _(u"Ask a TA View")
 
     template = "ask_ta_view.html"
     css_file = "ask_ta_view.css"
@@ -310,3 +377,11 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
         img_url = self.runtime.local_resource_url(self.navigator.group_project, "public/img/ask_ta.png")
         context = {'view': self, 'course_id': self.course_id, 'img_url': img_url}
         return self.render_student_view(context)
+
+
+PROJECT_NAVIGATOR_VIEW_TYPES = (
+    NavigationViewXBlock.CATEGORY,
+    ResourcesViewXBlock.CATEGORY,
+    SubmissionsViewXBlock.CATEGORY,
+    AskTAViewXBlock.CATEGORY
+)

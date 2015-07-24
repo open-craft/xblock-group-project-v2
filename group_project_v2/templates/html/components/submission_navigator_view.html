@@ -11,9 +11,9 @@
     />
   </div>
   <label for="{{ submission.upload_id }}">
-    <span class="side button tiny radius {{ submission.upload_id }}_label fa-paperclip"></span>
+    <span class="side button tiny radius {{ submission.upload_id }}_label fa fa-paperclip" {% if disabled %} disabled="disabled"{% endif %}></span>
   </label>
-  <input style="display:none;" class="file_upload" name="{{ submission.upload_id }}" id="{{ submission.upload_id }}" type="file" />
+  <input style="display:none;" class="file_upload" name="{{ submission.upload_id }}" id="{{ submission.upload_id }}" type="file" {% if disabled %} disabled="disabled"{% endif %}/>
   {% if submission.description %}
     <div class="description">{{ submission.description }}</div>
   {% endif %}

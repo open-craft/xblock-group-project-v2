@@ -5,3 +5,15 @@
     height: 30px;
     line-height: 30px;
 }
+
+/* urls for linking to stages/PN views */
+.xblock[data-block-type] .url-name-footer,
+.xblock[data-block-type] .url-name-footer {
+  font-style: italic;
+}
+
+.xblock[data-block-type] .url-name-footer .url-name,
+.xblock[data-block-type] .url-name-footer .url-name {
+  margin: 0 10px;
+  font-family: monospace;
+}
