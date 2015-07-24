@@ -557,7 +557,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
 class TeamEvaluationStage(ReviewBaseStage):
     CATEGORY = 'gp-v2-stage-team-evaluation'
-    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
+    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/team_evaluation.html'
 
     STUDIO_LABEL = _(u"Team Evaluation")
 
@@ -637,7 +637,7 @@ class TeamEvaluationStage(ReviewBaseStage):
 
 class PeerReviewStage(ReviewBaseStage):
     CATEGORY = 'gp-v2-stage-peer-review'
-    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_review.html'
+    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
 
     STUDIO_LABEL = _(u"Peer Grading")
 
@@ -765,7 +765,7 @@ class FeedbackDisplayBaseStage(BaseGroupActivityStage):
 
 class EvaluationDisplayStage(FeedbackDisplayBaseStage):
     CATEGORY = 'gp-v2-stage-evaluation-display'
-    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_assessment.html'
+    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/evaluation_display.html'
 
     STUDIO_LABEL = _(u"Evaluation Display")
 
@@ -785,7 +785,7 @@ class EvaluationDisplayStage(FeedbackDisplayBaseStage):
 
 class GradeDisplayStage(FeedbackDisplayBaseStage):
     CATEGORY = 'gp-v2-stage-grade-display'
-    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/group_assessment.html'
+    STAGE_CONTENT_TEMPLATE = 'templates/html/stages/grade_display.html'
 
     STUDIO_LABEL = _(u"Grade Display")
 
