@@ -16,7 +16,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContain
 
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import (
-    ChildrenNavigationXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin,
+    ChildrenNavigationXBlockMixin,
     WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin,
     XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin
 )
@@ -27,7 +27,6 @@ from group_project_v2.stage_components import (
     GroupProjectResourceXBlock, GroupProjectSubmissionXBlock, SubmissionsStaticContentXBlock,
     GradeRubricStaticContentXBlock, GroupProjectVideoResourceXBlock
 )
-from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.utils import (
     loader, format_date, gettext as _, make_key, outsider_disallowed_protected_view,
     outsider_disallowed_protected_handler, key_error_protected_handler,

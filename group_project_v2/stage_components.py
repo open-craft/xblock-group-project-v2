@@ -13,7 +13,7 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import UserAwareXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
+from group_project_v2.mixins import WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
@@ -561,7 +561,7 @@ class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin, XBlock
 
 
 class GroupProjectBaseAssessmentXBlock(
-    XBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin
+    XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin, WorkgroupAwareXBlockMixin
 ):
     question_id = String(
         display_name=_(u"Question"),
@@ -647,9 +647,7 @@ class GroupProjectBaseAssessmentXBlock(
         return fragment
 
 
-class GroupProjectPeerAssessmentXBlock(
-    GroupProjectBaseAssessmentXBlock, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
-):
+class GroupProjectPeerAssessmentXBlock(GroupProjectBaseAssessmentXBlock):
     CATEGORY = "gp-v2-peer-assessment"
 
     def get_feedback(self):
@@ -662,9 +660,7 @@ class GroupProjectPeerAssessmentXBlock(
         return [item for item in all_feedback if item["question"] == self.question_id]
 
 
-class GroupProjectGroupAssessmentXBlock(
-    GroupProjectBaseAssessmentXBlock, WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
-):
+class GroupProjectGroupAssessmentXBlock(GroupProjectBaseAssessmentXBlock):
     CATEGORY = "gp-v2-group-assessment"
 
     def get_feedback(self):

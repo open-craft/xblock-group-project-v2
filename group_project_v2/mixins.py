@@ -204,7 +204,7 @@ class XBlockWithUrlNameDisplayMixin(object):
 
 class AdminAccessControlXBlockMixin(object):
     @property
-    def allow_admin_grader_access(self):
+    def allow_admin_grader_access(self):  # pylint: disable=no-self-use
         return False
 
     @property
