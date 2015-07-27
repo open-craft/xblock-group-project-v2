@@ -98,6 +98,8 @@ class BaseGroupActivityStage(
     STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as it's closed")
     STAGE_URL_NAME_TEMPLATE = _(u"url_name to link to this {stage_name}:")
 
+    CURRENT_STAGE_ID_PARAMETER_NAME = 'current_stage_id'
+
     @property
     def id(self):
         return self.scope_ids.usage_id
@@ -168,6 +170,9 @@ class BaseGroupActivityStage(
     @property
     def url_name_caption(self):
         return self.STAGE_URL_NAME_TEMPLATE.format(stage_name=self.STUDIO_LABEL)
+
+    def is_current_stage(self, context):
+        return context.get(self.CURRENT_STAGE_ID_PARAMETER_NAME, None) == str(self.id)
 
     def _view_render(self, context, view='student_view'):
         stage_fragment = self.get_stage_content_fragment(context, view)
@@ -261,7 +266,8 @@ class BaseGroupActivityStage(
             'stage': self,
             'activity_id': self.activity.id,
             'stage_state': self.get_stage_state(),
-            'block_link': get_link_to_block(self)
+            'block_link': get_link_to_block(self),
+            'is_current_stage': self.is_current_stage(context)
         }
         rendering_context.update(context)
         fragment.add_content(loader.render_template("templates/html/stages/navigation_view.html", rendering_context))

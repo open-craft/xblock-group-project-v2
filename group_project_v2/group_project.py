@@ -275,9 +275,15 @@ class GroupActivityXBlock(
     def navigation_view(self, context):
         fragment = Fragment()
 
+        children_context = {}
+        if context.get('activate_block_id', None):
+            children_context[BasicStage.CURRENT_STAGE_ID_PARAMETER_NAME] = context.get('activate_block_id', None)
+
+        children_context.update(context)
+
         stage_contents = []
         for stage in self.available_stages:
-            child_fragment = stage.render('navigation_view', context)
+            child_fragment = stage.render('navigation_view', children_context)
             fragment.add_frag_resources(child_fragment)
             stage_contents.append(child_fragment.content)
 
