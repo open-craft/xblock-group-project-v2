@@ -1,6 +1,6 @@
 {% load i18n %}
 <li class="group-project-stage" data-stage-id="{{ stage.id }}">
-  <span class="group-project-stage-state {{ stage_state }}"></span>
+  <span class="group-project-stage-state fa {{ stage_state }}"></span>
   {% if not stage.hide_stage_label %}
     <span class="group-project-stage-type group-project-navigator-grey-text">{{ stage.NAVIGATION_LABEL }}:</span>
   {% endif %}
