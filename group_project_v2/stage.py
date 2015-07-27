@@ -527,8 +527,8 @@ class ReviewBaseStage(BaseGroupActivityStage):
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
     def submit_review(self, submissions, context=''):  # pylint: disable=unused-argument
-        # if admin grader - refuse grading if either activity is not TA graded or does not allow admin access
-        if self.is_admin_grader and (not self.activity.is_ta_graded or not self.allow_admin_grader_access):
+        # if admin grader - still allow providing grades even for non-TA-graded activities
+        if self.is_admin_grader and not self.allow_admin_grader_access:
             return {'result': 'error', 'msg': self.TA_GRADING_NOT_ALLOWED}
 
         if not self.available_now:
