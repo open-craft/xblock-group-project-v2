@@ -98,6 +98,8 @@ class BaseGroupActivityStage(
     STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as it's closed")
     STAGE_URL_NAME_TEMPLATE = _(u"url_name to link to this {stage_name}:")
 
+    CURRENT_STAGE_ID_PARAMETER_NAME = 'current_stage_id'
+
     @property
     def id(self):
         return self.scope_ids.usage_id
@@ -168,6 +170,9 @@ class BaseGroupActivityStage(
     @property
     def url_name_caption(self):
         return self.STAGE_URL_NAME_TEMPLATE.format(stage_name=self.STUDIO_LABEL)
+
+    def is_current_stage(self, context):
+        return context.get(self.CURRENT_STAGE_ID_PARAMETER_NAME, None) == str(self.id)
 
     def _view_render(self, context, view='student_view'):
         stage_fragment = self.get_stage_content_fragment(context, view)
@@ -261,7 +266,8 @@ class BaseGroupActivityStage(
             'stage': self,
             'activity_id': self.activity.id,
             'stage_state': self.get_stage_state(),
-            'block_link': get_link_to_block(self)
+            'block_link': get_link_to_block(self),
+            'is_current_stage': self.is_current_stage(context)
         }
         rendering_context.update(context)
         fragment.add_content(loader.render_template("templates/html/stages/navigation_view.html", rendering_context))
@@ -527,8 +533,8 @@ class ReviewBaseStage(BaseGroupActivityStage):
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
     def submit_review(self, submissions, context=''):  # pylint: disable=unused-argument
-        # if admin grader - refuse grading if either activity is not TA graded or does not allow admin access
-        if self.is_admin_grader and (not self.activity.is_ta_graded or not self.allow_admin_grader_access):
+        # if admin grader - still allow providing grades even for non-TA-graded activities
+        if self.is_admin_grader and not self.allow_admin_grader_access:
             return {'result': 'error', 'msg': self.TA_GRADING_NOT_ALLOWED}
 
         if not self.available_now:

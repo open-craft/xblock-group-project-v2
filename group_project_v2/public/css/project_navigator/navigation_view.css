@@ -4,6 +4,10 @@
     list-style: none;
 }
 
+.group-project-navigation-view .group-project-stage.current {
+    background-color: #fffec9;
+}
+
 .group-project-navigation-view  .group-project-stage-state {
     display: inline-block;
     font-size: 16px;

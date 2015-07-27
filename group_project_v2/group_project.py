@@ -275,14 +275,17 @@ class GroupActivityXBlock(
     def navigation_view(self, context):
         fragment = Fragment()
 
+        children_context = {}
+        if context.get('activate_block_id', None):
+            children_context[BasicStage.CURRENT_STAGE_ID_PARAMETER_NAME] = context.get('activate_block_id', None)
+
+        children_context.update(context)
+
         stage_contents = []
-        # if ta_graded we're still showing the activity in Project Navigator, but it should not contain any stages,
-        # even those allowing TA grading
-        if not self.is_admin_grader or self.is_ta_graded:
-            for stage in self.available_stages:
-                child_fragment = stage.render('navigation_view', context)
-                fragment.add_frag_resources(child_fragment)
-                stage_contents.append(child_fragment.content)
+        for stage in self.available_stages:
+            child_fragment = stage.render('navigation_view', children_context)
+            fragment.add_frag_resources(child_fragment)
+            stage_contents.append(child_fragment.content)
 
         context = {'activity': self, 'stage_contents': stage_contents}
         fragment.add_content(loader.render_template("templates/html/activity/navigation_view.html", context))
