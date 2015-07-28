@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
-#
-# TODO: lots of broad except clauses - disabled in pylint, but might make sense to clean them up
-# Imports ###########################################################
 import logging
 import itertools
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.locator import BlockUsageLocator
-
 
 from django.utils.translation import ugettext as _
 
@@ -28,11 +24,12 @@ from group_project_v2.utils import loader, make_key, outsider_disallowed_protect
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
-    STAGE_TYPES)
+    STAGE_TYPES
+)
 from group_project_v2.api_error import ApiError
 
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 
 class GroupProjectXBlock(
@@ -376,7 +373,7 @@ class GroupActivityXBlock(
         if notifications_service:
             self.fire_grades_posted_notification(group_id, notifications_service)
 
-    def calculate_grade(self, group_id):
+    def calculate_grade(self, group_id):  # pylint:disable=too-many-locals,too-many-branches
 
         def mean(value_array):
             numeric_values = [float(v) for v in value_array]

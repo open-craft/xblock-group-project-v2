@@ -26,7 +26,6 @@ COURSES_API = '/'.join([API_PREFIX, 'courses'])
 # * Service isolation - it should be used only through some other (not existent yet) class that would ALWAYS do
 # post-processing in order to isolate clients from response format changes. As of now, if format changes
 # virtually every method in group_project might be affected.
-# pylint: disable=invalid-name
 class ProjectAPI(object):
     def __init__(self, address, dry_run=False):
         self._api_server_address = address
@@ -62,6 +61,15 @@ class ProjectAPI(object):
         return json.loads(response.read())
 
     @api_error_protect
+    def get_user_details(self, user_id):
+        return self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
+
+    @api_error_protect
+    def get_user_organizations(self, user_id):
+        qs_params = {'page_size': 0}
+        return self.send_request(GET, (USERS_API, user_id, 'organizations'), query_params=qs_params)
+
+    @api_error_protect
     def get_user_preferences(self, user_id):
         """ gets users preferences information """
         return self.send_request(GET, (USERS_API, user_id, 'preferences'), no_trailing_slash=True)
@@ -89,12 +97,12 @@ class ProjectAPI(object):
         return self.send_request(GET, (WORKGROUP_API, group_id, 'workgroup_reviews'), query_params=qs_params)
 
     @api_error_protect
-    def update_workgroup_review_assessment(self, question_data):
-        return self.send_request(PUT, (WORKGROUP_REVIEW_API, question_data['id']), data=question_data)
-
-    @api_error_protect
     def create_workgroup_review_assessment(self, question_data):
         return self.send_request(POST, (WORKGROUP_REVIEW_API, ), data=question_data)
+
+    @api_error_protect
+    def update_workgroup_review_assessment(self, question_data):
+        return self.send_request(PUT, (WORKGROUP_REVIEW_API, question_data['id']), data=question_data)
 
     @api_error_protect
     def delete_workgroup_review_assessment(self, assessment_id):
@@ -113,10 +121,6 @@ class ProjectAPI(object):
             return None
 
         return self.get_workgroup_by_id(workgroups_list['results'][0]['id'])
-
-    @api_error_protect
-    def get_user_details(self, user_id):
-        return self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
 
     @api_error_protect
     def get_user_grades(self, user_id, course_id):
@@ -206,6 +210,15 @@ class ProjectAPI(object):
         response = self.send_request(GET, (COURSES_API, course_id, 'completions'), query_params=qs_params)
         return response.get('results', [])
 
+    @api_error_protect
+    def get_user_roles_for_course(self, user_id, course_id):
+        qs_params = {
+            "user_id": user_id,
+        }
+
+        return self.send_request(GET, (COURSES_API, course_id, 'roles'), query_params=qs_params)
+
+    # TODO: this method post-process api response: probably they should be moved outside of this class
     def get_stage_state(self, course_id, content_id, stage):
         stage_completions = self.get_stage_completions(course_id, content_id, stage)
         if stage_completions:
@@ -214,14 +227,6 @@ class ProjectAPI(object):
             completed_users = set()
 
         return completed_users
-
-    @api_error_protect
-    def get_user_roles_for_course(self, user_id, course_id):
-        qs_params = {
-            "user_id": user_id,
-        }
-
-        return self.send_request(GET, (COURSES_API, course_id, 'roles'), query_params=qs_params)
 
     # TODO: this method post-process api response: probably they should be moved outside of this class
     def get_peer_review_items(self, reviewer_id, peer_id, group_id, content_id):
@@ -239,25 +244,25 @@ class ProjectAPI(object):
         # get any data already there
         current_data = {pi['question']: pi for pi in
                         self.get_peer_review_items(reviewer_id, peer_id, group_id, content_id)}
-        for k, v in data.iteritems():
-            if k in current_data:
-                question_data = current_data[k]
+        for question_id, answer in data.iteritems():
+            if question_id in current_data:
+                question_data = current_data[question_id]
 
-                if question_data['answer'] != v:
-                    if len(v) > 0:
+                if question_data['answer'] != answer:
+                    if len(answer) > 0:
                         # update with relevant data
                         del question_data['created']
                         del question_data['modified']
-                        question_data['answer'] = v
+                        question_data['answer'] = answer
 
                         self.update_peer_review_assessment(question_data)
                     else:
                         self.delete_peer_review_assessment(question_data['id'])
 
-            elif len(v) > 0:
+            elif len(answer) > 0:
                 question_data = {
-                    "question": k,
-                    "answer": v,
+                    "question": question_id,
+                    "answer": answer,
                     "workgroup": group_id,
                     "user": peer_id,
                     "reviewer": reviewer_id,
@@ -274,25 +279,25 @@ class ProjectAPI(object):
     def submit_workgroup_review_items(self, reviewer_id, group_id, content_id, data):
         # get any data already there
         current_data = {ri['question']: ri for ri in self.get_workgroup_review_items(reviewer_id, group_id, content_id)}
-        for k, v in data.iteritems():
-            if k in current_data:
-                question_data = current_data[k]
+        for question_id, answer in data.iteritems():
+            if question_id in current_data:
+                question_data = current_data[question_id]
 
-                if question_data['answer'] != v:
-                    if len(v) > 0:
+                if question_data['answer'] != answer:
+                    if len(answer) > 0:
                         # update with relevant data
                         del question_data['created']
                         del question_data['modified']
-                        question_data['answer'] = v
+                        question_data['answer'] = answer
 
                         self.update_workgroup_review_assessment(question_data)
                     else:
                         self.delete_workgroup_review_assessment(question_data['id'])
 
-            elif len(v) > 0:
+            elif len(answer) > 0:
                 question_data = {
-                    "question": k,
-                    "answer": v,
+                    "question": question_id,
+                    "answer": answer,
                     "workgroup": group_id,
                     "reviewer": reviewer_id,
                     "content_id": content_id,
@@ -328,13 +333,13 @@ class ProjectAPI(object):
 
 # Looks like it's an issue, but technically it's not; this code runs in LMS, so 127.0.0.1 is always correct
 # location for API server, as it's basically executed in a neighbour thread/process/whatever.
-api_server = "http://127.0.0.1:8000"
+API_SERVER = "http://127.0.0.1:8000"
 if hasattr(settings, 'API_LOOPBACK_ADDRESS'):
-    api_server = settings.API_LOOPBACK_ADDRESS
+    API_SERVER = settings.API_LOOPBACK_ADDRESS
 
 
 class ProjectAPIXBlockMixin(object):
     @lazy
     def project_api(self):
         author_mode = getattr(self.runtime, 'is_author_mode', False)
-        return ProjectAPI(api_server, author_mode)
+        return ProjectAPI(API_SERVER, author_mode)

@@ -11,13 +11,12 @@ disable=
  missing-docstring,no-member,
  fixme,
  locally-disabled,
- too-many-instance-attributes,too-many-locals,too-many-arguments,
- too-few-public-methods,too-many-public-methods,too-many-ancestors,
- too-many-branches,too-many-lines
+ too-few-public-methods,too-many-public-methods,too-many-ancestors
 
 
 [OPTIONS]
 good-names=id,log,loader,setUp
+max-args=6
 method-rgx=_?[a-z_][a-z0-9_]{2,40}$
 function-rgx=_?[a-z_][a-z0-9_]{2,40}$
 method-name-hint=_?[a-z_][a-z0-9_]{2,40}$

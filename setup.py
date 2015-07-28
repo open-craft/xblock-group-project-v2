@@ -39,8 +39,9 @@ BLOCKS = [
     'gp-v2-review-question = group_project_v2.stage_components:GroupProjectReviewQuestionXBlock',
     'gp-v2-peer-assessment = group_project_v2.stage_components:GroupProjectTeamEvaluationDisplayXBlock',
     'gp-v2-group-assessment = group_project_v2.stage_components:GroupProjectGradeEvaluationDisplayXBlock',
-    "gp-v2-static-submissions = group_project_v2.stage_components:SubmissionsStaticContentXBlock",
-    "gp-v2-static-grade-rubric = group_project_v2.stage_components:GradeRubricStaticContentXBlock",
+    'gp-v2-static-submissions = group_project_v2.stage_components:SubmissionsStaticContentXBlock',
+    'gp-v2-static-grade-rubric = group_project_v2.stage_components:GradeRubricStaticContentXBlock',
+    'gp-v2-project-team = group_project_v2.stage_components:ProjectTeamXBlock',
 
     'gp-v2-navigator = group_project_v2.project_navigator:GroupProjectNavigatorXBlock',
     'gp-v2-navigator-navigation = group_project_v2.project_navigator:NavigationViewXBlock',

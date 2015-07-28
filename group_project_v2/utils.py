@@ -10,8 +10,8 @@ from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
-loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
+loader = ResourceLoader(__name__)
 
 
 ALLOWED_OUTSIDER_ROLES = getattr(settings, "ALLOWED_OUTSIDER_ROLES", None)

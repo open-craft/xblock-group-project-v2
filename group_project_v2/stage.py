@@ -21,16 +21,15 @@ from group_project_v2.mixins import (
 )
 from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
-    HtmlXBlockProxy,
-    PeerSelectorXBlock, GroupSelectorXBlock,
-    GroupProjectReviewQuestionXBlock, GroupProjectTeamEvaluationDisplayXBlock, GroupProjectGradeEvaluationDisplayXBlock,
-    GroupProjectResourceXBlock, GroupProjectSubmissionXBlock, SubmissionsStaticContentXBlock,
-    GradeRubricStaticContentXBlock, GroupProjectVideoResourceXBlock,
+    HtmlXBlockProxy, ProjectTeamXBlock, GroupProjectResourceXBlock, GroupProjectVideoResourceXBlock,
+    GroupProjectSubmissionXBlock, SubmissionsStaticContentXBlock,
+    PeerSelectorXBlock, GroupSelectorXBlock, GroupProjectReviewQuestionXBlock, GradeRubricStaticContentXBlock,
+    GroupProjectTeamEvaluationDisplayXBlock, GroupProjectGradeEvaluationDisplayXBlock,
 )
 from group_project_v2.utils import (
-    loader, format_date, gettext as _, make_key, outsider_disallowed_protected_view,
-    outsider_disallowed_protected_handler, key_error_protected_handler,
-    get_link_to_block)
+    loader, format_date, gettext as _, make_key, get_link_to_block,
+    outsider_disallowed_protected_view, outsider_disallowed_protected_handler, key_error_protected_handler,
+)
 
 log = logging.getLogger(__name__)
 
@@ -116,6 +115,7 @@ class BaseGroupActivityStage(
         blocks = [HtmlXBlockProxy, GroupProjectResourceXBlock]
         if GroupProjectVideoResourceXBlock.is_available():
             blocks.append(GroupProjectVideoResourceXBlock)
+        blocks.append(ProjectTeamXBlock)
         return blocks
 
     @lazy
@@ -135,6 +135,31 @@ class BaseGroupActivityStage(
         return self._get_children_by_category(
             GroupProjectResourceXBlock.CATEGORY, GroupProjectVideoResourceXBlock.CATEGORY
         )
+
+    @property
+    def team_members(self):
+        """
+        Returns teammates to review. May throw `class`: OutsiderDisallowedError
+        """
+        if not self.is_group_member:
+            return []
+
+        try:
+            result = []
+            for team_member in self.workgroup["users"]:
+                team_member_id = team_member["id"]
+                if self.user_id == int(team_member_id):
+                    continue
+
+                team_member_details = self.project_api.get_user_details(team_member_id)
+                team_member_organizations = self.project_api.get_user_organizations(team_member_id)
+                if team_member_organizations:
+                    team_member_details['organization'] = team_member_organizations[0]['display_name']
+                result.append(team_member_details)
+
+            return result
+        except ApiError:
+            return []
 
     @property
     def formatted_open_date(self):
@@ -564,23 +589,6 @@ class TeamEvaluationStage(ReviewBaseStage):
         blocks = super(TeamEvaluationStage, self).allowed_nested_blocks
         blocks.extend([PeerSelectorXBlock])
         return blocks
-
-    @property
-    def team_members(self):
-        """
-        Returns teammates to review. May throw `class`: OutsiderDisallowedError
-        """
-        if not self.is_group_member:
-            return []
-
-        try:
-            return [
-                self.project_api.get_user_details(team_member["id"])
-                for team_member in self.workgroup["users"]
-                if self.user_id != int(team_member["id"])
-            ]
-        except ApiError:
-            return []
 
     def review_status(self):
         peers_to_review = [user for user in self.workgroup["users"] if user["id"] != self.user_id]

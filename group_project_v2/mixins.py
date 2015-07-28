@@ -7,8 +7,8 @@ from xblock.fragment import Fragment
 from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.utils import (
-    OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES, loader,
-    outsider_disallowed_protected_view
+    OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES,
+    loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS
 )
 
 log = logging.getLogger(__name__)
@@ -217,3 +217,10 @@ class AdminAccessControlXBlockMixin(object):
     @property
     def available_to_current_user(self):
         return self.allow_admin_grader_access or not self.is_admin_grader
+
+
+class NoStudioEditableSettingsMixin(object):
+    def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
+        fragment = Fragment()
+        fragment.add_content(NO_EDITABLE_SETTINGS)
+        return fragment

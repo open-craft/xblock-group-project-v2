@@ -33,6 +33,7 @@ class StageNotificationsMixin(object):
             timer_name_suffix=timer_name_suffix
         )
 
+    # pylint: disable=too-many-arguments
     def _set_activity_timed_notification(self, course_id, msg_type, event_date, send_at_date,
                                          services, timer_name_suffix):
 

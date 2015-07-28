@@ -5,7 +5,7 @@ from urllib2 import HTTPError
 from django.utils.translation import ugettext as _
 
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 ERROR_CODE_MESSAGES = {}
 
