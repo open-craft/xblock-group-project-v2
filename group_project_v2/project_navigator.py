@@ -37,6 +37,7 @@ class GroupProjectNavigatorXBlock(
     Should only be added as a child to GroupProjectXBlock
     """
     CATEGORY = "gp-v2-navigator"
+    STUDIO_LABEL = _(u"Group Project Navigator")
     INITIAL_VIEW = ViewTypes.NAVIGATION
 
     display_name_with_default = _(u"Group Project Navigator")
@@ -55,10 +56,10 @@ class GroupProjectNavigatorXBlock(
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return {
-            NavigationViewXBlock.CATEGORY: _(u"Navigation View"),
-            ResourcesViewXBlock.CATEGORY: _(u"Resources View"),
-            SubmissionsViewXBlock.CATEGORY: _(u"Submissions View"),
-            AskTAViewXBlock.CATEGORY: _(u"Ask a TA View"),
+            NavigationViewXBlock.CATEGORY: NavigationViewXBlock.STUDIO_LABEL,
+            ResourcesViewXBlock.CATEGORY: ResourcesViewXBlock.STUDIO_LABEL,
+            SubmissionsViewXBlock.CATEGORY: ResourcesViewXBlock.STUDIO_LABEL,
+            AskTAViewXBlock.CATEGORY: AskTAViewXBlock.STUDIO_LABEL,
         }
 
     def _get_activated_view_type(self, activate_block_id):
@@ -266,6 +267,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     any stage in Group Project
     """
     CATEGORY = "gp-v2-navigator-navigation"
+    STUDIO_LABEL = _(u"Navigation View")
     type = ViewTypes.NAVIGATION
     icon = u"fa fa-bars"
     display_name_with_default = _(u"Navigation View")
@@ -299,6 +301,7 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     Resources view XBlock - displays Resources links grouped by Activity
     """
     CATEGORY = "gp-v2-navigator-resources"
+    STUDIO_LABEL = _(u"Resources View")
     type = ViewTypes.RESOURCES
     icon = u"fa fa-files-o"
     display_name_with_default = _(u"Resources View")
@@ -328,6 +331,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     earlier uploads
     """
     CATEGORY = "gp-v2-navigator-submissions"
+    STUDIO_LABEL = _(u"Submissions View")
     type = ViewTypes.SUBMISSIONS
     icon = u"fa fa-upload"
     display_name_with_default = _(u"Submissions View")
@@ -361,6 +365,7 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     Ask a TA view - displays  a form to send message to Teaching Assistant
     """
     CATEGORY = "gp-v2-navigator-ask-ta"
+    STUDIO_LABEL = _(u"Ask a TA View")
     type = ViewTypes.ASK_TA
     selector_text = u"TA"
     display_name_with_default = _(u"Ask a TA View")

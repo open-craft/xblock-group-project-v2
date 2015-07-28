@@ -57,8 +57,8 @@ class GroupProjectXBlock(
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return {
-            GroupActivityXBlock.CATEGORY: _(u"Group Project Activity"),
-            GroupProjectNavigatorXBlock.CATEGORY: _(u"Group Project Navigator"),
+            GroupActivityXBlock.CATEGORY: GroupActivityXBlock.STUDIO_LABEL,
+            GroupProjectNavigatorXBlock.CATEGORY: GroupProjectNavigatorXBlock.STUDIO_LABEL,
         }
 
     @lazy
@@ -170,6 +170,7 @@ class GroupActivityXBlock(
     )
 
     CATEGORY = "gp-v2-activity"
+    STUDIO_LABEL = _(u"Group Project Activity")
 
     editable_fields = ("display_name", "weight", "group_reviews_required_count", "user_review_count")
     has_score = True

@@ -23,7 +23,7 @@ from group_project_v2.mixins import (
 from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
     PeerSelectorXBlock, GroupSelectorXBlock,
-    GroupProjectReviewQuestionXBlock, GroupProjectPeerAssessmentXBlock, GroupProjectGroupAssessmentXBlock,
+    GroupProjectReviewQuestionXBlock, GroupProjectTeamEvaluationDisplayXBlock, GroupProjectGradeEvaluationDisplayXBlock,
     GroupProjectResourceXBlock, GroupProjectSubmissionXBlock, SubmissionsStaticContentXBlock,
     GradeRubricStaticContentXBlock, GroupProjectVideoResourceXBlock
 )
@@ -115,11 +115,11 @@ class BaseGroupActivityStage(
         """
         blocks = OrderedDict([
             ("html", _(u"HTML")),
-            (GroupProjectResourceXBlock.CATEGORY, _(u"Resource"))
+            (GroupProjectResourceXBlock.CATEGORY, GroupProjectResourceXBlock.STUDIO_LABEL)
         ])
         if GroupProjectVideoResourceXBlock.is_available():
             blocks.update(OrderedDict([
-                (GroupProjectVideoResourceXBlock.CATEGORY, _(u"Video Resource"))
+                (GroupProjectVideoResourceXBlock.CATEGORY, GroupProjectVideoResourceXBlock.STUDIO_LABEL)
             ]))
         return blocks
 
@@ -372,8 +372,8 @@ class SubmissionStage(BaseGroupActivityStage):
     def allowed_nested_blocks(self):
         blocks = super(SubmissionStage, self).allowed_nested_blocks
         blocks.update(OrderedDict([
-            (GroupProjectSubmissionXBlock.CATEGORY, _(u"Submission")),
-            (SubmissionsStaticContentXBlock.CATEGORY, SubmissionsStaticContentXBlock.DISPLAY_NAME)
+            (GroupProjectSubmissionXBlock.CATEGORY, GroupProjectSubmissionXBlock.STUDIO_LABEL),
+            (SubmissionsStaticContentXBlock.CATEGORY, SubmissionsStaticContentXBlock.STUDIO_LABEL)
         ]))
         return blocks
 
@@ -461,8 +461,8 @@ class ReviewBaseStage(BaseGroupActivityStage):
     def allowed_nested_blocks(self):
         blocks = super(ReviewBaseStage, self).allowed_nested_blocks
         blocks.update(OrderedDict([
-            (GroupProjectReviewQuestionXBlock.CATEGORY, _(u"Review Question")),
-            (GradeRubricStaticContentXBlock.CATEGORY, GradeRubricStaticContentXBlock.display_name_with_default)
+            (GroupProjectReviewQuestionXBlock.CATEGORY, GroupProjectReviewQuestionXBlock.STUDIO_LABEL),
+            (GradeRubricStaticContentXBlock.CATEGORY, GradeRubricStaticContentXBlock.STUDIO_LABEL)
         ]))
         return blocks
 
@@ -574,7 +574,7 @@ class TeamEvaluationStage(ReviewBaseStage):
     def allowed_nested_blocks(self):
         blocks = super(TeamEvaluationStage, self).allowed_nested_blocks
         blocks.update(OrderedDict([
-            (PeerSelectorXBlock.CATEGORY, _(u"Teammate selector"))
+            (PeerSelectorXBlock.CATEGORY, PeerSelectorXBlock.STUDIO_LABEL)
         ]))
         return blocks
 
@@ -654,7 +654,7 @@ class PeerReviewStage(ReviewBaseStage):
     def allowed_nested_blocks(self):
         blocks = super(PeerReviewStage, self).allowed_nested_blocks
         blocks.update(OrderedDict([
-            (GroupSelectorXBlock.CATEGORY, _(u"Group selector"))
+            (GroupSelectorXBlock.CATEGORY, GroupSelectorXBlock.STUDIO_LABEL)
         ]))
         return blocks
 
@@ -783,13 +783,13 @@ class EvaluationDisplayStage(FeedbackDisplayBaseStage):
     def allowed_nested_blocks(self):
         blocks = super(FeedbackDisplayBaseStage, self).allowed_nested_blocks
         blocks.update(OrderedDict([
-            (GroupProjectPeerAssessmentXBlock.CATEGORY, _(u"Review Assessment"))
+            (GroupProjectTeamEvaluationDisplayXBlock.CATEGORY, GroupProjectTeamEvaluationDisplayXBlock.STUDIO_LABEL)
         ]))
         return blocks
 
     @property
     def assessments(self):
-        return self._get_children_by_category(GroupProjectPeerAssessmentXBlock.CATEGORY)
+        return self._get_children_by_category(GroupProjectTeamEvaluationDisplayXBlock.CATEGORY)
 
 
 class GradeDisplayStage(FeedbackDisplayBaseStage):
@@ -801,13 +801,13 @@ class GradeDisplayStage(FeedbackDisplayBaseStage):
     def allowed_nested_blocks(self):
         blocks = super(FeedbackDisplayBaseStage, self).allowed_nested_blocks
         blocks.update(OrderedDict([
-            (GroupProjectGroupAssessmentXBlock.CATEGORY, _(u"Review Assessment"))
+            (GroupProjectGradeEvaluationDisplayXBlock.CATEGORY, GroupProjectGradeEvaluationDisplayXBlock.STUDIO_LABEL)
         ]))
         return blocks
 
     @property
     def assessments(self):
-        return self._get_children_by_category(GroupProjectGroupAssessmentXBlock.CATEGORY)
+        return self._get_children_by_category(GroupProjectGradeEvaluationDisplayXBlock.CATEGORY)
 
     def get_stage_content_fragment(self, context, view='student_view'):
         final_grade = self.activity.calculate_grade(self.workgroup['id'])
