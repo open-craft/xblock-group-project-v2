@@ -142,7 +142,7 @@
     font-style: italic;
 }
 
-.message, .review_submissions_dialog {
+.message, .review_submissions_dialog, .group-project-team-email-dialog {
     display: none;
 }
 

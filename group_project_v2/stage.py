@@ -137,6 +137,23 @@ class BaseGroupActivityStage(
         )
 
     @property
+    def team_members(self):
+        """
+        Returns teammates to review. May throw `class`: OutsiderDisallowedError
+        """
+        if not self.is_group_member:
+            return []
+
+        try:
+            return [
+                self.project_api.get_user_details(team_member["id"])
+                for team_member in self.workgroup["users"]
+                if self.user_id != int(team_member["id"])
+            ]
+        except ApiError:
+            return []
+
+    @property
     def formatted_open_date(self):
         return format_date(self.open_date)
 
@@ -564,23 +581,6 @@ class TeamEvaluationStage(ReviewBaseStage):
         blocks = super(TeamEvaluationStage, self).allowed_nested_blocks
         blocks.extend([PeerSelectorXBlock])
         return blocks
-
-    @property
-    def team_members(self):
-        """
-        Returns teammates to review. May throw `class`: OutsiderDisallowedError
-        """
-        if not self.is_group_member:
-            return []
-
-        try:
-            return [
-                self.project_api.get_user_details(team_member["id"])
-                for team_member in self.workgroup["users"]
-                if self.user_id != int(team_member["id"])
-            ]
-        except ApiError:
-            return []
 
     def review_status(self):
         peers_to_review = [user for user in self.workgroup["users"] if user["id"] != self.user_id]

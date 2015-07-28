@@ -31,7 +31,13 @@ class HtmlXBlockProxy(object):
     STUDIO_LABEL = _(u"HTML")
 
 
-class BaseGroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
+class BaseStageComponentXBlock(XBlock):
+    @lazy
+    def stage(self):
+        return self.get_parent()
+
+
+class BaseGroupProjectResourceXBlock(BaseStageComponentXBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
     display_name = String(
         display_name=_(u"Display Name"),
         help=_(U"This is a name of the resource"),
@@ -119,13 +125,9 @@ class GroupProjectVideoResourceXBlock(BaseGroupProjectResourceXBlock):
         return validation
 
 
-class StaticContentBaseXBlock(XBlock, XBlockWithPreviewMixin):
+class StaticContentBaseXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin):
     TARGET_PROJECT_NAVIGATOR_VIEW = None
     TEXT_TEMPLATE = None
-
-    @lazy
-    def stage(self):
-        return self.get_parent()
 
     def student_view(self, context):
         activity = self.stage.activity
@@ -149,9 +151,6 @@ class StaticContentBaseXBlock(XBlock, XBlockWithPreviewMixin):
         fragment = Fragment()
         fragment.add_content(loader.render_template("templates/html/components/static_content.html", render_context))
         return fragment
-
-    def studio_view(self, context):  # pylint: disable=no-self-use,unused-argument
-        return Fragment(NO_EDITABLE_SETTINGS)
 
 
 class SubmissionsStaticContentXBlock(StaticContentBaseXBlock):
@@ -184,7 +183,9 @@ SubmissionUpload = namedtuple("SubmissionUpload", "location file_name submission
 
 @XBlock.needs('user')
 @XBlock.wants('notifications')
-class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
+class GroupProjectSubmissionXBlock(
+    BaseStageComponentXBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin
+):
     CATEGORY = "gp-v2-submission"
     STUDIO_LABEL = _(u"Submission")
     PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/submission_navigator_view.html'
@@ -218,10 +219,6 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
         u"Your deliverable have been successfully uploaded. You can attach an updated version of the "
         u"deliverable by clicking the <span class='icon {icon}'></span> icon at any time before the deadline passes"
     )
-
-    @lazy
-    def stage(self):
-        return self.get_parent()
 
     def get_upload(self, group_id):
         submission_map = self.project_api.get_latest_workgroup_submissions_by_id(group_id)
@@ -364,15 +361,11 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
         return uploaded_file
 
 
-class PeerSelectorXBlock(XBlock, XBlockWithPreviewMixin):
+class PeerSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin):
     CATEGORY = "gp-v2-peer-selector"
     STUDIO_LABEL = _(u"Teammate selector")
     display_name_with_default = _(u"Teammate selector XBlock")
     STUDENT_TEMPLATE = "templates/html/components/peer_selector.html"
-
-    @property
-    def stage(self):
-        return self.get_parent()
 
     @property
     def peers(self):
@@ -404,15 +397,11 @@ class PeerSelectorXBlock(XBlock, XBlockWithPreviewMixin):
         return fragment
 
 
-class GroupSelectorXBlock(XBlock, XBlockWithPreviewMixin):
+class GroupSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin):
     CATEGORY = "gp-v2-group-selector"
     STUDIO_LABEL = _(u"Group selector")
     display_name_with_default = _(u"Group selector XBlock")
     STUDENT_TEMPLATE = "templates/html/components/group_selector.html"
-
-    @property
-    def stage(self):
-        return self.get_parent()
 
     @property
     def groups(self):
@@ -444,7 +433,7 @@ class GroupSelectorXBlock(XBlock, XBlockWithPreviewMixin):
         return fragment
 
 
-class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
+class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
     CATEGORY = "gp-v2-review-question"
     STUDIO_LABEL = _(u"Review Question")
 
@@ -574,7 +563,7 @@ class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin, XBlock
 
 
 class GroupProjectBaseFeedbackDisplayXBlock(
-    XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin, WorkgroupAwareXBlockMixin
+    BaseStageComponentXBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin, WorkgroupAwareXBlockMixin
 ):
     question_id = String(
         display_name=_(u"Question"),
@@ -598,10 +587,6 @@ class GroupProjectBaseFeedbackDisplayXBlock(
             return _(u'Review Assessment for question "{question_title}"').format(question_title=self.question.title)
         else:
             return _(u"Review Assessment")
-
-    @lazy
-    def stage(self):
-        return self.get_parent()
 
     @lazy
     def question(self):
@@ -687,7 +672,7 @@ class GroupProjectGradeEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXB
 
 
 class ProjectTeamXBlock(
-    XBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin, StudioEditableXBlockMixin, WorkgroupAwareXBlockMixin
+    BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin, StudioEditableXBlockMixin
 ):
     CATEGORY = 'gp-v2-project-team'
     STUDIO_LABEL = _(u"Project Team")
@@ -695,4 +680,17 @@ class ProjectTeamXBlock(
     display_name_with_default = STUDIO_LABEL
 
     def student_view(self, context):
-        return Fragment(u"I'm Project Team Block")
+        fragment = Fragment()
+        render_context = {
+            'team_members': self.stage.team_members,
+            'course_id': self.stage.course_id,
+            'group_id': self.stage.workgroup['id']
+        }
+        render_context.update(context)
+
+        fragment.add_content(loader.render_template("templates/html/components/project_team.html", render_context))
+        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/project_team.css"))
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/components/project_team.js"))
+        fragment.initialize_js("ProjectTeamXBlock")
+        return fragment
+
