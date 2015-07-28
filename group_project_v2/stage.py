@@ -323,7 +323,7 @@ class BasicStage(BaseGroupActivityStage):
     CATEGORY = 'gp-v2-stage-basic'
 
     NAVIGATION_LABEL = _(u'Overview')
-    STUDIO_LABEL = _(u"Overview")
+    STUDIO_LABEL = _(u"Text")
 
     def student_view(self, context):
         fragment = super(BasicStage, self).student_view(context)
