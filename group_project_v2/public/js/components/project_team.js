@@ -43,7 +43,7 @@ function ProjectTeamXBlock(runtime, element) {
         });
     });
 
-    modal_dialogs.find(".button, .close-box").click(function(){
+    modal_dialogs.find(".button, .close-box, .modal-bg").click(function(){
         $(this).parents(".group-project-team-email-dialog").hide();
     });
 
