@@ -2,10 +2,10 @@
 <div class="group-project-activity-wrapper" data-activity-id="{{ activity.id }}">
   <div class="group-project-activity-header">{{ activity.display_name }}</div>
   {% if has_submissions %}
-    <ul class="group-project-submissions">
+    <ul class="group-project-activity-content group-project-submissions">
       {% for stage_content in stage_contents %}{{ stage_content|safe }}{% endfor %}
     </ul>
   {% else %}
-    <div class="group-project-navigator-grey-text">{% trans "No uploads for this activity" %}</div>
+    <div class="group-project-activity-content group-project-navigator-grey-text">{% trans "No uploads for this activity" %}</div>
   {% endif %}
 </div>
