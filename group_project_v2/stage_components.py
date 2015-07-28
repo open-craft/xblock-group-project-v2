@@ -26,6 +26,11 @@ from group_project_v2.utils import (
 log = logging.getLogger(__name__)
 
 
+class HtmlXBlockProxy(object):
+    CATEGORY = 'html'
+    STUDIO_LABEL = _(u"HTML")
+
+
 class BaseGroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
     display_name = String(
         display_name=_(u"Display Name"),

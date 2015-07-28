@@ -56,10 +56,7 @@ class GroupProjectXBlock(
 
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
-        return {
-            GroupActivityXBlock.CATEGORY: GroupActivityXBlock.STUDIO_LABEL,
-            GroupProjectNavigatorXBlock.CATEGORY: GroupProjectNavigatorXBlock.STUDIO_LABEL,
-        }
+        return [GroupActivityXBlock, GroupProjectNavigatorXBlock]
 
     @lazy
     def activities(self):
@@ -197,14 +194,11 @@ class GroupActivityXBlock(
 
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
-        return OrderedDict([
-            (stage_type.CATEGORY, stage_type.STUDIO_LABEL)
-            for stage_type in (
-                BasicStage, CompletionStage, SubmissionStage,
-                TeamEvaluationStage, PeerReviewStage,
-                EvaluationDisplayStage, GradeDisplayStage
-            )
-        ])
+        return [
+            BasicStage, CompletionStage, SubmissionStage,
+            TeamEvaluationStage, PeerReviewStage,
+            EvaluationDisplayStage, GradeDisplayStage
+        ]
 
     @property
     def stages(self):

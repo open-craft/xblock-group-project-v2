@@ -55,12 +55,7 @@ class GroupProjectNavigatorXBlock(
 
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
-        return {
-            NavigationViewXBlock.CATEGORY: NavigationViewXBlock.STUDIO_LABEL,
-            ResourcesViewXBlock.CATEGORY: ResourcesViewXBlock.STUDIO_LABEL,
-            SubmissionsViewXBlock.CATEGORY: ResourcesViewXBlock.STUDIO_LABEL,
-            AskTAViewXBlock.CATEGORY: AskTAViewXBlock.STUDIO_LABEL,
-        }
+        return [NavigationViewXBlock, ResourcesViewXBlock, SubmissionsViewXBlock, AskTAViewXBlock]
 
     def _get_activated_view_type(self, activate_block_id):
         try:

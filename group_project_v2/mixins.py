@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import logging
 from lazy.lazy import lazy
 from xblock.exceptions import NoSuchViewError
@@ -123,7 +124,13 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin, Pr
 class XBlockWithComponentsMixin(object):
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
-        return None
+        return []
+
+    def get_nested_blocks_spec(self):
+        return OrderedDict([
+            (block.CATEGORY, block.STUDIO_LABEL)
+            for block in self.allowed_nested_blocks
+        ])
 
     @outsider_disallowed_protected_view
     def author_edit_view(self, context):
@@ -134,7 +141,7 @@ class XBlockWithComponentsMixin(object):
 
         self.render_children(context, fragment, can_reorder=True, can_add=False)
         fragment.add_content(
-            loader.render_template('templates/html/add_buttons.html', {'child_blocks': self.allowed_nested_blocks})
+            loader.render_template('templates/html/add_buttons.html', {'child_blocks': self.get_nested_blocks_spec()})
         )
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
