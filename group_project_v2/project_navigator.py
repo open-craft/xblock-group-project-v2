@@ -11,12 +11,14 @@ from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
-from group_project_v2.mixins import XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin, \
+from group_project_v2.mixins import (
+    XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin,
     XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin, NoStudioEditableSettingsMixin
+)
 
-from group_project_v2.utils import loader, gettext as _, NO_EDITABLE_SETTINGS
+from group_project_v2.utils import loader, gettext as _
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 
 class ViewTypes(object):

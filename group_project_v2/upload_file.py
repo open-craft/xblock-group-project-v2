@@ -8,22 +8,38 @@ from django.core.files.storage import default_storage
 from django.conf import settings
 
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 
 class UploadFile(object):
     _sha1_hash = None
 
-    def __init__(self, file_stream, submission_id, project_context):  # group_id, user_id, project_api)
+    def __init__(self, file_stream, submission_id, project_context):
 
         self.file = file_stream
         self.mimetype = mimetypes.guess_type(self.file.name)[0]
 
         self.submission_id = submission_id
-        self.group_id = project_context["group_id"]
-        self.user_id = project_context["user_id"]
-        self.project_api = project_context["project_api"]
-        self.course_id = project_context["course_id"]
+        self.project_context = project_context
+
+    def _get_project_context_key(self, key):
+        return self.project_context[key]
+
+    @property
+    def user_id(self):
+        return self._get_project_context_key("user_id")
+
+    @property
+    def group_id(self):
+        return self._get_project_context_key("group_id")
+
+    @property
+    def course_id(self):
+        return self._get_project_context_key("course_id")
+
+    @property
+    def project_api(self):
+        return self._get_project_context_key("project_api")
 
     @lazy
     def sha1(self):
