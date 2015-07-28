@@ -6,7 +6,7 @@
 
 .group-project-team-wrapper .group-project-team-member {
     border-bottom: 1px solid #ccc;
-    padding: 15px;
+    padding: 15px 0 8px 0;
 }
 
 .group-project-team-wrapper .group-project-team-member:first-of-type {
@@ -14,16 +14,44 @@
 }
 
 .group-project-team-wrapper .group-project-team-member-avatar {
-    width: 10%;
+    width: 40px;
     display: inline-block;
     vertical-align: top;
+    margin-left: 20px;
+    margin-right: 10px;
 }
 
 .group-project-team-wrapper .group-project-team-member-data {
     display: inline-block;
-    height: 130px;
+    font-size: 10px;
+}
+
+.group-project-team-wrapper .group-project-team-member-data .group-project-team-member-info {
+    height: 110px;
+}
+
+.group-project-team-wrapper .group-project-team-member-data .group-project-team-member-username a,
+.group-project-team-wrapper .group-project-team-member-data .group-project-team-member-username a:visited, {
+    font-size: 10px;
+}
+
+.group-project-team-wrapper .group-project-team-member-name {
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.group-project-team-wrapper .group-project-team-member-title {
+    font-size: 12px;
 }
 
 .group-project-team-wrapper .group-project-team-member-city {
     color: #8f8f8f;
+}
+
+.group-project-team-wrapper  .group-project-team-member-organization {
+    text-transform: uppercase;
+}
+
+.group-project-team-email-dialog .group-project-team-email-modal-subtitle {
+    margin-bottom: 10px;
 }

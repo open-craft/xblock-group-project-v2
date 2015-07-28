@@ -7,15 +7,20 @@
         <img class="avatar" {% if team_member.avatar_url %} src="{{team_member.avatar_url }}" {% endif %}/>
       </div>
       <div class="group-project-team-member-data">
-        <div class="group-project-team-member-username">
-          <a href={{course_id}}/discussion/forum/users/{{ team_member.id }}>{{ team_member.username}}</a>
-        </div>
-        <div class="group-project-team-member-name">{{ team_member.full_name }}</div>
-        <div class="group-project-team-member-title">
-          {% if team_member.title %}{{ team_member.title }}{% endif %}
-        </div>
-        <div class="group-project-team-member-city">
-          {% if team_member.city %}{{ team_member.city }}{% endif %}
+        <div class="group-project-team-member-info">
+          <div class="group-project-team-member-username">
+            <a href={{course_id}}/discussion/forum/users/{{ team_member.id }}>{{ team_member.username}}</a>
+          </div>
+          <div class="group-project-team-member-name">{{ team_member.full_name }}</div>
+          <div class="group-project-team-member-title">
+            {% if team_member.title %}{{ team_member.title }}{% endif %}
+          </div>
+          <div class="group-project-team-member-organization">
+            {% if team_member.organization %}{{ team_member.organization }}{% endif %}
+          </div>
+          <div class="group-project-team-member-city">
+            {% if team_member.city %}{{ team_member.city }}{% endif %}
+          </div>
         </div>
         <div class="group-project-team-member-email">
           <a href="#" data-email="{{ team_member.email }}">{% trans "Email" %}</a>
@@ -32,6 +37,8 @@
       <i class="fa fa-times-circle"></i>
     </div>
     <h2 class="group-project-team-email-modal-title">{% trans "Message your group" %}</h2>
+    <hr/>
+    <div class="group-project-team-email-modal-subtitle">{% trans "Send any questions or messages to your group." %}</div>
     <div class="error"></div>
     <form class="email-member-form" action="/courses/{{ course_id }}/group_email/{{ group_id }}" method="POST">
       <input type="hidden" class="csrfmiddlewaretoken" name="csrfmiddlewaretoken" value="">
@@ -47,12 +54,14 @@
     <div class="close-box">
       <i class="fa fa-times-circle"></i>
     </div>
-    <h2 class="group-project-team-email-modal-title">{% trans "Send any questions or messages to your group member." %}</h2>
+    <h2 class="group-project-team-email-modal-title">{% trans "Message your group member"%}</h2>
+    <hr/>
+    <div class="group-project-team-email-modal-subtitle">{% trans "Send any questions or messages to your group member." %}</div>
     <div class="error"></div>
     <form class="email-member-form" action="/courses/{{ course_id }}/group_member_email/{{ group_id }}" method="POST">
       <input type="hidden" class="csrfmiddlewaretoken" name="csrfmiddlewaretoken" value="">
       <input type="hidden" class="member-email" name="member-email" value="">
-      <textarea placeholder='{% trans "Enter your message for the TA here" %}' name="member_message"></textarea>
+      <textarea placeholder='{% trans "Enter your message here" %}' name="member_message"></textarea>
       <input class="button radius small" type="submit" value='{% trans "Submit" %}' disabled="disabled">
     </form>
   </div>

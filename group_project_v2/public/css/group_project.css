@@ -165,6 +165,7 @@
     visibility: visible !important;
 }
 
+.group-project-team-email-dialog .xblock-reveal.reveal-modal.open,
 .message .xblock-reveal.reveal-modal.open {
     width: 500px !important;
     margin-left: -250px;
