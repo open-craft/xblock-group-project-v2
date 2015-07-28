@@ -26,6 +26,11 @@ from group_project_v2.utils import (
 log = logging.getLogger(__name__)
 
 
+class HtmlXBlockProxy(object):
+    CATEGORY = 'html'
+    STUDIO_LABEL = _(u"HTML")
+
+
 class BaseGroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
     display_name = String(
         display_name=_(u"Display Name"),
@@ -54,6 +59,7 @@ class BaseGroupProjectResourceXBlock(XBlock, StudioEditableXBlockMixin, XBlockWi
 
 class GroupProjectResourceXBlock(BaseGroupProjectResourceXBlock):
     CATEGORY = "gp-v2-resource"
+    STUDIO_LABEL = _(u"Resource")
 
     PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/resource.html'
 
@@ -78,6 +84,7 @@ class GroupProjectResourceXBlock(BaseGroupProjectResourceXBlock):
 
 class GroupProjectVideoResourceXBlock(BaseGroupProjectResourceXBlock):
     CATEGORY = "gp-v2-video-resource"
+    STUDIO_LABEL = _(u"Video Resource")
     PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/video_resource.html'
 
     video_id = String(
@@ -149,6 +156,7 @@ class StaticContentBaseXBlock(XBlock, XBlockWithPreviewMixin):
 
 class SubmissionsStaticContentXBlock(StaticContentBaseXBlock):
     DISPLAY_NAME = _(u"Submissions Help Text")
+    STUDIO_LABEL = DISPLAY_NAME
     CATEGORY = "gp-v2-static-submissions"
 
     display_name_with_default = DISPLAY_NAME
@@ -160,6 +168,7 @@ class SubmissionsStaticContentXBlock(StaticContentBaseXBlock):
 
 class GradeRubricStaticContentXBlock(StaticContentBaseXBlock):
     DISPLAY_NAME = _(u"Grade Rubric Help Text")
+    STUDIO_LABEL = DISPLAY_NAME
     CATEGORY = "gp-v2-static-grade-rubric"
 
     display_name_with_default = DISPLAY_NAME
@@ -177,6 +186,7 @@ SubmissionUpload = namedtuple("SubmissionUpload", "location file_name submission
 @XBlock.wants('notifications')
 class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
     CATEGORY = "gp-v2-submission"
+    STUDIO_LABEL = _(u"Submission")
     PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/submission_navigator_view.html'
     REVIEW_VIEW_TEMPLATE = 'templates/html/components/submission_review_view.html'
 
@@ -356,6 +366,7 @@ class GroupProjectSubmissionXBlock(XBlock, ProjectAPIXBlockMixin, StudioEditable
 
 class PeerSelectorXBlock(XBlock, XBlockWithPreviewMixin):
     CATEGORY = "gp-v2-peer-selector"
+    STUDIO_LABEL = _(u"Teammate selector")
     display_name_with_default = _(u"Teammate selector XBlock")
     STUDENT_TEMPLATE = "templates/html/components/peer_selector.html"
 
@@ -395,6 +406,7 @@ class PeerSelectorXBlock(XBlock, XBlockWithPreviewMixin):
 
 class GroupSelectorXBlock(XBlock, XBlockWithPreviewMixin):
     CATEGORY = "gp-v2-group-selector"
+    STUDIO_LABEL = _(u"Group selector")
     display_name_with_default = _(u"Group selector XBlock")
     STUDENT_TEMPLATE = "templates/html/components/group_selector.html"
 
@@ -434,6 +446,7 @@ class GroupSelectorXBlock(XBlock, XBlockWithPreviewMixin):
 
 class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
     CATEGORY = "gp-v2-review-question"
+    STUDIO_LABEL = _(u"Review Question")
 
     @property
     def display_name_with_default(self):
@@ -560,7 +573,7 @@ class GroupProjectReviewQuestionXBlock(XBlock, StudioEditableXBlockMixin, XBlock
         return fragment
 
 
-class GroupProjectBaseAssessmentXBlock(
+class GroupProjectBaseFeedbackDisplayXBlock(
     XBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin, WorkgroupAwareXBlockMixin
 ):
     question_id = String(
@@ -628,7 +641,7 @@ class GroupProjectBaseAssessmentXBlock(
         return fragment
 
     def validate(self):
-        validation = super(GroupProjectBaseAssessmentXBlock, self).validate()
+        validation = super(GroupProjectBaseFeedbackDisplayXBlock, self).validate()
 
         if self.question is None:
             validation.add(ValidationMessage(
@@ -647,8 +660,9 @@ class GroupProjectBaseAssessmentXBlock(
         return fragment
 
 
-class GroupProjectPeerAssessmentXBlock(GroupProjectBaseAssessmentXBlock):
+class GroupProjectTeamEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXBlock):
     CATEGORY = "gp-v2-peer-assessment"
+    STUDIO_LABEL = _(u"Team Evaluation Display")
 
     def get_feedback(self):
         all_feedback = self.project_api.get_user_peer_review_items(
@@ -660,8 +674,9 @@ class GroupProjectPeerAssessmentXBlock(GroupProjectBaseAssessmentXBlock):
         return [item for item in all_feedback if item["question"] == self.question_id]
 
 
-class GroupProjectGroupAssessmentXBlock(GroupProjectBaseAssessmentXBlock):
+class GroupProjectGradeEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXBlock):
     CATEGORY = "gp-v2-group-assessment"
+    STUDIO_LABEL = _(u"Grade Evaluation Display")
 
     def get_feedback(self):
         all_feedback = self.project_api.get_workgroup_review_items_for_group(

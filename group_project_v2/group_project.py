@@ -2,8 +2,6 @@
 #
 # TODO: lots of broad except clauses - disabled in pylint, but might make sense to clean them up
 # Imports ###########################################################
-from collections import OrderedDict
-
 import logging
 import itertools
 from lazy.lazy import lazy
@@ -56,10 +54,7 @@ class GroupProjectXBlock(
 
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
-        return {
-            GroupActivityXBlock.CATEGORY: _(u"Group Project Activity"),
-            GroupProjectNavigatorXBlock.CATEGORY: _(u"Group Project Navigator"),
-        }
+        return [GroupActivityXBlock, GroupProjectNavigatorXBlock]
 
     @lazy
     def activities(self):
@@ -170,6 +165,7 @@ class GroupActivityXBlock(
     )
 
     CATEGORY = "gp-v2-activity"
+    STUDIO_LABEL = _(u"Group Project Activity")
 
     editable_fields = ("display_name", "weight", "group_reviews_required_count", "user_review_count")
     has_score = True
@@ -196,14 +192,11 @@ class GroupActivityXBlock(
 
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
-        return OrderedDict([
-            (stage_type.CATEGORY, stage_type.STUDIO_LABEL)
-            for stage_type in (
-                BasicStage, CompletionStage, SubmissionStage,
-                TeamEvaluationStage, PeerReviewStage,
-                EvaluationDisplayStage, GradeDisplayStage
-            )
-        ])
+        return [
+            BasicStage, CompletionStage, SubmissionStage,
+            TeamEvaluationStage, PeerReviewStage,
+            EvaluationDisplayStage, GradeDisplayStage
+        ]
 
     @property
     def stages(self):

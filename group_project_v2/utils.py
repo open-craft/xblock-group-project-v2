@@ -158,7 +158,8 @@ def get_default_stage(stages):
     was requested. Rules for getting "default" stage are as follows:
         1. If all the stages are not open - sequentially first
         2. If all the stages are closed - sequentially last
-        3. If at least one stage is open and not closed - sequentially last opened and not closed
+        3. If at least one opened and not closed and incomplete - first open and incomplete
+        4. Otherwise - sequentially last open and not closed
 
     """
     stages = [stage for stage in stages if stage]
@@ -171,12 +172,13 @@ def get_default_stage(stages):
     if all(stage.is_closed for stage in stages):
         return stages[-1]
 
-    last_opened = None
-    for stage in stages:
-        if stage.is_open and not stage.is_closed:
-            last_opened = stage
+    available_stages = [stage for stage in stages if stage.available_now]
+    try:
+        return next(stage for stage in available_stages if not stage.completed)
+    except StopIteration:
+        pass
 
-    return last_opened
+    return available_stages[-1]
 
 
 def get_link_to_block(block):
