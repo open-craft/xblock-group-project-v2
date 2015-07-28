@@ -62,6 +62,15 @@ class ProjectAPI(object):
         return json.loads(response.read())
 
     @api_error_protect
+    def get_user_details(self, user_id):
+        return self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
+
+    @api_error_protect
+    def get_user_organizations(self, user_id):
+        qs_params = {'page_size': 0}
+        return self.send_request(GET, (USERS_API, user_id, 'organizations'), query_params=qs_params)
+
+    @api_error_protect
     def get_user_preferences(self, user_id):
         """ gets users preferences information """
         return self.send_request(GET, (USERS_API, user_id, 'preferences'), no_trailing_slash=True)
@@ -89,12 +98,12 @@ class ProjectAPI(object):
         return self.send_request(GET, (WORKGROUP_API, group_id, 'workgroup_reviews'), query_params=qs_params)
 
     @api_error_protect
-    def update_workgroup_review_assessment(self, question_data):
-        return self.send_request(PUT, (WORKGROUP_REVIEW_API, question_data['id']), data=question_data)
-
-    @api_error_protect
     def create_workgroup_review_assessment(self, question_data):
         return self.send_request(POST, (WORKGROUP_REVIEW_API, ), data=question_data)
+
+    @api_error_protect
+    def update_workgroup_review_assessment(self, question_data):
+        return self.send_request(PUT, (WORKGROUP_REVIEW_API, question_data['id']), data=question_data)
 
     @api_error_protect
     def delete_workgroup_review_assessment(self, assessment_id):
@@ -113,10 +122,6 @@ class ProjectAPI(object):
             return None
 
         return self.get_workgroup_by_id(workgroups_list['results'][0]['id'])
-
-    @api_error_protect
-    def get_user_details(self, user_id):
-        return self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
 
     @api_error_protect
     def get_user_grades(self, user_id, course_id):
@@ -206,6 +211,15 @@ class ProjectAPI(object):
         response = self.send_request(GET, (COURSES_API, course_id, 'completions'), query_params=qs_params)
         return response.get('results', [])
 
+    @api_error_protect
+    def get_user_roles_for_course(self, user_id, course_id):
+        qs_params = {
+            "user_id": user_id,
+        }
+
+        return self.send_request(GET, (COURSES_API, course_id, 'roles'), query_params=qs_params)
+
+    # TODO: this method post-process api response: probably they should be moved outside of this class
     def get_stage_state(self, course_id, content_id, stage):
         stage_completions = self.get_stage_completions(course_id, content_id, stage)
         if stage_completions:
@@ -214,14 +228,6 @@ class ProjectAPI(object):
             completed_users = set()
 
         return completed_users
-
-    @api_error_protect
-    def get_user_roles_for_course(self, user_id, course_id):
-        qs_params = {
-            "user_id": user_id,
-        }
-
-        return self.send_request(GET, (COURSES_API, course_id, 'roles'), query_params=qs_params)
 
     # TODO: this method post-process api response: probably they should be moved outside of this class
     def get_peer_review_items(self, reviewer_id, peer_id, group_id, content_id):

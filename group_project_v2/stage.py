@@ -145,11 +145,19 @@ class BaseGroupActivityStage(
             return []
 
         try:
-            return [
-                self.project_api.get_user_details(team_member["id"])
-                for team_member in self.workgroup["users"]
-                if self.user_id != int(team_member["id"])
-            ]
+            result = []
+            for team_member in self.workgroup["users"]:
+                team_member_id = team_member["id"]
+                if self.user_id == int(team_member_id):
+                    continue
+
+                team_member_details = self.project_api.get_user_details(team_member_id)
+                team_member_organizations = self.project_api.get_user_organizations(team_member_id)
+                if team_member_organizations:
+                    team_member_details['organization'] = team_member_organizations[0]['display_name']
+                result.append(team_member_details)
+
+            return result
         except ApiError:
             return []
 
