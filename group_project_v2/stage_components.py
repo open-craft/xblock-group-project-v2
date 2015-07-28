@@ -17,7 +17,7 @@ from group_project_v2.mixins import WorkgroupAwareXBlockMixin, XBlockWithPreview
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
-from group_project_v2.utils import NO_EDITABLE_SETTINGS, get_link_to_block
+from group_project_v2.utils import get_link_to_block
 from group_project_v2.utils import (
     outer_html, gettext as _, loader, format_date, build_date_field, mean,
     outsider_disallowed_protected_view
@@ -361,7 +361,7 @@ class GroupProjectSubmissionXBlock(
         return uploaded_file
 
 
-class PeerSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin):
+class PeerSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin):
     CATEGORY = "gp-v2-peer-selector"
     STUDIO_LABEL = _(u"Teammate selector")
     display_name_with_default = _(u"Teammate selector XBlock")
@@ -391,13 +391,8 @@ class PeerSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin):
         render_context.update(context)
         return self.student_view(render_context)
 
-    def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
-        fragment = Fragment()
-        fragment.add_content(NO_EDITABLE_SETTINGS)
-        return fragment
 
-
-class GroupSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin):
+class GroupSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin):
     CATEGORY = "gp-v2-group-selector"
     STUDIO_LABEL = _(u"Group selector")
     display_name_with_default = _(u"Group selector XBlock")
@@ -426,11 +421,6 @@ class GroupSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin):
         }
         render_context.update(context)
         return self.student_view(render_context)
-
-    def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
-        fragment = Fragment()
-        fragment.add_content(NO_EDITABLE_SETTINGS)
-        return fragment
 
 
 class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin):
