@@ -13,7 +13,7 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin
+from group_project_v2.mixins import WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
@@ -684,3 +684,15 @@ class GroupProjectGradeEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXB
             self.stage.content_id,
         )
         return [item for item in all_feedback if item["question"] == self.question_id]
+
+
+class ProjectTeamXBlock(
+    XBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin, StudioEditableXBlockMixin, WorkgroupAwareXBlockMixin
+):
+    CATEGORY = 'gp-v2-project-team'
+    STUDIO_LABEL = _(u"Project Team")
+
+    display_name_with_default = STUDIO_LABEL
+
+    def student_view(self, context):
+        return Fragment(u"I'm Project Team Block")

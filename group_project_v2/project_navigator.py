@@ -12,7 +12,7 @@ from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
 from group_project_v2.mixins import XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin, \
-    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin
+    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin, NoStudioEditableSettingsMixin
 
 from group_project_v2.utils import loader, gettext as _, NO_EDITABLE_SETTINGS
 
@@ -30,7 +30,8 @@ class ViewTypes(object):
 
 
 class GroupProjectNavigatorXBlock(
-    ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin, StudioContainerXBlockMixin, XBlock
+    ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin,
+    NoStudioEditableSettingsMixin, StudioContainerXBlockMixin, XBlock
 ):
     """
     XBlock that provides basic layout and switching between children XBlocks (views)
@@ -115,11 +116,6 @@ class GroupProjectNavigatorXBlock(
         ))
         fragment.initialize_js("GroupProjectNavigatorBlock", js_parameters)
 
-        return fragment
-
-    def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
-        fragment = Fragment()
-        fragment.add_content(NO_EDITABLE_SETTINGS)
         return fragment
 
     def author_preview_view(self, context):  # pylint: disable=unused-argument, no-self-use
