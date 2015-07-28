@@ -297,20 +297,6 @@ class BaseGroupActivityStage(
         fragment.add_content(loader.render_template("templates/html/stages/navigation_view.html", rendering_context))
         return fragment
 
-    def resources_view(self, context):
-        fragment = Fragment()
-
-        resource_contents = []
-        for resource in self.resources:
-            resource_fragment = resource.render('resources_view', context)
-            fragment.add_frag_resources(resource_fragment)
-            resource_contents.append(resource_fragment.content)
-
-        context = {'stage': self, 'resource_contents': resource_contents}
-        fragment.add_content(loader.render_template("templates/html/stages/resources_view.html", context))
-
-        return fragment
-
     def get_new_stage_state_data(self):
         return {
             "activity_id": str(self.activity.id),

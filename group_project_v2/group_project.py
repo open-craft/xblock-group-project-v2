@@ -291,13 +291,14 @@ class GroupActivityXBlock(
 
         has_resources = any([bool(stage.resources) for stage in self.stages])
 
-        stage_contents = []
-        for child in self.stages:
-            child_fragment = child.render('resources_view', context)
-            fragment.add_frag_resources(child_fragment)
-            stage_contents.append(child_fragment.content)
+        resource_contents = []
+        for stage in self.stages:
+            for resource in stage.resources:
+                resource_fragment = resource.render('resources_view', context)
+                fragment.add_frag_resources(resource_fragment)
+                resource_contents.append(resource_fragment.content)
 
-        context = {'activity': self, 'stage_contents': stage_contents, 'has_resources': has_resources}
+        context = {'activity': self, 'resource_contents': resource_contents, 'has_resources': has_resources}
         fragment.add_content(loader.render_template("templates/html/activity/resources_view.html", context))
 
         return fragment
