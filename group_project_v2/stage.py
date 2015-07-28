@@ -164,6 +164,10 @@ class BaseGroupActivityStage(
         return (self.close_date is not None) and (self.close_date < datetime.utcnow().replace(tzinfo=pytz.UTC))
 
     @property
+    def completed(self):
+        return self.get_stage_state() == StageState.COMPLETED
+
+    @property
     def available_now(self):
         return self.is_open and not self.is_closed
 
