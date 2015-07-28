@@ -684,5 +684,3 @@ class GroupProjectGradeEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXB
             self.stage.content_id,
         )
         return [item for item in all_feedback if item["question"] == self.question_id]
-
-

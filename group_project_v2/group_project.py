@@ -2,8 +2,6 @@
 #
 # TODO: lots of broad except clauses - disabled in pylint, but might make sense to clean them up
 # Imports ###########################################################
-from collections import OrderedDict
-
 import logging
 import itertools
 from lazy.lazy import lazy
