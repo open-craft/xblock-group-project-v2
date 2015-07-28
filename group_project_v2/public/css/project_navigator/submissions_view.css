@@ -1,10 +1,20 @@
-.group-project-submissions-view .group-project-submissions {
-    padding: 8px 0;
+.group-project-submissions-view ul.group-project-submissions li {
+    border-bottom: 1px solid #ccc;
+    list-style: none;
+    padding: 5px 0px;
+}
+
+.group-project-submissions-view ul.group-project-submissions li:last-of-type {
+    border-bottom: none;
 }
 
 .group-project-submissions-view .action_buttons {
     /* should not be visible by default, but still consume space to avoid resizing view - hence using visibility, not display*/
     visibility: hidden;
+}
+
+.group-project-submissions-view .uploader {
+    font-size: 14px;
 }
 
 .group-project-submissions-view .uploader .file-progress-box {
@@ -26,11 +36,6 @@
 
 .group-project-submissions-view .uploader .file-progress-box .file-progress.failed {
     background-color: #B85433;
-}
-
-.group-project-submissions-view .uploader {
-    font-size: 14px;
-    margin-bottom: 10px;
 }
 
 .group-project-submissions-view .uploader .upload_title {
@@ -58,6 +63,12 @@
     padding: 0;
     line-height: 30px;
     margin-bottom: 0;
+    font-size: 14px;
+}
+
+.group-project-submissions-view .uploader input {
+    border: none;
+    box-shadow: none;
 }
 
 .group-project-submissions-view .uploader .description {

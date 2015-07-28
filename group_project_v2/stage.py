@@ -454,9 +454,6 @@ class SubmissionStage(BaseGroupActivityStage):
 
         return fragment
 
-    def submissions_view(self, context):
-        return self._render_view('submissions_view', "templates/html/stages/submissions_view.html", context)
-
     def review_submissions_view(self, context):
         # transparently passing group_id via context
         return self._render_view(

@@ -3,9 +3,13 @@
   <div class="group-project-activity-header">{{ activity.display_name }}</div>
   {% if has_submissions %}
     <ul class="group-project-activity-content group-project-submissions">
-      {% for stage_content in stage_contents %}{{ stage_content|safe }}{% endfor %}
+      {% for submission_content in submission_contents %}
+        <li>{{ submission_content|safe }}</li>
+      {% endfor %}
     </ul>
   {% else %}
-    <div class="group-project-activity-content group-project-navigator-grey-text">{% trans "No uploads for this activity" %}</div>
+    <div class="group-project-activity-content group-project-navigator-grey-text">
+      {% trans "No uploads required for this activity" %}
+    </div>
   {% endif %}
 </div>

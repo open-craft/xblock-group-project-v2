@@ -310,13 +310,14 @@ class GroupActivityXBlock(
 
         has_submissions = any([stage.has_submissions for stage in target_stages])
 
-        stage_contents = []
-        for child in target_stages:
-            child_fragment = child.render('submissions_view', context)
-            fragment.add_frag_resources(child_fragment)
-            stage_contents.append(child_fragment.content)
+        submission_contents = []
+        for stage in target_stages:
+            for child in stage.submissions:
+                child_fragment = child.render('submissions_view', context)
+                fragment.add_frag_resources(child_fragment)
+                submission_contents.append(child_fragment.content)
 
-        context = {'activity': self, 'stage_contents': stage_contents, 'has_submissions': has_submissions}
+        context = {'activity': self, 'submission_contents': submission_contents, 'has_submissions': has_submissions}
         fragment.add_content(loader.render_template("templates/html/activity/submissions_view.html", context))
 
         return fragment
