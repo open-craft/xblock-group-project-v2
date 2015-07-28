@@ -25,10 +25,6 @@
     margin-right: 5px;
 }
 
-.group-project-navigation-view .group-project-activity-header:after {
-    content: ":";
-}
-
 .group-project-navigation-view .group-project-stage-state.not_started {
     color: #ccc;
 }

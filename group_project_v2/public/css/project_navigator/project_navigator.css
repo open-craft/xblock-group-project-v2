@@ -82,6 +82,10 @@
     color: #8e8e8e;
 }
 
+.group-project-navigator-view .group-project-activity-header:after {
+    content: ":";
+}
+
 .group-project-navigator-view .group-project-activity-content {
     margin-bottom: 5px;
 }
