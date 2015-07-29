@@ -9,7 +9,6 @@ from xblock.fields import String, Scope
 from xblockutils.base_test import SeleniumXBlockTest
 
 from group_project_v2.group_project import GroupActivityXBlock
-from group_project_v2.project_api import ProjectAPIXBlockMixin
 from tests.integration.page_elements import GroupProjectElement
 from tests.utils import loader, get_mock_project_api
 
@@ -24,8 +23,7 @@ class DummyHtmlXBlock(XBlock):
 class BaseIntegrationTest(SeleniumXBlockTest):
     """ Base Integraition test class """
     PROJECT_API_PATCHES = (
-        "group_project_v2.mixins.ProjectAPIXBlockMixin",
-        "group_project_v2.stage_components.ProjectAPIXBlockMixin",
+        "group_project_v2.project_api.ProjectAPIXBlockMixin.project_api",
     )
 
     @classmethod
@@ -51,12 +49,13 @@ class BaseIntegrationTest(SeleniumXBlockTest):
 
         super(BaseIntegrationTest, self).setUp()
         self.project_api_mock = get_mock_project_api()
-        patch = mock.Mock(spec=ProjectAPIXBlockMixin)
-        patch.project_api = mock.PropertyMock(return_value=self.project_api_mock)
+
+        asides_patch = mock.patch("workbench.runtime.WorkbenchRuntime.applicable_aside_types", mock.Mock(return_value=[]))
+        asides_patch.start()
 
         patchers = []
         for patch_location in self.PROJECT_API_PATCHES:
-            patcher = mock.patch(patch_location, patch)
+            patcher = mock.patch(patch_location, self.project_api_mock)
             patcher.start()
             patchers.append(patcher)
 
@@ -65,6 +64,7 @@ class BaseIntegrationTest(SeleniumXBlockTest):
                 patcher.stop()
 
         self.addCleanup(stop_patchers)
+        self.addCleanup(lambda: asides_patch.stop())
 
 
     def _add_external_features(self):
