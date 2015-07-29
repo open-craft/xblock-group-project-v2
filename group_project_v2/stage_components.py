@@ -457,7 +457,8 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
         help=_(u"HTML control"),
         default="",
         scope=Scope.content,
-        multiline_editor="xml"
+        multiline_editor="xml",
+        xml_node=True
     )
 
     required = Boolean(
@@ -500,8 +501,10 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
     def render_content(self):
         try:
             answer_node = ElementTree.fromstring(self.question_content)
-        except ElementTree.ParseError as exception:
-            log.exception(exception)
+        except ElementTree.ParseError:
+            message_tpl = "Exception when parsing question content for question {question_id}. Content is [{content}]."
+            message_tpl.format(question_id=self.question_id, content=self.question_content)
+            log.exception(message_tpl)
             return ""
 
         answer_node.set('name', self.question_id)
