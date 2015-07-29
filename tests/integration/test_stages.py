@@ -6,7 +6,7 @@ import ddt
 import textwrap
 from freezegun import freeze_time
 import mock
-from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage, GroupReviewStage
+from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage, TeamEvaluationStage
 
 from tests.integration.base_test import BaseIntegrationTest
 from tests.integration.page_elements import GroupProjectElement, StageElement, ReviewStageElement
@@ -371,7 +371,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
 
 @ddt.ddt
 class GroupReviewStageTest(BaseReviewStageTest):
-    stage_type = GroupReviewStage
+    stage_type = TeamEvaluationStage
     stage_element = ReviewStageElement
 
     OTHER_GROUPS = {
