@@ -50,7 +50,7 @@ class UserAwareXBlockMixin(object):
         try:
             return self.runtime.anonymous_student_id
         except AttributeError:
-            log.exception("Runtime does not have anonymous_student_id attribute - trying user_id")
+            log.warning("Runtime does not have anonymous_student_id attribute - trying user_id")
             return self.runtime.user_id
 
     @lazy
