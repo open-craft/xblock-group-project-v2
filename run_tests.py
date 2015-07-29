@@ -16,6 +16,8 @@ logging_level_overrides = {
     'workbench.views': logging.ERROR,
     'django.request': logging.ERROR,
     'workbench.runtime': logging.ERROR,
+    'group_project_v2.json_requests': logging.ERROR,
+    'group_project_v2.mixins': logging.ERROR,
 }
 
 if __name__ == "__main__":

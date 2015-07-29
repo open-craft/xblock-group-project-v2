@@ -24,8 +24,7 @@ class DummyHtmlXBlock(XBlock):
 class BaseIntegrationTest(SeleniumXBlockTest):
     """ Base Integraition test class """
     PROJECT_API_PATCHES = (
-        "group_project_v2.group_project.ProjectAPIXBlockMixin",
-        "group_project_v2.stage.ProjectAPIXBlockMixin",
+        "group_project_v2.mixins.ProjectAPIXBlockMixin",
         "group_project_v2.stage_components.ProjectAPIXBlockMixin",
     )
 
