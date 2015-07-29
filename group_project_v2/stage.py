@@ -46,19 +46,16 @@ class ReviewState(object):
     COMPLETED = 'completed'
 
 
+DISPLAY_NAME_NAME = _(u"Display Name")
+DISPLAY_NAME_HELP = _(U"This is a name of the stage")
+
+
 class BaseGroupActivityStage(
     XBlockWithPreviewMixin, XBlockWithComponentsMixin, StageNotificationsMixin,
     XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
     ChildrenNavigationXBlockMixin, XBlockWithUrlNameDisplayMixin,
     WorkgroupAwareXBlockMixin, AdminAccessControlXBlockMixin
 ):
-    display_name = String(
-        display_name=_(u"Display Name"),
-        help=_(U"This is a name of the stage"),
-        scope=Scope.content,
-        default="Group Project V2 Stage"
-    )
-
     open_date = DateTime(
         display_name=_(u"Open Date"),
         help=_(u"Stage open date"),
@@ -102,10 +99,6 @@ class BaseGroupActivityStage(
     @property
     def id(self):
         return self.scope_ids.usage_id
-
-    @property
-    def display_name_with_default(self):
-        return u"{type_name} - {stage_name}".format(type_name=self.STUDIO_LABEL, stage_name=self.display_name)
 
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
@@ -320,6 +313,13 @@ class BaseGroupActivityStage(
 
 
 class BasicStage(BaseGroupActivityStage):
+    display_name = String(
+        display_name=DISPLAY_NAME_NAME,
+        help=DISPLAY_NAME_HELP,
+        scope=Scope.content,
+        default=_(u"Text Stage")
+    )
+
     CATEGORY = 'gp-v2-stage-basic'
 
     NAVIGATION_LABEL = _(u'Overview')
@@ -335,6 +335,13 @@ class BasicStage(BaseGroupActivityStage):
 
 
 class CompletionStage(BaseGroupActivityStage):
+    display_name = String(
+        display_name=DISPLAY_NAME_NAME,
+        help=DISPLAY_NAME_HELP,
+        scope=Scope.content,
+        default=_(u"Completion Stage")
+    )
+
     completed = Boolean(
         display_name=_(u"Completed"),
         scope=Scope.user_state
@@ -379,6 +386,13 @@ class CompletionStage(BaseGroupActivityStage):
 
 
 class SubmissionStage(BaseGroupActivityStage):
+    display_name = String(
+        display_name=DISPLAY_NAME_NAME,
+        help=DISPLAY_NAME_HELP,
+        scope=Scope.content,
+        default=_(u"Submission Stage")
+    )
+
     CATEGORY = 'gp-v2-stage-submission'
 
     NAVIGATION_LABEL = _(u'Task')
@@ -579,6 +593,13 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
 
 class TeamEvaluationStage(ReviewBaseStage):
+    display_name = String(
+        display_name=DISPLAY_NAME_NAME,
+        help=DISPLAY_NAME_HELP,
+        scope=Scope.content,
+        default=_(u"Team Evaluation Stage")
+    )
+
     CATEGORY = 'gp-v2-stage-team-evaluation'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/team_evaluation.html'
 
@@ -640,6 +661,13 @@ class TeamEvaluationStage(ReviewBaseStage):
 
 
 class PeerReviewStage(ReviewBaseStage):
+    display_name = String(
+        display_name=DISPLAY_NAME_NAME,
+        help=DISPLAY_NAME_HELP,
+        scope=Scope.content,
+        default=_(u"Peer Grading Stage")
+    )
+
     CATEGORY = 'gp-v2-stage-peer-review'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
 
@@ -766,6 +794,13 @@ class FeedbackDisplayBaseStage(BaseGroupActivityStage):
 
 
 class EvaluationDisplayStage(FeedbackDisplayBaseStage):
+    display_name = String(
+        display_name=DISPLAY_NAME_NAME,
+        help=DISPLAY_NAME_HELP,
+        scope=Scope.content,
+        default=_(u"Evaluation Display Stage")
+    )
+
     CATEGORY = 'gp-v2-stage-evaluation-display'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/evaluation_display.html'
 
@@ -785,6 +820,13 @@ class EvaluationDisplayStage(FeedbackDisplayBaseStage):
 
 
 class GradeDisplayStage(FeedbackDisplayBaseStage):
+    display_name = String(
+        display_name=DISPLAY_NAME_NAME,
+        help=DISPLAY_NAME_HELP,
+        scope=Scope.content,
+        default=_(u"Grade Display Stage")
+    )
+
     CATEGORY = 'gp-v2-stage-grade-display'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/grade_display.html'
 
