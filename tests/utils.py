@@ -88,9 +88,9 @@ class XMLContents(object):
         STAGES = ('overview', 'upload', 'peer_review', 'group_review', 'peer_assessment', 'group_assessment')
 
         STAGE_DATA = {
-            'overview': {
+            'Overview': {
                 'title': 'Overview',
-                'contents': "<p>I'm Overview Stage</p>",
+                'contents': "I'm Overview Stage",
             },
             'upload': {
                 'title': 'Upload',
