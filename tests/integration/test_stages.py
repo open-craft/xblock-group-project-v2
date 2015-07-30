@@ -101,12 +101,11 @@ class CommonStageTest(StageTestBase):
     )
     @ddt.unpack
     def test_open_close_label(self, mock_now, open_date, close_date, expected_label):
-        date_format = "%m/%d/%Y"
         kwargs = {}
         if open_date is not None:
-            kwargs['open'] = open_date.strftime(date_format)
+            kwargs['open_date'] = open_date.isoformat()
         if close_date is not None:
-            kwargs['close'] = close_date.strftime(date_format)
+            kwargs['close_date'] = close_date.isoformat()
 
         with freeze_time(mock_now):
             scenario_xml = self.build_scenario_xml("", **kwargs)  # pylint: disable=star-args
@@ -121,17 +120,21 @@ class NormalStageTest(StageTestBase):
     stage_type = BasicStage
 
     @ddt.data(
-        "I'm content",
-        "<p>I'm HTML content</p>",
-        '<div><p>More complex<span class="highlight">HTML content</span></p><p>Very complex indeed</p></div>'
+        ("I'm content", "I'm content"),
+        ("<p>I'm HTML content</p>", "I'm HTML content"),
+        (
+            '<div><p>More complex <span class="highlight">HTML content</span></p><p>Very complex indeed</p></div>',
+            'More complex HTML content\nVery complex indeed'
+        )
     )
-    def test_rendering(self, content):
+    @ddt.unpack
+    def test_rendering(self, content, expected_text):
         stage_content_xml = "<html>{content}</html>".format(content=content)
         self.load_scenario_xml(self.build_scenario_xml(stage_content_xml))
 
         stage_element = self.get_stage(self.go_to_view())
-        stage_content = stage_element.content.get_attribute('innerHTML').strip()
-        self.assertEqual(stage_content, content)
+        stage_content = stage_element.content.text.strip()
+        self.assertEqual(stage_content, expected_text)
 
 
 @ddt.ddt
@@ -139,18 +142,22 @@ class UploadStageTest(StageTestBase):
     stage_type = SubmissionStage
 
     @ddt.data(
-        "I'm content",
-        "<p>I'm HTML content</p>",
-        '<div><p>More complex<span class="highlight">HTML content</span></p><p>Very complex indeed</p></div>'
+        ("I'm content", "I'm content"),
+        ("<p>I'm HTML content</p>", "I'm HTML content"),
+        (
+            '<div><p>More complex <span class="highlight">HTML content</span></p><p>Very complex indeed</p></div>',
+            'More complex HTML content\nVery complex indeed'
+        )
     )
-    def test_rendering(self, content):
+    @ddt.unpack
+    def test_rendering(self, content, expected_text):
         stage_content_xml = "<html>{content}</html>".format(content=content)
         scenario_xml = self.build_scenario_xml(stage_content_xml)
         self.load_scenario_xml(scenario_xml)
 
         stage_element = self.get_stage(self.go_to_view())
-        stage_content = stage_element.content.get_attribute('innerHTML').strip()
-        self.assertEqual(stage_content, content)
+        stage_content = stage_element.content.text.strip()
+        self.assertEqual(stage_content, expected_text)
 
 
 class BaseReviewStageTest(StageTestBase):
@@ -475,7 +482,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
         self.assertEqual(len(groups), len(self.OTHER_GROUPS.keys()))
         for group_id, group in zip(self.OTHER_GROUPS.keys(), groups):
             group.click()
-            self.assertEqual(stage_element.form.group_id, str(group_id))
+            self.assertEqual(stage_element.form.group_id, group_id)
 
     def test_submission(self):
         user_id = 1
