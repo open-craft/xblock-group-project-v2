@@ -620,9 +620,10 @@ class TeamEvaluationStage(ReviewBaseStage):
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
     def load_peer_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
+        peer_id = int(request.GET["peer_id"])
         feedback = self.project_api.get_peer_review_items(
             self.anonymous_student_id,
-            request.GET["peer_id"],
+            peer_id,
             self.workgroup['id'],
             self.content_id,
         )
@@ -631,7 +632,7 @@ class TeamEvaluationStage(ReviewBaseStage):
         return webob.response.Response(body=json.dumps(results))
 
     def do_submit_review(self, submissions):
-        peer_id = submissions["review_subject_id"]
+        peer_id = int(submissions["review_subject_id"])
         del submissions["review_subject_id"]
 
         self.project_api.submit_peer_review_items(
@@ -694,7 +695,7 @@ class PeerReviewStage(ReviewBaseStage):
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
     def other_submission_links(self, request, suffix=''):  # pylint: disable=unused-argument
-        group_id = request.GET["group_id"]
+        group_id = int(request.GET["group_id"])
 
         target_stages = [stage for stage in self.activity.stages if stage.submissions_stage]
 
@@ -714,7 +715,7 @@ class PeerReviewStage(ReviewBaseStage):
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
     def load_other_group_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
-        group_id = request.GET["group_id"]
+        group_id = int(request.GET["group_id"])
         feedback = self.project_api.get_workgroup_review_items(self.anonymous_student_id, group_id, self.content_id)
         results = self._pivot_feedback(feedback)
 

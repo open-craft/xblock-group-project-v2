@@ -2,8 +2,9 @@
 This module contains classes representing various GroupProject page elements
 """
 from lazy.lazy import lazy
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from selenium.webdriver.support.select import Select
+from selenium.webdriver.support.wait import WebDriverWait
 from group_project_v2.stage import StageState
 
 
@@ -143,11 +144,11 @@ class ReviewStageElement(StageElement):
 
     @property
     def peers(self):
-        return self.make_elements(".peers .select_peer", ReviewObjectSelectorElement)
+        return self.make_elements(".peers.review_subjects .select_peer", ReviewObjectSelectorElement)
 
     @property
     def groups(self):
-        return self.make_elements(".other_groups .select_group", ReviewObjectSelectorElement)
+        return self.make_elements(".groups.review_subjects .select_group", ReviewObjectSelectorElement)
 
 
 class ReviewObjectSelectorElement(BaseElement):
@@ -156,22 +157,30 @@ class ReviewObjectSelectorElement(BaseElement):
     def name(self):
         return self.get_attribute('title')
 
+    @property
+    def subject_id(self):
+        return self.get_attribute('data-id')
+
 
 class ReviewFormElement(BaseElement):
     def _get_hidden_input_value(self, input_name):
         return self.element.find_element_by_css_selector("input[name='{}']".format(input_name)).get_attribute('value')
 
-    @property
-    def peer_id(self):
-        return self._get_hidden_input_value('peer_id')
+    def _get_review_subject_id(self, css_selector):
+        try:
+            selected_teammate_element = self.find_element_by_css_selector(css_selector)
+            selected_teammate = self.make_element(selected_teammate_element, ReviewObjectSelectorElement)
+            return int(selected_teammate.subject_id)
+        except NoSuchElementException:
+            return None
 
     @property
-    def stage_id(self):
-        return self._get_hidden_input_value('stage_id')
+    def peer_id(self):
+        return self._get_review_subject_id(".peers.review_subjects .select_peer.selected")
 
     @property
     def group_id(self):
-        return self._get_hidden_input_value('group_id')
+        return self._get_review_subject_id(".groups.review_subjects .select_group.selected")
 
     @property
     def questions(self):
@@ -193,17 +202,28 @@ class ReviewQuestionElement(BaseElement):
 
 
 class InputControl(BaseElement):
+    timeout = 5
+
     def __getattr__(self, item):
         if hasattr(self.element, item):
             return getattr(self.element, item)
         else:
             return self.element.get_attribute(item)
 
+    def _wait_unitl_enabled(self):
+        wait = WebDriverWait(self.element, self.timeout)
+        wait.until(lambda e: e.is_enabled(), u"{} should be enabled".format(self.element.text))
+
     def fill_text(self, text):
-        self.element.clear()
-        self.element.send_keys(text)
+        self._wait_unitl_enabled()
+        try:
+            self.element.clear()
+            self.element.send_keys(text)
+        except WebDriverException:
+            import time; time.sleep(120); raise
 
     def select_option(self, option_value):
+        self._wait_unitl_enabled()
         select = Select(self.element)
         select.select_by_value(option_value)
 
