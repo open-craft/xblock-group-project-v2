@@ -5,7 +5,7 @@ before_install:
     - "export DISPLAY=:99"
     - "sh -e /etc/init.d/xvfb start"
 install:
-    - "pip install -e git://github.com/edx/xblock-sdk.git#egg=xblock-sdk"
+    - "pip install -e git+https://github.com/edx-solutions/xblock-sdk.git@9a8be581c7bc6a32ab3645680f3e2e35d0320b70#egg=xblock_sdk"
     - "pip install -r requirements.txt"
     - "pip install -r test-requirements.txt"
     - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/requirements.txt"
