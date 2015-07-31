@@ -1,6 +1,8 @@
 .group-project-navigator-wrapper {
     border: 1px solid #ccc;
     color: #8f8f8f;
+    background-color: white;
+    margin-right: -27px;
     box-shadow: 0 2px 5px 0 #ccc;
 }
 
