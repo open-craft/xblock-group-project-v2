@@ -9,8 +9,8 @@
 
 .group-project-navigation-view .group-project-stage {
     margin: 0 -10px;
-    /* 28px left padding = 18px for state icon and 10 px to compensate for negative margin */
-    padding: 4px 10px 4px 28px;
+    /* 30px left padding = 20px for state icon and 10 px to compensate for negative margin */
+    padding: 4px 10px 4px 30px;
 }
 
 .group-project-navigation-view .group-project-stage.current {
@@ -20,9 +20,9 @@
 .group-project-navigation-view  .group-project-stage-state {
     display: inline-block;
     font-size: 16px;
-    margin-left: -18px;
+    margin-left: -20px;
     width: 14px;
-    margin-right: 5px;
+    margin-right: 2px;
 }
 
 .group-project-navigation-view .group-project-stage-state.not_started {
