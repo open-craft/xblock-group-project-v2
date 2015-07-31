@@ -133,7 +133,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
         # need to get this now as `navigate_to` will navigate from the page and `stage` instance will become detached
         stage_ids = [stage.stage_id for stage in nav_view.stages]
         for stage_id in stage_ids:
-            stage = [stage for stage in nav_view.stages if stage.stage_id == stage_id][0]
+            stage = [st for st in nav_view.stages if st.stage_id == stage_id][0]
             activity_id = stage.activity_id
             stage.navigate_to()
             # refreshing wrappers after page reload

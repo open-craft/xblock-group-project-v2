@@ -1,5 +1,4 @@
 """ Base classes for integration tests """
-import textwrap
 from django.utils.safestring import mark_safe
 import mock
 from sample_xblocks.basic.content import HtmlBlock
@@ -11,6 +10,12 @@ from xblockutils.base_test import SeleniumXBlockTest
 from group_project_v2.group_project import GroupActivityXBlock
 from tests.integration.page_elements import GroupProjectElement
 from tests.utils import loader, get_mock_project_api
+
+
+def get_block_link(block):
+    return "/scenario/test/student_view/?student=1&activate_block_id={block_id}".format(
+        block_id=block.scope_ids.usage_id
+    )
 
 
 class DummyHtmlXBlock(XBlock):
@@ -27,7 +32,7 @@ class BaseIntegrationTest(SeleniumXBlockTest):
     )
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls):  # pylint: disable=invalid-name
         super(BaseIntegrationTest, cls).setUpClass()
         entry_point = mock.Mock(
             dist=mock.Mock(key='xblock'),
@@ -38,19 +43,17 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         XBlock.extra_entry_points.append(cls._extra_entry_points_record)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls):  # pylint: disable=invalid-name
         super(BaseIntegrationTest, cls).tearDownClass()
         XBlock.extra_entry_points.remove(cls._extra_entry_points_record)
-
-    def get_block_link(self, block):
-        return "/scenario/test/student_view/?student=1&activate_block_id={block_id}".format(
-            block_id=block.scope_ids.usage_id
-        )
 
     def _set_up_global_patches(self):
         patchers = []
 
-        asides_patch = mock.patch("workbench.runtime.WorkbenchRuntime.applicable_aside_types", mock.Mock(return_value=[]))
+        asides_patch = mock.patch(
+            "workbench.runtime.WorkbenchRuntime.applicable_aside_types",
+            mock.Mock(return_value=[])
+        )
         asides_patch.start()
         patchers.append(asides_patch)
 
@@ -64,7 +67,7 @@ class BaseIntegrationTest(SeleniumXBlockTest):
             'group_project_v2.stage_components.get_link_to_block'
         )
         for location in patch_get_link_to_block_at:
-            patcher = mock.patch(location, mock.Mock(side_effect=self.get_block_link))
+            patcher = mock.patch(location, mock.Mock(side_effect=get_block_link))
             patcher.start()
             patchers.append(patcher)
 
@@ -79,7 +82,7 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         self.project_api_mock = get_mock_project_api()
 
         patchers = self._set_up_global_patches()
-        self.addCleanup(lambda: map(lambda p: p.stop, patchers))
+        self.addCleanup(lambda: [patcher.stop for patcher in patchers])
 
     def go_to_view(self, view_name='student_view', student_id=1):
         """

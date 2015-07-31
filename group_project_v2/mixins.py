@@ -22,7 +22,7 @@ class ChildrenNavigationXBlockMixin(object):
         children = (self.runtime.get_block(child_id) for child_id in self.children)
         return [child for child in children if child is not None]
 
-    def get_child_category(self, child):
+    def get_child_category(self, child):  # pylint: disable=no-self-use
         field_candidates = ('category', 'plugin_name')
         try:
             return next(getattr(child, field) for field in field_candidates if hasattr(child, field))
