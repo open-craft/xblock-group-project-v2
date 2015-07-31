@@ -82,7 +82,12 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         self.project_api_mock = get_mock_project_api()
 
         patchers = self._set_up_global_patches()
-        self.addCleanup(lambda: [patcher.stop for patcher in patchers])
+
+        def cleanup():
+            for patcher in patchers:
+                patcher.stop()
+
+        self.addCleanup(cleanup)
 
     def go_to_view(self, view_name='student_view', student_id=1):
         """
