@@ -70,7 +70,7 @@ class BaseElement(object):
 
 class GroupProjectElement(BaseElement):
     """ Wrapper around group project xblock element """
-    ACTIVITY_CSS_SELECTOR = ".xblock-v1[data-block-type='gp-v2-activity']"
+    ACTIVITY_CSS_SELECTOR = ".group-project-content .xblock-v1[data-block-type='gp-v2-activity']"
 
     @property
     def activities(self):
@@ -273,6 +273,8 @@ class ProjectNavigatorViewElement(BaseElement):
             close_button.click()
         except NoSuchElementException:
             raise AssertionError("View cannot be closed")
+        except Exception:
+            import time; time.sleep(1200); raise
 
 
 class ProjectNavigatorViewSelectorElement(BaseElement):
@@ -319,7 +321,7 @@ class SubmissionsViewElement(ProjectNavigatorViewElement):
 class StageItemElement(BaseElement):
     def __init__(self, browser, element):
         super(StageItemElement, self).__init__(browser, element)
-        self.stage_link = element.find_element_by_css_selector(".group-project-stage-type a")
+        self.stage_link = element.find_element_by_css_selector(".group-project-stage-title a")
 
     @property
     def stage_id(self):

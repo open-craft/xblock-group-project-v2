@@ -72,7 +72,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
         """
         Tests navigation view and stage navigation
         """
-        def stage_states(course_id, activity_id, user_id, stage_id):  # pylint: disable=unused-argument
+        def stage_states(course_id, activity_id, stage_id):  # pylint: disable=unused-argument
             users_in_group, completed_users = {1, 2}, {}  # default: two users in group and no one completed
             if stage_id == "overview":
                 completed_users = {1, 2}  # overview is completed

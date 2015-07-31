@@ -62,10 +62,11 @@ class GroupProjectNavigatorXBlock(
 
     def _get_activated_view_type(self, activate_block_id):
         try:
-            usage_id = BlockUsageLocator.from_string(activate_block_id)
-            if usage_id.block_type in PROJECT_NAVIGATOR_VIEW_TYPES:
-                block = self.runtime.get_block(usage_id)
-                return block.type
+            if activate_block_id:
+                usage_id = BlockUsageLocator.from_string(activate_block_id)
+                if usage_id.block_type in PROJECT_NAVIGATOR_VIEW_TYPES:
+                    block = self.runtime.get_block(usage_id)
+                    return block.type
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 

@@ -123,6 +123,7 @@ class GroupProjectXBlock(
         fragment.add_content(loader.render_template("templates/html/group_project.html", render_context))
 
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/vendor/font-awesome/font-awesome.css'))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/group_project.js'))
         fragment.initialize_js("GroupProjectBlock")
         return fragment

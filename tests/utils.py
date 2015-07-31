@@ -54,6 +54,9 @@ def get_mock_project_api():
     mock_api.get_user_details = Mock(side_effect=_get_user_details)
     mock_api.get_workgroups_to_review = Mock(return_value={})
     mock_api.get_latest_workgroup_submissions_by_id = Mock(return_value={})
+    mock_api.get_peer_review_items_for_group = Mock(return_value={})
+    mock_api.get_workgroup_review_items = Mock(return_value={})
+    mock_api.get_workgroup_review_items_for_group = Mock(return_value={})
 
     mock_api.mark_as_complete = Mock(return_value={})
     return mock_api

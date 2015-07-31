@@ -66,25 +66,12 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         self.addCleanup(stop_patchers)
         self.addCleanup(lambda: asides_patch.stop())
 
-
-    def _add_external_features(self):
-        """
-        Adds script providing external features to page
-        """
-        script_url = '/resource/group-project-v2/public/js/test_scripts/external_features.js'
-        self.browser.execute_script(textwrap.dedent("""
-            var s=window.document.createElement('script');
-            s.src='{}';
-            window.document.head.appendChild(s);
-        """).format(script_url))
-
     def go_to_view(self, view_name='student_view', student_id=1):
         """
         Navigate to the page `page_name`, as listed on the workbench home
         Returns the DOM element on the visited page located by the `css_selector`
         """
         result = super(BaseIntegrationTest, self).go_to_view(view_name, student_id)
-        self._add_external_features()
         return result
 
     def load_scenario(self, xml_file, params=None, load_immediately=True):
