@@ -42,6 +42,17 @@
     margin-bottom: 5px;
 }
 
+.group-project-submissions-view .uploader .uploader-upload-controls-wrapper {
+    min-width: 180px;
+}
+
+.group-project-submissions-view .uploader .upload_item_wrapper {
+    display: inline-block;
+    padding: 0;
+    /* 32px right margin = 30px icon + 2px actual margin*/
+    margin: 0 32px 0 0;
+}
+
 .group-project-submissions-view .uploader input[type=text] {
     width: 100%;
     background-color: transparent;
@@ -50,11 +61,17 @@
     height: 30px;
 }
 
+.group-project-submissions-view .uploader .upload_item_wrapper[data-location] input[type=text] {
+    cursor: pointer;
+}
+
 .group-project-submissions-view .uploader label {
     width: 30px;
+    margin-left: -30px;
     display: inline-block;
     text-align: right;
     vertical-align: top;
+    float: right;
 }
 
 .group-project-submissions-view .uploader label span {
@@ -81,13 +98,3 @@
     color: #8f8f8f;
 }
 
-.group-project-submissions-view .uploader .upload_item_wrapper {
-    width: 83%;
-    display: inline-block;
-    margin: 0;
-    padding: 0;
-}
-
-.group-project-submissions-view .uploader .upload_item_wrapper[data-location] input[type=text] {
-    cursor: pointer;
-}
