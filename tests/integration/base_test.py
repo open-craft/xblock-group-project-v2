@@ -42,6 +42,34 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         super(BaseIntegrationTest, cls).tearDownClass()
         XBlock.extra_entry_points.remove(cls._extra_entry_points_record)
 
+    def get_block_link(self, block):
+        return "/scenario/test/student_view/?student=1&activate_block_id={block_id}".format(
+            block_id=block.scope_ids.usage_id
+        )
+
+    def _set_up_global_patches(self):
+        patchers = []
+
+        asides_patch = mock.patch("workbench.runtime.WorkbenchRuntime.applicable_aside_types", mock.Mock(return_value=[]))
+        asides_patch.start()
+        patchers.append(asides_patch)
+
+        for patch_location in self.PROJECT_API_PATCHES:
+            patcher = mock.patch(patch_location, self.project_api_mock)
+            patcher.start()
+            patchers.append(patcher)
+
+        patch_get_link_to_block_at = (
+            'group_project_v2.stage.get_link_to_block',
+            'group_project_v2.stage_components.get_link_to_block'
+        )
+        for location in patch_get_link_to_block_at:
+            patcher = mock.patch(location, mock.Mock(side_effect=self.get_block_link))
+            patcher.start()
+            patchers.append(patcher)
+
+        return patchers
+
     def setUp(self):
         """
         Set Up method
@@ -50,21 +78,8 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         super(BaseIntegrationTest, self).setUp()
         self.project_api_mock = get_mock_project_api()
 
-        asides_patch = mock.patch("workbench.runtime.WorkbenchRuntime.applicable_aside_types", mock.Mock(return_value=[]))
-        asides_patch.start()
-
-        patchers = []
-        for patch_location in self.PROJECT_API_PATCHES:
-            patcher = mock.patch(patch_location, self.project_api_mock)
-            patcher.start()
-            patchers.append(patcher)
-
-        def stop_patchers():
-            for patcher in patchers:
-                patcher.stop()
-
-        self.addCleanup(stop_patchers)
-        self.addCleanup(lambda: asides_patch.stop())
+        patchers = self._set_up_global_patches()
+        self.addCleanup(lambda: map(lambda p: p.stop, patchers))
 
     def go_to_view(self, view_name='student_view', student_id=1):
         """

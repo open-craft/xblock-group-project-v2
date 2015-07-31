@@ -18,30 +18,6 @@ from tests.utils import KNOWN_USERS
 class TestProjectNavigatorViews(SingleScenarioTestSuite):
     scenario = "example_1.xml"
 
-    def get_block_link(self, block):
-        return "/scenario/test/student_view/?student=1&activate_block_id={block_id}".format(
-            block_id=block.scope_ids.usage_id
-        )
-
-    def setUp(self):
-        super(TestProjectNavigatorViews, self).setUp()
-        self.block_link_patch = mock.Mock(side_effect=self.get_block_link)
-        patch_at = (
-            'group_project_v2.stage.get_link_to_block',
-            'group_project_v2.stage_components.get_link_to_block'
-        )
-        patchers = []
-        for location in patch_at:
-            patcher = mock.patch(location, self.block_link_patch)
-            patcher.start()
-            patchers.append(patcher)
-
-        def cleanPatches():
-            for patcher in patchers:
-                patcher.stop()
-
-        self.addCleanup(cleanPatches)
-
     @property
     def submissions(self):
         """

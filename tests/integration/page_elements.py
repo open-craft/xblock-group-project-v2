@@ -296,7 +296,7 @@ class ProjectNavigatorResourcesActivityElement(ProjectNavigatorViewActivityEleme
 class ProjectNavigatorSubmissionsActivityElement(ProjectNavigatorViewActivityElement):
     @property
     def submissions(self):
-        return self.make_elements(".group-project-submissions .upload_item", SubmissionUploadItemElement)
+        return self.make_elements(".group-project-submissions .uploader", SubmissionUploadItemElement)
 
 
 class NavigationViewElement(ProjectNavigatorViewElement):
