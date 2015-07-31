@@ -86,22 +86,39 @@ class GroupProjectXBlock(
 
     @outsider_disallowed_protected_view
     def student_view(self, context):
-        target_stage_id = context.get('activate_block_id', None)
-        target_activity = self._get_activity_to_display(target_stage_id)
-
         fragment = Fragment()
+        render_context = {
+            'project': self,
+        }
 
-        if not target_activity:
-            fragment.add_content(_(u"This Group Project does not contain any activities"))
-        else:
-            activity_fragment = target_activity.render('student_view', context)
-            fragment.add_frag_resources(activity_fragment)
-            render_context = {
-                'project': self,
-                'activity_content': activity_fragment.content
-            }
-            render_context.update(context)
-            fragment.add_content(loader.render_template("templates/html/group_project.html", render_context))
+        render_context = {'project': self}
+        render_context.update(context)
+
+        def render_child_fragment(child, content_key, fallback_message):
+            """
+            Renders child, appends child fragment resources to parent fragment and
+            updates parent's rendering context
+            """
+            if child:
+                child_fragment = child.render('student_view', context)
+                fragment.add_frag_resources(child_fragment)
+                render_context[content_key] = child_fragment.content
+            else:
+                render_context[content_key] = fallback_message
+
+        target_activity = self._get_activity_to_display(context.get('activate_block_id', None))
+        render_child_fragment(
+            target_activity, 'activity_content', _(u"This Group Project does not contain any activities")
+        )
+
+        project_navigator = self.get_child_of_category(GroupProjectNavigatorXBlock.CATEGORY)
+        render_child_fragment(
+            project_navigator, 'project_navigator_content',
+            _(u"This Group Project V2 does not contain Project Navigator - "
+              u"please edit course outline in Studio to include one")
+        )
+
+        fragment.add_content(loader.render_template("templates/html/group_project.html", render_context))
 
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/group_project.js'))

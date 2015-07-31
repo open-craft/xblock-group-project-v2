@@ -1,6 +1,13 @@
 {% load i18n %}
 <div class="group-project-xblock-wrapper">
-  {{ activity_content|safe }}
+  <!-- floats to the right -->
+  <div class="group-project-navigator">
+    {{project_navigator_content|safe}}
+  </div>
+
+  <div class="group-project-content">
+    {{ activity_content|safe }}
+  </div>
 
   <div class="message">
     <div class="modal-bg"></div>
