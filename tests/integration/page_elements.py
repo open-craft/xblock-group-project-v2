@@ -216,11 +216,8 @@ class InputControl(BaseElement):
 
     def fill_text(self, text):
         self._wait_unitl_enabled()
-        try:
-            self.element.clear()
-            self.element.send_keys(text)
-        except WebDriverException:
-            import time; time.sleep(120); raise
+        self.element.clear()
+        self.element.send_keys(text)
 
     def select_option(self, option_value):
         self._wait_unitl_enabled()
@@ -273,8 +270,6 @@ class ProjectNavigatorViewElement(BaseElement):
             close_button.click()
         except NoSuchElementException:
             raise AssertionError("View cannot be closed")
-        except Exception:
-            import time; time.sleep(1200); raise
 
 
 class ProjectNavigatorViewSelectorElement(BaseElement):
