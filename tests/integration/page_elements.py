@@ -357,7 +357,7 @@ class ResourceLinkElement(BaseElement):
 
     @property
     def video_id(self):
-        return self.resource_link.get_attribute("data-video")
+        return self.resource_link.get_attribute("data-video-id")
 
 
 class SubmissionUploadItemElement(BaseElement):
