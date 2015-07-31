@@ -4,7 +4,6 @@ This module contains Project Navigator XBlock and it's children view XBlocks
 import logging
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
-from opaque_keys.edx.locator import BlockUsageLocator
 from xblock.core import XBlock
 from xblock.exceptions import NoSuchUsage
 from xblock.fragment import Fragment
@@ -63,9 +62,8 @@ class GroupProjectNavigatorXBlock(
     def _get_activated_view_type(self, activate_block_id):
         try:
             if activate_block_id:
-                usage_id = BlockUsageLocator.from_string(activate_block_id)
-                if usage_id.block_type in PROJECT_NAVIGATOR_VIEW_TYPES:
-                    block = self.runtime.get_block(usage_id)
+                block = self.get_block_by_id(activate_block_id)
+                if self.get_child_category(block) in PROJECT_NAVIGATOR_VIEW_TYPES:
                     return block.type
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)

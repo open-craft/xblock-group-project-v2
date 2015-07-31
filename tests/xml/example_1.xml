@@ -20,6 +20,9 @@
       <gp-v2-submission upload_id="budget" display_name="Budget" description="xls budget plan"/>
       <html>I'm Upload Stage</html>
     </gp-v2-stage-submission>
+    <gp-v2-stage-completion display_name="Completion">
+      <html>I'm completion Stage</html>
+    </gp-v2-stage-completion>
   </gp-v2-activity>
   <gp-v2-activity display_name="Activity 2">
     <gp-v2-stage-team-evaluation display_name="Review Team" open_date="2014-05-24T00:00:00Z" close_date="2014-06-20T00:00:00Z">

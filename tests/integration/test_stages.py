@@ -218,7 +218,6 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
     def setUp(self):
         super(TeamEvaluationStageTest, self).setUp()
         self.project_api_mock.get_peer_review_items = mock.Mock(return_value={})
-        self.project_api_mock.get_user_organizations = mock.Mock(return_value=[{'display_name': "Org1"}])
 
         self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML))
 

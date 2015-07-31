@@ -183,12 +183,9 @@ def get_default_stage(stages):
 
 def get_link_to_block(block):
     usage_id = block.scope_ids.usage_id
-    try:
-        return "/courses/{course_id}/jump_to_id/{block_id}".format(
-            course_id=usage_id.course_key, block_id=usage_id.block_id
-        )
-    except AttributeError:  # in xblock-sdk workbench usage_id is plain string
-        return "/courses/all/jump_to_id/{block_id}".format(block_id=usage_id)
+    return "/courses/{course_id}/jump_to_id/{block_id}".format(
+        course_id=usage_id.course_key, block_id=usage_id.block_id
+    )
 
 
 NO_EDITABLE_SETTINGS = gettext(u"This XBlock does not contain any editable settings")

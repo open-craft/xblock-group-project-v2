@@ -124,3 +124,7 @@ class SingleScenarioTestSuite(BaseIntegrationTest):
         """
         scenario = self.go_to_view(view_name=view_name, student_id=student_id)
         self.page = GroupProjectElement(self.browser, scenario)
+
+    def _update_after_reload(self):
+        top_element = self.browser.find_element_by_css_selector('.workbench .preview > div.xblock-v1:first-child')
+        self.page = GroupProjectElement(self.browser, top_element)

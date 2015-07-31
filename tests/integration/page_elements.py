@@ -108,7 +108,7 @@ class ActivityElement(BaseElement):
         return self.make_elements(self.STAGE_CSS_SELECTOR, StageElement)
 
     def get_stage_by_id(self, stage_id):
-        stage_selector = self.STAGE_CSS_SELECTOR + "#activity_"+stage_id
+        stage_selector = self.STAGE_CSS_SELECTOR + "#" + stage_id.replace(".", "\\.")
         stage_element = self.element.find_element_by_css_selector(stage_selector)
         return self.make_element(stage_element, StageElement)
 

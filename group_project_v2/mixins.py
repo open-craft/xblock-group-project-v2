@@ -1,6 +1,8 @@
 from collections import OrderedDict
 import logging
 from lazy.lazy import lazy
+from opaque_keys import InvalidKeyError
+from opaque_keys.edx.locator import BlockUsageLocator
 from xblock.exceptions import NoSuchViewError
 from xblock.fragment import Fragment
 
@@ -20,7 +22,7 @@ class ChildrenNavigationXBlockMixin(object):
         children = (self.runtime.get_block(child_id) for child_id in self.children)
         return [child for child in children if child is not None]
 
-    def _get_child_category(self, child):
+    def get_child_category(self, child):
         field_candidates = ('category', 'plugin_name')
         try:
             return next(getattr(child, field) for field in field_candidates if hasattr(child, field))
@@ -28,16 +30,24 @@ class ChildrenNavigationXBlockMixin(object):
             return None
 
     def _get_children_by_category(self, *child_categories):
-        return [child for child in self._children if self._get_child_category(child) in child_categories]
+        return [child for child in self._children if self.get_child_category(child) in child_categories]
 
     def get_child_of_category(self, child_category):
         try:
-            return next(child for child in self._children if self._get_child_category(child) == child_category)
+            return next(child for child in self._children if self.get_child_category(child) == child_category)
         except StopIteration:
             return None
 
     def has_child_of_category(self, child_category):
         return any(child.block_type == child_category for child in self.children)
+
+    def get_block_by_id(self, block_id):
+        try:
+            usage_id = BlockUsageLocator.from_string(block_id)
+        except InvalidKeyError:
+            usage_id = block_id
+
+        return self.runtime.get_block(usage_id)
 
 
 class CourseAwareXBlockMixin(object):

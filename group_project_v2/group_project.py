@@ -3,7 +3,6 @@ import logging
 import itertools
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
-from opaque_keys.edx.locator import BlockUsageLocator
 
 from django.utils.translation import ugettext as _
 
@@ -65,11 +64,9 @@ class GroupProjectXBlock(
     def _get_activity_to_display(self, target_stage_id):
         try:
             if target_stage_id:
-                usage_id = BlockUsageLocator.from_string(target_stage_id)
-                if usage_id.block_type in STAGE_TYPES:
-                    stage = self.runtime.get_block(usage_id)
-                    if stage.available_to_current_user:
-                        return stage.activity
+                stage = self.get_block_by_id(target_stage_id)
+                if self.get_child_category(stage) in STAGE_TYPES and stage.available_to_current_user:
+                    return stage.activity
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 
@@ -244,11 +241,9 @@ class GroupActivityXBlock(
     def _get_stage_to_display(self, target_stage_id):
         try:
             if target_stage_id:
-                usage_id = BlockUsageLocator.from_string(target_stage_id)
-                if usage_id.block_type in STAGE_TYPES:
-                    stage = self.runtime.get_block(usage_id)
-                    if stage.available_to_current_user:
-                        return stage
+                stage = self.get_block_by_id(target_stage_id)
+                if self.get_child_category(stage) in STAGE_TYPES and stage.available_to_current_user:
+                    return stage
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 
