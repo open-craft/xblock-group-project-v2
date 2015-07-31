@@ -1,5 +1,5 @@
-.group-project-resources-view .group-project-activity-stages li {
-    list-style: none;
+.group-project-resources-view .group-project-resources li {
+    list-style-type: disc;
 }
 
 .group-project-resources-view .player-modal {

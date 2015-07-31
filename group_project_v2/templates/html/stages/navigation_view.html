@@ -1,5 +1,5 @@
 {% load i18n %}
-<li class="group-project-stage {% if is_current_stage %}current{% endif %}" data-stage-id="{{ stage.id }}">
+<div class="group-project-stage {% if is_current_stage %}current{% endif %}" data-stage-id="{{ stage.id }}">
   <span class="group-project-stage-state fa {{ stage_state }}"></span>
   {% if not stage.hide_stage_label %}
     <span class="group-project-stage-type group-project-navigator-grey-text">{{ stage.NAVIGATION_LABEL }}:</span>
@@ -18,4 +18,4 @@
     {% trans "Available" %} {{ stage.formatted_open_date }}
   {% endif %}
   </span>
-</li>
+</div>

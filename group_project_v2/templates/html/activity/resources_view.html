@@ -2,10 +2,12 @@
 <div class="group-project-activity-wrapper" data-activity-id="{{ activity.id }}">
   <div class="group-project-activity-header">{{ activity.display_name }}</div>
   {% if has_resources %}
-    <ul class="group-project-resources">
-      {% for stage_content in stage_contents %}{{ stage_content|safe }}{% endfor %}
+    <ul class="group-project-activity-content group-project-resources">
+      {% for resource_content in resource_contents %}
+        <li>{{ resource_content|safe }}</li>
+      {% endfor %}
     </ul>
   {% else %}
-    <div class="group-project-navigator-grey-text">{% trans "No resources for this activity" %}</div>
+    <div class="group-project-activity-content group-project-navigator-grey-text">{% trans "No resources for this activity" %}</div>
   {% endif %}
 </div>

@@ -1,7 +1,16 @@
-.group-project-navigation-view .group-project-stage {
+.group-project-navigation-view ul.group-project-activity-content li {
     border-bottom: 1px solid #ccc;
-    padding-left: 18px;
     list-style: none;
+}
+
+.group-project-navigation-view ul.group-project-activity-content li:last-of-type {
+    border-bottom: none;
+}
+
+.group-project-navigation-view .group-project-stage {
+    margin: 0 -10px;
+    /* 30px left padding = 20px for state icon and 10 px to compensate for negative margin */
+    padding: 4px 10px 4px 30px;
 }
 
 .group-project-navigation-view .group-project-stage.current {
@@ -11,22 +20,34 @@
 .group-project-navigation-view  .group-project-stage-state {
     display: inline-block;
     font-size: 16px;
-    margin-left: -18px;
+    margin-left: -20px;
     width: 14px;
+    margin-right: 2px;
+}
+
+.group-project-navigation-view .group-project-stage-state.not_started {
+    color: #ccc;
+}
+
+.group-project-navigation-view .group-project-stage-state.not_started:before {
+    content: "\f111";
+    font-family: FontAwesome;
 }
 
 .group-project-navigation-view .group-project-stage-state.completed {
-    color: green;
+    color: #629b2a;
 }
 
 .group-project-navigation-view .group-project-stage-state.completed:before {
     content: "\f058";
+    font-family: FontAwesome;
 }
 
 .group-project-navigation-view .group-project-stage-state.incomplete {
-    color: #b7d432;
+    color: #b6d332;
 }
 
 .group-project-navigation-view .group-project-stage-state.incomplete:before {
     content: "\f111";
+    font-family: FontAwesome;
 }
