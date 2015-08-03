@@ -19,6 +19,14 @@ if ALLOWED_OUTSIDER_ROLES is None:
     ALLOWED_OUTSIDER_ROLES = ["assistant"]
 
 
+# Make '_' a no-op so we can scrape strings
+def gettext(text):
+    return text
+
+
+NO_EDITABLE_SETTINGS = gettext(u"This XBlock does not contain any editable settings")
+
+
 class OutsiderDisallowedError(Exception):
     def __init__(self, detail):
         self.value = detail
@@ -75,11 +83,6 @@ def build_date_field(json_date_string_value):
 def format_date(date_value):
     fmt = "%b %d" if date_value.year == date.today().year else "%b %d %Y"
     return date_value.strftime(fmt)  # TODO: not l10n friendly
-
-
-# Make '_' a no-op so we can scrape strings
-def gettext(text):
-    return text
 
 
 def make_key(*args):
@@ -201,4 +204,32 @@ def get_link_to_block(block):
     )
 
 
-NO_EDITABLE_SETTINGS = gettext(u"This XBlock does not contain any editable settings")
+def memoize_with_expiration(expires_after=None):
+    """
+    This memoization decorator provides lightweight caching mechanism. It is not thread-safe and contain
+    no cache invalidation features except cache expiration - use only on data that are unlikely to be changed
+    within single request (i.e. workgroup and user data, assigned reviews, etc.)
+    """
+    def decorator(func):
+        cache = func.cache = {}
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            key_list = (
+                tuple([func.__name__]) + tuple(args) +
+                tuple("{}:{}".format(key, value) for key, value in kwargs.iteritems())
+            )
+            key = make_key(key_list)
+            if key not in cache or cache[key]['timestamp'] + expires_after <= datetime.now():
+                result = func(*args, **kwargs)
+                log.info("Updating cached value for key %s", key)
+                cache[key] = {
+                    'timestamp': datetime.now(),
+                    'result': result
+                }
+
+            return cache[key]['result']
+
+        return wrapper
+
+    return decorator
