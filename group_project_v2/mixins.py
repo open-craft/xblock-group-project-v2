@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import logging
+from datetime import timedelta
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.locator import BlockUsageLocator
@@ -10,7 +11,7 @@ from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.utils import (
     OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES,
-    loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS
+    loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration
 )
 
 log = logging.getLogger(__name__)
@@ -56,7 +57,9 @@ class CourseAwareXBlockMixin(object):
         raw_course_id = getattr(self.runtime, 'course_id', 'all')
         try:
             return unicode(raw_course_id)
-        except Exception:    # pylint: disable=broad-except
+        except Exception as exc:    # pylint: disable=broad-except
+            msg = "Error converting course_id to unicode: {message}".format(message=exc.message)
+            log.exception(msg)
             return raw_course_id
 
 
@@ -106,35 +109,39 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin, Pr
     def is_admin_grader(self):
         return not self.is_group_member
 
-    def _confirm_outsider_allowed(self):
-        granted_roles = {r["role"] for r in self.project_api.get_user_roles_for_course(self.user_id, self.course_id)}
+    @staticmethod
+    def _confirm_outsider_allowed(project_api, user_id, course_id):
+        granted_roles = {r["role"] for r in project_api.get_user_roles_for_course(user_id, course_id)}
         allowed_roles = set(ALLOWED_OUTSIDER_ROLES)
 
         if not (allowed_roles & granted_roles):
             raise OutsiderDisallowedError("User does not have an allowed role")
 
-    @lazy
+    @property
     def workgroup(self):
-        fallback_result = {
-            "id": "0",
-            "users": [],
-        }
+        fallback_result = {"id": "0", "users": []}
 
+        workgroup = self._get_workgroup(self.project_api, self.user_id, self.course_id)
+        return workgroup if workgroup else fallback_result
+
+    @staticmethod
+    @memoize_with_expiration(expires_after=timedelta(seconds=5))
+    def _get_workgroup(project_api, user_id, course_id):
         try:
-            user_prefs = self.project_api.get_user_preferences(self.user_id)
+            user_prefs = project_api.get_user_preferences(user_id)
 
             if "TA_REVIEW_WORKGROUP" in user_prefs:
-                self._confirm_outsider_allowed()
-                result = self.project_api.get_workgroup_by_id(user_prefs["TA_REVIEW_WORKGROUP"])
+                WorkgroupAwareXBlockMixin._confirm_outsider_allowed(project_api, user_id, course_id)
+                result = project_api.get_workgroup_by_id(user_prefs["TA_REVIEW_WORKGROUP"])
             else:
-                result = self.project_api.get_user_workgroup_for_course(self.user_id, self.course_id)
+                result = project_api.get_user_workgroup_for_course(user_id, course_id)
         except OutsiderDisallowedError:
             raise
         except ApiError as exception:
             log.exception(exception)
             result = None
 
-        return result if result is not None else fallback_result
+        return result
 
 
 class XBlockWithComponentsMixin(object):
