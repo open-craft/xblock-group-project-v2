@@ -599,6 +599,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
         questions[2].control.fill_text(expected_submissions["group_q2"])
         stage_element.form.submit.click()
 
+        self.wait_for_ajax()
         self.project_api_mock.mark_as_complete.assert_called_with(
             'all',
             self.activity_id,
