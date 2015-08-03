@@ -1,10 +1,11 @@
 ''' API calls with respect group projects'''
 import json
 from urllib import urlencode
+from datetime import timedelta
 from django.conf import settings
 from lazy.lazy import lazy
 
-from group_project_v2.utils import build_date_field
+from group_project_v2.utils import build_date_field, memoize_with_expiration
 from .json_requests import GET, POST, PUT, DELETE
 from .api_error import api_error_protect
 
@@ -18,6 +19,9 @@ USERS_API = '/'.join([API_PREFIX, 'users'])
 SUBMISSION_API = '/'.join([API_PREFIX, 'submissions'])
 GROUP_API = '/'.join([API_PREFIX, 'groups'])
 COURSES_API = '/'.join([API_PREFIX, 'courses'])
+
+
+DEFAULT_EXPIRATION_TIME = timedelta(seconds=10)
 
 
 # TODO: this class crosses service boundary, but some methods post-process responses, while other do not
@@ -61,6 +65,7 @@ class ProjectAPI(object):
         return json.loads(response.read())
 
     @api_error_protect
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_user_details(self, user_id):
         return self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
 
@@ -92,6 +97,7 @@ class ProjectAPI(object):
         self.send_request(DELETE, (PEER_REVIEW_API, assessment_id))
 
     @api_error_protect
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_workgroup_review_items_for_group(self, group_id, content_id):
         qs_params = {"content_id": content_id}
         return self.send_request(GET, (WORKGROUP_API, group_id, 'workgroup_reviews'), query_params=qs_params)
@@ -113,6 +119,7 @@ class ProjectAPI(object):
         return self.send_request(GET, (WORKGROUP_API, group_id))
 
     @api_error_protect
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_user_workgroup_for_course(self, user_id, course_id):
         qs_params = {"course_id": course_id}
         workgroups_list = self.send_request(GET, (USERS_API, user_id, 'workgroups'), query_params=qs_params)
@@ -142,10 +149,12 @@ class ProjectAPI(object):
         return self.send_request(POST, (SUBMISSION_API, ), data=submit_hash)
 
     @api_error_protect
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_workgroup_submissions(self, group_id):
         return self.send_request(GET, (WORKGROUP_API, group_id, 'submissions'))
 
     @api_error_protect
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_review_assignment_groups(self, user_id, course_id, xblock_id):
         qs_params = {
             "course": course_id,
@@ -156,6 +165,7 @@ class ProjectAPI(object):
         return response.get("groups", {})
 
     @api_error_protect
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_workgroups_for_assignment(self, assignment_id):
         workgroups = self.send_request(GET, (GROUP_API, assignment_id, 'workgroups'), no_trailing_slash=True)
         return workgroups["results"]
@@ -308,18 +318,11 @@ class ProjectAPI(object):
     def get_latest_workgroup_submissions_by_id(self, group_id):
         submission_list = self.get_workgroup_submissions(group_id)
 
-        user_details_cache = {}
-
-        def get_user_details(user_id):
-            if user_id not in user_details_cache:
-                user_details_cache[user_id] = self.get_user_details(user_id)
-            return user_details_cache[user_id]
-
         submissions_by_id = {}
         for submission in submission_list:
             submission_id = submission['document_id']
             if submission['user']:
-                submission[u'user_details'] = get_user_details(submission['user'])
+                submission[u'user_details'] = self.get_user_details(submission['user'])
             if submission_id in submissions_by_id:
                 last_modified = build_date_field(submissions_by_id[submission_id]["modified"])
                 this_modified = build_date_field(submission["modified"])
@@ -339,7 +342,13 @@ if hasattr(settings, 'API_LOOPBACK_ADDRESS'):
 
 
 class ProjectAPIXBlockMixin(object):
+    _project_api = None
+
     @lazy
     def project_api(self):
-        author_mode = getattr(self.runtime, 'is_author_mode', False)
-        return ProjectAPI(API_SERVER, author_mode)
+        # project_api instance needs to be static to allow workgorpu caching in WorkgroupAwareXBlockMixin
+        if ProjectAPIXBlockMixin._project_api is None:
+            author_mode = getattr(self.runtime, 'is_author_mode', False)
+            ProjectAPIXBlockMixin._project_api = ProjectAPI(API_SERVER, author_mode)
+
+        return ProjectAPIXBlockMixin._project_api
