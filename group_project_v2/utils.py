@@ -140,6 +140,19 @@ def key_error_protected_handler(func):
     return wrapper
 
 
+def conversion_protected_handler(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except (TypeError, ValueError) as exception:
+            message = "Conversion failed: {}".format(exception.message)
+            log.exception(message)
+            return {'result': 'error', 'msg': message}
+
+    return wrapper
+
+
 def log_and_suppress_exceptions(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):

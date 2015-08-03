@@ -1,54 +1,94 @@
 """ Base classes for integration tests """
-import textwrap
+from bok_choy.promise import EmptyPromise
+from django.utils.safestring import mark_safe
 import mock
+from sample_xblocks.basic.content import HtmlBlock
+from xblock.core import XBlock
+from xblock.fields import String, Scope
 
 from xblockutils.base_test import SeleniumXBlockTest
 
 from group_project_v2.group_project import GroupActivityXBlock
-from group_project_v2.project_api import ProjectAPIXBlockMixin
 from tests.integration.page_elements import GroupProjectElement
 from tests.utils import loader, get_mock_project_api
+
+
+def get_block_link(block):
+    return "/scenario/test/student_view/?student=1&activate_block_id={block_id}".format(
+        block_id=block.scope_ids.usage_id
+    )
+
+
+class DummyHtmlXBlock(XBlock):
+    data = String(default=u"", scope=Scope.content)
+
+    def student_view(self):
+        return mark_safe(self.data)
 
 
 class BaseIntegrationTest(SeleniumXBlockTest):
     """ Base Integraition test class """
     PROJECT_API_PATCHES = (
-        "group_project_v2.group_project.ProjectAPIXBlockMixin",
-        "group_project_v2.stage.ProjectAPIXBlockMixin",
-        "group_project_v2.stage_components.ProjectAPIXBlockMixin",
+        "group_project_v2.project_api.ProjectAPIXBlockMixin.project_api",
     )
+
+    @classmethod
+    def setUpClass(cls):  # pylint: disable=invalid-name
+        super(BaseIntegrationTest, cls).setUpClass()
+        entry_point = mock.Mock(
+            dist=mock.Mock(key='xblock'),
+            load=mock.Mock(return_value=HtmlBlock),
+        )
+        entry_point.name = "html"
+        cls._extra_entry_points_record = ("html", entry_point)
+        XBlock.extra_entry_points.append(cls._extra_entry_points_record)
+
+    @classmethod
+    def tearDownClass(cls):  # pylint: disable=invalid-name
+        super(BaseIntegrationTest, cls).tearDownClass()
+        XBlock.extra_entry_points.remove(cls._extra_entry_points_record)
+
+    def _set_up_global_patches(self):
+        patchers = []
+
+        asides_patch = mock.patch(
+            "workbench.runtime.WorkbenchRuntime.applicable_aside_types",
+            mock.Mock(return_value=[])
+        )
+        asides_patch.start()
+        patchers.append(asides_patch)
+
+        for patch_location in self.PROJECT_API_PATCHES:
+            patcher = mock.patch(patch_location, self.project_api_mock)
+            patcher.start()
+            patchers.append(patcher)
+
+        patch_get_link_to_block_at = (
+            'group_project_v2.stage.get_link_to_block',
+            'group_project_v2.stage_components.get_link_to_block'
+        )
+        for location in patch_get_link_to_block_at:
+            patcher = mock.patch(location, mock.Mock(side_effect=get_block_link))
+            patcher.start()
+            patchers.append(patcher)
+
+        return patchers
 
     def setUp(self):
         """
         Set Up method
         """
+
         super(BaseIntegrationTest, self).setUp()
         self.project_api_mock = get_mock_project_api()
-        patch = mock.Mock(spec=ProjectAPIXBlockMixin)
-        patch.project_api = mock.PropertyMock(return_value=self.project_api_mock)
 
-        patchers = []
-        for patch_location in self.PROJECT_API_PATCHES:
-            patcher = mock.patch(patch_location, patch)
-            patcher.start()
-            patchers.append(patcher)
+        patchers = self._set_up_global_patches()
 
-        def stop_patchers():
+        def cleanup():
             for patcher in patchers:
                 patcher.stop()
 
-        self.addCleanup(stop_patchers)
-
-    def _add_external_features(self):
-        """
-        Adds script providing external features to page
-        """
-        script_url = '/resource/group-project-v2/public/js/test_scripts/external_features.js'
-        self.browser.execute_script(textwrap.dedent("""
-            var s=window.document.createElement('script');
-            s.src='{}';
-            window.document.head.appendChild(s);
-        """).format(script_url))
+        self.addCleanup(cleanup)
 
     def go_to_view(self, view_name='student_view', student_id=1):
         """
@@ -56,7 +96,6 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         Returns the DOM element on the visited page located by the `css_selector`
         """
         result = super(BaseIntegrationTest, self).go_to_view(view_name, student_id)
-        self._add_external_features()
         return result
 
     def load_scenario(self, xml_file, params=None, load_immediately=True):
@@ -88,6 +127,15 @@ class BaseIntegrationTest(SeleniumXBlockTest):
             if isinstance(child, GroupActivityXBlock)
         }
 
+    def wait_for_ajax(self):
+        def _is_ajax_finished():
+            """
+            Check if all the ajax calls on the current page have completed.
+            """
+            return self.browser.execute_script("return jQuery.active") == 0
+
+        EmptyPromise(_is_ajax_finished, "Finished waiting for ajax requests.").fulfill()
+
 
 class SingleScenarioTestSuite(BaseIntegrationTest):
     """
@@ -109,3 +157,7 @@ class SingleScenarioTestSuite(BaseIntegrationTest):
         """
         scenario = self.go_to_view(view_name=view_name, student_id=student_id)
         self.page = GroupProjectElement(self.browser, scenario)
+
+    def _update_after_reload(self):
+        top_element = self.browser.find_element_by_css_selector('.workbench .preview > div.xblock-v1:first-child')
+        self.page = GroupProjectElement(self.browser, top_element)

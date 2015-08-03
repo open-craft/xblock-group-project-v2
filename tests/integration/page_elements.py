@@ -4,6 +4,7 @@ This module contains classes representing various GroupProject page elements
 from lazy.lazy import lazy
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.select import Select
+from selenium.webdriver.support.wait import WebDriverWait
 from group_project_v2.stage import StageState
 
 
@@ -69,7 +70,7 @@ class BaseElement(object):
 
 class GroupProjectElement(BaseElement):
     """ Wrapper around group project xblock element """
-    ACTIVITY_CSS_SELECTOR = ".xblock-v1[data-block-type='gp-v2-activity']"
+    ACTIVITY_CSS_SELECTOR = ".group-project-content .xblock-v1[data-block-type='gp-v2-activity']"
 
     @property
     def activities(self):
@@ -107,7 +108,7 @@ class ActivityElement(BaseElement):
         return self.make_elements(self.STAGE_CSS_SELECTOR, StageElement)
 
     def get_stage_by_id(self, stage_id):
-        stage_selector = self.STAGE_CSS_SELECTOR + "#activity_"+stage_id
+        stage_selector = self.STAGE_CSS_SELECTOR + "#" + stage_id.replace(".", "\\.")
         stage_element = self.element.find_element_by_css_selector(stage_selector)
         return self.make_element(stage_element, StageElement)
 
@@ -143,11 +144,11 @@ class ReviewStageElement(StageElement):
 
     @property
     def peers(self):
-        return self.make_elements(".peers .select_peer", ReviewObjectSelectorElement)
+        return self.make_elements(".peers.review_subjects .select_peer", ReviewObjectSelectorElement)
 
     @property
     def groups(self):
-        return self.make_elements(".other_groups .select_group", ReviewObjectSelectorElement)
+        return self.make_elements(".groups.review_subjects .select_group", ReviewObjectSelectorElement)
 
 
 class ReviewObjectSelectorElement(BaseElement):
@@ -156,22 +157,30 @@ class ReviewObjectSelectorElement(BaseElement):
     def name(self):
         return self.get_attribute('title')
 
+    @property
+    def subject_id(self):
+        return self.get_attribute('data-id')
+
 
 class ReviewFormElement(BaseElement):
     def _get_hidden_input_value(self, input_name):
         return self.element.find_element_by_css_selector("input[name='{}']".format(input_name)).get_attribute('value')
 
-    @property
-    def peer_id(self):
-        return self._get_hidden_input_value('peer_id')
+    def _get_review_subject_id(self, css_selector):
+        try:
+            selected_teammate_element = self.find_element_by_css_selector(css_selector)
+            selected_teammate = self.make_element(selected_teammate_element, ReviewObjectSelectorElement)
+            return int(selected_teammate.subject_id)
+        except NoSuchElementException:
+            return None
 
     @property
-    def stage_id(self):
-        return self._get_hidden_input_value('stage_id')
+    def peer_id(self):
+        return self._get_review_subject_id(".peers.review_subjects .select_peer.selected")
 
     @property
     def group_id(self):
-        return self._get_hidden_input_value('group_id')
+        return self._get_review_subject_id(".groups.review_subjects .select_group.selected")
 
     @property
     def questions(self):
@@ -193,17 +202,25 @@ class ReviewQuestionElement(BaseElement):
 
 
 class InputControl(BaseElement):
+    timeout = 5
+
     def __getattr__(self, item):
         if hasattr(self.element, item):
             return getattr(self.element, item)
         else:
             return self.element.get_attribute(item)
 
+    def _wait_unitl_enabled(self):
+        wait = WebDriverWait(self.element, self.timeout)
+        wait.until(lambda e: e.is_enabled(), u"{} should be enabled".format(self.element.text))
+
     def fill_text(self, text):
+        self._wait_unitl_enabled()
         self.element.clear()
         self.element.send_keys(text)
 
     def select_option(self, option_value):
+        self._wait_unitl_enabled()
         select = Select(self.element)
         select.select_by_value(option_value)
 
@@ -279,7 +296,7 @@ class ProjectNavigatorResourcesActivityElement(ProjectNavigatorViewActivityEleme
 class ProjectNavigatorSubmissionsActivityElement(ProjectNavigatorViewActivityElement):
     @property
     def submissions(self):
-        return self.make_elements(".group-project-submissions .upload_item", SubmissionUploadItemElement)
+        return self.make_elements(".group-project-submissions .uploader", SubmissionUploadItemElement)
 
 
 class NavigationViewElement(ProjectNavigatorViewElement):
@@ -299,7 +316,7 @@ class SubmissionsViewElement(ProjectNavigatorViewElement):
 class StageItemElement(BaseElement):
     def __init__(self, browser, element):
         super(StageItemElement, self).__init__(browser, element)
-        self.stage_link = element.find_element_by_css_selector(".group-project-stage-type a")
+        self.stage_link = element.find_element_by_css_selector(".group-project-stage-title a")
 
     @property
     def stage_id(self):
@@ -340,7 +357,7 @@ class ResourceLinkElement(BaseElement):
 
     @property
     def video_id(self):
-        return self.resource_link.get_attribute("data-video")
+        return self.resource_link.get_attribute("data-video-id")
 
 
 class SubmissionUploadItemElement(BaseElement):

@@ -3,7 +3,6 @@ import logging
 import itertools
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
-from opaque_keys.edx.locator import BlockUsageLocator
 
 from django.utils.translation import ugettext as _
 
@@ -65,11 +64,9 @@ class GroupProjectXBlock(
     def _get_activity_to_display(self, target_stage_id):
         try:
             if target_stage_id:
-                usage_id = BlockUsageLocator.from_string(target_stage_id)
-                if usage_id.block_type in STAGE_TYPES:
-                    stage = self.runtime.get_block(usage_id)
-                    if stage.available_to_current_user:
-                        return stage.activity
+                stage = self.get_block_by_id(target_stage_id)
+                if self.get_child_category(stage) in STAGE_TYPES and stage.available_to_current_user:
+                    return stage.activity
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 
@@ -86,6 +83,8 @@ class GroupProjectXBlock(
 
     @outsider_disallowed_protected_view
     def student_view(self, context):
+        context = context if context else {}  # workbench does not provide context at all
+
         fragment = Fragment()
         render_context = {
             'project': self,
@@ -121,6 +120,7 @@ class GroupProjectXBlock(
         fragment.add_content(loader.render_template("templates/html/group_project.html", render_context))
 
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/vendor/font-awesome/font-awesome.css'))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/group_project.js'))
         fragment.initialize_js("GroupProjectBlock")
         return fragment
@@ -241,11 +241,9 @@ class GroupActivityXBlock(
     def _get_stage_to_display(self, target_stage_id):
         try:
             if target_stage_id:
-                usage_id = BlockUsageLocator.from_string(target_stage_id)
-                if usage_id.block_type in STAGE_TYPES:
-                    stage = self.runtime.get_block(usage_id)
-                    if stage.available_to_current_user:
-                        return stage
+                stage = self.get_block_by_id(target_stage_id)
+                if self.get_child_category(stage) in STAGE_TYPES and stage.available_to_current_user:
+                    return stage
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 
