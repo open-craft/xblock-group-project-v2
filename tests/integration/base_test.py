@@ -1,4 +1,5 @@
 """ Base classes for integration tests """
+from bok_choy.promise import EmptyPromise
 from django.utils.safestring import mark_safe
 import mock
 from sample_xblocks.basic.content import HtmlBlock
@@ -125,6 +126,15 @@ class BaseIntegrationTest(SeleniumXBlockTest):
             for child in children
             if isinstance(child, GroupActivityXBlock)
         }
+
+    def wait_for_ajax(self):
+        def _is_ajax_finished():
+            """
+            Check if all the ajax calls on the current page have completed.
+            """
+            return self.browser.execute_script("return jQuery.active") == 0
+
+        EmptyPromise(_is_ajax_finished, "Finished waiting for ajax requests.").fulfill()
 
 
 class SingleScenarioTestSuite(BaseIntegrationTest):

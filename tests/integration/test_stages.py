@@ -165,6 +165,10 @@ class BaseReviewStageTest(StageTestBase):
         {"id": 11, "name": "Group 1"}
     ]
 
+    def select_review_subject(self, subject):
+        subject.click()
+        self.wait_for_ajax()
+
     def setUp(self):
         super(BaseReviewStageTest, self).setUp()
         self.project_api_mock.get_workgroups_to_review.return_value = self.workgroups_to_review
@@ -254,7 +258,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         self.assertEqual(len(peers), len(other_users))
         for user_id, peer in zip(other_users, peers):
             self.assertEqual(peer.name, KNOWN_USERS[user_id]['username'])
-            peer.click()
+            self.select_review_subject(peer)
             self.assertEqual(stage_element.form.peer_id, user_id)
 
     @ddt.data(*KNOWN_USERS.keys())  # pylint: disable=star-args
@@ -262,7 +266,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
 
         peer = stage_element.peers[0]
-        peer.click()
+        self.select_review_subject(peer)
 
         expected_submissions = {
             "peer_score": "10",
@@ -303,7 +307,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
 
         peer = stage_element.peers[0]
-        peer.click()
+        self.select_review_subject(peer)
 
         # loading peer review items from project_api
         self.project_api_mock.get_peer_review_items.assert_called_with(
@@ -364,14 +368,16 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         ]
 
         peer = stage_element.peers[0]
-        peer.click()
+        self.select_review_subject(peer)
 
         questions = stage_element.form.questions
+        self.wait_for_ajax()
         questions[0].control.select_option(expected_submissions["peer_score"])
         questions[1].control.select_option(expected_submissions["peer_q1"])
         questions[2].control.fill_text(expected_submissions["peer_q2"])
         stage_element.form.submit.click()
 
+        self.wait_for_ajax()
         self.project_api_mock.mark_as_complete.assert_called_with(
             'all',
             self.activity_id,
@@ -477,15 +483,15 @@ class PeerReviewStageTest(BaseReviewStageTest):
         groups = stage_element.groups
         self.assertEqual(len(groups), len(self.OTHER_GROUPS.keys()))
         for group_id, group in zip(self.OTHER_GROUPS.keys(), groups):
-            group.click()
+            self.select_review_subject(group)
             self.assertEqual(stage_element.form.group_id, group_id)
 
     def test_submission(self):
         user_id = 1
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
 
-        groups = stage_element.groups[0]
-        groups.click()
+        group = stage_element.groups[0]
+        self.select_review_subject(group)
 
         expected_submissions = {
             "group_score": "100",
@@ -526,7 +532,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
 
         group = stage_element.groups[0]
-        group.click()
+        self.select_review_subject(group)
 
         # loading peer review items from project_api
         self.project_api_mock.get_workgroup_review_items.assert_called_with(
@@ -584,8 +590,8 @@ class PeerReviewStageTest(BaseReviewStageTest):
             for reviewer_id in KNOWN_USERS.keys()
         ]
 
-        groups = stage_element.groups[0]
-        groups.click()
+        group = stage_element.groups[0]
+        self.select_review_subject(group)
 
         questions = stage_element.form.questions
         questions[0].control.select_option(expected_submissions["group_score"])
