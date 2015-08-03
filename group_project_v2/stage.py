@@ -29,6 +29,7 @@ from group_project_v2.stage_components import (
 from group_project_v2.utils import (
     loader, format_date, gettext as _, make_key, get_link_to_block,
     outsider_disallowed_protected_view, outsider_disallowed_protected_handler, key_error_protected_handler,
+    conversion_protected_handler
 )
 
 log = logging.getLogger(__name__)
@@ -547,6 +548,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
     @XBlock.json_handler
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
+    @conversion_protected_handler
     def submit_review(self, submissions, context=''):  # pylint: disable=unused-argument
         # if admin grader - still allow providing grades even for non-TA-graded activities
         if self.is_admin_grader and not self.allow_admin_grader_access:
@@ -619,6 +621,7 @@ class TeamEvaluationStage(ReviewBaseStage):
     @XBlock.handler
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
+    @conversion_protected_handler
     def load_peer_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
         peer_id = int(request.GET["peer_id"])
         feedback = self.project_api.get_peer_review_items(
@@ -694,6 +697,7 @@ class PeerReviewStage(ReviewBaseStage):
     @XBlock.handler
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
+    @conversion_protected_handler
     def other_submission_links(self, request, suffix=''):  # pylint: disable=unused-argument
         group_id = int(request.GET["group_id"])
 
@@ -722,7 +726,7 @@ class PeerReviewStage(ReviewBaseStage):
         return webob.response.Response(body=json.dumps(results))
 
     def do_submit_review(self, submissions):
-        group_id = submissions["review_subject_id"]
+        group_id = int(submissions["review_subject_id"])
         del submissions["review_subject_id"]
 
         self.project_api.submit_workgroup_review_items(
