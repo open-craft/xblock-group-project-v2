@@ -145,9 +145,11 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin, Pr
 
 
 class NestedXBlockSpec(object):
-    def __init__(self, block, single_instance=False):
+    def __init__(self, block, single_instance=False, disabled=False, disabled_reason=None):
         self._block = block
         self._single_instance = single_instance
+        self._disabled = disabled
+        self._disabled_reason = disabled_reason
 
     @property
     def category(self):
@@ -160,6 +162,14 @@ class NestedXBlockSpec(object):
     @property
     def single_instance(self):
         return self._single_instance
+
+    @property
+    def disabled(self):
+        return self._disabled
+
+    @property
+    def disabled_reason(self):
+        return self._disabled_reason
 
 
 class XBlockWithComponentsMixin(object):

@@ -12,7 +12,7 @@ function XBlockWithComponentsEdit(runtime, element) {
         } else {
             if (isSingleInstance(this)) {
                 $(this).addClass('disabled');
-                $(this).setAttribute('disabled', 'disabled');
+                $(this).attr('disabled', 'disabled');
             }
         }
     });
