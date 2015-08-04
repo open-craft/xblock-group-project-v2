@@ -12,7 +12,8 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
 from group_project_v2.mixins import (
     XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin,
-    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin, NoStudioEditableSettingsMixin
+    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin, NoStudioEditableSettingsMixin,
+    NestedXBlockSpec
 )
 
 from group_project_v2.utils import loader, gettext as _
@@ -57,7 +58,12 @@ class GroupProjectNavigatorXBlock(
 
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
-        return [NavigationViewXBlock, ResourcesViewXBlock, SubmissionsViewXBlock, AskTAViewXBlock]
+        return [
+            NestedXBlockSpec(NavigationViewXBlock, single_instance=True),
+            NestedXBlockSpec(ResourcesViewXBlock, single_instance=True),
+            NestedXBlockSpec(SubmissionsViewXBlock, single_instance=True),
+            NestedXBlockSpec(AskTAViewXBlock, single_instance=True)
+        ]
 
     def _get_activated_view_type(self, activate_block_id):
         try:

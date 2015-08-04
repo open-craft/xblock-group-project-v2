@@ -144,16 +144,34 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin, Pr
         return result
 
 
+class NestedXBlockSpec(object):
+    def __init__(self, block, single_instance=False):
+        self._block = block
+        self._single_instance = single_instance
+
+    @property
+    def category(self):
+        return self._block.CATEGORY
+
+    @property
+    def label(self):
+        return self._block.STUDIO_LABEL
+
+    @property
+    def single_instance(self):
+        return self._single_instance
+
+
 class XBlockWithComponentsMixin(object):
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return []
 
     def get_nested_blocks_spec(self):
-        return OrderedDict([
-            (block.CATEGORY, block.STUDIO_LABEL)
-            for block in self.allowed_nested_blocks
-        ])
+        return [
+            block_spec if isinstance(block_spec, NestedXBlockSpec) else NestedXBlockSpec(block_spec)
+            for block_spec in self.allowed_nested_blocks
+        ]
 
     @outsider_disallowed_protected_view
     def author_edit_view(self, context):
@@ -168,6 +186,8 @@ class XBlockWithComponentsMixin(object):
         )
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/xblock_with_components_edit.js'))
+        fragment.initialize_js('XBlockWithComponentsEdit')
         return fragment
 
     @outsider_disallowed_protected_view

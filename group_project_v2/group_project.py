@@ -16,6 +16,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContain
 
 from group_project_v2.mixins import (
     ChildrenNavigationXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin,
+    NestedXBlockSpec
 )
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
@@ -29,6 +30,11 @@ from group_project_v2.api_error import ApiError
 
 
 log = logging.getLogger(__name__)
+
+
+class DiscussionXBlockProxy(object):
+    CATEGORY = "discussion-forum"
+    STUDIO_LABEL = "Discussion"
 
 
 class GroupProjectXBlock(
@@ -50,7 +56,11 @@ class GroupProjectXBlock(
 
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
-        return [GroupActivityXBlock, GroupProjectNavigatorXBlock]
+        return [
+            NestedXBlockSpec(GroupActivityXBlock),
+            NestedXBlockSpec(GroupProjectNavigatorXBlock, single_instance=True),
+            NestedXBlockSpec(DiscussionXBlockProxy, single_instance=True)
+        ]
 
     @lazy
     def activities(self):
