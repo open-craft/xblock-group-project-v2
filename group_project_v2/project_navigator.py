@@ -326,7 +326,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     STUDIO_LABEL = _(u"Submissions View")
     type = ViewTypes.SUBMISSIONS
     icon = u"fa fa-upload"
-    display_name_with_default = _(u"Submissions View")
+    display_name_with_default = _(u"Upload")
 
     template = "submissions_view.html"
     css_file = "submissions_view.css"

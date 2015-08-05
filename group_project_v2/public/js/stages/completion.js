@@ -25,7 +25,7 @@ function GroupProjectCompletionStage(runtime, element) {
             url: runtime.handlerUrl(element, $form.attr('action')),
             data: JSON.stringify({}),
             success: function (data) {
-                var msg = (data.msg) ? data.msg : gettext('Stage completed!');
+                var msg = (data.msg) ? data.msg : gettext('This task has been marked as complete.');
                 show_message(msg);
 
                 if (data.result == 'error'){
