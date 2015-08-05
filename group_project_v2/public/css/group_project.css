@@ -268,3 +268,11 @@
     margin-right: -15px;
     display: inline-block;
 }
+
+.group-project-xblock-wrapper #group-project-discussion {
+    display:none;
+}
+
+.group-project-xblock-wrapper #group-project-discussion .discussion-module {
+    width: 100%;
+}

@@ -124,6 +124,12 @@ class GroupProjectXBlock(
               u"please edit course outline in Studio to include one")
         )
 
+        discussion = self.get_child_of_category(DiscussionXBlockProxy.CATEGORY)
+        render_child_fragment(
+            discussion, 'discussion_content',
+            _(u"This Group Project V2 does not contain a discussion")
+        )
+
         fragment.add_content(loader.render_template("templates/html/group_project.html", render_context))
 
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))

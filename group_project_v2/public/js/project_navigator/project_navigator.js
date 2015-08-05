@@ -2,6 +2,7 @@ function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
     const initial_view = 'navigation';
     const selector_item_query = ".group-project-navigator-view-selector .view-selector-item";
     const activate_project_nav_view_event = 'group_project_v2.project_navigator.activate_view';
+    const hide_group_project_discussion = 'group_project_v2.discussion.hide';
 
     var view_elements = $(".group-project-navigator-view", element),
         views = {},
@@ -41,6 +42,10 @@ function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
         if (target_block) {
             switch_to_view(target_block.data('view-type'));
         }
+    });
+
+    $(document).on(hide_group_project_discussion, function(){
+        switch_to_view(initial_view);
     });
 
     for (var i=0; i<=view_elements.length; i++) {
