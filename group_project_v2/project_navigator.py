@@ -215,7 +215,7 @@ class ProjectNavigatorViewXBlockBase(
         return True
 
     @property
-    def is_view_available(self):
+    def is_view_available(self):  # pylint: disable=no-self-use
         return True
 
     def render_student_view(self, context, add_resources_from=None):
@@ -438,7 +438,6 @@ class PrivateDiscussionViewXBlock(ProjectNavigatorViewXBlockBase):
             ))
 
         return validation
-
 
 
 PROJECT_NAVIGATOR_VIEW_TYPES = (

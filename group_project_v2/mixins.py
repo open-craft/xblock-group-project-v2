@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import logging
 from datetime import timedelta
 from lazy.lazy import lazy
