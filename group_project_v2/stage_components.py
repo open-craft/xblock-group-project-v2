@@ -26,11 +26,6 @@ from group_project_v2.utils import (
 log = logging.getLogger(__name__)
 
 
-class HtmlXBlockProxy(object):
-    CATEGORY = 'html'
-    STUDIO_LABEL = _(u"HTML")
-
-
 class BaseStageComponentXBlock(XBlock):
     @lazy
     def stage(self):

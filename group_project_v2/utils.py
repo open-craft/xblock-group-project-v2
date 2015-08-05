@@ -27,6 +27,16 @@ def gettext(text):
 NO_EDITABLE_SETTINGS = gettext(u"This XBlock does not contain any editable settings")
 
 
+class HtmlXBlockProxy(object):
+    CATEGORY = 'html'
+    STUDIO_LABEL = gettext(u"HTML")
+
+
+class DiscussionXBlockProxy(object):
+    CATEGORY = "discussion-forum"
+    STUDIO_LABEL = gettext(u"Discussion")
+
+
 class OutsiderDisallowedError(Exception):
     def __init__(self, detail):
         self.value = detail

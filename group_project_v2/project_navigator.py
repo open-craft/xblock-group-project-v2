@@ -16,7 +16,7 @@ from group_project_v2.mixins import (
     NestedXBlockSpec
 )
 
-from group_project_v2.utils import loader, gettext as _
+from group_project_v2.utils import loader, gettext as _, DiscussionXBlockProxy
 
 log = logging.getLogger(__name__)
 
@@ -86,9 +86,8 @@ class GroupProjectNavigatorXBlock(
         children_items = []
         for child_id in self.children:
             view = self.runtime.get_block(child_id)
-            if not view.available_to_current_user:
+            if not view.available_to_current_user or not view.is_view_available:
                 continue
-
 
             item = {
                 'id': str(child_id).replace("/", ";_"),
@@ -212,7 +211,11 @@ class ProjectNavigatorViewXBlockBase(
         )
 
     @classmethod
-    def is_available(cls):
+    def is_view_type_available(cls):
+        return True
+
+    @property
+    def is_view_available(self):
         return True
 
     def render_student_view(self, context, add_resources_from=None):
@@ -385,7 +388,7 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     initialize_js_function = "GroupProjectNavigatorAskTAView"
 
     @classmethod
-    def is_available(cls):
+    def is_view_type_available(cls):
         # TODO: LMS support - check if TAs are available at all
         return True
 
@@ -409,6 +412,13 @@ class PrivateDiscussionViewXBlock(ProjectNavigatorViewXBlockBase):
     js_file = "private_discussion_view.js"
     initialize_js_function = "GroupProjectPrivateDiscussionView"
 
+    def _project_has_discussion(self):
+        return self.navigator.group_project.has_child_of_category(DiscussionXBlockProxy.CATEGORY)
+
+    @property
+    def is_view_available(self):
+        return self._project_has_discussion()
+
     def selector_view(self, context):  # pylint: disable=unused-argument
         """
         Selector view - this view is used by GroupProjectNavigatorXBlock to render selector buttons
@@ -417,6 +427,17 @@ class PrivateDiscussionViewXBlock(ProjectNavigatorViewXBlockBase):
         fragment.add_javascript_url(self.runtime.local_resource_url(self, self.JS_BASE + self.js_file))
         fragment.initialize_js(self.initialize_js_function)
         return fragment
+
+    def validate(self):
+        validation = super(PrivateDiscussionViewXBlock, self).validate()
+        if not self._project_has_discussion():
+            validation.add(ValidationMessage(
+                ValidationMessage.WARNING,
+                _(u"Parent group project does not contain discussion XBlock - this {block_type} will not "
+                  u"function properly and will not be displayed to students").format(block_type=self.STUDIO_LABEL)
+            ))
+
+        return validation
 
 
 

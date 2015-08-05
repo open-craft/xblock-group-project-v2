@@ -20,7 +20,9 @@ from group_project_v2.mixins import (
 )
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
-from group_project_v2.utils import loader, make_key, outsider_disallowed_protected_view, get_default_stage
+from group_project_v2.utils import (
+    loader, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockProxy
+)
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
@@ -30,11 +32,6 @@ from group_project_v2.api_error import ApiError
 
 
 log = logging.getLogger(__name__)
-
-
-class DiscussionXBlockProxy(object):
-    CATEGORY = "discussion-forum"
-    STUDIO_LABEL = "Discussion"
 
 
 class GroupProjectXBlock(
