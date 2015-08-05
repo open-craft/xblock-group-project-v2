@@ -102,7 +102,7 @@ class GroupProjectNavigatorXBlock(
                 item['content'] = ''
 
             if not view.skip_selector:
-                child_selector_fragment = view.selector_view(context)
+                child_selector_fragment = view.render('selector_view', context)
                 item['selector'] = child_selector_fragment.content
                 fragment.add_frag_resources(child_selector_fragment)
             else:

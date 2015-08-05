@@ -14,7 +14,9 @@
   </div>
   <ol class="group-project-navigator-view-selector">
     {% for child in children %}
-      {{ child.selector|safe}}
+      {% if child.selector %}
+        <li>{{ child.selector|safe}}</li>
+      {% endif %}
     {% endfor %}
   </ol>
 </div>

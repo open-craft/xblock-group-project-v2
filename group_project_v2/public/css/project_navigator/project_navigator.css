@@ -37,18 +37,8 @@
 }
 
 .group-project-navigator-view-selector li {
-    display: inline-block;
     list-style: none;
-    padding: 0.7em 2em;
-    background-color: #eee;
-    margin: 1px 2px;
-    cursor: pointer;
-    border-radius: 3px;
-    color: #555;
-    text-align: center;
-    font-size: 14px;
-    font-weight: bold;
-    text-decoration: none;
+    display: inline-block;
     min-width: 35px;
     width: 23%;  /* should fit four in one line + some extra space for margins */
     height: 30px;
@@ -56,7 +46,21 @@
     vertical-align: bottom;
 }
 
-.group-project-navigator-view-selector li.active {
+.group-project-navigator-view-selector li span.view-selector-item {
+    display: inline-block;
+    width: 100%;
+    padding: 0.7em 2em;
+    background-color: #eee;
+    cursor: pointer;
+    border-radius: 3px;
+    color: #555;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.group-project-navigator-view-selector li span.view-selector-item.active {
     background-color: #555;
     color: #eee;
 }
