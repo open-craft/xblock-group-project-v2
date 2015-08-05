@@ -258,12 +258,12 @@
 }
 
 .group-project-xblock-wrapper .group-project-content {
-    width: 70%;
+    width: 65%;
     display: inline-block;
 }
 
 .group-project-xblock-wrapper .group-project-navigator {
-    width: 30%;
+    width: 35%;
     float: right;
     margin-right: -15px;
     display: inline-block;

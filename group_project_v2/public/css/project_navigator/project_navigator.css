@@ -49,6 +49,11 @@
     font-size: 14px;
     font-weight: bold;
     text-decoration: none;
+    min-width: 35px;
+    width: 23%;  /* should fit four in one line + some extra space for margins */
+    height: 30px;
+    /* looks like FA icons have slightly shifted to bottom baseline, so they are not aligned with ordinary text */
+    vertical-align: bottom;
 }
 
 .group-project-navigator-view-selector li.active {
