@@ -1,0 +1,3 @@
+function GroupProjectPrivateDiscussionView(runtime, element) {
+
+}

@@ -7,17 +7,20 @@ function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
         views = {},
         selected_view = initialization_args.selected_view;
 
-    function switch_to_view(target_view) {
+    function switch_to_view(target_view, skip_content_switching) {
         var view_data = views[target_view];
 
         $(selector_item_query, element).removeClass('active');
-        $(".group-project-navigator-view", element).hide();
-
-        view_data.view.show();
         view_data.selector.addClass('active');
+
+        if (!skip_content_switching) {
+            $(".group-project-navigator-view", element).hide();
+            view_data.view.show();
+        }
     }
 
     $(selector_item_query, element).click(function(e){
+        e.preventDefault();
         var view_type = $(this).data("view-type");
 
         if (!views.hasOwnProperty(view_type)) {
@@ -25,8 +28,7 @@ function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
             return;
         }
 
-        e.preventDefault();
-        switch_to_view(view_type);
+        switch_to_view(view_type, $(this).data('skip-content'));
     });
 
     $(".group-project-navigator-view-close").click(function(){

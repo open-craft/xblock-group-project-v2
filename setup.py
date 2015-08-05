@@ -48,6 +48,7 @@ BLOCKS = [
     'gp-v2-navigator-resources = group_project_v2.project_navigator:ResourcesViewXBlock',
     'gp-v2-navigator-submissions = group_project_v2.project_navigator:SubmissionsViewXBlock',
     'gp-v2-navigator-ask-ta = group_project_v2.project_navigator:AskTAViewXBlock',
+    'gp-v2-navigator-private-discussion = group_project_v2.project_navigator:PrivateDiscussionViewXBlock',
 ]
 
 
