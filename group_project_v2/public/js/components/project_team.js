@@ -1,5 +1,5 @@
 function ProjectTeamXBlock(runtime, element) {
-    const email_memeber_modal_selector = ".group-project-team-email-member-modal";
+    const email_member_modal_selector = ".group-project-team-email-member-modal";
     const email_group_modal_selector = ".group-project-team-email-group-modal";
 
     var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
@@ -12,7 +12,7 @@ function ProjectTeamXBlock(runtime, element) {
     }
 
     function showModal(target_modal){
-        $(target_modal, element).show();
+        $(target_modal, group_project_dom).show();
     }
 
     $(".group-project-team-email-group", element).click(function(ev){
@@ -22,13 +22,13 @@ function ProjectTeamXBlock(runtime, element) {
 
     $(".group-project-team-member-email a[data-email]", element).click(function(ev){
         ev.preventDefault();
-        var form = $(email_memeber_modal_selector, element).find('form'),
+        var form = $(email_member_modal_selector, element).find('form'),
             member_email = $(this).data('email');
         $(".member-email", form).val(member_email);
-        showModal(email_memeber_modal_selector);
+        showModal(email_member_modal_selector);
     });
 
-    var modal_dialogs = $(email_memeber_modal_selector, element).add(email_group_modal_selector, element);
+    var modal_dialogs = $(email_member_modal_selector, group_project_dom).add(email_group_modal_selector, group_project_dom);
 
     modal_dialogs.find('form').submit(function(ev){
         ev.preventDefault();
