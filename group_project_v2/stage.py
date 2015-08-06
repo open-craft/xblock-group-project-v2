@@ -21,7 +21,7 @@ from group_project_v2.mixins import (
 )
 from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
-    HtmlXBlockProxy, ProjectTeamXBlock, GroupProjectResourceXBlock, GroupProjectVideoResourceXBlock,
+    ProjectTeamXBlock, GroupProjectResourceXBlock, GroupProjectVideoResourceXBlock,
     GroupProjectSubmissionXBlock, SubmissionsStaticContentXBlock,
     PeerSelectorXBlock, GroupSelectorXBlock, GroupProjectReviewQuestionXBlock, GradeRubricStaticContentXBlock,
     GroupProjectTeamEvaluationDisplayXBlock, GroupProjectGradeEvaluationDisplayXBlock,
@@ -29,7 +29,8 @@ from group_project_v2.stage_components import (
 from group_project_v2.utils import (
     loader, format_date, gettext as _, make_key, get_link_to_block,
     outsider_disallowed_protected_view, outsider_disallowed_protected_handler, key_error_protected_handler,
-    conversion_protected_handler
+    conversion_protected_handler,
+    HtmlXBlockProxy,
 )
 
 log = logging.getLogger(__name__)

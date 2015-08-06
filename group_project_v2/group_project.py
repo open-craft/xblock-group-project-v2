@@ -16,10 +16,13 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContain
 
 from group_project_v2.mixins import (
     ChildrenNavigationXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin,
+    NestedXBlockSpec
 )
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
-from group_project_v2.utils import loader, make_key, outsider_disallowed_protected_view, get_default_stage
+from group_project_v2.utils import (
+    loader, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockProxy
+)
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
@@ -50,7 +53,11 @@ class GroupProjectXBlock(
 
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
-        return [GroupActivityXBlock, GroupProjectNavigatorXBlock]
+        return [
+            NestedXBlockSpec(GroupActivityXBlock),
+            NestedXBlockSpec(GroupProjectNavigatorXBlock, single_instance=True),
+            NestedXBlockSpec(DiscussionXBlockProxy, single_instance=True)
+        ]
 
     @lazy
     def activities(self):
@@ -115,6 +122,12 @@ class GroupProjectXBlock(
             project_navigator, 'project_navigator_content',
             _(u"This Group Project V2 does not contain Project Navigator - "
               u"please edit course outline in Studio to include one")
+        )
+
+        discussion = self.get_child_of_category(DiscussionXBlockProxy.CATEGORY)
+        render_child_fragment(
+            discussion, 'discussion_content',
+            _(u"This Group Project V2 does not contain a discussion")
         )
 
         fragment.add_content(loader.render_template("templates/html/group_project.html", render_context))

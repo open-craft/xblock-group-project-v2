@@ -4,8 +4,17 @@
   <div class="new-component">
     <h5>{% trans "Add New Component" %}</h5>
     <ul class="new-component-type">
-      {% for block_category, block_name in child_blocks.items %}
-        <li><a href="#" class="single-template add-xblock-component-button" data-category="{{ block_category }}">{{ block_name }}</a></li>
+      {% for block_spec in child_blocks %}
+        <li>
+          <a href="#" class="single-template add-xblock-component-button"
+             data-category="{{ block_spec.category }}" data-single-instance="{{ block_spec.single_instance|lower }}"
+             {% if block_spec.disabled %}
+              disabled="disabled" title="{{ block_spec.disabled_reason }}"
+             {% endif %}
+              >
+            {{ block_spec.label }}
+          </a>
+        </li>
       {% endfor %}
     </ul>
   </div>

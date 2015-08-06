@@ -12,10 +12,11 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
 from group_project_v2.mixins import (
     XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin,
-    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin, NoStudioEditableSettingsMixin
+    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin, NoStudioEditableSettingsMixin,
+    NestedXBlockSpec
 )
 
-from group_project_v2.utils import loader, gettext as _
+from group_project_v2.utils import loader, gettext as _, DiscussionXBlockProxy
 
 log = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ class ViewTypes(object):
     RESOURCES = 'resources'
     SUBMISSIONS = 'submissions'
     ASK_TA = 'ask-ta'
+    PRIVATE_DISCUSSION = 'private-discussion'
 
 
 class GroupProjectNavigatorXBlock(
@@ -57,7 +59,13 @@ class GroupProjectNavigatorXBlock(
 
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
-        return [NavigationViewXBlock, ResourcesViewXBlock, SubmissionsViewXBlock, AskTAViewXBlock]
+        return [
+            NestedXBlockSpec(NavigationViewXBlock, single_instance=True),
+            NestedXBlockSpec(ResourcesViewXBlock, single_instance=True),
+            NestedXBlockSpec(SubmissionsViewXBlock, single_instance=True),
+            NestedXBlockSpec(AskTAViewXBlock, single_instance=True),
+            NestedXBlockSpec(PrivateDiscussionViewXBlock, single_instance=True),
+        ]
 
     def _get_activated_view_type(self, activate_block_id):
         try:
@@ -78,20 +86,23 @@ class GroupProjectNavigatorXBlock(
         children_items = []
         for child_id in self.children:
             view = self.runtime.get_block(child_id)
-            if not view.available_to_current_user:
+            if not view.available_to_current_user or not view.is_view_available:
                 continue
-            child_fragment = view.render('student_view', context)
 
             item = {
                 'id': str(child_id).replace("/", ";_"),
                 'type': view.type,
-                'content': child_fragment.content,
             }
 
-            fragment.add_frag_resources(child_fragment)
+            if not view.skip_content:
+                child_fragment = view.render('student_view', context)
+                item['content'] = child_fragment.content
+                fragment.add_frag_resources(child_fragment)
+            else:
+                item['content'] = ''
 
             if not view.skip_selector:
-                child_selector_fragment = view.selector_view(context)
+                child_selector_fragment = view.render('selector_view', context)
                 item['selector'] = child_selector_fragment.content
                 fragment.add_frag_resources(child_selector_fragment)
             else:
@@ -159,6 +170,7 @@ class ProjectNavigatorViewXBlockBase(
     icon = None
     selector_text = None
     skip_selector = False
+    skip_content = False
     show_to_admin_grader = False
 
     TEMPLATE_BASE = "templates/html/project_navigator/"
@@ -198,6 +210,14 @@ class ProjectNavigatorViewXBlockBase(
             project_navigator_view=self.display_name_with_default
         )
 
+    @classmethod
+    def is_view_type_available(cls):
+        return True
+
+    @property
+    def is_view_available(self):  # pylint: disable=no-self-use
+        return True
+
     def render_student_view(self, context, add_resources_from=None):
         """
         Common code to render student view
@@ -206,20 +226,16 @@ class ProjectNavigatorViewXBlockBase(
         fragment.add_content(loader.render_template(self.TEMPLATE_BASE + self.template, context))
 
         if self.css_file:
-            fragment.add_css_url(self.runtime.local_resource_url(
-                self.navigator.group_project, self.CSS_BASE + self.css_file
-            ))
+            fragment.add_css_url(self.runtime.local_resource_url(self, self.CSS_BASE + self.css_file))
 
         if self.js_file:
-            fragment.add_javascript_url(self.runtime.local_resource_url(
-                self.navigator.group_project, self.JS_BASE + self.js_file
-            ))
+            fragment.add_javascript_url(self.runtime.local_resource_url(self, self.JS_BASE + self.js_file))
 
         if self.initialize_js_function:
             fragment.initialize_js(self.initialize_js_function)
 
         for js_file in self.additional_js_files:
-            fragment.add_javascript_url(self.runtime.local_resource_url(self.navigator.group_project, js_file))
+            fragment.add_javascript_url(self.runtime.local_resource_url(self, js_file))
 
         if add_resources_from:
             for frag in add_resources_from:
@@ -242,7 +258,11 @@ class ProjectNavigatorViewXBlockBase(
         Selector view - this view is used by GroupProjectNavigatorXBlock to render selector buttons
         """
         fragment = Fragment()
-        context = {'type': self.type, 'display_name': self.display_name_with_default}
+        context = {
+            'type': self.type,
+            'display_name': self.display_name_with_default,
+            'skip_content': self.skip_content
+        }
         for attribute in ['icon', 'selector_text']:
             if getattr(self, attribute, None) is not None:
                 context[attribute] = getattr(self, attribute)
@@ -262,7 +282,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     STUDIO_LABEL = _(u"Navigation View")
     type = ViewTypes.NAVIGATION
     icon = u"fa fa-bars"
-    display_name_with_default = _(u"Navigation View")
+    display_name_with_default = STUDIO_LABEL
     skip_selector = True
     show_to_admin_grader = True
 
@@ -296,7 +316,7 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     STUDIO_LABEL = _(u"Resources View")
     type = ViewTypes.RESOURCES
     icon = u"fa fa-files-o"
-    display_name_with_default = _(u"Resources View")
+    display_name_with_default = STUDIO_LABEL
 
     template = "resources_view.html"
     css_file = "resources_view.css"
@@ -360,25 +380,70 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     STUDIO_LABEL = _(u"Ask a TA View")
     type = ViewTypes.ASK_TA
     selector_text = u"TA"
-    display_name_with_default = _(u"Ask a TA View")
+    display_name_with_default = STUDIO_LABEL
 
     template = "ask_ta_view.html"
     css_file = "ask_ta_view.css"
     js_file = "ask_ta_view.js"
     initialize_js_function = "GroupProjectNavigatorAskTAView"
 
+    @classmethod
+    def is_view_type_available(cls):
+        # TODO: LMS support - check if TAs are available at all
+        return True
+
     def student_view(self, context):  # pylint: disable=unused-argument
         """
         Student view
         """
-        img_url = self.runtime.local_resource_url(self.navigator.group_project, "public/img/ask_ta.png")
+        img_url = self.runtime.local_resource_url(self, "public/img/ask_ta.png")
         context = {'view': self, 'course_id': self.course_id, 'img_url': img_url}
         return self.render_student_view(context)
+
+
+class PrivateDiscussionViewXBlock(ProjectNavigatorViewXBlockBase):
+    CATEGORY = 'gp-v2-navigator-private-discussion'
+    STUDIO_LABEL = _(u"Private Discussion View")
+    type = ViewTypes.PRIVATE_DISCUSSION
+    icon = 'fa fa-comment'
+    skip_content = True  # there're no content in this view so far - it only shows discussion in a popup
+    display_name_with_default = STUDIO_LABEL
+
+    js_file = "private_discussion_view.js"
+    initialize_js_function = "GroupProjectPrivateDiscussionView"
+
+    def _project_has_discussion(self):
+        return self.navigator.group_project.has_child_of_category(DiscussionXBlockProxy.CATEGORY)
+
+    @property
+    def is_view_available(self):
+        return self._project_has_discussion()
+
+    def selector_view(self, context):  # pylint: disable=unused-argument
+        """
+        Selector view - this view is used by GroupProjectNavigatorXBlock to render selector buttons
+        """
+        fragment = super(PrivateDiscussionViewXBlock, self).selector_view(context)
+        fragment.add_javascript_url(self.runtime.local_resource_url(self, self.JS_BASE + self.js_file))
+        fragment.initialize_js(self.initialize_js_function)
+        return fragment
+
+    def validate(self):
+        validation = super(PrivateDiscussionViewXBlock, self).validate()
+        if not self._project_has_discussion():
+            validation.add(ValidationMessage(
+                ValidationMessage.WARNING,
+                _(u"Parent group project does not contain discussion XBlock - this {block_type} will not "
+                  u"function properly and will not be displayed to students").format(block_type=self.STUDIO_LABEL)
+            ))
+
+        return validation
 
 
 PROJECT_NAVIGATOR_VIEW_TYPES = (
     NavigationViewXBlock.CATEGORY,
     ResourcesViewXBlock.CATEGORY,
     SubmissionsViewXBlock.CATEGORY,
-    AskTAViewXBlock.CATEGORY
+    AskTAViewXBlock.CATEGORY,
+    PrivateDiscussionViewXBlock.CATEGORY
 )
