@@ -280,6 +280,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     """
     CATEGORY = "gp-v2-navigator-navigation"
     STUDIO_LABEL = _(u"Navigation View")
+    STUDENT_VIEW_TITLE = _(u"Navigation")
     type = ViewTypes.NAVIGATION
     icon = u"fa fa-bars"
     display_name_with_default = STUDIO_LABEL
@@ -314,6 +315,7 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     """
     CATEGORY = "gp-v2-navigator-resources"
     STUDIO_LABEL = _(u"Resources View")
+    STUDENT_VIEW_TITLE = _(u"Resources")
     type = ViewTypes.RESOURCES
     icon = u"fa fa-files-o"
     display_name_with_default = STUDIO_LABEL
@@ -344,9 +346,10 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     """
     CATEGORY = "gp-v2-navigator-submissions"
     STUDIO_LABEL = _(u"Submissions View")
+    STUDENT_VIEW_TITLE = _(u"Upload")
     type = ViewTypes.SUBMISSIONS
     icon = u"fa fa-upload"
-    display_name_with_default = _(u"Upload")
+    display_name_with_default = STUDIO_LABEL
 
     template = "submissions_view.html"
     css_file = "submissions_view.css"
@@ -378,9 +381,11 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     """
     CATEGORY = "gp-v2-navigator-ask-ta"
     STUDIO_LABEL = _(u"Ask a TA View")
+    STUDENT_VIEW_TITLE = _(u"Ask a McKinsey TA")
     type = ViewTypes.ASK_TA
     selector_text = u"TA"
     display_name_with_default = STUDIO_LABEL
+
 
     template = "ask_ta_view.html"
     css_file = "ask_ta_view.css"
