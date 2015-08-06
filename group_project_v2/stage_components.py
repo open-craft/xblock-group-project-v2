@@ -211,13 +211,13 @@ class GroupProjectSubmissionXBlock(
 
     editable_fields = ('display_name', 'description', 'upload_id')
 
-    STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as stage is not yet opened")
-    STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as stage is closed")
+    STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as stage is not yet opened.")
+    STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as stage is closed.")
 
-    SUCCESSFUL_UPLOAD_TITLE = _(u"Upload complete")
+    SUCCESSFUL_UPLOAD_TITLE = _(u"Upload complete.")
     SUCCESSFUL_UPLOAD_MESSAGE_TPL = _(
         u"Your deliverable have been successfully uploaded. You can attach an updated version of the "
-        u"deliverable by clicking the <span class='icon {icon}'></span> icon at any time before the deadline passes"
+        u"deliverable by clicking the <span class='icon {icon}'></span> icon at any time before the deadline passes."
     )
 
     def get_upload(self, group_id):

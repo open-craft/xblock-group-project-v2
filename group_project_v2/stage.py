@@ -87,12 +87,13 @@ class BaseGroupActivityStage(
 
     NAVIGATION_LABEL = None
     STUDIO_LABEL = _(u"Stage")
+    STAGE_COMPLETION_MESSAGE = _(u"This task has been marked as complete.")
 
     js_file = None
     js_init = None
 
-    STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as it's not yet opened")
-    STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as it's closed")
+    STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as it's not yet opened.")
+    STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as it's closed.")
     STAGE_URL_NAME_TEMPLATE = _(u"url_name to link to this {stage_name}:")
 
     CURRENT_STAGE_ID_PARAMETER_NAME = 'current_stage_id'
@@ -357,7 +358,7 @@ class CompletionStage(BaseGroupActivityStage):
             self.completed = True
             return {
                 'result': 'success',
-                'msg': _('Stage completed!'),
+                'msg': self.STAGE_COMPLETION_MESSAGE,
                 'new_stage_states': [self.get_new_stage_state_data()]
             }
         except ApiError as exception:
@@ -469,6 +470,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
     js_init = "GroupProjectReviewStage"
 
     STAGE_ACTION = _(u"save feedback")
+    FEEDBACK_SAVED_MESSAGE = _(u'Thanks for your feedback.')
 
     TA_GRADING_NOT_ALLOWED = _(u"TA grading is not allowed for this stage")
 
@@ -569,7 +571,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
         return {
             'result': 'success',
-            'msg': _('Thanks for your feedback'),
+            'msg': self.FEEDBACK_SAVED_MESSAGE,
             'new_stage_states': [self.get_new_stage_state_data()]
         }
 
