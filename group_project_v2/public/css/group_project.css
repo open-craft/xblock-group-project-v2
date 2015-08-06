@@ -276,3 +276,9 @@
 .group-project-xblock-wrapper #group-project-discussion .discussion-module {
     width: 100%;
 }
+
+.group-project-xblock-wrapper #group-project-discussion .reveal-modal {
+    width: 120%;
+    left: -10%;
+    margin-left: 0;
+}
