@@ -1,7 +1,7 @@
 .group-project-submissions-view ul.group-project-submissions li {
     border-bottom: 1px solid #ccc;
     list-style: none;
-    padding: 5px 0px;
+    padding: 5px 0;
 }
 
 .group-project-submissions-view ul.group-project-submissions li:last-of-type {
@@ -44,30 +44,19 @@
 
 .group-project-submissions-view .uploader .uploader-upload-controls-wrapper {
     min-width: 180px;
+    padding-right: 32px; /* placing label in wrapper padding: 30px lable width + 2px "margin" */
 }
 
 .group-project-submissions-view .uploader .upload_item_wrapper {
     display: inline-block;
     padding: 0;
-    /* 32px right margin = 30px icon + 2px actual margin*/
-    margin: 0 32px 0 0;
-}
-
-.group-project-submissions-view .uploader input[type=text] {
     width: 100%;
-    background-color: transparent;
-    color: #3384ca;
-    margin-bottom: 0;
-    height: 30px;
-}
-
-.group-project-submissions-view .uploader .upload_item_wrapper[data-location] input[type=text] {
-    cursor: pointer;
+    /* right margin won't work here - update uploader-upload-controls-wrapper padding-right and .uploader label margin-right */
 }
 
 .group-project-submissions-view .uploader label {
     width: 30px;
-    margin-left: -30px;
+    margin-right: -32px;
     display: inline-block;
     text-align: right;
     vertical-align: top;
@@ -83,9 +72,20 @@
     font-size: 14px;
 }
 
-.group-project-submissions-view .uploader input {
-    border: none;
-    box-shadow: none;
+.group-project-submissions-view .uploader input[type=text] {
+    width: 100%;
+    background-color: transparent;
+    color: #3384ca;
+    margin-bottom: 0;
+    height: 30px;
+    font-style: italic;
+    font-size: 12px;
+}
+
+.group-project-submissions-view .uploader .upload_item_wrapper[data-location] input[type=text] {
+    cursor: pointer;
+    font-style: normal;
+    font-weight: bold;
 }
 
 .group-project-submissions-view .uploader .description {
@@ -97,4 +97,3 @@
     font-size: 12px;
     color: #8f8f8f;
 }
-

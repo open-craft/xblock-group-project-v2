@@ -386,7 +386,6 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     selector_text = u"TA"
     display_name_with_default = STUDIO_LABEL
 
-
     template = "ask_ta_view.html"
     css_file = "ask_ta_view.css"
     js_file = "ask_ta_view.js"
