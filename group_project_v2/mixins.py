@@ -55,12 +55,7 @@ class CourseAwareXBlockMixin(object):
     @property
     def course_id(self):
         raw_course_id = getattr(self.runtime, 'course_id', 'all')
-        try:
-            return unicode(raw_course_id)
-        except Exception as exc:    # pylint: disable=broad-except
-            msg = "Error converting course_id to unicode: {message}".format(message=exc.message)
-            log.exception(msg)
-            return raw_course_id
+        return unicode(raw_course_id)
 
 
 class UserAwareXBlockMixin(object):

@@ -1,8 +1,9 @@
 from unittest import TestCase
+import ddt
 import mock
 
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
-from group_project_v2.mixins import ChildrenNavigationXBlockMixin
+from group_project_v2.mixins import ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin
 from tests.utils import TestWithPatchesMixin
 from xblock.core import XBlock
 from xblock.runtime import Runtime
@@ -112,3 +113,28 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
 
         self.block.get_block_by_id(string_block_id)
         self.runtime_mock.get_block.assert_called_with(actual_block_id)
+
+
+class CourseAwareXBlockMixinGuineaPig(CommonMixinGuineaPig, CourseAwareXBlockMixin):
+    pass
+
+
+@ddt.ddt
+class TestCourseAwareXBlockMixin(TestCase, TestWithPatchesMixin):
+    def setUp(self):
+        self.block = CourseAwareXBlockMixinGuineaPig()
+        self.runtime_mock = mock.create_autospec(Runtime)
+        self.make_patch(
+            CourseAwareXBlockMixinGuineaPig, 'runtime',
+            mock.PropertyMock(return_value=self.runtime_mock)
+        )
+
+    @ddt.data(
+        'string_course_id',
+        u'unicode_course_id',
+        CourseLocator(org='123', course='456', run='789')
+    )
+    def test_course_id(self, course_id):
+        self.runtime_mock.course_id = course_id
+        self.assertEqual(self.block.course_id, unicode(course_id))
+
