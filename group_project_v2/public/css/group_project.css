@@ -43,6 +43,7 @@
 .group-project-xblock-wrapper .answer.side {
     width: 25%;
     float: right;
+    margin-bottom: 0;
 }
 
 .group-project-xblock-wrapper .other_submissions {
@@ -228,10 +229,13 @@
     cursor: wait !important;
 }
 
+.group-project-xblock-wrapper .question {
+    margin-top: 10px;
+}
+
 .group-project-xblock-wrapper .group-project-question-title {
     font-weight: 600;
     display: block;
-    margin-top: 10px;
 }
 
 .group-project-xblock-wrapper .group-project-answer-mean {

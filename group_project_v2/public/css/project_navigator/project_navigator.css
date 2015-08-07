@@ -58,6 +58,7 @@
     font-size: 14px;
     font-weight: bold;
     text-decoration: none;
+    line-height: 18px;
 }
 
 .group-project-navigator-view-selector li span.view-selector-item.active {
