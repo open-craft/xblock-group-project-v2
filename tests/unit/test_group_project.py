@@ -6,10 +6,11 @@ from xblock.runtime import Runtime
 
 
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
+from xblock.field_data import DictFieldData
 
 
 def _make_question(question_id):
-    question_mock = mock.Mock(spec=GroupProjectReviewQuestionXBlock)
+    question_mock = mock.create_autospec(spec=GroupProjectReviewQuestionXBlock)
     question_mock.question_id = question_id
     return question_mock
 
@@ -22,41 +23,26 @@ def _make_reviews(reviews):
     return result
 
 
-class TestableGroupActivityXBlock(GroupActivityXBlock):
-    _grade_questions = None
-    _project_api = None
-
-    def real_user_id(self, user_id):
-        return user_id
-
-    @property
-    def project_api(self):
-        return self._project_api
-
-    @project_api.setter
-    def project_api(self, value):
-        self._project_api = value
-
-    @property
-    def grade_questions(self):
-        return self._grade_questions
-
-    @grade_questions.setter
-    def grade_questions(self, value):
-        self._grade_questions = value
+class TestWithPatchesMixin(object):
+    def make_patch(self, obj, member_name, new=mock.DEFAULT):
+        patcher = mock.patch.object(obj, member_name, new)
+        patch_instance = patcher.start()
+        self.addCleanup(patcher.stop)
+        return patch_instance
 
 
 @ddt.ddt
-class TestGroupActivityXBlock(TestCase):
+class TestCalculateGradeGroupActivityXBlock(TestWithPatchesMixin, TestCase):
     def setUp(self):
         self.project_api_mock = mock.Mock()
-        self.runtime_mock = self.get_runtime_mock()
-        self.block = TestableGroupActivityXBlock(self.runtime_mock, field_data={}, scope_ids=mock.Mock())
-        self.block.project_api = self.project_api_mock
+        self.runtime_mock = mock.Mock(spec=Runtime)
+        self.grade_questions_mock = mock.PropertyMock()
+        self.block = GroupActivityXBlock(self.runtime_mock, field_data={}, scope_ids=mock.Mock())
 
-    def get_runtime_mock(self):
-        runtime = mock.Mock(spec=Runtime)
-        return runtime
+        self.project_api_mock = self.make_patch(self.block, 'project_api')
+        self.grade_questions_mock = self.make_patch(GroupActivityXBlock, 'grade_questions', mock.PropertyMock())
+        self.real_user_id_mock = self.make_patch(self.block, 'real_user_id')
+        self.real_user_id_mock.side_effect = lambda u_id: u_id
 
     @ddt.data(
         (1, ["q1"], [1], [], None),
@@ -75,7 +61,8 @@ class TestGroupActivityXBlock(TestCase):
             return_value=[{"id": rew_id} for rew_id in reviewer_ids]
         )
         self.project_api_mock.get_workgroup_review_items_for_group = mock.Mock(return_value=_make_reviews(reviews))
-        self.block.grade_questions = [_make_question(question_id) for question_id in question_ids]
+
+        self.grade_questions_mock.return_value = [_make_question(question_id) for question_id in question_ids]
 
         grade = self.block.calculate_grade(group_id)
         self.assertEqual(grade, expected_grade)
@@ -105,7 +92,9 @@ class TestGroupActivityXBlock(TestCase):
         self.project_api_mock.get_workgroup_review_items_for_group = mock.Mock(
             return_value=_make_reviews(reviews)+_make_reviews(admin_reviews)
         )
-        self.block.grade_questions = [_make_question(question_id) for question_id in question_ids]
+
+        self.grade_questions_mock.return_value = [_make_question(question_id) for question_id in question_ids]
+        self.real_user_id_mock.side_effect = lambda u_id: u_id
 
         grade = self.block.calculate_grade(group_id)
         self.assertEqual(grade, expected_grade)
@@ -114,3 +103,111 @@ class TestGroupActivityXBlock(TestCase):
             group_id, self.block.content_id
         )
 
+
+@ddt.ddt
+class TestEventsAndCompletionGroupActivityXBlock(TestWithPatchesMixin, TestCase):
+    STANDARD_DATA = (
+        (1, [], 100),
+        (2, [1, 2], 10),
+        (3, [1, 2, 3], 92)
+    )
+
+    def _make_workgroup(self, user_ids):
+        return {
+            'users': [{'id': user_id} for user_id in user_ids]
+        }
+
+    def setUp(self):
+        self.project_api_mock = mock.Mock()
+        self.project_api_mock.get_workgroup_by_id = mock.Mock()
+        self.runtime_mock = mock.create_autospec(spec=Runtime)
+        self.runtime_mock.service = mock.Mock(return_value=None)
+        self.block = GroupActivityXBlock(
+            self.runtime_mock, field_data=DictFieldData({'weight': 100}), scope_ids=mock.Mock()
+        )
+
+        self.project_api_mock = self.make_patch(self.block, 'project_api')
+        self.calculate_grade_mock = self.make_patch(self.block, 'calculate_grade')
+        self.mark_complete = self.make_patch(self.block, 'mark_complete')
+
+    @ddt.data(
+        (1, [], 100),
+        (2, [1, 2], 10),
+        (3, [1, 2, 3], 92)
+    )
+    @ddt.unpack
+    def test_marks_complete_for_workgroup(self, group_id, workgroup_users, grade):
+        self.calculate_grade_mock.return_value = grade
+        self.project_api_mock.get_workgroup_by_id.return_value = self._make_workgroup(workgroup_users)
+
+        self.block.calculate_and_send_grade(group_id)
+
+        mark_complete_calls = self.block.mark_complete.call_args_list
+        self.assertEqual(mark_complete_calls, [mock.call(user_id) for user_id in workgroup_users])
+
+    @ddt.data(
+        (1, 100, 'course1', 'content1', 100),
+        (2, 10, 'course2', 'content2', 50),
+        (3, 92, 'course3', 'contrent3', 150)
+    )
+    @ddt.unpack
+    def test_sets_group_grade(self, group_id, grade, course_id, content_id, weight):
+        self.calculate_grade_mock.return_value = grade
+        self.block.weight = weight
+
+        with mock.patch.object(GroupActivityXBlock, 'course_id', mock.PropertyMock(return_value=course_id)),\
+                mock.patch.object(GroupActivityXBlock, 'content_id', mock.PropertyMock(return_value=content_id)):
+
+            self.block.calculate_and_send_grade(group_id)
+
+            self.project_api_mock.set_group_grade.assert_called_once_with(
+                group_id, course_id, content_id, grade, weight
+            )
+
+    @ddt.data(
+        (1, 100, 'content1', 100),
+        (2, 10, 'content2', 50),
+        (3, 92, 'contrent3', 150)
+    )
+    @ddt.unpack
+    def test_publishes_runtime_event(self, group_id, grade, content_id, weight):
+        self.calculate_grade_mock.return_value = grade
+
+        with mock.patch.object(GroupActivityXBlock, 'content_id', mock.PropertyMock(return_value=content_id)):
+            self.block.calculate_and_send_grade(group_id)
+
+            expected_calls = [
+                mock.call(
+                    self.block, "group_activity.final_grade",
+                    {
+                        "grade_value": grade,
+                        "group_id": group_id,
+                        "content_id": self.block.content_id,
+                    }
+                ),
+                mock.call(
+                    self.block, 'grade', {
+                        'value': grade,
+                        'max_value': self.block.weight,
+                    }
+                )
+            ]
+
+            self.assertEqual(self.runtime_mock.publish.call_args_list, expected_calls)
+
+    @ddt.data(1, 2, 3)
+    def test_sends_notifications_message(self, group_id):
+        self.calculate_grade_mock.return_value = 100
+        # self.runtime_mock.service.return_value = None
+        with mock.patch.object(self.block, 'fire_grades_posted_notification') as grades_posted_mock:
+            self.block.calculate_and_send_grade(group_id)
+            self.runtime_mock.service.assert_called_with(self.block, 'notifications')
+            grades_posted_mock.assert_not_called()
+
+            notifications_service_mock = mock.Mock()
+            self.runtime_mock.service.return_value = notifications_service_mock
+
+            self.block.calculate_and_send_grade(group_id)
+
+            self.runtime_mock.service.assert_called_with(self.block, 'notifications')
+            grades_posted_mock.assert_called_once_with(group_id, notifications_service_mock)
