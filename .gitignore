@@ -3,6 +3,8 @@ dist
 *.pyc
 *~
 .coverage
+htmlcov
+htmlcov*
 *.log
 *.log.*
 .DS_Store

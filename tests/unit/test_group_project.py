@@ -1,12 +1,13 @@
 import ddt
 from unittest import TestCase
-from mock import mock
+import mock
 from group_project_v2.group_project import GroupActivityXBlock
 from xblock.runtime import Runtime
 
 
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
 from xblock.field_data import DictFieldData
+from tests.utils import TestWithPatchesMixin
 
 
 def _make_question(question_id):
@@ -21,14 +22,6 @@ def _make_reviews(reviews):
         reviewer, question, answer = review
         result.append({'reviewer': reviewer, 'question': question, 'answer': answer})
     return result
-
-
-class TestWithPatchesMixin(object):
-    def make_patch(self, obj, member_name, new=mock.DEFAULT):
-        patcher = mock.patch.object(obj, member_name, new)
-        patch_instance = patcher.start()
-        self.addCleanup(patcher.stop)
-        return patch_instance
 
 
 @ddt.ddt

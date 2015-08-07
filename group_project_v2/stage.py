@@ -128,7 +128,7 @@ class BaseGroupActivityStage(
 
     @property
     def resources(self):
-        return self._get_children_by_category(
+        return self.get_children_by_category(
             GroupProjectResourceXBlock.CATEGORY, GroupProjectVideoResourceXBlock.CATEGORY
         )
 
@@ -399,7 +399,7 @@ class SubmissionStage(BaseGroupActivityStage):
 
     @property
     def submissions(self):
-        return self._get_children_by_category(GroupProjectSubmissionXBlock.CATEGORY)
+        return self.get_children_by_category(GroupProjectSubmissionXBlock.CATEGORY)
 
     @property
     def is_upload_available(self):
@@ -483,7 +483,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
     @property
     def questions(self):
-        return self._get_children_by_category(GroupProjectReviewQuestionXBlock.CATEGORY)
+        return self.get_children_by_category(GroupProjectReviewQuestionXBlock.CATEGORY)
 
     @property
     def required_questions(self):
@@ -807,7 +807,7 @@ class EvaluationDisplayStage(FeedbackDisplayBaseStage):
 
     @property
     def assessments(self):
-        return self._get_children_by_category(GroupProjectTeamEvaluationDisplayXBlock.CATEGORY)
+        return self.get_children_by_category(GroupProjectTeamEvaluationDisplayXBlock.CATEGORY)
 
 
 class GradeDisplayStage(FeedbackDisplayBaseStage):
@@ -831,7 +831,7 @@ class GradeDisplayStage(FeedbackDisplayBaseStage):
 
     @property
     def assessments(self):
-        return self._get_children_by_category(GroupProjectGradeEvaluationDisplayXBlock.CATEGORY)
+        return self.get_children_by_category(GroupProjectGradeEvaluationDisplayXBlock.CATEGORY)
 
     def get_stage_content_fragment(self, context, view='student_view'):
         final_grade = self.activity.calculate_grade(self.workgroup['id'])
