@@ -123,13 +123,15 @@ class GroupProjectVideoResourceXBlock(BaseGroupProjectResourceXBlock):
 class StaticContentBaseXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin):
     TARGET_PROJECT_NAVIGATOR_VIEW = None
     TEXT_TEMPLATE = None
+    TEMPLATE_PATH = "templates/html/components/static_content.html"
 
     def student_view(self, context):
-        activity = self.stage.activity
-        if activity.project.navigator is None:
-            return Fragment()
-
-        target_block = activity.project.navigator.get_child_of_category(self.TARGET_PROJECT_NAVIGATOR_VIEW)
+        try:
+            activity = self.stage.activity
+            target_block = activity.project.navigator.get_child_of_category(self.TARGET_PROJECT_NAVIGATOR_VIEW)
+        except AttributeError:
+            activity = None
+            target_block = None
 
         if target_block is None:
             return Fragment()
@@ -144,7 +146,7 @@ class StaticContentBaseXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin, 
         render_context.update(context)
 
         fragment = Fragment()
-        fragment.add_content(loader.render_template("templates/html/components/static_content.html", render_context))
+        fragment.add_content(loader.render_template(self.TEMPLATE_PATH, render_context))
         return fragment
 
 
