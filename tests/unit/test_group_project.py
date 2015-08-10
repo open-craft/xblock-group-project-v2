@@ -34,7 +34,7 @@ class TestCalculateGradeGroupActivityXBlock(TestWithPatchesMixin, TestCase):
         self.project_api_mock = mock.Mock()
         self.runtime_mock = mock.Mock(spec=Runtime)
         self.grade_questions_mock = mock.PropertyMock()
-        self.block = GroupActivityXBlock(self.runtime_mock, field_data={}, scope_ids=mock.Mock())
+        self.block = GroupActivityXBlock(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
 
         self.project_api_mock = self.make_patch(self.block, 'project_api')
         self.grade_questions_mock = self.make_patch(GroupActivityXBlock, 'grade_questions', mock.PropertyMock())
