@@ -4,6 +4,7 @@ from unittest import TestCase
 from datetime import datetime
 import ddt
 import mock
+from xml.etree import ElementTree
 
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
@@ -13,7 +14,8 @@ from group_project_v2.group_project import GroupActivityXBlock
 from group_project_v2.project_api import ProjectAPI
 from group_project_v2.project_navigator import ProjectNavigatorViewXBlockBase
 from group_project_v2.stage import BaseGroupActivityStage
-from group_project_v2.stage_components import StaticContentBaseXBlock, GroupProjectSubmissionXBlock
+from group_project_v2.stage_components import StaticContentBaseXBlock, GroupProjectSubmissionXBlock, \
+    GroupProjectReviewQuestionXBlock
 from group_project_v2.upload_file import UploadFile
 from tests.utils import TestWithPatchesMixin, make_api_error
 
@@ -322,3 +324,44 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
             )
 
             self.stage_mock.activity.fire_file_upload_notification.assert_called_with(notification_service_mock)
+
+
+@ddt.ddt
+class TestGroupProjectReviewQuestionXBlock(StageComponentXBlockTestBase):
+    block_to_test = GroupProjectReviewQuestionXBlock
+
+    def test_render_content_bad_content(self):
+        self.block.question_content = "imparsable as XML"
+
+        self.assertEqual(self.block.render_content(), "")
+
+    @ddt.data(
+        ("<input type='text'/>", False, False, {'answer', 'editable'}),
+        ("<textarea class='initial_class'/>", False, False, {'answer', 'editable', 'initial_class'}),
+        ("<input type='text'/>", True, False, {'answer', 'editable', 'side'}),
+        ("<input type='text'/>", False, True, {'answer'}),
+    )
+    @ddt.unpack
+    def test_render_content_node_content(self, question_content, single_line, closed, expected_classes):
+        self.block.question_content = question_content
+        self.block.single_line = single_line
+        self.stage_mock.is_closed = closed
+
+        with mock.patch('group_project_v2.stage_components.outer_html') as patched_outer_html:
+            expected_response = "some rendered content"
+            patched_outer_html.return_value = expected_response
+
+            response = self.block.render_content()
+            self.assertEqual(response, expected_response)
+
+            self.assertEqual(len(patched_outer_html.call_args_list), 1)  # essentially "called once with any attributes"
+            call_args, call_kwargs = patched_outer_html.call_args
+            self.assertEqual(call_kwargs, {})
+            self.assertEqual(len(call_args), 1)
+            node_to_render = call_args[0]
+
+            self.assertIsInstance(node_to_render, ElementTree.Element)
+            self.assertEqual(node_to_render.get('id'), self.block.question_id)
+            self.assertEqual(node_to_render.get('name'), self.block.question_id)
+            self.assertEqual(set(node_to_render.get('class').split(' ')), expected_classes)
+            self.assertEqual(node_to_render.get('disabled', None), 'disabled' if closed else None)
