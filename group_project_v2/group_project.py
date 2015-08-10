@@ -21,7 +21,7 @@ from group_project_v2.mixins import (
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import (
-    loader, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockProxy
+    loader, mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockProxy
 )
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
@@ -407,11 +407,6 @@ class GroupActivityXBlock(
             self.fire_grades_posted_notification(group_id, notifications_service)
 
     def calculate_grade(self, group_id):  # pylint:disable=too-many-locals,too-many-branches
-
-        def mean(value_array):
-            numeric_values = [float(v) for v in value_array]
-            return float(sum(numeric_values) / len(numeric_values))
-
         review_item_data = self.project_api.get_workgroup_review_items_for_group(group_id, self.content_id)
         review_item_map = {
             make_key(review_item['question'], self.real_user_id(review_item['reviewer'])): review_item['answer']

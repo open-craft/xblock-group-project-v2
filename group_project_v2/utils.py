@@ -49,23 +49,9 @@ class OutsiderDisallowedError(Exception):
         return u"Outsider Denied Access: {}".format(self.value)
 
 
-class DottableDict(dict):
-    def __init__(self, *args, **kwargs):
-        dict.__init__(self, *args, **kwargs)
-        self.__dict__ = self
-
-
 def parse_date(date_string):
     split_string = date_string.split('/')
     return date(int(split_string[2]), int(split_string[0]), int(split_string[1]))
-
-
-def inner_html(node):
-    if node is None:
-        return None
-
-    tag_length = len(node.tag)
-    return outer_html(node)[tag_length + 2:-1 * (tag_length + 3)]
 
 
 def outer_html(node):
