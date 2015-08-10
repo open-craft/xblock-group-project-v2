@@ -153,3 +153,62 @@ class TestCourseAwareXBlockMixin(TestCase, TestWithPatchesMixin):
     def test_course_id(self, course_id):
         self.runtime_mock.course_id = course_id
         self.assertEqual(self.block.course_id, unicode(course_id))
+
+
+class UserAwareXBlockMixinGuineaPig(CommonMixinGuineaPig, UserAwareXBlockMixin):
+    pass
+
+
+@ddt.ddt
+class TestUserAwareXBlockMixin(TestCase, TestWithPatchesMixin):
+    def setUp(self):
+        UserAwareXBlockMixinGuineaPig._known_real_user_ids = {}
+        self.block = UserAwareXBlockMixinGuineaPig()
+        self.runtime_mock = mock.create_autospec(Runtime)
+        self.make_patch(
+            UserAwareXBlockMixinGuineaPig, 'runtime',
+            mock.PropertyMock(return_value=self.runtime_mock)
+        )
+
+    @ddt.data('1', '12', 'student1')
+    def test_anonymous_student_id(self, student_id):
+        self.runtime_mock.anonymous_student_id = student_id
+        self.assertEqual(self.block.anonymous_student_id, student_id)
+
+    @ddt.data('1', '12', 'student1')
+    def test_anonymous_student_id_no_runtime_attribute(self, student_id):
+        self.runtime_mock.user_id = student_id
+        self.assertEqual(self.block.anonymous_student_id, student_id)
+
+    def test_real_user_id(self):
+        real_users = {'u1': _make_user_mock(1), 'u2': _make_user_mock(2), 'u3': _make_user_mock(3)}
+        self.runtime_mock.get_real_user = mock.Mock(side_effect=lambda u_id: real_users.get(u_id, None))
+        self.assertEqual(self.block.real_user_id('u1'), 1)
+        self.assertEqual(self.block.real_user_id('u2'), 2)
+        self.assertEqual(self.block.real_user_id('u3'), 3)
+
+        del self.runtime_mock.get_real_user
+        # these three are cached
+        self.assertEqual(self.block.real_user_id('u1'), 1)
+        self.assertEqual(self.block.real_user_id('u2'), 2)
+        self.assertEqual(self.block.real_user_id('u3'), 3)
+
+        # these three are not
+        self.assertEqual(self.block.real_user_id('u4'), 'u4')
+        self.assertEqual(self.block.real_user_id('u5'), 'u5')
+        self.assertEqual(self.block.real_user_id('u6'), 'u6')
+
+    @ddt.data(
+        ('u1', 1),  # via get_real_user
+        ('u2', 2),  # via get_real_user
+        ('12', 12),  # get_real_user throws - via int conversion
+        ('u3', None),  # get_real_user and in conversion throws - return None
+        ('qwerty', None)  # get_real_user and in conversion throws - return None
+    )
+    @ddt.unpack
+    def test_user_id_property(self, user_id, expected_result):
+        self.runtime_mock.user_id = user_id
+        real_users = {'u1': _make_user_mock(1), 'u2': _make_user_mock(2)}
+        self.runtime_mock.get_real_user = mock.Mock(side_effect=lambda u_id: real_users.get(u_id, None))
+
+        self.assertEqual(self.block.user_id, expected_result)

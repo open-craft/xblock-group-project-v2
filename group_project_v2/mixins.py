@@ -84,10 +84,9 @@ class UserAwareXBlockMixin(object):
 
     def real_user_id(self, anonymous_student_id):
         if anonymous_student_id not in self._known_real_user_ids:
-            try:
+            if hasattr(self.runtime, 'get_real_user'):
                 self._known_real_user_ids[anonymous_student_id] = self.runtime.get_real_user(anonymous_student_id).id
-            except AttributeError:
-                # workbench support
+            else:
                 self._known_real_user_ids[anonymous_student_id] = anonymous_student_id
         return self._known_real_user_ids[anonymous_student_id]
 
