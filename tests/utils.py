@@ -135,3 +135,14 @@ class TestWithPatchesMixin(object):
         patch_instance = patcher.start()
         self.addCleanup(patcher.stop)
         return patch_instance
+
+
+def make_api_error(code, reason):
+    error_mock = mock.Mock()
+    error_mock.code = code
+    error_mock.reason = reason
+    return ApiError(error_mock)
+
+
+def raise_api_error(code, reason):
+    raise make_api_error(code, reason)

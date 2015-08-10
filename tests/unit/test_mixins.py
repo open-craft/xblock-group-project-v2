@@ -5,12 +5,11 @@ import mock
 
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
 import group_project_v2
-from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin, \
     WorkgroupAwareXBlockMixin
 from group_project_v2.project_api import ProjectAPI
 from group_project_v2.utils import OutsiderDisallowedError
-from tests.utils import TestWithPatchesMixin
+from tests.utils import TestWithPatchesMixin, raise_api_error
 from xblock.core import XBlock
 from xblock.runtime import Runtime
 
@@ -26,13 +25,6 @@ def _make_user_mock(user_id):
     result = mock.Mock(spec={})
     result.id = user_id
     return result
-
-
-def _raise_api_error(code, reason):
-    error_mock = mock.Mock()
-    error_mock.code = code
-    error_mock.reason = reason
-    raise ApiError(error_mock)
 
 
 class CommonMixinGuineaPig(object):
@@ -260,7 +252,7 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
         self.project_api_mock.get_user_roles_for_course = mock.Mock()
 
     def test_fallback_workgroup(self):
-        self.project_api_mock.get_user_preferences.side_effect = lambda u_id: _raise_api_error(401, "qwerty")
+        self.project_api_mock.get_user_preferences.side_effect = lambda u_id: raise_api_error(401, "qwerty")
 
         self.assertEqual(self.block.workgroup, WorkgroupAwareXBlockMixin.FALLBACK_WORKGROUP)
 
