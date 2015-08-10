@@ -1,6 +1,6 @@
+# pylint:disable=protected-access,no-self-use,invalid-name
 from unittest import TestCase
 import ddt
-from django.test.utils import override_settings
 import mock
 
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
@@ -299,7 +299,7 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
         }
         self.project_api_mock.get_workgroup_by_id.return_value = workgroup
 
-        with mock.patch.object(WorkgroupAwareXBlockMixin, '_confirm_outsider_allowed') as patched_check:
+        with mock.patch.object(WorkgroupAwareXBlockMixin, '_confirm_outsider_allowed'):
             # patched_check is noop if everything is ok, so we're letting it return a mock, or whatever it pleases
             self.assertEqual(self.block.workgroup, workgroup)
             self.project_api_mock.get_workgroup_by_id.assert_called_once_with(pref_group_id)
@@ -355,7 +355,7 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
     def test_is_group_member(self, user_id, group_members, is_member):
         self.user_id_mock.return_value = user_id
         with mock.patch.object(WorkgroupAwareXBlockMixin, 'workgroup', mock.PropertyMock()) as patched_workgroup:
-            patched_workgroup.return_value = {"id": 'irrelevant', "users": [{"id": id} for id in group_members]}
+            patched_workgroup.return_value = {"id": 'irrelevant', "users": [{"id": u_id} for u_id in group_members]}
 
             self.assertEqual(self.block.is_group_member, is_member)
             self.assertEqual(self.block.is_admin_grader, not is_member)

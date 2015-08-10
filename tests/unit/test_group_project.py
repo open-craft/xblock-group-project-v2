@@ -24,6 +24,10 @@ def _make_reviews(reviews):
     return result
 
 
+def _make_workgroup(user_ids):
+    return {'users': [{'id': user_id} for user_id in user_ids]}
+
+
 @ddt.ddt
 class TestCalculateGradeGroupActivityXBlock(TestWithPatchesMixin, TestCase):
     def setUp(self):
@@ -64,6 +68,7 @@ class TestCalculateGradeGroupActivityXBlock(TestWithPatchesMixin, TestCase):
             group_id, self.block.content_id
         )
 
+    # pylint: disable=too-many-arguments
     @ddt.data(
         (0, ["q1"], [], [], [], None),  # no reviews at all
         (1, ["q1"], [], [], [(10, "q1", 15)], 15),  # one admin review
@@ -105,11 +110,6 @@ class TestEventsAndCompletionGroupActivityXBlock(TestWithPatchesMixin, TestCase)
         (3, [1, 2, 3], 92)
     )
 
-    def _make_workgroup(self, user_ids):
-        return {
-            'users': [{'id': user_id} for user_id in user_ids]
-        }
-
     def setUp(self):
         self.project_api_mock = mock.Mock()
         self.project_api_mock.get_workgroup_by_id = mock.Mock()
@@ -131,7 +131,7 @@ class TestEventsAndCompletionGroupActivityXBlock(TestWithPatchesMixin, TestCase)
     @ddt.unpack
     def test_marks_complete_for_workgroup(self, group_id, workgroup_users, grade):
         self.calculate_grade_mock.return_value = grade
-        self.project_api_mock.get_workgroup_by_id.return_value = self._make_workgroup(workgroup_users)
+        self.project_api_mock.get_workgroup_by_id.return_value = _make_workgroup(workgroup_users)
 
         self.block.calculate_and_send_grade(group_id)
 
@@ -148,7 +148,7 @@ class TestEventsAndCompletionGroupActivityXBlock(TestWithPatchesMixin, TestCase)
         self.calculate_grade_mock.return_value = grade
         self.block.weight = weight
 
-        with mock.patch.object(GroupActivityXBlock, 'course_id', mock.PropertyMock(return_value=course_id)),\
+        with mock.patch.object(GroupActivityXBlock, 'course_id', mock.PropertyMock(return_value=course_id)), \
                 mock.patch.object(GroupActivityXBlock, 'content_id', mock.PropertyMock(return_value=content_id)):
 
             self.block.calculate_and_send_grade(group_id)
@@ -158,12 +158,12 @@ class TestEventsAndCompletionGroupActivityXBlock(TestWithPatchesMixin, TestCase)
             )
 
     @ddt.data(
-        (1, 100, 'content1', 100),
-        (2, 10, 'content2', 50),
-        (3, 92, 'contrent3', 150)
+        (1, 100, 'content1'),
+        (2, 10, 'content2'),
+        (3, 92, 'contrent3')
     )
     @ddt.unpack
-    def test_publishes_runtime_event(self, group_id, grade, content_id, weight):
+    def test_publishes_runtime_event(self, group_id, grade, content_id):
         self.calculate_grade_mock.return_value = grade
 
         with mock.patch.object(GroupActivityXBlock, 'content_id', mock.PropertyMock(return_value=content_id)):
