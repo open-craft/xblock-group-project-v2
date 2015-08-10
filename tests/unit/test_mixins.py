@@ -16,6 +16,12 @@ def _make_block_mock(block_id, category=None):
     return result
 
 
+def _make_user_mock(user_id):
+    result = mock.Mock(spec={})
+    result.id = user_id
+    return result
+
+
 class CommonMixinGuineaPig(object):
     @property
     def runtime(self):
@@ -58,12 +64,15 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
         child_with_plugin_name_and_category.category = 'category_3'
         child_with_plugin_name_and_category.plugin_name = 'category 4'
 
+        child_with_no_target_props = mock.Mock(spec={})
+
         self.assertEqual(self.block.get_child_category(child_with_category), child_with_category.category)
         self.assertEqual(self.block.get_child_category(child_with_plugin_name), child_with_plugin_name.plugin_name)
         self.assertEqual(
             self.block.get_child_category(child_with_plugin_name_and_category),
             child_with_plugin_name_and_category.category
         )
+        self.assertEqual(self.block.get_child_category(child_with_no_target_props), None)
 
     def test_get_children_by_category(self):
         child_categories = {
@@ -87,6 +96,13 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
         do_assert(['block_3'], 'category_3')
         do_assert(['block_2', 'block_3'], 'category_2', 'category_3')
         do_assert([], 'missing_category')
+
+        self.assertEqual(self.block.get_child_of_category('category_1').usage_id, 'block_1')
+        self.assertEqual(self.block.get_child_of_category('category_2').usage_id, 'block_2')
+        self.assertEqual(self.block.get_child_of_category('category_3').usage_id, 'block_3')
+
+        self.assertIsNone(self.block.get_child_of_category('missing_category'))
+        self.assertIsNone(self.block.get_child_of_category('other_missing_category'))
 
     def test_has_child_of_category(self):
         def _make_block_usage(block_id, block_type):
@@ -137,4 +153,3 @@ class TestCourseAwareXBlockMixin(TestCase, TestWithPatchesMixin):
     def test_course_id(self, course_id):
         self.runtime_mock.course_id = course_id
         self.assertEqual(self.block.course_id, unicode(course_id))
-
