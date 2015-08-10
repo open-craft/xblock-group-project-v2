@@ -1,9 +1,15 @@
 from unittest import TestCase
 import ddt
+from django.test.utils import override_settings
 import mock
 
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
-from group_project_v2.mixins import ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin
+import group_project_v2
+from group_project_v2.api_error import ApiError
+from group_project_v2.mixins import ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin, \
+    WorkgroupAwareXBlockMixin
+from group_project_v2.project_api import ProjectAPI
+from group_project_v2.utils import OutsiderDisallowedError
 from tests.utils import TestWithPatchesMixin
 from xblock.core import XBlock
 from xblock.runtime import Runtime
@@ -20,6 +26,13 @@ def _make_user_mock(user_id):
     result = mock.Mock(spec={})
     result.id = user_id
     return result
+
+
+def _raise_api_error(code, reason):
+    error_mock = mock.Mock()
+    error_mock.code = code
+    error_mock.reason = reason
+    raise ApiError(error_mock)
 
 
 class CommonMixinGuineaPig(object):
@@ -212,3 +225,137 @@ class TestUserAwareXBlockMixin(TestCase, TestWithPatchesMixin):
         self.runtime_mock.get_real_user = mock.Mock(side_effect=lambda u_id: real_users.get(u_id, None))
 
         self.assertEqual(self.block.user_id, expected_result)
+
+
+class WorkgroupAwareXBlockMixinGuineaPig(CommonMixinGuineaPig, WorkgroupAwareXBlockMixin):
+    @property
+    def project_api(self):
+        return None
+
+    @property
+    def user_id(self):
+        return None
+
+    @property
+    def course_id(self):
+        return None
+
+
+@ddt.ddt
+class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
+    def setUp(self):
+        self.block = WorkgroupAwareXBlockMixinGuineaPig()
+        self.project_api_mock = mock.create_autospec(ProjectAPI)
+        self.make_patch(
+            WorkgroupAwareXBlockMixinGuineaPig, 'project_api',
+            mock.PropertyMock(return_value=self.project_api_mock)
+        )
+
+        self.user_id_mock = self.make_patch(WorkgroupAwareXBlockMixinGuineaPig, 'user_id', mock.PropertyMock())
+        self.course_id_mock = self.make_patch(WorkgroupAwareXBlockMixinGuineaPig, 'course_id', mock.PropertyMock())
+
+        self.project_api_mock.get_user_preferences = mock.Mock()
+        self.project_api_mock.get_workgroup_by_id = mock.Mock()
+        self.project_api_mock.get_user_workgroup_for_course = mock.Mock()
+        self.project_api_mock.get_user_roles_for_course = mock.Mock()
+
+    def test_fallback_workgroup(self):
+        self.project_api_mock.get_user_preferences.side_effect = lambda u_id: _raise_api_error(401, "qwerty")
+
+        self.assertEqual(self.block.workgroup, WorkgroupAwareXBlockMixin.FALLBACK_WORKGROUP)
+
+    @ddt.data(
+        (1, 'course', {'users': [1], 'id': 12}),
+        (4, 'other-course', {'users': [1, 2, 3, 4], 'id': 1})
+    )
+    @ddt.unpack
+    def test_non_ta_path(self, user_id, course_id, workgroup):
+        self.user_id_mock.return_value = user_id
+        self.course_id_mock.return_value = course_id
+        self.project_api_mock.get_user_preferences.return_value = {}
+        self.project_api_mock.get_user_workgroup_for_course.return_value = workgroup
+
+        self.assertEqual(self.block.workgroup, workgroup)
+
+        self.project_api_mock.get_user_preferences.assert_called_once_with(user_id)
+        self.project_api_mock.get_user_workgroup_for_course.assert_called_once_with(user_id, course_id)
+
+        self.project_api_mock.get_user_preferences.reset_mock()
+        self.project_api_mock.get_user_workgroup_for_course.reset_mock()
+
+        self.assertEqual(self.block.workgroup, workgroup)  # checks caching
+
+        self.project_api_mock.get_user_preferences.assert_not_called()
+        self.project_api_mock.get_user_workgroup_for_course.assert_not_called()
+
+    @ddt.data(
+        (1, {'users': [1], 'id': 12}),
+        (2, {'users': [1, 2, 3, 4], 'id': 1})
+    )
+    @ddt.unpack
+    def test_ta_path(self, pref_group_id, workgroup):
+        self.project_api_mock.get_user_preferences.return_value = {
+            WorkgroupAwareXBlockMixin.TA_REVIEW_KEY: pref_group_id
+        }
+        self.project_api_mock.get_workgroup_by_id.return_value = workgroup
+
+        with mock.patch.object(WorkgroupAwareXBlockMixin, '_confirm_outsider_allowed') as patched_check:
+            # patched_check is noop if everything is ok, so we're letting it return a mock, or whatever it pleases
+            self.assertEqual(self.block.workgroup, workgroup)
+            self.project_api_mock.get_workgroup_by_id.assert_called_once_with(pref_group_id)
+
+    def test_outsider_disallowed_propagates(self):
+        self.project_api_mock.get_user_preferences.return_value = {WorkgroupAwareXBlockMixin.TA_REVIEW_KEY: 1}
+
+        with mock.patch.object(WorkgroupAwareXBlockMixin, '_confirm_outsider_allowed') as patched_check:
+            patched_check.side_effect = OutsiderDisallowedError("QWERTY")
+
+            self.assertRaises(OutsiderDisallowedError, lambda: self.block.workgroup)
+            patched_check.assert_called_with(self.project_api_mock, self.block.user_id, self.block.course_id)
+
+    @ddt.data(
+        (1, 'qwe', ['role1'], ['role1', 'role2']),
+        (2, 'asd', ['qwe', 'asd'], ['qwe', 'rty']),
+        (3, 'course_id', ['123', '456'], ['123', '456']),
+    )
+    @ddt.unpack
+    def test_confirm_outsider_allowed(self, user_id, course_id, user_roles, allowed_roles):
+        self.project_api_mock.get_user_roles_for_course.return_value = [
+            {'role': role} for role in user_roles
+        ]
+        with mock.patch.object(group_project_v2.mixins, 'ALLOWED_OUTSIDER_ROLES', allowed_roles):
+            # should not raise
+            self.block._confirm_outsider_allowed(self.project_api_mock, user_id, course_id)
+
+            self.project_api_mock.get_user_roles_for_course.assert_called_once_with(user_id, course_id)
+
+    @ddt.data(
+        (1, 'qwe', ['qwe'], ['role1', 'role2']),
+        (2, 'asd', [], ['qwe', 'rty']),
+        (3, 'course_id', ['role1', 'role2'], ['123', '456']),
+    )
+    @ddt.unpack
+    def test_confirm_outsider_allowed_raises(self, user_id, course_id, user_roles, allowed_roles):
+        self.project_api_mock.get_user_roles_for_course.return_value = [
+            {'role': role} for role in user_roles
+        ]
+        with mock.patch.object(group_project_v2.mixins, 'ALLOWED_OUTSIDER_ROLES', allowed_roles):
+            self.assertRaises(
+                OutsiderDisallowedError,
+                lambda: self.block._confirm_outsider_allowed(self.project_api_mock, user_id, course_id)
+            )
+
+    @ddt.data(
+        (1, [1, 2], True),
+        (17, [17], True),
+        (1, [2, 3], False),
+        (95, [120, 123], False),
+    )
+    @ddt.unpack
+    def test_is_group_member(self, user_id, group_members, is_member):
+        self.user_id_mock.return_value = user_id
+        with mock.patch.object(WorkgroupAwareXBlockMixin, 'workgroup', mock.PropertyMock()) as patched_workgroup:
+            patched_workgroup.return_value = {"id": 'irrelevant', "users": [{"id": id} for id in group_members]}
+
+            self.assertEqual(self.block.is_group_member, is_member)
+            self.assertEqual(self.block.is_admin_grader, not is_member)
