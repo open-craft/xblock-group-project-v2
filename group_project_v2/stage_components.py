@@ -217,6 +217,8 @@ class GroupProjectSubmissionXBlock(
         u"deliverable by clicking the <span class='icon {icon}'></span> icon at any time before the deadline passes."
     )
 
+    SUBMISSION_RECEIVED_EVENT = "activity.received_submission"
+
     def get_upload(self, group_id):
         submission_map = self.project_api.get_latest_workgroup_submissions_by_id(group_id)
         submission_data = submission_map.get(self.upload_id, None)
@@ -331,7 +333,7 @@ class GroupProjectSubmissionXBlock(
             # Emit analytics event...
             self.runtime.publish(
                 self,
-                "activity.received_submission",
+                self.SUBMISSION_RECEIVED_EVENT,
                 {
                     "submission_id": uploaded_file.submission_id,
                     "filename": uploaded_file.file.name,

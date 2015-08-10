@@ -68,10 +68,7 @@ def outer_html(node):
 def build_date_field(json_date_string_value):
     """ converts json date string to date object """
     try:
-        return datetime.strptime(
-            json_date_string_value,
-            '%Y-%m-%dT%H:%M:%SZ'
-        )
+        return datetime.strptime(json_date_string_value, '%Y-%m-%dT%H:%M:%SZ')
     except ValueError:
         return None
 
