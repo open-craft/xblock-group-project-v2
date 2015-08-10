@@ -424,7 +424,7 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
 
     @property
     def display_name_with_default(self):
-        return _(u"Review Question {title}").format(title=self.title)
+        return self.title or _(u"Review Question")
 
     question_id = String(
         display_name=_(u"Question ID"),
