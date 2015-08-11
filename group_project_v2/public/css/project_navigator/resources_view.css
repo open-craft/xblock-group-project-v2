@@ -2,6 +2,10 @@
     list-style-type: disc;
 }
 
+.group-project-resources-view ul.group-project-resources {
+    padding-left: 20px;
+}
+
 .group-project-resources-view .player-modal {
     position: fixed;
     top: 50% !important;
