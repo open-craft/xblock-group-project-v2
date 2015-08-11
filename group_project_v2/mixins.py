@@ -22,14 +22,15 @@ class ChildrenNavigationXBlockMixin(object):
         children = (self.runtime.get_block(child_id) for child_id in self.children)
         return [child for child in children if child is not None]
 
-    def get_child_category(self, child):  # pylint: disable=no-self-use
+    @staticmethod
+    def get_child_category(child):  # pylint: disable=no-self-use
         field_candidates = ('category', 'plugin_name')
         try:
             return next(getattr(child, field) for field in field_candidates if hasattr(child, field))
         except StopIteration:
             return None
 
-    def _get_children_by_category(self, *child_categories):
+    def get_children_by_category(self, *child_categories):
         return [child for child in self._children if self.get_child_category(child) in child_categories]
 
     def get_child_of_category(self, child_category):
@@ -54,12 +55,7 @@ class CourseAwareXBlockMixin(object):
     @property
     def course_id(self):
         raw_course_id = getattr(self.runtime, 'course_id', 'all')
-        try:
-            return unicode(raw_course_id)
-        except Exception as exc:    # pylint: disable=broad-except
-            msg = "Error converting course_id to unicode: {message}".format(message=exc.message)
-            log.exception(msg)
-            return raw_course_id
+        return unicode(raw_course_id)
 
 
 class UserAwareXBlockMixin(object):
@@ -88,10 +84,9 @@ class UserAwareXBlockMixin(object):
 
     def real_user_id(self, anonymous_student_id):
         if anonymous_student_id not in self._known_real_user_ids:
-            try:
+            if hasattr(self.runtime, 'get_real_user'):
                 self._known_real_user_ids[anonymous_student_id] = self.runtime.get_real_user(anonymous_student_id).id
-            except AttributeError:
-                # workbench support
+            else:
                 self._known_real_user_ids[anonymous_student_id] = anonymous_student_id
         return self._known_real_user_ids[anonymous_student_id]
 
@@ -100,6 +95,9 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin, Pr
     """
     Gets current user workgroup, respecting TA review
     """
+    TA_REVIEW_KEY = "TA_REVIEW_WORKGROUP"
+    FALLBACK_WORKGROUP = {"id": "0", "users": []}
+
     @property
     def is_group_member(self):
         return self.user_id in [u["id"] for u in self.workgroup["users"]]
@@ -118,10 +116,8 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin, Pr
 
     @property
     def workgroup(self):
-        fallback_result = {"id": "0", "users": []}
-
         workgroup = self._get_workgroup(self.project_api, self.user_id, self.course_id)
-        return workgroup if workgroup else fallback_result
+        return workgroup if workgroup else self.FALLBACK_WORKGROUP
 
     @staticmethod
     @memoize_with_expiration(expires_after=timedelta(seconds=5))
@@ -129,9 +125,9 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin, Pr
         try:
             user_prefs = project_api.get_user_preferences(user_id)
 
-            if "TA_REVIEW_WORKGROUP" in user_prefs:
+            if WorkgroupAwareXBlockMixin.TA_REVIEW_KEY in user_prefs:
                 WorkgroupAwareXBlockMixin._confirm_outsider_allowed(project_api, user_id, course_id)
-                result = project_api.get_workgroup_by_id(user_prefs["TA_REVIEW_WORKGROUP"])
+                result = project_api.get_workgroup_by_id(user_prefs[WorkgroupAwareXBlockMixin.TA_REVIEW_KEY])
             else:
                 result = project_api.get_user_workgroup_for_course(user_id, course_id)
         except OutsiderDisallowedError:

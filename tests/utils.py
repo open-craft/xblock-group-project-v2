@@ -1,5 +1,6 @@
 import datetime
 from mock import Mock
+import mock
 from xblockutils.resources import ResourceLoader
 from group_project_v2.api_error import ApiError
 
@@ -126,3 +127,22 @@ class XMLContents(object):
                 'contents': COMPLEX_CONTENTS_SENTINEL,
             },
         }
+
+
+class TestWithPatchesMixin(object):
+    def make_patch(self, obj, member_name, new=mock.DEFAULT):
+        patcher = mock.patch.object(obj, member_name, new)
+        patch_instance = patcher.start()
+        self.addCleanup(patcher.stop)
+        return patch_instance
+
+
+def make_api_error(code, reason):
+    error_mock = mock.Mock()
+    error_mock.code = code
+    error_mock.reason = reason
+    return ApiError(error_mock)
+
+
+def raise_api_error(code, reason):
+    raise make_api_error(code, reason)
