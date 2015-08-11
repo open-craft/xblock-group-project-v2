@@ -66,69 +66,6 @@ def get_mock_project_api():
     return mock_api
 
 
-def get_open_close_label(open_date, close_date):
-    if not open_date and not close_date:
-        return None
-
-    today = datetime.date.today()
-    before_open = open_date and today < open_date
-    after_close = close_date and today > close_date
-
-    if open_date and before_open:
-        return "opens {date}".format(date=format_date(open_date))
-    elif close_date and after_close:
-        return "closed on {date}".format(date=format_date(close_date))
-    elif close_date:
-        return "due {date}".format(date=format_date(close_date))
-
-    return None
-
-
-COMPLEX_CONTENTS_SENTINEL = "complex_content"
-
-
-class XMLContents(object):
-    COMPLEX_CONTENTS_SENTINEL = COMPLEX_CONTENTS_SENTINEL
-
-    class Example1(object):
-        ACTIVITIES = ("Activity 1", "Activity 2")
-        STAGES = ('overview', 'upload', 'peer_review', 'group_review', 'peer_assessment', 'group_assessment')
-
-        STAGE_DATA = {
-            'Overview': {
-                'title': 'Overview',
-                'contents': "I'm Overview Stage",
-            },
-            'upload': {
-                'title': 'Upload',
-                'close_date': datetime.date(2014, 5, 24),
-                'contents': "I'm Upload Stage",
-            },
-            'peer_review': {
-                'title': 'Review Team',
-                'open_date': datetime.date(2014, 5, 24),
-                'close_date': datetime.date(2014, 6, 20),
-                'contents': COMPLEX_CONTENTS_SENTINEL,
-            },
-            'group_review': {
-                'title': 'Review Group',
-                'open_date': datetime.date(2014, 5, 24),
-                'close_date': datetime.date(2014, 6, 20),
-                'contents': COMPLEX_CONTENTS_SENTINEL,
-            },
-            'peer_assessment': {
-                'title': 'Evaluate Team Feedback',
-                'open_date': datetime.date(2014, 6, 20),
-                'contents': COMPLEX_CONTENTS_SENTINEL,
-            },
-            'group_assessment': {
-                'title': 'Evaluate Group Feedback',
-                'open_date': datetime.date(2014, 6, 20),
-                'contents': COMPLEX_CONTENTS_SENTINEL,
-            },
-        }
-
-
 class TestWithPatchesMixin(object):
     def make_patch(self, obj, member_name, new=mock.DEFAULT):
         patcher = mock.patch.object(obj, member_name, new)
