@@ -59,6 +59,9 @@ class BaseElement(object):
         elements = self.element.find_elements_by_css_selector(css_selector)
         return [self.make_element(elem, element_type) for elem in elements]
 
+    def click(self):
+        self.element.click()
+
     def is_displayed(self):
         return self.element.is_displayed()
 

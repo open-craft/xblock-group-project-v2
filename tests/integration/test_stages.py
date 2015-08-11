@@ -464,8 +464,8 @@ class PeerReviewStageTest(BaseReviewStageTest):
         self.assertEqual(stage_element.form.group_id, None)
 
         groups = stage_element.groups
-        self.assertEqual(len(groups), len(self.OTHER_GROUPS.keys()))
-        for group_id, group in zip(self.OTHER_GROUPS.keys(), groups):
+        self.assertEqual(len(groups), len(OTHER_GROUPS.keys()))
+        for group_id, group in zip(OTHER_GROUPS.keys(), groups):
             self.select_review_subject(group)
             self.assertEqual(stage_element.form.group_id, group_id)
 
@@ -551,7 +551,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
 
     def test_completion(self):
         user_id = 1
-        workgroups_to_review = self.OTHER_GROUPS.keys()
+        workgroups_to_review = OTHER_GROUPS.keys()
         expected_submissions = {
             "group_score": "100",
             "group_q1": "Y",
