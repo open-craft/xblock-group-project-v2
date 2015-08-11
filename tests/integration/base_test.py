@@ -9,7 +9,7 @@ from xblock.fields import String, Scope
 from xblockutils.base_test import SeleniumXBlockTest
 
 from group_project_v2.group_project import GroupActivityXBlock
-from tests.integration.page_elements import GroupProjectElement
+from tests.integration.page_elements import GroupProjectElement, StageElement
 from tests.utils import loader, get_mock_project_api
 
 
@@ -31,6 +31,8 @@ class BaseIntegrationTest(SeleniumXBlockTest):
     PROJECT_API_PATCHES = (
         "group_project_v2.project_api.ProjectAPIXBlockMixin.project_api",
     )
+
+    stage_element = StageElement
 
     @classmethod
     def setUpClass(cls):  # pylint: disable=invalid-name
@@ -113,6 +115,18 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         self.set_scenario_xml(scenario_xml)
         if load_immediately:
             return self.go_to_view("student_view")
+
+    def get_stage(self, group_project, stage_element_type=None):
+        """
+        Returns stage element wrapper
+        """
+        stage_element_type = stage_element_type if stage_element_type else self.stage_element
+        stage_element = group_project.activities[0].stages[0]
+        self.activity_id = group_project.activities[0].id
+        if stage_element_type != StageElement:
+            stage_element = stage_element_type(self.browser, stage_element.element)
+        self.assertTrue(stage_element.is_displayed())
+        return stage_element
 
     def get_activities_map(self):
         """

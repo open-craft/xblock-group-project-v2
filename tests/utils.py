@@ -37,6 +37,19 @@ WORKGROUP = {
     "peer_reviews": []
 }
 
+OTHER_GROUPS = {
+    2: {"id": 2, "name": "Group 2"},
+    3: {"id": 3, "name": "Group 3"},
+}
+
+def make_submission_data(doc_url, doc_filename, upload_date, user_details):
+    return {
+        'document_url': doc_url,
+        'document_filename': doc_filename,
+        'modified': upload_date.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'user_details': user_details
+    }
+
 
 def _get_user_details(user_id):
     if user_id not in KNOWN_USERS:

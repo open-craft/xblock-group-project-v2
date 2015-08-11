@@ -10,7 +10,7 @@ from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage,
 
 from tests.integration.base_test import BaseIntegrationTest
 from tests.integration.page_elements import GroupProjectElement, StageElement, ReviewStageElement
-from tests.utils import KNOWN_USERS
+from tests.utils import KNOWN_USERS, OTHER_GROUPS
 
 
 class StageTestBase(BaseIntegrationTest):
@@ -28,8 +28,6 @@ class StageTestBase(BaseIntegrationTest):
     activity_id = None
 
     DEFAULT_STAGE_ID = 'stage_id'
-
-    stage_element = StageElement
 
     def build_scenario_xml(self, stage_data, title="Stage Title", **kwargs):
         """
@@ -54,17 +52,6 @@ class StageTestBase(BaseIntegrationTest):
         scenario = super(StageTestBase, self).go_to_view(view_name=view_name, student_id=student_id)
         self.page = GroupProjectElement(self.browser, scenario)
         return self.page
-
-    def get_stage(self, group_project):
-        """
-        Returns stage element wrapper
-        """
-        stage_element = group_project.activities[0].stages[0]
-        self.activity_id = group_project.activities[0].id
-        if self.stage_element != StageElement:
-            stage_element = self.stage_element(self.browser, stage_element.element)
-        self.assertTrue(stage_element.is_displayed())
-        return stage_element
 
     def dismiss_message(self):
         """
@@ -391,11 +378,6 @@ class PeerReviewStageTest(BaseReviewStageTest):
     stage_type = PeerReviewStage
     stage_element = ReviewStageElement
 
-    OTHER_GROUPS = {
-        2: {"id": 2, "name": "Group 2"},
-        3: {"id": 3, "name": "Group 3"},
-    }
-
     STAGE_DATA_XML = textwrap.dedent("""
         <gp-v2-group-selector/>
         <gp-v2-review-question question_id="group_score" title="How about that?" required="true" single_line="true">
@@ -449,7 +431,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
 
     def setUp(self):
         super(PeerReviewStageTest, self).setUp()
-        self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=self.OTHER_GROUPS.values())
+        self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=OTHER_GROUPS.values())
         self.project_api_mock.get_workgroup_reviewers = mock.Mock(return_value=[
             {"id": user.id} for user in KNOWN_USERS.values()
         ])
@@ -608,3 +590,4 @@ class PeerReviewStageTest(BaseReviewStageTest):
             user_id,
             stage_element.id
         )
+
