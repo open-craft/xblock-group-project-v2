@@ -226,3 +226,12 @@ def memoize_with_expiration(expires_after=None):
         return wrapper
 
     return decorator
+
+
+def make_user_caption(user_details):
+    context = {
+        'id': user_details.id,
+        'full_name': user_details.full_name,
+        'api_link': user_details.uri
+    }
+    return loader.render_template("templates/html/user_label.html", context)
