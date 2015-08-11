@@ -394,7 +394,9 @@ class StageItemElement(BaseElement):
 
     @property
     def state(self):
-        classes = set(self.element.find_element_by_css_selector(".group-project-stage-state").get_attribute("class").split())
+        classes = set(
+            self.element.find_element_by_css_selector(".group-project-stage-state").get_attribute("class").split()
+        )
         state_classes = {StageState.COMPLETED, StageState.INCOMPLETE, StageState.NOT_STARTED}
         intersection = (classes & state_classes)
         assert(len(intersection)) == 1
@@ -425,7 +427,8 @@ class ResourceLinkElement(BaseElement):
 class SubmissionUploadItemElement(BaseElement):
     @property
     def title(self):
-        return self.element.find_element_by_css_selector(".upload_title").text.strip()[:-1]  # last char is always a semicolon
+        # last char is always a semicolon
+        return self.element.find_element_by_css_selector(".upload_title").text.strip()[:-1]
 
     @property
     def file_location(self):

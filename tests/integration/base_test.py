@@ -32,6 +32,7 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         "group_project_v2.project_api.ProjectAPIXBlockMixin.project_api",
     )
 
+    activity_id = None
     stage_element = StageElement
 
     @classmethod

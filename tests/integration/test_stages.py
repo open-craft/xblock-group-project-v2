@@ -9,7 +9,7 @@ import mock
 from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage, TeamEvaluationStage
 
 from tests.integration.base_test import BaseIntegrationTest
-from tests.integration.page_elements import GroupProjectElement, StageElement, ReviewStageElement
+from tests.integration.page_elements import GroupProjectElement, ReviewStageElement
 from tests.utils import KNOWN_USERS, OTHER_GROUPS
 
 
@@ -25,7 +25,6 @@ class StageTestBase(BaseIntegrationTest):
     """)
     stage_type = None
     page = None
-    activity_id = None
 
     DEFAULT_STAGE_ID = 'stage_id'
 
@@ -590,4 +589,3 @@ class PeerReviewStageTest(BaseReviewStageTest):
             user_id,
             stage_element.id
         )
-

@@ -24,6 +24,7 @@ COURSES_API = '/'.join([API_PREFIX, 'courses'])
 DEFAULT_EXPIRATION_TIME = timedelta(seconds=10)
 
 
+# pylint:disable=too-many-instance-attributes
 class UserDetails(object):
     def __init__(self, **kwargs):
         self.id = kwargs.get('id', None)
@@ -92,7 +93,7 @@ class ProjectAPI(object):
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_user_details(self, user_id):
         response = self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
-        return UserDetails(**response)
+        return UserDetails(**response)  # pylint: disable=star-args
 
     @api_error_protect
     def get_user_organizations(self, user_id):

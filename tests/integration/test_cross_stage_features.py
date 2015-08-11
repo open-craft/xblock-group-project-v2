@@ -80,5 +80,3 @@ class TestOtherGroupSubmissionLinks(SingleScenarioTestSuite):
             marketing_pitch_upload, False, "Marketing Pitch", 'http://marketing_pitch.doc', 'marketing_pitch.doc',
             uploaded_by_tpl.format(user=KNOWN_USERS[2].full_name, date="Jan 02")
         )
-
-

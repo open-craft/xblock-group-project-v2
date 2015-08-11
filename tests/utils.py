@@ -9,18 +9,9 @@ from group_project_v2.project_api import ProjectAPI, UserDetails
 loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
 
 KNOWN_USERS = {
-    1: UserDetails(**{
-        "id": 1, "email": "jane@example.com", "is_active": True,
-        "username": "Jane", "full_name": "Jane", "resources": []
-    }),
-    2: UserDetails(**{
-        "id": 2, "email": "jack@example.com", "is_active": True,
-        "username": "Jack", "full_name": "Jack", "resources": []
-    }),
-    3: UserDetails(**{
-        "id": 3, "email": "jill@example.com", "is_active": True,
-        "username": "Jill", "full_name": "Jill", "resources": []
-    })
+    1: UserDetails(id=1, email="jane@example.com", is_active=True, username="Jane", full_name="Jane"),
+    2: UserDetails(id=2, email="jack@example.com", is_active=True, username="Jack", full_name="Jack"),
+    3: UserDetails(id=3, email="jill@example.com", is_active=True, username="Jill", full_name="Jill"),
 }
 
 WORKGROUP = {
@@ -41,6 +32,7 @@ OTHER_GROUPS = {
     2: {"id": 2, "name": "Group 2"},
     3: {"id": 3, "name": "Group 3"},
 }
+
 
 def make_submission_data(doc_url, doc_filename, upload_date, user_details):
     return {
