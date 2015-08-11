@@ -28,7 +28,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
             "issue_tree": {
                 "id": "issue_tree", "document_url": self.live_server_url+"/issue_tree_location",
                 "document_filename": "issue_tree.doc", "modified": "2014-05-22T11:44:14Z",
-                "user_details": {"id": "1", "full_name": KNOWN_USERS[1]['full_name']}
+                "user_details": KNOWN_USERS[1]
             }
         }
 
@@ -191,7 +191,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
         self.assertEqual(issue_tree.file_location, issue_tree_loc)
         self.assertEqual(
             issue_tree.uploaded_by,
-            "Uploaded by {user} on {date}".format(user=KNOWN_USERS[1]['full_name'], date="May 22 2014")
+            "Uploaded by {user} on {date}".format(user=KNOWN_USERS[1].full_name, date="May 22 2014")
         )
 
         self.assertEqual(marketing_pitch.title, "Marketing Pitch")

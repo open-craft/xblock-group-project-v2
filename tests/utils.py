@@ -1,27 +1,26 @@
-import datetime
 from mock import Mock
 import mock
 from xblockutils.resources import ResourceLoader
 from group_project_v2.api_error import ApiError
 
-import group_project_v2.project_api as project_api_module
-from group_project_v2.utils import format_date
+from group_project_v2.project_api import ProjectAPI, UserDetails
+
 
 loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
 
 KNOWN_USERS = {
-    1: {
+    1: UserDetails(**{
         "id": 1, "email": "jane@example.com", "is_active": True,
         "username": "Jane", "full_name": "Jane", "resources": []
-    },
-    2: {
+    }),
+    2: UserDetails(**{
         "id": 2, "email": "jack@example.com", "is_active": True,
         "username": "Jack", "full_name": "Jack", "resources": []
-    },
-    3: {
+    }),
+    3: UserDetails(**{
         "id": 3, "email": "jill@example.com", "is_active": True,
         "username": "Jill", "full_name": "Jill", "resources": []
-    }
+    })
 }
 
 WORKGROUP = {
@@ -30,7 +29,7 @@ WORKGROUP = {
     "project": 1,
     "groups": [],
     "users": [
-        {"id": user["id"], "username": user["username"], "email": user["email"]}
+        {"id": user.id, "username": user.username, "email": user.email}
         for user in KNOWN_USERS.values()
     ],
     "submissions": [],
@@ -47,7 +46,7 @@ def _get_user_details(user_id):
 
 def get_mock_project_api():
     """ Mock api with canned responses """
-    mock_api = Mock(spec=project_api_module.ProjectAPI)
+    mock_api = Mock(spec=ProjectAPI)
     mock_api.get_user_preferences = Mock(return_value={})
     mock_api.get_user_workgroup_for_course = Mock(return_value=WORKGROUP)
     mock_api.get_workgroup_by_id = Mock(return_value=WORKGROUP)

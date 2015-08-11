@@ -257,7 +257,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         peers = stage_element.peers
         self.assertEqual(len(peers), len(other_users))
         for user_id, peer in zip(other_users, peers):
-            self.assertEqual(peer.name, KNOWN_USERS[user_id]['username'])
+            self.assertEqual(peer.name, KNOWN_USERS[user_id].username)
             self.select_review_subject(peer)
             self.assertEqual(stage_element.form.peer_id, user_id)
 
@@ -450,7 +450,9 @@ class PeerReviewStageTest(BaseReviewStageTest):
     def setUp(self):
         super(PeerReviewStageTest, self).setUp()
         self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=self.OTHER_GROUPS.values())
-        self.project_api_mock.get_workgroup_reviewers = mock.Mock(return_value=KNOWN_USERS.values())
+        self.project_api_mock.get_workgroup_reviewers = mock.Mock(return_value=[
+            {"id": user.id} for user in KNOWN_USERS.values()
+        ])
 
         self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML))
 
