@@ -6,8 +6,8 @@ from django.conf import settings
 from lazy.lazy import lazy
 
 from group_project_v2.utils import build_date_field, memoize_with_expiration
-from .json_requests import GET, POST, PUT, DELETE
-from .api_error import api_error_protect
+from group_project_v2.json_requests import GET, POST, PUT, DELETE
+from group_project_v2.api_error import api_error_protect
 
 
 API_PREFIX = '/'.join(['api', 'server'])
@@ -175,31 +175,6 @@ class ProjectAPI(object):
         return self.send_request(GET, (GROUP_API, group_id))
 
     @api_error_protect
-    def get_workgroups_to_review(self, user_id, course_id, xblock_id):
-        assignments = self.get_review_assignment_groups(user_id, course_id, xblock_id)
-
-        workgroup_assignments = []
-        for assignment in assignments:
-            workgroup_assignments += self.get_workgroups_for_assignment(assignment["id"])
-
-        return workgroup_assignments
-
-    @api_error_protect
-    def get_workgroup_reviewers(self, group_id, content_id):
-        review_assignments = self.send_request(GET, (WORKGROUP_API, group_id, 'groups'), no_trailing_slash=True)
-
-        reviewers = []
-        for review_assignment in review_assignments:
-            if review_assignment["data"]["xblock_id"] != content_id:
-                continue
-            # stripping slashes as we're adding it in send_request anyway
-            review_assignment_url = review_assignment["url"].strip("/")
-            review_assignment_details = self.send_request(GET, (review_assignment_url, 'users'))
-            reviewers.extend(review_assignment_details["users"])
-
-        return reviewers
-
-    @api_error_protect
     def mark_as_complete(self, course_id, content_id, user_id, stage_id=None):
         completion_data = {
             "content_id": content_id,
@@ -228,7 +203,33 @@ class ProjectAPI(object):
 
         return self.send_request(GET, (COURSES_API, course_id, 'roles'), query_params=qs_params)
 
-    # TODO: this method post-process api response: probably they should be moved outside of this class
+    # TODO: methods below post-process api response - they should be moved outside of this class.
+    # When doing the move, add tests before moving, since there are no test coverage for them
+    @api_error_protect
+    def get_workgroups_to_review(self, user_id, course_id, xblock_id):
+        assignments = self.get_review_assignment_groups(user_id, course_id, xblock_id)
+
+        workgroup_assignments = []
+        for assignment in assignments:
+            workgroup_assignments += self.get_workgroups_for_assignment(assignment["id"])
+
+        return workgroup_assignments
+
+    @api_error_protect
+    def get_workgroup_reviewers(self, group_id, content_id):
+        review_assignments = self.send_request(GET, (WORKGROUP_API, group_id, 'groups'), no_trailing_slash=True)
+
+        reviewers = []
+        for review_assignment in review_assignments:
+            if review_assignment["data"]["xblock_id"] != content_id:
+                continue
+            # stripping slashes as we're adding it in send_request anyway
+            review_assignment_url = review_assignment["url"].strip("/")
+            review_assignment_details = self.send_request(GET, (review_assignment_url, 'users'))
+            reviewers.extend(review_assignment_details["users"])
+
+        return reviewers
+
     def get_stage_state(self, course_id, content_id, stage):
         stage_completions = self.get_stage_completions(course_id, content_id, stage)
         if stage_completions:
@@ -238,18 +239,15 @@ class ProjectAPI(object):
 
         return completed_users
 
-    # TODO: this method post-process api response: probably they should be moved outside of this class
     def get_peer_review_items(self, reviewer_id, peer_id, group_id, content_id):
         group_peer_items = self.get_peer_review_items_for_group(group_id, content_id)
         return [pri for pri in group_peer_items if
                 pri['reviewer'] == reviewer_id and (pri['user'] == peer_id or pri['user'] == int(peer_id))]
 
-    # TODO: this method post-process api response: probably they should be moved outside of this class
     def get_user_peer_review_items(self, user_id, group_id, content_id):
         group_peer_items = self.get_peer_review_items_for_group(group_id, content_id)
         return [pri for pri in group_peer_items if pri['user'] == user_id or pri['user'] == int(user_id)]
 
-    # TODO: this method pre-process api request: probably they should be moved outside of this class
     def submit_peer_review_items(self, reviewer_id, peer_id, group_id, content_id, data):
         # get any data already there
         current_data = {pi['question']: pi for pi in
@@ -280,12 +278,10 @@ class ProjectAPI(object):
                 }
                 self.create_peer_review_assessment(question_data)
 
-    # TODO: this method post-process api response: probably they should be moved outside of this class
     def get_workgroup_review_items(self, reviewer_id, group_id, content_id):
         group_review_items = self.get_workgroup_review_items_for_group(group_id, content_id)
         return [gri for gri in group_review_items if gri['reviewer'] == reviewer_id and gri['content_id'] == content_id]
 
-    # TODO: this method pre-process api request: probably they should be moved outside of this class
     def submit_workgroup_review_items(self, reviewer_id, group_id, content_id, data):
         # get any data already there
         current_data = {ri['question']: ri for ri in self.get_workgroup_review_items(reviewer_id, group_id, content_id)}
@@ -314,7 +310,6 @@ class ProjectAPI(object):
                 }
                 self.create_workgroup_review_assessment(question_data)
 
-    # TODO: this method post-process api response: probably they should be moved outside of this class
     def get_latest_workgroup_submissions_by_id(self, group_id):
         submission_list = self.get_workgroup_submissions(group_id)
 
