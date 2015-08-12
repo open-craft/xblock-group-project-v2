@@ -4,6 +4,7 @@ import logging
 from datetime import date, datetime
 from django.conf import settings
 import xml.etree.ElementTree as ET
+from django.utils.safestring import mark_safe
 
 from xblock.fragment import Fragment
 
@@ -234,4 +235,4 @@ def make_user_caption(user_details):
         'full_name': user_details.full_name,
         'api_link': user_details.uri
     }
-    return loader.render_template("templates/html/user_label.html", context)
+    return mark_safe(loader.render_template("templates/html/user_label.html", context))
