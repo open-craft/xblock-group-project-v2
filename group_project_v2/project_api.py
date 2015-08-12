@@ -5,7 +5,7 @@ from datetime import timedelta
 from django.conf import settings
 from lazy.lazy import lazy
 
-from group_project_v2.utils import build_date_field, memoize_with_expiration
+from group_project_v2.utils import build_date_field, memoize_with_expiration, make_user_caption
 from group_project_v2.json_requests import GET, POST, PUT, DELETE
 from group_project_v2.api_error import api_error_protect
 
@@ -24,6 +24,36 @@ COURSES_API = '/'.join([API_PREFIX, 'courses'])
 DEFAULT_EXPIRATION_TIME = timedelta(seconds=10)
 
 
+# pylint:disable=too-many-instance-attributes
+class UserDetails(object):
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id', None)
+        self.email = kwargs.get('email', None)
+        self.username = kwargs.get('username', None)
+        self.uri = kwargs.get('uri', None)
+        self.first_name = kwargs.get('first_name', None)
+        self.last_name = kwargs.get('last_name', None)
+        self._full_name = kwargs.get('full_name', None)
+        self.gender = kwargs.get('gender', None)
+        self.avatar_url = kwargs.get('avatar_url', None)
+        self.city = kwargs.get('city', None)
+        self.country = kwargs.get('country', None)
+        self.is_active = kwargs.get('is_active', None)
+        self.level_of_education = kwargs.get('level_of_education', None)
+        self.organization = kwargs.get('organization', None)
+
+    @property
+    def full_name(self):
+        if self._full_name:
+            return self._full_name
+        parts = [self.first_name, self.last_name]
+        return u" ".join([unicode(part) for part in parts if part is not None])
+
+    @property
+    def user_label(self):
+        return make_user_caption(self)
+
+
 # TODO: this class crosses service boundary, but some methods post-process responses, while other do not
 # There're two things to improve:
 # * SRP - it should only cross the service boundary, and not do any post-processing
@@ -34,11 +64,6 @@ class ProjectAPI(object):
     def __init__(self, address, dry_run=False):
         self._api_server_address = address
         self.dry_run = dry_run
-
-    # TODO: self._api_server_address is used virtually everywhere - maybe should extract method, e.g.
-    # send_request(GET, USERS_API, user_id, 'preferences')
-    # send_request(GET, WORKGROUP_API, group_id, 'preferences', querystring=urlencode(qs_params))
-    # send_request(PUT, PEER_REVIEW_API, question_data['id'], data=question_data)
 
     def send_request(self, method, url_parts, data=None, query_params=None, no_trailing_slash=False):
         if self.dry_run:
@@ -67,7 +92,8 @@ class ProjectAPI(object):
     @api_error_protect
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_user_details(self, user_id):
-        return self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
+        response = self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
+        return UserDetails(**response)  # pylint: disable=star-args
 
     @api_error_protect
     def get_user_organizations(self, user_id):

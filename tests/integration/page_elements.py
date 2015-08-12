@@ -44,20 +44,12 @@ class BaseElement(object):
         """
         return self._element
 
-    def __getattr__(self, item):
-        """
-        Returns instance attribute or self.element attribute, if any of those present
-        """
-        if hasattr(self.__dict__, item):
-            return getattr(self.__dict__, item)
-        if hasattr(self.element, item):
-            return getattr(self.element, item)
-        return super(BaseElement, self).__getattr__(item)
-
     def make_element(self, dom_element, element_type):
         """
         Wraps dom_element (:class:`WebElement`) into a BaseElement object of element_type class
         """
+        if isinstance(dom_element, str):
+            dom_element = self.element.find_element_by_css_selector(dom_element)
         return element_type(self.browser, dom_element)
 
     def make_elements(self, css_selector, element_type):
@@ -66,6 +58,12 @@ class BaseElement(object):
         """
         elements = self.element.find_elements_by_css_selector(css_selector)
         return [self.make_element(elem, element_type) for elem in elements]
+
+    def click(self):
+        self.element.click()
+
+    def is_displayed(self):
+        return self.element.is_displayed()
 
 
 class GroupProjectElement(BaseElement):
@@ -140,7 +138,7 @@ class ReviewStageElement(StageElement):
     """ Wrapper around group project review stage element """
     @property
     def form(self):
-        return self.make_element(self.find_element_by_tag_name('form'), ReviewFormElement)
+        return self.make_element(self.element.find_element_by_tag_name('form'), ReviewFormElement)
 
     @property
     def peers(self):
@@ -150,16 +148,77 @@ class ReviewStageElement(StageElement):
     def groups(self):
         return self.make_elements(".groups.review_subjects .select_group", ReviewObjectSelectorElement)
 
+    @property
+    def other_submission_links_popup(self):
+        return self.make_element(
+            self.element.find_element_by_css_selector(".review_submissions_dialog"), ReviewSubmissionsDialogPopup
+        )
+
 
 class ReviewObjectSelectorElement(BaseElement):
     """ Wrapper around review object selector elements """
     @property
     def name(self):
-        return self.get_attribute('title')
+        return self.element.get_attribute('title')
 
     @property
     def subject_id(self):
-        return self.get_attribute('data-id')
+        return self.element.get_attribute('data-id')
+
+    def open_group_submissions(self):
+        self.element.find_element_by_css_selector(".view_other_submissions").click()
+
+
+class ReviewSubmissionsDialogPopup(BaseElement):
+    @property
+    def stage_submissions(self):
+        return self.make_elements(".other-team-submission", OtherTeamStageSubmissionsElement)
+
+
+class OtherTeamStageSubmissionsElement(BaseElement):
+    @property
+    def title(self):
+        return self.element.find_element_by_css_selector("h4").text
+
+    @property
+    def uploads(self):
+        return self.make_elements("ul.group-project-submissions li", OtherTeamSubmissionElement)
+
+
+class OtherTeamSubmissionElement(BaseElement):
+    def __init__(self, browser, element):
+        super(OtherTeamSubmissionElement, self).__init__(browser, element)
+        try:
+            self.element.find_element_by_css_selector(".no_submission")
+            self.no_upload = True
+        except NoSuchElementException:
+            self.no_upload = False
+            self._link = self.element.find_element_by_tag_name("a")
+            self._uploaded_by = self.element.find_element_by_css_selector(".upload_item_data")
+
+    @property
+    def title(self):
+        if self.no_upload:
+            return self.element.find_element_by_css_selector(".no_submission").text
+        return self._link.text
+
+    @property
+    def link(self):
+        if self.no_upload:
+            return None
+        return self._link.get_attribute('href').rstrip('/')
+
+    @property
+    def filename(self):
+        if self.no_upload:
+            return None
+        return self.element.find_element_by_css_selector('.upload_filename').text.strip('()')
+
+    @property
+    def uploaded_by(self):
+        if self.no_upload:
+            return None
+        return self._uploaded_by.text
 
 
 class ReviewFormElement(BaseElement):
@@ -168,7 +227,7 @@ class ReviewFormElement(BaseElement):
 
     def _get_review_subject_id(self, css_selector):
         try:
-            selected_teammate_element = self.find_element_by_css_selector(css_selector)
+            selected_teammate_element = self.element.find_element_by_css_selector(css_selector)
             selected_teammate = self.make_element(selected_teammate_element, ReviewObjectSelectorElement)
             return int(selected_teammate.subject_id)
         except NoSuchElementException:
@@ -245,7 +304,7 @@ class ProjectNavigatorElement(BaseElement):
     def get_view_by_type(self, target_type, view_element_class=None):
         view_element_class = view_element_class if view_element_class else ProjectNavigatorViewElement
         css_selector = ".group-project-navigator-view[data-view-type='{}']".format(target_type)
-        element = self.find_element_by_css_selector(css_selector)
+        element = self.element.find_element_by_css_selector(css_selector)
         return self.make_element(element, view_element_class)
 
     def get_view_selector_by_type(self, target_type):
@@ -262,7 +321,7 @@ class ProjectNavigatorViewElement(BaseElement):
 
     @property
     def type(self):
-        return self.get_attribute("data-view-type")
+        return self.element.get_attribute("data-view-type")
 
     def close_view(self):
         try:
@@ -276,14 +335,14 @@ class ProjectNavigatorViewSelectorElement(BaseElement):
     """ Wrapper around view selectors in Project Navigator """
     @property
     def type(self):
-        return self.get_attribute("data-view-type")
+        return self.element.get_attribute("data-view-type")
 
 
 class ProjectNavigatorViewActivityElement(BaseElement):
     """ Represents activity block in Project Navigator activity-related views (resources, submissions, navigation) """
     @property
     def activity_name(self):
-        return self.find_element_by_css_selector(".group-project-activity-header").text.strip()
+        return self.element.find_element_by_css_selector(".group-project-activity-header").text.strip()
 
 
 class ProjectNavigatorResourcesActivityElement(ProjectNavigatorViewActivityElement):
@@ -304,6 +363,12 @@ class NavigationViewElement(ProjectNavigatorViewElement):
     def stages(self):
         return self.make_elements(".group-project-stage", StageItemElement)
 
+    def get_stage_by_title(self, stage_title):
+        try:
+            return next(stage for stage in self.stages if stage.title == stage_title)
+        except StopIteration:
+            return None
+
 
 class ResourcesViewElement(ProjectNavigatorViewElement):
     activity_element_type = ProjectNavigatorResourcesActivityElement
@@ -320,7 +385,7 @@ class StageItemElement(BaseElement):
 
     @property
     def stage_id(self):
-        return self.get_attribute("data-stage-id")
+        return self.element.get_attribute("data-stage-id")
 
     @property
     def activity_id(self):
@@ -328,11 +393,13 @@ class StageItemElement(BaseElement):
 
     @property
     def title(self):
-        return self.find_element_by_css_selector(".group-project-stage-title").text.strip()
+        return self.element.find_element_by_css_selector(".group-project-stage-title").text.strip()
 
     @property
     def state(self):
-        classes = set(self.find_element_by_css_selector(".group-project-stage-state").get_attribute("class").split())
+        classes = set(
+            self.element.find_element_by_css_selector(".group-project-stage-state").get_attribute("class").split()
+        )
         state_classes = {StageState.COMPLETED, StageState.INCOMPLETE, StageState.NOT_STARTED}
         intersection = (classes & state_classes)
         assert(len(intersection)) == 1
@@ -363,11 +430,12 @@ class ResourceLinkElement(BaseElement):
 class SubmissionUploadItemElement(BaseElement):
     @property
     def title(self):
-        return self.find_element_by_css_selector(".upload_title").text.strip()[:-1]  # last char is always a semicolon
+        # last char is always a semicolon
+        return self.element.find_element_by_css_selector(".upload_title").text.strip()[:-1]
 
     @property
     def file_location(self):
-        return self.find_element_by_css_selector(".upload_item_wrapper").get_attribute("data-location")
+        return self.element.find_element_by_css_selector(".upload_item_wrapper").get_attribute("data-location")
 
     @property
     def uploaded_by(self):

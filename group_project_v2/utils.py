@@ -4,6 +4,7 @@ import logging
 from datetime import date, datetime
 from django.conf import settings
 import xml.etree.ElementTree as ET
+from django.utils.safestring import mark_safe
 
 from xblock.fragment import Fragment
 
@@ -226,3 +227,12 @@ def memoize_with_expiration(expires_after=None):
         return wrapper
 
     return decorator
+
+
+def make_user_caption(user_details):
+    context = {
+        'id': user_details.id,
+        'full_name': user_details.full_name,
+        'api_link': user_details.uri
+    }
+    return mark_safe(loader.render_template("templates/html/user_label.html", context))

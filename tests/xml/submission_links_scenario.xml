@@ -1,0 +1,20 @@
+<gp-v2-project>
+  <gp-v2-navigator>
+    <gp-v2-navigator-navigation />
+    <gp-v2-navigator-submissions />
+    <gp-v2-navigator-resources />
+    <gp-v2-navigator-ask-ta />
+  </gp-v2-navigator>
+  <gp-v2-activity display_name="Activity 1">
+    <gp-v2-stage-submission display_name="Upload 1">
+      <gp-v2-submission upload_id="issue_tree" display_name="Issue Tree"/>
+      <gp-v2-submission upload_id="budget" display_name="Budget" description="xls budget plan"/>
+    </gp-v2-stage-submission>
+    <gp-v2-stage-submission display_name="Upload 2">
+      <gp-v2-submission upload_id="marketing_pitch" display_name="Marketing Pitch"/>
+    </gp-v2-stage-submission>
+    <gp-v2-stage-peer-review display_name="Review Group">
+      <gp-v2-group-selector/>
+    </gp-v2-stage-peer-review>
+  </gp-v2-activity>
+</gp-v2-project>

@@ -9,8 +9,8 @@ import mock
 from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage, TeamEvaluationStage
 
 from tests.integration.base_test import BaseIntegrationTest
-from tests.integration.page_elements import GroupProjectElement, StageElement, ReviewStageElement
-from tests.utils import KNOWN_USERS
+from tests.integration.page_elements import GroupProjectElement, ReviewStageElement
+from tests.utils import KNOWN_USERS, OTHER_GROUPS
 
 
 class StageTestBase(BaseIntegrationTest):
@@ -25,11 +25,8 @@ class StageTestBase(BaseIntegrationTest):
     """)
     stage_type = None
     page = None
-    activity_id = None
 
     DEFAULT_STAGE_ID = 'stage_id'
-
-    stage_element = StageElement
 
     def build_scenario_xml(self, stage_data, title="Stage Title", **kwargs):
         """
@@ -54,17 +51,6 @@ class StageTestBase(BaseIntegrationTest):
         scenario = super(StageTestBase, self).go_to_view(view_name=view_name, student_id=student_id)
         self.page = GroupProjectElement(self.browser, scenario)
         return self.page
-
-    def get_stage(self, group_project):
-        """
-        Returns stage element wrapper
-        """
-        stage_element = group_project.activities[0].stages[0]
-        self.activity_id = group_project.activities[0].id
-        if self.stage_element != StageElement:
-            stage_element = self.stage_element(self.browser, stage_element.element)
-        self.assertTrue(stage_element.is_displayed())
-        return stage_element
 
     def dismiss_message(self):
         """
@@ -257,7 +243,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         peers = stage_element.peers
         self.assertEqual(len(peers), len(other_users))
         for user_id, peer in zip(other_users, peers):
-            self.assertEqual(peer.name, KNOWN_USERS[user_id]['username'])
+            self.assertEqual(peer.name, KNOWN_USERS[user_id].username)
             self.select_review_subject(peer)
             self.assertEqual(stage_element.form.peer_id, user_id)
 
@@ -391,11 +377,6 @@ class PeerReviewStageTest(BaseReviewStageTest):
     stage_type = PeerReviewStage
     stage_element = ReviewStageElement
 
-    OTHER_GROUPS = {
-        2: {"id": 2, "name": "Group 2"},
-        3: {"id": 3, "name": "Group 3"},
-    }
-
     STAGE_DATA_XML = textwrap.dedent("""
         <gp-v2-group-selector/>
         <gp-v2-review-question question_id="group_score" title="How about that?" required="true" single_line="true">
@@ -449,8 +430,10 @@ class PeerReviewStageTest(BaseReviewStageTest):
 
     def setUp(self):
         super(PeerReviewStageTest, self).setUp()
-        self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=self.OTHER_GROUPS.values())
-        self.project_api_mock.get_workgroup_reviewers = mock.Mock(return_value=KNOWN_USERS.values())
+        self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=OTHER_GROUPS.values())
+        self.project_api_mock.get_workgroup_reviewers = mock.Mock(return_value=[
+            {"id": user.id} for user in KNOWN_USERS.values()
+        ])
 
         self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML))
 
@@ -481,8 +464,8 @@ class PeerReviewStageTest(BaseReviewStageTest):
         self.assertEqual(stage_element.form.group_id, None)
 
         groups = stage_element.groups
-        self.assertEqual(len(groups), len(self.OTHER_GROUPS.keys()))
-        for group_id, group in zip(self.OTHER_GROUPS.keys(), groups):
+        self.assertEqual(len(groups), len(OTHER_GROUPS.keys()))
+        for group_id, group in zip(OTHER_GROUPS.keys(), groups):
             self.select_review_subject(group)
             self.assertEqual(stage_element.form.group_id, group_id)
 
@@ -568,7 +551,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
 
     def test_completion(self):
         user_id = 1
-        workgroups_to_review = self.OTHER_GROUPS.keys()
+        workgroups_to_review = OTHER_GROUPS.keys()
         expected_submissions = {
             "group_score": "100",
             "group_q1": "Y",

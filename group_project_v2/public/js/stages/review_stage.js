@@ -175,7 +175,7 @@ function GroupProjectReviewStage(runtime, element) {
         return false;
     });
 
-    var review_submissions_dialog = $('.review_submissions_dialog', element).appendTo($(document.body));
+    var review_submissions_dialog = $('.review_submissions_dialog', element);
     $('.view_other_submissions', element).on('click', function () {
         var $content = $('.other_submission_links', review_submissions_dialog);
         $content.empty().hide();
