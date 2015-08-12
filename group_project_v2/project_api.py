@@ -47,7 +47,7 @@ class UserDetails(object):
         if self._full_name:
             return self._full_name
         parts = [self.first_name, self.last_name]
-        return " ".join([part for part in parts if part is not None])
+        return " ".join([str(part) for part in parts if part is not None])
 
     @property
     def user_label(self):
