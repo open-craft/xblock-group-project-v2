@@ -8,6 +8,10 @@ from group_project_v2.project_api import ProjectAPI, WORKGROUP_API
 from tests.utils import TestWithPatchesMixin
 
 
+def _make_review_item(reviewer, peer, question, content_id=None):
+    return {'reviewer': reviewer, 'user': peer, 'question': question, 'content_id': content_id}
+
+
 @ddt.ddt
 class TestProjectApi(TestCase, TestWithPatchesMixin):
     api_server_address = 'http://localhost/api'
@@ -174,3 +178,77 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
 
             self.assertEqual(result, expected_result)
             patched_get_stage_completions.assert_called_once_with(course_id, content_id, stage)
+
+    @ddt.data(
+        (1, 2, [_make_review_item(1, 2, 'qwe'), _make_review_item(1, 3, 'asd')], [_make_review_item(1, 2, 'qwe')]),
+        (
+            5, 3,
+            [_make_review_item(5, 3, 'qwe'), _make_review_item(5, 3, 'asd')],
+            [_make_review_item(5, 3, 'qwe'), _make_review_item(5, 3, 'asd')]
+        ),
+        (11, 12, [_make_review_item(11, 3, 'qwe'), _make_review_item(11, 4, 'asd')], []),
+        (11, 12, [_make_review_item(15, 12, 'qwe'), _make_review_item(18, 12, 'asd')], []),
+    )
+    @ddt.unpack
+    def test_get_peer_review_items(self, reviewer_id, peer_id, review_items, expected_result):
+        with mock.patch.object(self.project_api, 'get_peer_review_items_for_group') as patched_get_review_items:
+            patched_get_review_items.return_value = review_items
+            result = self.project_api.get_peer_review_items(reviewer_id, peer_id, 'group_id', 'content_id')
+
+            self.assertEqual(result, expected_result)
+            patched_get_review_items.assert_called_once_with('group_id', 'content_id')
+
+    @ddt.data(
+        (
+            1,
+            [_make_review_item(2, 1, 'qwe'), _make_review_item(5, 1, 'asd')],
+            [_make_review_item(2, 1, 'qwe'), _make_review_item(5, 1, 'asd')]),
+        (
+            5,
+            [_make_review_item(7, 5, 'qwe'), _make_review_item(7, 5, 'asd')],
+            [_make_review_item(7, 5, 'qwe'), _make_review_item(7, 5, 'asd')]
+        ),
+        (11, [_make_review_item(16, 3, 'qwe'), _make_review_item(18, 4, 'asd')], []),
+        (
+            11,
+            [_make_review_item(16, 3, 'qwe'), _make_review_item(18, 11, 'question1')],
+            [_make_review_item(18, 11, 'question1')]
+        ),
+    )
+    @ddt.unpack
+    def test_get_user_peer_review_items(self, user_id, review_items, expected_result):
+        with mock.patch.object(self.project_api, 'get_peer_review_items_for_group') as patched_get_review_items:
+            patched_get_review_items.return_value = review_items
+            result = self.project_api.get_user_peer_review_items(user_id, 'group_id', 'content_id')
+
+            self.assertEqual(result, expected_result)
+            patched_get_review_items.assert_called_once_with('group_id', 'content_id')
+
+    @ddt.data(
+        (
+            1, 'content_1',
+            [_make_review_item(1, 7, 'qwe', 'content_1'), _make_review_item(1, 7, 'asd', 'content_1')],
+            [_make_review_item(1, 7, 'qwe', 'content_1'), _make_review_item(1, 7, 'asd', 'content_1')]),
+        (
+            5, 'content_2',
+            [_make_review_item(5, 14, 'qwe', 'content_2'), _make_review_item(5, 19, 'asd', 'content_2')],
+            [_make_review_item(5, 14, 'qwe', 'content_2'), _make_review_item(5, 19, 'asd', 'content_2')]
+        ),
+        (
+            11, 'content_3',
+            [_make_review_item(11, 3, 'qwe', 'content_2'), _make_review_item(16, 4, 'asd', 'content_3')], []
+        ),
+        (
+            11, 'content_4',
+            [_make_review_item(12, 18, 'qwe', 'content_4'), _make_review_item(11, 18, 'question1', 'content_4')],
+            [_make_review_item(11, 18, 'question1', 'content_4')]
+        ),
+    )
+    @ddt.unpack
+    def test_get_workgroup_review_items(self, reviewer_id, content_id, review_items, expected_result):
+        with mock.patch.object(self.project_api, 'get_workgroup_review_items_for_group') as patched_get_review_items:
+            patched_get_review_items.return_value = review_items
+            result = self.project_api.get_workgroup_review_items(reviewer_id, 'group_id', content_id)
+
+            self.assertEqual(result, expected_result)
+            patched_get_review_items.assert_called_once_with('group_id', content_id)

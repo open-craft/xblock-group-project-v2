@@ -240,13 +240,25 @@ class ProjectAPI(object):
         return completed_users
 
     def get_peer_review_items(self, reviewer_id, peer_id, group_id, content_id):
-        group_peer_items = self.get_peer_review_items_for_group(group_id, content_id)
-        return [pri for pri in group_peer_items if
-                pri['reviewer'] == reviewer_id and (pri['user'] == peer_id or pri['user'] == int(peer_id))]
+        teammate_evaluation_items = self.get_peer_review_items_for_group(group_id, content_id)
+        return [
+            pri for pri in teammate_evaluation_items
+            if pri['reviewer'] == reviewer_id and (pri['user'] == peer_id or pri['user'] == int(peer_id))
+        ]
 
     def get_user_peer_review_items(self, user_id, group_id, content_id):
-        group_peer_items = self.get_peer_review_items_for_group(group_id, content_id)
-        return [pri for pri in group_peer_items if pri['user'] == user_id or pri['user'] == int(user_id)]
+        teammate_evaluation_items = self.get_peer_review_items_for_group(group_id, content_id)
+        return [
+            pri for pri in teammate_evaluation_items
+            if pri['user'] == user_id or pri['user'] == int(user_id)
+        ]
+
+    def get_workgroup_review_items(self, reviewer_id, group_id, content_id):
+        peer_review_items = self.get_workgroup_review_items_for_group(group_id, content_id)
+        return [
+            gri for gri in peer_review_items
+            if gri['reviewer'] == reviewer_id and gri['content_id'] == content_id
+        ]
 
     def submit_peer_review_items(self, reviewer_id, peer_id, group_id, content_id, data):
         # get any data already there
@@ -277,10 +289,6 @@ class ProjectAPI(object):
                     "content_id": content_id,
                 }
                 self.create_peer_review_assessment(question_data)
-
-    def get_workgroup_review_items(self, reviewer_id, group_id, content_id):
-        group_review_items = self.get_workgroup_review_items_for_group(group_id, content_id)
-        return [gri for gri in group_review_items if gri['reviewer'] == reviewer_id and gri['content_id'] == content_id]
 
     def submit_workgroup_review_items(self, reviewer_id, group_id, content_id, data):
         # get any data already there
