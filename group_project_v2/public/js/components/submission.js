@@ -103,8 +103,16 @@ function GroupProjectSubmissionBlock(runtime, element) {
         fail: function (e, data) {
             var target_form = $(e.target);
             $('.' + data.paramName[0] + '_progress', target_form).css('width', '100%').addClass('failed');
-            var message = getMessageFromJson(data.jqXHR),
+            var message, title;
+            if (data.jqXHR.status === 0 && data.jqXHR.statusText === 'abort') {
+                title = gettext('Upload cancelled.');
+                message = gettext("Upload cancelled by user.");
+            }
+            else {
+                message = getMessageFromJson(data.jqXHR);
                 title = getMessageTitleFromJson(data.jqXHR, gettext("Error"));
+            }
+
             target_form.prop('title', message);
             show_message(message, title, 'error');
         }

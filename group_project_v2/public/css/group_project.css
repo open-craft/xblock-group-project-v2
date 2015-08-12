@@ -188,6 +188,7 @@
 }
 
 .message .message_title.error {
+    text-align: left;
     color: #E37222;
 }
 

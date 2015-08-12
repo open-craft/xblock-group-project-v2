@@ -212,10 +212,12 @@ class GroupProjectSubmissionXBlock(
     STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as stage is closed.")
 
     SUCCESSFUL_UPLOAD_TITLE = _(u"Upload complete.")
+    FAILED_UPLOAD_TITLE = _(u"Upload failed.")
     SUCCESSFUL_UPLOAD_MESSAGE_TPL = _(
         u"Your deliverable have been successfully uploaded. You can attach an updated version of the "
         u"deliverable by clicking the <span class='icon {icon}'></span> icon at any time before the deadline passes."
     )
+    FAILED_UPLOAD_MESSAGE_TPL = _(u"Error uploading file: {error_goes_here}")
 
     SUBMISSION_RECEIVED_EVENT = "activity.received_submission"
 
@@ -303,9 +305,12 @@ class GroupProjectSubmissionXBlock(
                 failure_code = 500
                 if isinstance(exception, ApiError):
                     failure_code = exception.code
-                if not hasattr(exception, "message"):
-                    exception.message = _("Error uploading at least one file")
-                response_data.update({"message": exception.message})
+                error_message = getattr(exception, "message", _(u"Unknown error"))
+
+                response_data.update({
+                    "title": self.FAILED_UPLOAD_TITLE,
+                    "message": self.FAILED_UPLOAD_MESSAGE_TPL.format(error_goes_here=error_message)
+                })
 
         response = webob.response.Response(body=json.dumps(response_data))
         if failure_code:
