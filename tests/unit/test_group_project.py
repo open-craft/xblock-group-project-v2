@@ -17,11 +17,10 @@ def _make_question(question_id):
 
 
 def _make_reviews(reviews):
-    result = []
-    for review in reviews:
-        reviewer, question, answer = review
-        result.append({'reviewer': reviewer, 'question': question, 'answer': answer})
-    return result
+    return [
+        {'reviewer': reviewer, 'question': question, 'answer': answer}
+        for reviewer, question, answer in reviews
+    ]
 
 
 def _make_workgroup(user_ids):

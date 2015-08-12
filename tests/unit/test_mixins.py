@@ -16,8 +16,10 @@ from xblock.runtime import Runtime
 
 def _make_block_mock(block_id, category=None):
     result = mock.create_autospec(XBlock)
+
     result.usage_id = block_id
-    result.category = category if category else 'xblock_category'
+
+    result.category = category or 'xblock_category'
     return result
 
 
