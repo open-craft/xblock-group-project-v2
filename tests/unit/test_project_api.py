@@ -2,7 +2,6 @@ import json
 from unittest import TestCase
 import ddt
 import mock
-from mock.mock import call
 from group_project_v2.json_requests import GET
 from group_project_v2.project_api import ProjectAPI, WORKGROUP_API
 from tests.utils import TestWithPatchesMixin
@@ -20,6 +19,7 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
         self.project_api = ProjectAPI(self.api_server_address, dry_run=False)
 
     def _patch_send_request(self, calls_and_results, misisng_callback=None):
+        # pylint: disable=unused-argument
         def side_effect(method, url_parts, data=None, query_params=None, no_trailing_slash=False):
             if url_parts in calls_and_results:
                 return calls_and_results[url_parts]
@@ -51,7 +51,7 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
         method.assert_called_once_with(expected_url)
         self.assertEqual(result, expected_response)
 
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments
     @ddt.data(
         (["part1", "part2"], None, [123], False, api_server_address+"/part1/part2/", {'error': True}),
         (["part1", "part2"], None, 'qwerty', True, api_server_address+"/part1/part2", {'success': True}),
@@ -108,7 +108,8 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
     )
     @ddt.unpack
     def test_get_workgroups_to_review(self, user_id, course_id, xblock_id, assignment_ids):
-        assignment_data_by_id = lambda a_id: {"id": a_id, 'data': 'data'+str(a_id)}
+        def assignment_data_by_id(a_id):
+            return {"id": a_id, 'data': 'data'+str(a_id)}
 
         with mock.patch.object(self.project_api, 'get_review_assignment_groups') as review_assignment_groups, \
                 mock.patch.object(self.project_api, 'get_workgroups_for_assignment') as workgroups_for_assignment:
@@ -121,7 +122,7 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             review_assignment_groups.assert_called_once_with(user_id, course_id, xblock_id)
             self.assertEqual(
                 workgroups_for_assignment.mock_calls,
-                [call(assignment_id) for assignment_id in assignment_ids]
+                [mock.call(assignment_id) for assignment_id in assignment_ids]
             )
 
             self.assertEqual(response, [assignment_data_by_id(assignment_id) for assignment_id in assignment_ids])
@@ -144,15 +145,17 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
         calls_and_results = {
             (WORKGROUP_API, group_id, 'groups'): review_assignments
         }
-        missing_callback = lambda url_parts: {'users': [1, 2, 3]}
+
+        def missing_callback(url_parts):  # pylint: disable=unused-argument
+            return {'users': [1, 2, 3]}
 
         with self._patch_send_request(calls_and_results, missing_callback) as patched_send_request:
             response = self.project_api.get_workgroup_reviewers(group_id, content_id)
 
             self.assertEqual(
                 patched_send_request.mock_calls,
-                [call(GET, (WORKGROUP_API, group_id, 'groups'), no_trailing_slash=True)] +
-                [call(GET, (expected_url, 'users')) for expected_url in expected_urls]
+                [mock.call(GET, (WORKGROUP_API, group_id, 'groups'), no_trailing_slash=True)] +
+                [mock.call(GET, (expected_url, 'users')) for expected_url in expected_urls]
             )
 
             self.assertEqual(response, [1, 2, 3] * len(expected_urls))
