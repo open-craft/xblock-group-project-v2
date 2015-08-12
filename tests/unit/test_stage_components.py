@@ -31,25 +31,16 @@ class StageComponentXBlockTestBase(TestCase, TestWithPatchesMixin):
         # pylint: disable=not-callable
         self.block = self.block_to_test(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
         self.make_patch(self.block_to_test, 'stage', mock.PropertyMock(return_value=self.stage_mock))
-        self.fragment_class_mock = mock.Mock()
-        patcher = mock.patch('group_project_v2.stage_components.Fragment', self.fragment_class_mock)
-        patcher.start()
-
-        self.addCleanup(patcher.stop)
 
     # pylint: disable=no-self-use
     def _assert_empty_fragment(self, fragment):
-        fragment.add_content.assert_not_called()
-        fragment.add_javascript_url.assert_not_called()
-        fragment.add_javascript.assert_not_called()
-        fragment.add_css_url.assert_not_called()
-        fragment.add_css.assert_not_called()
-        fragment.add_resources.assert_not_called()
+        self.assertEqual(fragment.content, u'')
+        self.assertEqual(fragment.resources, [])
 
 
 class TestableStaticContentXBlock(StaticContentBaseXBlock):
     TARGET_PROJECT_NAVIGATOR_VIEW = 'some-pn-view'
-    TEXT_TEMPLATE = "Static content for {activity_name}"
+    TEXT_TEMPLATE = u"Static content for {activity_name}"
 
 
 @ddt.ddt
@@ -92,8 +83,8 @@ class TestStaticContentBaseXBlockMixin(StageComponentXBlockTestBase):
         navigator_mock.get_child_of_category.assert_called_once_with(self.block.TARGET_PROJECT_NAVIGATOR_VIEW)
 
     @ddt.data(
-        ({'additional': 'context'}, "Rendered content", "activity 1"),
-        ({'other': 'additional'}, "Other content", "Activity 2"),
+        ({'additional': 'context'}, u"Rendered content", "activity 1"),
+        ({'other': 'additional'}, u"Other content", "Activity 2"),
     )
     @ddt.unpack
     def test_student_view_normal(self, additional_context, content, activity_name):
@@ -119,7 +110,7 @@ class TestStaticContentBaseXBlockMixin(StageComponentXBlockTestBase):
             expected_context.update(additional_context)
 
             fragment = self.block.student_view(additional_context)
-            fragment.add_content.assert_called_once_with(content)
+            self.assertEqual(fragment.content, content)
 
             patched_get_link_to_block.assert_called_once_with(target_block)
             patched_render_template.assert_called_once_with(StaticContentBaseXBlock.TEMPLATE_PATH, expected_context)
