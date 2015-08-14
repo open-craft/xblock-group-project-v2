@@ -155,8 +155,8 @@
 }
 
 .group-project-xblock-wrapper .xblock-reveal.reveal-modal.open {
-    min-width: 500px;
-    position: fixed;
+    min-width: 600px;
+    position: absolute;
     top: 20%;
     left: 0;
     right:0;
