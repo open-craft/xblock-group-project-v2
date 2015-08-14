@@ -5,9 +5,12 @@ function ProjectTeamXBlock(runtime, element) {
     var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
     var message_box = $(".message", group_project_dom);
 
-    function show_message(msg, title) {
+    function show_message(msg, title, title_css_class) {
         message_box.find('.message_text').html(msg);
         message_box.find('.message_title').html(title);
+        if (title_css_class) {
+            message_box.find('.message_title').addClass(title_css_class);
+        }
         message_box.show();
     }
 
@@ -40,6 +43,8 @@ function ProjectTeamXBlock(runtime, element) {
             data: data
         }).done(function (data) {
             show_message(data.message, 'Notification');
+        }).fail(function (data) {
+            show_message(data.message, 'Error', 'error');
         });
     });
 
