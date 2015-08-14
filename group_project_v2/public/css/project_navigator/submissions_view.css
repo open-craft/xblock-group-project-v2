@@ -19,7 +19,6 @@
 
 .group-project-submissions-view .uploader .file-progress-box {
     background-color: transparent;
-    width: 83%;
     height: 5px;
     visibility: hidden;
 }

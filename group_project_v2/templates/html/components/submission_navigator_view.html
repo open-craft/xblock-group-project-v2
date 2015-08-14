@@ -14,15 +14,15 @@
           value="{{ upload.file_name }}" data-original-value="{{ upload.file_name }}"
         {% endif %}
       />
+      <div class="{{ submission.upload_id }}_progress_box file-progress-box">
+        <div class="{{ submission.upload_id }}_progress file-progress"></div>
+      </div>
     </div>
     <input style="display:none;" class="file_upload" name="{{ submission.upload_id }}" id="{{ submission.upload_id }}" type="file" {% if disabled %} disabled="disabled"{% endif %}/>
   </div>
   {% if submission.description %}
     <div class="description">{{ submission.description }}</div>
   {% endif %}
-  <div class="{{ submission.upload_id }}_progress_box file-progress-box">
-    <div class="{{ submission.upload_id }}_progress file-progress"></div>
-  </div>
   {% if upload.location %}
     <div class="upload_item_data">
       {% trans "Uploaded by" %} {{ upload.user_details.user_label }} on {{ upload.submission_date }}
