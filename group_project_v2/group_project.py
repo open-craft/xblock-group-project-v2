@@ -8,7 +8,7 @@ from django.utils.translation import ugettext as _
 
 from xblock.core import XBlock
 from xblock.exceptions import NoSuchUsage
-from xblock.fields import Scope, String, Float, Integer
+from xblock.fields import Scope, String, Float, Integer, DateTime
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
@@ -191,10 +191,17 @@ class GroupActivityXBlock(
         default=1
     )
 
+    due_date = DateTime(
+        display_name="Due date",
+        help="ACtivity due date",
+        has_score=Scope.settings,
+        default=None
+    )
+
     CATEGORY = "gp-v2-activity"
     STUDIO_LABEL = _(u"Group Project Activity")
 
-    editable_fields = ("display_name", "weight", "group_reviews_required_count", "user_review_count")
+    editable_fields = ("display_name", "weight", "group_reviews_required_count", "user_review_count", "due_date")
     has_score = True
     has_children = True
 
