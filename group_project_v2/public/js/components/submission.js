@@ -23,7 +23,7 @@ function GroupProjectSubmissionBlock(runtime, element) {
         message_box.find('.message_text').html(msg);
         message_box.find('.message_title').html(title);
         if (title_css_class) {
-            message_box.find('.message_title').addClass(title_css_class)
+            message_box.find('.message_title').addClass(title_css_class);
         }
         message_box.show();
     }

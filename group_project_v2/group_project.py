@@ -95,9 +95,10 @@ class GroupProjectXBlock(
         fragment = Fragment()
         render_context = {
             'project': self,
+            'course_id': self.course_id,
+            'group_id': self.workgroup['id']
         }
 
-        render_context = {'project': self}
         render_context.update(context)
 
         def render_child_fragment(child, content_key, fallback_message):

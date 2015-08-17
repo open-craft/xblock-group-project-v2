@@ -34,6 +34,7 @@
     margin: 0;
     padding: 12px 10px;
     background-color: #f3f3f3;
+    text-align: center;
 }
 
 .group-project-navigator-view-selector li {
@@ -81,7 +82,7 @@
 }
 
 .group-project-navigator-view .group-project-navigator-view-close {
-    color: #e5ebee;
+    color: #AAAAAA;
     font-size: 16px;
     float: right;
     cursor: pointer;
