@@ -10,3 +10,4 @@ htmlcov*
 .DS_Store
 
 tests.*.png
+node_modules

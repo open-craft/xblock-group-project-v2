@@ -2,5 +2,6 @@ mock
 ddt
 freezegun
 
+-e git+https://github.com/edx-solutions/xblock-sdk.git@70fe6fcea496ede27c640b5b0657c94d4feecd1c#egg=xblock_sdk
 -e git+https://github.com/edx/opaque-keys.git@1254ed4d615a428591850656f39f26509b86d30a#egg=opaque-keys
 -e git://github.com/nosedjango/nosedjango.git@ed7d7f9aa969252ff799ec159f828eaa8c1cbc5a#egg=nosedjango-dev
