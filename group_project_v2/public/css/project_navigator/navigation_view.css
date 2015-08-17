@@ -57,6 +57,16 @@
     font-size: 12px;
 }
 
+.group-project-navigation-view .group-project-stage-title {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.group-project-navigation-view .group-project-stage.disabled .group-project-stage-title a,
+.group-project-navigation-view .group-project-stage.disabled .group-project-stage-title a:hover {
+    color: #868685;
+}
+
 .group-project-navigation-view .group-project-stage-dates {
     font-size: 12px;
     font-weight: 600;
