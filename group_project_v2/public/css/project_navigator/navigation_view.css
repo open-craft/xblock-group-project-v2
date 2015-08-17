@@ -51,3 +51,8 @@
     content: "\f111";
     font-family: FontAwesome;
 }
+
+.group-project-navigation-view .group-project-stage-type {
+    color: #868685;
+    font-size: 12px;
+}
