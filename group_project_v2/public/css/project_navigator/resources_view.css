@@ -1,9 +1,23 @@
 .group-project-resources-view .group-project-resources li {
     list-style-type: disc;
+    color: #333333;
+}
+
+.group-project-resources-view .group-project-resources li div {
+    color: #868685;
 }
 
 .group-project-resources-view ul.group-project-resources {
     padding-left: 20px;
+}
+
+.group-project-resources-view  .resource_link {
+    font-size: 12px;
+}
+
+.group-project-resources-view  .resource_link a {
+    font-size: 12px;
+    font-weight: bold;
 }
 
 .group-project-resources-view .player-modal {
