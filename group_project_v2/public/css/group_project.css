@@ -276,3 +276,9 @@
     color: #3384ca;
     font-weight: 600;
 }
+
+.group-project-xblock-wrapper .stage_content {
+    font-size: 14px;
+    line-height: 1.5em;
+    color: #333333;
+}
