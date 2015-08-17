@@ -184,8 +184,8 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
 
     @ddt.data(
         (Exception("exception message"), 500),
-        (make_api_error(419, "other message"), 419),
-        (make_api_error(403, "yet another message"), 403),
+        (make_api_error(418, "other message"), 418),
+        (make_api_error(401, "yet another message"), 401),
     )
     @ddt.unpack
     def test_upload_submission_persist_and_submit_file_raises(self, exception, expected_code):
@@ -203,7 +203,11 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
             response = self.block.upload_submission(request_mock)
             self.assertEqual(response.status_code, expected_code)
             response_body = json.loads(response.body)
-            self.assertEqual(response_body['message'], exception.message)
+            self.assertEqual(response_body['title'], GroupProjectSubmissionXBlock.FAILED_UPLOAD_TITLE)
+            self.assertEqual(
+                response_body['message'],
+                GroupProjectSubmissionXBlock.FAILED_UPLOAD_MESSAGE_TPL.format(error_goes_here=exception.message)
+            )
 
     @ddt.data(
         ("sub1", "file.html", "new_stage_state1"),
