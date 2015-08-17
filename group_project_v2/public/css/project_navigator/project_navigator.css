@@ -91,9 +91,11 @@
 .group-project-navigator-view .group-project-activity-header {
     text-transform: uppercase;
     background-color: #f3f3f3;
-    padding: 3px 8px;
+    padding: 3px 10px;
     margin: 0 -10px 5px -10px;
-    color: #8e8e8e;
+    color: #868685;
+    font-weight: 600;
+    font-size: 12px;
 }
 
 .group-project-navigator-view .group-project-activity-header:after {
