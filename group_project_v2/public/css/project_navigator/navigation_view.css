@@ -56,3 +56,9 @@
     color: #868685;
     font-size: 12px;
 }
+
+.group-project-navigation-view .group-project-stage-dates {
+    font-size: 12px;
+    font-weight: 600;
+    color: #E37222;
+}

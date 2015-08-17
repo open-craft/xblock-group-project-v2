@@ -9,7 +9,7 @@
       {{ stage.display_name }}
     </a>
   </span>
-  <span class="highlight">
+  <span class="group-project-stage-dates">
   {% if stage.close_date and stage.is_closed %}
     {% trans "Closed on" %} {{ stage.formatted_close_date }}
   {% elif stage.close_date and stage.is_open %}
