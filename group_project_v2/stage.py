@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 import logging
+import itertools
 
 from lazy.lazy import lazy
 import pytz
@@ -191,6 +192,10 @@ class BaseGroupActivityStage(
     def url_name_caption(self):
         return self.STAGE_URL_NAME_TEMPLATE.format(stage_name=self.STUDIO_LABEL)
 
+    @property
+    def can_mark_complete(self):
+        return self.available_now and self.is_group_member
+
     def is_current_stage(self, context):
         return context.get(self.CURRENT_STAGE_ID_PARAMETER_NAME, None) == str(self.id)
 
@@ -317,7 +322,7 @@ class BasicStage(BaseGroupActivityStage):
     def student_view(self, context):
         fragment = super(BasicStage, self).student_view(context)
 
-        if self.available_now and self.is_group_member:
+        if self.can_mark_complete:
             self.mark_complete()
 
         return fragment
@@ -355,8 +360,8 @@ class CompletionStage(BaseGroupActivityStage):
             return {'result': 'error',  'msg': template.format(action=self.STAGE_ACTION)}
 
         try:
-            self.mark_complete()
-            self.completed = True
+            if self.can_mark_complete:
+                self.mark_complete()
             return {
                 'result': 'success',
                 'msg': self.STAGE_COMPLETION_MESSAGE,
@@ -365,6 +370,12 @@ class CompletionStage(BaseGroupActivityStage):
         except ApiError as exception:
             log.exception(exception.message)
             return {'result': 'error', 'msg': exception.message}
+
+    def mark_complete(self, user_id=None):
+        if user_id != self.user_id:
+            raise Exception("Can only mark as complete for current user")
+        super(CompletionStage, self).mark_complete(user_id)
+        self.completed = True
 
     def get_stage_content_fragment(self, context, view='student_view'):
         extra_context = {
@@ -564,7 +575,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
         try:
             self.do_submit_review(submissions)
 
-            if self.is_group_member and self.review_status() == ReviewState.COMPLETED:
+            if self.can_mark_complete and self.review_status() == ReviewState.COMPLETED:
                 self.mark_complete()
         except ApiError as exception:
             log.exception(exception.message)
@@ -761,6 +772,23 @@ class PeerReviewStage(ReviewBaseStage):
 class FeedbackDisplayBaseStage(BaseGroupActivityStage):
     NAVIGATION_LABEL = _(u'Review')
 
+    @property
+    def can_mark_complete(self):
+        base_result = super(FeedbackDisplayBaseStage, self).can_mark_complete
+        if not base_result:
+            return False
+
+        required_reviews = set(self.get_required_review_items())
+        performed_reviews = set(self._make_review_keys(self.get_reviews()))
+
+        return required_reviews == performed_reviews
+
+    def get_required_review_items(self):
+        return []
+
+    def _make_review_keys(self, review_items):
+        return [(self.real_user_id(item['reviewer']), item['question']) for item in review_items]
+
     def validate(self):
         violations = super(FeedbackDisplayBaseStage, self).validate()
 
@@ -778,7 +806,7 @@ class FeedbackDisplayBaseStage(BaseGroupActivityStage):
         fragment = super(FeedbackDisplayBaseStage, self).student_view(context)
 
         # TODO: should probably check for all reviews to be ready
-        if self.available_now and self.is_group_member:
+        if self.can_mark_complete:
             self.mark_complete()
 
         return fragment
@@ -809,6 +837,19 @@ class EvaluationDisplayStage(FeedbackDisplayBaseStage):
     def assessments(self):
         return self.get_children_by_category(GroupProjectTeamEvaluationDisplayXBlock.CATEGORY)
 
+    def get_required_review_items(self):
+        reviewers = [user.id for user in self.team_members]
+        questions = [assessment.question_id for assessment in self.assessments]
+
+        return itertools.product(reviewers, questions)
+
+    def get_reviews(self):
+        return self.project_api.get_user_peer_review_items(
+            self.user_id,
+            self.group_id,
+            self.content_id,
+        )
+
 
 class GradeDisplayStage(FeedbackDisplayBaseStage):
     display_name = String(
@@ -832,6 +873,18 @@ class GradeDisplayStage(FeedbackDisplayBaseStage):
     @property
     def assessments(self):
         return self.get_children_by_category(GroupProjectGradeEvaluationDisplayXBlock.CATEGORY)
+
+    def get_required_review_items(self):
+        reviewers = [user['id'] for user in self.project_api.get_workgroup_reviewers(self.group_id, self.content_id)]
+        questions = [assessment.question_id for assessment in self.assessments]
+
+        return itertools.product(reviewers, questions)
+
+    def get_reviews(self):
+        return self.project_api.get_workgroup_review_items_for_group(
+            self.group_id,
+            self.content_id,
+        )
 
     def get_stage_content_fragment(self, context, view='student_view'):
         final_grade = self.activity.calculate_grade(self.workgroup['id'])
