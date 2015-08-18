@@ -39,6 +39,7 @@
 
 .group-project-submissions-view .uploader .upload_title {
     margin-bottom: 5px;
+    font-size: 12px;
 }
 
 .group-project-submissions-view .uploader .uploader-upload-controls-wrapper {
@@ -94,5 +95,4 @@
 
 .group-project-submissions-view .uploader .upload_item_data {
     font-size: 12px;
-    color: #8f8f8f;
 }

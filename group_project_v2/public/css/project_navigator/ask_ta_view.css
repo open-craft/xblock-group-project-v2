@@ -2,6 +2,10 @@
     float: right;
 }
 
+.group-project-ask-ta-view .group-project-ask-ta-label {
+    color: #333333;
+}
+
 .group-project-ask-ta-view .group-project-ask-ta-label img {
     margin: 5px 0;
 }
