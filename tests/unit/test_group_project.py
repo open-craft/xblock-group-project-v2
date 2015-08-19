@@ -7,7 +7,7 @@ from xblock.runtime import Runtime
 
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
 from xblock.field_data import DictFieldData
-from tests.utils import TestWithPatchesMixin
+from tests.utils import TestWithPatchesMixin, make_review_item
 
 
 def _make_question(question_id):
@@ -18,7 +18,7 @@ def _make_question(question_id):
 
 def _make_reviews(reviews):
     return [
-        {'reviewer': reviewer, 'question': question, 'answer': answer}
+        make_review_item(reviewer, question, answer=answer)
         for reviewer, question, answer in reviews
     ]
 

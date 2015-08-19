@@ -771,6 +771,11 @@ class PeerReviewStage(ReviewBaseStage):
 
 class FeedbackDisplayBaseStage(BaseGroupActivityStage):
     NAVIGATION_LABEL = _(u'Review')
+    FEEDBACK_DISPLAY_BLOCK_CATEGORY = None
+
+    @property
+    def feedback_display_blocks(self):
+        return self.get_children_by_category(self.FEEDBACK_DISPLAY_BLOCK_CATEGORY)
 
     @property
     def can_mark_complete(self):
@@ -778,13 +783,25 @@ class FeedbackDisplayBaseStage(BaseGroupActivityStage):
         if not base_result:
             return False
 
-        required_reviews = set(self.get_required_review_items())
+        reviewer_ids = self.get_reviewer_ids()
+
+        required_reviews = set(itertools.product(reviewer_ids, self.required_questions))
         performed_reviews = set(self._make_review_keys(self.get_reviews()))
 
-        return required_reviews == performed_reviews
+        return performed_reviews >= required_reviews
 
-    def get_required_review_items(self):
-        return []
+    @property
+    def required_questions(self):
+        return [
+            feedback_display.question_id for feedback_display in self.feedback_display_blocks
+            if feedback_display.question and feedback_display.question.required
+        ]
+
+    def get_reviewer_ids(self):
+        raise NotImplementedError("Must be overridden in inherited class")
+
+    def get_reviews(self):
+        raise NotImplementedError("Must be overridden in inherited class")
 
     def _make_review_keys(self, review_items):
         return [(self.real_user_id(item['reviewer']), item['question']) for item in review_items]
@@ -792,10 +809,10 @@ class FeedbackDisplayBaseStage(BaseGroupActivityStage):
     def validate(self):
         violations = super(FeedbackDisplayBaseStage, self).validate()
 
-        if not self.assessments:
+        if not self.feedback_display_blocks:
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                _(u"Assessments are not specified for {class_name} '{stage_title}'").format(
+                _(u"Feedback display blocks are not specified for {class_name} '{stage_title}'").format(
                     class_name=self.__class__.__name__, stage_title=self.display_name
                 )
             ))
@@ -824,6 +841,7 @@ class EvaluationDisplayStage(FeedbackDisplayBaseStage):
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/evaluation_display.html'
 
     STUDIO_LABEL = _(u"Evaluation Display")
+    FEEDBACK_DISPLAY_BLOCK_CATEGORY = GroupProjectTeamEvaluationDisplayXBlock.CATEGORY
 
     type = u'Evaluation'
 
@@ -833,15 +851,8 @@ class EvaluationDisplayStage(FeedbackDisplayBaseStage):
         blocks.extend([GroupProjectTeamEvaluationDisplayXBlock])
         return blocks
 
-    @property
-    def assessments(self):
-        return self.get_children_by_category(GroupProjectTeamEvaluationDisplayXBlock.CATEGORY)
-
-    def get_required_review_items(self):
-        reviewers = [user.id for user in self.team_members]
-        questions = [assessment.question_id for assessment in self.assessments]
-
-        return itertools.product(reviewers, questions)
+    def get_reviewer_ids(self):
+        return [user.id for user in self.team_members]
 
     def get_reviews(self):
         return self.project_api.get_user_peer_review_items(
@@ -863,6 +874,7 @@ class GradeDisplayStage(FeedbackDisplayBaseStage):
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/grade_display.html'
 
     STUDIO_LABEL = _(u"Grade Display")
+    FEEDBACK_DISPLAY_BLOCK_CATEGORY = GroupProjectGradeEvaluationDisplayXBlock.CATEGORY
 
     @property
     def allowed_nested_blocks(self):
@@ -870,15 +882,8 @@ class GradeDisplayStage(FeedbackDisplayBaseStage):
         blocks.extend([GroupProjectGradeEvaluationDisplayXBlock])
         return blocks
 
-    @property
-    def assessments(self):
-        return self.get_children_by_category(GroupProjectGradeEvaluationDisplayXBlock.CATEGORY)
-
-    def get_required_review_items(self):
-        reviewers = [user['id'] for user in self.project_api.get_workgroup_reviewers(self.group_id, self.content_id)]
-        questions = [assessment.question_id for assessment in self.assessments]
-
-        return itertools.product(reviewers, questions)
+    def get_reviewer_ids(self):
+        return [user['id'] for user in self.project_api.get_workgroup_reviewers(self.group_id, self.content_id)]
 
     def get_reviews(self):
         return self.project_api.get_workgroup_review_items_for_group(

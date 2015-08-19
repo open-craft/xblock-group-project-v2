@@ -4,11 +4,7 @@ import ddt
 import mock
 from group_project_v2.json_requests import GET
 from group_project_v2.project_api import ProjectAPI, WORKGROUP_API
-from tests.utils import TestWithPatchesMixin
-
-
-def _make_review_item(reviewer, peer, question, content_id=None):
-    return {'reviewer': reviewer, 'user': peer, 'question': question, 'content_id': content_id}
+from tests.utils import TestWithPatchesMixin, make_review_item as mri
 
 
 @ddt.ddt
@@ -183,14 +179,14 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             patched_get_stage_completions.assert_called_once_with(course_id, content_id, stage)
 
     @ddt.data(
-        (1, 2, [_make_review_item(1, 2, 'qwe'), _make_review_item(1, 3, 'asd')], [_make_review_item(1, 2, 'qwe')]),
+        (1, 2, [mri(1, 'qwe', peer=2), mri(1, 'asd', peer=3)], [mri(1, 'qwe', peer=2)]),
         (
             5, 3,
-            [_make_review_item(5, 3, 'qwe'), _make_review_item(5, 3, 'asd')],
-            [_make_review_item(5, 3, 'qwe'), _make_review_item(5, 3, 'asd')]
+            [mri(5, 'qwe', peer=3), mri(5, 'asd', peer=3)],
+            [mri(5, 'qwe', peer=3), mri(5, 'asd', peer=3)]
         ),
-        (11, 12, [_make_review_item(11, 3, 'qwe'), _make_review_item(11, 4, 'asd')], []),
-        (11, 12, [_make_review_item(15, 12, 'qwe'), _make_review_item(18, 12, 'asd')], []),
+        (11, 12, [mri(11, 'qwe', peer=3), mri(11, 'asd', peer=4)], []),
+        (11, 12, [mri(15, 'qwe', peer=12), mri(18, 'asd', peer=12)], []),
     )
     @ddt.unpack
     def test_get_peer_review_items(self, reviewer_id, peer_id, review_items, expected_result):
@@ -202,21 +198,10 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             patched_get_review_items.assert_called_once_with('group_id', 'content_id')
 
     @ddt.data(
-        (
-            1,
-            [_make_review_item(2, 1, 'qwe'), _make_review_item(5, 1, 'asd')],
-            [_make_review_item(2, 1, 'qwe'), _make_review_item(5, 1, 'asd')]),
-        (
-            5,
-            [_make_review_item(7, 5, 'qwe'), _make_review_item(7, 5, 'asd')],
-            [_make_review_item(7, 5, 'qwe'), _make_review_item(7, 5, 'asd')]
-        ),
-        (11, [_make_review_item(16, 3, 'qwe'), _make_review_item(18, 4, 'asd')], []),
-        (
-            11,
-            [_make_review_item(16, 3, 'qwe'), _make_review_item(18, 11, 'question1')],
-            [_make_review_item(18, 11, 'question1')]
-        ),
+        (1, [mri(2, 'qwe', peer=1), mri(5, 'asd', peer=1)], [mri(2, 'qwe', peer=1), mri(5, 'asd', peer=1)]),
+        (5, [mri(7, 'qwe', peer=5), mri(7, 'asd', peer=5)], [mri(7, 'qwe', peer=5), mri(7, 'asd', peer=5)]),
+        (11, [mri(16, 'qwe', peer=3), mri(18, 'asd', peer=4)], []),
+        (11, [mri(16, 'qwe', peer=3), mri(18, 'question1', peer=11)], [mri(18, 'question1', peer=11)]),
     )
     @ddt.unpack
     def test_get_user_peer_review_items(self, user_id, review_items, expected_result):
@@ -227,24 +212,25 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             self.assertEqual(result, expected_result)
             patched_get_review_items.assert_called_once_with('group_id', 'content_id')
 
+    # pylint: disable=too-many-function-args
     @ddt.data(
         (
             1, 'content_1',
-            [_make_review_item(1, 7, 'qwe', 'content_1'), _make_review_item(1, 7, 'asd', 'content_1')],
-            [_make_review_item(1, 7, 'qwe', 'content_1'), _make_review_item(1, 7, 'asd', 'content_1')]),
+            [mri(1, 'qwe', peer=7, content_id='content_1'), mri(1, 'asd', peer=7, content_id='content_1')],
+            [mri(1, 'qwe', peer=7, content_id='content_1'), mri(1, 'asd', peer=7, content_id='content_1')]),
         (
             5, 'content_2',
-            [_make_review_item(5, 14, 'qwe', 'content_2'), _make_review_item(5, 19, 'asd', 'content_2')],
-            [_make_review_item(5, 14, 'qwe', 'content_2'), _make_review_item(5, 19, 'asd', 'content_2')]
+            [mri(5, 'qwe', peer=14, content_id='content_2'), mri(5, 'asd', peer=19, content_id='content_2')],
+            [mri(5, 'qwe', peer=14, content_id='content_2'), mri(5, 'asd', peer=19, content_id='content_2')]
         ),
         (
             11, 'content_3',
-            [_make_review_item(11, 3, 'qwe', 'content_2'), _make_review_item(16, 4, 'asd', 'content_3')], []
+            [mri(11, 'qwe', peer=3, content_id='content_2'), mri(16, 'asd', peer=4, content_id='content_3')], []
         ),
         (
             11, 'content_4',
-            [_make_review_item(12, 18, 'qwe', 'content_4'), _make_review_item(11, 18, 'question1', 'content_4')],
-            [_make_review_item(11, 18, 'question1', 'content_4')]
+            [mri(12, 'qwe', peer=18, content_id='content_4'), mri(11, 'question1', peer=18, content_id='content_4')],
+            [mri(11, 'question1', peer=18, content_id='content_4')]
         ),
     )
     @ddt.unpack
