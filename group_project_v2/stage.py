@@ -28,10 +28,9 @@ from group_project_v2.stage_components import (
     GroupProjectTeamEvaluationDisplayXBlock, GroupProjectGradeEvaluationDisplayXBlock,
 )
 from group_project_v2.utils import (
-    loader, format_date, gettext as _, make_key, get_link_to_block,
+    loader, format_date, gettext as _, make_key, get_link_to_block, HtmlXBlockProxy, Constants,
     outsider_disallowed_protected_view, outsider_disallowed_protected_handler, key_error_protected_handler,
     conversion_protected_handler,
-    HtmlXBlockProxy,
 )
 
 log = logging.getLogger(__name__)
@@ -97,8 +96,6 @@ class BaseGroupActivityStage(
     STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as it's not yet opened.")
     STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as it's closed.")
     STAGE_URL_NAME_TEMPLATE = _(u"url_name to link to this {stage_name}:")
-
-    CURRENT_STAGE_ID_PARAMETER_NAME = 'current_stage_id'
 
     @property
     def id(self):
@@ -197,7 +194,10 @@ class BaseGroupActivityStage(
         return self.available_now and self.is_group_member
 
     def is_current_stage(self, context):
-        return context.get(self.CURRENT_STAGE_ID_PARAMETER_NAME, None) == str(self.id)
+        target_stage = context.get(Constants.CURRENT_STAGE_PARAMETER_NAME, None)
+        if not target_stage:
+            return False
+        return target_stage.id == self.id  # they might not be the same object, so comparing by id to make sure
 
     def _view_render(self, context, view='student_view'):
         stage_fragment = self.get_stage_content_fragment(context, view)
@@ -278,7 +278,7 @@ class BaseGroupActivityStage(
         """
         Gets stage completion state
         """
-        completed_users = self.project_api.get_stage_state(self.course_id, self.activity.id, self.id)
+        completed_users = self.project_api.get_stage_state(self.course_id, self.content_id, self.id)
 
         if self.user_id in completed_users:
             return StageState.COMPLETED

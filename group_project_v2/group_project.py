@@ -21,7 +21,7 @@ from group_project_v2.mixins import (
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import (
-    loader, mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockProxy
+    loader, mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockProxy, Constants
 )
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
@@ -51,6 +51,24 @@ class GroupProjectXBlock(
     has_score = False
     has_children = True
 
+    @staticmethod
+    def _sanitize_context(context):
+        """
+        Context passed into views is :class:QueryDict instance, which has a particular feature of supporting multiple
+        values for the same key. It is achieved at a cost of always using lists even for singular values. When `get` is
+        invoked for the singular key it detects there's only one value and returns value, not the list itself
+
+        The caveat is that if it is used with dict(context) or update(context), those singular values are returned as
+        lists. This breaks the approach of passing context as intact as possible to children by making a copy and adding
+        necessary children data. So, this method serves as a filter and converter for context coming from LMS.
+        """
+        if not context:
+            return {}
+
+        return {
+            Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME: context.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME, None)
+        }
+
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
         return [
@@ -68,19 +86,23 @@ class GroupProjectXBlock(
     def navigator(self):
         return self.get_child_of_category(GroupProjectNavigatorXBlock.CATEGORY)
 
-    def _get_activity_to_display(self, target_stage_id):
+    def get_stage_to_display(self, target_stage_id):
         try:
             if target_stage_id:
                 stage = self.get_block_by_id(target_stage_id)
                 if self.get_child_category(stage) in STAGE_TYPES and stage.available_to_current_user:
-                    return stage.activity
+                    return stage
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 
-        if self.default_stage:
-            return self.default_stage.activity
+        default_stage = self.default_stage
+        if default_stage:
+            return default_stage
 
-        return self.activities[0] if self.activities else None
+        if self.activities:
+            return self.activities[0].get_stage_to_display(target_stage_id)
+
+        return None  # if there are no activities there's no stages as well - nothing we can really do
 
     @property
     def default_stage(self):
@@ -90,7 +112,7 @@ class GroupProjectXBlock(
 
     @outsider_disallowed_protected_view
     def student_view(self, context):
-        context = context if context else {}  # workbench does not provide context at all
+        ctx = self._sanitize_context(context)
 
         fragment = Fragment()
         render_context = {
@@ -101,28 +123,38 @@ class GroupProjectXBlock(
 
         render_context.update(context)
 
-        def render_child_fragment(child, content_key, fallback_message):
+        def render_child_fragment(child, content_key, fallback_message, extra_context=None):
             """
             Renders child, appends child fragment resources to parent fragment and
             updates parent's rendering context
             """
+            internal_context = dict(ctx)
+            if extra_context:
+                internal_context.update(extra_context)
+
             if child:
-                child_fragment = child.render('student_view', context)
+                log.debug("Rendering {child} with context: {context}".format(
+                    child=child.__class__.__name__, context=internal_context,
+                ))
+                child_fragment = child.render('student_view', internal_context)
                 fragment.add_frag_resources(child_fragment)
                 render_context[content_key] = child_fragment.content
             else:
                 render_context[content_key] = fallback_message
 
-        target_activity = self._get_activity_to_display(context.get('activate_block_id', None))
+        target_stage = self.get_stage_to_display(ctx.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME, None))
+        target_activity = target_stage.activity if target_stage else None
         render_child_fragment(
-            target_activity, 'activity_content', _(u"This Group Project does not contain any activities")
+            target_activity, 'activity_content', _(u"This Group Project does not contain any activities"),
+            {Constants.CURRENT_STAGE_PARAMETER_NAME: target_stage}
         )
 
         project_navigator = self.get_child_of_category(GroupProjectNavigatorXBlock.CATEGORY)
         render_child_fragment(
             project_navigator, 'project_navigator_content',
             _(u"This Group Project V2 does not contain Project Navigator - "
-              u"please edit course outline in Studio to include one")
+              u"please edit course outline in Studio to include one"),
+            {Constants.CURRENT_STAGE_PARAMETER_NAME: target_stage}
         )
 
         discussion = self.get_child_of_category(DiscussionXBlockProxy.CATEGORY)
@@ -245,7 +277,11 @@ class GroupActivityXBlock(
 
     @property
     def default_stage(self):
-        return get_default_stage(self.available_stages)
+        def_stage = get_default_stage(self.available_stages)
+        if def_stage:
+            return def_stage
+        else:
+            return self.stages[0] if self.stages else None
 
     @property
     def questions(self):
@@ -259,7 +295,7 @@ class GroupActivityXBlock(
             *[getattr(stage, 'grade_questions', ()) for stage in self.stages]
         ))
 
-    def _get_stage_to_display(self, target_stage_id):
+    def get_stage_to_display(self, target_stage_id):
         try:
             if target_stage_id:
                 stage = self.get_block_by_id(target_stage_id)
@@ -268,10 +304,7 @@ class GroupActivityXBlock(
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 
-        if self.default_stage:
-            return self.default_stage
-
-        return self.stages[0] if self.stages else None
+        return self.default_stage
 
     @outsider_disallowed_protected_view
     def student_view(self, context):
@@ -280,8 +313,7 @@ class GroupActivityXBlock(
         """
         fragment = Fragment()
 
-        target_stage_id = context.get('activate_block_id', None)
-        target_stage = self._get_stage_to_display(target_stage_id)
+        target_stage = context.get(Constants.CURRENT_STAGE_PARAMETER_NAME, self.default_stage)
 
         if not target_stage:
             fragment.add_content(_(u"This Group Project Activity does not contain any stages"))
@@ -301,13 +333,7 @@ class GroupActivityXBlock(
     def navigation_view(self, context):
         fragment = Fragment()
 
-        target_stage_id = context.get('activate_block_id', None)
-        if not target_stage_id:
-            target_stage = self.project.default_stage
-            if target_stage:
-                target_stage_id = str(target_stage.id)
-
-        children_context = {BasicStage.CURRENT_STAGE_ID_PARAMETER_NAME: target_stage_id}
+        children_context = {}
         children_context.update(context)
 
         stage_contents = []
@@ -316,8 +342,8 @@ class GroupActivityXBlock(
             fragment.add_frag_resources(child_fragment)
             stage_contents.append(child_fragment.content)
 
-        context = {'activity': self, 'stage_contents': stage_contents}
-        fragment.add_content(loader.render_template("templates/html/activity/navigation_view.html", context))
+        render_context = {'activity': self, 'stage_contents': stage_contents}
+        fragment.add_content(loader.render_template("templates/html/activity/navigation_view.html", render_context))
 
         return fragment
 
