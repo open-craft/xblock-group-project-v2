@@ -139,6 +139,8 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
             # refreshing wrappers after page reload
             self._update_after_reload()
             nav_view = self.page.project_navigator.get_view_by_type(ViewTypes.NAVIGATION, NavigationViewElement)
+            selected_stage = nav_view.selected_stage
+            self.assertEqual(selected_stage.stage_id, stage_id)
 
             stage_content = self.page.get_activity_by_id(activity_id).get_stage_by_id(stage_id)
             self.assertTrue(stage_content.is_displayed())
