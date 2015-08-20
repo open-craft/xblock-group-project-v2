@@ -317,7 +317,7 @@ class BasicStage(BaseGroupActivityStage):
     def student_view(self, context):
         fragment = super(BasicStage, self).student_view(context)
 
-        if self.available_now and not self.is_admin_grader:
+        if self.available_now and self.is_group_member:
             self.mark_complete()
 
         return fragment
@@ -678,7 +678,7 @@ class PeerReviewStage(ReviewBaseStage):
         """
         Returns groups to review. May throw `class`: OutsiderDisallowedError
         """
-        if not self.is_group_member:
+        if self.is_admin_grader:
             return [self.workgroup]
 
         try:
@@ -778,7 +778,7 @@ class FeedbackDisplayBaseStage(BaseGroupActivityStage):
         fragment = super(FeedbackDisplayBaseStage, self).student_view(context)
 
         # TODO: should probably check for all reviews to be ready
-        if self.available_now and not self.is_admin_grader:
+        if self.available_now and self.is_group_member:
             self.mark_complete()
 
         return fragment

@@ -133,6 +133,14 @@ class StageElement(BaseElement):
     def content(self):
         return self.element.find_element_by_css_selector('.stage_content')
 
+    @property
+    def has_admin_grading_notification(self):
+        try:
+            self.element.find_element_by_css_selector(".grading_override.ta_graded")
+            return True
+        except NoSuchElementException:
+            return False
+
 
 class ReviewStageElement(StageElement):
     """ Wrapper around group project review stage element """

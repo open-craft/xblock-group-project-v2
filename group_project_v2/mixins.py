@@ -58,7 +58,9 @@ class CourseAwareXBlockMixin(object):
         return unicode(raw_course_id)
 
 
-class UserAwareXBlockMixin(object):
+class UserAwareXBlockMixin(ProjectAPIXBlockMixin):
+    TA_REVIEW_KEY = "TA_REVIEW_WORKGROUP"
+
     @lazy
     def anonymous_student_id(self):
         try:
@@ -80,6 +82,19 @@ class UserAwareXBlockMixin(object):
                 log.exception(exc)
                 return None
 
+    @lazy
+    def user_preferences(self):
+        return self._user_preferences(self.project_api, self.user_id)
+
+    @staticmethod
+    @memoize_with_expiration(expires_after=timedelta(seconds=5))
+    def _user_preferences(project_api, user_id):
+        return project_api.get_user_preferences(user_id)
+
+    @property
+    def is_admin_grader(self):
+        return UserAwareXBlockMixin.TA_REVIEW_KEY in self.user_preferences
+
     _known_real_user_ids = {}
 
     def real_user_id(self, anonymous_student_id):
@@ -91,20 +106,15 @@ class UserAwareXBlockMixin(object):
         return self._known_real_user_ids[anonymous_student_id]
 
 
-class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin, ProjectAPIXBlockMixin):
+class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin):
     """
     Gets current user workgroup, respecting TA review
     """
-    TA_REVIEW_KEY = "TA_REVIEW_WORKGROUP"
     FALLBACK_WORKGROUP = {"id": "0", "users": []}
 
     @property
     def is_group_member(self):
         return self.user_id in [u["id"] for u in self.workgroup["users"]]
-
-    @property
-    def is_admin_grader(self):
-        return not self.is_group_member
 
     @staticmethod
     def _confirm_outsider_allowed(project_api, user_id, course_id):
@@ -123,11 +133,11 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin, Pr
     @memoize_with_expiration(expires_after=timedelta(seconds=5))
     def _get_workgroup(project_api, user_id, course_id):
         try:
-            user_prefs = project_api.get_user_preferences(user_id)
+            user_prefs = UserAwareXBlockMixin._user_preferences(project_api, user_id)
 
-            if WorkgroupAwareXBlockMixin.TA_REVIEW_KEY in user_prefs:
+            if UserAwareXBlockMixin.TA_REVIEW_KEY in user_prefs:
                 WorkgroupAwareXBlockMixin._confirm_outsider_allowed(project_api, user_id, course_id)
-                result = project_api.get_workgroup_by_id(user_prefs[WorkgroupAwareXBlockMixin.TA_REVIEW_KEY])
+                result = project_api.get_workgroup_by_id(user_prefs[UserAwareXBlockMixin.TA_REVIEW_KEY])
             else:
                 result = project_api.get_user_workgroup_for_course(user_id, course_id)
         except OutsiderDisallowedError:
