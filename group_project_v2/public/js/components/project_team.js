@@ -25,7 +25,7 @@ function ProjectTeamXBlock(runtime, element) {
 
     $(".group-project-team-member-email a[data-email]", element).click(function(ev){
         ev.preventDefault();
-        var form = $(email_member_modal_selector, element).find('form'),
+        var form = $(email_member_modal_selector, group_project_dom).find('form'),
             member_email = $(this).data('email');
         $(".member-email", form).val(member_email);
         showModal(email_member_modal_selector);
