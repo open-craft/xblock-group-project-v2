@@ -698,7 +698,10 @@ class PeerReviewStage(ReviewBaseStage):
             return []
 
     def review_status(self):
-        groups_to_review = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
+        if not self.is_admin_grader:
+            groups_to_review = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
+        else:
+            groups_to_review = [self.workgroup]
 
         group_review_items = []
         for assess_group in groups_to_review:
@@ -882,6 +885,15 @@ class GradeDisplayStage(FeedbackDisplayBaseStage):
         blocks.extend([GroupProjectGradeEvaluationDisplayXBlock])
         return blocks
 
+    @lazy
+    def final_grade(self):
+        """
+        Gets final grade for activity
+        """
+        # this is an expensive computation that can't change in scope of one request - hence lazy. And no, this
+        # comment is a very bad docstring.
+        return self.activity.calculate_grade(self.group_id)
+
     def get_reviewer_ids(self):
         return [user['id'] for user in self.project_api.get_workgroup_reviewers(self.group_id, self.content_id)]
 
@@ -891,8 +903,12 @@ class GradeDisplayStage(FeedbackDisplayBaseStage):
             self.content_id,
         )
 
+    @property
+    def can_mark_complete(self):
+        return self.final_grade is not None
+
     def get_stage_content_fragment(self, context, view='student_view'):
-        final_grade = self.activity.calculate_grade(self.workgroup['id'])
+        final_grade = self.final_grade
         context_extension = {
             'final_grade': final_grade if final_grade is not None else _(u"N/A")
         }
