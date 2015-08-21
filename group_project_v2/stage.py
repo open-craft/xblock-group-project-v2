@@ -50,6 +50,30 @@ class ReviewState(object):
 
 DISPLAY_NAME_NAME = _(u"Display Name")
 DISPLAY_NAME_HELP = _(U"This is a name of the stage")
+MUST_BE_OVERRIDDEN = _(u"Must be overridden in inherited class")
+
+
+class SimpleCompletionStageMixin(object):
+    """
+    runtime.publish(block, 'progress', {'user_id': user_id}) properly creates completion records, but they are
+    unavailable to API until current request is ended. They are created in transaction and looks like in LMS every
+    request have dedicated transaction, but that's speculation. Anyway, we can't rely on
+    runtime.publish - project_api.get_stage_id to update stage state and get new state in single run.
+    """
+    completed = Boolean(
+        display_name=_(u"Completed"),
+        scope=Scope.user_state
+    )
+
+    def get_stage_state(self):
+        if self.completed:
+            return StageState.COMPLETED
+        return StageState.NOT_STARTED
+
+    def mark_complete(self, user_id=None):
+        result = super(SimpleCompletionStageMixin, self).mark_complete(user_id)
+        self.completed = True
+        return result
 
 
 class BaseGroupActivityStage(
@@ -267,23 +291,10 @@ class BaseGroupActivityStage(
 
     def mark_complete(self, user_id=None):
         user_id = user_id if user_id is not None else self.user_id
-        try:
-            self.project_api.mark_as_complete(self.course_id, self.content_id, user_id, self.id)
-        except ApiError as exc:
-            # 409 indicates that the completion record already existed # That's ok in this case
-            if exc.code != 409:
-                raise
+        self.runtime.publish(self, 'progress', {'user_id': user_id})
 
     def get_stage_state(self):
-        """
-        Gets stage completion state
-        """
-        completed_users = self.project_api.get_stage_state(self.course_id, self.content_id, self.id)
-
-        if self.user_id in completed_users:
-            return StageState.COMPLETED
-        else:
-            return StageState.NOT_STARTED
+        raise NotImplementedError(MUST_BE_OVERRIDDEN + str(self))
 
     def navigation_view(self, context):
         fragment = Fragment()
@@ -306,7 +317,7 @@ class BaseGroupActivityStage(
         }
 
 
-class BasicStage(BaseGroupActivityStage):
+class BasicStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
     display_name = String(
         display_name=DISPLAY_NAME_NAME,
         help=DISPLAY_NAME_HELP,
@@ -328,17 +339,12 @@ class BasicStage(BaseGroupActivityStage):
         return fragment
 
 
-class CompletionStage(BaseGroupActivityStage):
+class CompletionStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
     display_name = String(
         display_name=DISPLAY_NAME_NAME,
         help=DISPLAY_NAME_HELP,
         scope=Scope.content,
         default=_(u"Completion Stage")
-    )
-
-    completed = Boolean(
-        display_name=_(u"Completed"),
-        scope=Scope.user_state
     )
 
     CATEGORY = 'gp-v2-stage-completion'
@@ -372,10 +378,10 @@ class CompletionStage(BaseGroupActivityStage):
             return {'result': 'error', 'msg': exception.message}
 
     def mark_complete(self, user_id=None):
+        user_id = user_id or self.user_id
         if user_id != self.user_id:
             raise Exception("Can only mark as complete for current user")
-        super(CompletionStage, self).mark_complete(user_id)
-        self.completed = True
+        return super(CompletionStage, self).mark_complete(user_id)
 
     def get_stage_content_fragment(self, context, view='student_view'):
         extra_context = {
@@ -772,7 +778,7 @@ class PeerReviewStage(ReviewBaseStage):
         self.activity.calculate_and_send_grade(group_id)
 
 
-class FeedbackDisplayBaseStage(BaseGroupActivityStage):
+class FeedbackDisplayBaseStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
     NAVIGATION_LABEL = _(u'Review')
     FEEDBACK_DISPLAY_BLOCK_CATEGORY = None
 
@@ -788,10 +794,10 @@ class FeedbackDisplayBaseStage(BaseGroupActivityStage):
         ]
 
     def get_reviewer_ids(self):
-        raise NotImplementedError("Must be overridden in inherited class")
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
     def get_reviews(self):
-        raise NotImplementedError("Must be overridden in inherited class")
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
     def _make_review_keys(self, review_items):
         return [(self.real_user_id(item['reviewer']), item['question']) for item in review_items]
