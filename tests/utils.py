@@ -87,3 +87,9 @@ def make_api_error(code, reason):
 
 def raise_api_error(code, reason):
     raise make_api_error(code, reason)
+
+
+def make_review_item(reviewer, question, peer=None, content_id=None, answer=None):
+    return {
+        'reviewer': reviewer, 'user': peer, 'question': question, 'content_id': content_id, 'answer': answer
+    }

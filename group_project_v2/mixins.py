@@ -113,6 +113,10 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin):
     FALLBACK_WORKGROUP = {"id": "0", "users": []}
 
     @property
+    def group_id(self):
+        return self.workgroup['id']
+
+    @property
     def is_group_member(self):
         return self.user_id in [u["id"] for u in self.workgroup["users"]]
 
