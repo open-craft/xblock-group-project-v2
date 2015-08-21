@@ -28,7 +28,6 @@ from group_project_v2.stage import (
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
     STAGE_TYPES
 )
-from group_project_v2.api_error import ApiError
 
 
 log = logging.getLogger(__name__)

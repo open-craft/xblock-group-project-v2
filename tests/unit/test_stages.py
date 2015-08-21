@@ -79,9 +79,7 @@ class EvaluationStagesBaseTestMixin(object):
             self.block.student_view({})
 
             if should_call_mark_complete:
-                self.project_api_mock.mark_as_complete.assert_called_with(
-                    self.block.course_id, self.block.content_id, self.block.user_id, self.block.id
-                )
+                self.runtime_mock.publish.assert_called_with(self.block, 'progress', {'user_id': self.block.user_id})
             else:
                 self.assertFalse(self.project_api_mock.mark_as_complete.called)
 
