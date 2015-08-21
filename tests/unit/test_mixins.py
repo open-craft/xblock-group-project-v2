@@ -352,4 +352,16 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
             patched_workgroup.return_value = {"id": 'irrelevant', "users": [{"id": u_id} for u_id in group_members]}
 
             self.assertEqual(self.block.is_group_member, is_member)
-            self.assertEqual(self.block.is_admin_grader, not is_member)
+
+    @ddt.data(
+        ({}, False),
+        ({'qwe': 'rty'}, False),
+        ({UserAwareXBlockMixin.TA_REVIEW_KEY: 1}, True),
+        ({UserAwareXBlockMixin.TA_REVIEW_KEY: 15}, True),
+    )
+    @ddt.unpack
+    def test_is_admin_grader(self, preferences, expected_is_admin_grader):
+        with mock.patch.object(WorkgroupAwareXBlockMixin, 'user_preferences', mock.PropertyMock()) as patched_prefs:
+            patched_prefs.return_value = preferences
+
+            self.assertEqual(self.block.is_admin_grader, expected_is_admin_grader)

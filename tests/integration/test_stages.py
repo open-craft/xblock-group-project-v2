@@ -6,7 +6,9 @@ import ddt
 import textwrap
 from freezegun import freeze_time
 import mock
+from group_project_v2.mixins import UserAwareXBlockMixin
 from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage, TeamEvaluationStage
+from group_project_v2.utils import ALLOWED_OUTSIDER_ROLES
 
 from tests.integration.base_test import BaseIntegrationTest
 from tests.integration.page_elements import GroupProjectElement, ReviewStageElement
@@ -435,7 +437,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
             {"id": user.id} for user in KNOWN_USERS.values()
         ])
 
-        self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML))
+        self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML), load_immediately=False)
 
     def test_renderigng_questions(self):
         stage_element = self.get_stage(self.go_to_view())
@@ -513,6 +515,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
         ]
 
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
+        self.assertFalse(stage_element.has_admin_grading_notification)
 
         group = stage_element.groups[0]
         self.select_review_subject(group)
@@ -588,4 +591,46 @@ class PeerReviewStageTest(BaseReviewStageTest):
             self.activity_id,
             user_id,
             stage_element.id
+        )
+
+    def test_ta_grading(self):
+        user_id, group_id = 1, 3
+        self.project_api_mock.get_user_preferences = mock.Mock(
+            return_value={UserAwareXBlockMixin.TA_REVIEW_KEY: group_id}
+        )
+        self.project_api_mock.get_user_roles_for_course = mock.Mock(return_value=[{'role': ALLOWED_OUTSIDER_ROLES[0]}])
+        self.project_api_mock.get_workgroup_by_id.side_effect = lambda g_id: {"id": g_id, "users": [{"id": 1}]}
+
+        stage_element = self.get_stage(self.go_to_view(student_id=user_id))
+        self.assertTrue(stage_element.has_admin_grading_notification)
+
+        self.project_api_mock.get_workgroup_by_id.assert_called_once_with(group_id)
+
+        self.assertEqual(len(stage_element.groups), 1)
+        group = stage_element.groups[0]
+        self.assertEqual(group.subject_id, str(group_id))
+
+        self.select_review_subject(group)
+
+        expected_submissions = {
+            "group_score": "100",
+            "group_q1": "Y",
+            "group_q2": "Awesome"
+        }
+
+        questions = stage_element.form.questions
+        questions[0].control.select_option(expected_submissions["group_score"])
+        questions[1].control.select_option(expected_submissions["group_q1"])
+        questions[2].control.fill_text(expected_submissions["group_q2"])
+
+        self.assertTrue(stage_element.form.submit.is_displayed())
+        self.assertEqual(stage_element.form.submit.text, "Submit")  # first time here - should read Submit
+
+        stage_element.form.submit.click()
+
+        self.project_api_mock.submit_workgroup_review_items.assert_called_with(
+            str(user_id),
+            stage_element.form.group_id,
+            self.activity_id,
+            expected_submissions
         )
