@@ -22,7 +22,7 @@ class StageStateRegistry(object):
 
 class TestGeneralFunctionality(SingleScenarioTestSuite):
     scenario = "example_1.xml"
-    
+
     def setUp(self):
         super(TestGeneralFunctionality, self).setUp()
         stage_state_registry = StageStateRegistry()

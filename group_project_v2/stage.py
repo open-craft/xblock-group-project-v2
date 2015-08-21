@@ -698,7 +698,10 @@ class PeerReviewStage(ReviewBaseStage):
             return []
 
     def review_status(self):
-        groups_to_review = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
+        if not self.is_admin_grader:
+            groups_to_review = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
+        else:
+            groups_to_review = [self.workgroup]
 
         group_review_items = []
         for assess_group in groups_to_review:
@@ -777,20 +780,7 @@ class FeedbackDisplayBaseStage(BaseGroupActivityStage):
     def feedback_display_blocks(self):
         return self.get_children_by_category(self.FEEDBACK_DISPLAY_BLOCK_CATEGORY)
 
-    @property
-    def can_mark_complete(self):
-        base_result = super(FeedbackDisplayBaseStage, self).can_mark_complete
-        if not base_result:
-            return False
-
-        reviewer_ids = self.get_reviewer_ids()
-
-        required_reviews = set(itertools.product(reviewer_ids, self.required_questions))
-        performed_reviews = set(self._make_review_keys(self.get_reviews()))
-
-        return performed_reviews >= required_reviews
-
-    @property
+    @lazy
     def required_questions(self):
         return [
             feedback_display.question_id for feedback_display in self.feedback_display_blocks
@@ -846,8 +836,21 @@ class EvaluationDisplayStage(FeedbackDisplayBaseStage):
     type = u'Evaluation'
 
     @property
+    def can_mark_complete(self):
+        base_result = super(EvaluationDisplayStage, self).can_mark_complete
+        if not base_result:
+            return False
+
+        reviewer_ids = self.get_reviewer_ids()
+
+        required_reviews = set(itertools.product(reviewer_ids, self.required_questions))
+        performed_reviews = set(self._make_review_keys(self.get_reviews()))
+
+        return performed_reviews >= required_reviews
+
+    @property
     def allowed_nested_blocks(self):
-        blocks = super(FeedbackDisplayBaseStage, self).allowed_nested_blocks
+        blocks = super(EvaluationDisplayStage, self).allowed_nested_blocks
         blocks.extend([GroupProjectTeamEvaluationDisplayXBlock])
         return blocks
 
@@ -878,9 +881,18 @@ class GradeDisplayStage(FeedbackDisplayBaseStage):
 
     @property
     def allowed_nested_blocks(self):
-        blocks = super(FeedbackDisplayBaseStage, self).allowed_nested_blocks
+        blocks = super(GradeDisplayStage, self).allowed_nested_blocks
         blocks.extend([GroupProjectGradeEvaluationDisplayXBlock])
         return blocks
+
+    @lazy
+    def final_grade(self):
+        """
+        Gets final grade for activity
+        """
+        # this is an expensive computation that can't change in scope of one request - hence lazy. And no, this
+        # comment is a very bad docstring.
+        return self.activity.calculate_grade(self.group_id)
 
     def get_reviewer_ids(self):
         return [user['id'] for user in self.project_api.get_workgroup_reviewers(self.group_id, self.content_id)]
@@ -891,8 +903,15 @@ class GradeDisplayStage(FeedbackDisplayBaseStage):
             self.content_id,
         )
 
+    @property
+    def can_mark_complete(self):
+        base_result = super(GradeDisplayStage, self).can_mark_complete
+        if not base_result:
+            return False
+        return self.final_grade is not None
+
     def get_stage_content_fragment(self, context, view='student_view'):
-        final_grade = self.activity.calculate_grade(self.workgroup['id'])
+        final_grade = self.final_grade
         context_extension = {
             'final_grade': final_grade if final_grade is not None else _(u"N/A")
         }
