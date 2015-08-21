@@ -132,9 +132,8 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
 
     def test_get_block_by_id(self):
         actual_block_id = BlockUsageLocator(CourseLocator(org='qwe', course='asd', run='zxc'), 'block_type', '1234')
-        string_block_id = unicode(actual_block_id)
 
-        self.block.get_block_by_id(string_block_id)
+        self.block.get_block_by_id(actual_block_id)
         self.runtime_mock.get_block.assert_called_with(actual_block_id)
 
 

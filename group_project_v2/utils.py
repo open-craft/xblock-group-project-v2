@@ -31,7 +31,7 @@ NO_EDITABLE_SETTINGS = gettext(u"This XBlock does not contain any editable setti
 # TODO: collect all constants here?
 class Constants(object):
     ACTIVATE_BLOCK_ID_PARAMETER_NAME = 'activate_block_id'
-    CURRENT_STAGE_PARAMETER_NAME = 'current_stage'
+    CURRENT_STAGE_ID_PARAMETER_NAME = 'current_stage'
 
 
 class HtmlXBlockProxy(object):

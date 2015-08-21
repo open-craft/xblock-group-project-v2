@@ -194,10 +194,10 @@ class BaseGroupActivityStage(
         return self.available_now and self.is_group_member
 
     def is_current_stage(self, context):
-        target_stage = context.get(Constants.CURRENT_STAGE_PARAMETER_NAME, None)
-        if not target_stage:
+        target_stage_id = context.get(Constants.CURRENT_STAGE_ID_PARAMETER_NAME, None)
+        if not target_stage_id:
             return False
-        return target_stage.id == self.id  # they might not be the same object, so comparing by id to make sure
+        return target_stage_id == self.id  # they might not be the same object, so comparing by id to make sure
 
     def _view_render(self, context, view='student_view'):
         stage_fragment = self.get_stage_content_fragment(context, view)

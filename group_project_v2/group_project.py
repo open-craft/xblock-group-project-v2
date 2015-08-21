@@ -142,19 +142,25 @@ class GroupProjectXBlock(
             else:
                 render_context[content_key] = fallback_message
 
-        target_stage = self.get_stage_to_display(ctx.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME, None))
+        target_stage_id = self.get_block_id_from_string(ctx.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME, None))
+        target_stage = self.get_stage_to_display(target_stage_id)
+
+        # activity should be rendered first, as some stages might report completion in student-view - this way stage
+        # PN sees updated state.
         target_activity = target_stage.activity if target_stage else None
         render_child_fragment(
             target_activity, 'activity_content', _(u"This Group Project does not contain any activities"),
-            {Constants.CURRENT_STAGE_PARAMETER_NAME: target_stage}
+            {Constants.CURRENT_STAGE_ID_PARAMETER_NAME: target_stage.id}
         )
 
+        # TODO: project nav is slow, mostly due to navigation view. It might make sense to rework it into
+        # asynchronously loading navigation and stage states.
         project_navigator = self.get_child_of_category(GroupProjectNavigatorXBlock.CATEGORY)
         render_child_fragment(
             project_navigator, 'project_navigator_content',
             _(u"This Group Project V2 does not contain Project Navigator - "
               u"please edit course outline in Studio to include one"),
-            {Constants.CURRENT_STAGE_PARAMETER_NAME: target_stage}
+            {Constants.CURRENT_STAGE_ID_PARAMETER_NAME: target_stage.id}
         )
 
         discussion = self.get_child_of_category(DiscussionXBlockProxy.CATEGORY)
@@ -313,7 +319,8 @@ class GroupActivityXBlock(
         """
         fragment = Fragment()
 
-        target_stage = context.get(Constants.CURRENT_STAGE_PARAMETER_NAME, self.default_stage)
+        target_stage_id = context.get(Constants.CURRENT_STAGE_ID_PARAMETER_NAME, None)
+        target_stage = self.get_stage_to_display(target_stage_id)
 
         if not target_stage:
             fragment.add_content(_(u"This Group Project Activity does not contain any stages"))
