@@ -50,9 +50,6 @@ class ChildrenNavigationXBlockMixin(object):
         except InvalidKeyError:  # workbench support
             return block_id_string
 
-    def get_block_by_id(self, block_id):
-        return self.runtime.get_block(block_id)
-
 
 class CourseAwareXBlockMixin(object):
     @property

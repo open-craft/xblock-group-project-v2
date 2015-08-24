@@ -88,7 +88,7 @@ class GroupProjectXBlock(
     def get_stage_to_display(self, target_stage_id):
         try:
             if target_stage_id:
-                stage = self.get_block_by_id(target_stage_id)
+                stage = self.runtime.get_block(target_stage_id)
                 if self.get_child_category(stage) in STAGE_TYPES and stage.available_to_current_user:
                     return stage
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
@@ -303,7 +303,7 @@ class GroupActivityXBlock(
     def get_stage_to_display(self, target_stage_id):
         try:
             if target_stage_id:
-                stage = self.get_block_by_id(target_stage_id)
+                stage = self.runtime.get_block(target_stage_id)
                 if self.get_child_category(stage) in STAGE_TYPES and stage.available_to_current_user:
                     return stage
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:

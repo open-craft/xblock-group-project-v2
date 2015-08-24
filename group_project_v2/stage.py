@@ -218,7 +218,7 @@ class BaseGroupActivityStage(
         target_stage_id = context.get(Constants.CURRENT_STAGE_ID_PARAMETER_NAME, None)
         if not target_stage_id:
             return False
-        return target_stage_id == self.id  # they might not be the same object, so comparing by id to make sure
+        return target_stage_id == self.id
 
     def _view_render(self, context, view='student_view'):
         stage_fragment = self.get_stage_content_fragment(context, view)

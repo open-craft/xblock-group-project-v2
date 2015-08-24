@@ -70,7 +70,7 @@ class GroupProjectNavigatorXBlock(
     def _get_activated_view_type(self, target_block_id):
         try:
             if target_block_id:
-                block = self.get_block_by_id(target_block_id)
+                block = self.runtime.get_block(target_block_id)
                 if self.get_child_category(block) in PROJECT_NAVIGATOR_VIEW_TYPES:
                     return block.type
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:

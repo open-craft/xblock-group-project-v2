@@ -130,12 +130,6 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
         self.assertFalse(self.block.has_child_of_category('missing_category'))
         self.assertFalse(self.block.has_child_of_category('other_missing_category'))
 
-    def test_get_block_by_id(self):
-        actual_block_id = BlockUsageLocator(CourseLocator(org='qwe', course='asd', run='zxc'), 'block_type', '1234')
-
-        self.block.get_block_by_id(actual_block_id)
-        self.runtime_mock.get_block.assert_called_with(actual_block_id)
-
 
 class CourseAwareXBlockMixinGuineaPig(CommonMixinGuineaPig, CourseAwareXBlockMixin):
     pass
