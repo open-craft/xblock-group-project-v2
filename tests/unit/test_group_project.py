@@ -3,7 +3,7 @@ from unittest import TestCase
 import mock
 from group_project_v2.group_project import GroupActivityXBlock
 from xblock.runtime import Runtime
-
+from group_project_v2.stage import BaseGroupActivityStage
 
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
 from xblock.field_data import DictFieldData
@@ -25,6 +25,35 @@ def _make_reviews(reviews):
 
 def _make_workgroup(user_ids):
     return {'users': [{'id': user_id} for user_id in user_ids]}
+
+
+class TestGroupActivityXBlock(TestWithPatchesMixin, TestCase):
+    def setUp(self):
+        super(TestGroupActivityXBlock, self).setUp()
+        self.runtime_mock = mock.Mock(spec=Runtime)
+        self.block = GroupActivityXBlock(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
+
+    def test_questions_property(self):
+        stage1_mock = mock.create_autospec(BaseGroupActivityStage)
+        stage2_mock = mock.create_autospec(BaseGroupActivityStage)
+        stage1_mock.questions = ['q1', 'q2']
+        stage2_mock.questions = ['q3']
+
+        with mock.patch.object(self.block.__class__, 'stages', mock.PropertyMock()) as stages_mock:
+            stages_mock.return_value=[stage1_mock, stage2_mock]
+
+            self.assertEqual(self.block.questions, ['q1', 'q2', 'q3'])
+
+    def test_grade_questions_property(self):
+        stage1_mock = mock.create_autospec(BaseGroupActivityStage)
+        stage2_mock = mock.create_autospec(BaseGroupActivityStage)
+        stage1_mock.grade_questions = ['q1', 'q2']
+        stage2_mock.grade_questions = ['q3']
+
+        with mock.patch.object(self.block.__class__, 'stages', mock.PropertyMock()) as stages_mock:
+            stages_mock.return_value=[stage1_mock, stage2_mock]
+
+            self.assertEqual(self.block.grade_questions, ['q1', 'q2', 'q3'])
 
 
 @ddt.ddt

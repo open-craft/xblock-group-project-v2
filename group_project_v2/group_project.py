@@ -290,15 +290,16 @@ class GroupActivityXBlock(
 
     @property
     def questions(self):
-        return list(itertools.chain(
-            *[getattr(stage, 'questions', ()) for stage in self.stages]
-        ))
+        return list(self._chain_questions(self.stages, 'questions'))
 
     @property
     def grade_questions(self):
-        return list(itertools.chain(
-            *[getattr(stage, 'grade_questions', ()) for stage in self.stages]
-        ))
+        return list(self._chain_questions(self.stages, 'grade_questions'))
+
+    def _chain_questions(self, stages, question_type):
+        return itertools.chain(
+            *[getattr(stage, question_type, ()) for stage in stages]
+        )
 
     def get_stage_to_display(self, target_stage_id):
         try:
