@@ -28,7 +28,6 @@ from group_project_v2.stage import (
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
     STAGE_TYPES
 )
-from group_project_v2.api_error import ApiError
 
 
 log = logging.getLogger(__name__)
@@ -393,12 +392,7 @@ class GroupActivityXBlock(
         return fragment
 
     def mark_complete(self, user_id):
-        try:
-            self.project_api.mark_as_complete(self.course_id, self.content_id, user_id)
-        except ApiError as e:
-            # 409 indicates that the completion record already existed. That's ok in this case
-            if e.code != 409:
-                raise
+        self.runtime.publish(self, 'progress', {'user_id': user_id})
 
     def validate_field_data(self, validation, data):
         super(GroupActivityXBlock, self).validate_field_data(validation, data)

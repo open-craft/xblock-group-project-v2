@@ -161,6 +161,22 @@ class BaseReviewStageTest(StageTestBase):
         super(BaseReviewStageTest, self).setUp()
         self.project_api_mock.get_workgroups_to_review.return_value = self.workgroups_to_review
 
+    def submit_and_assert_completion_published(self, stage_element, user_id):
+        with mock.patch('workbench.runtime.WorkbenchRuntime.publish') as patched_publish:
+            stage_element.form.submit.click()
+            self.wait_for_ajax()
+
+            self.assertTrue(patched_publish.called)
+
+            call_args, call_kwargs = patched_publish.call_args
+            self.assertEqual(call_kwargs, {})
+            self.assertEqual(len(call_args), 3)
+
+            block, event_type, event_data = call_args
+            self.assertEqual(block.id, stage_element.id)
+            self.assertEqual(event_type, 'progress')
+            self.assertEqual(event_data, {'user_id': user_id})
+
 
 @ddt.ddt
 class TeamEvaluationStageTest(BaseReviewStageTest):
@@ -363,15 +379,8 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         questions[0].control.select_option(expected_submissions["peer_score"])
         questions[1].control.select_option(expected_submissions["peer_q1"])
         questions[2].control.fill_text(expected_submissions["peer_q2"])
-        stage_element.form.submit.click()
 
-        self.wait_for_ajax()
-        self.project_api_mock.mark_as_complete.assert_called_with(
-            'all',
-            self.activity_id,
-            user_id,
-            stage_element.id
-        )
+        self.submit_and_assert_completion_published(stage_element, user_id)
 
 
 @ddt.ddt
@@ -583,15 +592,8 @@ class PeerReviewStageTest(BaseReviewStageTest):
         questions[0].control.select_option(expected_submissions["group_score"])
         questions[1].control.select_option(expected_submissions["group_q1"])
         questions[2].control.fill_text(expected_submissions["group_q2"])
-        stage_element.form.submit.click()
 
-        self.wait_for_ajax()
-        self.project_api_mock.mark_as_complete.assert_called_with(
-            'all',
-            self.activity_id,
-            user_id,
-            stage_element.id
-        )
+        self.submit_and_assert_completion_published(stage_element, user_id)
 
     def test_ta_grading(self):
         user_id, group_id = 1, 3

@@ -2,7 +2,6 @@
 Tests for project navigator and its views
 """
 import logging
-import mock
 
 from group_project_v2.project_navigator import ViewTypes
 from group_project_v2.stage import (
@@ -91,19 +90,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
         Tests navigation view and stage navigation
         """
         # arrange: setting up mocks influencing stage states
-        def stage_states(course_id, activity_id, stage_id):  # pylint: disable=unused-argument
-            completed_users = {1, 2}
-            if BasicStage.CATEGORY in stage_id:
-                completed_users = {1, 2}  # overview is completed
-            elif CompletionStage.CATEGORY in stage_id:
-                completed_users = {}  # completion is not started
-            elif EvaluationDisplayStage.CATEGORY in stage_id:
-                completed_users = {1, 3, 4}  # evaluation display is complete
-            elif GradeDisplayStage.CATEGORY in stage_id:
-                completed_users = {1, 3, 4}  # grade display is complete
-            return completed_users
 
-        self.project_api_mock.get_stage_state = mock.Mock(side_effect=stage_states)
         self.project_api_mock.get_latest_workgroup_submissions_by_id.return_value = self.submissions
 
         self._prepare_page()
@@ -122,13 +109,13 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
             self.assertEqual(stage.state, stage_state)
 
         stages = nav_view.stages
-        assert_stage(stages[0], "Activity 1", BasicStage, "Overview", StageState.COMPLETED)
-        assert_stage(stages[1], "Activity 1", SubmissionStage, "Upload", StageState.INCOMPLETE)
+        assert_stage(stages[0], "Activity 1", BasicStage, "Overview", StageState.COMPLETED)  # marks self as complete
+        assert_stage(stages[1], "Activity 1", SubmissionStage, "Upload", StageState.INCOMPLETE)  # one submission
         assert_stage(stages[2], "Activity 1", CompletionStage, "Completion", StageState.NOT_STARTED)
         assert_stage(stages[3], "Activity 2", TeamEvaluationStage, "Review Team", StageState.NOT_STARTED)
-        assert_stage(stages[4], "Activity 2", PeerReviewStage, "Review Group", StageState.COMPLETED)
-        assert_stage(stages[5], "Activity 2", EvaluationDisplayStage, "Evaluate Team Feedback", StageState.COMPLETED)
-        assert_stage(stages[6], "Activity 2", GradeDisplayStage, "Evaluate Group Feedback", StageState.COMPLETED)
+        assert_stage(stages[4], "Activity 2", PeerReviewStage, "Review Group", StageState.COMPLETED)  # no reviews
+        assert_stage(stages[5], "Activity 2", EvaluationDisplayStage, "Evaluate Team Feedback", StageState.NOT_STARTED)
+        assert_stage(stages[6], "Activity 2", GradeDisplayStage, "Evaluate Group Feedback", StageState.NOT_STARTED)
 
         # need to get this now as `navigate_to` will navigate from the page and `stage` instance will become detached
         stage_ids = [stage.stage_id for stage in nav_view.stages]

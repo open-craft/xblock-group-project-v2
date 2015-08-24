@@ -157,28 +157,6 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             self.assertEqual(response, [1, 2, 3] * len(expected_urls))
 
     @ddt.data(
-        ('course-1', 'content-1', 'stage-1', None),
-        ('course-1', 'content-1', 'stage-1', []),
-        ('course-2', 'content-2', 'stage-2', [1, 2, 3]),
-        ('other_course', 'no_content', 'missing_stage', [120, 514, 997]),
-    )
-    @ddt.unpack
-    def test_get_stage_state(self, course_id, content_id, stage, completed_users):
-        if completed_users:
-            completions = [{'user_id': user_id} for user_id in completed_users]
-            expected_result = set(completed_users)
-        else:
-            completions = None
-            expected_result = set()
-
-        with mock.patch.object(self.project_api, 'get_stage_completions') as patched_get_stage_completions:
-            patched_get_stage_completions.return_value = completions
-            result = self.project_api.get_stage_state(course_id, content_id, stage)
-
-            self.assertEqual(result, expected_result)
-            patched_get_stage_completions.assert_called_once_with(course_id, content_id, stage)
-
-    @ddt.data(
         (1, 2, [mri(1, 'qwe', peer=2), mri(1, 'asd', peer=3)], [mri(1, 'qwe', peer=2)]),
         (
             5, 3,
