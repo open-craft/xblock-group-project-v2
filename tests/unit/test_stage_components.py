@@ -9,15 +9,16 @@ from xml.etree import ElementTree
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
 from xblock.runtime import Runtime
+from xblock.validation import ValidationMessage
 
 from group_project_v2.group_project import GroupActivityXBlock
 from group_project_v2.project_api import ProjectAPI
 from group_project_v2.project_navigator import ProjectNavigatorViewXBlockBase
 from group_project_v2.stage import BaseGroupActivityStage
 from group_project_v2.stage_components import StaticContentBaseXBlock, GroupProjectSubmissionXBlock, \
-    GroupProjectReviewQuestionXBlock
+    GroupProjectReviewQuestionXBlock, GroupProjectTeamEvaluationDisplayXBlock, GroupProjectGradeEvaluationDisplayXBlock
 from group_project_v2.upload_file import UploadFile
-from tests.utils import TestWithPatchesMixin, make_api_error
+from tests.utils import TestWithPatchesMixin, make_api_error, make_review_item as mri, make_question
 
 
 class StageComponentXBlockTestBase(TestCase, TestWithPatchesMixin):
@@ -360,3 +361,146 @@ class TestGroupProjectReviewQuestionXBlock(StageComponentXBlockTestBase):
             self.assertEqual(node_to_render.get('name'), self.block.question_id)
             self.assertEqual(set(node_to_render.get('class').split(' ')), expected_classes)
             self.assertEqual(node_to_render.get('disabled', None), 'disabled' if closed else None)
+
+
+class CommonFeedbackDisplayStageTests(object):
+    def setUp(self):
+        super(CommonFeedbackDisplayStageTests, self).setUp()
+        self.activity_mock = mock.create_autospec(GroupActivityXBlock)
+        self.stage_mock.activity = self.activity_mock
+
+        self.project_api_mock = mock.Mock(spec=ProjectAPI)
+        self.make_patch(self.block_to_test, 'project_api', mock.PropertyMock(return_value=self.project_api_mock))
+        self.block.question_id = "q1"
+
+    @staticmethod
+    def _print_messages(validation):
+        for message in validation.messages:
+            print message.text
+
+    def test_validate_no_question_id_sets_error_message(self):
+        self.block.question_id = None
+        validation = self.block.validate()
+        try:
+            self.assertEqual(len(validation.messages), 2)
+            self.assertEqual(validation.messages[0].type, ValidationMessage.ERROR)
+            self.assertEqual(validation.messages[1].type, ValidationMessage.ERROR)
+        except AssertionError:
+            print self._print_messages(validation)
+            raise
+
+    def test_validate_question_not_found_sets_error_message(self):
+        with mock.patch.object(self.block_to_test, 'question', mock.PropertyMock(return_value=None)):
+            try:
+                validation = self.block.validate()
+                self.assertEqual(len(validation.messages), 1)
+                message = validation.messages[0]
+                self.assertEqual(message.type, ValidationMessage.ERROR)
+            except AssertionError:
+                print self._print_messages(validation)
+                raise
+
+    def test_has_question_passes_validation(self):
+        question_mock = mock.create_autospec(GroupProjectReviewQuestionXBlock)
+        with mock.patch.object(self.block_to_test, 'question', mock.PropertyMock(return_value=question_mock)):
+            try:
+                validation = self.block.validate()
+                self.assertEqual(len(validation.messages), 0)
+            except AssertionError:
+                print self._print_messages(validation)
+                raise
+
+    def test_question_property_no_questions(self):
+        with mock.patch.object(self.block_to_test, 'activity_questions', mock.PropertyMock(return_value=[])):
+            self.assertIsNone(self.block.question)
+
+    def test_question_property_no_matching_questions(self):
+        self.block.question_id = 'q1'
+        questions = [make_question('123', '123'), make_question('456', '456')]
+        with mock.patch.object(self.block_to_test, 'activity_questions', mock.PropertyMock(return_value=questions)):
+            self.assertIsNone(self.block.question)
+
+    def test_question_property_one_matching_question(self):
+        self.block.question_id = '456'
+        questions = [make_question('123', '123'), make_question('456', '456')]
+        with mock.patch.object(self.block_to_test, 'activity_questions', mock.PropertyMock(return_value=questions)):
+            self.assertEqual(self.block.question, questions[1])
+
+    def test_question_property_multiple_matching_questions(self):
+        self.block.question_id = '123'
+        questions = [make_question('123', '123'), make_question('123', '123')]
+        with mock.patch.object(self.block_to_test, 'activity_questions', mock.PropertyMock(return_value=questions)), \
+                self.assertRaises(ValueError):
+            _ = self.block.question
+
+    def test_question_ids_values_provider(self):
+        questions = [make_question('123', 'Title 1'), make_question('456', 'Title 2'), make_question('789', 'Title 3')]
+        with mock.patch.object(self.block_to_test, 'activity_questions', mock.PropertyMock(return_value=questions)):
+            values = self.block.question_ids_values_provider()
+            self.assertEqual(values, [
+                {"display_name": 'Title 1', "value": '123'},
+                {"display_name": 'Title 2', "value": '456'},
+                {"display_name": 'Title 3', "value": '789'}
+            ])
+
+
+@ddt.ddt
+class TestGroupProjectTeamEvaluationDisplayXBlock(CommonFeedbackDisplayStageTests, StageComponentXBlockTestBase):
+    block_to_test = GroupProjectTeamEvaluationDisplayXBlock
+
+    # pylint: disable=too-many-arguments
+    @ddt.data(
+        (1, 2, 'content-1', 'q1', [mri(1, "q1"), mri(2, "q1")], [mri(1, "q1"), mri(2, "q1")]),
+        (3, 9, 'content-2', 'q2', [mri(1, "q1"), mri(2, "q1")], []),
+        (7, 15, 'content-3', 'q1', [mri(1, "q1"), mri(1, "q2")], [mri(1, "q1")]),
+        (7, 15, 'content-3', 'q2', [mri(1, "q1"), mri(1, "q2")], [mri(1, "q2")]),
+    )
+    @ddt.unpack
+    def test_get_feedback(self, user_id, group_id, content_id, question_id, feedback_items, expected_result):
+        self.project_api_mock.get_user_peer_review_items = mock.Mock(return_value=feedback_items)
+        self.stage_mock.content_id = content_id
+        self.block.question_id = question_id
+
+        with mock.patch.object(self.block_to_test, 'user_id', mock.PropertyMock(return_value=user_id)), \
+                mock.patch.object(self.block_to_test, 'group_id', mock.PropertyMock(return_value=group_id)):
+            result = self.block.get_feedback()
+
+            self.project_api_mock.get_user_peer_review_items.assert_called_once_with(
+                user_id, group_id, content_id
+            )
+            self.assertEqual(result, expected_result)
+
+    def test_activity_questions(self):
+        self.activity_mock.team_evaluation_questions = [1, 2, 3]
+        self.activity_mock.peer_review_questions = [4, 5, 6]
+
+        self.assertEqual(self.block.activity_questions, [1, 2, 3])
+
+
+@ddt.ddt
+class TestGroupProjectGradeEvaluationDisplayXBlock(CommonFeedbackDisplayStageTests, StageComponentXBlockTestBase):
+    block_to_test = GroupProjectGradeEvaluationDisplayXBlock
+
+    @ddt.data(
+        (2, 'content-1', 'q1', [mri(1, "q1"), mri(2, "q1")], [mri(1, "q1"), mri(2, "q1")]),
+        (9, 'content-2', 'q2', [mri(1, "q1"), mri(2, "q1")], []),
+        (15, 'content-3', 'q1', [mri(1, "q1"), mri(1, "q2")], [mri(1, "q1")]),
+        (15, 'content-3', 'q2', [mri(1, "q1"), mri(1, "q2")], [mri(1, "q2")]),
+    )
+    @ddt.unpack
+    def test_get_feedback(self, group_id, content_id, question_id, feedback_items, expected_result):
+        self.project_api_mock.get_workgroup_review_items_for_group = mock.Mock(return_value=feedback_items)
+        self.stage_mock.content_id = content_id
+        self.block.question_id = question_id
+
+        with mock.patch.object(self.block_to_test, 'group_id', mock.PropertyMock(return_value=group_id)):
+            result = self.block.get_feedback()
+
+            self.project_api_mock.get_workgroup_review_items_for_group.assert_called_once_with(group_id, content_id)
+            self.assertEqual(result, expected_result)
+
+    def test_activity_questions(self):
+        self.activity_mock.team_evaluation_questions = [1, 2, 3]
+        self.activity_mock.peer_review_questions = [4, 5, 6]
+
+        self.assertEqual(self.block.activity_questions, [4, 5, 6])

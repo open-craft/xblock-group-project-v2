@@ -306,10 +306,9 @@ class GroupActivityXBlock(
         stages = self.get_children_by_category(PeerReviewStage.CATEGORY)
         return list(self._chain_questions(stages, 'questions'))
 
-    def _chain_questions(self, stages, question_type):
-        return itertools.chain(
-            *[getattr(stage, question_type, ()) for stage in stages]
-        )
+    @staticmethod
+    def _chain_questions(stages, question_type):
+        return itertools.chain.from_iterable(getattr(stage, question_type, ()) for stage in stages)
 
     def get_stage_to_display(self, target_stage_id):
         try:
