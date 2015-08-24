@@ -4,7 +4,7 @@ from xblockutils.resources import ResourceLoader
 from group_project_v2.api_error import ApiError
 
 from group_project_v2.project_api import ProjectAPI, UserDetails
-
+from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
 
 loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
 
@@ -93,3 +93,10 @@ def make_review_item(reviewer, question, peer=None, content_id=None, answer=None
     return {
         'reviewer': reviewer, 'user': peer, 'question': question, 'content_id': content_id, 'answer': answer
     }
+
+
+def make_question(question_id, title):
+    question = mock.create_autospec(GroupProjectReviewQuestionXBlock)
+    question.question_id = question_id
+    question.title = title
+    return question

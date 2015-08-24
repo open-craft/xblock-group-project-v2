@@ -17,7 +17,7 @@ from group_project_v2.mixins import WorkgroupAwareXBlockMixin, XBlockWithPreview
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
-from group_project_v2.utils import get_link_to_block
+from group_project_v2.utils import get_link_to_block, FieldValuesContextManager, MUST_BE_OVERRIDDEN
 from group_project_v2.utils import (
     outer_html, gettext as _, loader, format_date, build_date_field, mean,
     outsider_disallowed_protected_view
@@ -579,6 +579,10 @@ class GroupProjectBaseFeedbackDisplayXBlock(
     has_author_view = True
 
     @property
+    def activity_questions(self):
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
+
+    @property
     def display_name_with_default(self):
         if self.question:
             return _(u'Review Assessment for question "{question_title}"').format(question_title=self.question.title)
@@ -588,7 +592,7 @@ class GroupProjectBaseFeedbackDisplayXBlock(
     @lazy
     def question(self):
         matching_questions = [
-            question for question in self.stage.activity.questions if question.question_id == self.question_id
+            question for question in self.activity_questions if question.question_id == self.question_id
         ]
         if len(matching_questions) > 1:
             raise ValueError("Question ID is not unique")
@@ -625,10 +629,16 @@ class GroupProjectBaseFeedbackDisplayXBlock(
     def validate(self):
         validation = super(GroupProjectBaseFeedbackDisplayXBlock, self).validate()
 
-        if self.question is None:
+        if not self.question_id:
             validation.add(ValidationMessage(
                 ValidationMessage.ERROR,
                 _(u"No question selected")
+            ))
+
+        if self.question is None:
+            validation.add(ValidationMessage(
+                ValidationMessage.ERROR,
+                _(u"Selected question not found")
             ))
 
         return validation
@@ -641,15 +651,29 @@ class GroupProjectBaseFeedbackDisplayXBlock(
         fragment.add_content(_(u"Question is not selected"))
         return fragment
 
+    def studio_view(self, context):
+        with FieldValuesContextManager(self, 'question_id', self.question_ids_values_provider):
+            return super(GroupProjectBaseFeedbackDisplayXBlock, self).studio_view(context)
+
+    def question_ids_values_provider(self):
+        return [
+            {"display_name": question.title, "value": question.question_id}
+            for question in self.activity_questions
+        ]
+
 
 class GroupProjectTeamEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXBlock):
     CATEGORY = "gp-v2-peer-assessment"
     STUDIO_LABEL = _(u"Team Evaluation Display")
 
+    @property
+    def activity_questions(self):
+        return self.stage.activity.team_evaluation_questions
+
     def get_feedback(self):
         all_feedback = self.project_api.get_user_peer_review_items(
             self.user_id,
-            self.workgroup['id'],
+            self.group_id,
             self.stage.content_id,
         )
 
@@ -660,9 +684,13 @@ class GroupProjectGradeEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXB
     CATEGORY = "gp-v2-group-assessment"
     STUDIO_LABEL = _(u"Grade Evaluation Display")
 
+    @property
+    def activity_questions(self):
+        return self.stage.activity.peer_review_questions
+
     def get_feedback(self):
         all_feedback = self.project_api.get_workgroup_review_items_for_group(
-            self.workgroup['id'],
+            self.group_id,
             self.stage.content_id,
         )
         return [item for item in all_feedback if item["question"] == self.question_id]

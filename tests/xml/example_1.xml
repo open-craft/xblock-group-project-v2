@@ -121,9 +121,9 @@
     </gp-v2-stage-evaluation-display>
     <gp-v2-stage-grade-display display_name="Evaluate Group Feedback" open_date="2014-06-20T00:00:00Z">
       <html>Group Review Results</html>
-      <gp-v2-group-assessment question_id="peer_q1"/>
-      <gp-v2-group-assessment question_id="peer_q2"/>
-      <gp-v2-group-assessment question_id="peer_score" show_mean="true"/>
+      <gp-v2-group-assessment question_id="group_q1"/>
+      <gp-v2-group-assessment question_id="group_q2"/>
+      <gp-v2-group-assessment question_id="group_score" show_mean="true"/>
     </gp-v2-stage-grade-display>
   </gp-v2-activity>
 </gp-v2-project>

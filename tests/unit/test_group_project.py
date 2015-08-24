@@ -3,7 +3,7 @@ from unittest import TestCase
 import mock
 from group_project_v2.group_project import GroupActivityXBlock
 from xblock.runtime import Runtime
-
+from group_project_v2.stage import BaseGroupActivityStage, TeamEvaluationStage, PeerReviewStage
 
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
 from xblock.field_data import DictFieldData
@@ -25,6 +25,90 @@ def _make_reviews(reviews):
 
 def _make_workgroup(user_ids):
     return {'users': [{'id': user_id} for user_id in user_ids]}
+
+
+@ddt.ddt
+class TestGroupActivityXBlock(TestWithPatchesMixin, TestCase):
+    def setUp(self):
+        super(TestGroupActivityXBlock, self).setUp()
+        self.runtime_mock = mock.Mock(spec=Runtime)
+        self.block = GroupActivityXBlock(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
+
+    @ddt.data(
+        ([], []),
+        (['q1', 'q2', 'q3'], ['q1', 'q2'], ['q3']),
+        (['q8', 'q12', 'q22', 'q54'], ['q8'], ['q12', 'q22'], ['q54'])
+    )
+    @ddt.unpack
+    def test_questions_property(self, expected_result, *stage_questions):
+        stages = []
+        for questions in stage_questions:
+            stage_mock = mock.create_autospec(BaseGroupActivityStage)
+            stage_mock.questions = questions
+            stages.append(stage_mock)
+
+        with mock.patch.object(self.block.__class__, 'stages', mock.PropertyMock()) as stages_mock:
+            stages_mock.return_value = stages
+            self.assertEqual(self.block.questions, expected_result)
+
+    @ddt.data(
+        ([], []),
+        (['q1', 'q2', 'q3'], ['q1', 'q2'], ['q3']),
+        (['q8', 'q12', 'q22', 'q54'], ['q8'], ['q12', 'q22'], ['q54'])
+    )
+    @ddt.unpack
+    def test_grade_questions_property(self, expected_result, *stage_questions):
+        stages = []
+        for questions in stage_questions:
+            stage_mock = mock.create_autospec(BaseGroupActivityStage)
+            stage_mock.grade_questions = questions
+            stages.append(stage_mock)
+
+        with mock.patch.object(self.block.__class__, 'stages', mock.PropertyMock()) as stages_mock:
+            stages_mock.return_value = stages
+            self.assertEqual(self.block.grade_questions, expected_result)
+
+    @ddt.data(
+        ([], []),
+        (['q1', 'q2', 'q3'], ['q1', 'q2'], ['q3']),
+        (['q8', 'q12', 'q22', 'q54'], ['q8'], ['q12', 'q22'], ['q54'])
+    )
+    @ddt.unpack
+    def test_team_evaluation_questions(self, expected_result, *stage_questions):
+        stages = []
+        for questions in stage_questions:
+            stage_mock = mock.create_autospec(TeamEvaluationStage)
+            stage_mock.questions = questions
+            stages.append(stage_mock)
+
+        with mock.patch.object(self.block, 'get_children_by_category', mock.Mock()) as get_stages:
+            get_stages.return_value = stages
+
+            result = self.block.team_evaluation_questions
+            self.assertEqual(result, expected_result)
+
+            get_stages.assert_called_with(TeamEvaluationStage.CATEGORY)
+
+    @ddt.data(
+        ([], []),
+        (['q1', 'q2', 'q3'], ['q1', 'q2'], ['q3']),
+        (['q8', 'q12', 'q22', 'q54'], ['q8'], ['q12', 'q22'], ['q54'])
+    )
+    @ddt.unpack
+    def test_peer_grade_questions(self, expected_result, *stage_questions):
+        stages = []
+        for questions in stage_questions:
+            stage_mock = mock.create_autospec(PeerReviewStage)
+            stage_mock.questions = questions
+            stages.append(stage_mock)
+
+        with mock.patch.object(self.block, 'get_children_by_category', mock.Mock()) as get_stages:
+            get_stages.return_value = stages
+
+            result = self.block.peer_review_questions
+            self.assertEqual(result, expected_result)
+
+            get_stages.assert_called_with(PeerReviewStage.CATEGORY)
 
 
 @ddt.ddt
