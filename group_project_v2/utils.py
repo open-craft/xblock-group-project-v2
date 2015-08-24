@@ -26,6 +26,7 @@ def gettext(text):
 
 
 NO_EDITABLE_SETTINGS = gettext(u"This XBlock does not contain any editable settings")
+MUST_BE_OVERRIDDEN = gettext(u"Must be overridden in inherited class")
 
 
 # TODO: collect all constants here?

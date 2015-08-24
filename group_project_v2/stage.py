@@ -6,12 +6,10 @@ import itertools
 from lazy.lazy import lazy
 import pytz
 import webob
-
 from xblock.core import XBlock
 from xblock.fields import Scope, String, DateTime, Boolean
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
-
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
 from group_project_v2.api_error import ApiError
@@ -28,7 +26,7 @@ from group_project_v2.stage_components import (
     GroupProjectTeamEvaluationDisplayXBlock, GroupProjectGradeEvaluationDisplayXBlock,
 )
 from group_project_v2.utils import (
-    loader, format_date, gettext as _, make_key, get_link_to_block, HtmlXBlockProxy, Constants,
+    loader, format_date, gettext as _, make_key, get_link_to_block, HtmlXBlockProxy, Constants, MUST_BE_OVERRIDDEN,
     outsider_disallowed_protected_view, outsider_disallowed_protected_handler, key_error_protected_handler,
     conversion_protected_handler,
 )
@@ -50,7 +48,6 @@ class ReviewState(object):
 
 DISPLAY_NAME_NAME = _(u"Display Name")
 DISPLAY_NAME_HELP = _(U"This is a name of the stage")
-MUST_BE_OVERRIDDEN = _(u"Must be overridden in inherited class")
 
 
 class SimpleCompletionStageMixin(object):
@@ -294,7 +291,7 @@ class BaseGroupActivityStage(
         self.runtime.publish(self, 'progress', {'user_id': user_id})
 
     def get_stage_state(self):
-        raise NotImplementedError(MUST_BE_OVERRIDDEN + str(self))
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
     def navigation_view(self, context):
         fragment = Fragment()
