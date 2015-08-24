@@ -379,7 +379,7 @@ class CompletionStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
 
     def mark_complete(self, user_id=None):
         user_id = user_id or self.user_id
-        if user_id != self.user_id:
+        if str(user_id) != str(self.user_id):
             raise Exception("Can only mark as complete for current user")
         return super(CompletionStage, self).mark_complete(user_id)
 
