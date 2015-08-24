@@ -3,7 +3,7 @@ import ddt
 import mock
 from xblock.field_data import DictFieldData
 from group_project_v2.group_project import GroupActivityXBlock
-from group_project_v2.project_api import ProjectAPI, UserDetails
+from group_project_v2.project_api import ProjectAPI
 from group_project_v2.stage import EvaluationDisplayStage, GradeDisplayStage
 from tests.utils import TestWithPatchesMixin, make_review_item
 
@@ -44,6 +44,13 @@ class EvaluationStagesBaseTestMixin(object):
     def setUp(self):
         super(EvaluationStagesBaseTestMixin, self).setUp()
 
+        self.available_now_mock = self.make_patch(
+            self.block_to_test, 'available_now', mock.PropertyMock(return_value=True)
+        )
+        self.is_group_member_mock = self.make_patch(
+            self.block_to_test, 'is_group_member', mock.PropertyMock(return_value=True)
+        )
+
     @ddt.data(
         (False, False, False),
         (True, False, False),
@@ -51,29 +58,15 @@ class EvaluationStagesBaseTestMixin(object):
         (True, True, True),
     )
     @ddt.unpack
-    def test_can_mark_complete_base_conditions(self, available_now, is_group_member, should_call_get_reviews):
+    def test_can_mark_complete_base_conditions(self, available_now, is_group_member, should_proceed_calculation):
         self.available_now_mock.return_value = available_now
         self.is_group_member_mock.return_value = is_group_member
-        with mock.patch.object(self.block, 'get_reviews') as patched_get_reviews, \
-                mock.patch.object(self.block, 'get_reviewer_ids') as patched_get_reviewer_ids:
-            result = self.block.can_mark_complete
+        result = self.block.can_mark_complete
 
-            if should_call_get_reviews:
-                patched_get_reviews.assert_called_once_with()
-                patched_get_reviewer_ids.assert_called_once_with()
-            else:
-                self.assertFalse(patched_get_reviews.called)
-                self.assertFalse(patched_get_reviewer_ids.called)
+        self.assert_proceeds_calculation(should_proceed_calculation)
 
-            if not available_now or not is_group_member:
-                self.assertFalse(result)
-
-    # pylint: disable=invalid-name
-    def test_can_mark_complete_no_questions_returns_false(self):
-        with mock.patch.object(self.block_to_test, 'required_questions') as patched_required_questions:
-            patched_required_questions.return_value = []
-
-            self.assertFalse(self.block.can_mark_complete)
+        if not available_now or not is_group_member:
+            self.assertFalse(result)
 
     @ddt.data(
         (False, False),
@@ -86,36 +79,42 @@ class EvaluationStagesBaseTestMixin(object):
             self.block.student_view({})
 
             if should_call_mark_complete:
-                self.project_api_mock.mark_as_complete.assert_called_with(
-                    self.block.course_id, self.block.content_id, self.block.user_id, self.block.id
-                )
+                self.runtime_mock.publish.assert_called_with(self.block, 'progress', {'user_id': self.block.user_id})
             else:
                 self.assertFalse(self.project_api_mock.mark_as_complete.called)
 
 
 @ddt.ddt
-class TestEvaluationDisplayStage(BaseStageTest, EvaluationStagesBaseTestMixin):
+class TestEvaluationDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
     block_to_test = EvaluationDisplayStage
 
     def setUp(self):
         super(TestEvaluationDisplayStage, self).setUp()
 
-        self.available_now_mock = self.make_patch(
-            self.block_to_test, 'available_now', mock.PropertyMock(return_value=False)
-        )
-        self.is_group_member_mock = self.make_patch(
-            self.block_to_test, 'is_group_member', mock.PropertyMock(return_value=False)
-        )
+        self.team_members_mock = self.make_patch(self.block_to_test, 'team_members', mock.PropertyMock(return_value=[]))
+        self.get_reviews_mock = self.make_patch(self.block, 'get_reviews')
+        self.get_reviewer_ids_mock = self.make_patch(self.block, 'get_reviewer_ids')
 
-        self.team_members_mock = self.make_patch(
-            self.block_to_test, 'team_members', mock.PropertyMock(return_value=[])
-        )
+    def assert_proceeds_calculation(self, should_perform_expensive_part):
+        if should_perform_expensive_part:
+            self.assertTrue(self.get_reviews_mock.called)
+            self.assertTrue(self.get_reviewer_ids_mock.called)
+        else:
+            self.assertFalse(self.get_reviews_mock.called)
+            self.assertFalse(self.get_reviewer_ids_mock.called)
 
     # pylint: disable=invalid-name
-    def test_can_mark_complete_no_reviewers_returns_false(self):
+    def test_can_mark_complete_no_reviewers_returns_true(self):
         self.team_members_mock.return_value = []
 
-        self.assertFalse(self.block.can_mark_complete)
+        self.assertTrue(self.block.can_mark_complete)
+
+    # pylint: disable=invalid-name
+    def test_can_mark_complete_no_questions_returns_true(self):
+        with mock.patch.object(self.block_to_test, 'required_questions') as patched_required_questions:
+            patched_required_questions.return_value = []
+
+            self.assertTrue(self.block.can_mark_complete)
 
     @ddt.data(
         ([10], ["q1"], [], False),
@@ -128,11 +127,8 @@ class TestEvaluationDisplayStage(BaseStageTest, EvaluationStagesBaseTestMixin):
     )
     @ddt.unpack
     def test_can_mark_compete_suite(self, reviewers, questions, reviews, expected_result):
-        self.available_now_mock.return_value = True
-        self.is_group_member_mock.return_value = True
-
-        self.team_members_mock.return_value = [UserDetails(id=user_id) for user_id in reviewers]
-        self.project_api_mock.get_user_peer_review_items.return_value = reviews
+        self.get_reviewer_ids_mock.return_value = reviewers
+        self.get_reviews_mock.return_value = reviews
 
         with mock.patch.object(
             self.block_to_test, 'required_questions', mock.PropertyMock()
@@ -143,49 +139,26 @@ class TestEvaluationDisplayStage(BaseStageTest, EvaluationStagesBaseTestMixin):
 
 
 @ddt.ddt
-class TestGradeDisplayStage(BaseStageTest, EvaluationStagesBaseTestMixin):
+class TestGradeDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
     block_to_test = GradeDisplayStage
 
     def setUp(self):
         super(TestGradeDisplayStage, self).setUp()
-
-        self.available_now_mock = self.make_patch(
-            self.block_to_test, 'available_now', mock.PropertyMock(return_value=False)
-        )
-        self.is_group_member_mock = self.make_patch(
-            self.block_to_test, 'is_group_member', mock.PropertyMock(return_value=False)
-        )
         self.project_api_mock.get_workgroup_reviewers.return_value = [{"id": 1}]
 
-    # pylint: disable=invalid-name
-    def test_can_mark_complete_no_reviewers_returns_false(self):
-        self.project_api_mock.get_workgroup_reviewers.return_value = []
-
-        self.assertFalse(self.block.can_mark_complete)
+    def assert_proceeds_calculation(self, should_perform_expensive_part):
+        if should_perform_expensive_part:
+            self.assertTrue(self.activity_mock.calculate_grade.called)
+        else:
+            self.assertFalse(self.activity_mock.calculate_grade.called)
 
     @ddt.data(
-        ([10], ["q1"], [], False),
-        ([10], ["q1"], [make_review_item(10, "q1")], True),
-        ([10], ["q1"], [make_review_item(10, "q1"), make_review_item(10, "q2")], True),
-        ([10], ["q1"], [make_review_item(11, "q1")], False),
-        ([10], ["q1"], [make_review_item(10, "q2"), make_review_item(11, "q1")], False),
-        ([10, 11], ["q1"], [make_review_item(10, "q1"), make_review_item(11, "q1")], True),
-        ([10, 11], ["q1", "q2"], [make_review_item(10, "q1"), make_review_item(11, "q1")], False),
+        (None, False),
+        (10, True),
+        (15, True)
     )
     @ddt.unpack
-    def test_can_mark_compete_suite(self, reviewers, questions, reviews, expected_result):
-        self.available_now_mock.return_value = True
-        self.is_group_member_mock.return_value = True
+    def test_can_mark_compete_suite(self, calculate_grade_result, expected_result):
+        self.activity_mock.calculate_grade.return_value = calculate_grade_result
 
-        self.project_api_mock.get_workgroup_reviewers.return_value = [{'id': user_id} for user_id in reviewers]
-        self.project_api_mock.get_workgroup_review_items_for_group.return_value = reviews
-
-        with mock.patch.object(
-            self.block_to_test, 'required_questions', mock.PropertyMock()
-        ) as patched_required_questions:
-            patched_required_questions.return_value = questions
-
-            self.assertEqual(self.block.can_mark_complete, expected_result)
-            self.project_api_mock.get_workgroup_review_items_for_group.assert_called_once_with(
-                self.block.group_id, self.block.content_id
-            )
+        self.assertEqual(self.block.can_mark_complete, expected_result)

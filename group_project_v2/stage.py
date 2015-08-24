@@ -6,12 +6,10 @@ import itertools
 from lazy.lazy import lazy
 import pytz
 import webob
-
 from xblock.core import XBlock
 from xblock.fields import Scope, String, DateTime, Boolean
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
-
 from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
 
 from group_project_v2.api_error import ApiError
@@ -28,10 +26,9 @@ from group_project_v2.stage_components import (
     GroupProjectTeamEvaluationDisplayXBlock, GroupProjectGradeEvaluationDisplayXBlock,
 )
 from group_project_v2.utils import (
-    loader, format_date, gettext as _, make_key, get_link_to_block,
+    loader, format_date, gettext as _, make_key, get_link_to_block, HtmlXBlockProxy, Constants, MUST_BE_OVERRIDDEN,
     outsider_disallowed_protected_view, outsider_disallowed_protected_handler, key_error_protected_handler,
     conversion_protected_handler,
-    HtmlXBlockProxy,
 )
 
 log = logging.getLogger(__name__)
@@ -51,6 +48,29 @@ class ReviewState(object):
 
 DISPLAY_NAME_NAME = _(u"Display Name")
 DISPLAY_NAME_HELP = _(U"This is a name of the stage")
+
+
+class SimpleCompletionStageMixin(object):
+    """
+    runtime.publish(block, 'progress', {'user_id': user_id}) properly creates completion records, but they are
+    unavailable to API until current request is ended. They are created in transaction and looks like in LMS every
+    request have dedicated transaction, but that's speculation. Anyway, we can't rely on
+    runtime.publish - project_api.get_stage_id to update stage state and get new state in single run.
+    """
+    completed = Boolean(
+        display_name=_(u"Completed"),
+        scope=Scope.user_state
+    )
+
+    def get_stage_state(self):
+        if self.completed:
+            return StageState.COMPLETED
+        return StageState.NOT_STARTED
+
+    def mark_complete(self, user_id=None):
+        result = super(SimpleCompletionStageMixin, self).mark_complete(user_id)
+        self.completed = True
+        return result
 
 
 class BaseGroupActivityStage(
@@ -97,8 +117,6 @@ class BaseGroupActivityStage(
     STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as it's not yet opened.")
     STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as it's closed.")
     STAGE_URL_NAME_TEMPLATE = _(u"url_name to link to this {stage_name}:")
-
-    CURRENT_STAGE_ID_PARAMETER_NAME = 'current_stage_id'
 
     @property
     def id(self):
@@ -197,7 +215,10 @@ class BaseGroupActivityStage(
         return self.available_now and self.is_group_member
 
     def is_current_stage(self, context):
-        return context.get(self.CURRENT_STAGE_ID_PARAMETER_NAME, None) == str(self.id)
+        target_stage_id = context.get(Constants.CURRENT_STAGE_ID_PARAMETER_NAME, None)
+        if not target_stage_id:
+            return False
+        return target_stage_id == self.id
 
     def _view_render(self, context, view='student_view'):
         stage_fragment = self.get_stage_content_fragment(context, view)
@@ -267,23 +288,10 @@ class BaseGroupActivityStage(
 
     def mark_complete(self, user_id=None):
         user_id = user_id if user_id is not None else self.user_id
-        try:
-            self.project_api.mark_as_complete(self.course_id, self.content_id, user_id, self.id)
-        except ApiError as exc:
-            # 409 indicates that the completion record already existed # That's ok in this case
-            if exc.code != 409:
-                raise
+        self.runtime.publish(self, 'progress', {'user_id': user_id})
 
     def get_stage_state(self):
-        """
-        Gets stage completion state
-        """
-        completed_users = self.project_api.get_stage_state(self.course_id, self.activity.id, self.id)
-
-        if self.user_id in completed_users:
-            return StageState.COMPLETED
-        else:
-            return StageState.NOT_STARTED
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
     def navigation_view(self, context):
         fragment = Fragment()
@@ -306,7 +314,7 @@ class BaseGroupActivityStage(
         }
 
 
-class BasicStage(BaseGroupActivityStage):
+class BasicStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
     display_name = String(
         display_name=DISPLAY_NAME_NAME,
         help=DISPLAY_NAME_HELP,
@@ -328,17 +336,12 @@ class BasicStage(BaseGroupActivityStage):
         return fragment
 
 
-class CompletionStage(BaseGroupActivityStage):
+class CompletionStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
     display_name = String(
         display_name=DISPLAY_NAME_NAME,
         help=DISPLAY_NAME_HELP,
         scope=Scope.content,
         default=_(u"Completion Stage")
-    )
-
-    completed = Boolean(
-        display_name=_(u"Completed"),
-        scope=Scope.user_state
     )
 
     CATEGORY = 'gp-v2-stage-completion'
@@ -372,10 +375,10 @@ class CompletionStage(BaseGroupActivityStage):
             return {'result': 'error', 'msg': exception.message}
 
     def mark_complete(self, user_id=None):
-        if user_id != self.user_id:
+        user_id = user_id or self.user_id
+        if str(user_id) != str(self.user_id):
             raise Exception("Can only mark as complete for current user")
-        super(CompletionStage, self).mark_complete(user_id)
-        self.completed = True
+        return super(CompletionStage, self).mark_complete(user_id)
 
     def get_stage_content_fragment(self, context, view='student_view'):
         extra_context = {
@@ -698,7 +701,10 @@ class PeerReviewStage(ReviewBaseStage):
             return []
 
     def review_status(self):
-        groups_to_review = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
+        if not self.is_admin_grader:
+            groups_to_review = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
+        else:
+            groups_to_review = [self.workgroup]
 
         group_review_items = []
         for assess_group in groups_to_review:
@@ -769,7 +775,7 @@ class PeerReviewStage(ReviewBaseStage):
         self.activity.calculate_and_send_grade(group_id)
 
 
-class FeedbackDisplayBaseStage(BaseGroupActivityStage):
+class FeedbackDisplayBaseStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
     NAVIGATION_LABEL = _(u'Review')
     FEEDBACK_DISPLAY_BLOCK_CATEGORY = None
 
@@ -777,20 +783,7 @@ class FeedbackDisplayBaseStage(BaseGroupActivityStage):
     def feedback_display_blocks(self):
         return self.get_children_by_category(self.FEEDBACK_DISPLAY_BLOCK_CATEGORY)
 
-    @property
-    def can_mark_complete(self):
-        base_result = super(FeedbackDisplayBaseStage, self).can_mark_complete
-        if not base_result:
-            return False
-
-        reviewer_ids = self.get_reviewer_ids()
-
-        required_reviews = set(itertools.product(reviewer_ids, self.required_questions))
-        performed_reviews = set(self._make_review_keys(self.get_reviews()))
-
-        return performed_reviews >= required_reviews
-
-    @property
+    @lazy
     def required_questions(self):
         return [
             feedback_display.question_id for feedback_display in self.feedback_display_blocks
@@ -798,10 +791,10 @@ class FeedbackDisplayBaseStage(BaseGroupActivityStage):
         ]
 
     def get_reviewer_ids(self):
-        raise NotImplementedError("Must be overridden in inherited class")
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
     def get_reviews(self):
-        raise NotImplementedError("Must be overridden in inherited class")
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
     def _make_review_keys(self, review_items):
         return [(self.real_user_id(item['reviewer']), item['question']) for item in review_items]
@@ -846,8 +839,21 @@ class EvaluationDisplayStage(FeedbackDisplayBaseStage):
     type = u'Evaluation'
 
     @property
+    def can_mark_complete(self):
+        base_result = super(EvaluationDisplayStage, self).can_mark_complete
+        if not base_result:
+            return False
+
+        reviewer_ids = self.get_reviewer_ids()
+
+        required_reviews = set(itertools.product(reviewer_ids, self.required_questions))
+        performed_reviews = set(self._make_review_keys(self.get_reviews()))
+
+        return performed_reviews >= required_reviews
+
+    @property
     def allowed_nested_blocks(self):
-        blocks = super(FeedbackDisplayBaseStage, self).allowed_nested_blocks
+        blocks = super(EvaluationDisplayStage, self).allowed_nested_blocks
         blocks.extend([GroupProjectTeamEvaluationDisplayXBlock])
         return blocks
 
@@ -878,9 +884,18 @@ class GradeDisplayStage(FeedbackDisplayBaseStage):
 
     @property
     def allowed_nested_blocks(self):
-        blocks = super(FeedbackDisplayBaseStage, self).allowed_nested_blocks
+        blocks = super(GradeDisplayStage, self).allowed_nested_blocks
         blocks.extend([GroupProjectGradeEvaluationDisplayXBlock])
         return blocks
+
+    @lazy
+    def final_grade(self):
+        """
+        Gets final grade for activity
+        """
+        # this is an expensive computation that can't change in scope of one request - hence lazy. And no, this
+        # comment is a very bad docstring.
+        return self.activity.calculate_grade(self.group_id)
 
     def get_reviewer_ids(self):
         return [user['id'] for user in self.project_api.get_workgroup_reviewers(self.group_id, self.content_id)]
@@ -891,8 +906,15 @@ class GradeDisplayStage(FeedbackDisplayBaseStage):
             self.content_id,
         )
 
+    @property
+    def can_mark_complete(self):
+        base_result = super(GradeDisplayStage, self).can_mark_complete
+        if not base_result:
+            return False
+        return self.final_grade is not None
+
     def get_stage_content_fragment(self, context, view='student_view'):
-        final_grade = self.activity.calculate_grade(self.workgroup['id'])
+        final_grade = self.final_grade
         context_extension = {
             'final_grade': final_grade if final_grade is not None else _(u"N/A")
         }

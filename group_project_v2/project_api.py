@@ -213,15 +213,6 @@ class ProjectAPI(object):
         return self.send_request(POST, (COURSES_API, course_id, 'completions'), data=completion_data)
 
     @api_error_protect
-    def get_stage_completions(self, course_id, content_id, stage_id):
-        qs_params = {
-            "content_id": content_id,
-            "stage": stage_id
-        }
-        response = self.send_request(GET, (COURSES_API, course_id, 'completions'), query_params=qs_params)
-        return response.get('results', [])
-
-    @api_error_protect
     def get_user_roles_for_course(self, user_id, course_id):
         qs_params = {
             "user_id": user_id,
@@ -255,15 +246,6 @@ class ProjectAPI(object):
             reviewers.extend(review_assignment_details["users"])
 
         return reviewers
-
-    def get_stage_state(self, course_id, content_id, stage):
-        stage_completions = self.get_stage_completions(course_id, content_id, stage)
-        if stage_completions:
-            completed_users = {completion['user_id'] for completion in stage_completions}
-        else:
-            completed_users = set()
-
-        return completed_users
 
     def get_peer_review_items(self, reviewer_id, peer_id, group_id, content_id):
         teammate_evaluation_items = self.get_peer_review_items_for_group(group_id, content_id)

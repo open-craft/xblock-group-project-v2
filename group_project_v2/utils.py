@@ -26,6 +26,13 @@ def gettext(text):
 
 
 NO_EDITABLE_SETTINGS = gettext(u"This XBlock does not contain any editable settings")
+MUST_BE_OVERRIDDEN = gettext(u"Must be overridden in inherited class")
+
+
+# TODO: collect all constants here?
+class Constants(object):
+    ACTIVATE_BLOCK_ID_PARAMETER_NAME = 'activate_block_id'
+    CURRENT_STAGE_ID_PARAMETER_NAME = 'current_stage'
 
 
 class HtmlXBlockProxy(object):

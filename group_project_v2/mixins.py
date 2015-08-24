@@ -42,13 +42,13 @@ class ChildrenNavigationXBlockMixin(object):
     def has_child_of_category(self, child_category):
         return any(child.block_type == child_category for child in self.children)
 
-    def get_block_by_id(self, block_id):
+    def get_block_id_from_string(self, block_id_string):  # pylint: disable=no-self-use
+        if not block_id_string:
+            return None
         try:
-            usage_id = BlockUsageLocator.from_string(block_id)
-        except InvalidKeyError:
-            usage_id = block_id
-
-        return self.runtime.get_block(usage_id)
+            return BlockUsageLocator.from_string(block_id_string)
+        except InvalidKeyError:  # workbench support
+            return block_id_string
 
 
 class CourseAwareXBlockMixin(object):

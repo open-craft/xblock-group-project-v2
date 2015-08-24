@@ -5,6 +5,7 @@ from lazy.lazy import lazy
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
+from group_project_v2.project_navigator import ViewTypes
 from group_project_v2.stage import StageState
 
 
@@ -309,6 +310,11 @@ class ProjectNavigatorElement(BaseElement):
     def view_selectors(self):
         return self.make_elements(".view-selector-item", ProjectNavigatorViewSelectorElement)
 
+    @property
+    def selected_stage(self):
+        nav_view = self.get_view_by_type(ViewTypes.NAVIGATION, NavigationViewElement)
+        return nav_view.selected_stage
+
     def get_view_by_type(self, target_type, view_element_class=None):
         view_element_class = view_element_class if view_element_class else ProjectNavigatorViewElement
         css_selector = ".group-project-navigator-view[data-view-type='{}']".format(target_type)
@@ -376,6 +382,12 @@ class NavigationViewElement(ProjectNavigatorViewElement):
             return next(stage for stage in self.stages if stage.title == stage_title)
         except StopIteration:
             return None
+
+    @property
+    def selected_stage(self):
+        return self.make_element(
+            self.element.find_element_by_css_selector(".group-project-stage.current"), StageItemElement
+        )
 
 
 class ResourcesViewElement(ProjectNavigatorViewElement):

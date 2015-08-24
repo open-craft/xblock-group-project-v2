@@ -67,10 +67,10 @@ class GroupProjectNavigatorXBlock(
             NestedXBlockSpec(PrivateDiscussionViewXBlock, single_instance=True),
         ]
 
-    def _get_activated_view_type(self, activate_block_id):
+    def _get_activated_view_type(self, target_block_id):
         try:
-            if activate_block_id:
-                block = self.get_block_by_id(activate_block_id)
+            if target_block_id:
+                block = self.runtime.get_block(target_block_id)
                 if self.get_child_category(block) in PROJECT_NAVIGATOR_VIEW_TYPES:
                     return block.type
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
@@ -110,8 +110,10 @@ class GroupProjectNavigatorXBlock(
 
             children_items.append(item)
 
+        activate_block_id = self.get_block_id_from_string(context.get('activate_block_id', None))
+
         js_parameters = {
-            'selected_view': self._get_activated_view_type(context.get('activate_block_id', None))
+            'selected_view': self._get_activated_view_type(activate_block_id)
         }
 
         fragment.add_content(
