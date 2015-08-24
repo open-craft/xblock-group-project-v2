@@ -296,6 +296,16 @@ class GroupActivityXBlock(
     def grade_questions(self):
         return list(self._chain_questions(self.stages, 'grade_questions'))
 
+    @property
+    def team_evaluation_questions(self):
+        stages = self.get_children_by_category(TeamEvaluationStage.CATEGORY)
+        return list(self._chain_questions(stages, 'questions'))
+
+    @property
+    def peer_review_questions(self):
+        stages = self.get_children_by_category(PeerReviewStage.CATEGORY)
+        return list(self._chain_questions(stages, 'questions'))
+
     def _chain_questions(self, stages, question_type):
         return itertools.chain(
             *[getattr(stage, question_type, ()) for stage in stages]
