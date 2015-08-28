@@ -23,7 +23,7 @@ def add_click_link_params(msg, course_id, location):
     In the initial use case, we need to make the link point to a different front end website so we need to
     resolve these links at dispatch time
     """
-    msg.add_click_link_params({'course_id': unicode(course_id), 'activity_location': unicode(location)})
+    msg.add_click_link_params({'course_id': unicode(course_id), 'location': unicode(location)})
 
 
 class StageNotificationsMixin(object):
@@ -82,7 +82,7 @@ class StageNotificationsMixin(object):
             if self.open_date:
                 self._set_activity_timed_notification(
                     course_id,
-                    u'open-edx.xblock.group-project.stage-open',
+                    u'open-edx.xblock.group-project-v2.stage-open',
                     datetime.combine(self.open_date, datetime.min.time()),
                     datetime.combine(self.open_date, datetime.min.time()),
                     services,
@@ -92,7 +92,7 @@ class StageNotificationsMixin(object):
             if self.close_date:
                 self._set_activity_timed_notification(
                     course_id,
-                    u'open-edx.xblock.group-project.stage-due',
+                    u'open-edx.xblock.group-project-v2.stage-due',
                     datetime.combine(self.close_date, datetime.min.time()),
                     datetime.combine(self.close_date, datetime.min.time()),
                     services,
@@ -102,7 +102,7 @@ class StageNotificationsMixin(object):
                 # send a notice 3 days prior to closing stage
                 self._set_activity_timed_notification(
                     course_id,
-                    u'open-edx.xblock.group-project.stage-due',
+                    u'open-edx.xblock.group-project-v2.stage-due',
                     datetime.combine(self.close_date, datetime.min.time()),
                     datetime.combine(self.close_date, datetime.min.time()) - timedelta(days=3),
                     services,
@@ -133,7 +133,7 @@ class ActivityNotificationsMixin(object):
     @log_and_suppress_exceptions
     def fire_file_upload_notification(self, notifications_service):
         # this NotificationType is registered in the list of default Open edX Notifications
-        msg_type = notifications_service.get_notification_type('open-edx.xblock.group-project.file-uploaded')
+        msg_type = notifications_service.get_notification_type('open-edx.xblock.group-project-v2.file-uploaded')
 
         workgroup_user_ids = []
         uploader_username = ''
@@ -164,7 +164,7 @@ class ActivityNotificationsMixin(object):
     @log_and_suppress_exceptions
     def fire_grades_posted_notification(self, group_id, notifications_service):
         # this NotificationType is registered in the list of default Open edX Notifications
-        msg_type = notifications_service.get_notification_type('open-edx.xblock.group-project.grades-posted')
+        msg_type = notifications_service.get_notification_type('open-edx.xblock.group-project-v2.grades-posted')
         msg = NotificationMessage(
             msg_type=msg_type,
             namespace=unicode(self.course_id),
