@@ -26,7 +26,7 @@ from group_project_v2.stage_components import (
     GroupProjectTeamEvaluationDisplayXBlock, GroupProjectGradeEvaluationDisplayXBlock,
 )
 from group_project_v2.utils import (
-    loader, format_date, gettext as _, make_key, get_link_to_block, HtmlXBlockProxy, Constants, MUST_BE_OVERRIDDEN,
+    loader, format_date, gettext as _, make_key, get_link_to_block, HtmlXBlockShim, Constants, MUST_BE_OVERRIDDEN,
     outsider_disallowed_protected_view, outsider_disallowed_protected_handler, key_error_protected_handler,
     conversion_protected_handler,
     add_resource)
@@ -127,7 +127,7 @@ class BaseGroupActivityStage(
         """
         This property outputs an ordered dictionary of allowed nested XBlocks in form of block_category: block_caption.
         """
-        blocks = [HtmlXBlockProxy, GroupProjectResourceXBlock]
+        blocks = [HtmlXBlockShim, GroupProjectResourceXBlock]
         if GroupProjectVideoResourceXBlock.is_available():
             blocks.append(GroupProjectVideoResourceXBlock)
         blocks.append(ProjectTeamXBlock)

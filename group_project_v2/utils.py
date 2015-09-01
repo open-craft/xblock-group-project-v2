@@ -36,12 +36,12 @@ class Constants(object):
     CURRENT_STAGE_ID_PARAMETER_NAME = 'current_stage'
 
 
-class HtmlXBlockProxy(object):
+class HtmlXBlockShim(object):
     CATEGORY = 'html'
     STUDIO_LABEL = gettext(u"HTML")
 
 
-class DiscussionXBlockProxy(object):
+class DiscussionXBlockShim(object):
     CATEGORY = "discussion-forum"
     STUDIO_LABEL = gettext(u"Discussion")
 
