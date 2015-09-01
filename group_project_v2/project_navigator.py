@@ -9,11 +9,12 @@ from xblock.exceptions import NoSuchUsage
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
-from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
+from xblockutils.studio_editable import (
+    StudioContainerXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin, NestedXBlockSpec
+)
 from group_project_v2.mixins import (
-    XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin,
+    XBlockWithComponentsMixin, ChildrenNavigationXBlockMixin,
     XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin, NoStudioEditableSettingsMixin,
-    NestedXBlockSpec
 )
 
 from group_project_v2.utils import loader, gettext as _, DiscussionXBlockProxy, add_resource

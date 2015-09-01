@@ -10,12 +10,12 @@ from xblock.core import XBlock
 from xblock.fields import Scope, String, DateTime, Boolean
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
-from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
+from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin, XBlockWithPreviewMixin
 
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import (
     ChildrenNavigationXBlockMixin,
-    WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin,
+    WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin,
     XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin
 )
 from group_project_v2.notifications import StageNotificationsMixin

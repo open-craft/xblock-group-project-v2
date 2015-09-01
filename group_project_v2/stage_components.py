@@ -11,10 +11,10 @@ from xblock.core import XBlock
 from xblock.fields import String, Boolean, Scope, UNIQUE_ID
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
-from xblockutils.studio_editable import StudioEditableXBlockMixin
+from xblockutils.studio_editable import StudioEditableXBlockMixin, XBlockWithPreviewMixin
 
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import WorkgroupAwareXBlockMixin, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin
+from group_project_v2.mixins import WorkgroupAwareXBlockMixin, NoStudioEditableSettingsMixin
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
