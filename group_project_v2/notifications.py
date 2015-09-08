@@ -14,6 +14,25 @@ except ImportError:
 log = logging.getLogger(__name__)
 
 
+class NotificationMessageTypes(object):
+    MESSAGE_TYPE_PREFIX = u'open-edx.xblock.group-project-v2.'
+    STAGE_OPEN = MESSAGE_TYPE_PREFIX + u'stage-open'
+    STAGE_DUE = MESSAGE_TYPE_PREFIX + u'stage-due'
+    FILE_UPLOADED = MESSAGE_TYPE_PREFIX + u'file-uploaded'
+    GRADES_POSTED = MESSAGE_TYPE_PREFIX + u'grades-posted'
+
+
+class NotificationTimers(object):
+    OPEN = 'open'
+    DUE = 'due'
+    COMING_DUE = 'coming-due'
+
+
+class NotificationScopes(object):
+    WORKGROUP = 'group_project_workgroup'
+    PARTICIPANTS = 'group_project_participants'
+
+
 def add_click_link_params(msg, course_id, location):
     """
     Adds in all the context parameters we'll need to generate a URL back to the website that will
@@ -37,7 +56,6 @@ class StageNotificationsMixin(object):
     def _set_activity_timed_notification(self, course_id, msg_type, event_date, send_at_date,
                                          services, timer_name_suffix):
 
-        stage_name = self.display_name
         notifications_service = services.get('notifications')
 
         activity_date_tz = event_date.replace(tzinfo=pytz.UTC)
@@ -49,18 +67,18 @@ class StageNotificationsMixin(object):
             payload={
                 '_schema_version': 1,
                 'activity_name': self.activity.display_name,
-                'stage': stage_name,
+                'stage': self.display_name,
                 'due_date': activity_date_tz.strftime('%-m/%-d/%-y'),
             }
         )
 
-        add_click_link_params(msg, course_id, self.activity.location)
+        add_click_link_params(msg, course_id, self.location)
 
         notifications_service.publish_timed_notification(
             msg=msg,
             send_at=send_at_date_tz,
             # send to all students participating in this project
-            scope_name='group_project_participants',
+            scope_name=NotificationScopes.PARTICIPANTS,
             scope_context={
                 'course_id': unicode(course_id),
                 'content_id': unicode(self.activity.project.location),
@@ -82,31 +100,31 @@ class StageNotificationsMixin(object):
             if self.open_date:
                 self._set_activity_timed_notification(
                     course_id,
-                    u'open-edx.xblock.group-project-v2.stage-open',
+                    NotificationMessageTypes.STAGE_OPEN,
                     datetime.combine(self.open_date, datetime.min.time()),
                     datetime.combine(self.open_date, datetime.min.time()),
                     services,
-                    'open'
+                    NotificationTimers.OPEN
                 )
 
             if self.close_date:
                 self._set_activity_timed_notification(
                     course_id,
-                    u'open-edx.xblock.group-project-v2.stage-due',
+                    NotificationMessageTypes.STAGE_DUE,
                     datetime.combine(self.close_date, datetime.min.time()),
                     datetime.combine(self.close_date, datetime.min.time()),
                     services,
-                    'due'
+                    NotificationTimers.DUE
                 )
 
                 # send a notice 3 days prior to closing stage
                 self._set_activity_timed_notification(
                     course_id,
-                    u'open-edx.xblock.group-project-v2.stage-due',
+                    NotificationMessageTypes.STAGE_DUE,
                     datetime.combine(self.close_date, datetime.min.time()),
                     datetime.combine(self.close_date, datetime.min.time()) - timedelta(days=3),
                     services,
-                    'coming-due'
+                    NotificationTimers.COMING_DUE
                 )
 
     @log_and_suppress_exceptions
@@ -119,13 +137,10 @@ class StageNotificationsMixin(object):
 
         notifications_service = services.get('notifications')
         if notifications_service:
-            # If we are being delete, then we should remove any NotificationTimers that
+            # If stage is being deleted, then it should remove any NotificationTimers that
             # may have been registered before
-            notifications_service.cancel_timed_notification(self._get_stage_timer_name('open'))
-
-            notifications_service.cancel_timed_notification(self._get_stage_timer_name('due'))
-
-            notifications_service.cancel_timed_notification(self._get_stage_timer_name('coming-due'))
+            for timer_suffix in (NotificationTimers.OPEN, NotificationTimers.DUE, NotificationTimers.COMING_DUE):
+                notifications_service.cancel_timed_notification(self._get_stage_timer_name(timer_suffix))
 
 
 class ActivityNotificationsMixin(object):
@@ -133,7 +148,7 @@ class ActivityNotificationsMixin(object):
     @log_and_suppress_exceptions
     def fire_file_upload_notification(self, notifications_service):
         # this NotificationType is registered in the list of default Open edX Notifications
-        msg_type = notifications_service.get_notification_type('open-edx.xblock.group-project-v2.file-uploaded')
+        msg_type = notifications_service.get_notification_type(NotificationMessageTypes.FILE_UPLOADED)
 
         workgroup_user_ids = []
         uploader_username = ''
@@ -164,7 +179,7 @@ class ActivityNotificationsMixin(object):
     @log_and_suppress_exceptions
     def fire_grades_posted_notification(self, group_id, notifications_service):
         # this NotificationType is registered in the list of default Open edX Notifications
-        msg_type = notifications_service.get_notification_type('open-edx.xblock.group-project-v2.grades-posted')
+        msg_type = notifications_service.get_notification_type(NotificationMessageTypes.GRADES_POSTED)
         msg = NotificationMessage(
             msg_type=msg_type,
             namespace=unicode(self.course_id),
@@ -174,11 +189,11 @@ class ActivityNotificationsMixin(object):
             }
         )
         location = unicode(self.location) if self.location else ''
-        self._add_click_link_params(msg, unicode(self.course_id), location)
+        add_click_link_params(msg, unicode(self.course_id), location)
 
         # Bulk publish to the 'group_project_workgroup' user scope
         notifications_service.bulk_publish_notification_to_scope(
-            'group_project_workgroup',
+            NotificationScopes.WORKGROUP,
             {'workgroup_id': group_id},
             msg
         )
