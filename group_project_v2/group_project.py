@@ -85,12 +85,14 @@ class GroupProjectXBlock(
     def navigator(self):
         return self.get_child_of_category(GroupProjectNavigatorXBlock.CATEGORY)
 
-    def get_stage_to_display(self, target_stage_id):
+    def get_stage_to_display(self, target_block_id):
         try:
-            if target_stage_id:
-                stage = self.runtime.get_block(target_stage_id)
-                if self.get_child_category(stage) in STAGE_TYPES and stage.available_to_current_user:
-                    return stage
+            if target_block_id:
+                target_block = self.runtime.get_block(target_block_id)
+                if self.get_child_category(target_block) in STAGE_TYPES and target_block.available_to_current_user:
+                    return target_block
+                if isinstance(target_block, GroupActivityXBlock):
+                    return target_block.default_stage
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
 
@@ -99,7 +101,7 @@ class GroupProjectXBlock(
             return default_stage
 
         if self.activities:
-            return self.activities[0].get_stage_to_display(target_stage_id)
+            return self.activities[0].get_stage_to_display(target_block_id)
 
         return None  # if there are no activities there's no stages as well - nothing we can really do
 
@@ -141,8 +143,8 @@ class GroupProjectXBlock(
             else:
                 render_context[content_key] = fallback_message
 
-        target_stage_id = self.get_block_id_from_string(ctx.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME, None))
-        target_stage = self.get_stage_to_display(target_stage_id)
+        target_block_id = self.get_block_id_from_string(ctx.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME, None))
+        target_stage = self.get_stage_to_display(target_block_id)
 
         # activity should be rendered first, as some stages might report completion in student-view - this way stage
         # PN sees updated state.
@@ -300,10 +302,10 @@ class GroupActivityXBlock(
             *[getattr(stage, 'grade_questions', ()) for stage in self.stages]
         ))
 
-    def get_stage_to_display(self, target_stage_id):
+    def get_stage_to_display(self, target_block_id):
         try:
-            if target_stage_id:
-                stage = self.runtime.get_block(target_stage_id)
+            if target_block_id:
+                stage = self.runtime.get_block(target_block_id)
                 if self.get_child_category(stage) in STAGE_TYPES and stage.available_to_current_user:
                     return stage
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
@@ -318,8 +320,8 @@ class GroupActivityXBlock(
         """
         fragment = Fragment()
 
-        target_stage_id = context.get(Constants.CURRENT_STAGE_ID_PARAMETER_NAME, None)
-        target_stage = self.get_stage_to_display(target_stage_id)
+        current_stage_id = context.get(Constants.CURRENT_STAGE_ID_PARAMETER_NAME, None)
+        target_stage = self.get_stage_to_display(current_stage_id)
 
         if not target_stage:
             fragment.add_content(_(u"This Group Project Activity does not contain any stages"))
