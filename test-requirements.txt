@@ -2,7 +2,7 @@ mock
 ddt
 freezegun
 
--e git+https://github.com/edx-solutions/xblock-sdk.git@6b140be40ea3a9129ddc6fb6815c95f29a90d6d3#egg=xblock_sdk
+-e git+https://github.com/edx/xblock-sdk.git@ffdaa80b9857c4d6b6cb7307c742bd187ef40aed#egg=xblock_sdk
 -e git+https://github.com/edx/opaque-keys.git@1254ed4d615a428591850656f39f26509b86d30a#egg=opaque-keys
 -e git://github.com/nosedjango/nosedjango.git@ed7d7f9aa969252ff799ec159f828eaa8c1cbc5a#egg=nosedjango-dev
 -e git+https://github.com/edx/edx-notifications.git@8038452f6fbb2b95ad46f8fe7a2f80b145b45b9c#egg=edx-notifications
