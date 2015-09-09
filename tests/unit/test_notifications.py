@@ -37,7 +37,8 @@ class TestActivityNotificationsMixin(TestCase, TestWithPatchesMixin):
     workgroup1 = make_workgroup([1, 2, 3])
     workgroup2 = make_workgroup([7, 12, 54])
 
-    def _raise(self, exception):
+    @staticmethod
+    def _raise(exception):
         raise exception
 
     def setUp(self):
@@ -46,10 +47,10 @@ class TestActivityNotificationsMixin(TestCase, TestWithPatchesMixin):
         self.notifications_service_mock.bulk_publish_notification_to_users = mock.Mock()
         self.notifications_service_mock.bulk_publish_notification_to_scope = mock.Mock()
 
-    def _get_call_args(self, target):
+    def _get_call_args(self, target):  # pylint: disable=invalid-name
         self.assertTrue(target.called)
         self.assertEqual(len(target.call_args_list), 1)
-        args, _ = target.call_args
+        args, _kwargs = target.call_args
         return args
 
     @ddt.data(
@@ -58,7 +59,8 @@ class TestActivityNotificationsMixin(TestCase, TestWithPatchesMixin):
         (54, 'course3', 'yet-another-location', workgroup2, 'NotAnActivity'),
     )
     @ddt.unpack
-    def test_fire_file_upload_notification_success_scenario(self, user_id, course_id, location, workgroup, name):
+    # pylint: disable=invalid-name
+    def test_file_upload_success_scenario(self, user_id, course_id, location, workgroup, name):
         block = ActivityNotificationsGuineaPig(user_id, course_id, location, workgroup, name)
 
         expected_user = next(user for user in workgroup['users'] if user['id'] == user_id)
@@ -84,7 +86,8 @@ class TestActivityNotificationsMixin(TestCase, TestWithPatchesMixin):
             )
 
     @ddt.data(ValueError("test"), TypeError("QWE"), AttributeError("OMG"), Exception("Very Generic"))
-    def test_file_upload_get_notification_type_raises(self, exception):
+    # pylint: disable=invalid-name
+    def test_file_upload_notification_type_raises(self, exception):
         block = ActivityNotificationsGuineaPig('irrelevant', 'irrelevant', 'irrelevant', 'irrelevant', 'irrelevant')
         with mock.patch('logging.Logger.exception') as patched_exception_logger:
             self.notifications_service_mock.get_notification_type.side_effect = lambda msg_type: self._raise(exception)
@@ -108,7 +111,7 @@ class TestActivityNotificationsMixin(TestCase, TestWithPatchesMixin):
         (17, 'course3', 'yet-another-location', 'NotAnActivity'),
     )
     @ddt.unpack
-    def test_fire_grades_posted_notification_success_scenario(self, group_id, course_id, location, name):
+    def test_grades_posted_success_scenario(self, group_id, course_id, location, name):
         block = ActivityNotificationsGuineaPig('irrelevant', course_id, location, 'irrelevant', name)
 
         with mock.patch('edx_notifications.data.NotificationMessage.add_click_link_params') as patched_link_params:
@@ -134,7 +137,8 @@ class TestActivityNotificationsMixin(TestCase, TestWithPatchesMixin):
             )
 
     @ddt.data(ValueError("test"), TypeError("QWE"), AttributeError("OMG"), Exception("Very Generic"))
-    def test_grades_posted__notification_raises(self, exception):
+    # pylint: disable=invalid-name
+    def test_grades_posted_notification_type_raises(self, exception):
         block = ActivityNotificationsGuineaPig('irrelevant', 'irrelevant', 'irrelevant', 'irrelevant', 'irrelevant')
         with mock.patch('logging.Logger.exception') as patched_exception_logger:
             self.notifications_service_mock.get_notification_type.side_effect = lambda msg_type: self._raise(exception)
