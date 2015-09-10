@@ -438,6 +438,7 @@ class CommonFeedbackDisplayStageTests(object):
         with mock.patch.object(self.block_to_test, 'activity_questions', mock.PropertyMock(return_value=questions)):
             values = self.block.question_ids_values_provider()
             self.assertEqual(values, [
+                {'display_name': u'--- Not selected ---', 'value': None},
                 {"display_name": 'Title 1', "value": '123'},
                 {"display_name": 'Title 2', "value": '456'},
                 {"display_name": 'Title 3', "value": '789'}

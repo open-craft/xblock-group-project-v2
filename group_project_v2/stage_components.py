@@ -562,10 +562,13 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
 class GroupProjectBaseFeedbackDisplayXBlock(
     BaseStageComponentXBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin, WorkgroupAwareXBlockMixin
 ):
+    DEFAULT_QUESTION_ID_VALUE = None
+
     question_id = String(
         display_name=_(u"Question"),
         help=_(u"Question to be assessed"),
-        scope=Scope.content
+        scope=Scope.content,
+        default=DEFAULT_QUESTION_ID_VALUE
     )
 
     show_mean = Boolean(
@@ -652,14 +655,19 @@ class GroupProjectBaseFeedbackDisplayXBlock(
         return fragment
 
     def studio_view(self, context):
+        # can't use values_provider as we need it to be bound to current block instance
         with FieldValuesContextManager(self, 'question_id', self.question_ids_values_provider):
             return super(GroupProjectBaseFeedbackDisplayXBlock, self).studio_view(context)
 
     def question_ids_values_provider(self):
-        return [
+        not_selected = {
+            "display_name": _(u"--- Not selected ---"), "value": self.DEFAULT_QUESTION_ID_VALUE
+        }
+        question_values = [
             {"display_name": question.title, "value": question.question_id}
             for question in self.activity_questions
         ]
+        return [not_selected] + question_values
 
 
 class GroupProjectTeamEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXBlock):
