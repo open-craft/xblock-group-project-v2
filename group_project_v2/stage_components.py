@@ -564,6 +564,10 @@ class GroupProjectBaseFeedbackDisplayXBlock(
 ):
     DEFAULT_QUESTION_ID_VALUE = None
 
+    NO_QUESTION_SELECTED = _(u"No question selected")
+    QUESTION_NOT_FOUND = _(u"Selected question not found")
+    QUESTION_ID_IS_NOT_UNIQUE = _(u"Question ID is not unique")
+
     question_id = String(
         display_name=_(u"Question"),
         help=_(u"Question to be assessed"),
@@ -598,7 +602,7 @@ class GroupProjectBaseFeedbackDisplayXBlock(
             question for question in self.activity_questions if question.question_id == self.question_id
         ]
         if len(matching_questions) > 1:
-            raise ValueError("Question ID is not unique")
+            raise ValueError(self.QUESTION_ID_IS_NOT_UNIQUE)
         if not matching_questions:
             return None
 
@@ -607,7 +611,7 @@ class GroupProjectBaseFeedbackDisplayXBlock(
     @outsider_disallowed_protected_view
     def student_view(self, context):
         if self.question is None:
-            raise ValueError("No question selected")
+            raise ValueError(self.NO_QUESTION_SELECTED)
 
         raw_feedback = self.get_feedback()
 
@@ -635,13 +639,13 @@ class GroupProjectBaseFeedbackDisplayXBlock(
         if not self.question_id:
             validation.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                _(u"No question selected")
+                self.NO_QUESTION_SELECTED
             ))
 
-        if self.question is None:
+        if self.question_id and self.question is None:
             validation.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                _(u"Selected question not found")
+                self.QUESTION_NOT_FOUND
             ))
 
         return validation
