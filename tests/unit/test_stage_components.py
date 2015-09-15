@@ -380,11 +380,11 @@ class CommonFeedbackDisplayStageTests(object):
 
     def test_validate_no_question_id_sets_error_message(self):
         self.block.question_id = None
-        validation = self.block.validate()
         try:
-            self.assertEqual(len(validation.messages), 2)
+            validation = self.block.validate()
+            self.assertEqual(len(validation.messages), 1)
             self.assertEqual(validation.messages[0].type, ValidationMessage.ERROR)
-            self.assertEqual(validation.messages[1].type, ValidationMessage.ERROR)
+            self.assertEqual(validation.messages[0].text, self.block.NO_QUESTION_SELECTED)
         except AssertionError:
             print self._print_messages(validation)
             raise
@@ -394,8 +394,8 @@ class CommonFeedbackDisplayStageTests(object):
             try:
                 validation = self.block.validate()
                 self.assertEqual(len(validation.messages), 1)
-                message = validation.messages[0]
-                self.assertEqual(message.type, ValidationMessage.ERROR)
+                self.assertEqual(validation.messages[0].type, ValidationMessage.ERROR)
+                self.assertEqual(validation.messages[0].text, self.block.QUESTION_NOT_FOUND)
             except AssertionError:
                 print self._print_messages(validation)
                 raise
@@ -438,6 +438,7 @@ class CommonFeedbackDisplayStageTests(object):
         with mock.patch.object(self.block_to_test, 'activity_questions', mock.PropertyMock(return_value=questions)):
             values = self.block.question_ids_values_provider()
             self.assertEqual(values, [
+                {'display_name': u'--- Not selected ---', 'value': None},
                 {"display_name": 'Title 1', "value": '123'},
                 {"display_name": 'Title 2', "value": '456'},
                 {"display_name": 'Title 3', "value": '789'}
