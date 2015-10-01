@@ -17,7 +17,7 @@ from group_project_v2.mixins import WorkgroupAwareXBlockMixin, XBlockWithPreview
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
-from group_project_v2.utils import get_link_to_block, FieldValuesContextManager, MUST_BE_OVERRIDDEN
+from group_project_v2.utils import get_link_to_block, FieldValuesContextManager, MUST_BE_OVERRIDDEN, add_resource
 from group_project_v2.utils import (
     outer_html, gettext as _, loader, format_date, build_date_field, mean,
     outsider_disallowed_protected_view
@@ -248,7 +248,7 @@ class GroupProjectSubmissionXBlock(
         render_context = {'submission': self, 'upload': self.upload, 'disabled': not uploading_allowed}
         render_context.update(context)
         fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/components/submission.js'))
+        add_resource(self, 'javascript', 'public/js/components/submission.js', fragment)
         fragment.initialize_js("GroupProjectSubmissionBlock")
         return fragment
 
@@ -379,7 +379,7 @@ class PeerSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStu
         fragment = Fragment()
         render_context = {'selector': self, 'peers': self.peers}
         render_context.update(context)
-        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/review_subject_selector.css"))
+        add_resource(self, 'css', "public/css/components/review_subject_selector.css", fragment)
         fragment.add_content(loader.render_template(self.STUDENT_TEMPLATE, render_context))
         return fragment
 
@@ -410,7 +410,7 @@ class GroupSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin, NoSt
         fragment = Fragment()
         render_context = {'selector': self, 'groups': self.groups}
         render_context.update(context)
-        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/review_subject_selector.css"))
+        add_resource(self, 'css', "public/css/components/review_subject_selector.css", fragment)
         fragment.add_content(loader.render_template(self.STUDENT_TEMPLATE, render_context))
         return fragment
 
@@ -548,14 +548,14 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
         fragment = super(GroupProjectReviewQuestionXBlock, self).studio_view(context)
 
         # TODO: StudioEditableXBlockMixin should really support Codemirror XML editor
-        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/question_edit.css"))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/components/question_edit.js"))
+        add_resource(self, 'css', "public/css/components/question_edit.css", fragment)
+        add_resource(self, 'javascript', "public/js/components/question_edit.js", fragment)
         fragment.initialize_js("GroupProjectQuestionEdit")
         return fragment
 
     def author_view(self, context):
         fragment = self.student_view(context)
-        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/question_edit.css"))
+        add_resource(self, 'css', "public/css/components/question_edit.css", fragment)
         return fragment
 
 
@@ -726,7 +726,7 @@ class ProjectTeamXBlock(
         render_context.update(context)
 
         fragment.add_content(loader.render_template("templates/html/components/project_team.html", render_context))
-        fragment.add_css_url(self.runtime.local_resource_url(self, "public/css/components/project_team.css"))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, "public/js/components/project_team.js"))
+        add_resource(self, 'css', "public/css/components/project_team.css", fragment)
+        add_resource(self, 'javascript', "public/js/components/project_team.js", fragment)
         fragment.initialize_js("ProjectTeamXBlock")
         return fragment

@@ -21,8 +21,8 @@ from group_project_v2.mixins import (
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import (
-    loader, mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockProxy, Constants
-)
+    loader, mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockProxy, Constants,
+    add_resource)
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
@@ -172,9 +172,9 @@ class GroupProjectXBlock(
 
         fragment.add_content(loader.render_template("templates/html/group_project.html", render_context))
 
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/vendor/font-awesome/font-awesome.css'))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/group_project.js'))
+        add_resource(self, 'css', 'public/css/group_project.css', fragment)
+        add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment)
+        add_resource(self, 'javascript', 'public/js/group_project.js', fragment)
         fragment.initialize_js("GroupProjectBlock")
         return fragment
 

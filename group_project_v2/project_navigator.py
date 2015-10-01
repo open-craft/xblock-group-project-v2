@@ -16,7 +16,7 @@ from group_project_v2.mixins import (
     NestedXBlockSpec
 )
 
-from group_project_v2.utils import loader, gettext as _, DiscussionXBlockProxy
+from group_project_v2.utils import loader, gettext as _, DiscussionXBlockProxy, add_resource
 
 log = logging.getLogger(__name__)
 
@@ -122,12 +122,12 @@ class GroupProjectNavigatorXBlock(
                 {'children': children_items}
             )
         )
-        fragment.add_css_url(self.runtime.local_resource_url(
-            self, 'public/css/project_navigator/project_navigator.css'
-        ))
-        fragment.add_javascript_url(self.runtime.local_resource_url(
-            self, 'public/js/project_navigator/project_navigator.js'
-        ))
+        add_resource(
+            self, 'css', 'public/css/project_navigator/project_navigator.css'
+        , fragment)
+        add_resource(
+            self, 'javascript', 'public/js/project_navigator/project_navigator.js'
+        , fragment)
         fragment.initialize_js("GroupProjectNavigatorBlock", js_parameters)
 
         return fragment
@@ -144,9 +144,9 @@ class GroupProjectNavigatorXBlock(
             "templates/html/project_navigator/project_navigator_author_view.html",
             {'navigator': self, 'children_contents': children_contents}
         ))
-        fragment.add_css_url(self.runtime.local_resource_url(
-            self, 'public/css/project_navigator/project_navigator.css'
-        ))
+        add_resource(
+            self, 'css', 'public/css/project_navigator/project_navigator.css'
+        , fragment)
         return fragment
 
     def validate(self):
@@ -228,16 +228,16 @@ class ProjectNavigatorViewXBlockBase(
         fragment.add_content(loader.render_template(self.TEMPLATE_BASE + self.template, context))
 
         if self.css_file:
-            fragment.add_css_url(self.runtime.local_resource_url(self, self.CSS_BASE + self.css_file))
+            add_resource(self, 'css', self.CSS_BASE + self.css_file, fragment)
 
         if self.js_file:
-            fragment.add_javascript_url(self.runtime.local_resource_url(self, self.JS_BASE + self.js_file))
+            add_resource(self, 'javascript', self.JS_BASE + self.js_file, fragment)
 
         if self.initialize_js_function:
             fragment.initialize_js(self.initialize_js_function)
 
         for js_file in self.additional_js_files:
-            fragment.add_javascript_url(self.runtime.local_resource_url(self, js_file))
+            add_resource(self, 'javascript', js_file, fragment)
 
         if add_resources_from:
             for frag in add_resources_from:
@@ -430,7 +430,7 @@ class PrivateDiscussionViewXBlock(ProjectNavigatorViewXBlockBase):
         Selector view - this view is used by GroupProjectNavigatorXBlock to render selector buttons
         """
         fragment = super(PrivateDiscussionViewXBlock, self).selector_view(context)
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, self.JS_BASE + self.js_file))
+        add_resource(self, 'javascript', self.JS_BASE + self.js_file, fragment)
         fragment.initialize_js(self.initialize_js_function)
         return fragment
 

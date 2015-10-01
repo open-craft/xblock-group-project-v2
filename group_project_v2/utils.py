@@ -269,3 +269,10 @@ class FieldValuesContextManager(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.field._values = self._old_values_value
         return False
+
+
+def add_resource(block, resource_type, path, fragment):
+    action = fragment.add_javascript if resource_type == 'javascript' else fragment.add_css
+    resource_contents = loader.load_unicode(path)
+    # resource_url = block.runtime.local_resource_url(block, path)
+    action(resource_contents)

@@ -10,7 +10,7 @@ from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.utils import (
     OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES,
-    loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration
+    loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource
 )
 
 log = logging.getLogger(__name__)
@@ -203,9 +203,9 @@ class XBlockWithComponentsMixin(object):
         fragment.add_content(
             loader.render_template('templates/html/add_buttons.html', {'child_blocks': self.get_nested_blocks_spec()})
         )
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_edit.css'))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/xblock_with_components_edit.js'))
+        add_resource(self, 'css', 'public/css/group_project.css', fragment)
+        add_resource(self, 'css', 'public/css/group_project_edit.css', fragment)
+        add_resource(self, 'javascript', 'public/js/xblock_with_components_edit.js', fragment)
         fragment.initialize_js('XBlockWithComponentsEdit')
         return fragment
 
@@ -225,8 +225,8 @@ class XBlockWithComponentsMixin(object):
         }
         render_context.update(context)
         fragment.add_content(loader.render_template("templates/html/default_preview_view.html", render_context))
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project_preview.css'))
+        add_resource(self, 'css', 'public/css/group_project.css', fragment)
+        add_resource(self, 'css', 'public/css/group_project_preview.css', fragment)
         return fragment
 
     def _render_child_fragment(self, child, context, view='student_view'):
