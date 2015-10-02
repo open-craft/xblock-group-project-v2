@@ -122,12 +122,8 @@ class GroupProjectNavigatorXBlock(
                 {'children': children_items}
             )
         )
-        add_resource(
-            self, 'css', 'public/css/project_navigator/project_navigator.css'
-        , fragment)
-        add_resource(
-            self, 'javascript', 'public/js/project_navigator/project_navigator.js'
-        , fragment)
+        add_resource(self, 'css', 'public/css/project_navigator/project_navigator.css', fragment)
+        add_resource(self, 'javascript', 'public/js/project_navigator/project_navigator.js', fragment)
         fragment.initialize_js("GroupProjectNavigatorBlock", js_parameters)
 
         return fragment
@@ -144,9 +140,7 @@ class GroupProjectNavigatorXBlock(
             "templates/html/project_navigator/project_navigator_author_view.html",
             {'navigator': self, 'children_contents': children_contents}
         ))
-        add_resource(
-            self, 'css', 'public/css/project_navigator/project_navigator.css'
-        , fragment)
+        add_resource(self, 'css', 'public/css/project_navigator/project_navigator.css', fragment)
         return fragment
 
     def validate(self):
