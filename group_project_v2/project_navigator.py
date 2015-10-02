@@ -237,7 +237,7 @@ class ProjectNavigatorViewXBlockBase(
             fragment.initialize_js(self.initialize_js_function)
 
         for js_file in self.additional_js_files:
-            add_resource(self, 'javascript', js_file, fragment)
+            add_resource(self, 'javascript', js_file, fragment, via_url=True)
 
         if add_resources_from:
             for frag in add_resources_from:

@@ -173,7 +173,7 @@ class GroupProjectXBlock(
         fragment.add_content(loader.render_template("templates/html/group_project.html", render_context))
 
         add_resource(self, 'css', 'public/css/group_project.css', fragment)
-        add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment)
+        add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment, via_url=True)
         add_resource(self, 'javascript', 'public/js/group_project.js', fragment)
         fragment.initialize_js("GroupProjectBlock")
         return fragment

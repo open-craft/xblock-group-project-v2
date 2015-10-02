@@ -271,8 +271,12 @@ class FieldValuesContextManager(object):
         return False
 
 
-def add_resource(block, resource_type, path, fragment):
-    action = fragment.add_javascript if resource_type == 'javascript' else fragment.add_css
-    resource_contents = loader.load_unicode(path)
-    # resource_url = block.runtime.local_resource_url(block, path)
-    action(resource_contents)
+def add_resource(block, resource_type, path, fragment, via_url=False):
+    if via_url:
+        action = fragment.add_javascript_url if resource_type == 'javascript' else fragment.add_css_url
+        action_parameter = block.runtime.local_resource_url(block, path)
+    else:
+        action = fragment.add_javascript if resource_type == 'javascript' else fragment.add_css
+        action_parameter = loader.load_unicode(path)
+
+    action(action_parameter)
