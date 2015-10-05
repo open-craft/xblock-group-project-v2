@@ -161,10 +161,13 @@ class BaseReviewStageTest(StageTestBase):
         super(BaseReviewStageTest, self).setUp()
         self.project_api_mock.get_workgroups_to_review.return_value = self.workgroups_to_review
 
+    def click_submit(self, stage_element):
+        stage_element.form.submit.click()
+        self.wait_for_ajax()
+
     def submit_and_assert_completion_published(self, stage_element, user_id):
         with mock.patch('workbench.runtime.WorkbenchRuntime.publish') as patched_publish:
-            stage_element.form.submit.click()
-            self.wait_for_ajax()
+            self.click_submit(stage_element)
 
             self.assertTrue(patched_publish.called)
 
@@ -285,7 +288,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
 
         self.assertTrue(stage_element.form.submit.is_displayed())
         self.assertEqual(stage_element.form.submit.text, "Submit")  # first time here - should read Submit
-        stage_element.form.submit.click()
+        self.click_submit(stage_element)
 
         self.project_api_mock.submit_peer_review_items.assert_called_once_with(
             str(user_id),
@@ -337,7 +340,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         questions[2].control.fill_text(new_submissions["peer_q2"])
 
         self.assertEqual(stage_element.form.submit.text, "Resubmit")
-        stage_element.form.submit.click()
+        self.click_submit(stage_element)
 
         self.project_api_mock.submit_peer_review_items.assert_called_once_with(
             str(user_id),
@@ -501,7 +504,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
         self.assertTrue(stage_element.form.submit.is_displayed())
         self.assertEqual(stage_element.form.submit.text, "Submit")  # first time here - should read Submit
 
-        stage_element.form.submit.click()
+        self.click_submit(stage_element)
 
         self.project_api_mock.submit_workgroup_review_items.assert_called_with(
             str(user_id),
@@ -552,7 +555,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
         questions[2].control.fill_text(new_submissions["group_q2"])
 
         self.assertEqual(stage_element.form.submit.text, "Resubmit")
-        stage_element.form.submit.click()
+        self.click_submit(stage_element)
 
         self.project_api_mock.submit_workgroup_review_items.assert_called_with(
             str(user_id),
@@ -628,7 +631,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
         self.assertTrue(stage_element.form.submit.is_displayed())
         self.assertEqual(stage_element.form.submit.text, "Submit")  # first time here - should read Submit
 
-        stage_element.form.submit.click()
+        self.click_submit(stage_element)
 
         self.project_api_mock.submit_workgroup_review_items.assert_called_with(
             str(user_id),

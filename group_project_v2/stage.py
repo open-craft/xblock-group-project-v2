@@ -29,7 +29,7 @@ from group_project_v2.utils import (
     loader, format_date, gettext as _, make_key, get_link_to_block, HtmlXBlockProxy, Constants, MUST_BE_OVERRIDDEN,
     outsider_disallowed_protected_view, outsider_disallowed_protected_handler, key_error_protected_handler,
     conversion_protected_handler,
-)
+    add_resource)
 
 log = logging.getLogger(__name__)
 
@@ -279,7 +279,7 @@ class BaseGroupActivityStage(
         fragment.add_content(loader.render_template(self.STAGE_CONTENT_TEMPLATE, render_context))
 
         if self.js_file:
-            fragment.add_javascript_url(self.runtime.local_resource_url(self, self.js_file))
+            add_resource(self, 'javascript', self.js_file, fragment)
 
         if self.js_init:
             fragment.initialize_js(self.js_init)

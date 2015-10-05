@@ -21,8 +21,8 @@ from group_project_v2.mixins import (
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import (
-    loader, mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockProxy, Constants
-)
+    loader, mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockProxy, Constants,
+    add_resource)
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
@@ -146,12 +146,16 @@ class GroupProjectXBlock(
         target_block_id = self.get_block_id_from_string(ctx.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME, None))
         target_stage = self.get_stage_to_display(target_block_id)
 
+        child_context = {}
+        if target_stage:
+            child_context[Constants.CURRENT_STAGE_ID_PARAMETER_NAME] = target_stage.id
+
         # activity should be rendered first, as some stages might report completion in student-view - this way stage
         # PN sees updated state.
         target_activity = target_stage.activity if target_stage else None
         render_child_fragment(
             target_activity, 'activity_content', _(u"This Group Project does not contain any activities"),
-            {Constants.CURRENT_STAGE_ID_PARAMETER_NAME: target_stage.id}
+            child_context
         )
 
         # TODO: project nav is slow, mostly due to navigation view. It might make sense to rework it into
@@ -161,20 +165,21 @@ class GroupProjectXBlock(
             project_navigator, 'project_navigator_content',
             _(u"This Group Project V2 does not contain Project Navigator - "
               u"please edit course outline in Studio to include one"),
-            {Constants.CURRENT_STAGE_ID_PARAMETER_NAME: target_stage.id}
+            child_context
         )
 
         discussion = self.get_child_of_category(DiscussionXBlockProxy.CATEGORY)
         render_child_fragment(
             discussion, 'discussion_content',
-            _(u"This Group Project V2 does not contain a discussion")
+            _(u"This Group Project V2 does not contain a discussion"),
+            child_context
         )
 
         fragment.add_content(loader.render_template("templates/html/group_project.html", render_context))
 
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/group_project.css'))
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/vendor/font-awesome/font-awesome.css'))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/group_project.js'))
+        add_resource(self, 'css', 'public/css/group_project.css', fragment)
+        add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment)
+        add_resource(self, 'javascript', 'public/js/group_project.js', fragment)
         fragment.initialize_js("GroupProjectBlock")
         return fragment
 
