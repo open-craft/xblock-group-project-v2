@@ -718,8 +718,12 @@ class ProjectTeamXBlock(
 
     def student_view(self, context):
         fragment = Fragment()
+        user_details = self.stage.project_api.get_user_details(self.stage.user_id)
+        user_organizations = self.stage.project_api.get_user_organizations(self.stage.user_id)
+        if user_organizations:
+            user_details.organization = user_organizations[0]['display_name']
         render_context = {
-            'team_members': self.stage.team_members,
+            'team_members': [user_details] + self.stage.team_members,
             'course_id': self.stage.course_id,
             'group_id': self.stage.workgroup['id']
         }
