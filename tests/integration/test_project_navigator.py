@@ -2,6 +2,7 @@
 Tests for project navigator and its views
 """
 import logging
+import mock
 
 from group_project_v2.project_navigator import ViewTypes
 from group_project_v2.stage import (
@@ -11,10 +12,10 @@ from group_project_v2.stage import (
 )
 from tests.integration.base_test import SingleScenarioTestSuite
 from tests.integration.page_elements import NavigationViewElement, ResourcesViewElement, SubmissionsViewElement
-from tests.utils import KNOWN_USERS
+from tests.utils import KNOWN_USERS, TestWithPatchesMixin
 
 
-class TestProjectNavigatorViews(SingleScenarioTestSuite):
+class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
     scenario = "example_1.xml"
 
     @property
@@ -92,6 +93,8 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
         # arrange: setting up mocks influencing stage states
 
         self.project_api_mock.get_latest_workgroup_submissions_by_id.return_value = self.submissions
+        self.make_patch(PeerReviewStage, '_pivot_feedback', mock.Mock(return_value={}))
+        self.make_patch(TeamEvaluationStage, '_pivot_feedback', mock.Mock(return_value={}))
 
         self._prepare_page()
 
