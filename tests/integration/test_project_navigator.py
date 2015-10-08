@@ -185,8 +185,8 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite):
 
         self.assertEqual(marketing_pitch.title, "Marketing Pitch")
         self.assertEqual(marketing_pitch.file_location, None)
-        self.assertEqual(marketing_pitch.uploaded_by, None)
+        self.assertEqual(marketing_pitch.uploaded_by, '')
 
         self.assertEqual(budget.title, "Budget")
         self.assertEqual(budget.file_location, None)
-        self.assertEqual(budget.uploaded_by, None)
+        self.assertEqual(budget.uploaded_by, '')

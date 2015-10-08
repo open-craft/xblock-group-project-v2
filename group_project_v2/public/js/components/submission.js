@@ -46,13 +46,15 @@ function GroupProjectSubmissionBlock(runtime, element) {
             }
         ],
         add: function (e, data) {
-            var target_form = $(e.target);
+            var target_form = $(e.target),
+                parentData = data;
             $('.' + data.paramName + '_name', target_form).val(data.files[0].name);
             $('.' + data.paramName + '_progress', target_form).css({width: '0%'}).removeClass('complete failed');
             $('.' + data.paramName + '_progress_box', target_form).css({visibility: 'visible'});
 
             $(document).one('perform_uploads', function (ev) {
                 var uploadXHR = data.submit();
+
                 uploadXHR
                     .success(function (data, textStatus, jqXHR) {
                         if (data.new_stage_states) {
@@ -62,6 +64,8 @@ function GroupProjectSubmissionBlock(runtime, element) {
                                     "group_project_v2.project_navigator.stage_status_update",
                                     [new_state.activity_id, new_state.stage_id, new_state.state]
                                 );
+                                $('.' + parentData.paramName + '_uploaded_by', element).html(
+                                    'Uploaded by ' + data.user_label + ' on ' + data.submission_date);
                             }
                         }
 

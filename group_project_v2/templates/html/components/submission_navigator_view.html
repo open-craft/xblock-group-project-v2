@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="uploader">
+<div class="uploader {{submission.upload_id}}_uploader">
   <div class="upload_title">{{ submission.display_name }}:</div>
   <div class="uploader-upload-controls-wrapper">
     <!-- label floats to right -->
@@ -23,9 +23,9 @@
   {% if submission.description %}
     <div class="description">{{ submission.description }}</div>
   {% endif %}
-  {% if upload.location %}
-    <div class="upload_item_data">
+  <div class="{{submission.upload_id}}_uploaded_by upload_item_data">
+    {% if upload.location %}
       {% trans "Uploaded by" %} {{ upload.user_details.user_label }} on {{ upload.submission_date }}
-    </div>
-  {% endif %}
+    {% endif %}
+  </div>
 </div>

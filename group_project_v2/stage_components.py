@@ -2,6 +2,7 @@ from collections import namedtuple
 import json
 import logging
 from xml.etree import ElementTree
+from datetime import date
 
 from django.utils import html
 from lazy.lazy import lazy
@@ -299,6 +300,9 @@ class GroupProjectSubmissionXBlock(
 
                 self.stage.check_submissions_and_mark_complete()
                 response_data["new_stage_states"] = [self.stage.get_new_stage_state_data()]
+
+                response_data['user_label'] = self.project_api.get_user_details(target_activity.user_id).user_label
+                response_data['submission_date'] = format_date(date.today())
 
             except Exception as exception:  # pylint: disable=broad-except
                 log.exception(exception)
@@ -718,12 +722,13 @@ class ProjectTeamXBlock(
 
     def student_view(self, context):
         fragment = Fragment()
-        user_details = self.stage.project_api.get_user_details(self.stage.user_id)
-        user_organizations = self.stage.project_api.get_user_organizations(self.stage.user_id)
-        if user_organizations:
-            user_details.organization = user_organizations[0]['display_name']
+        # Could be a TA not in the group.
+        if self.is_group_member(self.stage.user_id):
+            user_details = [self.stage.project_api.get_member_data(self.stage.user_id)]
+        else:
+            user_details = []
         render_context = {
-            'team_members': [user_details] + self.stage.team_members,
+            'team_members': user_details + self.stage.team_members,
             'course_id': self.stage.course_id,
             'group_id': self.stage.workgroup['id']
         }

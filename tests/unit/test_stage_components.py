@@ -3,6 +3,7 @@ import json
 from unittest import TestCase
 from datetime import datetime
 import ddt
+from freezegun import freeze_time
 import mock
 from xml.etree import ElementTree
 
@@ -129,6 +130,10 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
         super(TestGroupProjectSubmissionXBlock, self).setUp()
         self.project_api_mock = mock.create_autospec(ProjectAPI)
         self.make_patch(self.block_to_test, 'project_api', mock.PropertyMock(return_value=self.project_api_mock))
+        user_details = mock.Mock(user_label='Test label')
+        self.block_to_test.project_api.get_user_details = mock.Mock(
+            spec=ProjectAPI.get_user_details, return_value=user_details
+        )
 
         self.project_api_mock.get_latest_workgroup_submissions_by_id = mock.Mock(return_value={})
 
@@ -215,6 +220,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
         ("sub2", "other_file.so", {"activity_id": 'A1', "stage_id": 'S1', 'state': 'complete'}),
     )
     @ddt.unpack
+    @freeze_time("2015-08-01")
     def test_upload_submission_success_scenario(self, submission_id, file_url, stage_state):
         upload_id = "upload_id"
 
@@ -245,6 +251,8 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
             self.assertEqual(response_payload['title'], self.block.SUCCESSFUL_UPLOAD_TITLE)
             self.assertEqual(response_payload["submissions"], {submission_id: file_url})
             self.assertEqual(response_payload["new_stage_states"], [stage_state])
+            self.assertEqual(response_payload["user_label"], 'Test label')
+            self.assertEqual(response_payload["submission_date"], 'Aug 01')
 
             self.stage_mock.check_submissions_and_mark_complete.assert_called_once_with()
             patched_persist_and_submit_file.assert_called_once_with(
