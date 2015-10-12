@@ -259,7 +259,8 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
 
         other_users = set(KNOWN_USERS.keys()) - {user_id}
 
-        self.assertEqual(stage_element.form.peer_id, None)
+        # A default selection should be made automatically.
+        self.assertEquals(stage_element.form.peer_id, min(other_users))
 
         peers = stage_element.peers
         self.assertEqual(len(peers), len(other_users))
@@ -475,7 +476,8 @@ class PeerReviewStageTest(BaseReviewStageTest):
     def test_interaction(self):
         stage_element = self.get_stage(self.go_to_view())
 
-        self.assertEqual(stage_element.form.group_id, None)
+        # A default selection should be made automatically.
+        self.assertIn(stage_element.form.group_id, OTHER_GROUPS)
 
         groups = stage_element.groups
         self.assertEqual(len(groups), len(OTHER_GROUPS.keys()))

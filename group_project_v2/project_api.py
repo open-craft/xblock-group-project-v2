@@ -344,6 +344,13 @@ class ProjectAPI(object):
 
         return submissions_by_id
 
+    def get_member_data(self, user_id):
+        user_details = self.get_user_details(user_id)
+        user_organizations = self.get_user_organizations(user_id)
+        if user_organizations:
+            user_details.organization = user_organizations[0]['display_name']
+        return user_details
+
 
 # Looks like it's an issue, but technically it's not; this code runs in LMS, so 127.0.0.1 is always correct
 # location for API server, as it's basically executed in a neighbour thread/process/whatever.

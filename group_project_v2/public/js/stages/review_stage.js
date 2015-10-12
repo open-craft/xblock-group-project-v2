@@ -206,4 +206,10 @@ function GroupProjectReviewStage(runtime, element) {
         $form.find('.answer').val(null);
         $form.find('button.submit').attr('disabled', 'disabled');
     }
+    $(element).ready(function () {
+        var options = $('.select_peer,.select_group', element);
+        if (options.length) {
+            options[0].click();
+        }
+    })
 }
