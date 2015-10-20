@@ -11,7 +11,7 @@ from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage,
 from group_project_v2.utils import ALLOWED_OUTSIDER_ROLES
 
 from tests.integration.base_test import BaseIntegrationTest
-from tests.integration.page_elements import GroupProjectElement, ReviewStageElement
+from tests.integration.page_elements import GroupProjectElement, ReviewStageElement, ProjectTeamElement
 from tests.utils import KNOWN_USERS, OTHER_GROUPS
 
 
@@ -641,3 +641,29 @@ class PeerReviewStageTest(BaseReviewStageTest):
             self.activity_id,
             expected_submissions
         )
+
+
+class ProjectTeamBlockTest(StageTestBase):
+    """
+    Tests the Project Team block
+    """
+
+    stage_type = BasicStage
+
+    STAGE_DATA_XML = textwrap.dedent("""
+        <gp-v2-project-team />
+    """)
+
+    def setUp(self):
+        super(ProjectTeamBlockTest, self).setUp()
+        self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML))
+
+    def test_block_renders(self):
+        """
+        Ensure block shows team members.
+        """
+        user_id = 1
+        self.project_api_mock.get_user_roles_for_course = mock.Mock(return_value=[{'role': ALLOWED_OUTSIDER_ROLES[0]}])
+        self.project_api_mock.get_workgroup_by_id.side_effect = lambda g_id: {"id": g_id, "users": [{"id": 1}]}
+        stage_element = self.get_stage(self.go_to_view(student_id=user_id), stage_element_type=ProjectTeamElement)
+        self.assertEqual(stage_element.team_members, [u'Jane', u'Jack', u'Jill'])

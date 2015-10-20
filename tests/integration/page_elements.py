@@ -468,3 +468,12 @@ class SubmissionUploadItemElement(BaseElement):
         upload_item = self.element.find_element_by_css_selector(".file_upload")
         upload_item.clear()
         upload_item.send_keys(location)
+
+
+class ProjectTeamElement(BaseElement):
+    @property
+    def team_members(self):
+        return [
+            element.text
+            for element in self.element.find_elements_by_css_selector('.group-project-team-member-name')
+        ]
