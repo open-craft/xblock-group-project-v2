@@ -713,7 +713,7 @@ class GroupProjectGradeEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXB
 
 
 class ProjectTeamXBlock(
-    BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin, StudioEditableXBlockMixin
+    BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin, StudioEditableXBlockMixin,
 ):
     CATEGORY = 'gp-v2-project-team'
     STUDIO_LABEL = _(u"Project Team")
@@ -723,7 +723,7 @@ class ProjectTeamXBlock(
     def student_view(self, context):
         fragment = Fragment()
         # Could be a TA not in the group.
-        if self.is_group_member(self.stage.user_id):
+        if self.stage.is_group_member:
             user_details = [self.stage.project_api.get_member_data(self.stage.user_id)]
         else:
             user_details = []
