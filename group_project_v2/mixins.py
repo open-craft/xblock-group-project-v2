@@ -30,7 +30,8 @@ class ChildrenNavigationXBlockMixin(object):
         except StopIteration:
             return None
 
-    def get_child_id_block_type(self, child_id):
+    @staticmethod
+    def get_child_id_block_type(child_id):
         try:
             return child_id.block_type
         except AttributeError:  # workbench support

@@ -5,10 +5,10 @@ import logging
 import textwrap
 import ddt
 import mock
-from xblock.core import XBlock
 
-from group_project_v2.project_navigator import ViewTypes, NavigationViewXBlock, ResourcesViewXBlock, \
-    SubmissionsViewXBlock, AskTAViewXBlock, PrivateDiscussionViewXBlock
+from group_project_v2.project_navigator import (
+    ViewTypes, ResourcesViewXBlock, SubmissionsViewXBlock, AskTAViewXBlock, PrivateDiscussionViewXBlock
+)
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage,

@@ -19,7 +19,7 @@ def get_block_link(block):
 
 
 class DummyDiscussionXBlock(XBlock):
-    def student_view(self, context):  # pylint:disable=unused-argument
+    def student_view(self, context):  # pylint:disable=unused-argument, no-self-use
         """
         Student view
         """
