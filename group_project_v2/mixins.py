@@ -30,6 +30,12 @@ class ChildrenNavigationXBlockMixin(object):
         except StopIteration:
             return None
 
+    def get_child_id_block_type(self, child_id):
+        try:
+            return child_id.block_type
+        except AttributeError:  # workbench support
+            return child_id.split(".")[1]
+
     def get_children_by_category(self, *child_categories):
         return [child for child in self._children if self.get_child_category(child) in child_categories]
 
@@ -40,7 +46,7 @@ class ChildrenNavigationXBlockMixin(object):
             return None
 
     def has_child_of_category(self, child_category):
-        return any(child.block_type == child_category for child in self.children)
+        return any(self.get_child_id_block_type(child) == child_category for child in self.children)
 
     def get_block_id_from_string(self, block_id_string):  # pylint: disable=no-self-use
         if not block_id_string:
