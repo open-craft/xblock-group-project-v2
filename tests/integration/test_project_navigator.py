@@ -2,16 +2,21 @@
 Tests for project navigator and its views
 """
 import logging
+import textwrap
+import ddt
 import mock
 
-from group_project_v2.project_navigator import ViewTypes
+from group_project_v2.project_navigator import (
+    ViewTypes, ResourcesViewXBlock, SubmissionsViewXBlock, AskTAViewXBlock, PrivateDiscussionViewXBlock
+)
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
     StageState
 )
-from tests.integration.base_test import SingleScenarioTestSuite
-from tests.integration.page_elements import NavigationViewElement, ResourcesViewElement, SubmissionsViewElement
+from tests.integration.base_test import SingleScenarioTestSuite, BaseIntegrationTest
+from tests.integration.page_elements import NavigationViewElement, ResourcesViewElement, SubmissionsViewElement, \
+    GroupProjectElement
 from tests.utils import KNOWN_USERS, TestWithPatchesMixin
 
 
@@ -193,3 +198,52 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
         self.assertEqual(budget.title, "Budget")
         self.assertEqual(budget.file_location, None)
         self.assertEqual(budget.uploaded_by, '')
+
+
+@ddt.ddt
+class TestProjectNavigator(BaseIntegrationTest, TestWithPatchesMixin):
+    XML_TEMPLATE = textwrap.dedent("""
+    <gp-v2-project>
+      <gp-v2-navigator>
+        {views}
+      </gp-v2-navigator>
+      <discussion-forum/>
+    </gp-v2-project>
+    """)
+
+    def build_scenario(self, view_categories):
+        views_string = "\n".join(["<{}/>".format(category) for category in view_categories])
+        return self.XML_TEMPLATE.format(views=views_string)
+
+    @ddt.data(
+        (
+            # test case 1 - all orderable views, correct order
+            (SubmissionsViewXBlock, ResourcesViewXBlock,  AskTAViewXBlock, PrivateDiscussionViewXBlock),
+            (ViewTypes.SUBMISSIONS, ViewTypes.RESOURCES, ViewTypes.ASK_TA, ViewTypes.PRIVATE_DISCUSSION)
+        ),
+        (
+            # test case 2 - all orderable views, random order
+            (AskTAViewXBlock, SubmissionsViewXBlock, PrivateDiscussionViewXBlock, ResourcesViewXBlock),
+            (ViewTypes.SUBMISSIONS, ViewTypes.RESOURCES, ViewTypes.ASK_TA, ViewTypes.PRIVATE_DISCUSSION)
+        ),
+        (
+            # test case 3 - some orderable views, correct order
+            (AskTAViewXBlock, PrivateDiscussionViewXBlock),
+            (ViewTypes.ASK_TA, ViewTypes.PRIVATE_DISCUSSION)
+        ),
+        (
+            # test case 4 - some orderable views, random order
+            (AskTAViewXBlock, SubmissionsViewXBlock, ResourcesViewXBlock),
+            (ViewTypes.SUBMISSIONS, ViewTypes.RESOURCES, ViewTypes.ASK_TA)
+        ),
+    )
+    @ddt.unpack
+    def test_project_navigator_views_order(self, views, expected_views):
+        scenario_xml = self.build_scenario([view.CATEGORY for view in views])
+        self.load_scenario_xml(scenario_xml)
+        scenario = self.go_to_view()
+        page = GroupProjectElement(self.browser, scenario)
+        project_navigator = page.project_navigator
+
+        view_selector_types = tuple([view.type for view in project_navigator.view_selectors])
+        self.assertEqual(view_selector_types, expected_views)

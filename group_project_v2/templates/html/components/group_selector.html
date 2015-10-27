@@ -1,7 +1,7 @@
 {% load i18n %}
 <div class="group_selector">
   <div class="review_selector_header">
-    {% trans "Please click on the group(s) you are assigned to grade to review their submissions" %}
+    {% trans "Please click on the group(s) you are assigned to grade to review their submissions." %}
   </div>
 
   <div>
@@ -16,7 +16,7 @@
           {% endcomment %}
           <span class="review_subject_label">{% trans "Group" %} {{ forloop.counter }}:</span>
           <span class="review_evaluating_now">{% trans "Evaluating below" %}</span>
-          <div class="other_submissions"><a href="#" class="view_other_submissions">View team submissions</a></div>
+          <div class="other_submissions"><a href="#" class="view_other_submissions">View team submission(s)</a></div>
         </li>
         {% endfor %}
       </ul>

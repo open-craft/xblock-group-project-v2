@@ -9,12 +9,8 @@
 }
 
 .group-project-team-wrapper .group-project-team-member {
-    border-bottom: 1px solid #ccc;
-    padding: 15px 0 8px 0;
-}
-
-.group-project-team-wrapper .group-project-team-member:first-of-type {
     border-top: 1px solid #ccc;
+    padding: 15px 0 8px 0;
 }
 
 .group-project-team-wrapper .group-project-team-member-avatar {

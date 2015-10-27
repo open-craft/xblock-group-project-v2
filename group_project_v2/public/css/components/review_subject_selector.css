@@ -1,11 +1,12 @@
 .peer_selector, .group_selector {
     font-size: 11px;
-    color: #8f8f8f;
+    color: #868685;
     margin-bottom: 10px;
 }
 
 .peer_selector .review_selector_header,
-.group_selector.review_selector_header {
+.group_selector .review_selector_header {
+    margin-top: 15px;
     font-style: italic;
 }
 
@@ -41,6 +42,7 @@
 
 .peer_selector ul.peers li.select_peer .review_evaluating_now,
 .group_selector ul.groups li.select_group .review_evaluating_now {
+    font-style: italic;
     visibility: hidden;
 }
 

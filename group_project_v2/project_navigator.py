@@ -78,19 +78,25 @@ class GroupProjectNavigatorXBlock(
 
         return ViewTypes.NAVIGATION
 
+    def _sorted_child_views(self):
+        all_views = []
+        for child_id in self.children:
+            view = self.runtime.get_block(child_id)
+            if view.available_to_current_user and view.is_view_available:
+                all_views.append(view)
+
+        all_views.sort(key=lambda view_instance: view_instance.SORT_ORDER)
+        return all_views
+
     def student_view(self, context):
         """
         Student view
         """
         fragment = Fragment()
         children_items = []
-        for child_id in self.children:
-            view = self.runtime.get_block(child_id)
-            if not view.available_to_current_user or not view.is_view_available:
-                continue
-
+        for view in self._sorted_child_views():
             item = {
-                'id': str(child_id).replace("/", ";_"),
+                'id': str(view.scope_ids.usage_id).replace("/", ";_"),
                 'type': view.type,
             }
 
@@ -172,6 +178,8 @@ class ProjectNavigatorViewXBlockBase(
     TEMPLATE_BASE = "templates/html/project_navigator/"
     CSS_BASE = "public/css/project_navigator/"
     JS_BASE = "public/js/project_navigator/"
+
+    SORT_ORDER = None
 
     template = None
     css_file = None
@@ -283,6 +291,8 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     skip_selector = True
     show_to_admin_grader = True
 
+    SORT_ORDER = 0
+
     template = "navigation_view.html"
     css_file = "navigation_view.css"
     js_file = "navigation_view.js"
@@ -316,6 +326,8 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     icon = u"fa fa-files-o"
     display_name_with_default = STUDIO_LABEL
 
+    SORT_ORDER = 2
+
     template = "resources_view.html"
     css_file = "resources_view.css"
     js_file = "resources_view.js"
@@ -346,6 +358,8 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     type = ViewTypes.SUBMISSIONS
     icon = u"fa fa-upload"
     display_name_with_default = STUDIO_LABEL
+
+    SORT_ORDER = 1
 
     template = "submissions_view.html"
     css_file = "submissions_view.css"
@@ -382,6 +396,8 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     selector_text = u"TA"
     display_name_with_default = STUDIO_LABEL
 
+    SORT_ORDER = 3
+
     template = "ask_ta_view.html"
     css_file = "ask_ta_view.css"
     js_file = "ask_ta_view.js"
@@ -408,6 +424,8 @@ class PrivateDiscussionViewXBlock(ProjectNavigatorViewXBlockBase):
     icon = 'fa fa-comment'
     skip_content = True  # there're no content in this view so far - it only shows discussion in a popup
     display_name_with_default = STUDIO_LABEL
+
+    SORT_ORDER = 4
 
     js_file = "private_discussion_view.js"
     initialize_js_function = "GroupProjectPrivateDiscussionView"

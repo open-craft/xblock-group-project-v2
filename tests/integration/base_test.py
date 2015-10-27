@@ -1,10 +1,9 @@
 """ Base classes for integration tests """
 from bok_choy.promise import EmptyPromise
-from django.utils.safestring import mark_safe
 import mock
 from sample_xblocks.basic.content import HtmlBlock
 from xblock.core import XBlock
-from xblock.fields import String, Scope
+from xblock.fragment import Fragment
 
 from xblockutils.base_test import SeleniumXBlockTest
 
@@ -19,11 +18,12 @@ def get_block_link(block):
     )
 
 
-class DummyHtmlXBlock(XBlock):
-    data = String(default=u"", scope=Scope.content)
-
-    def student_view(self):
-        return mark_safe(self.data)
+class DummyDiscussionXBlock(XBlock):
+    def student_view(self, context):  # pylint:disable=unused-argument, no-self-use
+        """
+        Student view
+        """
+        return Fragment(u"Discussion XBlock placeholder")
 
 
 class BaseIntegrationTest(SeleniumXBlockTest):
@@ -36,20 +36,27 @@ class BaseIntegrationTest(SeleniumXBlockTest):
     stage_element = StageElement
 
     @classmethod
-    def setUpClass(cls):  # pylint: disable=invalid-name
-        super(BaseIntegrationTest, cls).setUpClass()
+    def _append_entrypoint(cls, category, block_class):
         entry_point = mock.Mock(
             dist=mock.Mock(key='xblock'),
-            load=mock.Mock(return_value=HtmlBlock),
+            load=mock.Mock(return_value=block_class),
         )
-        entry_point.name = "html"
-        cls._extra_entry_points_record = ("html", entry_point)
-        XBlock.extra_entry_points.append(cls._extra_entry_points_record)
+        entry_point.name = category
+        cls._extra_entry_points_records.append((category, entry_point))
+
+    @classmethod
+    def setUpClass(cls):  # pylint: disable=invalid-name
+        super(BaseIntegrationTest, cls).setUpClass()
+        cls._extra_entry_points_records = []
+        cls._append_entrypoint('html', HtmlBlock)
+        cls._append_entrypoint('discussion-forum', DummyDiscussionXBlock)
+        XBlock.extra_entry_points.extend(cls._extra_entry_points_records)
 
     @classmethod
     def tearDownClass(cls):  # pylint: disable=invalid-name
         super(BaseIntegrationTest, cls).tearDownClass()
-        XBlock.extra_entry_points.remove(cls._extra_entry_points_record)
+        for entry_point in cls._extra_entry_points_records:
+            XBlock.extra_entry_points.remove(entry_point)
 
     def _set_up_global_patches(self):
         patchers = []
