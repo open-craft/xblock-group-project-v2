@@ -615,7 +615,10 @@ class GroupProjectBaseFeedbackDisplayXBlock(
     @outsider_disallowed_protected_view
     def student_view(self, context):
         if self.question is None:
-            raise ValueError(self.NO_QUESTION_SELECTED)
+            return Fragment(
+                u'This component is misconfigured and can\'t be displayed.  '
+                u'It needs to be fixed by the course authors.'
+            )
 
         raw_feedback = self.get_feedback()
 
