@@ -123,7 +123,9 @@ class ProjectAPI(object):
         self.send_request(DELETE, (PEER_REVIEW_API, assessment_id))
 
     @api_error_protect
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    # Do not cache - used both in submitting review and calculating grade, so if this call is cached grade calculation
+    # sees old value. So, when last review is performed, grade calculation does not see it and returns "No grade yet".
+    # See MCKIN-3501 and MCKIN-3471 for what would happen than.
     def get_workgroup_review_items_for_group(self, group_id, content_id):
         qs_params = {"content_id": content_id}
         return self.send_request(GET, (WORKGROUP_API, group_id, 'workgroup_reviews'), query_params=qs_params)
