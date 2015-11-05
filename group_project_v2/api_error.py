@@ -2,7 +2,7 @@ import logging
 import json
 from urllib2 import HTTPError
 
-from django.utils.translation import ugettext as _
+from group_project_v2.utils import gettext as _
 
 
 log = logging.getLogger(__name__)
