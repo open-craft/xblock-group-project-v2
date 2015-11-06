@@ -218,18 +218,18 @@ class TestProjectNavigator(BaseIntegrationTest, TestWithPatchesMixin):
     @ddt.data(
         (
             # test case 1 - all orderable views, correct order
-            (SubmissionsViewXBlock, ResourcesViewXBlock,  AskTAViewXBlock, PrivateDiscussionViewXBlock),
-            (ViewTypes.SUBMISSIONS, ViewTypes.RESOURCES, ViewTypes.ASK_TA, ViewTypes.PRIVATE_DISCUSSION)
+            (SubmissionsViewXBlock, ResourcesViewXBlock, PrivateDiscussionViewXBlock, AskTAViewXBlock),
+            (ViewTypes.SUBMISSIONS, ViewTypes.RESOURCES, ViewTypes.PRIVATE_DISCUSSION, ViewTypes.ASK_TA)
         ),
         (
             # test case 2 - all orderable views, random order
             (AskTAViewXBlock, SubmissionsViewXBlock, PrivateDiscussionViewXBlock, ResourcesViewXBlock),
-            (ViewTypes.SUBMISSIONS, ViewTypes.RESOURCES, ViewTypes.ASK_TA, ViewTypes.PRIVATE_DISCUSSION)
+            (ViewTypes.SUBMISSIONS, ViewTypes.RESOURCES, ViewTypes.PRIVATE_DISCUSSION, ViewTypes.ASK_TA)
         ),
         (
             # test case 3 - some orderable views, correct order
-            (AskTAViewXBlock, PrivateDiscussionViewXBlock),
-            (ViewTypes.ASK_TA, ViewTypes.PRIVATE_DISCUSSION)
+            (PrivateDiscussionViewXBlock, AskTAViewXBlock),
+            (ViewTypes.PRIVATE_DISCUSSION, ViewTypes.ASK_TA)
         ),
         (
             # test case 4 - some orderable views, random order

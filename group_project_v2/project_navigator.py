@@ -396,7 +396,7 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     selector_text = u"TA"
     display_name_with_default = STUDIO_LABEL
 
-    SORT_ORDER = 3
+    SORT_ORDER = 4
 
     template = "ask_ta_view.html"
     css_file = "ask_ta_view.css"
@@ -425,7 +425,7 @@ class PrivateDiscussionViewXBlock(ProjectNavigatorViewXBlockBase):
     skip_content = True  # there're no content in this view so far - it only shows discussion in a popup
     display_name_with_default = STUDIO_LABEL
 
-    SORT_ORDER = 4
+    SORT_ORDER = 3
 
     js_file = "private_discussion_view.js"
     initialize_js_function = "GroupProjectPrivateDiscussionView"
