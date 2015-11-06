@@ -694,6 +694,16 @@ class PeerReviewStage(ReviewBaseStage):
         except ApiError:
             return []
 
+    @property
+    def available_to_current_user(self):
+        if not super(PeerReviewStage, self).available_to_current_user:
+            return False
+
+        if not self.is_admin_grader and self.activity.is_ta_graded:
+            return False
+
+        return True
+
     def review_status(self):
         if not self.is_admin_grader:
             groups_to_review = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
