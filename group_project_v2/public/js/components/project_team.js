@@ -1,6 +1,6 @@
 function ProjectTeamXBlock(runtime, element) {
-    const email_member_modal_selector = ".group-project-team-email-member-modal";
-    const email_group_modal_selector = ".group-project-team-email-group-modal";
+    var email_member_modal_selector = ".group-project-team-email-member-modal";
+    var email_group_modal_selector = ".group-project-team-email-group-modal";
 
     var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
     var message_box = $(".message", group_project_dom);

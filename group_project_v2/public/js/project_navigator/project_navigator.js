@@ -1,8 +1,8 @@
 function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
-    const initial_view = 'navigation';
-    const selector_item_query = ".group-project-navigator-view-selector .view-selector-item";
-    const activate_project_nav_view_event = 'group_project_v2.project_navigator.activate_view';
-    const hide_group_project_discussion = 'group_project_v2.discussion.hide';
+    var initial_view = 'navigation';
+    var selector_item_query = ".group-project-navigator-view-selector .view-selector-item";
+    var activate_project_nav_view_event = 'group_project_v2.project_navigator.activate_view';
+    var hide_group_project_discussion = 'group_project_v2.discussion.hide';
 
     var view_elements = $(".group-project-navigator-view", element),
         views = {},
