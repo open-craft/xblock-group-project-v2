@@ -95,7 +95,7 @@ class BaseGroupActivityStage(
         display_name=_(u"Hide stage type label"),
         help=_(u"If true, hides stage type label in Project Navigator"),
         scope=Scope.settings,
-        default=False
+        default=True
     )
 
     editable_fields = ('display_name', 'open_date', 'close_date', 'hide_stage_label')
