@@ -203,18 +203,6 @@ class ProjectAPI(object):
         return self.send_request(GET, (GROUP_API, group_id))
 
     @api_error_protect
-    def mark_as_complete(self, course_id, content_id, user_id, stage_id=None):
-        completion_data = {
-            "content_id": content_id,
-            "user_id": user_id,
-        }
-
-        if stage_id is not None:
-            completion_data["stage"] = str(stage_id)
-
-        return self.send_request(POST, (COURSES_API, course_id, 'completions'), data=completion_data)
-
-    @api_error_protect
     def get_user_roles_for_course(self, user_id, course_id):
         qs_params = {
             "user_id": user_id,
