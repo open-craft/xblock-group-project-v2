@@ -213,7 +213,7 @@ class EvaluationStagesBaseTestMixin(object):
             if should_call_mark_complete:
                 self.runtime_mock.publish.assert_called_with(self.block, 'progress', {'user_id': self.block.user_id})
             else:
-                self.assertFalse(self.project_api_mock.mark_as_complete.called)
+                self.assertFalse(self.runtime_mock.publish.called)
 
 
 @ddt.ddt
