@@ -15,7 +15,8 @@ from xblockutils.studio_editable import (
 )
 
 from group_project_v2.mixins import (
-    ChildrenNavigationXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin
+    ChildrenNavigationXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin,
+    DashboardMixin
 )
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
@@ -35,7 +36,7 @@ log = logging.getLogger(__name__)
 
 class GroupProjectXBlock(
     XBlockWithComponentsMixin, ChildrenNavigationXBlockMixin, WorkgroupAwareXBlockMixin,
-    XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin
+    XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin, DashboardMixin
 ):
     display_name = String(
         display_name="Display Name",
@@ -181,6 +182,11 @@ class GroupProjectXBlock(
         add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment, via_url=True)
         add_resource(self, 'javascript', 'public/js/group_project.js', fragment)
         fragment.initialize_js("GroupProjectBlock")
+        return fragment
+
+    def dashboard_view(self, context):
+        fragment = Fragment()
+        fragment.add_content(u"Dashboard view")
         return fragment
 
     def validate(self):

@@ -9,8 +9,8 @@ from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.utils import (
     OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES,
-    loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource
-)
+    loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource,
+    MUST_BE_OVERRIDDEN)
 from xblockutils.studio_editable import StudioContainerWithNestedXBlocksMixin
 
 
@@ -222,3 +222,8 @@ class NoStudioEditableSettingsMixin(object):
         fragment = Fragment()
         fragment.add_content(NO_EDITABLE_SETTINGS)
         return fragment
+
+
+class DashboardMixin(object):
+    def dashboard_view(self, context):
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
