@@ -42,7 +42,7 @@ function ProjectTeamXBlock(runtime, element) {
             method: 'POST',
             data: data
         }).done(function (data) {
-            show_message(data.message, 'Notification');
+            show_message(data.message, '');
         }).fail(function (data) {
             show_message(data.message, 'Error', 'error');
         });

@@ -63,6 +63,10 @@
     margin-bottom: 10px;
 }
 
+.group-project-team-email-dialog .email-member-form textarea {
+    height: 120px;
+}
+
 .group-project-team-wrapper .group-project-team-member-email a,
 .group-project-team-wrapper .group-project-team-email-group {
     font-size: 13px;

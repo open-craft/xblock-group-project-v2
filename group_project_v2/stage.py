@@ -95,7 +95,7 @@ class BaseGroupActivityStage(
         display_name=_(u"Hide stage type label"),
         help=_(u"If true, hides stage type label in Project Navigator"),
         scope=Scope.settings,
-        default=False
+        default=True
     )
 
     editable_fields = ('display_name', 'open_date', 'close_date', 'hide_stage_label')
@@ -704,6 +704,16 @@ class PeerReviewStage(ReviewBaseStage):
             return self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
         except ApiError:
             return []
+
+    @property
+    def available_to_current_user(self):
+        if not super(PeerReviewStage, self).available_to_current_user:
+            return False
+
+        if not self.is_admin_grader and self.activity.is_ta_graded:
+            return False
+
+        return True
 
     def review_status(self):
         if not self.is_admin_grader:
