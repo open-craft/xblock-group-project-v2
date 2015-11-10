@@ -1,7 +1,7 @@
 function GroupProjectBlock(runtime, element) {
-    const activate_project_nav_view_event = 'group_project_v2.project_navigator.activate_view';
-    const show_group_project_discussion = 'group_project_v2.discussion.show';
-    const hide_group_project_discussion = 'group_project_v2.discussion.hide';
+    var activate_project_nav_view_event = 'group_project_v2.project_navigator.activate_view';
+    var show_group_project_discussion = 'group_project_v2.discussion.show';
+    var hide_group_project_discussion = 'group_project_v2.discussion.hide';
 
     var message_box = $('.message', element);
     var discussion_box = $("#group-project-discussion", element);

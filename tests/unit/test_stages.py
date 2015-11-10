@@ -2,9 +2,11 @@ from unittest import TestCase
 import ddt
 import mock
 from xblock.field_data import DictFieldData
+from xblock.validation import ValidationMessage
 from group_project_v2.group_project import GroupActivityXBlock
 from group_project_v2.project_api import ProjectAPI
-from group_project_v2.stage import EvaluationDisplayStage, GradeDisplayStage
+from group_project_v2.stage import EvaluationDisplayStage, GradeDisplayStage, TeamEvaluationStage, PeerReviewStage
+from group_project_v2.stage_components import PeerSelectorXBlock, GroupProjectReviewQuestionXBlock, GroupSelectorXBlock
 from tests.utils import TestWithPatchesMixin, make_review_item
 
 
@@ -37,6 +39,136 @@ class BaseStageTest(TestCase, TestWithPatchesMixin):
         self.user_id_mock = self.make_patch(
             self.block_to_test, 'user_id', mock.PropertyMock(return_value=self.user_id)
         )
+
+
+class ReviewStageChildrenMockContextManager(object):
+    def __init__(self, block, child_categories, questions):
+        self._block = block
+        self._child_categories = child_categories
+        self._questions = questions
+        self._patchers = []
+
+    def __enter__(self):
+        def _has_child_of_category(child_category):
+            return child_category in self._child_categories
+
+        has_child_mock = mock.Mock()
+        patch_has_child = mock.patch.object(self._block, 'has_child_of_category', has_child_mock)
+        has_child_mock.side_effect = _has_child_of_category
+        self._patchers.append(patch_has_child)
+
+        questions_mock = mock.PropertyMock()
+        questions_mock.return_value = self._questions
+        patch_questions = mock.patch.object(type(self._block), 'questions', questions_mock)
+        self._patchers.append(patch_questions)
+
+        for patch in self._patchers:
+            patch.start()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        for patch in self._patchers:
+            patch.stop()
+
+        return False
+
+
+class ReviewStageBaseTest(BaseStageTest):
+    def _make_question(self, required=False, graded=False):
+        fields = {
+            'grade': graded,
+            'required': required
+        }
+        return GroupProjectReviewQuestionXBlock(self.runtime_mock, DictFieldData(fields), scope_ids=mock.Mock())
+
+
+class TestTeamEvaluationStage(ReviewStageBaseTest):
+    block_to_test = TeamEvaluationStage
+
+    def setUp(self):
+        super(TestTeamEvaluationStage, self).setUp()
+
+    def test_validation_missing_peer_selector(self):
+        questions = [self._make_question()]
+        categories = []
+        with ReviewStageChildrenMockContextManager(self.block, categories, questions):
+            validation = self.block.validate()
+
+        messages = validation.messages
+        self.assertEqual(len(messages), 1)
+        message = messages[0]
+
+        self.assertEqual(message.type, ValidationMessage.ERROR)
+        self.assertIn(
+            u"missing required component '{ps_name}'".format(ps_name=PeerSelectorXBlock.STUDIO_LABEL),
+            message.text
+        )
+
+    def test_validation_has_graded_questions(self):
+        questions = [self._make_question(graded=True)]
+        categories = [GroupProjectReviewQuestionXBlock.CATEGORY, PeerSelectorXBlock.CATEGORY]
+        with ReviewStageChildrenMockContextManager(self.block, categories, questions):
+            validation = self.block.validate()
+
+        messages = validation.messages
+        self.assertEqual(len(messages), 1)
+        message = messages[0]
+
+        self.assertEqual(message.type, ValidationMessage.ERROR)
+        self.assertIn(u"Grade questions are not supported", message.text)
+
+    def test_validtion_passes(self):
+        questions = [self._make_question()]
+        categories = [GroupProjectReviewQuestionXBlock.CATEGORY, PeerSelectorXBlock.CATEGORY]
+        with ReviewStageChildrenMockContextManager(self.block, categories, questions):
+            validation = self.block.validate()
+
+        messages = validation.messages
+        self.assertEqual(len(messages), 0)
+
+
+class TestPeerReviewStage(ReviewStageBaseTest):
+    block_to_test = PeerReviewStage
+
+    def setUp(self):
+        super(TestPeerReviewStage, self).setUp()
+
+    def test_validation(self):
+        questions = [self._make_question(graded=True)]
+        categories = [GroupProjectReviewQuestionXBlock.CATEGORY]
+        with ReviewStageChildrenMockContextManager(self.block, categories, questions):
+            validation = self.block.validate()
+
+        messages = validation.messages
+        self.assertEqual(len(messages), 1)
+        message = messages[0]
+
+        self.assertEqual(message.type, ValidationMessage.ERROR)
+        self.assertIn(
+            u"missing required component '{gs_name}'".format(gs_name=GroupSelectorXBlock.STUDIO_LABEL),
+            message.text
+        )
+
+    def test_validation_no_graded_questions(self):
+        questions = [self._make_question(graded=False)]
+        categories = [GroupProjectReviewQuestionXBlock.CATEGORY, GroupSelectorXBlock.CATEGORY]
+        with ReviewStageChildrenMockContextManager(self.block, categories, questions):
+            validation = self.block.validate()
+
+        messages = validation.messages
+        self.assertEqual(len(messages), 1)
+        message = messages[0]
+
+        self.assertEqual(message.type, ValidationMessage.ERROR)
+        self.assertIn(u"Grade questions are required", message.text)
+
+    def test_validtion_passes(self):
+        questions = [self._make_question(graded=True)]
+        categories = [GroupProjectReviewQuestionXBlock.CATEGORY, GroupSelectorXBlock.CATEGORY]
+        with ReviewStageChildrenMockContextManager(self.block, categories, questions):
+            validation = self.block.validate()
+
+        messages = validation.messages
+        self.assertEqual(len(messages), 0)
 
 
 @ddt.ddt
@@ -81,7 +213,7 @@ class EvaluationStagesBaseTestMixin(object):
             if should_call_mark_complete:
                 self.runtime_mock.publish.assert_called_with(self.block, 'progress', {'user_id': self.block.user_id})
             else:
-                self.assertFalse(self.project_api_mock.mark_as_complete.called)
+                self.assertFalse(self.runtime_mock.publish.called)
 
 
 @ddt.ddt

@@ -1,7 +1,7 @@
 function GroupProjectNavigatorSubmissionsView(runtime, element) {
-    const upload_started_event = 'group_project_v2.submission.upload_started';
-    const upload_failed_event = 'group_project_v2.submission.upload_failed';
-    const upload_complete_event = 'group_project_v2.submission.upload_complete';
+    var upload_started_event = 'group_project_v2.submission.upload_started';
+    var upload_failed_event = 'group_project_v2.submission.upload_failed';
+    var upload_complete_event = 'group_project_v2.submission.upload_complete';
 
     var $action_buttons = $(".action_buttons", element);
 

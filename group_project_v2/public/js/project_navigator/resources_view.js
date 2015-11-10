@@ -1,5 +1,5 @@
 function GroupProjectNavigatorResourcesView(runtime, element) {
-    const ooyala_player_target_element_id = 'group-project-resources-view-ooyala-player';
+    var ooyala_player_target_element_id = 'group-project-resources-view-ooyala-player';
 
     var modal = $('.player-modal', element),
         player = $('.player-wrapper', modal),

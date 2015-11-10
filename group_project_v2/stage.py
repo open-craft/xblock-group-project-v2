@@ -622,8 +622,19 @@ class TeamEvaluationStage(ReviewBaseStage):
         if self.grade_questions:
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                _(u"Grade questions are not supported for {class_name} '{stage_title}'").format(
-                    class_name=self.__class__.__name__, stage_title=self.display_name
+                _(u"Grade questions are not supported for {class_name} stage '{stage_title}'").format(
+                    class_name=self.STUDIO_LABEL, stage_title=self.display_name
+                )
+            ))
+
+        if not self.has_child_of_category(PeerSelectorXBlock.CATEGORY):
+            violations.add(ValidationMessage(
+                ValidationMessage.ERROR,
+                _(
+                    u"{class_name} stage '{stage_title}' is missing required component '{peer_selector_class_name}'"
+                ).format(
+                    class_name=self.STUDIO_LABEL, stage_title=self.display_name,
+                    peer_selector_class_name=PeerSelectorXBlock.STUDIO_LABEL
                 )
             ))
 
@@ -707,6 +718,30 @@ class PeerReviewStage(ReviewBaseStage):
             )
 
         return self._check_review_status(groups_to_review, group_review_items, "workgroup")
+
+    def validate(self):
+        violations = super(PeerReviewStage, self).validate()
+
+        if not self.grade_questions:
+            violations.add(ValidationMessage(
+                ValidationMessage.ERROR,
+                _(u"Grade questions are required for {class_name} stage '{stage_title}'").format(
+                    class_name=self.STUDIO_LABEL, stage_title=self.display_name
+                )
+            ))
+
+        if not self.has_child_of_category(GroupSelectorXBlock.CATEGORY):
+            violations.add(ValidationMessage(
+                ValidationMessage.ERROR,
+                _(
+                    u"{class_name} stage '{stage_title}' is missing required component '{group_selector_class_name}'"
+                ).format(
+                    class_name=self.STUDIO_LABEL, stage_title=self.display_name,
+                    group_selector_class_name=GroupSelectorXBlock.STUDIO_LABEL
+                )
+            ))
+
+        return violations
 
     @XBlock.handler
     @outsider_disallowed_protected_handler

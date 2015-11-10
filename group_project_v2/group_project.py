@@ -4,8 +4,6 @@ import itertools
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 
-from django.utils.translation import ugettext as _
-
 from xblock.core import XBlock
 from xblock.exceptions import NoSuchUsage
 from xblock.fields import Scope, String, Float, Integer, DateTime
@@ -22,7 +20,8 @@ from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import (
     loader, mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockProxy, Constants,
-    add_resource)
+    add_resource, gettext as _
+)
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
@@ -178,7 +177,7 @@ class GroupProjectXBlock(
         fragment.add_content(loader.render_template("templates/html/group_project.html", render_context))
 
         add_resource(self, 'css', 'public/css/group_project.css', fragment)
-        add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment)
+        add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment, via_url=True)
         add_resource(self, 'javascript', 'public/js/group_project.js', fragment)
         fragment.initialize_js("GroupProjectBlock")
         return fragment
