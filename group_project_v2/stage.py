@@ -10,12 +10,12 @@ from xblock.core import XBlock
 from xblock.fields import Scope, String, DateTime, Boolean
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
-from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
+from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin, XBlockWithPreviewMixin
 
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import (
     ChildrenNavigationXBlockMixin,
-    WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin,
+    WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin,
     XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin
 )
 from group_project_v2.notifications import StageNotificationsMixin
@@ -26,7 +26,7 @@ from group_project_v2.stage_components import (
     GroupProjectTeamEvaluationDisplayXBlock, GroupProjectGradeEvaluationDisplayXBlock,
 )
 from group_project_v2.utils import (
-    loader, format_date, gettext as _, make_key, get_link_to_block, HtmlXBlockProxy, Constants, MUST_BE_OVERRIDDEN,
+    loader, format_date, gettext as _, make_key, get_link_to_block, HtmlXBlockShim, Constants, MUST_BE_OVERRIDDEN,
     outsider_disallowed_protected_view, outsider_disallowed_protected_handler, key_error_protected_handler,
     conversion_protected_handler,
     add_resource)
@@ -127,7 +127,7 @@ class BaseGroupActivityStage(
         """
         This property outputs an ordered dictionary of allowed nested XBlocks in form of block_category: block_caption.
         """
-        blocks = [HtmlXBlockProxy, GroupProjectResourceXBlock]
+        blocks = [HtmlXBlockShim, GroupProjectResourceXBlock]
         if GroupProjectVideoResourceXBlock.is_available():
             blocks.append(GroupProjectVideoResourceXBlock)
         blocks.append(ProjectTeamXBlock)

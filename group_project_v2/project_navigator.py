@@ -9,14 +9,15 @@ from xblock.exceptions import NoSuchUsage
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
-from xblockutils.studio_editable import StudioContainerXBlockMixin, StudioEditableXBlockMixin
+from xblockutils.studio_editable import (
+    StudioContainerXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin, NestedXBlockSpec
+)
 from group_project_v2.mixins import (
-    XBlockWithComponentsMixin, XBlockWithPreviewMixin, ChildrenNavigationXBlockMixin,
+    XBlockWithComponentsMixin, ChildrenNavigationXBlockMixin,
     XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin, NoStudioEditableSettingsMixin,
-    NestedXBlockSpec
 )
 
-from group_project_v2.utils import loader, gettext as _, DiscussionXBlockProxy, add_resource
+from group_project_v2.utils import loader, gettext as _, DiscussionXBlockShim, add_resource
 
 log = logging.getLogger(__name__)
 
@@ -431,7 +432,7 @@ class PrivateDiscussionViewXBlock(ProjectNavigatorViewXBlockBase):
     initialize_js_function = "GroupProjectPrivateDiscussionView"
 
     def _project_has_discussion(self):
-        return self.navigator.group_project.has_child_of_category(DiscussionXBlockProxy.CATEGORY)
+        return self.navigator.group_project.has_child_of_category(DiscussionXBlockShim.CATEGORY)
 
     @property
     def is_view_available(self):

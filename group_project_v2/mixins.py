@@ -3,7 +3,6 @@ from datetime import timedelta
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.locator import BlockUsageLocator
-from xblock.exceptions import NoSuchViewError
 from xblock.fragment import Fragment
 
 from group_project_v2.api_error import ApiError
@@ -12,6 +11,8 @@ from group_project_v2.utils import (
     OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES,
     loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource
 )
+from xblockutils.studio_editable import StudioContainerWithNestedXBlocksMixin
+
 
 log = logging.getLogger(__name__)
 
@@ -160,101 +161,29 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin):
         return result
 
 
-class NestedXBlockSpec(object):
-    def __init__(self, block, single_instance=False, disabled=False, disabled_reason=None):
-        self._block = block
-        self._single_instance = single_instance
-        self._disabled = disabled
-        self._disabled_reason = disabled_reason
+class XBlockWithComponentsMixin(StudioContainerWithNestedXBlocksMixin):
+    CHILD_PREVIEW_TEMPLATE = "templates/html/default_preview_view.html"
 
     @property
-    def category(self):
-        return self._block.CATEGORY
-
-    @property
-    def label(self):
-        return self._block.STUDIO_LABEL
-
-    @property
-    def single_instance(self):
-        return self._single_instance
-
-    @property
-    def disabled(self):
-        return self._disabled
-
-    @property
-    def disabled_reason(self):
-        return self._disabled_reason
-
-
-class XBlockWithComponentsMixin(object):
-    @property
-    def allowed_nested_blocks(self):  # pylint: disable=no-self-use
-        return []
-
-    def get_nested_blocks_spec(self):
-        return [
-            block_spec if isinstance(block_spec, NestedXBlockSpec) else NestedXBlockSpec(block_spec)
-            for block_spec in self.allowed_nested_blocks
-        ]
+    def loader(self):
+        return loader
 
     @outsider_disallowed_protected_view
     def author_edit_view(self, context):
         """
         Add some HTML to the author view that allows authors to add child blocks.
         """
-        fragment = Fragment()
-
-        self.render_children(context, fragment, can_reorder=True, can_add=False)
-        fragment.add_content(
-            loader.render_template('templates/html/add_buttons.html', {'child_blocks': self.get_nested_blocks_spec()})
-        )
+        fragment = super(XBlockWithComponentsMixin, self).author_edit_view(context)
         add_resource(self, 'css', 'public/css/group_project.css', fragment)
         add_resource(self, 'css', 'public/css/group_project_edit.css', fragment)
-        add_resource(self, 'javascript', 'public/js/xblock_with_components_edit.js', fragment)
-        fragment.initialize_js('XBlockWithComponentsEdit')
         return fragment
 
     @outsider_disallowed_protected_view
     def author_preview_view(self, context):
-        children_contents = []
-
-        fragment = Fragment()
-        for child in self._children:
-            child_fragment = self._render_child_fragment(child, context, 'preview_view')
-            fragment.add_frag_resources(child_fragment)
-            children_contents.append(child_fragment.content)
-
-        render_context = {
-            'block': self,
-            'children_contents': children_contents
-        }
-        render_context.update(context)
-        fragment.add_content(loader.render_template("templates/html/default_preview_view.html", render_context))
+        fragment = super(XBlockWithComponentsMixin, self).author_preview_view(context)
         add_resource(self, 'css', 'public/css/group_project.css', fragment)
         add_resource(self, 'css', 'public/css/group_project_preview.css', fragment)
         return fragment
-
-    def _render_child_fragment(self, child, context, view='student_view'):
-        try:
-            child_fragment = child.render(view, context)
-        except NoSuchViewError:
-            if child.scope_ids.block_type == 'html' and getattr(self.runtime, 'is_author_mode', False):
-                # html block doesn't support preview_view, and if we use student_view Studio will wrap
-                # it in HTML that we don't want in the preview. So just render its HTML directly:
-                child_fragment = Fragment(child.data)
-            else:
-                child_fragment = child.render('student_view', context)
-
-        return child_fragment
-
-
-class XBlockWithPreviewMixin(object):
-    def preview_view(self, context):
-        view_to_render = 'author_view' if hasattr(self, 'author_view') else 'student_view'
-        renderer = getattr(self, view_to_render)
-        return renderer(context)
 
 
 class XBlockWithUrlNameDisplayMixin(object):

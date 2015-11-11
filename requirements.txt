@@ -1,4 +1,4 @@
--e git+https://github.com/edx/xblock-utils.git@25f15734ec8d29fde0e114bbd199fd48638865ae#egg=xblock-utils
+-e git+https://github.com/edx/xblock-utils.git@08e5a5a9fc8ab46b627435427fd7e04c20809009#egg=xblock-utils
 -e .
 lxml>=3.0.1
 lazy>=1.1

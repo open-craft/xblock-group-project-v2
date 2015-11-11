@@ -10,16 +10,17 @@ from xblock.fields import Scope, String, Float, Integer, DateTime
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
-from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin
+from xblockutils.studio_editable import (
+    StudioEditableXBlockMixin, StudioContainerXBlockMixin, XBlockWithPreviewMixin, NestedXBlockSpec
+)
 
 from group_project_v2.mixins import (
-    ChildrenNavigationXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin,
-    NestedXBlockSpec
+    ChildrenNavigationXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin
 )
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import (
-    loader, mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockProxy, Constants,
+    loader, mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockShim, Constants,
     add_resource, gettext as _
 )
 from group_project_v2.stage import (
@@ -72,7 +73,7 @@ class GroupProjectXBlock(
         return [
             NestedXBlockSpec(GroupActivityXBlock),
             NestedXBlockSpec(GroupProjectNavigatorXBlock, single_instance=True),
-            NestedXBlockSpec(DiscussionXBlockProxy, single_instance=True)
+            NestedXBlockSpec(DiscussionXBlockShim, single_instance=True)
         ]
 
     @lazy
@@ -167,7 +168,7 @@ class GroupProjectXBlock(
             child_context
         )
 
-        discussion = self.get_child_of_category(DiscussionXBlockProxy.CATEGORY)
+        discussion = self.get_child_of_category(DiscussionXBlockShim.CATEGORY)
         render_child_fragment(
             discussion, 'discussion_content',
             _(u"This Group Project V2 does not contain a discussion"),
