@@ -176,7 +176,7 @@ class GroupProjectXBlock(
             child_context
         )
 
-        fragment.add_content(loader.render_template("templates/html/group_project.html", render_context))
+        fragment.add_content(loader.render_template("templates/html/project/student_view.html", render_context))
 
         add_resource(self, 'css', 'public/css/group_project.css', fragment)
         add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment, via_url=True)
@@ -186,7 +186,14 @@ class GroupProjectXBlock(
 
     def dashboard_view(self, context):
         fragment = Fragment()
-        fragment.add_content(u"Dashboard view")
+
+        activity_fragments = self._render_children('dashboard_view', context, self.activities)
+        activity_contents = [frag.content for frag in activity_fragments]
+        fragment.add_frags_resources(activity_fragments)
+
+        render_context = {'project': self, 'activity_contents': activity_contents}
+        fragment.add_content(loader.render_template("templates/html/project/dashboard_view.html", render_context))
+
         return fragment
 
     def validate(self):
@@ -409,6 +416,10 @@ class GroupActivityXBlock(
         fragment.add_content(loader.render_template("templates/html/activity/submissions_view.html", context))
 
         return fragment
+
+    @outsider_disallowed_protected_view
+    def dashboard_view(self, context):
+        return Fragment(u"Activity " + unicode(self.scope_ids.usage_id))
 
     def mark_complete(self, user_id):
         self.runtime.publish(self, 'progress', {'user_id': user_id})
