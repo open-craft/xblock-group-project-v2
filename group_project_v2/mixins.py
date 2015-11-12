@@ -58,6 +58,12 @@ class ChildrenNavigationXBlockMixin(object):
         except InvalidKeyError:  # workbench support
             return block_id_string
 
+    def _render_children(self, view, children_context, children=None):
+        children_to_render = children if children is not None else self._children
+        results = [child.render(view, children_context) for child in children_to_render]
+
+        return results
+
 
 class CourseAwareXBlockMixin(object):
     @property

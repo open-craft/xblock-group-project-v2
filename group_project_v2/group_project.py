@@ -365,11 +365,9 @@ class GroupActivityXBlock(
         children_context = {}
         children_context.update(context)
 
-        stage_contents = []
-        for stage in self.available_stages:
-            child_fragment = stage.render('navigation_view', children_context)
-            fragment.add_frag_resources(child_fragment)
-            stage_contents.append(child_fragment.content)
+        stage_fragments = self._render_children('navigation_view', children_context, self.available_stages)
+        stage_contents = [frag.content for frag in stage_fragments]
+        fragment.add_frags_resources(stage_fragments)
 
         render_context = {'activity': self, 'stage_contents': stage_contents}
         fragment.add_content(loader.render_template("templates/html/activity/navigation_view.html", render_context))
@@ -380,14 +378,12 @@ class GroupActivityXBlock(
     def resources_view(self, context):
         fragment = Fragment()
 
-        has_resources = any([bool(stage.resources) for stage in self.stages])
+        resources = [resource for stage in self.stages for resource in stage.resources]
+        has_resources = bool(resources)
 
-        resource_contents = []
-        for stage in self.stages:
-            for resource in stage.resources:
-                resource_fragment = resource.render('resources_view', context)
-                fragment.add_frag_resources(resource_fragment)
-                resource_contents.append(resource_fragment.content)
+        resource_fragments = self._render_children('resources_view', context, resources)
+        resource_contents = [frag.content for frag in resource_fragments]
+        fragment.add_frags_resources(resource_fragments)
 
         context = {'activity': self, 'resource_contents': resource_contents, 'has_resources': has_resources}
         fragment.add_content(loader.render_template("templates/html/activity/resources_view.html", context))
@@ -398,16 +394,16 @@ class GroupActivityXBlock(
     def submissions_view(self, context):
         fragment = Fragment()
 
-        target_stages = [stage for stage in self.stages if isinstance(stage, SubmissionStage)]
+        submissions = [
+            submission
+            for stage in self.stages if isinstance(stage, SubmissionStage)
+            for submission in stage.submissions
+        ]
+        has_submissions = bool(submissions)
 
-        has_submissions = any([stage.has_submissions for stage in target_stages])
-
-        submission_contents = []
-        for stage in target_stages:
-            for child in stage.submissions:
-                child_fragment = child.render('submissions_view', context)
-                fragment.add_frag_resources(child_fragment)
-                submission_contents.append(child_fragment.content)
+        submission_fragments = self._render_children('submissions_view', context, submissions)
+        submission_contents = [frag.content for frag in submission_fragments]
+        fragment.add_frags_resources(submission_fragments)
 
         context = {'activity': self, 'submission_contents': submission_contents, 'has_submissions': has_submissions}
         fragment.add_content(loader.render_template("templates/html/activity/submissions_view.html", context))
