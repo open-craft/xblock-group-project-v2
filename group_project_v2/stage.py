@@ -10,13 +10,11 @@ from xblock.core import XBlock
 from xblock.fields import Scope, String, DateTime, Boolean
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
-from xblockutils.studio_editable import StudioEditableXBlockMixin, StudioContainerXBlockMixin, XBlockWithPreviewMixin
+from xblockutils.studio_editable import XBlockWithPreviewMixin
 
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import (
-    ChildrenNavigationXBlockMixin,
-    WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin,
-    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin
+    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin, CommonMixinCollection
 )
 from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
@@ -74,10 +72,9 @@ class SimpleCompletionStageMixin(object):
 
 
 class BaseGroupActivityStage(
-    XBlockWithPreviewMixin, XBlockWithComponentsMixin, StageNotificationsMixin,
-    XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-    ChildrenNavigationXBlockMixin, XBlockWithUrlNameDisplayMixin,
-    WorkgroupAwareXBlockMixin, AdminAccessControlXBlockMixin
+    CommonMixinCollection, XBlockWithPreviewMixin, StageNotificationsMixin,
+    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
+    XBlock,
 ):
     open_date = DateTime(
         display_name=_(u"Open Date"),
@@ -117,6 +114,8 @@ class BaseGroupActivityStage(
     STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as it's not yet opened.")
     STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as it's closed.")
     STAGE_URL_NAME_TEMPLATE = _(u"url_name to link to this {stage_name}:")
+
+    template_location = 'stages'
 
     @property
     def id(self):
@@ -298,6 +297,19 @@ class BaseGroupActivityStage(
         }
         rendering_context.update(context)
         fragment.add_content(loader.render_template("templates/html/stages/navigation_view.html", rendering_context))
+        return fragment
+
+    def dashboard_view(self, context):
+        fragment = Fragment()
+
+        # TODO - real stats calculation
+        stats = {
+            StageState.COMPLETED: 0,
+            StageState.INCOMPLETE: 70,
+            StageState.NOT_STARTED: 30
+        }
+        render_context = {'stage': self, 'stats': stats}
+        fragment.add_content(self.render_template('dashboard_view', render_context))
         return fragment
 
     def get_new_stage_state_data(self):

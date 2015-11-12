@@ -1,0 +1,9 @@
+{% load i18n %}
+<div class="activity dashboard_view">
+  <div class="activity_header">
+    {{ activity.display_name }}
+  </div>
+  {% for stage_content in stage_contents %}
+    {{ stage_content|safe }}
+  {% endfor %}
+</div>
