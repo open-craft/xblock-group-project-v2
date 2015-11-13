@@ -1,0 +1,34 @@
+.group-project-stage-state {
+    display: inline-block;
+    font-size: 16px;
+    margin-left: 5px;
+    width: 14px;
+    margin-right: 2px;
+}
+
+.group-project-stage-state.not_started {
+    color: #ccc;
+}
+
+.group-project-stage-state.not_started:before {
+    content: "\f111";
+    font-family: FontAwesome;
+}
+
+.group-project-stage-state.completed {
+    color: #629b2a;
+}
+
+.group-project-stage-state.completed:before {
+    content: "\f058";
+    font-family: FontAwesome;
+}
+
+.group-project-stage-state.incomplete {
+    color: #b6d332;
+}
+
+.group-project-stage-state.incomplete:before {
+    content: "\f111";
+    font-family: FontAwesome;
+}

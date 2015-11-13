@@ -173,6 +173,7 @@ class GroupProjectXBlock(CommonMixinCollection, XBlock):
         fragment.add_content(self.render_template('student_view', render_context))
 
         add_resource(self, 'css', 'public/css/group_project.css', fragment)
+        add_resource(self, 'css', 'public/css/group_project_common.css', fragment)
         add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment, via_url=True)
         add_resource(self, 'javascript', 'public/js/group_project.js', fragment)
         fragment.initialize_js("GroupProjectBlock")
@@ -187,7 +188,9 @@ class GroupProjectXBlock(CommonMixinCollection, XBlock):
 
         render_context = {'project': self, 'activity_contents': activity_contents}
         fragment.add_content(self.render_template('dashboard_view', render_context))
+        add_resource(self, 'css', 'public/css/group_project_common.css', fragment)
         add_resource(self, 'css', 'public/css/group_project_dashboard.css', fragment)
+        add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment, via_url=True)
 
         return fragment
 
