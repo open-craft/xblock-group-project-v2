@@ -218,6 +218,10 @@ class BaseGroupActivityStage(
     def can_mark_complete(self):
         return self.available_now and self.is_group_member
 
+    @property
+    def is_graded_stage(self):
+        return False
+
     def is_current_stage(self, context):
         target_stage_id = context.get(Constants.CURRENT_STAGE_ID_PARAMETER_NAME, None)
         if not target_stage_id:
@@ -458,6 +462,10 @@ class SubmissionStage(BaseGroupActivityStage):
     @property
     def has_submissions(self):
         return bool(self.submissions)  # explicitly converting to bool to indicate that it is bool property
+
+    @property
+    def is_graded_stage(self):
+        return True
 
     def validate(self):
         violations = super(SubmissionStage, self).validate()
@@ -755,6 +763,10 @@ class PeerReviewStage(ReviewBaseStage):
         if not self.is_admin_grader and self.activity.is_ta_graded:
             return False
 
+        return True
+
+    @property
+    def is_graded_stage(self):
         return True
 
     def review_status(self):

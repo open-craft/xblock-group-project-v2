@@ -31,6 +31,13 @@
     width: 100%;
     background-color: white;
     padding: 15px 10px;
+    -webkit-box-shadow: 0 2px 5px 1px rgba(204,204,204,1);
+    -moz-box-shadow: 0 2px 5px 1px rgba(204,204,204,1);
+    box-shadow: 0 2px 5px 1px rgba(204,204,204,1);
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view.group-project-non-graded-stage {
+    background-color: #f3f3f3;
 }
 
 .group-project-xblock-wrapper .stage.dashboard-view .stage-status {
@@ -72,7 +79,7 @@
 .group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-stats {
     border: none;
     width: 100%;
-
+    background: transparent;
 }
 
 .group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-stats tr {
@@ -91,4 +98,14 @@
 .group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-stats td.group-project-stage-stat-value {
     color: #000;
     font-weight: bold;
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-navigate-to-detailed-view {
+    text-align: right;
+    color: #3384CA;
+    font-size: 18px;
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-navigate-to-detailed-view span {
+    font-family: FontAwesome;
 }

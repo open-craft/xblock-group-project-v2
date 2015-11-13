@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="stage dashboard-view">
+<div class="stage dashboard-view {% if not stage.is_graded_stage %}group-project-non-graded-stage{% endif %}">
   <div class="stage-status">
     <span class="stage-status-label">{% trans "Status:" %}</span>
     <span class="group-project-stage-state fa {{ stage_state }}"></span>
@@ -21,4 +21,11 @@
       </tr>
     {% endfor %}
   </table>
+  <div class="group-project-stage-navigate-to-detailed-view">
+    {% if stage.is_graded_stage %}
+      <span class="stage-open-detailed-view fa fa-chevron-right {% if not stage.is_open %}disabled{% endif %}"></span>
+    {% else %}
+      &nbsp;
+    {% endif %}
+  </div>
 </div>
