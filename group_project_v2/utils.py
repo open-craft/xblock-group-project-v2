@@ -26,6 +26,9 @@ def gettext(text):
     return text
 
 
+_ = gettext
+
+
 NO_EDITABLE_SETTINGS = gettext(u"This XBlock does not contain any editable settings")
 MUST_BE_OVERRIDDEN = gettext(u"Must be overridden in inherited class")
 
@@ -280,3 +283,25 @@ def add_resource(block, resource_type, path, fragment, via_url=False):
         action_parameter = loader.load_unicode(path)
 
     action(action_parameter)
+
+
+class StageState(object):
+    NOT_STARTED = 'not_started'
+    INCOMPLETE = 'incomplete'
+    COMPLETED = 'completed'
+
+    HUMAN_NAMES_MAP = {
+        NOT_STARTED: _("Not started"),
+        INCOMPLETE: _("Partially complete"),
+        COMPLETED: _("Complete")
+    }
+
+    @classmethod
+    def get_human_name(cls, state):
+        return cls.HUMAN_NAMES_MAP.get(state)
+
+
+class ReviewState(object):
+    NOT_STARTED = 'not_started'
+    INCOMPLETE = 'incomplete'
+    COMPLETED = 'completed'

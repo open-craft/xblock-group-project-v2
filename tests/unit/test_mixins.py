@@ -149,7 +149,6 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
         self.assertFalse(child2.render.called)
 
 
-
 class CourseAwareXBlockMixinGuineaPig(CommonMixinGuineaPig, CourseAwareXBlockMixin):
     pass
 

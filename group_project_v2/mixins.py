@@ -12,8 +12,9 @@ from group_project_v2.utils import (
     OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES,
     loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource,
     MUST_BE_OVERRIDDEN)
-from xblockutils.studio_editable import StudioContainerWithNestedXBlocksMixin, XBlockWithPreviewMixin, \
-    StudioContainerXBlockMixin, StudioEditableXBlockMixin
+from xblockutils.studio_editable import (
+    StudioContainerWithNestedXBlocksMixin, StudioContainerXBlockMixin, StudioEditableXBlockMixin
+)
 
 log = logging.getLogger(__name__)
 
@@ -250,4 +251,5 @@ class CommonMixinCollection(
     StudioEditableXBlockMixin, StudioContainerXBlockMixin,
     WorkgroupAwareXBlockMixin, TemplateManagerMixin, DashboardMixin
 ):
-    pass
+    def dashboard_view(self, context):  # just to make pylint and other static analyzers happy
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)

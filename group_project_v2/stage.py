@@ -11,6 +11,7 @@ from xblock.core import XBlock
 from xblock.fields import Scope, String, DateTime, Boolean
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
+
 from xblockutils.studio_editable import XBlockWithPreviewMixin
 
 from group_project_v2.api_error import ApiError
@@ -28,32 +29,10 @@ from group_project_v2.utils import (
     loader, format_date, gettext as _, make_key, get_link_to_block, HtmlXBlockShim, Constants, MUST_BE_OVERRIDDEN,
     outsider_disallowed_protected_view, outsider_disallowed_protected_handler, key_error_protected_handler,
     conversion_protected_handler,
-    add_resource)
+    add_resource, StageState, ReviewState
+)
 
 log = logging.getLogger(__name__)
-
-
-class StageState(object):
-    NOT_STARTED = 'not_started'
-    INCOMPLETE = 'incomplete'
-    COMPLETED = 'completed'
-
-    HUMAN_NAMES_MAP = {
-        NOT_STARTED: _("Not started"),
-        INCOMPLETE: _("Partially complete"),
-        COMPLETED: _("Complete")
-    }
-
-    @classmethod
-    def get_human_name(cls, state):
-        return cls.HUMAN_NAMES_MAP.get(state)
-
-
-class ReviewState(object):
-    NOT_STARTED = 'not_started'
-    INCOMPLETE = 'incomplete'
-    COMPLETED = 'completed'
-
 
 DISPLAY_NAME_NAME = _(u"Display Name")
 DISPLAY_NAME_HELP = _(U"This is a name of the stage")
@@ -219,7 +198,7 @@ class BaseGroupActivityStage(
         return self.available_now and self.is_group_member
 
     @property
-    def is_graded_stage(self):
+    def is_graded_stage(self):  # pylint: disable=no-self-use
         return False
 
     def is_current_stage(self, context):
@@ -312,7 +291,7 @@ class BaseGroupActivityStage(
 
         return stage_state, state_stats
 
-    def get_stage_stats(self):
+    def get_stage_stats(self):  # pylint: disable=no-self-use
         # TODO - real stats calculation
         return {
             StageState.COMPLETED: 0.4,
@@ -342,7 +321,9 @@ class BaseGroupActivityStage(
             (StageState.get_human_name(StageState.INCOMPLETE), stats[StageState.INCOMPLETE]*100),
             (StageState.get_human_name(StageState.COMPLETED), stats[StageState.COMPLETED]*100),
         ])
-        render_context = {'stage': self, 'stats': human_stats, 'stage_state': state, 'ta_graded': self.activity.is_ta_graded}
+        render_context = {
+            'stage': self, 'stats': human_stats, 'stage_state': state, 'ta_graded': self.activity.is_ta_graded
+        }
         fragment.add_content(self.render_template('dashboard_view', render_context))
         return fragment
 

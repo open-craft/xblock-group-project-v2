@@ -408,7 +408,9 @@ class GroupActivityXBlock(CommonMixinCollection, XBlockWithPreviewMixin, Activit
         submission_contents = [frag.content for frag in submission_fragments]
         fragment.add_frags_resources(submission_fragments)
 
-        render_context = {'activity': self, 'submission_contents': submission_contents, 'has_submissions': has_submissions}
+        render_context = {
+            'activity': self, 'submission_contents': submission_contents, 'has_submissions': has_submissions
+        }
         fragment.add_content(self.render_template('submissions_view', render_context))
 
         return fragment
