@@ -1,4 +1,5 @@
 <div class="stage dashboard-view">
+
   {% for stat_key, stat_percent in stats.items %}
     {{ stat_key }} -> {{ stat_percent|floatformat:"0"}}%
   {% endfor %}

@@ -6,7 +6,10 @@
   </div>
   <div class="stages">
     {% for stage_content in stage_contents %}
-      {{ stage_content|safe }}
+      <div class="stage-wrapper">
+        {{ stage_content|safe }}
+      </div>
     {% endfor %}
   </div>
+  <div class="clear-float"></div>
 </div>

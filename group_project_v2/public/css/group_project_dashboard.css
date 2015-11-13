@@ -1,5 +1,9 @@
+.clear-float {
+    clear: both;
+}
+
 .group-project-xblock-wrapper .activity.dashboard-view {
-    margin-top: 15px;
+    margin-bottom: 15px;
 }
 
 .group-project-xblock-wrapper .activity.dashboard-view .activity-header .activity-header-label {
@@ -13,4 +17,18 @@
 
 .group-project-xblock-wrapper .activity.dashboard-view .stages {
     margin-top: 10px;
+}
+
+.group-project-xblock-wrapper .activity.dashboard-view .stages .stage-wrapper {
+    display: inline-block;
+    padding-right: 15px;
+    width: 25%;
+    margin: 15px 0 0;
+    float: left;
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view {
+    width: 100%;
+    background-color: white;
+    height: 160px;
 }
