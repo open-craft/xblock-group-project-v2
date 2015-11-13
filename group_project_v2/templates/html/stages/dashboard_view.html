@@ -4,6 +4,15 @@
     <span class="stage-status-label">{% trans "Status:" %}</span>
     <span class="group-project-stage-state fa {{ stage_state }}"></span>
   </div>
+  <div class="stage-data">
+    <div class="group-project-stage-title">{{ stage.display_name }}</div>
+    <div class="group-project-stage-dates details">
+      {% if stage.close_date %}{{ stage.formatted_close_date }}{% else %}&nbsp;{% endif %}
+    </div>
+    <div class="group-project-stage-ta-graded details">
+      {% if ta_graded %}{% trans "TA Graded" %}{% else %}&nbsp;{% endif %}
+    </div>
+  </div>
   {% for stat_key, stat_percent in stats.items %}
     {{ stat_key }} -> {{ stat_percent|floatformat:"0"}}%
   {% endfor %}

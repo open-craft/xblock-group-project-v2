@@ -322,7 +322,7 @@ class BaseGroupActivityStage(
         fragment = Fragment()
 
         state, stats = self.get_dashboard_stage_state()
-        render_context = {'stage': self, 'stats': stats, 'stage_state': state}
+        render_context = {'stage': self, 'stats': stats, 'stage_state': state, 'ta_graded': self.activity.is_ta_graded}
         fragment.add_content(self.render_template('dashboard_view', render_context))
         return fragment
 

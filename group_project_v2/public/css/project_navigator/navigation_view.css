@@ -21,15 +21,7 @@
     margin-left: -20px;
 }
 
-.group-project-navigation-view .group-project-stage-type {
-    color: #868685;
-    font-size: 12px;
-}
 
-.group-project-navigation-view .group-project-stage-title {
-    font-size: 12px;
-    font-weight: bold;
-}
 
 .group-project-navigation-view .group-project-stage.disabled .group-project-stage-title a,
 .group-project-navigation-view .group-project-stage.disabled .group-project-stage-title a:hover {
@@ -39,5 +31,4 @@
 .group-project-navigation-view .group-project-stage-dates {
     font-size: 12px;
     font-weight: 600;
-    color: #E37222;
 }

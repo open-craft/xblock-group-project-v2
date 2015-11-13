@@ -30,7 +30,6 @@
 .group-project-xblock-wrapper .stage.dashboard-view {
     width: 100%;
     background-color: white;
-    height: 160px;
     padding: 15px 10px;
 }
 
@@ -41,4 +40,27 @@
 .group-project-xblock-wrapper .stage.dashboard-view .stage-status .stage-status-label {
     text-transform: uppercase;
     font-weight: 600;
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view .stage-data {
+    margin-bottom: 20px;
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view .stage-data div {
+    margin-bottom: 5px;
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view .stage-data div.details {
+    font-size: 14px;
+    color: #E37222;
+    font-weight: 600;
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view .stage-data .group-project-stage-title {
+    font-size: 14px;
+    color: #3384CA;
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view .stage-data .group-project-stage-ta-graded {
+    text-transform: uppercase;
 }
