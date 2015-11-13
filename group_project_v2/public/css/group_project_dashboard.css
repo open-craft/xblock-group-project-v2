@@ -1,0 +1,16 @@
+.group-project-xblock-wrapper .activity.dashboard-view {
+    margin-top: 15px;
+}
+
+.group-project-xblock-wrapper .activity.dashboard-view .activity-header .activity-header-label {
+    text-transform: uppercase;
+    color: #868685;
+}
+
+.group-project-xblock-wrapper .activity.dashboard-view .activity-header .activity-header-title {
+    color: #3384CA;
+}
+
+.group-project-xblock-wrapper .activity.dashboard-view .stages {
+    margin-top: 10px;
+}

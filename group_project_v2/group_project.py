@@ -187,6 +187,7 @@ class GroupProjectXBlock(CommonMixinCollection, XBlock):
 
         render_context = {'project': self, 'activity_contents': activity_contents}
         fragment.add_content(self.render_template('dashboard_view', render_context))
+        add_resource(self, 'css', 'public/css/group_project_dashboard.css', fragment)
 
         return fragment
 

@@ -1,9 +1,12 @@
 {% load i18n %}
-<div class="activity dashboard_view">
-  <div class="activity_header">
-    {{ activity.display_name }}
+<div class="activity dashboard-view">
+  <div class="activity-header">
+    <span class="activity-header-label">{% trans "Activity:" %}</span>
+    <span class="activity-header-title">{{ activity.display_name }}</span>
   </div>
-  {% for stage_content in stage_contents %}
-    {{ stage_content|safe }}
-  {% endfor %}
+  <div class="stages">
+    {% for stage_content in stage_contents %}
+      {{ stage_content|safe }}
+    {% endfor %}
+  </div>
 </div>

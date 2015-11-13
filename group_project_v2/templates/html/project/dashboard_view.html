@@ -1,6 +1,6 @@
 {% load i18n %}
-<div class="group-project-xblock-wrapper dashboard_view">
+<div class="group-project-xblock-wrapper dashboard-view">
   {% for activity_content in activity_contents %}
-  <div class="activity">{{ activity_content|safe }}</div>
+    {{ activity_content|safe }}
   {% endfor %}
 </div>
