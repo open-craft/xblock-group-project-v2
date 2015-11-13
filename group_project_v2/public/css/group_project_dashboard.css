@@ -31,4 +31,14 @@
     width: 100%;
     background-color: white;
     height: 160px;
+    padding: 15px 10px;
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view .stage-status {
+    margin-bottom: 20px;
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view .stage-status .stage-status-label {
+    text-transform: uppercase;
+    font-weight: 600;
 }

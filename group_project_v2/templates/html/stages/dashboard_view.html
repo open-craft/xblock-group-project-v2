@@ -1,5 +1,9 @@
+{% load i18n %}
 <div class="stage dashboard-view">
-
+  <div class="stage-status">
+    <span class="stage-status-label">{% trans "Status:" %}</span>
+    <span class="group-project-stage-state fa {{ stage_state }}"></span>
+  </div>
   {% for stat_key, stat_percent in stats.items %}
     {{ stat_key }} -> {{ stat_percent|floatformat:"0"}}%
   {% endfor %}

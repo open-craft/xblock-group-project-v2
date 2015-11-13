@@ -286,6 +286,25 @@ class BaseGroupActivityStage(
     def get_stage_state(self):
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
+    def get_dashboard_stage_state(self):
+        state_stats = self.get_stage_stats()
+        if state_stats.get(StageState.COMPLETED, 0) == 1:
+            stage_state = StageState.COMPLETED
+        elif state_stats.get(StageState.INCOMPLETE, 0) > 0 or state_stats.get(StageState.COMPLETED, 0) > 0:
+            stage_state = StageState.INCOMPLETE
+        else:
+            stage_state = StageState.INCOMPLETE
+
+        return stage_state, state_stats
+
+    def get_stage_stats(self):
+        # TODO - real stats calculation
+        return {
+            StageState.COMPLETED: 0,
+            StageState.INCOMPLETE: 70,
+            StageState.NOT_STARTED: 30
+        }
+
     def navigation_view(self, context):
         fragment = Fragment()
         rendering_context = {
@@ -302,13 +321,8 @@ class BaseGroupActivityStage(
     def dashboard_view(self, context):
         fragment = Fragment()
 
-        # TODO - real stats calculation
-        stats = {
-            StageState.COMPLETED: 0,
-            StageState.INCOMPLETE: 70,
-            StageState.NOT_STARTED: 30
-        }
-        render_context = {'stage': self, 'stats': stats}
+        state, stats = self.get_dashboard_stage_state()
+        render_context = {'stage': self, 'stats': stats, 'stage_state': state}
         fragment.add_content(self.render_template('dashboard_view', render_context))
         return fragment
 
