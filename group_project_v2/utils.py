@@ -2,15 +2,13 @@
 import functools
 import logging
 from datetime import date, datetime
-from django.conf import settings
 import xml.etree.ElementTree as ET
+
+from django.conf import settings
 from django.utils.safestring import mark_safe
 from lazy.lazy import lazy
-
 from xblock.fragment import Fragment
-
 from xblockutils.resources import ResourceLoader
-
 
 log = logging.getLogger(__name__)
 loader = ResourceLoader(__name__)
@@ -283,25 +281,3 @@ def add_resource(block, resource_type, path, fragment, via_url=False):
         action_parameter = loader.load_unicode(path)
 
     action(action_parameter)
-
-
-class StageState(object):
-    NOT_STARTED = 'not_started'
-    INCOMPLETE = 'incomplete'
-    COMPLETED = 'completed'
-
-    HUMAN_NAMES_MAP = {
-        NOT_STARTED: _("Not started"),
-        INCOMPLETE: _("Partially complete"),
-        COMPLETED: _("Complete")
-    }
-
-    @classmethod
-    def get_human_name(cls, state):
-        return cls.HUMAN_NAMES_MAP.get(state)
-
-
-class ReviewState(object):
-    NOT_STARTED = 'not_started'
-    INCOMPLETE = 'incomplete'
-    COMPLETED = 'completed'

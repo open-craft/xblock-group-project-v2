@@ -2,14 +2,15 @@
 Tests for stage contents and interaction
 """
 import datetime
-import ddt
 import textwrap
+
+import ddt
 from freezegun import freeze_time
 import mock
+
 from group_project_v2.mixins import UserAwareXBlockMixin
 from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage, TeamEvaluationStage
 from group_project_v2.utils import ALLOWED_OUTSIDER_ROLES
-
 from tests.integration.base_test import BaseIntegrationTest
 from tests.integration.page_elements import GroupProjectElement, ReviewStageElement, ProjectTeamElement
 from tests.utils import KNOWN_USERS, OTHER_GROUPS

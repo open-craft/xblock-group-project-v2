@@ -6,7 +6,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 from group_project_v2.project_navigator import ViewTypes
-from group_project_v2.utils import StageState
+from group_project_v2.stage.utils import StageState
 
 
 class BaseElement(object):

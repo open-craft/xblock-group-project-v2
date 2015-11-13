@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 import logging
 import itertools
+
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
-
 from xblock.core import XBlock
 from xblock.exceptions import NoSuchUsage
 from xblock.fields import Scope, String, Float, Integer, DateTime
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
-
 from xblockutils.studio_editable import XBlockWithPreviewMixin, NestedXBlockSpec
 
 from group_project_v2.mixins import CommonMixinCollection
@@ -24,7 +23,6 @@ from group_project_v2.stage import (
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
     STAGE_TYPES
 )
-
 
 log = logging.getLogger(__name__)
 

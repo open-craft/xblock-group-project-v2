@@ -74,7 +74,7 @@ class BaseIntegrationTest(SeleniumXBlockTest):
             patchers.append(patcher)
 
         patch_get_link_to_block_at = (
-            'group_project_v2.stage.get_link_to_block',
+            'group_project_v2.stage.base.get_link_to_block',
             'group_project_v2.stage_components.get_link_to_block'
         )
         for location in patch_get_link_to_block_at:

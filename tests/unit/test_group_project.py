@@ -1,12 +1,13 @@
-import ddt
 from unittest import TestCase
-import mock
-from group_project_v2.group_project import GroupActivityXBlock
-from xblock.runtime import Runtime
-from group_project_v2.stage import BaseGroupActivityStage, TeamEvaluationStage, PeerReviewStage
 
-from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
+import ddt
+import mock
+from xblock.runtime import Runtime
 from xblock.field_data import DictFieldData
+
+from group_project_v2.group_project import GroupActivityXBlock
+from group_project_v2.stage import BaseGroupActivityStage, TeamEvaluationStage, PeerReviewStage
+from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
 from tests.utils import TestWithPatchesMixin, make_review_item
 
 

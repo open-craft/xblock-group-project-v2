@@ -2,11 +2,11 @@
 import json
 from unittest import TestCase
 from datetime import datetime
+from xml.etree import ElementTree
+
 import ddt
 from freezegun import freeze_time
 import mock
-from xml.etree import ElementTree
-
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
 from xblock.runtime import Runtime
