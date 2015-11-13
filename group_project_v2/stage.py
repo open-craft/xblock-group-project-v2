@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from datetime import datetime
 import json
 import logging
@@ -36,6 +37,16 @@ class StageState(object):
     NOT_STARTED = 'not_started'
     INCOMPLETE = 'incomplete'
     COMPLETED = 'completed'
+
+    HUMAN_NAMES_MAP = {
+        NOT_STARTED: _("Not started"),
+        INCOMPLETE: _("Partially complete"),
+        COMPLETED: _("Complete")
+    }
+
+    @classmethod
+    def get_human_name(cls, state):
+        return cls.HUMAN_NAMES_MAP.get(state)
 
 
 class ReviewState(object):
@@ -293,16 +304,16 @@ class BaseGroupActivityStage(
         elif state_stats.get(StageState.INCOMPLETE, 0) > 0 or state_stats.get(StageState.COMPLETED, 0) > 0:
             stage_state = StageState.INCOMPLETE
         else:
-            stage_state = StageState.INCOMPLETE
+            stage_state = StageState.NOT_STARTED
 
         return stage_state, state_stats
 
     def get_stage_stats(self):
         # TODO - real stats calculation
         return {
-            StageState.COMPLETED: 0,
-            StageState.INCOMPLETE: 70,
-            StageState.NOT_STARTED: 30
+            StageState.COMPLETED: 0.4,
+            StageState.INCOMPLETE: 0.3,
+            StageState.NOT_STARTED: 0.3
         }
 
     def navigation_view(self, context):
@@ -322,7 +333,12 @@ class BaseGroupActivityStage(
         fragment = Fragment()
 
         state, stats = self.get_dashboard_stage_state()
-        render_context = {'stage': self, 'stats': stats, 'stage_state': state, 'ta_graded': self.activity.is_ta_graded}
+        human_stats = OrderedDict([
+            (StageState.get_human_name(StageState.NOT_STARTED), stats[StageState.NOT_STARTED]*100),
+            (StageState.get_human_name(StageState.INCOMPLETE), stats[StageState.INCOMPLETE]*100),
+            (StageState.get_human_name(StageState.COMPLETED), stats[StageState.COMPLETED]*100),
+        ])
+        render_context = {'stage': self, 'stats': human_stats, 'stage_state': state, 'ta_graded': self.activity.is_ta_graded}
         fragment.add_content(self.render_template('dashboard_view', render_context))
         return fragment
 

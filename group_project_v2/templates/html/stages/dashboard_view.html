@@ -13,7 +13,12 @@
       {% if ta_graded %}{% trans "TA Graded" %}{% else %}&nbsp;{% endif %}
     </div>
   </div>
-  {% for stat_key, stat_percent in stats.items %}
-    {{ stat_key }} -> {{ stat_percent|floatformat:"0"}}%
-  {% endfor %}
+  <table class="group-project-stage-stats">
+    {% for stat_label, stat_value in stats.items %}
+      <tr class="group-project-stage-stat">
+        <td class="group-project-stage-stat-label">{{ stat_label }}</td>
+        <td class="group-project-stage-stat-value">{{ stat_value|floatformat:"0" }}%</td>
+      </tr>
+    {% endfor %}
+  </table>
 </div>

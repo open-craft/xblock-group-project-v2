@@ -64,3 +64,31 @@
 .group-project-xblock-wrapper .stage.dashboard-view .stage-data .group-project-stage-ta-graded {
     text-transform: uppercase;
 }
+
+.group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-stats .group-project-stage-stat-label {
+    width: 80%;
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-stats {
+    border: none;
+    width: 100%;
+
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-stats tr {
+    background: transparent;
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-stats td {
+    padding: 4px 0;
+    color: #868685;
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-stats td.group-project-stage-stat-label {
+    width: 80%;
+}
+
+.group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-stats td.group-project-stage-stat-value {
+    color: #000;
+    font-weight: bold;
+}
