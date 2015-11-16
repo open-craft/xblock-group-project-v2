@@ -2,15 +2,13 @@
 import functools
 import logging
 from datetime import date, datetime
-from django.conf import settings
 import xml.etree.ElementTree as ET
+
+from django.conf import settings
 from django.utils.safestring import mark_safe
 from lazy.lazy import lazy
-
 from xblock.fragment import Fragment
-
 from xblockutils.resources import ResourceLoader
-
 
 log = logging.getLogger(__name__)
 loader = ResourceLoader(__name__)
@@ -24,6 +22,9 @@ if ALLOWED_OUTSIDER_ROLES is None:
 # Make '_' a no-op so we can scrape strings
 def gettext(text):
     return text
+
+
+_ = gettext
 
 
 NO_EDITABLE_SETTINGS = gettext(u"This XBlock does not contain any editable settings")

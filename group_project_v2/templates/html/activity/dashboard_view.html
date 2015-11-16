@@ -1,0 +1,15 @@
+{% load i18n %}
+<div class="activity dashboard-view">
+  <div class="activity-header">
+    <span class="activity-header-label">{% trans "Activity:" %}</span>
+    <span class="activity-header-title">{{ activity.display_name }}</span>
+  </div>
+  <div class="stages">
+    {% for stage_content in stage_contents %}
+      <div class="stage-wrapper">
+        {{ stage_content|safe }}
+      </div>
+    {% endfor %}
+  </div>
+  <div class="clear-float"></div>
+</div>

@@ -1,5 +1,6 @@
 import logging
 from datetime import timedelta
+import os
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.locator import BlockUsageLocator
@@ -9,10 +10,11 @@ from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.utils import (
     OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES,
-    loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource
+    loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource,
+    MUST_BE_OVERRIDDEN)
+from xblockutils.studio_editable import (
+    StudioContainerWithNestedXBlocksMixin, StudioContainerXBlockMixin, StudioEditableXBlockMixin
 )
-from xblockutils.studio_editable import StudioContainerWithNestedXBlocksMixin
-
 
 log = logging.getLogger(__name__)
 
@@ -57,6 +59,12 @@ class ChildrenNavigationXBlockMixin(object):
             return BlockUsageLocator.from_string(block_id_string)
         except InvalidKeyError:  # workbench support
             return block_id_string
+
+    def _render_children(self, view, children_context, children=None):
+        children_to_render = children if children is not None else self._children
+        results = [child.render(view, children_context) for child in children_to_render]
+
+        return results
 
 
 class CourseAwareXBlockMixin(object):
@@ -222,3 +230,26 @@ class NoStudioEditableSettingsMixin(object):
         fragment = Fragment()
         fragment.add_content(NO_EDITABLE_SETTINGS)
         return fragment
+
+
+class DashboardMixin(object):
+    def dashboard_view(self, context):
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
+
+
+class TemplateManagerMixin(object):
+    BASE_TEMPLATE_LOCATION = "templates/html"
+    template_location = None
+
+    def render_template(self, template, context, template_suffix=".html"):
+        template_path = os.path.join(self.BASE_TEMPLATE_LOCATION, self.template_location, template + template_suffix)
+        return loader.render_template(template_path, context)
+
+
+class CommonMixinCollection(
+    ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin,
+    StudioEditableXBlockMixin, StudioContainerXBlockMixin,
+    WorkgroupAwareXBlockMixin, TemplateManagerMixin, DashboardMixin
+):
+    def dashboard_view(self, context):  # just to make pylint and other static analyzers happy
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)

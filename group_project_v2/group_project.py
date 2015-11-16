@@ -1,26 +1,21 @@
 # -*- coding: utf-8 -*-
 import logging
 import itertools
+
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
-
 from xblock.core import XBlock
 from xblock.exceptions import NoSuchUsage
 from xblock.fields import Scope, String, Float, Integer, DateTime
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
+from xblockutils.studio_editable import XBlockWithPreviewMixin, NestedXBlockSpec
 
-from xblockutils.studio_editable import (
-    StudioEditableXBlockMixin, StudioContainerXBlockMixin, XBlockWithPreviewMixin, NestedXBlockSpec
-)
-
-from group_project_v2.mixins import (
-    ChildrenNavigationXBlockMixin, WorkgroupAwareXBlockMixin, XBlockWithComponentsMixin
-)
+from group_project_v2.mixins import CommonMixinCollection
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import (
-    loader, mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockShim, Constants,
+    mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockShim, Constants,
     add_resource, gettext as _
 )
 from group_project_v2.stage import (
@@ -29,14 +24,10 @@ from group_project_v2.stage import (
     STAGE_TYPES
 )
 
-
 log = logging.getLogger(__name__)
 
 
-class GroupProjectXBlock(
-    XBlockWithComponentsMixin, ChildrenNavigationXBlockMixin, WorkgroupAwareXBlockMixin,
-    XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin
-):
+class GroupProjectXBlock(CommonMixinCollection, XBlock):
     display_name = String(
         display_name="Display Name",
         help="This is a name of the project",
@@ -49,6 +40,8 @@ class GroupProjectXBlock(
     editable_fields = ('display_name', )
     has_score = False
     has_children = True
+
+    template_location = "project"
 
     @staticmethod
     def _sanitize_context(context):
@@ -175,12 +168,28 @@ class GroupProjectXBlock(
             child_context
         )
 
-        fragment.add_content(loader.render_template("templates/html/group_project.html", render_context))
+        fragment.add_content(self.render_template('student_view', render_context))
 
         add_resource(self, 'css', 'public/css/group_project.css', fragment)
+        add_resource(self, 'css', 'public/css/group_project_common.css', fragment)
         add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment, via_url=True)
         add_resource(self, 'javascript', 'public/js/group_project.js', fragment)
         fragment.initialize_js("GroupProjectBlock")
+        return fragment
+
+    def dashboard_view(self, context):
+        fragment = Fragment()
+
+        activity_fragments = self._render_children('dashboard_view', context, self.activities)
+        activity_contents = [frag.content for frag in activity_fragments]
+        fragment.add_frags_resources(activity_fragments)
+
+        render_context = {'project': self, 'activity_contents': activity_contents}
+        fragment.add_content(self.render_template('dashboard_view', render_context))
+        add_resource(self, 'css', 'public/css/group_project_common.css', fragment)
+        add_resource(self, 'css', 'public/css/group_project_dashboard.css', fragment)
+        add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment, via_url=True)
+
         return fragment
 
     def validate(self):
@@ -199,11 +208,7 @@ class GroupProjectXBlock(
 # pylint: disable=unused-argument,invalid-name
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
-class GroupActivityXBlock(
-    XBlockWithPreviewMixin, XBlockWithComponentsMixin, ActivityNotificationsMixin,
-    XBlock, StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-    ChildrenNavigationXBlockMixin, WorkgroupAwareXBlockMixin
-):
+class GroupActivityXBlock(CommonMixinCollection, XBlockWithPreviewMixin, ActivityNotificationsMixin, XBlock):
     """
     XBlock providing a group activity project for a group of students to collaborate upon
     """
@@ -249,6 +254,8 @@ class GroupActivityXBlock(
     editable_fields = ("display_name", "weight", "group_reviews_required_count", "user_review_count", "due_date")
     has_score = True
     has_children = True
+
+    template_location = 'activity'
 
     @property
     def id(self):
@@ -348,7 +355,7 @@ class GroupActivityXBlock(
                 'stage_content': stage_fragment.content,
             }
             render_context.update(context)
-            fragment.add_content(loader.render_template('/templates/html/activity/student_view.html', render_context))
+            fragment.add_content(self.render_template('student_view', render_context))
 
         return fragment
 
@@ -359,14 +366,12 @@ class GroupActivityXBlock(
         children_context = {}
         children_context.update(context)
 
-        stage_contents = []
-        for stage in self.available_stages:
-            child_fragment = stage.render('navigation_view', children_context)
-            fragment.add_frag_resources(child_fragment)
-            stage_contents.append(child_fragment.content)
+        stage_fragments = self._render_children('navigation_view', children_context, self.available_stages)
+        stage_contents = [frag.content for frag in stage_fragments]
+        fragment.add_frags_resources(stage_fragments)
 
         render_context = {'activity': self, 'stage_contents': stage_contents}
-        fragment.add_content(loader.render_template("templates/html/activity/navigation_view.html", render_context))
+        fragment.add_content(self.render_template('navigation_view', render_context))
 
         return fragment
 
@@ -374,17 +379,15 @@ class GroupActivityXBlock(
     def resources_view(self, context):
         fragment = Fragment()
 
-        has_resources = any([bool(stage.resources) for stage in self.stages])
+        resources = [resource for stage in self.stages for resource in stage.resources]
+        has_resources = bool(resources)
 
-        resource_contents = []
-        for stage in self.stages:
-            for resource in stage.resources:
-                resource_fragment = resource.render('resources_view', context)
-                fragment.add_frag_resources(resource_fragment)
-                resource_contents.append(resource_fragment.content)
+        resource_fragments = self._render_children('resources_view', context, resources)
+        resource_contents = [frag.content for frag in resource_fragments]
+        fragment.add_frags_resources(resource_fragments)
 
-        context = {'activity': self, 'resource_contents': resource_contents, 'has_resources': has_resources}
-        fragment.add_content(loader.render_template("templates/html/activity/resources_view.html", context))
+        render_context = {'activity': self, 'resource_contents': resource_contents, 'has_resources': has_resources}
+        fragment.add_content(self.render_template('resources_view', render_context))
 
         return fragment
 
@@ -392,19 +395,34 @@ class GroupActivityXBlock(
     def submissions_view(self, context):
         fragment = Fragment()
 
-        target_stages = [stage for stage in self.stages if isinstance(stage, SubmissionStage)]
+        submissions = [
+            submission
+            for stage in self.stages if isinstance(stage, SubmissionStage)
+            for submission in stage.submissions
+        ]
+        has_submissions = bool(submissions)
 
-        has_submissions = any([stage.has_submissions for stage in target_stages])
+        submission_fragments = self._render_children('submissions_view', context, submissions)
+        submission_contents = [frag.content for frag in submission_fragments]
+        fragment.add_frags_resources(submission_fragments)
 
-        submission_contents = []
-        for stage in target_stages:
-            for child in stage.submissions:
-                child_fragment = child.render('submissions_view', context)
-                fragment.add_frag_resources(child_fragment)
-                submission_contents.append(child_fragment.content)
+        render_context = {
+            'activity': self, 'submission_contents': submission_contents, 'has_submissions': has_submissions
+        }
+        fragment.add_content(self.render_template('submissions_view', render_context))
 
-        context = {'activity': self, 'submission_contents': submission_contents, 'has_submissions': has_submissions}
-        fragment.add_content(loader.render_template("templates/html/activity/submissions_view.html", context))
+        return fragment
+
+    @outsider_disallowed_protected_view
+    def dashboard_view(self, context):
+        fragment = Fragment()
+
+        stage_fragments = self._render_children('dashboard_view', context, self.available_stages)
+        stage_contents = [frag.content for frag in stage_fragments]
+        fragment.add_frags_resources(stage_fragments)
+
+        render_context = {'activity': self, 'stage_contents': stage_contents}
+        fragment.add_content(self.render_template('dashboard_view', render_context))
 
         return fragment
 
@@ -431,6 +449,11 @@ class GroupActivityXBlock(
             workgroup = self.project_api.get_workgroup_by_id(group_id)
             for u in workgroup["users"]:
                 self.mark_complete(u["id"])
+                self.runtime.publish(self, 'grade', {
+                    'user_id': u["id"],
+                    'value': grade_value,
+                    'max_value': self.weight,
+                })
 
     def assign_grade_to_group(self, group_id, grade_value):
         self.project_api.set_group_grade(
@@ -450,10 +473,7 @@ class GroupActivityXBlock(
                 "content_id": self.content_id,
             }
         )
-        self.runtime.publish(self, 'grade', {
-            'value': grade_value,
-            'max_value': self.weight,
-        })
+
         notifications_service = self.runtime.service(self, 'notifications')
         if notifications_service:
             self.fire_grades_posted_notification(group_id, notifications_service)

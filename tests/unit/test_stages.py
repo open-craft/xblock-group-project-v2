@@ -1,8 +1,10 @@
 from unittest import TestCase
+
 import ddt
 import mock
 from xblock.field_data import DictFieldData
 from xblock.validation import ValidationMessage
+
 from group_project_v2.group_project import GroupActivityXBlock
 from group_project_v2.project_api import ProjectAPI
 from group_project_v2.stage import EvaluationDisplayStage, GradeDisplayStage, TeamEvaluationStage, PeerReviewStage

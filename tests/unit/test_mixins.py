@@ -130,6 +130,24 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
         self.assertFalse(self.block.has_child_of_category('missing_category'))
         self.assertFalse(self.block.has_child_of_category('other_missing_category'))
 
+    def test_render_children(self):
+        child1, child2 = mock.Mock(), mock.Mock()
+        view1, context1 = 'nav_view', {'qwe': 'asd'}
+        print id(child1), id(child2)
+
+        with mock.patch.object(type(self.block), '_children', mock.PropertyMock(return_value=[child1, child2])):
+            self.block._render_children(view1, context1)
+
+        child1.render.assert_called_once_with(view1, context1)
+        child2.render.assert_called_once_with(view1, context1)
+        child1.reset_mock()
+        child2.reset_mock()
+
+        view2, context2 = 'other_view', {'rty', 'fgh'}
+        self.block._render_children(view2, context2, [child1])
+        child1.render.assert_called_once_with(view2, context2)
+        self.assertFalse(child2.render.called)
+
 
 class CourseAwareXBlockMixinGuineaPig(CommonMixinGuineaPig, CourseAwareXBlockMixin):
     pass

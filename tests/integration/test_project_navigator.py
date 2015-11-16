@@ -3,6 +3,7 @@ Tests for project navigator and its views
 """
 import logging
 import textwrap
+
 import ddt
 import mock
 
@@ -11,9 +12,9 @@ from group_project_v2.project_navigator import (
 )
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
-    EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
-    StageState
+    EvaluationDisplayStage, GradeDisplayStage, CompletionStage
 )
+from group_project_v2.stage.utils import StageState
 from tests.integration.base_test import SingleScenarioTestSuite, BaseIntegrationTest
 from tests.integration.page_elements import NavigationViewElement, ResourcesViewElement, SubmissionsViewElement, \
     GroupProjectElement

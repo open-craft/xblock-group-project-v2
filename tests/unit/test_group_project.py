@@ -1,12 +1,13 @@
-import ddt
 from unittest import TestCase
-import mock
-from group_project_v2.group_project import GroupActivityXBlock
-from xblock.runtime import Runtime
-from group_project_v2.stage import BaseGroupActivityStage, TeamEvaluationStage, PeerReviewStage
 
-from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
+import ddt
+import mock
+from xblock.runtime import Runtime
 from xblock.field_data import DictFieldData
+
+from group_project_v2.group_project import GroupActivityXBlock
+from group_project_v2.stage import BaseGroupActivityStage, TeamEvaluationStage, PeerReviewStage
+from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
 from tests.utils import TestWithPatchesMixin, make_review_item
 
 
@@ -241,13 +242,14 @@ class TestEventsAndCompletionGroupActivityXBlock(TestWithPatchesMixin, TestCase)
             )
 
     @ddt.data(
-        (1, 100, 'content1'),
-        (2, 10, 'content2'),
-        (3, 92, 'contrent3')
+        (1, 100, 'content1', []),
+        (2, 10, 'content2', [1, 2]),
+        (3, 92, 'contrent3', [10, 15, 112])
     )
     @ddt.unpack
-    def test_publishes_runtime_event(self, group_id, grade, content_id):
+    def test_publishes_runtime_event(self, group_id, grade, content_id, workgroup_users):
         self.calculate_grade_mock.return_value = grade
+        self.project_api_mock.get_workgroup_by_id.return_value = _make_workgroup(workgroup_users)
 
         with mock.patch.object(GroupActivityXBlock, 'content_id', mock.PropertyMock(return_value=content_id)):
             self.block.calculate_and_send_grade(group_id)
@@ -261,12 +263,15 @@ class TestEventsAndCompletionGroupActivityXBlock(TestWithPatchesMixin, TestCase)
                         "content_id": self.block.content_id,
                     }
                 ),
+            ] + [
                 mock.call(
                     self.block, 'grade', {
+                        'user_id': user,
                         'value': grade,
                         'max_value': self.block.weight,
                     }
                 )
+                for user in workgroup_users
             ]
 
             self.assertEqual(self.runtime_mock.publish.call_args_list, expected_calls)

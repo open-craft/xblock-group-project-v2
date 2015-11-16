@@ -20,7 +20,6 @@ class TestOtherGroupSubmissionLinks(SingleScenarioTestSuite):
 
     @freeze_time(datetime(2015, 01, 01))
     def test_submission_links(self):
-
         other_group_submissions = {
             'issue_tree': make_submission_data(
                 'http://issue_tree.csv', 'issue_tree.csv',
