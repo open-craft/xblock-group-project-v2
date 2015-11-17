@@ -122,7 +122,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
         assert_stage(stages[1], "Activity 1", SubmissionStage, "Upload", StageState.INCOMPLETE)  # one submission
         assert_stage(stages[2], "Activity 1", CompletionStage, "Completion", StageState.NOT_STARTED)
         assert_stage(stages[3], "Activity 2", TeamEvaluationStage, "Review Team", StageState.NOT_STARTED)
-        assert_stage(stages[4], "Activity 2", PeerReviewStage, "Review Group", StageState.COMPLETED)  # no reviews
+        assert_stage(stages[4], "Activity 2", PeerReviewStage, "Review Group", StageState.NOT_STARTED)  # no reviews
         assert_stage(stages[5], "Activity 2", EvaluationDisplayStage, "Evaluate Team Feedback", StageState.NOT_STARTED)
         assert_stage(stages[6], "Activity 2", GradeDisplayStage, "Evaluate Group Feedback", StageState.NOT_STARTED)
 
