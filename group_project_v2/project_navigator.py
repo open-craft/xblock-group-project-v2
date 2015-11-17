@@ -174,7 +174,6 @@ class ProjectNavigatorViewXBlockBase(
     selector_text = None
     skip_selector = False
     skip_content = False
-    show_to_admin_grader = False
 
     TEMPLATE_BASE = "templates/html/project_navigator/"
     CSS_BASE = "public/css/project_navigator/"
@@ -290,7 +289,6 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     icon = u"fa fa-bars"
     display_name_with_default = STUDIO_LABEL
     skip_selector = True
-    show_to_admin_grader = True
 
     SORT_ORDER = 0
 
