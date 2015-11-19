@@ -2,9 +2,11 @@ from mock import Mock
 import mock
 from xblockutils.resources import ResourceLoader
 from group_project_v2.api_error import ApiError
+from group_project_v2.mixins import UserAwareXBlockMixin
 
 from group_project_v2.project_api import ProjectAPI, UserDetails
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
+from group_project_v2.utils import ALLOWED_OUTSIDER_ROLES
 
 loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
 
@@ -100,3 +102,10 @@ def make_question(question_id, title):
     question.question_id = question_id
     question.title = title
     return question
+
+
+def switch_to_ta_grading(project_api_mock, review_group_id=1):
+    project_api_mock.get_user_preferences.return_value = {
+        UserAwareXBlockMixin.TA_REVIEW_KEY: review_group_id
+    }
+    project_api_mock.get_user_roles_for_course.return_value = [{'role': role} for role in ALLOWED_OUTSIDER_ROLES]

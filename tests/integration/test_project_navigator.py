@@ -8,8 +8,8 @@ import ddt
 import mock
 
 from group_project_v2.project_navigator import (
-    ViewTypes, ResourcesViewXBlock, SubmissionsViewXBlock, AskTAViewXBlock, PrivateDiscussionViewXBlock
-)
+    ViewTypes, ResourcesViewXBlock, SubmissionsViewXBlock, AskTAViewXBlock, PrivateDiscussionViewXBlock,
+    NavigationViewXBlock)
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage
@@ -18,7 +18,7 @@ from group_project_v2.stage.utils import StageState
 from tests.integration.base_test import SingleScenarioTestSuite, BaseIntegrationTest
 from tests.integration.page_elements import NavigationViewElement, ResourcesViewElement, SubmissionsViewElement, \
     GroupProjectElement
-from tests.utils import KNOWN_USERS, TestWithPatchesMixin
+from tests.utils import KNOWN_USERS, TestWithPatchesMixin, switch_to_ta_grading
 
 
 class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
@@ -248,3 +248,27 @@ class TestProjectNavigator(BaseIntegrationTest, TestWithPatchesMixin):
 
         view_selector_types = tuple([view.type for view in project_navigator.view_selectors])
         self.assertEqual(view_selector_types, expected_views)
+
+    def test_ta_views_visibility(self):
+        views = (
+            NavigationViewXBlock, SubmissionsViewXBlock, ResourcesViewXBlock,
+            PrivateDiscussionViewXBlock, AskTAViewXBlock
+        )
+        switch_to_ta_grading(self.project_api_mock)
+        scenario_xml = self.build_scenario([view.CATEGORY for view in views])
+        self.load_scenario_xml(scenario_xml)
+        scenario = self.go_to_view()
+        page = GroupProjectElement(self.browser, scenario)
+        project_navigator = page.project_navigator
+
+        view_types = tuple([view.type for view in project_navigator.views])
+        view_selector_types = tuple([view.type for view in project_navigator.view_selectors])
+
+        self.assertEqual(
+            view_types,
+            (NavigationViewXBlock.type, ResourcesViewXBlock.type, PrivateDiscussionViewXBlock.type)
+        )
+        self.assertEqual(
+            view_selector_types,
+            (ResourcesViewXBlock.type, PrivateDiscussionViewXBlock.type)
+        )
