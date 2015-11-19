@@ -442,7 +442,8 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
     question_id = String(
         display_name=_(u"Question ID"),
         default=UNIQUE_ID,
-        scope=Scope.content
+        scope=Scope.content,
+        force_export=True
     )
 
     title = String(
