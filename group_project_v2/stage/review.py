@@ -1,5 +1,6 @@
 import json
 import logging
+from lazy.lazy import lazy
 import webob
 from xblock.core import XBlock
 from xblock.fields import String, Scope, Boolean
@@ -36,6 +37,10 @@ class ReviewBaseStage(BaseGroupActivityStage):
         blocks = super(ReviewBaseStage, self).allowed_nested_blocks
         blocks.extend([GradeRubricStaticContentXBlock, GroupProjectReviewQuestionXBlock])
         return blocks
+
+    @property
+    def review_subjects(self):
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
     @property
     def questions(self):
@@ -159,6 +164,10 @@ class TeamEvaluationStage(ReviewBaseStage):
 
     STUDIO_LABEL = _(u"Team Evaluation")
 
+    @lazy
+    def review_subjects(self):
+        return [user for user in self.workgroup["users"] if user["id"] != self.user_id]
+
     @property
     def allowed_nested_blocks(self):
         blocks = super(TeamEvaluationStage, self).allowed_nested_blocks
@@ -166,10 +175,9 @@ class TeamEvaluationStage(ReviewBaseStage):
         return blocks
 
     def review_status(self):
-        peers_to_review = [user for user in self.workgroup["users"] if user["id"] != self.user_id]
         peer_review_items = self.project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
 
-        return self._check_review_status(peers_to_review, peer_review_items, "user")
+        return self._check_review_status(self.review_subjects, peer_review_items, "user")
 
     def validate(self):
         violations = super(TeamEvaluationStage, self).validate()
@@ -250,8 +258,8 @@ class PeerReviewStage(ReviewBaseStage):
     def allow_admin_grader_access(self):
         return True
 
-    @property
-    def review_groups(self):
+    @lazy
+    def review_subjects(self):
         """
         Returns groups to review. May throw `class`: OutsiderDisallowedError
         """
@@ -262,6 +270,10 @@ class PeerReviewStage(ReviewBaseStage):
             return self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
         except ApiError:
             return []
+
+    @property
+    def review_groups(self):
+        return self.review_subjects
 
     @property
     def available_to_current_user(self):
@@ -278,18 +290,13 @@ class PeerReviewStage(ReviewBaseStage):
         return True
 
     def review_status(self):
-        if not self.is_admin_grader:
-            groups_to_review = self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
-        else:
-            groups_to_review = [self.workgroup]
-
         group_review_items = []
-        for assess_group in groups_to_review:
+        for assess_group in self.review_groups:
             group_review_items.extend(
                 self.project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id)
             )
 
-        return self._check_review_status(groups_to_review, group_review_items, "workgroup")
+        return self._check_review_status(self.review_groups, group_review_items, "workgroup")
 
     def validate(self):
         violations = super(PeerReviewStage, self).validate()
@@ -314,6 +321,12 @@ class PeerReviewStage(ReviewBaseStage):
             ))
 
         return violations
+
+    def get_stage_state(self):
+        if not self.review_subjects:
+            return StageState.NOT_STARTED
+
+        return super(PeerReviewStage, self).get_stage_state()
 
     @XBlock.handler
     @outsider_disallowed_protected_handler

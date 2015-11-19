@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 import ddt
+import itertools
 import mock
 from xblock.field_data import DictFieldData
 from xblock.validation import ValidationMessage
@@ -108,8 +109,11 @@ class ReviewStageBaseTest(object):
     @ddt.unpack
     def test_stage_state(self, review_stage_state, visited, expected_stage_state):
         self.block.visited = visited
-        with mock.patch.object(self.block_to_test, 'review_status') as patched_review_status:
+        patched_review_subjects = mock.PropertyMock()
+        with mock.patch.object(self.block_to_test, 'review_status') as patched_review_status, \
+                mock.patch.object(self.block_to_test, 'review_subjects', patched_review_subjects):
             patched_review_status.return_value = review_stage_state
+            patched_review_subjects.return_value = [{'id': 1}, {'id': 2}]
 
             self.assertEqual(self.block.get_stage_state(), expected_stage_state)
 
@@ -159,11 +163,29 @@ class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
         self.assertEqual(len(messages), 0)
 
 
+@ddt.ddt
 class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
     block_to_test = PeerReviewStage
 
     def setUp(self):
         super(TestPeerReviewStage, self).setUp()
+
+    @ddt.data(
+        *itertools.product(
+            (ReviewState.NOT_STARTED, ReviewState.INCOMPLETE, ReviewState.COMPLETED),
+            (True, False)
+        )
+    )
+    @ddt.unpack
+    def test_stage_state_no_reviews_assigned(self, review_stage_state, visited):
+        self.block.visited = visited
+        patched_review_subjects = mock.PropertyMock()
+        with mock.patch.object(self.block_to_test, 'review_status') as patched_review_status, \
+                mock.patch.object(self.block_to_test, 'review_subjects', patched_review_subjects):
+            patched_review_status.return_value = review_stage_state
+            patched_review_subjects.return_value = []
+
+            self.assertEqual(self.block.get_stage_state(), StageState.NOT_STARTED)
 
     def test_validation(self):
         questions = [self._make_question(graded=True)]
