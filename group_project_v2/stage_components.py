@@ -216,7 +216,7 @@ class GroupProjectSubmissionXBlock(
     FAILED_UPLOAD_TITLE = _(u"Upload failed.")
     SUCCESSFUL_UPLOAD_MESSAGE_TPL = _(
         u"Your deliverable has been successfully uploaded. You can attach an updated version of the "
-        u"deliverable by clicking the <span class='icon {icon}'></span> icon at any time before the deadline passes."
+        u"deliverable by clicking the <span class='icon {icon}'></span> icon at any time before the deadline."
     )
     FAILED_UPLOAD_MESSAGE_TPL = _(u"Error uploading file: {error_goes_here}")
 
@@ -442,7 +442,8 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
     question_id = String(
         display_name=_(u"Question ID"),
         default=UNIQUE_ID,
-        scope=Scope.content
+        scope=Scope.content,
+        force_export=True
     )
 
     title = String(

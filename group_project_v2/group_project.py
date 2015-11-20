@@ -449,11 +449,6 @@ class GroupActivityXBlock(CommonMixinCollection, XBlockWithPreviewMixin, Activit
             workgroup = self.project_api.get_workgroup_by_id(group_id)
             for u in workgroup["users"]:
                 self.mark_complete(u["id"])
-                self.runtime.publish(self, 'grade', {
-                    'user_id': u["id"],
-                    'value': grade_value,
-                    'max_value': self.weight,
-                })
 
     def assign_grade_to_group(self, group_id, grade_value):
         self.project_api.set_group_grade(
@@ -473,7 +468,6 @@ class GroupActivityXBlock(CommonMixinCollection, XBlockWithPreviewMixin, Activit
                 "content_id": self.content_id,
             }
         )
-
         notifications_service = self.runtime.service(self, 'notifications')
         if notifications_service:
             self.fire_grades_posted_notification(group_id, notifications_service)

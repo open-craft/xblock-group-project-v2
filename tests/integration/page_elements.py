@@ -147,7 +147,7 @@ class ReviewStageElement(StageElement):
     """ Wrapper around group project review stage element """
     @property
     def form(self):
-        return self.make_element(self.element.find_element_by_tag_name('form'), ReviewFormElement)
+        return self.make_element(self.element.find_element_by_css_selector('div.review'), ReviewFormElement)
 
     @property
     def peers(self):

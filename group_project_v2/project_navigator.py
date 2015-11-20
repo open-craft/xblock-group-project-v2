@@ -174,7 +174,6 @@ class ProjectNavigatorViewXBlockBase(
     selector_text = None
     skip_selector = False
     skip_content = False
-    show_to_admin_grader = False
 
     TEMPLATE_BASE = "templates/html/project_navigator/"
     CSS_BASE = "public/css/project_navigator/"
@@ -203,7 +202,7 @@ class ProjectNavigatorViewXBlockBase(
 
     @property
     def allow_admin_grader_access(self):
-        return False
+        return True
 
     @property
     def is_admin_grader(self):
@@ -290,7 +289,6 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     icon = u"fa fa-bars"
     display_name_with_default = STUDIO_LABEL
     skip_selector = True
-    show_to_admin_grader = True
 
     SORT_ORDER = 0
 
@@ -298,10 +296,6 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     css_file = "navigation_view.css"
     js_file = "navigation_view.js"
     initialize_js_function = "GroupProjectNavigatorNavigationView"
-
-    @property
-    def allow_admin_grader_access(self):
-        return True
 
     def student_view(self, context):  # pylint: disable=unused-argument
         """
@@ -372,6 +366,10 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         'public/js/vendor/jquery.iframe-transport.js'
     )
 
+    @property
+    def allow_admin_grader_access(self):
+        return False
+
     def student_view(self, context):  # pylint: disable=unused-argument
         """
         Student view
@@ -403,6 +401,10 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
     css_file = "ask_ta_view.css"
     js_file = "ask_ta_view.js"
     initialize_js_function = "GroupProjectNavigatorAskTAView"
+
+    @property
+    def allow_admin_grader_access(self):
+        return False
 
     @classmethod
     def is_view_type_available(cls):

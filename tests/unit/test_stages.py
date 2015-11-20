@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 import ddt
+import itertools
 import mock
 from xblock.field_data import DictFieldData
 from xblock.validation import ValidationMessage
@@ -8,6 +9,7 @@ from xblock.validation import ValidationMessage
 from group_project_v2.group_project import GroupActivityXBlock
 from group_project_v2.project_api import ProjectAPI
 from group_project_v2.stage import EvaluationDisplayStage, GradeDisplayStage, TeamEvaluationStage, PeerReviewStage
+from group_project_v2.stage.utils import ReviewState, StageState
 from group_project_v2.stage_components import PeerSelectorXBlock, GroupProjectReviewQuestionXBlock, GroupSelectorXBlock
 from tests.utils import TestWithPatchesMixin, make_review_item
 
@@ -74,7 +76,8 @@ class ReviewStageChildrenMockContextManager(object):
         return False
 
 
-class ReviewStageBaseTest(BaseStageTest):
+@ddt.ddt
+class ReviewStageBaseTest(object):
     def _make_question(self, required=False, graded=False):
         fields = {
             'grade': graded,
@@ -82,8 +85,40 @@ class ReviewStageBaseTest(BaseStageTest):
         }
         return GroupProjectReviewQuestionXBlock(self.runtime_mock, DictFieldData(fields), scope_ids=mock.Mock())
 
+    @ddt.data(
+        (False, False),
+        (True, True)
+    )
+    @ddt.unpack
+    def test_marks_visited_on_student_view(self, can_mark_complete, should_set_visited):
+        can_mark_mock = mock.PropertyMock(return_value=can_mark_complete)
+        self.assertFalse(self.block.visited)  # precondition check
+        with mock.patch.object(self.block_to_test, 'can_mark_complete', can_mark_mock):
+            self.block.student_view({})
 
-class TestTeamEvaluationStage(ReviewStageBaseTest):
+            self.assertEqual(self.block.visited, should_set_visited)
+
+    @ddt.data(
+        (ReviewState.NOT_STARTED, False, StageState.NOT_STARTED),
+        (ReviewState.INCOMPLETE, False, StageState.NOT_STARTED),
+        (ReviewState.COMPLETED, False, StageState.NOT_STARTED),
+        (ReviewState.NOT_STARTED, True, StageState.NOT_STARTED),
+        (ReviewState.INCOMPLETE, True, StageState.INCOMPLETE),
+        (ReviewState.COMPLETED, True, StageState.COMPLETED),
+    )
+    @ddt.unpack
+    def test_stage_state(self, review_stage_state, visited, expected_stage_state):
+        self.block.visited = visited
+        patched_review_subjects = mock.PropertyMock()
+        with mock.patch.object(self.block_to_test, 'review_status') as patched_review_status, \
+                mock.patch.object(self.block_to_test, 'review_subjects', patched_review_subjects):
+            patched_review_status.return_value = review_stage_state
+            patched_review_subjects.return_value = [{'id': 1}, {'id': 2}]
+
+            self.assertEqual(self.block.get_stage_state(), expected_stage_state)
+
+
+class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
     block_to_test = TeamEvaluationStage
 
     def setUp(self):
@@ -118,7 +153,7 @@ class TestTeamEvaluationStage(ReviewStageBaseTest):
         self.assertEqual(message.type, ValidationMessage.ERROR)
         self.assertIn(u"Grade questions are not supported", message.text)
 
-    def test_validtion_passes(self):
+    def test_validation_passes(self):
         questions = [self._make_question()]
         categories = [GroupProjectReviewQuestionXBlock.CATEGORY, PeerSelectorXBlock.CATEGORY]
         with ReviewStageChildrenMockContextManager(self.block, categories, questions):
@@ -128,11 +163,29 @@ class TestTeamEvaluationStage(ReviewStageBaseTest):
         self.assertEqual(len(messages), 0)
 
 
-class TestPeerReviewStage(ReviewStageBaseTest):
+@ddt.ddt
+class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
     block_to_test = PeerReviewStage
 
     def setUp(self):
         super(TestPeerReviewStage, self).setUp()
+
+    @ddt.data(
+        *itertools.product(
+            (ReviewState.NOT_STARTED, ReviewState.INCOMPLETE, ReviewState.COMPLETED),
+            (True, False)
+        )
+    )
+    @ddt.unpack
+    def test_stage_state_no_reviews_assigned(self, review_stage_state, visited):
+        self.block.visited = visited
+        patched_review_subjects = mock.PropertyMock()
+        with mock.patch.object(self.block_to_test, 'review_status') as patched_review_status, \
+                mock.patch.object(self.block_to_test, 'review_subjects', patched_review_subjects):
+            patched_review_status.return_value = review_stage_state
+            patched_review_subjects.return_value = []
+
+            self.assertEqual(self.block.get_stage_state(), StageState.NOT_STARTED)
 
     def test_validation(self):
         questions = [self._make_question(graded=True)]
@@ -163,7 +216,7 @@ class TestPeerReviewStage(ReviewStageBaseTest):
         self.assertEqual(message.type, ValidationMessage.ERROR)
         self.assertIn(u"Grade questions are required", message.text)
 
-    def test_validtion_passes(self):
+    def test_validation_passes(self):
         questions = [self._make_question(graded=True)]
         categories = [GroupProjectReviewQuestionXBlock.CATEGORY, GroupSelectorXBlock.CATEGORY]
         with ReviewStageChildrenMockContextManager(self.block, categories, questions):

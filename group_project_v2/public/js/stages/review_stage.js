@@ -10,7 +10,8 @@ function GroupProjectReviewStage(runtime, element) {
     var SELECT_PEER_TO_REVIEW = gettext("Please select Teammate to review");
     var SELECT_GROUP_TO_REVIEW = gettext("Please select Group to review");
 
-    var $form = $("form.review",  element);
+    var $form = $(".review",  element);
+    var $submit_btn = $form.find('button.submit');
     var is_peer_review = $form.data('review-type') == 'peer_review';
     var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
     var message_box = $(".message", group_project_dom);
@@ -129,11 +130,11 @@ function GroupProjectReviewStage(runtime, element) {
         return false;
     });
 
-    $form.on('submit', function (ev) {
+    $submit_btn.on('click', function (ev) {
         ev.preventDefault();
 
         $form.find(':submit').prop('disabled', true);
-        var items = $form.serializeArray();
+        var items = $form.find('input, select, textarea').serializeArray();
         var data = {};
         $.each(items, function (i, v) {
             data[v.name] = v.value;
@@ -147,8 +148,8 @@ function GroupProjectReviewStage(runtime, element) {
         }
 
         $.ajax({
-            type: $form.attr('method'),
-            url: runtime.handlerUrl(element, $form.attr('action')),
+            type: $form.data('method'),
+            url: runtime.handlerUrl(element, $form.data('action')),
             data: JSON.stringify(data),
             success: function (data) {
                 var msg = (data.msg) ? data.msg : gettext('Thanks for your feedback!');
@@ -204,7 +205,7 @@ function GroupProjectReviewStage(runtime, element) {
     if ($('.select_peer.selected,.select_group.selected', element).length === 0) {
         $form.find('.editable').attr('disabled', 'disabled');
         $form.find('.answer').val(null);
-        $form.find('button.submit').attr('disabled', 'disabled');
+        $submit_btn.attr('disabled', 'disabled');
     }
     $(element).ready(function () {
         var options = $('.select_peer,.select_group', element);
