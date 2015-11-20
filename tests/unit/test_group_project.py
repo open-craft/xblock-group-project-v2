@@ -241,41 +241,6 @@ class TestEventsAndCompletionGroupActivityXBlock(TestWithPatchesMixin, TestCase)
                 group_id, course_id, content_id, grade, weight
             )
 
-    @ddt.data(
-        (1, 100, 'content1', []),
-        (2, 10, 'content2', [1, 2]),
-        (3, 92, 'contrent3', [10, 15, 112])
-    )
-    @ddt.unpack
-    def test_publishes_runtime_event(self, group_id, grade, content_id, workgroup_users):
-        self.calculate_grade_mock.return_value = grade
-        self.project_api_mock.get_workgroup_by_id.return_value = _make_workgroup(workgroup_users)
-
-        with mock.patch.object(GroupActivityXBlock, 'content_id', mock.PropertyMock(return_value=content_id)):
-            self.block.calculate_and_send_grade(group_id)
-
-            expected_calls = [
-                mock.call(
-                    self.block, "group_activity.final_grade",
-                    {
-                        "grade_value": grade,
-                        "group_id": group_id,
-                        "content_id": self.block.content_id,
-                    }
-                ),
-            ] + [
-                mock.call(
-                    self.block, 'grade', {
-                        'user_id': user,
-                        'value': grade,
-                        'max_value': self.block.weight,
-                    }
-                )
-                for user in workgroup_users
-            ]
-
-            self.assertEqual(self.runtime_mock.publish.call_args_list, expected_calls)
-
     @ddt.data(1, 2, 3)
     def test_sends_notifications_message(self, group_id):
         self.calculate_grade_mock.return_value = 100
