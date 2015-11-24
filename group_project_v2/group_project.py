@@ -168,7 +168,11 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
     def dashboard_view(self, context):
         fragment = Fragment()
 
-        activity_fragments = self._render_children('dashboard_view', context, self.activities)
+        children_context = {}
+        children_context.update(context)
+        self._append_context_parameters_if_not_present(children_context)
+
+        activity_fragments = self._render_children('dashboard_view', children_context, self.activities)
         activity_contents = [frag.content for frag in activity_fragments]
         fragment.add_frags_resources(activity_fragments)
 
@@ -433,7 +437,11 @@ class GroupActivityXBlock(
     def dashboard_view(self, context):
         fragment = Fragment()
 
-        stage_fragments = self._render_children('dashboard_view', context, self.available_stages)
+        children_context = {}
+        children_context.update(context)
+        self._append_context_parameters_if_not_present(children_context)
+
+        stage_fragments = self._render_children('dashboard_view', children_context, self.stages)
         stage_contents = [frag.content for frag in stage_fragments]
         fragment.add_frags_resources(stage_fragments)
 
