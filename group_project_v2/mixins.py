@@ -248,12 +248,24 @@ class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
     """
     @property
     def project_details(self):
+        """
+        Gets ProjectDetails for current block
+        :rtype: group_project_v2.project_api.dtos.ProjectDetails
+        """
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
-    @staticmethod
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
-    def _get_all_workgroups(project_api, project_id):
-        pass
+    @property
+    def workgroups(self):
+        """
+        :rtype: list[group_project_v2.project_api.dtos.WorkgroupDetails]
+        """
+        workgroup_ids = self.project_details.workgroups
+
+        workgroups = []
+        for workgroup_id in workgroup_ids:
+            workgroups.append(self.project_api.get_workgroup_by_id(workgroup_id))
+
+        return workgroups
 
 
 class TemplateManagerMixin(object):

@@ -3,14 +3,16 @@ from unittest import TestCase
 
 import ddt
 import mock
+from mock.mock import call
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
 from xblock.core import XBlock
 from xblock.runtime import Runtime
 
 import group_project_v2
 from group_project_v2.mixins import ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin, \
-    WorkgroupAwareXBlockMixin
+    WorkgroupAwareXBlockMixin, DashboardRootXBlockMixin
 from group_project_v2.project_api import TypedProjectAPI
+from group_project_v2.project_api.dtos import ProjectDetails
 from group_project_v2.utils import OutsiderDisallowedError
 from tests.utils import TestWithPatchesMixin, raise_api_error
 
@@ -377,3 +379,41 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
             patched_prefs.return_value = preferences
 
             self.assertEqual(self.block.is_admin_grader, expected_is_admin_grader)
+
+
+@ddt.ddt
+class TestDashboardRootXBlockMixin(TestCase, TestWithPatchesMixin):
+    class DashboardRootXBlockMixinGuineaPig(DashboardRootXBlockMixin):
+        def __init__(self):
+            self._project_details = mock.Mock()
+
+        @property
+        def project_details(self):
+            return self._project_details
+
+    def setUp(self):
+        self.block = self.DashboardRootXBlockMixinGuineaPig()
+        self.project_api_mock = mock.Mock(spec=TypedProjectAPI)
+        self.make_patch(
+            self.DashboardRootXBlockMixinGuineaPig, 'project_api',
+            mock.PropertyMock(return_value=self.project_api_mock)
+        )
+
+    @ddt.data(
+        [1, 2, 3],
+        [4, 5],
+        []
+    )
+    def test_workgroups(self, workgroup_ids):
+        def _get_workgroup_by_id(workgroup_id):
+            return {"id": workgroup_id, "users": []}
+
+        self.block.project_details.workgroups = workgroup_ids
+        self.project_api_mock.get_workgroup_by_id.side_effect = _get_workgroup_by_id
+
+        workgroups = self.block.workgroups
+
+        expected_calls = [call(workgroup_id) for workgroup_id in workgroup_ids]
+        expected_groups = [_get_workgroup_by_id(workgroup_id) for workgroup_id in workgroup_ids]
+        self.assertEqual(self.project_api_mock.get_workgroup_by_id.mock_calls, expected_calls)
+        self.assertEqual(workgroups, expected_groups)
