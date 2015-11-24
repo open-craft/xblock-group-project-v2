@@ -17,6 +17,9 @@ class ProjectAPIXBlockMixin(object):
 
     @lazy
     def project_api(self):
+        """
+        :rtype: TypedProjectAPI
+        """
         # project_api instance needs to be static to allow workgroup caching in WorkgroupAwareXBlockMixin
         if ProjectAPIXBlockMixin._project_api is None:
             author_mode = getattr(self.runtime, 'is_author_mode', False)

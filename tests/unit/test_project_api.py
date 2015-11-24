@@ -15,9 +15,8 @@ class CannedResponses(object):
     class Projects(object):
         project1 = {
             "id": 1,
-            "url": "http://localhost:8000/api/server/projects/1/",
-            "created": None,
-            "modified": None,
+            "url": "/api/server/projects/1/",
+            "created": None, "modified": None,
             "course_id": "McKinsey/GP2/T2",
             "content_id": "i4x://McKinsey/GP2/gp-v2-project/abcdefghijklmnopqrstuvwxyz12345",
             "organization": "Org1",
@@ -25,13 +24,65 @@ class CannedResponses(object):
         }
         project2 = {
             "id": 2,
-            "url": "http://localhost:8000/api/server/projects/2/",
-            "created": "2015-08-04T13:26:01Z",
-            "modified": "2015-08-04T13:26:01Z",
+            "url": "/api/server/projects/2/",
+            "created": "2015-08-04T13:26:01Z", "modified": "2015-08-04T13:26:01Z",
             "course_id": "McKinsey/GP2/T1",
             "content_id": "i4x://McKinsey/GP2/gp-v2-project/41fe8cae0614470c9aeb72bd078b0348",
             "organization": None,
             "workgroups": [20, 21, 22]
+        }
+
+    class Workgroups(object):
+        workgroup1 = {
+            "id": 20,
+            "url": "/api/server/workgroups/20/",
+            "created": "2015-11-05T12:20:10Z", "modified": "2015-11-13T11:07:58Z",
+            "name": "Group 1",
+            "project": 2,
+            "groups": [
+                {
+                    "id": 54,
+                    "url": "/api/server/groups/54/",
+                    "name": "Assignment group for 20",
+                    "type": "reviewassignment",
+                    "data": {
+                        "xblock_id": "i4x://McKinsey/GP2/gp-v2-activity/ddf65290008d48c991ec41f724877d90",
+                        "assignment_date": "2015-11-05T12:45:10.870070Z"
+                    }
+                }
+            ],
+            "users": [
+                {"id": 17, "url": "/user_api/v1/users/17/", "username": "Alice", "email": "Alice@example.com"},
+                {"id": 20, "url": "/user_api/v1/users/20/", "username": "Derek", "email": "Derek@example.com"}
+            ],
+            "submissions": [1, 2, 3],
+            "workgroup_reviews": [4, 5, 6],
+            "peer_reviews": [7, 8, 9]
+        }
+        workgroup2 = {
+            "id": 21,
+            "url": "http://localhost:8000/api/server/workgroups/21/",
+            "created": "2015-11-05T12:20:18Z", "modified": "2015-11-05T12:45:13Z",
+            "name": "Group 2",
+            "project": 1,
+            "groups": [
+                {
+                    "id": 55,
+                    "url": "http://localhost:8000/api/server/groups/55/",
+                    "name": "Assignment group for 21",
+                    "type": "reviewassignment",
+                    "data": {
+                        "xblock_id": "i4x://McKinsey/GP2/gp-v2-activity/ddf65290008d48c991ec41f724877d90",
+                        "assignment_date": "2015-11-05T12:45:12.563121Z"
+                    }
+                }
+            ],
+            "users": [
+                {"id": 18, "url": "/user_api/v1/users/18/", "username": "Bob", "email": "Bob@example.com"}
+            ],
+            "submissions": [10, 11],
+            "workgroup_reviews": [117, 118, 119, 120, 135],
+            "peer_reviews": [1111, 1121, 111011]
         }
 
 
@@ -304,3 +355,22 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             project = self.project_api.get_project_by_content_id('irrelevant', 'irrelevant')
             self.assertIsNone(project)
 
+    @ddt.data(
+        (1, CannedResponses.Workgroups.workgroup1),
+        (2, CannedResponses.Workgroups.workgroup2),
+    )
+    @ddt.unpack
+    def test_get_workgroup_by_id(self, group_id, expected_result):
+        calls_and_results = {
+            (WORKGROUP_API, 1): CannedResponses.Workgroups.workgroup1,
+            (WORKGROUP_API, 2): CannedResponses.Workgroups.workgroup2
+        }
+
+        with self._patch_send_request(calls_and_results) as patched_send_request:
+            workgroup = self.project_api.get_workgroup_by_id(group_id)
+            patched_send_request.assert_called_once_with(GET, (WORKGROUP_API, group_id))
+
+        self.assertEqual(workgroup.id, expected_result['id'])
+        self.assertEqual(workgroup.project, expected_result['project'])
+        self.assertEqual(len(workgroup.users), len(expected_result['users']))
+        self.assertEqual([user.id for user in workgroup.users], [user['id'] for user in expected_result['users']])

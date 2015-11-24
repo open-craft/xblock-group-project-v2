@@ -43,3 +43,25 @@ class ProjectDetails(object):
         self.workgroups = kwargs.get('workgroups')
 
 
+class WorkgroupDetails(object):
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id')
+        self.url = kwargs.get('url')
+        self.created = kwargs.get('created')
+        self.modified = kwargs.get('modified')
+        self.name = kwargs.get('name')
+        self.project = kwargs.get('project')
+        self.groups = kwargs.get('groups')
+        self.workgroups = kwargs.get('workgroups')
+        self.users = [ReducedUserDetails(**user_detail) for user_detail in kwargs.get('users')]
+        self.submissions = kwargs.get('submissions')
+        self.workgroup_reviews = kwargs.get('workgroup_reviews')
+        self.peer_reviews = kwargs.get('peer_reviews')
+
+
+class ReducedUserDetails(object):
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id')
+        self.url = kwargs.get('url')
+        self.username = kwargs.get('username')
+        self.email = kwargs.get('email')

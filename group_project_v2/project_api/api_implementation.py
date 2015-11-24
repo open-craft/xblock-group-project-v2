@@ -4,7 +4,7 @@ from urllib import urlencode
 from group_project_v2.api_error import api_error_protect
 from group_project_v2.json_requests import DELETE, GET, PUT, POST
 from group_project_v2.utils import memoize_with_expiration, DEFAULT_EXPIRATION_TIME, build_date_field
-from group_project_v2.project_api.dtos import UserDetails, ProjectDetails
+from group_project_v2.project_api.dtos import UserDetails, ProjectDetails, WorkgroupDetails
 
 API_PREFIX = '/'.join(['api', 'server'])
 WORKGROUP_API = '/'.join([API_PREFIX, 'workgroups'])
@@ -101,10 +101,6 @@ class ProjectAPI(object):
     @api_error_protect
     def delete_workgroup_review_assessment(self, assessment_id):
         self.send_request(DELETE, (WORKGROUP_REVIEW_API, assessment_id))
-
-    @api_error_protect
-    def get_workgroup_by_id(self, group_id):
-        return self.send_request(GET, (WORKGROUP_API, group_id))
 
     @api_error_protect
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
@@ -333,4 +329,7 @@ class TypedProjectAPI(ProjectAPI):
         response = self.send_request(GET, (PROJECTS_API, project_id), no_trailing_slash=True)
         return ProjectDetails(**response)  # pylint: disable=star-args
 
-
+    @api_error_protect
+    def get_workgroup_by_id(self, group_id):
+        response = self.send_request(GET, (WORKGROUP_API, group_id))
+        return WorkgroupDetails(**response)
