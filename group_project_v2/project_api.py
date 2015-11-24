@@ -50,6 +50,18 @@ class UserDetails(object):
         return make_user_caption(self)
 
 
+class ProjectDetails(object):
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id')
+        self.url = kwargs.get('url')
+        self.created = kwargs.get('created')
+        self.modified = kwargs.get('modified')
+        self.course_id = kwargs.get('course_id')
+        self.content_id = kwargs.get('content_id')
+        self.organization = kwargs.get('organization')
+        self.workgroup_ids = kwargs.get('workgroups')
+
+
 # TODO: this class crosses service boundary, but some methods post-process responses, while other do not
 # There're two things to improve:
 # * SRP - it should only cross the service boundary, and not do any post-processing
@@ -57,6 +69,9 @@ class UserDetails(object):
 # post-processing in order to isolate clients from response format changes. As of now, if format changes
 # virtually every method in group_project might be affected.
 class ProjectAPI(object):
+    """
+    Deprecated - do not extend or modify. Add new methods and move existing ones to TypedProjectAPI.
+    """
     def __init__(self, address, dry_run=False):
         self._api_server_address = address
         self.dry_run = dry_run
@@ -84,12 +99,6 @@ class ProjectAPI(object):
             return None
 
         return json.loads(response.read())
-
-    @api_error_protect
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
-    def get_user_details(self, user_id):
-        response = self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
-        return UserDetails(**response)  # pylint: disable=star-args
 
     @api_error_protect
     def get_user_organizations(self, user_id):
@@ -338,6 +347,23 @@ class ProjectAPI(object):
         return user_details
 
 
+class TypedProjectAPI(ProjectAPI):
+    """
+    This class is intended to contain methods that return typed responses.
+    """
+    @api_error_protect
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    def get_user_details(self, user_id):
+        response = self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
+        return UserDetails(**response)  # pylint: disable=star-args
+
+    @api_error_protect
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    def get_project_details(self, project_id):
+        response = self.send_request(GET, (USERS_API, project_id), no_trailing_slash=True)
+        return ProjectDetails(**response)  # pylint: disable=star-args
+
+
 # Looks like it's an issue, but technically it's not; this code runs in LMS, so 127.0.0.1 is always correct
 # location for API server, as it's basically executed in a neighbour thread/process/whatever.
 API_SERVER = "http://127.0.0.1:8000"
@@ -353,6 +379,6 @@ class ProjectAPIXBlockMixin(object):
         # project_api instance needs to be static to allow workgroup caching in WorkgroupAwareXBlockMixin
         if ProjectAPIXBlockMixin._project_api is None:
             author_mode = getattr(self.runtime, 'is_author_mode', False)
-            ProjectAPIXBlockMixin._project_api = ProjectAPI(API_SERVER, author_mode)
+            ProjectAPIXBlockMixin._project_api = TypedProjectAPI(API_SERVER, author_mode)
 
         return ProjectAPIXBlockMixin._project_api
