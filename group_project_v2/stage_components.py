@@ -1,12 +1,12 @@
-from collections import namedtuple
 import json
 import logging
+from collections import namedtuple
 from xml.etree import ElementTree
-from datetime import date
 
+import webob
+from datetime import date
 from django.utils import html
 from lazy.lazy import lazy
-import webob
 from xblock.core import XBlock
 from xblock.fields import String, Boolean, Scope, UNIQUE_ID
 from xblock.fragment import Fragment

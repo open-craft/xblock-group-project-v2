@@ -1,17 +1,18 @@
 # pylint:disable=protected-access,no-self-use,invalid-name
 from unittest import TestCase
+
 import ddt
 import mock
-
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
+from xblock.core import XBlock
+from xblock.runtime import Runtime
+
 import group_project_v2
 from group_project_v2.mixins import ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin, \
     WorkgroupAwareXBlockMixin
-from group_project_v2.project_api import ProjectAPI
+from group_project_v2.project_api import TypedProjectAPI
 from group_project_v2.utils import OutsiderDisallowedError
 from tests.utils import TestWithPatchesMixin, raise_api_error
-from xblock.core import XBlock
-from xblock.runtime import Runtime
 
 
 def _make_block_mock(block_id, category=None):
@@ -250,7 +251,7 @@ class WorkgroupAwareXBlockMixinGuineaPig(CommonMixinGuineaPig, WorkgroupAwareXBl
 class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
     def setUp(self):
         self.block = WorkgroupAwareXBlockMixinGuineaPig()
-        self.project_api_mock = mock.create_autospec(ProjectAPI)
+        self.project_api_mock = mock.create_autospec(TypedProjectAPI)
         self.make_patch(
             WorkgroupAwareXBlockMixinGuineaPig, 'project_api',
             mock.PropertyMock(return_value=self.project_api_mock)

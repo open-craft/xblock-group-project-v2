@@ -1,13 +1,13 @@
+import itertools
 from unittest import TestCase
 
 import ddt
-import itertools
 import mock
 from xblock.field_data import DictFieldData
 from xblock.validation import ValidationMessage
 
 from group_project_v2.group_project import GroupActivityXBlock
-from group_project_v2.project_api import ProjectAPI
+from group_project_v2.project_api import TypedProjectAPI
 from group_project_v2.stage import EvaluationDisplayStage, GradeDisplayStage, TeamEvaluationStage, PeerReviewStage
 from group_project_v2.stage.utils import ReviewState, StageState
 from group_project_v2.stage_components import PeerSelectorXBlock, GroupProjectReviewQuestionXBlock, GroupSelectorXBlock
@@ -30,7 +30,7 @@ class BaseStageTest(TestCase, TestWithPatchesMixin):
         self.activity_mock.content_id = '123456'
         # can't use create_autospec here, as most methods are wrapped in decorators and mock fails signature checks
         # with "Too many positional arguments" because of this
-        self.project_api_mock = mock.Mock(spec_set=ProjectAPI)
+        self.project_api_mock = mock.Mock(spec_set=TypedProjectAPI)
 
         # pylint: disable=not-callable
         self.block = self.block_to_test(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())

@@ -1,16 +1,12 @@
-''' API calls with respect group projects'''
 import json
 from urllib import urlencode
 
-from django.conf import settings
-from lazy.lazy import lazy
-
 from group_project_v2.api_error import api_error_protect
-from group_project_v2.json_requests import GET, POST, PUT, DELETE
-from group_project_v2.utils import build_date_field, memoize_with_expiration, make_user_caption, DEFAULT_EXPIRATION_TIME
+from group_project_v2.json_requests import DELETE, GET, PUT, POST
+from group_project_v2.utils import memoize_with_expiration, DEFAULT_EXPIRATION_TIME, build_date_field
+from group_project_v2.project_api.dtos import UserDetails, ProjectDetails
 
 API_PREFIX = '/'.join(['api', 'server'])
-
 WORKGROUP_API = '/'.join([API_PREFIX, 'workgroups'])
 PEER_REVIEW_API = '/'.join([API_PREFIX, 'peer_reviews'])
 WORKGROUP_REVIEW_API = '/'.join([API_PREFIX, 'workgroup_reviews'])
@@ -18,48 +14,6 @@ USERS_API = '/'.join([API_PREFIX, 'users'])
 SUBMISSION_API = '/'.join([API_PREFIX, 'submissions'])
 GROUP_API = '/'.join([API_PREFIX, 'groups'])
 COURSES_API = '/'.join([API_PREFIX, 'courses'])
-
-
-# pylint:disable=too-many-instance-attributes
-class UserDetails(object):
-    def __init__(self, **kwargs):
-        self.id = kwargs.get('id', None)
-        self.email = kwargs.get('email', None)
-        self.username = kwargs.get('username', None)
-        self.uri = kwargs.get('uri', None)
-        self.first_name = kwargs.get('first_name', None)
-        self.last_name = kwargs.get('last_name', None)
-        self._full_name = kwargs.get('full_name', None)
-        self.gender = kwargs.get('gender', None)
-        self.avatar_url = kwargs.get('avatar_url', None)
-        self.city = kwargs.get('city', None)
-        self.country = kwargs.get('country', None)
-        self.is_active = kwargs.get('is_active', None)
-        self.level_of_education = kwargs.get('level_of_education', None)
-        self.organization = kwargs.get('organization', None)
-
-    @property
-    def full_name(self):
-        if self._full_name:
-            return self._full_name
-        parts = [self.first_name, self.last_name]
-        return u" ".join([unicode(part) for part in parts if part is not None])
-
-    @property
-    def user_label(self):
-        return make_user_caption(self)
-
-
-class ProjectDetails(object):
-    def __init__(self, **kwargs):
-        self.id = kwargs.get('id')
-        self.url = kwargs.get('url')
-        self.created = kwargs.get('created')
-        self.modified = kwargs.get('modified')
-        self.course_id = kwargs.get('course_id')
-        self.content_id = kwargs.get('content_id')
-        self.organization = kwargs.get('organization')
-        self.workgroup_ids = kwargs.get('workgroups')
 
 
 # TODO: this class crosses service boundary, but some methods post-process responses, while other do not
@@ -364,21 +318,3 @@ class TypedProjectAPI(ProjectAPI):
         return ProjectDetails(**response)  # pylint: disable=star-args
 
 
-# Looks like it's an issue, but technically it's not; this code runs in LMS, so 127.0.0.1 is always correct
-# location for API server, as it's basically executed in a neighbour thread/process/whatever.
-API_SERVER = "http://127.0.0.1:8000"
-if hasattr(settings, 'API_LOOPBACK_ADDRESS'):
-    API_SERVER = settings.API_LOOPBACK_ADDRESS
-
-
-class ProjectAPIXBlockMixin(object):
-    _project_api = None
-
-    @lazy
-    def project_api(self):
-        # project_api instance needs to be static to allow workgroup caching in WorkgroupAwareXBlockMixin
-        if ProjectAPIXBlockMixin._project_api is None:
-            author_mode = getattr(self.runtime, 'is_author_mode', False)
-            ProjectAPIXBlockMixin._project_api = TypedProjectAPI(API_SERVER, author_mode)
-
-        return ProjectAPIXBlockMixin._project_api

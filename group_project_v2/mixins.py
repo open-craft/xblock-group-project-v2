@@ -1,10 +1,13 @@
 import logging
-from datetime import timedelta
 import os
+
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.locator import BlockUsageLocator
 from xblock.fragment import Fragment
+from xblockutils.studio_editable import (
+    StudioContainerWithNestedXBlocksMixin, StudioContainerXBlockMixin, StudioEditableXBlockMixin
+)
 
 from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
@@ -12,9 +15,6 @@ from group_project_v2.utils import (
     OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES,
     loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource,
     MUST_BE_OVERRIDDEN, DEFAULT_EXPIRATION_TIME)
-from xblockutils.studio_editable import (
-    StudioContainerWithNestedXBlocksMixin, StudioContainerXBlockMixin, StudioEditableXBlockMixin
-)
 
 log = logging.getLogger(__name__)
 

@@ -1,9 +1,12 @@
 import json
 from unittest import TestCase
+
 import ddt
 import mock
+
 from group_project_v2.json_requests import GET
-from group_project_v2.project_api import ProjectAPI, WORKGROUP_API
+from group_project_v2.project_api import TypedProjectAPI
+from group_project_v2.project_api.api_implementation import WORKGROUP_API
 from tests.utils import TestWithPatchesMixin, make_review_item as mri
 
 
@@ -12,7 +15,7 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
     api_server_address = 'http://localhost/api'
 
     def setUp(self):
-        self.project_api = ProjectAPI(self.api_server_address, dry_run=False)
+        self.project_api = TypedProjectAPI(self.api_server_address, dry_run=False)
 
     def _patch_send_request(self, calls_and_results, misisng_callback=None):
         # pylint: disable=unused-argument
@@ -84,13 +87,13 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
 
     def test_dry_run_does_not_send_request(self):
         method = mock.Mock()
-        proj_api = ProjectAPI(self.api_server_address, True)
+        proj_api = TypedProjectAPI(self.api_server_address, True)
         result = proj_api.send_request(method, ('123', '34'))
         method.assert_not_called()
         self.assertEqual(result, {})
 
     def test_send_delete_request_returns_none(self):
-        with mock.patch('group_project_v2.project_api.DELETE') as patched_delete:
+        with mock.patch('group_project_v2.project_api.api_implementation.DELETE') as patched_delete:
             result = self.project_api.send_request(patched_delete, ('123', '456'))
             self.assertEqual(result, None)
 

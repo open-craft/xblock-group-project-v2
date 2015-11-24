@@ -1,19 +1,19 @@
 # pylint: disable=invalid-name
 import json
 from unittest import TestCase
-from datetime import datetime
 from xml.etree import ElementTree
 
 import ddt
-from freezegun import freeze_time
 import mock
+from datetime import datetime
+from freezegun import freeze_time
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
 from xblock.runtime import Runtime
 from xblock.validation import ValidationMessage
 
 from group_project_v2.group_project import GroupActivityXBlock
-from group_project_v2.project_api import ProjectAPI
+from group_project_v2.project_api import TypedProjectAPI
 from group_project_v2.project_navigator import ProjectNavigatorViewXBlockBase
 from group_project_v2.stage import BaseGroupActivityStage
 from group_project_v2.stage_components import StaticContentBaseXBlock, GroupProjectSubmissionXBlock, \
@@ -128,11 +128,11 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
 
     def setUp(self):
         super(TestGroupProjectSubmissionXBlock, self).setUp()
-        self.project_api_mock = mock.create_autospec(ProjectAPI)
+        self.project_api_mock = mock.create_autospec(TypedProjectAPI)
         self.make_patch(self.block_to_test, 'project_api', mock.PropertyMock(return_value=self.project_api_mock))
         user_details = mock.Mock(user_label='Test label')
         self.block_to_test.project_api.get_user_details = mock.Mock(
-            spec=ProjectAPI.get_user_details, return_value=user_details
+            spec=TypedProjectAPI.get_user_details, return_value=user_details
         )
 
         self.project_api_mock.get_latest_workgroup_submissions_by_id = mock.Mock(return_value={})
@@ -377,7 +377,7 @@ class CommonFeedbackDisplayStageTests(object):
         self.activity_mock = mock.create_autospec(GroupActivityXBlock)
         self.stage_mock.activity = self.activity_mock
 
-        self.project_api_mock = mock.Mock(spec=ProjectAPI)
+        self.project_api_mock = mock.Mock(spec=TypedProjectAPI)
         self.make_patch(self.block_to_test, 'project_api', mock.PropertyMock(return_value=self.project_api_mock))
         self.block.question_id = "q1"
 

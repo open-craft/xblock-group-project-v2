@@ -1,10 +1,11 @@
-from mock import Mock
 import mock
+from mock import Mock
 from xblockutils.resources import ResourceLoader
+
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import UserAwareXBlockMixin
-
-from group_project_v2.project_api import ProjectAPI, UserDetails
+from group_project_v2.project_api import TypedProjectAPI
+from group_project_v2.project_api.dtos import UserDetails
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
 from group_project_v2.utils import ALLOWED_OUTSIDER_ROLES
 
@@ -53,7 +54,7 @@ def _get_user_details(user_id):
 
 def get_mock_project_api():
     """ Mock api with canned responses """
-    mock_api = Mock(spec=ProjectAPI)
+    mock_api = Mock(spec=TypedProjectAPI)
     mock_api.get_user_preferences = Mock(return_value={})
     mock_api.get_user_workgroup_for_course = Mock(return_value=WORKGROUP)
     mock_api.get_workgroup_by_id = Mock(return_value=WORKGROUP)
