@@ -266,5 +266,4 @@ class CommonMixinCollection(
     StudioEditableXBlockMixin, StudioContainerXBlockMixin,
     WorkgroupAwareXBlockMixin, TemplateManagerMixin
 ):
-    def dashboard_view(self, context):  # just to make pylint and other static analyzers happy
-        raise NotImplementedError(MUST_BE_OVERRIDDEN)
+    pass
