@@ -247,15 +247,15 @@ class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
     Mixin for an XBlock that can act as a root XBlock for dashboard view.
     Dashboard root XBlock is responsible for injecting workgroups and students into the view context
     """
-    TARGET_STUDENTS_PARAMETER_NAME = 'target_students'
-    TARGET_WORKGROUPS_PARAMETER_NAME = 'target_workgroups'
+    TARGET_STUDENTS = 'target_students'
+    TARGET_WORKGROUPS = 'target_workgroups'
 
     def _append_context_parameters_if_not_present(self, context):
-        if self.TARGET_STUDENTS_PARAMETER_NAME not in context:
-            context[self.TARGET_STUDENTS_PARAMETER_NAME] = self.all_users_in_workgroups
+        if self.TARGET_STUDENTS not in context:
+            context[self.TARGET_STUDENTS] = self.all_users_in_workgroups
 
-        if self.TARGET_WORKGROUPS_PARAMETER_NAME not in context:
-            context[self.TARGET_WORKGROUPS_PARAMETER_NAME] = self.workgroups
+        if self.TARGET_WORKGROUPS not in context:
+            context[self.TARGET_WORKGROUPS] = self.workgroups
 
     @property
     def project_details(self):

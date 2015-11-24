@@ -439,3 +439,26 @@ class TestDashboardRootXBlockMixin(TestCase, TestWithPatchesMixin):
         users = self.block.all_users_in_workgroups
 
         self.assertEqual([user.id for user in users], expected_user_ids)
+
+    @ddt.data(
+        ({}, 'workgroups_sentinel', 'user_sentinel'),
+        ({DashboardRootXBlockMixin.TARGET_WORKGROUPS: 'workgroup_value'}, 'workgroup_value', 'user_sentinel'),
+        ({DashboardRootXBlockMixin.TARGET_STUDENTS: 'user_value'}, 'workgroups_sentinel', 'user_value'),
+        (
+                {
+                    DashboardRootXBlockMixin.TARGET_STUDENTS: 'user_value',
+                    DashboardRootXBlockMixin.TARGET_WORKGROUPS: 'workgroup_value'
+                },
+                'workgroup_value', 'user_value'
+        ),
+    )
+    @ddt.unpack
+    def test_append_context_parameters_if_not_present(self, context, expected_workgroups, expected_users):
+        workgroups_sentinel = 'workgroups_sentinel'
+        users_sentinel = 'user_sentinel'
+        self.make_patch(type(self.block), 'workgroups', mock.PropertyMock(return_value=workgroups_sentinel))
+        self.make_patch(type(self.block), 'all_users_in_workgroups', mock.PropertyMock(return_value=users_sentinel))
+
+        self.block._append_context_parameters_if_not_present(context)
+        self.assertEqual(context[DashboardRootXBlockMixin.TARGET_WORKGROUPS], expected_workgroups)
+        self.assertEqual(context[DashboardRootXBlockMixin.TARGET_STUDENTS], expected_users)
