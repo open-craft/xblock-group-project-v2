@@ -12,7 +12,7 @@ import group_project_v2
 from group_project_v2.mixins import ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin, \
     WorkgroupAwareXBlockMixin, DashboardRootXBlockMixin
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.dtos import ProjectDetails
+from group_project_v2.project_api.dtos import ProjectDetails, ReducedUserDetails, WorkgroupDetails
 from group_project_v2.utils import OutsiderDisallowedError
 from tests.utils import TestWithPatchesMixin, raise_api_error
 
@@ -417,3 +417,25 @@ class TestDashboardRootXBlockMixin(TestCase, TestWithPatchesMixin):
         expected_groups = [_get_workgroup_by_id(workgroup_id) for workgroup_id in workgroup_ids]
         self.assertEqual(self.project_api_mock.get_workgroup_by_id.mock_calls, expected_calls)
         self.assertEqual(workgroups, expected_groups)
+
+    @ddt.data(
+        ([1], [1]),
+        ([2], [2, 3]),
+        ([1, 2], [1, 2, 3]),
+    )
+    @ddt.unpack
+    def test_users_in_workgroups(self, workgroup_ids, expected_user_ids):
+        workgroups = {
+            1: WorkgroupDetails(id=1, users=[{'id': 1}]),
+            2: WorkgroupDetails(id=2, users=[{'id': 2}, {'id': 3}])
+        }
+
+        def _get_workgroup_by_id(workgroup_id):
+            return workgroups.get(workgroup_id, None)
+
+        self.block.project_details.workgroups = workgroup_ids
+        self.project_api_mock.get_workgroup_by_id.side_effect = _get_workgroup_by_id
+
+        users = self.block.all_users_in_workgroups
+
+        self.assertEqual([user.id for user in users], expected_user_ids)

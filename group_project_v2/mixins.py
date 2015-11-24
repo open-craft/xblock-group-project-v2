@@ -1,6 +1,7 @@
 import logging
 import os
 
+import itertools
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.locator import BlockUsageLocator
@@ -266,6 +267,13 @@ class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
             workgroups.append(self.project_api.get_workgroup_by_id(workgroup_id))
 
         return workgroups
+
+    @property
+    def all_users_in_workgroups(self):
+        """
+        :rtype: collections.Iterable[group_project_v2.project_api.dtos.ReducedUserDetails]
+        """
+        return itertools.chain.from_iterable(workgroup.users for workgroup in self.workgroups)
 
 
 class TemplateManagerMixin(object):
