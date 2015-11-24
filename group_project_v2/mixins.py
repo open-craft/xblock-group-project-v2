@@ -246,6 +246,10 @@ class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
     Mixin for an XBlock that can act as a root XBlock for dashboard view.
     Dashboard root XBlock is responsible for injecting workgroups and students into the view context
     """
+    @property
+    def project_details(self):
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
+
     @staticmethod
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def _get_all_workgroups(project_api, project_id):

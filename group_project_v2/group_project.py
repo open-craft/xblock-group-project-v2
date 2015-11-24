@@ -69,6 +69,14 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
             NestedXBlockSpec(DiscussionXBlockShim, single_instance=True)
         ]
 
+    @property
+    def content_id(self):
+        return unicode(self.scope_ids.usage_id)
+
+    @property
+    def project_details(self):
+        return self.project_api.get_project_by_content_id(self.course_id, self.content_id)
+
     @lazy
     def activities(self):
         all_children = [self.runtime.get_block(child_id) for child_id in self.children]
@@ -273,10 +281,12 @@ class GroupActivityXBlock(
 
     @property
     def content_id(self):
-        try:
-            return unicode(self.scope_ids.usage_id)
-        except Exception:  # pylint: disable=broad-except
-            return self.id
+        return unicode(self.scope_ids.usage_id)
+
+    @property
+    def project_details(self):
+        # Project is linked to top-level GroupProjectXBlock, not individual Activities
+        return self.project_api.get_project_by_content_id(self.course_id, self.project.content_id)
 
     @property
     def is_ta_graded(self):
