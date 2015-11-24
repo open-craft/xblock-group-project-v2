@@ -11,7 +11,7 @@ from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import XBlockWithPreviewMixin, NestedXBlockSpec
 
-from group_project_v2.mixins import CommonMixinCollection
+from group_project_v2.mixins import CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import (
@@ -27,7 +27,7 @@ from group_project_v2.stage import (
 log = logging.getLogger(__name__)
 
 
-class GroupProjectXBlock(CommonMixinCollection, XBlock):
+class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin, XBlock):
     display_name = String(
         display_name="Display Name",
         help="This is a name of the project",
@@ -77,26 +77,6 @@ class GroupProjectXBlock(CommonMixinCollection, XBlock):
     @lazy
     def navigator(self):
         return self.get_child_of_category(GroupProjectNavigatorXBlock.CATEGORY)
-
-    def get_stage_to_display(self, target_block_id):
-        try:
-            if target_block_id:
-                target_block = self.runtime.get_block(target_block_id)
-                if self.get_child_category(target_block) in STAGE_TYPES and target_block.available_to_current_user:
-                    return target_block
-                if isinstance(target_block, GroupActivityXBlock):
-                    return target_block.default_stage
-        except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
-            log.exception(exc)
-
-        default_stage = self.default_stage
-        if default_stage:
-            return default_stage
-
-        if self.activities:
-            return self.activities[0].get_stage_to_display(target_block_id)
-
-        return None  # if there are no activities there's no stages as well - nothing we can really do
 
     @property
     def default_stage(self):
@@ -192,6 +172,9 @@ class GroupProjectXBlock(CommonMixinCollection, XBlock):
 
         return fragment
 
+    def dashboard_detail_view(self, context):
+        raise Exception("Should not be shown - detail views are not supported on GroupProject block")
+
     def validate(self):
         validation = super(GroupProjectXBlock, self).validate()
 
@@ -203,12 +186,35 @@ class GroupProjectXBlock(CommonMixinCollection, XBlock):
 
         return validation
 
+    def get_stage_to_display(self, target_block_id):
+        try:
+            if target_block_id:
+                target_block = self.runtime.get_block(target_block_id)
+                if self.get_child_category(target_block) in STAGE_TYPES and target_block.available_to_current_user:
+                    return target_block
+                if isinstance(target_block, GroupActivityXBlock):
+                    return target_block.default_stage
+        except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
+            log.exception(exc)
+
+        default_stage = self.default_stage
+        if default_stage:
+            return default_stage
+
+        if self.activities:
+            return self.activities[0].get_stage_to_display(target_block_id)
+
+        return None  # if there are no activities there's no stages as well - nothing we can really do
+
 
 # TODO: enable and fix these violations
 # pylint: disable=unused-argument,invalid-name
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
-class GroupActivityXBlock(CommonMixinCollection, XBlockWithPreviewMixin, ActivityNotificationsMixin, XBlock):
+class GroupActivityXBlock(
+    CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin,
+    XBlockWithPreviewMixin, ActivityNotificationsMixin, XBlock
+):
     """
     XBlock providing a group activity project for a group of students to collaborate upon
     """
@@ -425,6 +431,11 @@ class GroupActivityXBlock(CommonMixinCollection, XBlockWithPreviewMixin, Activit
         fragment.add_content(self.render_template('dashboard_view', render_context))
 
         return fragment
+
+    @outsider_disallowed_protected_view
+    def dashboard_detail_view(self, context):
+        # TODO: implement detail view
+        pass
 
     def mark_complete(self, user_id):
         self.runtime.publish(self, 'progress', {'user_id': user_id})

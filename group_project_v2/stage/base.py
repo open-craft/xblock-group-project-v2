@@ -7,7 +7,8 @@ from xblock.fields import DateTime, Scope, Boolean
 from xblock.fragment import Fragment
 from xblockutils.studio_editable import XBlockWithPreviewMixin
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import CommonMixinCollection, XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin
+from group_project_v2.mixins import CommonMixinCollection, XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin, \
+    DashboardXBlockMixin
 from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
     GroupProjectResourceXBlock, GroupProjectVideoResourceXBlock, ProjectTeamXBlock
@@ -20,7 +21,7 @@ from group_project_v2.stage.utils import StageState
 
 
 class BaseGroupActivityStage(
-    CommonMixinCollection, XBlockWithPreviewMixin, StageNotificationsMixin,
+    CommonMixinCollection, DashboardXBlockMixin, XBlockWithPreviewMixin, StageNotificationsMixin,
     XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
     XBlock,
 ):
@@ -284,6 +285,10 @@ class BaseGroupActivityStage(
         }
         fragment.add_content(self.render_template('dashboard_view', render_context))
         return fragment
+
+    def dashboard_detail_view(self, context):
+        # TODO: implement detail view
+        pass
 
     def get_new_stage_state_data(self):
         return {

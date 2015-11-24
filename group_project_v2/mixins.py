@@ -11,7 +11,7 @@ from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.utils import (
     OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES,
     loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource,
-    MUST_BE_OVERRIDDEN)
+    MUST_BE_OVERRIDDEN, DEFAULT_EXPIRATION_TIME)
 from xblockutils.studio_editable import (
     StudioContainerWithNestedXBlocksMixin, StudioContainerXBlockMixin, StudioEditableXBlockMixin
 )
@@ -103,7 +103,7 @@ class UserAwareXBlockMixin(ProjectAPIXBlockMixin):
         return self._user_preferences(self.project_api, self.user_id)
 
     @staticmethod
-    @memoize_with_expiration(expires_after=timedelta(seconds=5))
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def _user_preferences(project_api, user_id):
         return project_api.get_user_preferences(user_id)
 
@@ -150,7 +150,7 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin):
         return workgroup if workgroup else self.FALLBACK_WORKGROUP
 
     @staticmethod
-    @memoize_with_expiration(expires_after=timedelta(seconds=5))
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def _get_workgroup(project_api, user_id, course_id):
         try:
             user_prefs = UserAwareXBlockMixin._user_preferences(project_api, user_id)
@@ -232,9 +232,24 @@ class NoStudioEditableSettingsMixin(object):
         return fragment
 
 
-class DashboardMixin(object):
+class DashboardXBlockMixin(object):
+    """ Mixin for an XBlock that has dashboard views """
     def dashboard_view(self, context):
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
+
+    def dashboard_detail_view(self, context):
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
+
+
+class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
+    """
+    Mixin for an XBlock that can act as a root XBlock for dashboard view.
+    Dashboard root XBlock is responsible for injecting workgroups and students into the view context
+    """
+    @staticmethod
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    def _get_all_workgroups(project_api, project_id):
+        pass
 
 
 class TemplateManagerMixin(object):
@@ -249,7 +264,7 @@ class TemplateManagerMixin(object):
 class CommonMixinCollection(
     ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin,
     StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-    WorkgroupAwareXBlockMixin, TemplateManagerMixin, DashboardMixin
+    WorkgroupAwareXBlockMixin, TemplateManagerMixin
 ):
     def dashboard_view(self, context):  # just to make pylint and other static analyzers happy
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
