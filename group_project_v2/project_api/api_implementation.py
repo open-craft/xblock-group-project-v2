@@ -314,6 +314,21 @@ class TypedProjectAPI(ProjectAPI):
 
     @api_error_protect
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    def get_project_by_content_id(self, course_id, content_id):
+        query_params = {
+            'content_id': content_id,
+            'course_id': course_id
+        }
+        response = self.send_request(GET, (PROJECTS_API,), query_params=query_params)
+        assert len(response) <= 1
+        if not response:
+            return None
+
+        project = response[0]
+        return ProjectDetails(**project)
+
+    @api_error_protect
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_project_details(self, project_id):
         response = self.send_request(GET, (PROJECTS_API, project_id), no_trailing_slash=True)
         return ProjectDetails(**response)  # pylint: disable=star-args

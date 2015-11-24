@@ -11,6 +11,30 @@ from group_project_v2.project_api.api_implementation import WORKGROUP_API, PROJE
 from tests.utils import TestWithPatchesMixin, make_review_item as mri
 
 
+class CannedResponses(object):
+    class Projects(object):
+        project1 = {
+            "id": 1,
+            "url": "http://localhost:8000/api/server/projects/1/",
+            "created": None,
+            "modified": None,
+            "course_id": "McKinsey/GP2/T2",
+            "content_id": "i4x://McKinsey/GP2/gp-v2-project/abcdefghijklmnopqrstuvwxyz12345",
+            "organization": "Org1",
+            "workgroups": [1, 2, 3]
+        }
+        project2 = {
+            "id": 2,
+            "url": "http://localhost:8000/api/server/projects/2/",
+            "created": "2015-08-04T13:26:01Z",
+            "modified": "2015-08-04T13:26:01Z",
+            "course_id": "McKinsey/GP2/T1",
+            "content_id": "i4x://McKinsey/GP2/gp-v2-project/41fe8cae0614470c9aeb72bd078b0348",
+            "organization": None,
+            "workgroups": [20, 21, 22]
+        }
+
+
 @ddt.ddt
 class TestProjectApi(TestCase, TestWithPatchesMixin):
     api_server_address = 'http://localhost/api'
@@ -224,38 +248,18 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             self.assertEqual(result, expected_result)
             patched_get_review_items.assert_called_once_with('group_id', content_id)
 
-    def test_get_project_details(self):
-        project1_data = {
-            "id": 1,
-            "url": "http://localhost:8000/api/server/projects/1/",
-            "created": None,
-            "modified": None,
-            "course_id": "McKinsey/GP2/T2",
-            "content_id": "i4x://McKinsey/GP2/gp-v2-project/abcdefghijklmnopqrstuvwxyz12345",
-            "organization": "Org1",
-            "workgroups": [1, 2, 3]
-        }
-        project2_data = {
-            "id": 2,
-            "url": "http://localhost:8000/api/server/projects/2/",
-            "created": "2015-08-04T13:26:01Z",
-            "modified": "2015-08-04T13:26:01Z",
-            "course_id": "McKinsey/GP2/T1",
-            "content_id": "i4x://McKinsey/GP2/gp-v2-project/41fe8cae0614470c9aeb72bd078b0348",
-            "organization": None,
-            "workgroups": [20, 21, 22]
-        }
-        calls_and_results = {
-            (PROJECTS_API, 1): project1_data,
-            (PROJECTS_API, 2): project2_data
-        }
+    def assert_project_data(self, project_data, expected_values):
+        attrs_to_test = [
+            "id", "url", "created", "modified", "course_id", "content_id", "organization", "workgroups"
+        ]
+        for attr in attrs_to_test:
+            self.assertEqual(getattr(project_data, attr), expected_values[attr])
 
-        def assert_project_data(project_data, expected_values):
-            attrs_to_test = [
-                "id", "url", "created", "modified", "course_id", "content_id", "organization", "workgroups"
-            ]
-            for attr in attrs_to_test:
-                self.assertEqual(getattr(project_data, attr), expected_values[attr])
+    def test_get_project_details(self):
+        calls_and_results = {
+            (PROJECTS_API, 1): CannedResponses.Projects.project1,
+            (PROJECTS_API, 2): CannedResponses.Projects.project2
+        }
 
         expected_calls = [
             call(GET, (PROJECTS_API, 1), no_trailing_slash=True),
@@ -268,5 +272,35 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
 
             self.assertEqual(patched_send_request.mock_calls, expected_calls)
 
-        assert_project_data(project1, project1_data)
-        assert_project_data(project2, project2_data)
+        self.assert_project_data(project1, CannedResponses.Projects.project1)
+        self.assert_project_data(project2, CannedResponses.Projects.project2)
+
+    @ddt.data(
+        ('course1', 'content1'),
+        ('course2', 'content2'),
+    )
+    @ddt.unpack
+    def test_get_project_by_content_id(self, course_id, content_id):
+        expected_parameters = {
+            'course_id': course_id,
+            'content_id': content_id
+        }
+        calls_and_results = {(PROJECTS_API,): [CannedResponses.Projects.project1]}
+
+        with self._patch_send_request(calls_and_results) as patched_send_request:
+            project = self.project_api.get_project_by_content_id(course_id, content_id)
+            self.assert_project_data(project, CannedResponses.Projects.project1)
+
+            patched_send_request.assert_called_once_with(GET, (PROJECTS_API,), query_params=expected_parameters)
+
+    def test_get_project_by_content_id_fail_if_more_than_one(self):
+        calls_and_results = {(PROJECTS_API,): [CannedResponses.Projects.project1, CannedResponses.Projects.project2]}
+        with self._patch_send_request(calls_and_results), self.assertRaises(AssertionError):
+            self.project_api.get_project_by_content_id('irrelevant', 'irrelevant')
+
+    def test_get_project_by_content_id_return_none_if_not_found(self):
+        calls_and_results = {(PROJECTS_API,): []}
+        with self._patch_send_request(calls_and_results):
+            project = self.project_api.get_project_by_content_id('irrelevant', 'irrelevant')
+            self.assertIsNone(project)
+
