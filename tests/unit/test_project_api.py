@@ -3,10 +3,11 @@ from unittest import TestCase
 
 import ddt
 import mock
+from mock.mock import call
 
 from group_project_v2.json_requests import GET
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.api_implementation import WORKGROUP_API
+from group_project_v2.project_api.api_implementation import WORKGROUP_API, PROJECTS_API
 from tests.utils import TestWithPatchesMixin, make_review_item as mri
 
 
@@ -222,3 +223,50 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
 
             self.assertEqual(result, expected_result)
             patched_get_review_items.assert_called_once_with('group_id', content_id)
+
+    def test_get_project_details(self):
+        project1_data = {
+            "id": 1,
+            "url": "http://localhost:8000/api/server/projects/1/",
+            "created": None,
+            "modified": None,
+            "course_id": "McKinsey/GP2/T2",
+            "content_id": "i4x://McKinsey/GP2/gp-v2-project/abcdefghijklmnopqrstuvwxyz12345",
+            "organization": "Org1",
+            "workgroups": [1, 2, 3]
+        }
+        project2_data = {
+            "id": 2,
+            "url": "http://localhost:8000/api/server/projects/2/",
+            "created": "2015-08-04T13:26:01Z",
+            "modified": "2015-08-04T13:26:01Z",
+            "course_id": "McKinsey/GP2/T1",
+            "content_id": "i4x://McKinsey/GP2/gp-v2-project/41fe8cae0614470c9aeb72bd078b0348",
+            "organization": None,
+            "workgroups": [20, 21, 22]
+        }
+        calls_and_results = {
+            (PROJECTS_API, 1): project1_data,
+            (PROJECTS_API, 2): project2_data
+        }
+
+        def assert_project_data(project_data, expected_values):
+            attrs_to_test = [
+                "id", "url", "created", "modified", "course_id", "content_id", "organization", "workgroups"
+            ]
+            for attr in attrs_to_test:
+                self.assertEqual(getattr(project_data, attr), expected_values[attr])
+
+        expected_calls = [
+            call(GET, (PROJECTS_API, 1), no_trailing_slash=True),
+            call(GET, (PROJECTS_API, 2), no_trailing_slash=True)
+        ]
+
+        with self._patch_send_request(calls_and_results) as patched_send_request:
+            project1 = self.project_api.get_project_details(1)
+            project2 = self.project_api.get_project_details(2)
+
+            self.assertEqual(patched_send_request.mock_calls, expected_calls)
+
+        assert_project_data(project1, project1_data)
+        assert_project_data(project2, project2_data)

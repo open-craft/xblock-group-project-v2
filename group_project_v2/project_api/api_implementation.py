@@ -14,6 +14,7 @@ USERS_API = '/'.join([API_PREFIX, 'users'])
 SUBMISSION_API = '/'.join([API_PREFIX, 'submissions'])
 GROUP_API = '/'.join([API_PREFIX, 'groups'])
 COURSES_API = '/'.join([API_PREFIX, 'courses'])
+PROJECTS_API = '/'.join([API_PREFIX, 'projects'])
 
 
 # TODO: this class crosses service boundary, but some methods post-process responses, while other do not
@@ -314,7 +315,7 @@ class TypedProjectAPI(ProjectAPI):
     @api_error_protect
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_project_details(self, project_id):
-        response = self.send_request(GET, (USERS_API, project_id), no_trailing_slash=True)
+        response = self.send_request(GET, (PROJECTS_API, project_id), no_trailing_slash=True)
         return ProjectDetails(**response)  # pylint: disable=star-args
 
 

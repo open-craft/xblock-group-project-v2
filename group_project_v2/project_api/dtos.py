@@ -40,6 +40,6 @@ class ProjectDetails(object):
         self.course_id = kwargs.get('course_id')
         self.content_id = kwargs.get('content_id')
         self.organization = kwargs.get('organization')
-        self.workgroup_ids = kwargs.get('workgroups')
+        self.workgroups = kwargs.get('workgroups')
 
 
