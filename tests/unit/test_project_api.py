@@ -17,15 +17,15 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
     def setUp(self):
         self.project_api = TypedProjectAPI(self.api_server_address, dry_run=False)
 
-    def _patch_send_request(self, calls_and_results, misisng_callback=None):
+    def _patch_send_request(self, calls_and_results, missing_callback=None):
         # pylint: disable=unused-argument
         def side_effect(method, url_parts, data=None, query_params=None, no_trailing_slash=False):
             if url_parts in calls_and_results:
                 return calls_and_results[url_parts]
             if 'default' in calls_and_results:
                 return calls_and_results['default']
-            if misisng_callback:
-                return misisng_callback(url_parts)
+            if missing_callback:
+                return missing_callback(url_parts)
             return None
 
         return mock.patch.object(self.project_api, 'send_request', mock.Mock(side_effect=side_effect))
