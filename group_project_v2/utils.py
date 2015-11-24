@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import functools
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import xml.etree.ElementTree as ET
 
 from django.conf import settings
@@ -281,3 +281,6 @@ def add_resource(block, resource_type, path, fragment, via_url=False):
         action_parameter = loader.load_unicode(path)
 
     action(action_parameter)
+
+
+DEFAULT_EXPIRATION_TIME = timedelta(seconds=10)

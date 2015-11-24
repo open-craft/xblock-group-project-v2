@@ -1,14 +1,13 @@
 ''' API calls with respect group projects'''
 import json
 from urllib import urlencode
-from datetime import timedelta
+
 from django.conf import settings
 from lazy.lazy import lazy
 
-from group_project_v2.utils import build_date_field, memoize_with_expiration, make_user_caption
-from group_project_v2.json_requests import GET, POST, PUT, DELETE
 from group_project_v2.api_error import api_error_protect
-
+from group_project_v2.json_requests import GET, POST, PUT, DELETE
+from group_project_v2.utils import build_date_field, memoize_with_expiration, make_user_caption, DEFAULT_EXPIRATION_TIME
 
 API_PREFIX = '/'.join(['api', 'server'])
 
@@ -19,9 +18,6 @@ USERS_API = '/'.join([API_PREFIX, 'users'])
 SUBMISSION_API = '/'.join([API_PREFIX, 'submissions'])
 GROUP_API = '/'.join([API_PREFIX, 'groups'])
 COURSES_API = '/'.join([API_PREFIX, 'courses'])
-
-
-DEFAULT_EXPIRATION_TIME = timedelta(seconds=10)
 
 
 # pylint:disable=too-many-instance-attributes
