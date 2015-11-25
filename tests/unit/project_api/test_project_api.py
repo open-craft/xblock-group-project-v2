@@ -7,14 +7,14 @@ from mock.mock import call
 
 from group_project_v2.json_requests import GET
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.api_implementation import WORKGROUP_API, PROJECTS_API
+from group_project_v2.project_api.api_implementation import WORKGROUP_API, PROJECTS_API, COURSES_API
 from tests.utils import TestWithPatchesMixin, make_review_item as mri
 import tests.unit.project_api.canned_responses as canned_responses
 
 
 @ddt.ddt
 class TestProjectApi(TestCase, TestWithPatchesMixin):
-    api_server_address = 'http://localhost/api'
+    api_server_address = 'http://localhost'
 
     def setUp(self):
         self.project_api = TypedProjectAPI(self.api_server_address, dry_run=False)
@@ -40,7 +40,7 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
                 return urls_and_results['default']
             if missing_callback:
                 return missing_callback(url)
-            return None
+            raise Exception("Response not found")
 
         return mock.patch.object(self.project_api, '_do_send_request', mock.Mock(side_effect=side_effect))
 
@@ -312,3 +312,69 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
         self.assertEqual(workgroup.project, expected_result['project'])
         self.assertEqual(len(workgroup.users), len(expected_result['users']))
         self.assertEqual([user.id for user in workgroup.users], [user['id'] for user in expected_result['users']])
+
+    @ddt.data(
+        ('course1', 'content1'),
+        ('course1', 'content2'),
+        ('course2', 'content3')
+    )
+    @ddt.unpack
+    def test_get_completions_by_content_id(self, course_id, content_id):
+        def build_url(course_id, content_id):
+            return self.project_api._build_url(
+                (COURSES_API, course_id, 'completions'), query_params={'content_id': content_id}
+            )
+
+        urls_and_results = {
+            build_url('course1', 'content1'): canned_responses.Completions.non_paged1,
+            build_url('course1', 'content2'): canned_responses.Completions.non_paged2,
+            build_url('course2', 'content3'): canned_responses.Completions.empty,
+        }
+
+        expected_url = build_url(course_id, content_id)
+        expected_data = urls_and_results.get(expected_url)
+
+        with self._patch_do_send_request(urls_and_results) as patched_do_send_request:
+            completions = list(self.project_api.get_completions_by_content_id(course_id, content_id))
+            patched_do_send_request.assert_called_once_with(GET, expected_url, None)
+
+        self.assertEqual(len(completions), len(expected_data['results']))
+        self.assertEqual([comp.id for comp in completions], [data['id'] for data in expected_data['results']])
+
+    def test_get_completions_by_content_id_paged(self):
+        def build_url(course_id, content_id, page_num=None):
+            query_params = {'content_id': content_id}
+            if page_num:
+                query_params['page'] = page_num
+            return self.project_api._build_url((COURSES_API, course_id, 'completions'), query_params=query_params)
+
+        course, content = 'course1', 'content1'
+
+        urls_and_results = {
+            build_url(course, content): canned_responses.Completions.paged_page1,
+            build_url(course, content, 1): canned_responses.Completions.paged_page1,
+            build_url(course, content, 2): canned_responses.Completions.paged_page2,
+            build_url(course, content, 3): canned_responses.Completions.paged_page3,
+        }
+        all_responses = []
+        pages = [
+            canned_responses.Completions.paged_page1,
+            canned_responses.Completions.paged_page2,
+            canned_responses.Completions.paged_page3
+        ]
+        for page in pages:
+            all_responses.extend(page['results'])
+
+        expected_calls = [
+            call(GET, build_url(course, content), None),
+            call(GET, canned_responses.Completions.paged_page1['next'], None),
+            call(GET, canned_responses.Completions.paged_page2['next'], None),
+        ]
+
+        with self._patch_do_send_request(urls_and_results) as patched_do_send_request:
+            completions = list(self.project_api.get_completions_by_content_id(course, content))
+            self.assertEqual(patched_do_send_request.mock_calls, expected_calls)
+
+        self.assertEqual(len(completions), len(all_responses))
+        self.assertEqual([comp.id for comp in completions], [data['id'] for data in all_responses])
+        self.assertEqual([comp.user_id for comp in completions], [data['user_id'] for data in all_responses])
