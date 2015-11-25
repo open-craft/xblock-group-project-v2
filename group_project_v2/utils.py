@@ -10,6 +10,8 @@ from lazy.lazy import lazy
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 
+DEFAULT_EXPIRATION_TIME = timedelta(seconds=10)
+
 log = logging.getLogger(__name__)
 loader = ResourceLoader(__name__)
 
@@ -283,4 +285,5 @@ def add_resource(block, resource_type, path, fragment, via_url=False):
     action(action_parameter)
 
 
-DEFAULT_EXPIRATION_TIME = timedelta(seconds=10)
+def get_block_content_id(block):
+    return unicode(block.scope_ids.usage_id)

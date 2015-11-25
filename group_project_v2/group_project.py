@@ -16,8 +16,8 @@ from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import (
     mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockShim, Constants,
-    add_resource, gettext as _
-)
+    add_resource, gettext as _,
+    get_block_content_id)
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
@@ -71,7 +71,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
 
     @property
     def content_id(self):
-        return unicode(self.scope_ids.usage_id)
+        return get_block_content_id(self)
 
     @property
     def project_details(self):
@@ -285,7 +285,7 @@ class GroupActivityXBlock(
 
     @property
     def content_id(self):
-        return unicode(self.scope_ids.usage_id)
+        return get_block_content_id(self)
 
     @property
     def project_details(self):
