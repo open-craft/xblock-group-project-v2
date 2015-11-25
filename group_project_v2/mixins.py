@@ -265,10 +265,10 @@ class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
 
     def _append_context_parameters_if_not_present(self, context):
         if self.TARGET_STUDENTS not in context:
-            context[self.TARGET_STUDENTS] = self.all_users_in_workgroups
+            context[self.TARGET_STUDENTS] = list(self.all_users_in_workgroups)
 
         if self.TARGET_WORKGROUPS not in context:
-            context[self.TARGET_WORKGROUPS] = self.workgroups
+            context[self.TARGET_WORKGROUPS] = list(self.workgroups)
 
     @property
     def project_details(self):

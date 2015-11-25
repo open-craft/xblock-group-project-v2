@@ -1,3 +1,4 @@
+import logging
 from collections import OrderedDict
 from datetime import datetime
 from lazy.lazy import lazy
@@ -18,6 +19,12 @@ from group_project_v2.utils import (
     outsider_disallowed_protected_view, add_resource, MUST_BE_OVERRIDDEN, get_link_to_block,
     get_block_content_id)
 from group_project_v2.stage.utils import StageState
+
+
+log = logging.getLogger(__name__)
+
+STAGE_STATS_LOG_TPL = "Calculating stage stats for stage {stage}: " \
+                      "all - {target_users}, completed - {completed}, partially completed - {partially_completed}"
 
 
 class BaseGroupActivityStage(
@@ -258,12 +265,35 @@ class BaseGroupActivityStage(
         return stage_state, state_stats
 
     def get_stage_stats(self, target_users):  # pylint: disable=no-self-use
-        # TODO - real stats calculation
+        target_user_ids = set(user.id for user in target_users)
+        if not target_user_ids:
+            return {
+                StageState.COMPLETED: 0,
+                StageState.INCOMPLETE: 0,
+                StageState.NOT_STARTED: 0
+            }
+
+        target_user_count = len(target_user_ids) * 1.0
+
+        completions = self.project_api.get_completions_by_content_id(self.course_id, self.content_id)
+        completed_users = set(completion.user_id for completion in completions)
+        partially_completed_users = self.get_partially_completed_users(target_users)
+        log.info(STAGE_STATS_LOG_TPL.format(
+            stage=self.display_name, completed=completed_users, partially_completed=partially_completed_users,
+            target_users=target_users
+        ))
+
+        completed_ratio = len(completed_users & target_user_ids) / target_user_count
+        partially_completed_ratio = len(partially_completed_users) / target_user_count
+
         return {
-            StageState.COMPLETED: 0.4,
-            StageState.INCOMPLETE: 0.3,
-            StageState.NOT_STARTED: 0.3
+            StageState.COMPLETED: completed_ratio,
+            StageState.INCOMPLETE: partially_completed_ratio,
+            StageState.NOT_STARTED: 1 - completed_ratio - partially_completed_ratio
         }
+
+    def get_partially_completed_users(self, target_users):
+        return {}
 
     def navigation_view(self, context):
         fragment = Fragment()
