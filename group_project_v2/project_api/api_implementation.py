@@ -129,11 +129,6 @@ class ProjectAPI(object):
         response = self.send_request(GET, (USERS_API, user_id, 'groups'), query_params=qs_params)
         return response.get("groups", {})
 
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
-    def get_workgroups_for_assignment(self, assignment_id):
-        workgroups = self.send_request(GET, (GROUP_API, assignment_id, 'workgroups'), no_trailing_slash=True)
-        return workgroups["results"]
-
     def get_group_detail(self, group_id):
         return self.send_request(GET, (GROUP_API, group_id))
 
@@ -146,15 +141,6 @@ class ProjectAPI(object):
 
     # TODO: methods below post-process api response - they should be moved outside of this class.
     # When doing the move, add tests before moving, since there are no test coverage for them
-    def get_workgroups_to_review(self, user_id, course_id, xblock_id):
-        assignments = self.get_review_assignment_groups(user_id, course_id, xblock_id)
-
-        workgroup_assignments = []
-        for assignment in assignments:
-            workgroup_assignments += self.get_workgroups_for_assignment(assignment["id"])
-
-        return workgroup_assignments
-
     def get_workgroup_reviewers(self, group_id, content_id):
         review_assignments = self.send_request(GET, (WORKGROUP_API, group_id, 'groups'), no_trailing_slash=True)
 
@@ -365,3 +351,29 @@ class TypedProjectAPI(ProjectAPI):
 
         for item in self._consume_paged_response(GET, url):
             yield CompletionDetails(**item)
+
+    # TODO: add tests
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    def get_workgroups_for_assignment(self, assignment_id):
+        """
+        :param int assignment_id: Assignment ID
+        :rtype: list[WorkgroupDetails]
+        """
+        workgroups = self.send_request(GET, (GROUP_API, assignment_id, 'workgroups'), no_trailing_slash=True)
+        return [WorkgroupDetails(**item) for item in workgroups["results"]]
+
+    # TODO: add tests
+    def get_workgroups_to_review(self, user_id, course_id, xblock_id):
+        """
+        :param int user_id: User ID
+        :param str course_id: Course ID
+        :param str xblock_id: Block ID
+        :rtype: list[WorkgroupDetails]
+        """
+        assignments = self.get_review_assignment_groups(user_id, course_id, xblock_id)
+
+        workgroup_assignments = []
+        for assignment in assignments:
+            workgroup_assignments += self.get_workgroups_for_assignment(assignment["id"])
+
+        return workgroup_assignments

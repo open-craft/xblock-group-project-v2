@@ -262,6 +262,7 @@ class PeerReviewStage(ReviewBaseStage):
     def review_subjects(self):
         """
         Returns groups to review. May throw `class`: OutsiderDisallowedError
+        :rtype: list[group_project_v2.project_api.dtos.WorkgroupDetails]
         """
         if self.is_admin_grader:
             return [self.workgroup]
@@ -293,10 +294,10 @@ class PeerReviewStage(ReviewBaseStage):
         group_review_items = []
         for assess_group in self.review_groups:
             group_review_items.extend(
-                self.project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id)
+                self.project_api.get_workgroup_review_items_for_group(assess_group.id, self.content_id)
             )
 
-        return self._check_review_status([group['id'] for group in self.review_groups], group_review_items, "workgroup")
+        return self._check_review_status([group.id for group in self.review_groups], group_review_items, "workgroup")
 
     def validate(self):
         violations = super(PeerReviewStage, self).validate()

@@ -5,7 +5,7 @@ from xblockutils.resources import ResourceLoader
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import UserAwareXBlockMixin
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.dtos import UserDetails
+from group_project_v2.project_api.dtos import UserDetails, WorkgroupDetails
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
 from group_project_v2.utils import ALLOWED_OUTSIDER_ROLES
 
@@ -17,7 +17,7 @@ KNOWN_USERS = {
     3: UserDetails(id=3, email="jill@example.com", is_active=True, username="Jill", full_name="Jill"),
 }
 
-WORKGROUP = {
+WORKGROUP = WorkgroupDetails(**{
     "id": 1,
     "name": "Group 1",
     "project": 1,
@@ -29,11 +29,11 @@ WORKGROUP = {
     "submissions": [],
     "workgroup_reviews": [],
     "peer_reviews": []
-}
+})
 
 OTHER_GROUPS = {
-    2: {"id": 2, "name": "Group 2"},
-    3: {"id": 3, "name": "Group 3"},
+    2: WorkgroupDetails(id=2, name="Group 2"),
+    3: WorkgroupDetails(id=3, name="Group 3"),
 }
 
 
