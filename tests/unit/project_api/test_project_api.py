@@ -9,181 +9,7 @@ from group_project_v2.json_requests import GET
 from group_project_v2.project_api import TypedProjectAPI
 from group_project_v2.project_api.api_implementation import WORKGROUP_API, PROJECTS_API
 from tests.utils import TestWithPatchesMixin, make_review_item as mri
-
-
-class CannedResponses(object):
-    class Projects(object):
-        project1 = {
-            "id": 1,
-            "url": "/api/server/projects/1/",
-            "created": None, "modified": None,
-            "course_id": "McKinsey/GP2/T2",
-            "content_id": "i4x://McKinsey/GP2/gp-v2-project/abcdefghijklmnopqrstuvwxyz12345",
-            "organization": "Org1",
-            "workgroups": [1, 2, 3]
-        }
-        project2 = {
-            "id": 2,
-            "url": "/api/server/projects/2/",
-            "created": "2015-08-04T13:26:01Z", "modified": "2015-08-04T13:26:01Z",
-            "course_id": "McKinsey/GP2/T1",
-            "content_id": "i4x://McKinsey/GP2/gp-v2-project/41fe8cae0614470c9aeb72bd078b0348",
-            "organization": None,
-            "workgroups": [20, 21, 22]
-        }
-
-    class Workgroups(object):
-        workgroup1 = {
-            "id": 20,
-            "url": "/api/server/workgroups/20/",
-            "created": "2015-11-05T12:20:10Z", "modified": "2015-11-13T11:07:58Z",
-            "name": "Group 1",
-            "project": 2,
-            "groups": [
-                {
-                    "id": 54,
-                    "url": "/api/server/groups/54/",
-                    "name": "Assignment group for 20",
-                    "type": "reviewassignment",
-                    "data": {
-                        "xblock_id": "i4x://McKinsey/GP2/gp-v2-activity/ddf65290008d48c991ec41f724877d90",
-                        "assignment_date": "2015-11-05T12:45:10.870070Z"
-                    }
-                }
-            ],
-            "users": [
-                {"id": 17, "url": "/user_api/v1/users/17/", "username": "Alice", "email": "Alice@example.com"},
-                {"id": 20, "url": "/user_api/v1/users/20/", "username": "Derek", "email": "Derek@example.com"}
-            ],
-            "submissions": [1, 2, 3],
-            "workgroup_reviews": [4, 5, 6],
-            "peer_reviews": [7, 8, 9]
-        }
-        workgroup2 = {
-            "id": 21,
-            "url": "http://localhost:8000/api/server/workgroups/21/",
-            "created": "2015-11-05T12:20:18Z", "modified": "2015-11-05T12:45:13Z",
-            "name": "Group 2",
-            "project": 1,
-            "groups": [
-                {
-                    "id": 55,
-                    "url": "http://localhost:8000/api/server/groups/55/",
-                    "name": "Assignment group for 21",
-                    "type": "reviewassignment",
-                    "data": {
-                        "xblock_id": "i4x://McKinsey/GP2/gp-v2-activity/ddf65290008d48c991ec41f724877d90",
-                        "assignment_date": "2015-11-05T12:45:12.563121Z"
-                    }
-                }
-            ],
-            "users": [
-                {"id": 18, "url": "/user_api/v1/users/18/", "username": "Bob", "email": "Bob@example.com"}
-            ],
-            "submissions": [10, 11],
-            "workgroup_reviews": [117, 118, 119, 120, 135],
-            "peer_reviews": [1111, 1121, 111011]
-        }
-
-    class Completions(object):
-        non_paged = {
-            "count": 5,
-            "next": None,
-            "previous": None,
-            "num_pages": 1,
-            "results": [
-                {
-                    "id": 306, "user_id": 22, "course_id": "McKinsey/GP2/T1", "stage": None,
-                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
-                    "created": "2015-11-17T10:30:29Z", "modified": "2015-11-17T10:30:29Z"
-                },
-                {
-                    "id": 307, "user_id": 23, "course_id": "McKinsey/GP2/T1", "stage": None,
-                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
-                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
-                },
-                {
-                    "id": 308, "user_id": 24, "course_id": "McKinsey/GP2/T1", "stage": None,
-                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
-                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
-                },
-                {
-                    "id": 309, "user_id": 25, "course_id": "McKinsey/GP2/T1", "stage": None,
-                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
-                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
-                },
-                {
-                    "id": 310, "user_id": 26, "course_id": "McKinsey/GP2/T1", "stage": None,
-                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
-                    "created": "2015-11-17T10:31:20Z", "modified": "2015-11-17T10:31:20Z"
-                },
-            ]
-        }
-
-        paged_page1 = {
-            "count": 3,
-            "next": "http://localhost:8000/api/server/courses/McKinsey/GP2/T1/completions?page=2&page_size=3",
-            "previous": None,
-            "num_pages": 3,
-            "results": [
-                {
-                    "id": 306, "user_id": 22, "course_id": "McKinsey/GP2/T1", "stage": None,
-                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
-                    "created": "2015-11-17T10:30:29Z", "modified": "2015-11-17T10:30:29Z"
-                },
-                {
-                    "id": 307, "user_id": 23, "course_id": "McKinsey/GP2/T1", "stage": None,
-                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
-                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
-                },
-                {
-                    "id": 308, "user_id": 24, "course_id": "McKinsey/GP2/T1", "stage": None,
-                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
-                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
-                },
-            ]
-        }
-        paged_page2 = {
-            "count": 3,
-            "next": "http://localhost:8000/api/server/courses/McKinsey/GP2/T1/completions?page=3&page_size=3",
-            "previous": "http://localhost:8000/api/server/courses/McKinsey/GP2/T1/completions?page=1&page_size=3",
-            "num_pages": 3,
-            "results": [
-                {
-                    "id": 306, "user_id": 25, "course_id": "McKinsey/GP2/T1", "stage": None,
-                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
-                    "created": "2015-11-17T10:30:29Z", "modified": "2015-11-17T10:30:29Z"
-                },
-                {
-                    "id": 307, "user_id": 26, "course_id": "McKinsey/GP2/T1", "stage": None,
-                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
-                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
-                },
-                {
-                    "id": 308, "user_id": 27, "course_id": "McKinsey/GP2/T1", "stage": None,
-                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
-                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
-                },
-            ]
-        }
-        paged_page3 = {
-            "count": 3,
-            "next": None,
-            "previous": "http://localhost:8000/api/server/courses/McKinsey/GP2/T1/completions?page=2&page_size=3",
-            "num_pages": 3,
-            "results": [
-                {
-                    "id": 306, "user_id": 28, "course_id": "McKinsey/GP2/T1", "stage": None,
-                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
-                    "created": "2015-11-17T10:30:29Z", "modified": "2015-11-17T10:30:29Z"
-                },
-                {
-                    "id": 307, "user_id": 29, "course_id": "McKinsey/GP2/T1", "stage": None,
-                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
-                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
-                }
-            ]
-        }
+import tests.unit.project_api.canned_responses as canned_responses
 
 
 @ddt.ddt
@@ -420,8 +246,8 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
 
     def test_get_project_details(self):
         calls_and_results = {
-            (PROJECTS_API, 1): CannedResponses.Projects.project1,
-            (PROJECTS_API, 2): CannedResponses.Projects.project2
+            (PROJECTS_API, 1): canned_responses.Projects.project1,
+            (PROJECTS_API, 2): canned_responses.Projects.project2
         }
 
         expected_calls = [
@@ -435,8 +261,8 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
 
             self.assertEqual(patched_send_request.mock_calls, expected_calls)
 
-        self.assert_project_data(project1, CannedResponses.Projects.project1)
-        self.assert_project_data(project2, CannedResponses.Projects.project2)
+        self.assert_project_data(project1, canned_responses.Projects.project1)
+        self.assert_project_data(project2, canned_responses.Projects.project2)
 
     @ddt.data(
         ('course1', 'content1'),
@@ -448,16 +274,16 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             'course_id': course_id,
             'content_id': content_id
         }
-        calls_and_results = {(PROJECTS_API,): [CannedResponses.Projects.project1]}
+        calls_and_results = {(PROJECTS_API,): [canned_responses.Projects.project1]}
 
         with self._patch_send_request(calls_and_results) as patched_send_request:
             project = self.project_api.get_project_by_content_id(course_id, content_id)
-            self.assert_project_data(project, CannedResponses.Projects.project1)
+            self.assert_project_data(project, canned_responses.Projects.project1)
 
             patched_send_request.assert_called_once_with(GET, (PROJECTS_API,), query_params=expected_parameters)
 
     def test_get_project_by_content_id_fail_if_more_than_one(self):
-        calls_and_results = {(PROJECTS_API,): [CannedResponses.Projects.project1, CannedResponses.Projects.project2]}
+        calls_and_results = {(PROJECTS_API,): [canned_responses.Projects.project1, canned_responses.Projects.project2]}
         with self._patch_send_request(calls_and_results), self.assertRaises(AssertionError):
             self.project_api.get_project_by_content_id('irrelevant', 'irrelevant')
 
@@ -468,14 +294,14 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             self.assertIsNone(project)
 
     @ddt.data(
-        (1, CannedResponses.Workgroups.workgroup1),
-        (2, CannedResponses.Workgroups.workgroup2),
+        (1, canned_responses.Workgroups.workgroup1),
+        (2, canned_responses.Workgroups.workgroup2),
     )
     @ddt.unpack
     def test_get_workgroup_by_id(self, group_id, expected_result):
         calls_and_results = {
-            (WORKGROUP_API, 1): CannedResponses.Workgroups.workgroup1,
-            (WORKGROUP_API, 2): CannedResponses.Workgroups.workgroup2
+            (WORKGROUP_API, 1): canned_responses.Workgroups.workgroup1,
+            (WORKGROUP_API, 2): canned_responses.Workgroups.workgroup2
         }
 
         with self._patch_send_request(calls_and_results) as patched_send_request:
