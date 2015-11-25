@@ -14,6 +14,7 @@ from xblock.validation import ValidationMessage
 
 from group_project_v2.group_project import GroupActivityXBlock
 from group_project_v2.project_api import TypedProjectAPI
+from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.project_navigator import ProjectNavigatorViewXBlockBase
 from group_project_v2.stage import BaseGroupActivityStage
 from group_project_v2.stage_components import StaticContentBaseXBlock, GroupProjectSubmissionXBlock, \
@@ -140,7 +141,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
         self.stage_mock.available_now = True
         self.stage_mock.activity = mock.Mock()
         self.stage_mock.activity.user_id = self.user_id
-        self.stage_mock.activity.workgroup = {"id": self.group_id}
+        self.stage_mock.activity.workgroup = WorkgroupDetails(id=self.group_id)
         self.stage_mock.activity.course_id = self.course_id
 
     @ddt.data(1, 'qwe', 'upload 1')

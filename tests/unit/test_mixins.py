@@ -363,7 +363,7 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
     def test_is_group_member(self, user_id, group_members, is_member):
         self.user_id_mock.return_value = user_id
         with mock.patch.object(WorkgroupAwareXBlockMixin, 'workgroup', mock.PropertyMock()) as patched_workgroup:
-            patched_workgroup.return_value = {"id": 'irrelevant', "users": [{"id": u_id} for u_id in group_members]}
+            patched_workgroup.return_value = WorkgroupDetails(id='0', users=[{"id": u_id} for u_id in group_members])
 
             self.assertEqual(self.block.is_group_member, is_member)
 

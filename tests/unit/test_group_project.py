@@ -7,7 +7,7 @@ from xblock.field_data import DictFieldData
 
 from group_project_v2.group_project import GroupActivityXBlock, GroupProjectXBlock
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.dtos import ProjectDetails
+from group_project_v2.project_api.dtos import ProjectDetails, WorkgroupDetails
 from group_project_v2.stage import BaseGroupActivityStage, TeamEvaluationStage, PeerReviewStage
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
 from tests.utils import TestWithPatchesMixin, make_review_item
@@ -27,7 +27,7 @@ def _make_reviews(reviews):
 
 
 def _make_workgroup(user_ids):
-    return {'users': [{'id': user_id} for user_id in user_ids]}
+    return WorkgroupDetails(users=[{'id': user_id} for user_id in user_ids])
 
 
 @ddt.ddt

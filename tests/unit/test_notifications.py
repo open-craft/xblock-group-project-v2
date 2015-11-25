@@ -2,6 +2,7 @@ from unittest import TestCase
 import ddt
 import mock
 from group_project_v2.notifications import ActivityNotificationsMixin, NotificationMessageTypes, NotificationScopes
+from group_project_v2.project_api.dtos import WorkgroupDetails
 from tests.utils import TestWithPatchesMixin
 from edx_notifications.data import NotificationType
 
@@ -15,12 +16,11 @@ def get_notification_type(message_type):
 
 
 def make_workgroup(user_ids):
-    return {
-        "users": [
+    return WorkgroupDetails(
+        users=[
             {"id": user_id, "username": "User"+str(user_id), "email": "{0}@example.com".format(user_id)}
             for user_id in user_ids
-        ]
-    }
+        ])
 
 
 class ActivityNotificationsGuineaPig(ActivityNotificationsMixin):
@@ -63,9 +63,9 @@ class TestActivityNotificationsMixin(TestCase, TestWithPatchesMixin):
     def test_file_upload_success_scenario(self, user_id, course_id, location, workgroup, name):
         block = ActivityNotificationsGuineaPig(user_id, course_id, location, workgroup, name)
 
-        expected_user = next(user for user in workgroup['users'] if user['id'] == user_id)
-        expected_action_username = expected_user['username']
-        expected_user_ids = set([user['id'] for user in workgroup['users']]) - {user_id}
+        expected_user = next(user for user in workgroup.users if user.id == user_id)
+        expected_action_username = expected_user.username
+        expected_user_ids = set([user.id for user in workgroup.users]) - {user_id}
 
         with mock.patch('edx_notifications.data.NotificationMessage.add_click_link_params') as patched_link_params:
             block.fire_file_upload_notification(self.notifications_service_mock)

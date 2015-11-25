@@ -8,6 +8,7 @@ from xblock.validation import ValidationMessage
 
 from group_project_v2.group_project import GroupActivityXBlock
 from group_project_v2.project_api import TypedProjectAPI
+from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.stage import EvaluationDisplayStage, GradeDisplayStage, TeamEvaluationStage, PeerReviewStage
 from group_project_v2.stage.utils import ReviewState, StageState
 from group_project_v2.stage_components import PeerSelectorXBlock, GroupProjectReviewQuestionXBlock, GroupSelectorXBlock
@@ -17,12 +18,7 @@ from tests.utils import TestWithPatchesMixin, make_review_item
 class BaseStageTest(TestCase, TestWithPatchesMixin):
     block_to_test = None
     user_id = 1
-    workgroup_data = {
-        "id": 1,
-        "users": [
-            {"id": 1}, {"id": 2}, {"id": 3}
-        ]
-    }
+    workgroup_data = WorkgroupDetails(id=1, users=[{"id": 1}, {"id": 2}, {"id": 3}])
 
     def setUp(self):
         self.runtime_mock = mock.Mock()
