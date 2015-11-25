@@ -468,7 +468,7 @@ class TestGroupProjectTeamEvaluationDisplayXBlock(CommonFeedbackDisplayStageTest
     @ddt.unpack
     def test_get_feedback(self, user_id, group_id, content_id, question_id, feedback_items, expected_result):
         self.project_api_mock.get_user_peer_review_items = mock.Mock(return_value=feedback_items)
-        self.stage_mock.content_id = content_id
+        self.stage_mock.activity_content_id = content_id
         self.block.question_id = question_id
 
         with mock.patch.object(self.block_to_test, 'user_id', mock.PropertyMock(return_value=user_id)), \
@@ -500,7 +500,7 @@ class TestGroupProjectGradeEvaluationDisplayXBlock(CommonFeedbackDisplayStageTes
     @ddt.unpack
     def test_get_feedback(self, group_id, content_id, question_id, feedback_items, expected_result):
         self.project_api_mock.get_workgroup_review_items_for_group = mock.Mock(return_value=feedback_items)
-        self.stage_mock.content_id = content_id
+        self.stage_mock.activity_content_id = content_id
         self.block.question_id = question_id
 
         with mock.patch.object(self.block_to_test, 'group_id', mock.PropertyMock(return_value=group_id)):

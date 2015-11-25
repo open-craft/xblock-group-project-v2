@@ -93,7 +93,7 @@ class BaseGroupActivityStage(
         return False
 
     @property
-    def content_id(self):
+    def activity_content_id(self):
         return self.activity.content_id
 
     @property

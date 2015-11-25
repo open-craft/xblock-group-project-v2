@@ -697,7 +697,7 @@ class GroupProjectTeamEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXBl
         all_feedback = self.project_api.get_user_peer_review_items(
             self.user_id,
             self.group_id,
-            self.stage.content_id,
+            self.stage.activity_content_id,
         )
 
         return [item for item in all_feedback if item["question"] == self.question_id]
@@ -714,7 +714,7 @@ class GroupProjectGradeEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXB
     def get_feedback(self):
         all_feedback = self.project_api.get_workgroup_review_items_for_group(
             self.group_id,
-            self.stage.content_id,
+            self.stage.activity_content_id,
         )
         return [item for item in all_feedback if item["question"] == self.question_id]
 

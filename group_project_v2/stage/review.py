@@ -216,7 +216,7 @@ class TeamEvaluationStage(ReviewBaseStage):
             self.anonymous_student_id,
             peer_id,
             self.workgroup.id,
-            self.content_id,
+            self.activity_content_id,
         )
         results = self._pivot_feedback(feedback)
 
@@ -230,7 +230,7 @@ class TeamEvaluationStage(ReviewBaseStage):
             self.anonymous_student_id,
             peer_id,
             self.workgroup.id,
-            self.content_id,
+            self.activity_content_id,
             submissions,
         )
 
@@ -268,7 +268,7 @@ class PeerReviewStage(ReviewBaseStage):
             return [self.workgroup]
 
         try:
-            return self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
+            return self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.activity_content_id)
         except ApiError:
             return []
 
@@ -294,7 +294,7 @@ class PeerReviewStage(ReviewBaseStage):
         group_review_items = []
         for assess_group in self.review_groups:
             group_review_items.extend(
-                self.project_api.get_workgroup_review_items_for_group(assess_group.id, self.content_id)
+                self.project_api.get_workgroup_review_items_for_group(assess_group.id, self.activity_content_id)
             )
 
         return self._check_review_status([group.id for group in self.review_groups], group_review_items, "workgroup")
@@ -355,7 +355,9 @@ class PeerReviewStage(ReviewBaseStage):
     @key_error_protected_handler
     def load_other_group_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
         group_id = int(request.GET["group_id"])
-        feedback = self.project_api.get_workgroup_review_items(self.anonymous_student_id, group_id, self.content_id)
+        feedback = self.project_api.get_workgroup_review_items(
+            self.anonymous_student_id, group_id, self.activity_content_id
+        )
         results = self._pivot_feedback(feedback)
 
         return webob.response.Response(body=json.dumps(results))
@@ -367,7 +369,7 @@ class PeerReviewStage(ReviewBaseStage):
         self.project_api.submit_workgroup_review_items(
             self.anonymous_student_id,
             group_id,
-            self.content_id,
+            self.activity_content_id,
             submissions
         )
 
@@ -383,7 +385,7 @@ class PeerReviewStage(ReviewBaseStage):
                         "reviewer_id": self.anonymous_student_id,
                         "is_admin_grader": self.is_admin_grader,
                         "group_id": group_id,
-                        "content_id": self.content_id,
+                        "content_id": self.activity_content_id,
                     }
                 )
 

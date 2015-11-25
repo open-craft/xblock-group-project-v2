@@ -104,7 +104,7 @@ class EvaluationDisplayStage(FeedbackDisplayBaseStage):
         return self.project_api.get_user_peer_review_items(
             self.user_id,
             self.group_id,
-            self.content_id,
+            self.activity_content_id,
         )
 
 
@@ -138,12 +138,14 @@ class GradeDisplayStage(FeedbackDisplayBaseStage):
         return self.activity.calculate_grade(self.group_id)
 
     def get_reviewer_ids(self):
-        return [user['id'] for user in self.project_api.get_workgroup_reviewers(self.group_id, self.content_id)]
+        return [
+            user['id'] for user in self.project_api.get_workgroup_reviewers(self.group_id, self.activity_content_id)
+        ]
 
     def get_reviews(self):
         return self.project_api.get_workgroup_review_items_for_group(
             self.group_id,
-            self.content_id,
+            self.activity_content_id,
         )
 
     @property
