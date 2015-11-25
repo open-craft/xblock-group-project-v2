@@ -62,34 +62,27 @@ class ProjectAPI(object):
         url = self._build_url(url_parts, query_params, no_trailing_slash)
         return self._do_send_request(method, url, data)
 
-    @api_error_protect
     def get_user_organizations(self, user_id):
         qs_params = {'page_size': 0}
         return self.send_request(GET, (USERS_API, user_id, 'organizations'), query_params=qs_params)
 
-    @api_error_protect
     def get_user_preferences(self, user_id):
         """ gets users preferences information """
         return self.send_request(GET, (USERS_API, user_id, 'preferences'), no_trailing_slash=True)
 
-    @api_error_protect
     def get_peer_review_items_for_group(self, group_id, content_id):
         qs_params = {"content_id": content_id}
         return self.send_request(GET, (WORKGROUP_API, group_id, 'peer_reviews'), query_params=qs_params)
 
-    @api_error_protect
     def update_peer_review_assessment(self, question_data):
         return self.send_request(PUT, (PEER_REVIEW_API, question_data['id']), data=question_data)
 
-    @api_error_protect
     def create_peer_review_assessment(self, question_data):
         return self.send_request(POST, (PEER_REVIEW_API,), data=question_data)
 
-    @api_error_protect
     def delete_peer_review_assessment(self, assessment_id):
         self.send_request(DELETE, (PEER_REVIEW_API, assessment_id))
 
-    @api_error_protect
     # Do not cache - used both in submitting review and calculating grade, so if this call is cached grade calculation
     # sees old value. So, when last review is performed, grade calculation does not see it and returns "No grade yet".
     # See MCKIN-3501 and MCKIN-3471 for what would happen than.
@@ -97,19 +90,15 @@ class ProjectAPI(object):
         qs_params = {"content_id": content_id}
         return self.send_request(GET, (WORKGROUP_API, group_id, 'workgroup_reviews'), query_params=qs_params)
 
-    @api_error_protect
     def create_workgroup_review_assessment(self, question_data):
         return self.send_request(POST, (WORKGROUP_REVIEW_API, ), data=question_data)
 
-    @api_error_protect
     def update_workgroup_review_assessment(self, question_data):
         return self.send_request(PUT, (WORKGROUP_REVIEW_API, question_data['id']), data=question_data)
 
-    @api_error_protect
     def delete_workgroup_review_assessment(self, assessment_id):
         self.send_request(DELETE, (WORKGROUP_REVIEW_API, assessment_id))
 
-    @api_error_protect
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_user_workgroup_for_course(self, user_id, course_id):
         qs_params = {"course_id": course_id}
@@ -120,11 +109,9 @@ class ProjectAPI(object):
 
         return self.get_workgroup_by_id(workgroups_list['results'][0]['id'])
 
-    @api_error_protect
     def get_user_grades(self, user_id, course_id):
         return self.send_request(GET, (USERS_API, user_id, 'courses', course_id, 'grades'), no_trailing_slash=True)
 
-    @api_error_protect
     def set_group_grade(self, group_id, course_id, activity_id, grade_value, max_grade):
         grade_data = {
             "course_id": unicode(course_id),
@@ -135,16 +122,13 @@ class ProjectAPI(object):
 
         return self.send_request(POST, (WORKGROUP_API, group_id, 'grades'), data=grade_data)
 
-    @api_error_protect
     def create_submission(self, submit_hash):
         return self.send_request(POST, (SUBMISSION_API, ), data=submit_hash)
 
-    @api_error_protect
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_workgroup_submissions(self, group_id):
         return self.send_request(GET, (WORKGROUP_API, group_id, 'submissions'))
 
-    @api_error_protect
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_review_assignment_groups(self, user_id, course_id, xblock_id):
         qs_params = {
@@ -155,17 +139,14 @@ class ProjectAPI(object):
         response = self.send_request(GET, (USERS_API, user_id, 'groups'), query_params=qs_params)
         return response.get("groups", {})
 
-    @api_error_protect
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_workgroups_for_assignment(self, assignment_id):
         workgroups = self.send_request(GET, (GROUP_API, assignment_id, 'workgroups'), no_trailing_slash=True)
         return workgroups["results"]
 
-    @api_error_protect
     def get_group_detail(self, group_id):
         return self.send_request(GET, (GROUP_API, group_id))
 
-    @api_error_protect
     def get_user_roles_for_course(self, user_id, course_id):
         qs_params = {
             "user_id": user_id,
@@ -175,7 +156,6 @@ class ProjectAPI(object):
 
     # TODO: methods below post-process api response - they should be moved outside of this class.
     # When doing the move, add tests before moving, since there are no test coverage for them
-    @api_error_protect
     def get_workgroups_to_review(self, user_id, course_id, xblock_id):
         assignments = self.get_review_assignment_groups(user_id, course_id, xblock_id)
 
@@ -185,7 +165,6 @@ class ProjectAPI(object):
 
         return workgroup_assignments
 
-    @api_error_protect
     def get_workgroup_reviewers(self, group_id, content_id):
         review_assignments = self.send_request(GET, (WORKGROUP_API, group_id, 'groups'), no_trailing_slash=True)
 
@@ -321,13 +300,11 @@ class TypedProjectAPI(ProjectAPI):
 
             next_page_url = response.get('next')
 
-    @api_error_protect
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_user_details(self, user_id):
         response = self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
         return UserDetails(**response)  # pylint: disable=star-args
 
-    @api_error_protect
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_project_by_content_id(self, course_id, content_id):
         query_params = {
@@ -342,19 +319,16 @@ class TypedProjectAPI(ProjectAPI):
         project = response[0]
         return ProjectDetails(**project)
 
-    @api_error_protect
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_project_details(self, project_id):
         response = self.send_request(GET, (PROJECTS_API, project_id), no_trailing_slash=True)
         return ProjectDetails(**response)  # pylint: disable=star-args
 
-    @api_error_protect
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_workgroup_by_id(self, group_id):
         response = self.send_request(GET, (WORKGROUP_API, group_id))
         return WorkgroupDetails(**response)
 
-    @api_error_protect
     # No caching here - can be updated mid-request
     def get_completions_by_content_id(self, course_id, content_id):
         query_parameters = {
