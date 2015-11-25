@@ -75,8 +75,8 @@ class ReviewBaseStage(BaseGroupActivityStage):
         }
 
         required_keys = [
-            make_key(item["id"], question.question_id)
-            for item in items_to_grade
+            make_key(item_id, question.question_id)
+            for item_id in items_to_grade
             for question in self.required_questions
         ]
         has_all = True
@@ -166,7 +166,7 @@ class TeamEvaluationStage(ReviewBaseStage):
 
     @lazy
     def review_subjects(self):
-        return [user for user in self.workgroup["users"] if user["id"] != self.user_id]
+        return [user for user in self.workgroup.users if user.id != self.user_id]
 
     @property
     def allowed_nested_blocks(self):
@@ -175,9 +175,9 @@ class TeamEvaluationStage(ReviewBaseStage):
         return blocks
 
     def review_status(self):
-        peer_review_items = self.project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
+        peer_review_items = self.project_api.get_peer_review_items_for_group(self.workgroup.id, self.content_id)
 
-        return self._check_review_status(self.review_subjects, peer_review_items, "user")
+        return self._check_review_status([user.id for user in self.review_subjects], peer_review_items, "user")
 
     def validate(self):
         violations = super(TeamEvaluationStage, self).validate()
@@ -215,7 +215,7 @@ class TeamEvaluationStage(ReviewBaseStage):
         feedback = self.project_api.get_peer_review_items(
             self.anonymous_student_id,
             peer_id,
-            self.workgroup['id'],
+            self.workgroup.id,
             self.content_id,
         )
         results = self._pivot_feedback(feedback)
@@ -229,7 +229,7 @@ class TeamEvaluationStage(ReviewBaseStage):
         self.project_api.submit_peer_review_items(
             self.anonymous_student_id,
             peer_id,
-            self.workgroup['id'],
+            self.workgroup.id,
             self.content_id,
             submissions,
         )
@@ -296,7 +296,7 @@ class PeerReviewStage(ReviewBaseStage):
                 self.project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id)
             )
 
-        return self._check_review_status(self.review_groups, group_review_items, "workgroup")
+        return self._check_review_status([group['id'] for group in self.review_groups], group_review_items, "workgroup")
 
     def validate(self):
         violations = super(PeerReviewStage, self).validate()

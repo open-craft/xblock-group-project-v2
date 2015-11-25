@@ -83,6 +83,9 @@ class BaseGroupActivityStage(
 
     @lazy
     def activity(self):
+        """
+        :rtype: group_project_v2.group_project.GroupActivityXBlock
+        """
         return self.get_parent()
 
     @property
@@ -109,8 +112,8 @@ class BaseGroupActivityStage(
 
         try:
             result = []
-            for team_member in self.workgroup["users"]:
-                team_member_id = team_member["id"]
+            for team_member in self.workgroup.users:
+                team_member_id = team_member.id
                 if self.user_id == int(team_member_id):
                     continue
                 result.append(self.project_api.get_member_data(team_member_id))

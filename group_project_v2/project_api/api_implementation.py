@@ -99,16 +99,6 @@ class ProjectAPI(object):
     def delete_workgroup_review_assessment(self, assessment_id):
         self.send_request(DELETE, (WORKGROUP_REVIEW_API, assessment_id))
 
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
-    def get_user_workgroup_for_course(self, user_id, course_id):
-        qs_params = {"course_id": course_id}
-        workgroups_list = self.send_request(GET, (USERS_API, user_id, 'workgroups'), query_params=qs_params)
-
-        if not workgroups_list or workgroups_list['count'] < 1:
-            return None
-
-        return self.get_workgroup_by_id(workgroups_list['results'][0]['id'])
-
     def get_user_grades(self, user_id, course_id):
         return self.send_request(GET, (USERS_API, user_id, 'courses', course_id, 'grades'), no_trailing_slash=True)
 
@@ -345,6 +335,21 @@ class TypedProjectAPI(ProjectAPI):
         """
         response = self.send_request(GET, (WORKGROUP_API, group_id))
         return WorkgroupDetails(**response)
+
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    def get_user_workgroup_for_course(self, user_id, course_id):
+        """
+        :param int user_id: User ID
+        :param str course_id: Course ID
+        :rtype: WorkgroupDetails
+        """
+        qs_params = {"course_id": course_id}
+        workgroups_list = self.send_request(GET, (USERS_API, user_id, 'workgroups'), query_params=qs_params)
+
+        if not workgroups_list or workgroups_list['count'] < 1:
+            return None
+
+        return self.get_workgroup_by_id(workgroups_list['results'][0]['id'])
 
     # No caching here - can be updated mid-request
     def get_completions_by_content_id(self, course_id, content_id):

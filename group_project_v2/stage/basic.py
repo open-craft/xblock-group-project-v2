@@ -150,8 +150,8 @@ class SubmissionStage(BaseGroupActivityStage):
 
     def check_submissions_and_mark_complete(self):
         if self.has_all_submissions:
-            for user in self.workgroup["users"]:
-                self.mark_complete(user["id"])
+            for user in self.workgroup.users:
+                self.mark_complete(user.id)
 
     def get_stage_state(self):
         if self.has_all_submissions:

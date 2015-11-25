@@ -53,7 +53,11 @@ class WorkgroupDetails(object):
         self.project = kwargs.get('project')
         self.groups = kwargs.get('groups')
         self.workgroups = kwargs.get('workgroups')
-        self.users = [ReducedUserDetails(**user_detail) for user_detail in kwargs.get('users')]
+        users = kwargs.get('users')
+        """ :type: ReducedUserDetails """
+        self.users = []
+        if users:
+            self.users = [ReducedUserDetails(**user_detail) for user_detail in users]
         self.submissions = kwargs.get('submissions')
         self.workgroup_reviews = kwargs.get('workgroup_reviews')
         self.peer_reviews = kwargs.get('peer_reviews')

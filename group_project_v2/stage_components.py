@@ -30,6 +30,9 @@ log = logging.getLogger(__name__)
 class BaseStageComponentXBlock(XBlock):
     @lazy
     def stage(self):
+        """
+        :rtype: group_project_v2.stage.base.BaseGroupActivityStage
+        """
         return self.get_parent()
 
 
@@ -238,7 +241,7 @@ class GroupProjectSubmissionXBlock(
 
     @property
     def upload(self):
-        return self.get_upload(self.stage.activity.workgroup["id"])
+        return self.get_upload(self.stage.activity.workgroup.id)
 
     def student_view(self, context):  # pylint: disable=unused-argument, no-self-use
         return Fragment()
@@ -254,7 +257,7 @@ class GroupProjectSubmissionXBlock(
         return fragment
 
     def submission_review_view(self, context):
-        group_id = context.get('group_id', self.stage.activity.workgroup["id"])
+        group_id = context.get('group_id', self.stage.activity.workgroup.id)
         fragment = Fragment()
         render_context = {'submission': self, 'upload': self.get_upload(group_id)}
         render_context.update(context)
@@ -287,7 +290,7 @@ class GroupProjectSubmissionXBlock(
             try:
                 context = {
                     "user_id": target_activity.user_id,
-                    "group_id": target_activity.workgroup['id'],
+                    "group_id": target_activity.workgroup.id,
                     "project_api": self.project_api,
                     "course_id": target_activity.course_id
                 }
@@ -347,7 +350,7 @@ class GroupProjectSubmissionXBlock(
                     "submission_id": uploaded_file.submission_id,
                     "filename": uploaded_file.file.name,
                     "content_id": activity.content_id,
-                    "group_id": activity.workgroup['id'],
+                    "group_id": activity.workgroup.id,
                     "user_id": activity.user_id,
                 }
             )
@@ -734,7 +737,7 @@ class ProjectTeamXBlock(
         render_context = {
             'team_members': user_details + self.stage.team_members,
             'course_id': self.stage.course_id,
-            'group_id': self.stage.workgroup['id']
+            'group_id': self.stage.workgroup.id
         }
         render_context.update(context)
 

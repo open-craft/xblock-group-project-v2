@@ -152,12 +152,12 @@ class ActivityNotificationsMixin(object):
 
         workgroup_user_ids = []
         uploader_username = ''
-        for user in self.workgroup['users']:
+        for user in self.workgroup.users:
             # don't send to ourselves
-            if user['id'] != self.user_id:
-                workgroup_user_ids.append(user['id'])
+            if user.id != self.user_id:
+                workgroup_user_ids.append(user.id)
             else:
-                uploader_username = user['username']
+                uploader_username = user.username
 
         msg = NotificationMessage(
             msg_type=msg_type,

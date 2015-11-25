@@ -100,7 +100,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         render_context = {
             'project': self,
             'course_id': self.course_id,
-            'group_id': self.workgroup['id']
+            'group_id': self.workgroup.id
         }
 
         render_context.update(context)
@@ -476,8 +476,8 @@ class GroupActivityXBlock(
             self.assign_grade_to_group(group_id, grade_value)
 
             workgroup = self.project_api.get_workgroup_by_id(group_id)
-            for u in workgroup["users"]:
-                self.mark_complete(u["id"])
+            for u in workgroup.users:
+                self.mark_complete(u.id)
 
     def assign_grade_to_group(self, group_id, grade_value):
         self.project_api.set_group_grade(
