@@ -85,6 +85,106 @@ class CannedResponses(object):
             "peer_reviews": [1111, 1121, 111011]
         }
 
+    class Completions(object):
+        non_paged = {
+            "count": 5,
+            "next": None,
+            "previous": None,
+            "num_pages": 1,
+            "results": [
+                {
+                    "id": 306, "user_id": 22, "course_id": "McKinsey/GP2/T1", "stage": None,
+                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                    "created": "2015-11-17T10:30:29Z", "modified": "2015-11-17T10:30:29Z"
+                },
+                {
+                    "id": 307, "user_id": 23, "course_id": "McKinsey/GP2/T1", "stage": None,
+                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
+                },
+                {
+                    "id": 308, "user_id": 24, "course_id": "McKinsey/GP2/T1", "stage": None,
+                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
+                },
+                {
+                    "id": 309, "user_id": 25, "course_id": "McKinsey/GP2/T1", "stage": None,
+                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
+                },
+                {
+                    "id": 310, "user_id": 26, "course_id": "McKinsey/GP2/T1", "stage": None,
+                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                    "created": "2015-11-17T10:31:20Z", "modified": "2015-11-17T10:31:20Z"
+                },
+            ]
+        }
+
+        paged_page1 = {
+            "count": 3,
+            "next": "http://localhost:8000/api/server/courses/McKinsey/GP2/T1/completions?page=2&page_size=3",
+            "previous": None,
+            "num_pages": 3,
+            "results": [
+                {
+                    "id": 306, "user_id": 22, "course_id": "McKinsey/GP2/T1", "stage": None,
+                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                    "created": "2015-11-17T10:30:29Z", "modified": "2015-11-17T10:30:29Z"
+                },
+                {
+                    "id": 307, "user_id": 23, "course_id": "McKinsey/GP2/T1", "stage": None,
+                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
+                },
+                {
+                    "id": 308, "user_id": 24, "course_id": "McKinsey/GP2/T1", "stage": None,
+                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
+                },
+            ]
+        }
+        paged_page2 = {
+            "count": 3,
+            "next": "http://localhost:8000/api/server/courses/McKinsey/GP2/T1/completions?page=3&page_size=3",
+            "previous": "http://localhost:8000/api/server/courses/McKinsey/GP2/T1/completions?page=1&page_size=3",
+            "num_pages": 3,
+            "results": [
+                {
+                    "id": 306, "user_id": 25, "course_id": "McKinsey/GP2/T1", "stage": None,
+                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                    "created": "2015-11-17T10:30:29Z", "modified": "2015-11-17T10:30:29Z"
+                },
+                {
+                    "id": 307, "user_id": 26, "course_id": "McKinsey/GP2/T1", "stage": None,
+                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
+                },
+                {
+                    "id": 308, "user_id": 27, "course_id": "McKinsey/GP2/T1", "stage": None,
+                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
+                },
+            ]
+        }
+        paged_page3 = {
+            "count": 3,
+            "next": None,
+            "previous": "http://localhost:8000/api/server/courses/McKinsey/GP2/T1/completions?page=2&page_size=3",
+            "num_pages": 3,
+            "results": [
+                {
+                    "id": 306, "user_id": 28, "course_id": "McKinsey/GP2/T1", "stage": None,
+                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                    "created": "2015-11-17T10:30:29Z", "modified": "2015-11-17T10:30:29Z"
+                },
+                {
+                    "id": 307, "user_id": 29, "course_id": "McKinsey/GP2/T1", "stage": None,
+                    "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                    "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
+                }
+            ]
+        }
+
 
 @ddt.ddt
 class TestProjectApi(TestCase, TestWithPatchesMixin):
@@ -105,6 +205,18 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             return None
 
         return mock.patch.object(self.project_api, 'send_request', mock.Mock(side_effect=side_effect))
+
+    def _patch_do_send_request(self, urls_and_results, missing_callback=None):
+        def side_effect(method, url, data=None):
+            if url in urls_and_results:
+                return urls_and_results[url]
+            if 'default' in urls_and_results:
+                return urls_and_results['default']
+            if missing_callback:
+                return missing_callback(url)
+            return None
+
+        return mock.patch.object(self.project_api, '_do_send_request', mock.Mock(side_effect=side_effect))
 
     @ddt.data(
         (["part1", "part2"], None, False, api_server_address+"/part1/part2/", {'error': True}),
