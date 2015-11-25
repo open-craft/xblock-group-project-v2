@@ -180,3 +180,7 @@ class SubmissionStage(BaseGroupActivityStage):
         return self._render_view(
             'submission_review_view', "templates/html/stages/submissions_review_view.html", context
         )
+
+    def get_partially_completed_users(self, target_users):
+        # TODO: Implement
+        return {}

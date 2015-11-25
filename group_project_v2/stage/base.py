@@ -293,7 +293,7 @@ class BaseGroupActivityStage(
         }
 
     def get_partially_completed_users(self, target_users):
-        return {}
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
     def navigation_view(self, context):
         fragment = Fragment()

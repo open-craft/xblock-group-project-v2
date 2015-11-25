@@ -24,3 +24,6 @@ class SimpleCompletionStageMixin(object):
         result = super(SimpleCompletionStageMixin, self).mark_complete(user_id)
         self.completed = True
         return result
+
+    def get_partially_completed_users(self, target_users):
+        return {}
