@@ -302,11 +302,20 @@ class TypedProjectAPI(ProjectAPI):
 
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_user_details(self, user_id):
+        """
+        :param int user_id: User ID
+        :rtype: UserDetails
+        """
         response = self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
         return UserDetails(**response)  # pylint: disable=star-args
 
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_project_by_content_id(self, course_id, content_id):
+        """
+        :param str course_id: Course ID
+        :param str content_id: Content ID
+        :rtype: ProjectDetails
+        """
         query_params = {
             'content_id': content_id,
             'course_id': course_id
@@ -321,16 +330,29 @@ class TypedProjectAPI(ProjectAPI):
 
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_project_details(self, project_id):
+        """
+        :param int project_id: Project ID
+        :rtype: ProjectDetails
+        """
         response = self.send_request(GET, (PROJECTS_API, project_id), no_trailing_slash=True)
         return ProjectDetails(**response)  # pylint: disable=star-args
 
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_workgroup_by_id(self, group_id):
+        """
+        :param int group_id: Group ID
+        :rtype: WorkgroupDetails
+        """
         response = self.send_request(GET, (WORKGROUP_API, group_id))
         return WorkgroupDetails(**response)
 
     # No caching here - can be updated mid-request
     def get_completions_by_content_id(self, course_id, content_id):
+        """
+        :param str course_id: course ID
+        :param str content_id: content ID
+        :rtype: collections.Iterable[CompletionDetails]
+        """
         query_parameters = {
             'content_id': content_id
         }
