@@ -4,7 +4,7 @@ from urllib import urlencode
 from group_project_v2.api_error import api_error_protect
 from group_project_v2.json_requests import DELETE, GET, PUT, POST
 from group_project_v2.utils import memoize_with_expiration, DEFAULT_EXPIRATION_TIME, build_date_field
-from group_project_v2.project_api.dtos import UserDetails, ProjectDetails, WorkgroupDetails
+from group_project_v2.project_api.dtos import UserDetails, ProjectDetails, WorkgroupDetails, CompletionDetails
 
 API_PREFIX = '/'.join(['api', 'server'])
 WORKGROUP_API = '/'.join([API_PREFIX, 'workgroups'])
@@ -31,19 +31,22 @@ class ProjectAPI(object):
         self._api_server_address = address
         self.dry_run = dry_run
 
-    def send_request(self, method, url_parts, data=None, query_params=None, no_trailing_slash=False):
-        if self.dry_run:
-            return {}
-
+    def _build_url(self, url_parts, query_params=None, no_trailing_slash=False):
         url_template = "{}/" + "{}/" * len(url_parts)
         url_parameters = [self._api_server_address]
         url_parameters.extend(url_parts)
         url = url_template.format(*url_parameters)  # pylint: disable=star-args
         if no_trailing_slash:
             url = url[:-1]
-
         if query_params:
-            url += "?"+urlencode(query_params)
+            url += "?" + urlencode(query_params)
+
+        return url
+
+    @api_error_protect
+    def _do_send_request(self, method, url, data=None):
+        if self.dry_run:
+            return {}
 
         if data is not None:
             response = method(url, data)
@@ -54,6 +57,10 @@ class ProjectAPI(object):
             return None
 
         return json.loads(response.read())
+
+    def send_request(self, method, url_parts, data=None, query_params=None, no_trailing_slash=False):
+        url = self._build_url(url_parts, query_params, no_trailing_slash)
+        return self._do_send_request(method, url, data)
 
     @api_error_protect
     def get_user_organizations(self, user_id):
@@ -301,7 +308,19 @@ class ProjectAPI(object):
 class TypedProjectAPI(ProjectAPI):
     """
     This class is intended to contain methods that return typed responses.
+    Some of the methods may return non-reentrant iterables (i.e. generators) - clients are responsible to
+    convert them to reentrant collection if need more than one pass over the response
     """
+    def _consume_paged_response(self, method, entry_url, data=None):
+        next_page_url = entry_url
+
+        while next_page_url:
+            response = self._do_send_request(method, next_page_url, data)
+            for item in response['results']:
+                yield item
+
+            next_page_url = response.get('next')
+
     @api_error_protect
     @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_user_details(self, user_id):
@@ -330,6 +349,18 @@ class TypedProjectAPI(ProjectAPI):
         return ProjectDetails(**response)  # pylint: disable=star-args
 
     @api_error_protect
+    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
     def get_workgroup_by_id(self, group_id):
         response = self.send_request(GET, (WORKGROUP_API, group_id))
         return WorkgroupDetails(**response)
+
+    @api_error_protect
+    # No caching here - can be updated mid-request
+    def get_completions_by_content_id(self, course_id, content_id):
+        query_parameters = {
+            'content_id': content_id
+        }
+        url = self._build_url((COURSES_API, course_id, 'completions'), query_params=query_parameters)
+
+        for item in self._consume_paged_response(GET, url):
+            yield CompletionDetails(**item)

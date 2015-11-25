@@ -65,3 +65,14 @@ class ReducedUserDetails(object):
         self.url = kwargs.get('url')
         self.username = kwargs.get('username')
         self.email = kwargs.get('email')
+
+
+class CompletionDetails(object):
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id')
+        self.user_id = kwargs.get('user_id')
+        self.course_id = kwargs.get('course_id')
+        self.content_id = kwargs.get('content_id')
+        self.stage = kwargs.get('stage')
+        self.created = kwargs.get('created')
+        self.modified = kwargs.get('modified')

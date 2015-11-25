@@ -8,7 +8,7 @@ from xblock.fragment import Fragment
 from xblockutils.studio_editable import XBlockWithPreviewMixin
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import CommonMixinCollection, XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin, \
-    DashboardXBlockMixin
+    DashboardXBlockMixin, DashboardRootXBlockMixin
 from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
     GroupProjectResourceXBlock, GroupProjectVideoResourceXBlock, ProjectTeamXBlock
@@ -239,8 +239,8 @@ class BaseGroupActivityStage(
     def get_stage_state(self):
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
-    def get_dashboard_stage_state(self):
-        state_stats = self.get_stage_stats()
+    def get_dashboard_stage_state(self, target_users):
+        state_stats = self.get_stage_stats(target_users)
         if state_stats.get(StageState.COMPLETED, 0) == 1:
             stage_state = StageState.COMPLETED
         elif state_stats.get(StageState.INCOMPLETE, 0) > 0 or state_stats.get(StageState.COMPLETED, 0) > 0:
@@ -250,7 +250,7 @@ class BaseGroupActivityStage(
 
         return stage_state, state_stats
 
-    def get_stage_stats(self):  # pylint: disable=no-self-use
+    def get_stage_stats(self, target_users):  # pylint: disable=no-self-use
         # TODO - real stats calculation
         return {
             StageState.COMPLETED: 0.4,
@@ -274,7 +274,9 @@ class BaseGroupActivityStage(
     def dashboard_view(self, context):
         fragment = Fragment()
 
-        state, stats = self.get_dashboard_stage_state()
+        target_users = context.get(DashboardRootXBlockMixin.TARGET_STUDENTS)
+
+        state, stats = self.get_dashboard_stage_state(target_users)
         human_stats = OrderedDict([
             (StageState.get_human_name(StageState.NOT_STARTED), stats[StageState.NOT_STARTED]*100),
             (StageState.get_human_name(StageState.INCOMPLETE), stats[StageState.INCOMPLETE]*100),
