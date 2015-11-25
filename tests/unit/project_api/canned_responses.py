@@ -3,8 +3,8 @@ class Projects(object):
         "id": 1,
         "url": "/api/server/projects/1/",
         "created": None, "modified": None,
-        "course_id": "McKinsey/GP2/T2",
-        "content_id": "i4x://McKinsey/GP2/gp-v2-project/abcdefghijklmnopqrstuvwxyz12345",
+        "course_id": "MyCompany/GP2/T2",
+        "content_id": "i4x://MyCompany/GP2/gp-v2-project/abcdefghijklmnopqrstuvwxyz12345",
         "organization": "Org1",
         "workgroups": [1, 2, 3]
     }
@@ -12,8 +12,8 @@ class Projects(object):
         "id": 2,
         "url": "/api/server/projects/2/",
         "created": "2015-08-04T13:26:01Z", "modified": "2015-08-04T13:26:01Z",
-        "course_id": "McKinsey/GP2/T1",
-        "content_id": "i4x://McKinsey/GP2/gp-v2-project/41fe8cae0614470c9aeb72bd078b0348",
+        "course_id": "MyCompany/GP2/T1",
+        "content_id": "i4x://MyCompany/GP2/gp-v2-project/41fe8cae0614470c9aeb72bd078b0348",
         "organization": None,
         "workgroups": [20, 21, 22]
     }
@@ -33,7 +33,7 @@ class Workgroups(object):
                 "name": "Assignment group for 20",
                 "type": "reviewassignment",
                 "data": {
-                    "xblock_id": "i4x://McKinsey/GP2/gp-v2-activity/ddf65290008d48c991ec41f724877d90",
+                    "xblock_id": "i4x://MyCompany/GP2/gp-v2-activity/ddf65290008d48c991ec41f724877d90",
                     "assignment_date": "2015-11-05T12:45:10.870070Z"
                 }
             }
@@ -59,7 +59,7 @@ class Workgroups(object):
                 "name": "Assignment group for 21",
                 "type": "reviewassignment",
                 "data": {
-                    "xblock_id": "i4x://McKinsey/GP2/gp-v2-activity/ddf65290008d48c991ec41f724877d90",
+                    "xblock_id": "i4x://MyCompany/GP2/gp-v2-activity/ddf65290008d48c991ec41f724877d90",
                     "assignment_date": "2015-11-05T12:45:12.563121Z"
                 }
             }
@@ -81,28 +81,28 @@ class Completions(object):
         "num_pages": 1,
         "results": [
             {
-                "id": 306, "user_id": 22, "course_id": "McKinsey/GP2/T1", "stage": None,
-                "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                "id": 306, "user_id": 22, "course_id": "MyCompany/GP2/T1", "stage": None,
+                "content_id": "i4x://MyCompany/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
                 "created": "2015-11-17T10:30:29Z", "modified": "2015-11-17T10:30:29Z"
             },
             {
-                "id": 307, "user_id": 23, "course_id": "McKinsey/GP2/T1", "stage": None,
-                "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                "id": 307, "user_id": 23, "course_id": "MyCompany/GP2/T1", "stage": None,
+                "content_id": "i4x://MyCompany/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
                 "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
             },
             {
-                "id": 308, "user_id": 24, "course_id": "McKinsey/GP2/T1", "stage": None,
-                "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                "id": 308, "user_id": 24, "course_id": "MyCompany/GP2/T1", "stage": None,
+                "content_id": "i4x://MyCompany/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
                 "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
             },
             {
-                "id": 309, "user_id": 25, "course_id": "McKinsey/GP2/T1", "stage": None,
-                "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                "id": 309, "user_id": 25, "course_id": "MyCompany/GP2/T1", "stage": None,
+                "content_id": "i4x://MyCompany/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
                 "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
             },
             {
-                "id": 310, "user_id": 26, "course_id": "McKinsey/GP2/T1", "stage": None,
-                "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                "id": 310, "user_id": 26, "course_id": "MyCompany/GP2/T1", "stage": None,
+                "content_id": "i4x://MyCompany/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
                 "created": "2015-11-17T10:31:20Z", "modified": "2015-11-17T10:31:20Z"
             },
         ]
@@ -110,46 +110,46 @@ class Completions(object):
 
     paged_page1 = {
         "count": 3,
-        "next": "http://localhost:8000/api/server/courses/McKinsey/GP2/T1/completions?page=2&page_size=3",
+        "next": "http://localhost:8000/api/server/courses/MyCompany/GP2/T1/completions?page=2&page_size=3",
         "previous": None,
         "num_pages": 3,
         "results": [
             {
-                "id": 306, "user_id": 22, "course_id": "McKinsey/GP2/T1", "stage": None,
-                "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                "id": 306, "user_id": 22, "course_id": "MyCompany/GP2/T1", "stage": None,
+                "content_id": "i4x://MyCompany/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
                 "created": "2015-11-17T10:30:29Z", "modified": "2015-11-17T10:30:29Z"
             },
             {
-                "id": 307, "user_id": 23, "course_id": "McKinsey/GP2/T1", "stage": None,
-                "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                "id": 307, "user_id": 23, "course_id": "MyCompany/GP2/T1", "stage": None,
+                "content_id": "i4x://MyCompany/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
                 "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
             },
             {
-                "id": 308, "user_id": 24, "course_id": "McKinsey/GP2/T1", "stage": None,
-                "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                "id": 308, "user_id": 24, "course_id": "MyCompany/GP2/T1", "stage": None,
+                "content_id": "i4x://MyCompany/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
                 "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
             },
         ]
     }
     paged_page2 = {
         "count": 3,
-        "next": "http://localhost:8000/api/server/courses/McKinsey/GP2/T1/completions?page=3&page_size=3",
-        "previous": "http://localhost:8000/api/server/courses/McKinsey/GP2/T1/completions?page=1&page_size=3",
+        "next": "http://localhost:8000/api/server/courses/MyCompany/GP2/T1/completions?page=3&page_size=3",
+        "previous": "http://localhost:8000/api/server/courses/MyCompany/GP2/T1/completions?page=1&page_size=3",
         "num_pages": 3,
         "results": [
             {
-                "id": 306, "user_id": 25, "course_id": "McKinsey/GP2/T1", "stage": None,
-                "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                "id": 306, "user_id": 25, "course_id": "MyCompany/GP2/T1", "stage": None,
+                "content_id": "i4x://MyCompany/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
                 "created": "2015-11-17T10:30:29Z", "modified": "2015-11-17T10:30:29Z"
             },
             {
-                "id": 307, "user_id": 26, "course_id": "McKinsey/GP2/T1", "stage": None,
-                "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                "id": 307, "user_id": 26, "course_id": "MyCompany/GP2/T1", "stage": None,
+                "content_id": "i4x://MyCompany/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
                 "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
             },
             {
-                "id": 308, "user_id": 27, "course_id": "McKinsey/GP2/T1", "stage": None,
-                "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                "id": 308, "user_id": 27, "course_id": "MyCompany/GP2/T1", "stage": None,
+                "content_id": "i4x://MyCompany/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
                 "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
             },
         ]
@@ -157,17 +157,17 @@ class Completions(object):
     paged_page3 = {
         "count": 3,
         "next": None,
-        "previous": "http://localhost:8000/api/server/courses/McKinsey/GP2/T1/completions?page=2&page_size=3",
+        "previous": "http://localhost:8000/api/server/courses/MyCompany/GP2/T1/completions?page=2&page_size=3",
         "num_pages": 3,
         "results": [
             {
-                "id": 306, "user_id": 28, "course_id": "McKinsey/GP2/T1", "stage": None,
-                "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                "id": 306, "user_id": 28, "course_id": "MyCompany/GP2/T1", "stage": None,
+                "content_id": "i4x://MyCompany/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
                 "created": "2015-11-17T10:30:29Z", "modified": "2015-11-17T10:30:29Z"
             },
             {
-                "id": 307, "user_id": 29, "course_id": "McKinsey/GP2/T1", "stage": None,
-                "content_id": "i4x://McKinsey/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
+                "id": 307, "user_id": 29, "course_id": "MyCompany/GP2/T1", "stage": None,
+                "content_id": "i4x://MyCompany/GP2/gp-v2-stage-grade-display/8520b55c95684ff6b9c2a9129c126f0b",
                 "created": "2015-11-17T10:30:42Z", "modified": "2015-11-17T10:30:42Z"
             }
         ]
