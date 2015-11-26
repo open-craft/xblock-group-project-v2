@@ -282,7 +282,7 @@ class BaseGroupActivityStage(
         ))
 
         completed_ratio = len(completed_users & target_user_ids) / target_user_count
-        partially_completed_ratio = len(partially_completed_users) / target_user_count
+        partially_completed_ratio = len(partially_completed_users & target_user_ids) / target_user_count
 
         return {
             StageState.COMPLETED: completed_ratio,
