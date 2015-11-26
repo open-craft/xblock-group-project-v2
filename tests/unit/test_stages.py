@@ -19,6 +19,9 @@ from tests.utils import TestWithPatchesMixin, make_review_item as mri, make_ques
 USER_ID = 1
 OTHER_USER_ID = 2
 
+GROUP_ID = 10
+OTHER_GROUP_ID = 11
+
 
 class BaseStageTest(TestCase, TestWithPatchesMixin):
     block_to_test = None
@@ -273,12 +276,12 @@ class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
         ),
     )
     @ddt.unpack
-    def test_review_status(self, reviewers, questions, reviews, expected_result):
+    def test_review_status(self, peers_to_review, questions, reviews, expected_result):
         self.project_api_mock.get_peer_review_items_for_group.return_value = reviews
 
         with mock.patch.object(self.block_to_test, 'review_subjects', mock.PropertyMock()) as patched_review_subjects, \
                 mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
-            patched_review_subjects.return_value = [ReducedUserDetails(id=rev_id) for rev_id in reviewers]
+            patched_review_subjects.return_value = [ReducedUserDetails(id=rev_id) for rev_id in peers_to_review]
             patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
 
             self.assertEqual(self.block.review_status(), expected_result)
@@ -348,6 +351,89 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
 
         messages = validation.messages
         self.assertEqual(len(messages), 0)
+
+    @ddt.data(
+        ([GROUP_ID], ["q1"], {GROUP_ID: []}, ReviewState.NOT_STARTED),
+        ([GROUP_ID], ["q1"], {GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='1')]}, ReviewState.COMPLETED),
+        (
+                [GROUP_ID], ["q1"],
+                {GROUP_ID: [mri(OTHER_USER_ID, "q1", group=GROUP_ID, answer='1')]}, ReviewState.NOT_STARTED
+        ),
+        (
+                [GROUP_ID], ["q1", "q2"],
+                {GROUP_ID: [
+                    mri(USER_ID, "q1", group=GROUP_ID, answer='1'), mri(OTHER_USER_ID, "q1", group=GROUP_ID, answer='1')
+                ]},
+                ReviewState.INCOMPLETE
+        ),
+        (
+                [GROUP_ID], ["q1"],
+                {GROUP_ID: [
+                    mri(USER_ID, "q1", group=GROUP_ID, answer='2'), mri(USER_ID, "q2", group=GROUP_ID, answer="1")
+                ]},
+                ReviewState.COMPLETED
+        ),
+        (
+                [GROUP_ID], ["q1", "q2"],
+                {GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='3')]},
+                ReviewState.INCOMPLETE
+        ),
+        (
+                [GROUP_ID], ["q1"],
+                {GROUP_ID: [
+                    mri(USER_ID, "q2", group=GROUP_ID, answer='4'), mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='5')
+                ]},
+                ReviewState.NOT_STARTED
+        ),
+        (
+                [GROUP_ID, OTHER_GROUP_ID], ["q1"],
+                {
+                    GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='6')],
+                    OTHER_GROUP_ID: [mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='7')]
+                },
+                ReviewState.COMPLETED
+        ),
+        (
+                [GROUP_ID, OTHER_GROUP_ID], ["q1", "q2"],
+                {
+                    GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='7')],
+                    OTHER_GROUP_ID: [mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='8')]
+                },
+                ReviewState.INCOMPLETE
+        ),
+        (
+                [GROUP_ID, OTHER_GROUP_ID], ["q1", "q2"],
+                {
+                    GROUP_ID: [
+                        mri(USER_ID, "q1", group=GROUP_ID, answer='7'), mri(USER_ID, "q2", group=GROUP_ID, answer='7')
+                    ],
+                    OTHER_GROUP_ID: [
+                        mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='8'),
+                        mri(USER_ID, "q2", group=GROUP_ID, answer='7')
+                    ]
+                },
+                ReviewState.INCOMPLETE
+        ),
+    )
+    @ddt.unpack
+    def test_review_status(self, groups, questions, reviews, expected_result):
+        def get_reviews(group_id, component_id):
+            return reviews.get(group_id, [])
+
+        expected_calls = [
+            mock.call(group_id, self.block.activity_content_id)
+            for group_id in groups
+        ]
+        self.project_api_mock.get_workgroup_review_items_for_group.side_effect = get_reviews
+
+        with mock.patch.object(self.block_to_test, 'review_subjects', mock.PropertyMock()) as patched_review_subjects, \
+                mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+            patched_review_subjects.return_value = [WorkgroupDetails(id=rev_id) for rev_id in groups]
+            patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
+
+            self.assertEqual(self.block.review_status(), expected_result)
+
+        self.assertEqual(self.project_api_mock.get_workgroup_review_items_for_group.mock_calls, expected_calls)
 
 
 @ddt.ddt

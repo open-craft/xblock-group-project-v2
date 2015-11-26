@@ -92,9 +92,10 @@ def raise_api_error(code, reason):
     raise make_api_error(code, reason)
 
 
-def make_review_item(reviewer, question, peer=None, content_id=None, answer=None):
+def make_review_item(reviewer, question, peer=None, content_id=None, answer=None, group=None):
     return {
-        'reviewer': reviewer, 'user': peer, 'question': question, 'content_id': content_id, 'answer': answer
+        'reviewer': reviewer, 'question': question, 'content_id': content_id, 'answer': answer,
+        'user': peer, 'workgroup': group
     }
 
 
