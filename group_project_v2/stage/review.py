@@ -144,9 +144,9 @@ class ReviewBaseStage(BaseGroupActivityStage):
     def do_submit_review(self, submissions):
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
-    def get_partially_completed_users(self, target_workgroups, target_users):
+    def get_users_completion(self, target_workgroups, target_users):
         # TODO: Implement
-        return {}
+        return set(), set()
 
     def student_view(self, context):
         if self.can_mark_complete:

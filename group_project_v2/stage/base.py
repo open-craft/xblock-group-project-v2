@@ -275,12 +275,10 @@ class BaseGroupActivityStage(
 
         target_user_count = len(target_user_ids) * 1.0
 
-        completions = self.project_api.get_completions_by_content_id(self.course_id, self.content_id)
-        completed_users = set(completion.user_id for completion in completions)
-        partially_completed_users = self.get_partially_completed_users(target_workgroups, target_users)
+        completed_users, partially_completed_users = self.get_users_completion(target_workgroups, target_users)
         log.info(STAGE_STATS_LOG_TPL.format(
-            stage=self.display_name, completed=completed_users, partially_completed=partially_completed_users,
-            target_users=target_users
+            stage=self.display_name,  target_users=[user.id for user in target_users],
+            completed=completed_users, partially_completed=partially_completed_users,
         ))
 
         completed_ratio = len(completed_users & target_user_ids) / target_user_count
@@ -292,7 +290,13 @@ class BaseGroupActivityStage(
             StageState.NOT_STARTED: 1 - completed_ratio - partially_completed_ratio
         }
 
-    def get_partially_completed_users(self, target_workgroups, target_users):
+    def get_users_completion(self, target_workgroups, target_users):
+        """
+        Returns sets of completed user ids and partially completed user ids
+        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] target_workgroups:
+        :param collections.Iterable[group_project_v2.project_api.dtos.ReducedUserDetails] target_users:
+        :rtype: (set[int], set[int])
+        """
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
     def navigation_view(self, context):
