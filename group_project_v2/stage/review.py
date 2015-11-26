@@ -68,24 +68,21 @@ class ReviewBaseStage(BaseGroupActivityStage):
         return violations
 
     def _check_review_status(self, items_to_grade, review_items, review_item_key):
-        my_feedback = {
-            make_key(peer_review_item[review_item_key], peer_review_item["question"]): peer_review_item["answer"]
+        empty_values = (None, '')
+        my_feedback = set(
+            make_key(peer_review_item[review_item_key], peer_review_item["question"])
             for peer_review_item in review_items
-            if peer_review_item['reviewer'] == self.anonymous_student_id
-        }
+            if peer_review_item['reviewer'] == self.anonymous_student_id and
+            peer_review_item["answer"] not in empty_values
+        )
 
-        required_keys = [
+        required_keys = set(
             make_key(item_id, question.question_id)
             for item_id in items_to_grade
             for question in self.required_questions
-        ]
-        has_all = True
-        has_some = False
-
-        for key in required_keys:
-            has_answer = my_feedback.get(key, None) not in (None, '')
-            has_all = has_all and has_answer
-            has_some = has_some or has_answer
+        )
+        has_all = my_feedback >= required_keys
+        has_some = bool(my_feedback & required_keys)
 
         if has_all:
             return ReviewState.COMPLETED
