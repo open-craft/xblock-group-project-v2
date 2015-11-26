@@ -276,6 +276,7 @@ class PeerReviewStage(ReviewBaseStage):
         try:
             return self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.activity_content_id)
         except ApiError:
+            log.exception("Error obtaining list of groups to grade - assuming no groups to grade")
             return []
 
     @property
