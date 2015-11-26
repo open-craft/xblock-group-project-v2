@@ -17,6 +17,17 @@ COURSES_API = '/'.join([API_PREFIX, 'courses'])
 PROJECTS_API = '/'.join([API_PREFIX, 'projects'])
 
 
+def do_not_cache(reason):
+    """
+    Decorator to not cache the function result - essentially a noop
+    :param reason: Reason for not caching the API call
+    """
+    def inner_do_not_cache(func):
+        return func
+
+    return inner_do_not_cache
+
+
 # TODO: this class crosses service boundary, but some methods post-process responses, while other do not
 # There're two things to improve:
 # * SRP - it should only cross the service boundary, and not do any post-processing
@@ -83,9 +94,9 @@ class ProjectAPI(object):
     def delete_peer_review_assessment(self, assessment_id):
         self.send_request(DELETE, (PEER_REVIEW_API, assessment_id))
 
-    # Do not cache - used both in submitting review and calculating grade, so if this call is cached grade calculation
-    # sees old value. So, when last review is performed, grade calculation does not see it and returns "No grade yet".
-    # See MCKIN-3501 and MCKIN-3471 for what would happen than.
+    @do_not_cache("Used both in submitting review and calculating grade, so if this call is cached grade calculation "
+                  "sees old value. So, when last review is performed, grade calculation does not see it and returns "
+                  "'No grade yet'. See MCKIN-3501 and MCKIN-3471 for what would happen than.")
     def get_workgroup_review_items_for_group(self, group_id, content_id):
         qs_params = {"content_id": content_id}
         return self.send_request(GET, (WORKGROUP_API, group_id, 'workgroup_reviews'), query_params=qs_params)
@@ -115,7 +126,7 @@ class ProjectAPI(object):
     def create_submission(self, submit_hash):
         return self.send_request(POST, (SUBMISSION_API, ), data=submit_hash)
 
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    @do_not_cache("Upload submission handler updates a list of submissions, than queries which submissions are there")
     def get_workgroup_submissions(self, group_id):
         return self.send_request(GET, (WORKGROUP_API, group_id, 'submissions'))
 
