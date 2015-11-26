@@ -10,12 +10,11 @@ from group_project_v2.group_project import GroupActivityXBlock
 from group_project_v2.project_api import TypedProjectAPI
 from group_project_v2.project_api.dtos import WorkgroupDetails, ReducedUserDetails, CompletionDetails
 from group_project_v2.stage import EvaluationDisplayStage, GradeDisplayStage, TeamEvaluationStage, PeerReviewStage, \
-    BaseGroupActivityStage
+    BaseGroupActivityStage, SubmissionStage
 from group_project_v2.stage.mixins import SimpleCompletionStageMixin
 from group_project_v2.stage.utils import ReviewState, StageState
 from group_project_v2.stage_components import PeerSelectorXBlock, GroupProjectReviewQuestionXBlock, GroupSelectorXBlock
-from tests.utils import TestWithPatchesMixin, make_review_item as mri, make_question
-
+from tests.utils import TestWithPatchesMixin, make_review_item as mri, make_question, make_workgroup as mk_wg
 
 USER_ID = 1
 OTHER_USER_ID = 2
@@ -24,7 +23,7 @@ OTHER_USER_ID = 2
 class BaseStageTest(TestCase, TestWithPatchesMixin):
     block_to_test = None
     user_id = USER_ID
-    workgroup_data = WorkgroupDetails(id=1, users=[{"id": 1}, {"id": 2}, {"id": 3}])
+    workgroup_data = mk_wg(1, [{"id": 1}, {"id": 2}, {"id": 3}])
 
     def setUp(self):
         self.runtime_mock = mock.Mock()
@@ -47,6 +46,77 @@ class BaseStageTest(TestCase, TestWithPatchesMixin):
         )
 
         self.runtime_mock.anonymous_student_id = self.user_id
+
+
+@ddt.ddt
+class TestSubmissionStage(BaseStageTest):
+    block_to_test = SubmissionStage
+
+    def _set_upload_ids(self, upload_ids):
+        submissions = []
+        for upload_id in upload_ids:
+            submission = mock.Mock()
+            submission.upload_id = upload_id
+            submissions.append(submission)
+
+        self.submissions_mock.return_value = submissions
+
+    def setUp(self):
+        super(TestSubmissionStage, self).setUp()
+        self.submissions_mock = mock.PropertyMock()
+        self.make_patch(self.block_to_test, 'submissions', self.submissions_mock)
+
+    @ddt.data(
+        (['u1'], [mk_wg(1, [{'id': 1}])], {}, (set(), set())),
+        (['u1'], [mk_wg(1, [{'id': 1}])], {1: ['u1']}, ({1}, set())),
+        (['u1'], [mk_wg(1, [{'id': 1}, {'id': 2}])], {1: ['u1']}, ({1, 2}, set())),
+        (['u1', 'u2'], [mk_wg(1, [{'id': 1}])], {1: ['u1']}, (set(), {1})),
+        (['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}])], {1: ['u1']}, (set(), {1, 2})),
+        (['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])], {1: ['u1']}, (set(), {1, 2})),
+        (
+                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+                {1: ['u1'], 2: ['u2']}, (set(), {1, 2, 3})
+        ),
+        (
+                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+                {1: ['u1', 'u2'], 2: ['u2']}, ({1, 2}, {3})
+        ),
+        (
+                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+                {1: ['u1'], 2: ['u1', 'u2']}, ({3}, {1, 2})
+        ),
+        (
+                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+                {1: ['u1'], 2: ['u1', 'u2']}, ({3}, {1, 2})
+        ),
+        (
+                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+                {1: ['u1', 'u2'], 2: ['u1', 'u2']}, ({1, 2, 3}, set())
+        ),
+    )
+    @ddt.unpack
+    def test_get_users_completion(self, uploads, workgroups, submissions, expected_result):
+        workgroup_submissions = {
+            group_id: {upload_id: 'irrelevant' for upload_id in uploaded_submissions}
+            for group_id, uploaded_submissions in submissions.iteritems()
+        }
+
+        expected_completed, expected_partially_completed = expected_result
+        expected_calls = [mock.call(group.id) for group in workgroups]
+
+        def get_submissions_by_id(group_id):
+            return workgroup_submissions.get(group_id, {})
+
+        self._set_upload_ids(uploads)
+        self.project_api_mock.get_latest_workgroup_submissions_by_id.side_effect = get_submissions_by_id
+        completed, partially_completed = self.block.get_users_completion(workgroups, 'irrelevant')
+
+        self.assertEqual(completed, expected_completed)
+        self.assertEqual(partially_completed, expected_partially_completed)
+        self.assertEqual(
+            self.project_api_mock.get_latest_workgroup_submissions_by_id.mock_calls,
+            expected_calls
+        )
 
 
 class ReviewStageChildrenMockContextManager(object):
