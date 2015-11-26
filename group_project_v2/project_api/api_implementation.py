@@ -245,31 +245,6 @@ class ProjectAPI(object):
                 }
                 self.create_workgroup_review_assessment(question_data)
 
-    def get_latest_workgroup_submissions_by_id(self, group_id):
-        submission_list = self.get_workgroup_submissions(group_id)
-
-        submissions_by_id = {}
-        for submission in submission_list:
-            submission_id = submission['document_id']
-            if submission['user']:
-                submission[u'user_details'] = self.get_user_details(submission['user'])
-            if submission_id in submissions_by_id:
-                last_modified = build_date_field(submissions_by_id[submission_id]["modified"])
-                this_modified = build_date_field(submission["modified"])
-                if this_modified > last_modified:
-                    submissions_by_id[submission["document_id"]] = submission
-            else:
-                submissions_by_id[submission["document_id"]] = submission
-
-        return submissions_by_id
-
-    def get_member_data(self, user_id):
-        user_details = self.get_user_details(user_id)
-        user_organizations = self.get_user_organizations(user_id)
-        if user_organizations:
-            user_details.organization = user_organizations[0]['display_name']
-        return user_details
-
 
 class TypedProjectAPI(ProjectAPI):
     """
@@ -388,3 +363,38 @@ class TypedProjectAPI(ProjectAPI):
             workgroup_assignments += self.get_workgroups_for_assignment(assignment["id"])
 
         return workgroup_assignments
+
+    # TODO: make typed + add tests
+    def get_latest_workgroup_submissions_by_id(self, group_id):
+        """
+        :param int group_id: Group ID
+        :rtype: dict[dict]
+        """
+        submission_list = self.get_workgroup_submissions(group_id)
+
+        submissions_by_id = {}
+        for submission in submission_list:
+            submission_id = submission['document_id']
+            if submission['user']:
+                submission[u'user_details'] = self.get_user_details(submission['user'])
+            if submission_id in submissions_by_id:
+                last_modified = build_date_field(submissions_by_id[submission_id]["modified"])
+                this_modified = build_date_field(submission["modified"])
+                if this_modified > last_modified:
+                    submissions_by_id[submission["document_id"]] = submission
+            else:
+                submissions_by_id[submission["document_id"]] = submission
+
+        return submissions_by_id
+
+    # TODO: add tests + do something about different type of user_details.organization attribute
+    def get_member_data(self, user_id):
+        """
+        :param int user_id:
+        :rtype: UserDetails
+        """
+        user_details = self.get_user_details(user_id)  # user_details.organization is an int here
+        user_organizations = self.get_user_organizations(user_id)
+        if user_organizations:
+            user_details.organization = user_organizations[0]['display_name']  # and a string here
+        return user_details
