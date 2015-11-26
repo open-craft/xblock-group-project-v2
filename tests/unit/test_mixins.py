@@ -8,10 +8,12 @@ from xblock.core import XBlock
 from xblock.runtime import Runtime
 
 import group_project_v2
-from group_project_v2.mixins import ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin, \
+from group_project_v2.mixins import (
+    ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin,
     WorkgroupAwareXBlockMixin, DashboardRootXBlockMixin
+)
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.dtos import ProjectDetails, ReducedUserDetails, WorkgroupDetails
+from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.utils import OutsiderDisallowedError
 from tests.utils import TestWithPatchesMixin, raise_api_error
 

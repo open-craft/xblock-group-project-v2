@@ -1,11 +1,10 @@
 from unittest import TestCase
 import ddt
 import mock
-from opaque_keys.edx.keys import CourseKey
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
 from xblock.core import XBlock
 from xblock.field_data import DictFieldData
-from xblock.fields import String, ScopeIds
+from xblock.fields import String
 from group_project_v2.utils import FieldValuesContextManager, get_block_content_id
 
 

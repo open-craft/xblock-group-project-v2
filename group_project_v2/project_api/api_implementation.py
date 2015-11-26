@@ -17,7 +17,7 @@ COURSES_API = '/'.join([API_PREFIX, 'courses'])
 PROJECTS_API = '/'.join([API_PREFIX, 'projects'])
 
 
-def do_not_cache(reason):
+def do_not_cache(reason):  # pylint:disable=unused-argument
     """
     Decorator to not cache the function result - essentially a noop
     :param reason: Reason for not caching the API call

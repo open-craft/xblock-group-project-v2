@@ -25,7 +25,7 @@ class SimpleCompletionStageMixin(object):
         self.completed = True
         return result
 
-    def get_users_completion(self, target_workgroups, target_users):
+    def get_users_completion(self, target_workgroups, target_users):  # pylint:disable=unused-argument
         """
         Returns sets of completed user ids and partially completed user ids
         :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] target_workgroups:

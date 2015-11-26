@@ -102,7 +102,7 @@ class Completions(object):
             },
         ]
     }
-    
+
     non_paged2 = {
         "count": 5,
         "next": None,
@@ -161,7 +161,7 @@ class Completions(object):
     paged_page3 = {
         "count": 3,
         "next": None,
-        "previous": "http://localhost/api/server/courses/course1/completions/?content_id=content1&3page=2",
+        "previous": "http://localhost/api/server/courses/course1/completions/?content_id=content1&3page=23",
         "num_pages": 3,
         "results": [
             {

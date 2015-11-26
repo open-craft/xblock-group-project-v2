@@ -8,8 +8,10 @@ from xblock.fields import DateTime, Scope, Boolean
 from xblock.fragment import Fragment
 from xblockutils.studio_editable import XBlockWithPreviewMixin
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import CommonMixinCollection, XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin, \
+from group_project_v2.mixins import (
+    CommonMixinCollection, XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
     DashboardXBlockMixin, DashboardRootXBlockMixin
+)
 from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
     GroupProjectResourceXBlock, GroupProjectVideoResourceXBlock, ProjectTeamXBlock

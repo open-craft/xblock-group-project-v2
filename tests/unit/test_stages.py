@@ -417,7 +417,7 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
     )
     @ddt.unpack
     def test_review_status(self, groups, questions, reviews, expected_result):
-        def get_reviews(group_id, component_id):
+        def get_reviews(group_id, component_id):  # pylint:disable=unused-argument
             return reviews.get(group_id, [])
 
         expected_calls = [

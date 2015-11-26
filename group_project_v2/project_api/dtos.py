@@ -54,7 +54,7 @@ class WorkgroupDetails(object):
         self.groups = kwargs.get('groups')
         self.workgroups = kwargs.get('workgroups')
         users = kwargs.get('users')
-        """ :type: ReducedUserDetails """
+        """ :type: ReducedUserDetails """  # pylint:disable=pointless-string-statement
         self.users = []
         if users:
             self.users = [ReducedUserDetails(**user_detail) for user_detail in users]

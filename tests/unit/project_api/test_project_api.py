@@ -32,6 +32,7 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
         return mock.patch.object(self.project_api, 'send_request', mock.Mock(side_effect=side_effect))
 
     def _patch_do_send_request(self, urls_and_results, missing_callback=None):
+        # pylint: disable=unused-argument
         def side_effect(method, url, data=None):
             if url in urls_and_results:
                 return urls_and_results[url]
@@ -282,8 +283,11 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             patched_send_request.assert_called_once_with(GET, (PROJECTS_API,), query_params=expected_parameters)
 
     def test_get_project_by_content_id_fail_if_more_than_one(self):
-        calls_and_results = {(PROJECTS_API,): [canned_responses.Projects.project1, canned_responses.Projects.project2]}
-        with self._patch_send_request(calls_and_results), self.assertRaises(AssertionError):
+        calls_and_results = {
+            (PROJECTS_API,): [canned_responses.Projects.project1, canned_responses.Projects.project2]
+        }
+        with self._patch_send_request(calls_and_results), \
+                self.assertRaises(AssertionError):
             self.project_api.get_project_by_content_id('irrelevant', 'irrelevant')
 
     def test_get_project_by_content_id_return_none_if_not_found(self):
@@ -320,7 +324,7 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
     @ddt.unpack
     def test_get_completions_by_content_id(self, course_id, content_id):
         def build_url(course_id, content_id):
-            return self.project_api._build_url(
+            return self.project_api._build_url(  # pylint:disable=protected-access
                 (COURSES_API, course_id, 'completions'), query_params={'content_id': content_id}
             )
 
@@ -345,7 +349,9 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             query_params = {'content_id': content_id}
             if page_num:
                 query_params['page'] = page_num
-            return self.project_api._build_url((COURSES_API, course_id, 'completions'), query_params=query_params)
+            return self.project_api._build_url(  # pylint:disable=protected-access
+                (COURSES_API, course_id, 'completions'), query_params=query_params
+            )
 
         course, content = 'course1', 'content1'
 
