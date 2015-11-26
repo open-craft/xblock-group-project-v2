@@ -90,9 +90,9 @@ class ReviewBaseStage(BaseGroupActivityStage):
         if has_all:
             return ReviewState.COMPLETED
         elif has_some:
-            return StageState.INCOMPLETE
+            return ReviewState.INCOMPLETE
         else:
-            return StageState.NOT_STARTED
+            return ReviewState.NOT_STARTED
 
     def get_stage_state(self):
         review_status = self.review_status()
