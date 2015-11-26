@@ -253,8 +253,8 @@ class BaseGroupActivityStage(
     def get_stage_state(self):
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
-    def get_dashboard_stage_state(self, target_users):
-        state_stats = self.get_stage_stats(target_users)
+    def get_dashboard_stage_state(self, target_workgroups, target_users):
+        state_stats = self.get_stage_stats(target_workgroups, target_users)
         if state_stats.get(StageState.COMPLETED, 0) == 1:
             stage_state = StageState.COMPLETED
         elif state_stats.get(StageState.INCOMPLETE, 0) > 0 or state_stats.get(StageState.COMPLETED, 0) > 0:
@@ -264,7 +264,7 @@ class BaseGroupActivityStage(
 
         return stage_state, state_stats
 
-    def get_stage_stats(self, target_users):  # pylint: disable=no-self-use
+    def get_stage_stats(self, target_workgroups, target_users):  # pylint: disable=no-self-use
         target_user_ids = set(user.id for user in target_users)
         if not target_user_ids:
             return {
@@ -277,7 +277,7 @@ class BaseGroupActivityStage(
 
         completions = self.project_api.get_completions_by_content_id(self.course_id, self.content_id)
         completed_users = set(completion.user_id for completion in completions)
-        partially_completed_users = self.get_partially_completed_users(target_users)
+        partially_completed_users = self.get_partially_completed_users(target_workgroups, target_users)
         log.info(STAGE_STATS_LOG_TPL.format(
             stage=self.display_name, completed=completed_users, partially_completed=partially_completed_users,
             target_users=target_users
@@ -292,7 +292,7 @@ class BaseGroupActivityStage(
             StageState.NOT_STARTED: 1 - completed_ratio - partially_completed_ratio
         }
 
-    def get_partially_completed_users(self, target_users):
+    def get_partially_completed_users(self, target_workgroups, target_users):
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
     def navigation_view(self, context):
@@ -311,9 +311,10 @@ class BaseGroupActivityStage(
     def dashboard_view(self, context):
         fragment = Fragment()
 
+        target_workgroups = context.get(DashboardRootXBlockMixin.TARGET_WORKGROUPS)
         target_users = context.get(DashboardRootXBlockMixin.TARGET_STUDENTS)
 
-        state, stats = self.get_dashboard_stage_state(target_users)
+        state, stats = self.get_dashboard_stage_state(target_workgroups, target_users)
         human_stats = OrderedDict([
             (StageState.get_human_name(StageState.NOT_STARTED), stats[StageState.NOT_STARTED]*100),
             (StageState.get_human_name(StageState.INCOMPLETE), stats[StageState.INCOMPLETE]*100),

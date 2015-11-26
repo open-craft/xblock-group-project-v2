@@ -25,5 +25,5 @@ class SimpleCompletionStageMixin(object):
         self.completed = True
         return result
 
-    def get_partially_completed_users(self, target_users):
+    def get_partially_completed_users(self, target_workgroups, target_users):
         return {}

@@ -181,6 +181,5 @@ class SubmissionStage(BaseGroupActivityStage):
             'submission_review_view', "templates/html/stages/submissions_review_view.html", context
         )
 
-    def get_partially_completed_users(self, target_users):
-        # TODO: Implement
-        return {}
+    def get_partially_completed_users(self, target_workgroups, target_users):
+        pass
