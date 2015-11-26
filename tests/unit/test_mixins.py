@@ -3,7 +3,6 @@ from unittest import TestCase
 
 import ddt
 import mock
-from mock.mock import call
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
 from xblock.core import XBlock
 from xblock.runtime import Runtime
@@ -413,7 +412,7 @@ class TestDashboardRootXBlockMixin(TestCase, TestWithPatchesMixin):
 
         workgroups = self.block.workgroups
 
-        expected_calls = [call(workgroup_id) for workgroup_id in workgroup_ids]
+        expected_calls = [mock.call(workgroup_id) for workgroup_id in workgroup_ids]
         expected_groups = [_get_workgroup_by_id(workgroup_id) for workgroup_id in workgroup_ids]
         self.assertEqual(self.project_api_mock.get_workgroup_by_id.mock_calls, expected_calls)
         self.assertEqual(workgroups, expected_groups)
@@ -441,9 +440,9 @@ class TestDashboardRootXBlockMixin(TestCase, TestWithPatchesMixin):
         self.assertEqual([user.id for user in users], expected_user_ids)
 
     @ddt.data(
-        ({}, 'workgroups_sentinel', 'user_sentinel'),
-        ({DashboardRootXBlockMixin.TARGET_WORKGROUPS: 'workgroup_value'}, 'workgroup_value', 'user_sentinel'),
-        ({DashboardRootXBlockMixin.TARGET_STUDENTS: 'user_value'}, 'workgroups_sentinel', 'user_value'),
+        ({}, list('workgroups_sentinel'), list('user_sentinel')),
+        ({DashboardRootXBlockMixin.TARGET_WORKGROUPS: 'workgroup_value'}, 'workgroup_value', list('user_sentinel')),
+        ({DashboardRootXBlockMixin.TARGET_STUDENTS: 'user_value'}, list('workgroups_sentinel'), 'user_value'),
         (
                 {
                     DashboardRootXBlockMixin.TARGET_STUDENTS: 'user_value',
@@ -454,8 +453,8 @@ class TestDashboardRootXBlockMixin(TestCase, TestWithPatchesMixin):
     )
     @ddt.unpack
     def test_append_context_parameters_if_not_present(self, context, expected_workgroups, expected_users):
-        workgroups_sentinel = 'workgroups_sentinel'
-        users_sentinel = 'user_sentinel'
+        workgroups_sentinel = list('workgroups_sentinel')
+        users_sentinel = list('user_sentinel')
         self.make_patch(type(self.block), 'workgroups', mock.PropertyMock(return_value=workgroups_sentinel))
         self.make_patch(type(self.block), 'all_users_in_workgroups', mock.PropertyMock(return_value=users_sentinel))
 

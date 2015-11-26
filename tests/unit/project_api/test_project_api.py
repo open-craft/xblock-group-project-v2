@@ -3,7 +3,6 @@ from unittest import TestCase
 
 import ddt
 import mock
-from mock.mock import call
 
 from group_project_v2.json_requests import GET
 from group_project_v2.project_api import TypedProjectAPI
@@ -251,8 +250,8 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
         }
 
         expected_calls = [
-            call(GET, (PROJECTS_API, 1), no_trailing_slash=True),
-            call(GET, (PROJECTS_API, 2), no_trailing_slash=True)
+            mock.call(GET, (PROJECTS_API, 1), no_trailing_slash=True),
+            mock.call(GET, (PROJECTS_API, 2), no_trailing_slash=True)
         ]
 
         with self._patch_send_request(calls_and_results) as patched_send_request:
@@ -366,9 +365,9 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             all_responses.extend(page['results'])
 
         expected_calls = [
-            call(GET, build_url(course, content), None),
-            call(GET, canned_responses.Completions.paged_page1['next'], None),
-            call(GET, canned_responses.Completions.paged_page2['next'], None),
+            mock.call(GET, build_url(course, content), None),
+            mock.call(GET, canned_responses.Completions.paged_page1['next'], None),
+            mock.call(GET, canned_responses.Completions.paged_page2['next'], None),
         ]
 
         with self._patch_do_send_request(urls_and_results) as patched_do_send_request:
