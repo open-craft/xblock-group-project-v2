@@ -179,7 +179,9 @@ class TeamEvaluationStage(ReviewBaseStage):
         return blocks
 
     def review_status(self):
-        peer_review_items = self.project_api.get_peer_review_items_for_group(self.workgroup.id, self.content_id)
+        peer_review_items = self.project_api.get_peer_review_items_for_group(
+            self.workgroup.id, self.activity_content_id
+        )
 
         return self._check_review_status([user.id for user in self.review_subjects], peer_review_items, "user")
 

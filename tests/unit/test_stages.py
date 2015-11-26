@@ -8,16 +8,20 @@ from xblock.validation import ValidationMessage
 
 from group_project_v2.group_project import GroupActivityXBlock
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.dtos import WorkgroupDetails
+from group_project_v2.project_api.dtos import WorkgroupDetails, ReducedUserDetails
 from group_project_v2.stage import EvaluationDisplayStage, GradeDisplayStage, TeamEvaluationStage, PeerReviewStage
 from group_project_v2.stage.utils import ReviewState, StageState
 from group_project_v2.stage_components import PeerSelectorXBlock, GroupProjectReviewQuestionXBlock, GroupSelectorXBlock
-from tests.utils import TestWithPatchesMixin, make_review_item
+from tests.utils import TestWithPatchesMixin, make_review_item as mri, make_question
+
+
+USER_ID = 1
+OTHER_USER_ID = 2
 
 
 class BaseStageTest(TestCase, TestWithPatchesMixin):
     block_to_test = None
-    user_id = 1
+    user_id = USER_ID
     workgroup_data = WorkgroupDetails(id=1, users=[{"id": 1}, {"id": 2}, {"id": 3}])
 
     def setUp(self):
@@ -39,6 +43,8 @@ class BaseStageTest(TestCase, TestWithPatchesMixin):
         self.user_id_mock = self.make_patch(
             self.block_to_test, 'user_id', mock.PropertyMock(return_value=self.user_id)
         )
+
+        self.runtime_mock.anonymous_student_id = self.user_id
 
 
 class ReviewStageChildrenMockContextManager(object):
@@ -114,6 +120,7 @@ class ReviewStageBaseTest(object):
             self.assertEqual(self.block.get_stage_state(), expected_stage_state)
 
 
+@ddt.ddt
 class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
     block_to_test = TeamEvaluationStage
 
@@ -157,6 +164,55 @@ class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
 
         messages = validation.messages
         self.assertEqual(len(messages), 0)
+
+    @ddt.data(
+        ([10], ["q1"], [], ReviewState.NOT_STARTED),
+        ([10], ["q1"], [mri(USER_ID, "q1", peer=10, answer='1')], ReviewState.COMPLETED),
+        ([10], ["q1"], [mri(OTHER_USER_ID, "q1", peer=10, answer='1')], ReviewState.NOT_STARTED),
+        (
+                [10], ["q1", "q2"],
+                [mri(USER_ID, "q1", peer=10, answer='1'), mri(OTHER_USER_ID, "q1", peer=10, answer='1')],
+                ReviewState.INCOMPLETE
+        ),
+        (
+                [10], ["q1"],
+                [mri(USER_ID, "q1", peer=10, answer='2'), mri(USER_ID, "q2", peer=10, answer="1")],
+                ReviewState.COMPLETED
+        ),
+        (
+                [10], ["q1", "q2"],
+                [mri(USER_ID, "q1", peer=10, answer='3')],
+                ReviewState.INCOMPLETE
+        ),
+        (
+                [10], ["q1"],
+                [mri(USER_ID, "q2", peer=10, answer='4'), mri(USER_ID, "q1", peer=11, answer='5')],
+                ReviewState.NOT_STARTED
+        ),
+        (
+                [10, 11], ["q1"],
+                [mri(USER_ID, "q1", peer=10, answer='6'), mri(USER_ID, "q1", peer=11, answer='7')],
+                ReviewState.COMPLETED
+        ),
+        (
+                [10, 11], ["q1", "q2"],
+                [mri(USER_ID, "q1", peer=10, answer='7'), mri(USER_ID, "q1", peer=11, answer='8')],
+                ReviewState.INCOMPLETE
+        ),
+    )
+    @ddt.unpack
+    def test_review_status(self, reviewers, questions, reviews, expected_result):
+        self.project_api_mock.get_peer_review_items_for_group.return_value = reviews
+
+        with mock.patch.object(self.block_to_test, 'review_subjects', mock.PropertyMock()) as patched_review_subjects, \
+                mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+            patched_review_subjects.return_value = [ReducedUserDetails(id=rev_id) for rev_id in reviewers]
+            patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
+
+            self.assertEqual(self.block.review_status(), expected_result)
+            self.project_api_mock.get_peer_review_items_for_group.assert_called_once_with(
+                self.workgroup_data.id, self.activity_mock.content_id
+            )
 
 
 @ddt.ddt
@@ -301,12 +357,12 @@ class TestEvaluationDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
 
     @ddt.data(
         ([10], ["q1"], [], False),
-        ([10], ["q1"], [make_review_item(10, "q1")], True),
-        ([10], ["q1"], [make_review_item(10, "q1"), make_review_item(10, "q2")], True),
-        ([10], ["q1"], [make_review_item(11, "q1")], False),
-        ([10], ["q1"], [make_review_item(10, "q2"), make_review_item(11, "q1")], False),
-        ([10, 11], ["q1"], [make_review_item(10, "q1"), make_review_item(11, "q1")], True),
-        ([10, 11], ["q1", "q2"], [make_review_item(10, "q1"), make_review_item(11, "q1")], False),
+        ([10], ["q1"], [mri(10, "q1")], True),
+        ([10], ["q1"], [mri(10, "q1"), mri(10, "q2")], True),
+        ([10], ["q1"], [mri(11, "q1")], False),
+        ([10], ["q1"], [mri(10, "q2"), mri(11, "q1")], False),
+        ([10, 11], ["q1"], [mri(10, "q1"), mri(11, "q1")], True),
+        ([10, 11], ["q1", "q2"], [mri(10, "q1"), mri(11, "q1")], False),
     )
     @ddt.unpack
     def test_can_mark_compete_suite(self, reviewers, questions, reviews, expected_result):
@@ -319,7 +375,6 @@ class TestEvaluationDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
             patched_required_questions.return_value = questions
 
             self.assertEqual(self.block.can_mark_complete, expected_result)
-
 
 @ddt.ddt
 class TestGradeDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
