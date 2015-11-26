@@ -8,8 +8,10 @@ from xblock.validation import ValidationMessage
 
 from group_project_v2.group_project import GroupActivityXBlock
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.dtos import WorkgroupDetails, ReducedUserDetails
-from group_project_v2.stage import EvaluationDisplayStage, GradeDisplayStage, TeamEvaluationStage, PeerReviewStage
+from group_project_v2.project_api.dtos import WorkgroupDetails, ReducedUserDetails, CompletionDetails
+from group_project_v2.stage import EvaluationDisplayStage, GradeDisplayStage, TeamEvaluationStage, PeerReviewStage, \
+    BaseGroupActivityStage
+from group_project_v2.stage.mixins import SimpleCompletionStageMixin
 from group_project_v2.stage.utils import ReviewState, StageState
 from group_project_v2.stage_components import PeerSelectorXBlock, GroupProjectReviewQuestionXBlock, GroupSelectorXBlock
 from tests.utils import TestWithPatchesMixin, make_review_item as mri, make_question
@@ -376,6 +378,7 @@ class TestEvaluationDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
 
             self.assertEqual(self.block.can_mark_complete, expected_result)
 
+
 @ddt.ddt
 class TestGradeDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
     block_to_test = GradeDisplayStage
@@ -400,3 +403,30 @@ class TestGradeDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
         self.activity_mock.calculate_grade.return_value = calculate_grade_result
 
         self.assertEqual(self.block.can_mark_complete, expected_result)
+
+
+@ddt.ddt
+class TestSimpleCompletionStageMixin(BaseStageTest):
+    class SimpleCompletionGuineaPig(SimpleCompletionStageMixin, BaseGroupActivityStage):
+        pass
+
+    block_to_test = SimpleCompletionGuineaPig
+
+    @ddt.data(
+        ({1}, {1}),
+        (set(), set()),
+        ({1, 2, 3, 4}, {1, 2, 3, 4}),
+        ({1, 4, 11, 92}, {1, 4, 11, 92}),
+    )
+    @ddt.unpack
+    def test_get_users_completion(self, completed_users, expected_completed_users):
+        self.project_api_mock.get_completions_by_content_id.return_value = [
+            CompletionDetails(user_id=uid) for uid in completed_users
+        ]
+
+        completed, partially = self.block.get_users_completion('irrelevant', 'irrelevant')
+        self.assertEqual(completed, expected_completed_users)
+        self.assertEqual(partially, set())
+        self.project_api_mock.get_completions_by_content_id.assert_called_once_with(
+            self.block.course_id, self.block.content_id
+        )
