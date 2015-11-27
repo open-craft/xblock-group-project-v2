@@ -1,5 +1,7 @@
 import json
 import logging
+from collections import defaultdict
+
 from lazy.lazy import lazy
 import webob
 from xblock.core import XBlock
@@ -27,10 +29,27 @@ class ReviewBaseStage(BaseGroupActivityStage):
     js_file = "public/js/stages/review_stage.js"
     js_init = "GroupProjectReviewStage"
 
+    review_item_key = None
+
     STAGE_ACTION = _(u"save feedback")
     FEEDBACK_SAVED_MESSAGE = _(u'Thanks for your feedback.')
 
     TA_GRADING_NOT_ALLOWED = _(u"TA grading is not allowed for this stage")
+
+    # (has_some, has_all) -> ReviewState. have_all = True and have_some = False is obviously an error
+    REVIEW_STATE_CONDITIONS = {
+        (True, True): ReviewState.COMPLETED,
+        (True, False): ReviewState.INCOMPLETE,
+        (False, False): ReviewState.NOT_STARTED
+    }
+
+    # pretty much obvious mapping, but still it is useful to separate the two - more stage states could be theoretically
+    # added, i.e. Open, Closed, etc. THose won't have a mapping to ReviewState
+    STAGE_STATE_REVIEW_STATE_MAPPING = {
+        ReviewState.COMPLETED: StageState.COMPLETED,
+        ReviewState.INCOMPLETE: StageState.INCOMPLETE,
+        ReviewState.NOT_STARTED: StageState.NOT_STARTED,
+    }
 
     @property
     def allowed_nested_blocks(self):
@@ -67,29 +86,47 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
         return violations
 
-    def _check_review_status(self, items_to_grade, review_items, review_item_key):
+    def _group_review_items_by_reviewer(self, review_items):
         empty_values = (None, '')
-        my_feedback = set(
-            make_key(peer_review_item[review_item_key], peer_review_item["question"])
-            for peer_review_item in review_items
-            if peer_review_item['reviewer'] == self.anonymous_student_id and
-            peer_review_item["answer"] not in empty_values
-        )
+        grouped = defaultdict(set)
+        for review_item in review_items:
+            if review_item["answer"] not in empty_values:  # exclude missing or empty answers
+                reviewer = review_item['reviewer']
+                review_item_key = make_key(review_item[self.review_item_key], review_item["question"])
+                grouped[reviewer].add(review_item_key)
 
-        required_keys = set(
+        return grouped
+
+    def _make_required_keys(self, items_to_grade):
+        return set(
             make_key(item_id, question.question_id)
             for item_id in items_to_grade
             for question in self.required_questions
         )
-        has_all = my_feedback >= required_keys
-        has_some = bool(my_feedback & required_keys)
 
-        if has_all:
-            return ReviewState.COMPLETED
-        elif has_some:
-            return ReviewState.INCOMPLETE
-        else:
-            return ReviewState.NOT_STARTED
+    def _calculate_review_status(self, items_to_grade, reviewer_feedback_keys):
+        """
+        Calculates review status for all reviewers listed in review_items collection
+        :param collections.Iterable[int] items_to_grade: Ids of review subjects (teammates or other groups)
+        :param collections.Iterable[set[str]] reviewer_feedback_keys: Review feedback keys
+        :rtype: ReviewState
+        """
+        required_keys = self._make_required_keys(items_to_grade)
+        has_all = reviewer_feedback_keys >= required_keys
+        has_some = bool(reviewer_feedback_keys & required_keys)
+
+        return self.REVIEW_STATE_CONDITIONS.get((has_some, has_all))
+
+    def _check_review_status(self, items_to_grade, review_items):
+        """
+        Calculates review status for current user
+        :param collections.Iterable[int] items_to_grade: Ids of review subjects (teammates or other groups)
+        :param collections.Iterable[dict] review_items: review items (answers to review questions)
+        :rtype: ReviewState
+        """
+        grouped_review_keys = self._group_review_items_by_reviewer(review_items)
+        my_review_keys = grouped_review_keys.get(self.anonymous_student_id, set())
+        return self._calculate_review_status(items_to_grade, my_review_keys)
 
     def get_stage_state(self):
         review_status = self.review_status()
@@ -97,12 +134,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
         if not self.visited:
             return StageState.NOT_STARTED
 
-        if review_status == ReviewState.COMPLETED:
-            return StageState.COMPLETED
-        elif review_status == ReviewState.INCOMPLETE:
-            return StageState.INCOMPLETE
-        else:
-            return StageState.NOT_STARTED
+        return self.STAGE_STATE_REVIEW_STATE_MAPPING[review_status]
 
     def _pivot_feedback(self, feedback):  # pylint: disable=no-self-use
         """
@@ -165,6 +197,8 @@ class TeamEvaluationStage(ReviewBaseStage):
 
     STUDIO_LABEL = _(u"Team Evaluation")
 
+    review_item_key = "user"
+
     @lazy
     def review_subjects(self):
         return [user for user in self.workgroup.users if user.id != self.user_id]
@@ -180,7 +214,7 @@ class TeamEvaluationStage(ReviewBaseStage):
             self.workgroup.id, self.activity_content_id
         )
 
-        return self._check_review_status([user.id for user in self.review_subjects], peer_review_items, "user")
+        return self._check_review_status([user.id for user in self.review_subjects], peer_review_items)
 
     def validate(self):
         violations = super(TeamEvaluationStage, self).validate()
@@ -251,6 +285,8 @@ class PeerReviewStage(ReviewBaseStage):
 
     STUDIO_LABEL = _(u"Peer Grading")
 
+    review_item_key = "workgroup"
+
     @property
     def allowed_nested_blocks(self):
         blocks = super(PeerReviewStage, self).allowed_nested_blocks
@@ -301,7 +337,7 @@ class PeerReviewStage(ReviewBaseStage):
                 self.project_api.get_workgroup_review_items_for_group(assess_group.id, self.activity_content_id)
             )
 
-        return self._check_review_status([group.id for group in self.review_groups], group_review_items, "workgroup")
+        return self._check_review_status([group.id for group in self.review_groups], group_review_items)
 
     def validate(self):
         violations = super(PeerReviewStage, self).validate()
