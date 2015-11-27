@@ -15,7 +15,8 @@ from group_project_v2.stage_components import (
 from group_project_v2.utils import (
     loader, gettext as _, make_key,
     outsider_disallowed_protected_handler, key_error_protected_handler, conversion_protected_handler,
-    MUST_BE_OVERRIDDEN)
+    MUST_BE_OVERRIDDEN
+)
 from group_project_v2.stage.utils import StageState, ReviewState, DISPLAY_NAME_NAME, DISPLAY_NAME_HELP
 
 log = logging.getLogger(__name__)
@@ -112,7 +113,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
         :rtype: ReviewState
         """
         required_keys = self._make_required_keys(items_to_grade)
-        has_all = reviewer_feedback_keys >= required_keys
+        has_all = bool(required_keys) and reviewer_feedback_keys >= required_keys
         has_some = bool(reviewer_feedback_keys & required_keys)
 
         return self.REVIEW_STATE_CONDITIONS.get((has_some, has_all))
@@ -173,10 +174,6 @@ class ReviewBaseStage(BaseGroupActivityStage):
     def do_submit_review(self, submissions):
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
-    def get_users_completion(self, target_workgroups, target_users):
-        # TODO: Implement
-        return set(), set()
-
     def student_view(self, context):
         if self.can_mark_complete:
             self.visited = True
@@ -215,6 +212,28 @@ class TeamEvaluationStage(ReviewBaseStage):
         )
 
         return self._check_review_status([user.id for user in self.review_subjects], peer_review_items)
+
+    def get_users_completion(self, target_workgroups, target_users):
+        completed_users, partially_completed_users = set(), set()
+
+        for user in target_users:
+            workgroup = self.project_api.get_user_workgroup_for_course(user.id, self.course_id)
+            review_subjects = set(user.id for user in workgroup.users) - {user.id}
+            review_items = self.project_api.get_peer_review_items_for_group(workgroup.id, self.activity_content_id)
+            grouped_review_items = {
+                self.real_user_id(anonymous_id): grouped_items
+                for anonymous_id, grouped_items in self._group_review_items_by_reviewer(review_items).iteritems()
+            }
+            this_user_reviews = grouped_review_items.get(user.id, set())
+
+            review_status = self._calculate_review_status(review_subjects, this_user_reviews)
+
+            if review_status == ReviewState.COMPLETED:
+                completed_users.add(user.id)
+            elif review_items == ReviewState.INCOMPLETE:
+                partially_completed_users.add(user.id)
+
+        return completed_users, partially_completed_users
 
     def validate(self):
         violations = super(TeamEvaluationStage, self).validate()
@@ -338,6 +357,10 @@ class PeerReviewStage(ReviewBaseStage):
             )
 
         return self._check_review_status([group.id for group in self.review_groups], group_review_items)
+
+    def get_users_completion(self, target_workgroups, target_users):
+        # TODO: Implement
+        return set(), set()
 
     def validate(self):
         violations = super(PeerReviewStage, self).validate()
