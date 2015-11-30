@@ -746,6 +746,7 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
         ),
     )
     @ddt.unpack
+    # pylint:disable=too-many-locals
     def test_users_completion_multiple_groups(
             self, target_users, group_reviewers, questions, review_items, expected_result
     ):
