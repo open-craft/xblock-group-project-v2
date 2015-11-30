@@ -235,12 +235,11 @@ class TeamEvaluationStage(ReviewBaseStage):
                 for anonymous_id, grouped_items in self._group_review_items_by_reviewer(review_items).iteritems()
             }
             this_user_reviews = grouped_review_items.get(user.id, set())
-
             review_status = self._calculate_review_status(review_subjects, this_user_reviews)
 
             if review_status == ReviewState.COMPLETED:
                 completed_users.add(user.id)
-            elif review_items == ReviewState.INCOMPLETE:
+            elif review_status == ReviewState.INCOMPLETE:
                 partially_completed_users.add(user.id)
 
         return completed_users, partially_completed_users
