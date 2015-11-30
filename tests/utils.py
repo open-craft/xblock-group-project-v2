@@ -113,5 +113,7 @@ def switch_to_ta_grading(project_api_mock, review_group_id=1):
     project_api_mock.get_user_roles_for_course.return_value = [{'role': role} for role in ALLOWED_OUTSIDER_ROLES]
 
 
-def make_workgroup(workgroup_id, users):
+def make_workgroup(workgroup_id, users=None):
+    if not users:
+        users = []
     return WorkgroupDetails(id=workgroup_id, users=users)
