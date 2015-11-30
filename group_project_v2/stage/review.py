@@ -1,6 +1,5 @@
 import json
 import logging
-from collections import defaultdict
 
 import itertools
 from lazy.lazy import lazy
@@ -88,16 +87,13 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
         return violations
 
-    def _group_review_items_by_reviewer(self, review_items):
+    def _convert_review_items_to_keys(self, review_items):
         empty_values = (None, '')
-        grouped = defaultdict(set)
-        for review_item in review_items:
-            if review_item["answer"] not in empty_values:  # exclude missing or empty answers
-                reviewer = review_item['reviewer']
-                review_item_key = make_key(review_item[self.REVIEW_ITEM_KEY], review_item["question"])
-                grouped[reviewer].add(review_item_key)
-
-        return grouped
+        return set(
+            make_key(review_item[self.REVIEW_ITEM_KEY], review_item["question"])
+            for review_item in review_items
+            if review_item["answer"] not in empty_values
+        )
 
     def _make_required_keys(self, items_to_grade):
         return set(
@@ -127,8 +123,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
         :rtype: ReviewState
         """
         my_feedback = [item for item in review_items if item['reviewer'] == self.anonymous_student_id]
-        grouped_review_keys = self._group_review_items_by_reviewer(my_feedback)
-        my_review_keys = grouped_review_keys.get(self.anonymous_student_id, set())
+        my_review_keys = self._convert_review_items_to_keys(my_feedback)
         return self._calculate_review_status(items_to_grade, my_review_keys)
 
     def get_stage_state(self):
@@ -155,12 +150,8 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
         for user in target_users:
             review_items, review_subjects = self.get_review_data(user.id)
-            grouped_review_items = {
-                self.real_user_id(anonymous_id): grouped_items
-                for anonymous_id, grouped_items in self._group_review_items_by_reviewer(review_items).iteritems()
-            }
-            this_user_reviews = grouped_review_items.get(user.id, set())
-            review_status = self._calculate_review_status(review_subjects, this_user_reviews)
+            review_keys = self._convert_review_items_to_keys(review_items)
+            review_status = self._calculate_review_status(review_subjects, review_keys)
 
             if review_status == ReviewState.COMPLETED:
                 completed_users.add(user.id)
@@ -253,7 +244,11 @@ class TeamEvaluationStage(ReviewBaseStage):
         """
         workgroup = self.project_api.get_user_workgroup_for_course(user_id, self.course_id)
         review_subjects = set(user.id for user in workgroup.users) - {user_id}
-        review_items = self._get_review_items_for_group(self.project_api, workgroup.id, self.activity_content_id)
+        review_items = [
+            item
+            for item in self._get_review_items_for_group(self.project_api, workgroup.id, self.activity_content_id)
+            if self.real_user_id(item['reviewer']) == user_id
+        ]
         return review_items, review_subjects
 
     @staticmethod
@@ -394,7 +389,11 @@ class PeerReviewStage(ReviewBaseStage):
         :rtype: (dict, set[int])
         """
         review_subjects = self.project_api.get_workgroups_to_review(user_id, self.course_id, self.activity_content_id)
-        review_items = self._get_review_items(review_subjects, with_caching=True)
+        review_items = [
+            item
+            for item in self._get_review_items(review_subjects, with_caching=True)
+            if self.real_user_id(item['reviewer']) == user_id
+        ]
         return review_items, set(group.id for group in review_subjects)
 
     @staticmethod
