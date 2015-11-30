@@ -56,13 +56,7 @@ class TestSubmissionStage(BaseStageTest):
     block_to_test = SubmissionStage
 
     def _set_upload_ids(self, upload_ids):
-        submissions = []
-        for upload_id in upload_ids:
-            submission = mock.Mock()
-            submission.upload_id = upload_id
-            submissions.append(submission)
-
-        self.submissions_mock.return_value = submissions
+        self.submissions_mock.return_value = [mock.Mock(upload_id=upload_id) for upload_id in upload_ids]
 
     def setUp(self):
         super(TestSubmissionStage, self).setUp()
@@ -70,28 +64,39 @@ class TestSubmissionStage(BaseStageTest):
         self.make_patch(self.block_to_test, 'submissions', self.submissions_mock)
 
     @ddt.data(
+        # no submissions at all - not started
         (['u1'], [mk_wg(1, [{'id': 1}])], {}, (set(), set())),
+        # all submissions for one group with one user - user completed the stage
         (['u1'], [mk_wg(1, [{'id': 1}])], {1: ['u1']}, ({1}, set())),
+        # all submissionss for one group with two users - both users completed the stage
         (['u1'], [mk_wg(1, [{'id': 1}, {'id': 2}])], {1: ['u1']}, ({1, 2}, set())),
+        # some submissions for one group with one user - user partially completed the stage
         (['u1', 'u2'], [mk_wg(1, [{'id': 1}])], {1: ['u1']}, (set(), {1})),
+        # some submissions for one group with two users - both users partially completed the stage
         (['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}])], {1: ['u1']}, (set(), {1, 2})),
+        # two groups, some submissions for g1 - users in g1 partially completed, users in g2 not started
         (['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])], {1: ['u1']}, (set(), {1, 2})),
+        # two groups, some submissions for g1 and g2 - users both in g1 and g2 partially completed
         (
                 ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
                 {1: ['u1'], 2: ['u2']}, (set(), {1, 2, 3})
         ),
+        # two groups, all submissions for g1, some for g2 - g1 users completed, g2 users partially completed
         (
                 ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
                 {1: ['u1', 'u2'], 2: ['u2']}, ({1, 2}, {3})
         ),
+        # two groups, some submissions for g1, all for g2 - g2 users completed, g1 users partially completed
         (
                 ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
                 {1: ['u1'], 2: ['u1', 'u2']}, ({3}, {1, 2})
         ),
+        # two groups, all submissions for g2, none for g1 - g2 users completed, g1 users not started
         (
                 ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
-                {1: ['u1'], 2: ['u1', 'u2']}, ({3}, {1, 2})
+                {2: ['u1', 'u2']}, ({3}, set())
         ),
+        # two groups, all submissions for g1 and g2 - users in g1 and g2 completed
         (
                 ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
                 {1: ['u1', 'u2'], 2: ['u1', 'u2']}, ({1, 2, 3}, set())

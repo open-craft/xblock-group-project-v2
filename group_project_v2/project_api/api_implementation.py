@@ -1,9 +1,11 @@
 import json
 from urllib import urlencode
 
+import itertools
+
 from group_project_v2.api_error import api_error_protect
 from group_project_v2.json_requests import DELETE, GET, PUT, POST
-from group_project_v2.utils import memoize_with_expiration, DEFAULT_EXPIRATION_TIME, build_date_field
+from group_project_v2.utils import memoize_with_expiration, build_date_field
 from group_project_v2.project_api.dtos import UserDetails, ProjectDetails, WorkgroupDetails, CompletionDetails
 
 API_PREFIX = '/'.join(['api', 'server'])
@@ -130,7 +132,7 @@ class ProjectAPI(object):
     def get_workgroup_submissions(self, group_id):
         return self.send_request(GET, (WORKGROUP_API, group_id, 'submissions'))
 
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    @memoize_with_expiration()
     def get_review_assignment_groups(self, user_id, course_id, xblock_id):
         qs_params = {
             "course": course_id,
@@ -262,7 +264,7 @@ class TypedProjectAPI(ProjectAPI):
 
             next_page_url = response.get('next')
 
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    @memoize_with_expiration()
     def get_user_details(self, user_id):
         """
         :param int user_id: User ID
@@ -271,7 +273,7 @@ class TypedProjectAPI(ProjectAPI):
         response = self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
         return UserDetails(**response)  # pylint: disable=star-args
 
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    @memoize_with_expiration()
     def get_project_by_content_id(self, course_id, content_id):
         """
         :param str course_id: Course ID
@@ -290,7 +292,7 @@ class TypedProjectAPI(ProjectAPI):
         project = response[0]
         return ProjectDetails(**project)
 
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    @memoize_with_expiration()
     def get_project_details(self, project_id):
         """
         :param int project_id: Project ID
@@ -299,7 +301,7 @@ class TypedProjectAPI(ProjectAPI):
         response = self.send_request(GET, (PROJECTS_API, project_id), no_trailing_slash=True)
         return ProjectDetails(**response)  # pylint: disable=star-args
 
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    @memoize_with_expiration()
     def get_workgroup_by_id(self, group_id):
         """
         :param int group_id: Group ID
@@ -308,7 +310,7 @@ class TypedProjectAPI(ProjectAPI):
         response = self.send_request(GET, (WORKGROUP_API, group_id))
         return WorkgroupDetails(**response)
 
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    @memoize_with_expiration()
     def get_user_workgroup_for_course(self, user_id, course_id):
         """
         :param int user_id: User ID
@@ -339,7 +341,7 @@ class TypedProjectAPI(ProjectAPI):
             yield CompletionDetails(**item)
 
     # TODO: add tests
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    @memoize_with_expiration()
     def get_workgroups_for_assignment(self, assignment_id):
         """
         :param int assignment_id: Assignment ID
@@ -358,11 +360,12 @@ class TypedProjectAPI(ProjectAPI):
         """
         assignments = self.get_review_assignment_groups(user_id, course_id, xblock_id)
 
-        workgroup_assignments = []
-        for assignment in assignments:
-            workgroup_assignments += self.get_workgroups_for_assignment(assignment["id"])
-
-        return workgroup_assignments
+        return list(
+            itertools.chain.from_iterable(
+                self.get_workgroups_for_assignment(assignment["id"])
+                for assignment in assignments
+            )
+        )
 
     # TODO: make typed + add tests
     def get_latest_workgroup_submissions_by_id(self, group_id):

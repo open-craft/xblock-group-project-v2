@@ -364,7 +364,7 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
     def test_is_group_member(self, user_id, group_members, is_member):
         self.user_id_mock.return_value = user_id
         with mock.patch.object(WorkgroupAwareXBlockMixin, 'workgroup', mock.PropertyMock()) as patched_workgroup:
-            patched_workgroup.return_value = WorkgroupDetails(id='0', users=[{"id": u_id} for u_id in group_members])
+            patched_workgroup.return_value = WorkgroupDetails(id=0, users=[{"id": u_id} for u_id in group_members])
 
             self.assertEqual(self.block.is_group_member, is_member)
 
@@ -412,7 +412,7 @@ class TestDashboardRootXBlockMixin(TestCase, TestWithPatchesMixin):
         self.block.project_details.workgroups = workgroup_ids
         self.project_api_mock.get_workgroup_by_id.side_effect = _get_workgroup_by_id
 
-        workgroups = self.block.workgroups
+        workgroups = list(self.block.workgroups)
 
         expected_calls = [mock.call(workgroup_id) for workgroup_id in workgroup_ids]
         expected_groups = [_get_workgroup_by_id(workgroup_id) for workgroup_id in workgroup_ids]
@@ -442,21 +442,21 @@ class TestDashboardRootXBlockMixin(TestCase, TestWithPatchesMixin):
         self.assertEqual([user.id for user in users], expected_user_ids)
 
     @ddt.data(
-        ({}, list('workgroups_sentinel'), list('user_sentinel')),
-        ({DashboardRootXBlockMixin.TARGET_WORKGROUPS: 'workgroup_value'}, 'workgroup_value', list('user_sentinel')),
-        ({DashboardRootXBlockMixin.TARGET_STUDENTS: 'user_value'}, list('workgroups_sentinel'), 'user_value'),
+        ({}, ['workgroup_sentinel'], ['user_sentinel']),
+        ({DashboardRootXBlockMixin.TARGET_WORKGROUPS: ['workgroup_value']}, ['workgroup_value'], ['user_sentinel']),
+        ({DashboardRootXBlockMixin.TARGET_STUDENTS: ['user_value']}, ['workgroup_sentinel'], ['user_value']),
         (
                 {
-                    DashboardRootXBlockMixin.TARGET_STUDENTS: 'user_value',
-                    DashboardRootXBlockMixin.TARGET_WORKGROUPS: 'workgroup_value'
+                    DashboardRootXBlockMixin.TARGET_STUDENTS: ['user_value'],
+                    DashboardRootXBlockMixin.TARGET_WORKGROUPS: ['workgroup_value']
                 },
-                'workgroup_value', 'user_value'
+                ['workgroup_value'], ['user_value']
         ),
     )
     @ddt.unpack
     def test_append_context_parameters_if_not_present(self, context, expected_workgroups, expected_users):
-        workgroups_sentinel = list('workgroups_sentinel')
-        users_sentinel = list('user_sentinel')
+        workgroups_sentinel = ['workgroup_sentinel']
+        users_sentinel = ['user_sentinel']
         self.make_patch(type(self.block), 'workgroups', mock.PropertyMock(return_value=workgroups_sentinel))
         self.make_patch(type(self.block), 'all_users_in_workgroups', mock.PropertyMock(return_value=users_sentinel))
 

@@ -1,3 +1,4 @@
+""" Contains DTOs used in Typed API. DTOs mostly follow structure of API responses """
 from group_project_v2.utils import make_user_caption
 
 
@@ -7,7 +8,7 @@ class UserDetails(object):
         self.id = kwargs.get('id', None)
         self.email = kwargs.get('email', None)
         self.username = kwargs.get('username', None)
-        self.uri = kwargs.get('uri', None)
+        self.url = kwargs.get('uri', None)
         self.first_name = kwargs.get('first_name', None)
         self.last_name = kwargs.get('last_name', None)
         self._full_name = kwargs.get('full_name', None)
@@ -23,8 +24,7 @@ class UserDetails(object):
     def full_name(self):
         if self._full_name:
             return self._full_name
-        parts = [self.first_name, self.last_name]
-        return u" ".join([unicode(part) for part in parts if part is not None])
+        return u" ".join([unicode(part) for part in (self.first_name, self.last_name) if part is not None])
 
     @property
     def user_label(self):
@@ -44,6 +44,9 @@ class ProjectDetails(object):
 
 
 class WorkgroupDetails(object):
+    """
+    :type users: list[ReducedUserDetails]
+    """
     def __init__(self, **kwargs):
         self.id = kwargs.get('id')
         self.url = kwargs.get('url')
@@ -54,7 +57,6 @@ class WorkgroupDetails(object):
         self.groups = kwargs.get('groups')
         self.workgroups = kwargs.get('workgroups')
         users = kwargs.get('users')
-        """ :type: ReducedUserDetails """  # pylint:disable=pointless-string-statement
         self.users = []
         if users:
             self.users = [ReducedUserDetails(**user_detail) for user_detail in users]
@@ -64,6 +66,7 @@ class WorkgroupDetails(object):
 
 
 class ReducedUserDetails(object):
+    """ User data embedded in a workgroup detail responses """
     def __init__(self, **kwargs):
         self.id = kwargs.get('id')
         self.url = kwargs.get('url')

@@ -14,9 +14,9 @@ from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.utils import (
-    OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES,
+    OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES, MUST_BE_OVERRIDDEN,
     loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource,
-    MUST_BE_OVERRIDDEN, DEFAULT_EXPIRATION_TIME)
+)
 
 log = logging.getLogger(__name__)
 
@@ -105,7 +105,7 @@ class UserAwareXBlockMixin(ProjectAPIXBlockMixin):
         return self._user_preferences(self.project_api, self.user_id)
 
     @staticmethod
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    @memoize_with_expiration()
     def _user_preferences(project_api, user_id):
         return project_api.get_user_preferences(user_id)
 
@@ -128,7 +128,7 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin):
     """
     Gets current user workgroup, respecting TA review
     """
-    FALLBACK_WORKGROUP = WorkgroupDetails(id="0", users=[])
+    FALLBACK_WORKGROUP = WorkgroupDetails(id=0, users=[])
 
     @property
     def group_id(self):
@@ -161,7 +161,7 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin):
         return workgroup if workgroup else self.FALLBACK_WORKGROUP
 
     @staticmethod
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    @memoize_with_expiration()
     def _get_workgroup(project_api, user_id, course_id):
         """
         :rtype: WorkgroupDetails
@@ -264,6 +264,11 @@ class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
     TARGET_WORKGROUPS = 'target_workgroups'
 
     def _append_context_parameters_if_not_present(self, context):
+        """
+        Appends target students and target workgroups parameters, if not already present in context
+        :param dict context: XBlock view context
+        :rtype: None
+        """
         if self.TARGET_STUDENTS not in context:
             context[self.TARGET_STUDENTS] = list(self.all_users_in_workgroups)
 
@@ -281,15 +286,12 @@ class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
     @property
     def workgroups(self):
         """
-        :rtype: list[group_project_v2.project_api.dtos.WorkgroupDetails]
+        :rtype: collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails]
         """
-        workgroup_ids = self.project_details.workgroups
-
-        workgroups = []
-        for workgroup_id in workgroup_ids:
-            workgroups.append(self.project_api.get_workgroup_by_id(workgroup_id))
-
-        return workgroups
+        return (
+            self.project_api.get_workgroup_by_id(workgroup_id)
+            for workgroup_id in self.project_details.workgroups
+        )
 
     @property
     def all_users_in_workgroups(self):

@@ -209,11 +209,12 @@ def get_link_to_block(block):
     )
 
 
-def memoize_with_expiration(expires_after=None):
+def memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME):
     """
     This memoization decorator provides lightweight caching mechanism. It is not thread-safe and contain
     no cache invalidation features except cache expiration - use only on data that are unlikely to be changed
     within single request (i.e. workgroup and user data, assigned reviews, etc.)
+    :param timedelta expires_after: Caching period
     """
     def decorator(func):
         cache = func.cache = {}
@@ -244,7 +245,7 @@ def make_user_caption(user_details):
     context = {
         'id': user_details.id,
         'full_name': user_details.full_name,
-        'api_link': user_details.uri
+        'api_link': user_details.url
     }
     return mark_safe(loader.render_template("templates/html/user_label.html", context))
 

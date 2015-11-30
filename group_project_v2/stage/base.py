@@ -18,15 +18,17 @@ from group_project_v2.stage_components import (
 )
 from group_project_v2.utils import (
     gettext as _, HtmlXBlockShim, format_date, Constants, loader,
-    outsider_disallowed_protected_view, add_resource, MUST_BE_OVERRIDDEN, get_link_to_block,
-    get_block_content_id)
+    outsider_disallowed_protected_view, add_resource, MUST_BE_OVERRIDDEN, get_link_to_block, get_block_content_id
+)
 from group_project_v2.stage.utils import StageState
 
 
 log = logging.getLogger(__name__)
 
-STAGE_STATS_LOG_TPL = "Calculating stage stats for stage {stage}: " \
-                      "all - {target_users}, completed - {completed}, partially completed - {partially_completed}"
+STAGE_STATS_LOG_TPL = (
+    "Calculating stage stats for stage %(stage)s "
+    "all - %(target_users)s, completed - %(completed)s, partially completed - %(partially_completed)s"
+)
 
 
 class BaseGroupActivityStage(
@@ -275,13 +277,13 @@ class BaseGroupActivityStage(
                 StageState.NOT_STARTED: 0
             }
 
-        target_user_count = len(target_user_ids) * 1.0
+        target_user_count = float(len(target_user_ids))
 
         completed_users, partially_completed_users = self.get_users_completion(target_workgroups, target_users)
-        log.info(STAGE_STATS_LOG_TPL.format(
-            stage=self.display_name,  target_users=[user.id for user in target_users],
-            completed=completed_users, partially_completed=partially_completed_users,
-        ))
+        log.info(
+            STAGE_STATS_LOG_TPL, stage=self.display_name,  target_users=target_user_ids,
+            completed=completed_users, partially_completed=partially_completed_users
+        )
 
         completed_ratio = len(completed_users & target_user_ids) / target_user_count
         partially_completed_ratio = len(partially_completed_users & target_user_ids) / target_user_count

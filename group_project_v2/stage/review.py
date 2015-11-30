@@ -30,7 +30,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
     js_file = "public/js/stages/review_stage.js"
     js_init = "GroupProjectReviewStage"
 
-    review_item_key = None
+    REVIEW_ITEM_KEY = None
 
     STAGE_ACTION = _(u"save feedback")
     FEEDBACK_SAVED_MESSAGE = _(u'Thanks for your feedback.')
@@ -93,7 +93,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
         for review_item in review_items:
             if review_item["answer"] not in empty_values:  # exclude missing or empty answers
                 reviewer = review_item['reviewer']
-                review_item_key = make_key(review_item[self.review_item_key], review_item["question"])
+                review_item_key = make_key(review_item[self.REVIEW_ITEM_KEY], review_item["question"])
                 grouped[reviewer].add(review_item_key)
 
         return grouped
@@ -125,7 +125,8 @@ class ReviewBaseStage(BaseGroupActivityStage):
         :param collections.Iterable[dict] review_items: review items (answers to review questions)
         :rtype: ReviewState
         """
-        grouped_review_keys = self._group_review_items_by_reviewer(review_items)
+        my_feedback = [item for item in review_items if item['reviewer'] == self.anonymous_student_id]
+        grouped_review_keys = self._group_review_items_by_reviewer(my_feedback)
         my_review_keys = grouped_review_keys.get(self.anonymous_student_id, set())
         return self._calculate_review_status(items_to_grade, my_review_keys)
 
@@ -194,7 +195,7 @@ class TeamEvaluationStage(ReviewBaseStage):
 
     STUDIO_LABEL = _(u"Team Evaluation")
 
-    review_item_key = "user"
+    REVIEW_ITEM_KEY = "user"
 
     @lazy
     def review_subjects(self):
@@ -216,10 +217,19 @@ class TeamEvaluationStage(ReviewBaseStage):
     def get_users_completion(self, target_workgroups, target_users):
         completed_users, partially_completed_users = set(), set()
 
+        workgroup_review_items_cache = {}
+
+        def get_review_items(workgroup_id):
+            if workgroup_id not in workgroup_review_items_cache:
+                reviews = self.project_api.get_peer_review_items_for_group(workgroup_id, self.activity_content_id)
+                workgroup_review_items_cache[workgroup_id] = reviews
+
+            return workgroup_review_items_cache[workgroup_id]
+
         for user in target_users:
             workgroup = self.project_api.get_user_workgroup_for_course(user.id, self.course_id)
             review_subjects = set(user.id for user in workgroup.users) - {user.id}
-            review_items = self.project_api.get_peer_review_items_for_group(workgroup.id, self.activity_content_id)
+            review_items = get_review_items(workgroup.id)
             grouped_review_items = {
                 self.real_user_id(anonymous_id): grouped_items
                 for anonymous_id, grouped_items in self._group_review_items_by_reviewer(review_items).iteritems()
@@ -304,7 +314,7 @@ class PeerReviewStage(ReviewBaseStage):
 
     STUDIO_LABEL = _(u"Peer Grading")
 
-    review_item_key = "workgroup"
+    REVIEW_ITEM_KEY = "workgroup"
 
     @property
     def allowed_nested_blocks(self):

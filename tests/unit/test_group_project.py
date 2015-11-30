@@ -35,8 +35,9 @@ class TestGroupProjectXBlock(TestWithPatchesMixin, TestCase):
     def setUp(self):
         super(TestGroupProjectXBlock, self).setUp()
         self.runtime_mock = mock.Mock(spec=Runtime)
+        self.project_api_mock = mock.Mock(spec=TypedProjectAPI)
         self.block = GroupProjectXBlock(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
-        self.project_api_mock = self.make_patch(self.block, 'project_api', mock.Mock(spec=TypedProjectAPI))
+        self.make_patch(GroupProjectXBlock, 'project_api', mock.PropertyMock(return_value=self.project_api_mock))
 
     @ddt.data(
         (1, 'content1', 'course1'),
@@ -57,9 +58,10 @@ class TestGroupProjectXBlock(TestWithPatchesMixin, TestCase):
 class TestGroupActivityXBlock(TestWithPatchesMixin, TestCase):
     def setUp(self):
         super(TestGroupActivityXBlock, self).setUp()
+        self.project_api_mock = mock.Mock(spec=TypedProjectAPI)
         self.runtime_mock = mock.Mock(spec=Runtime)
         self.block = GroupActivityXBlock(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
-        self.project_api_mock = self.make_patch(self.block, 'project_api', mock.Mock(spec=TypedProjectAPI))
+        self.make_patch(GroupActivityXBlock, 'project_api', mock.PropertyMock(return_value=self.project_api_mock))
 
         self.group_project_mock = mock.Mock(spec=GroupProjectXBlock)
         self.group_project_mock.content_id = 'test_project_content_id'
@@ -148,23 +150,20 @@ class TestGroupActivityXBlock(TestWithPatchesMixin, TestCase):
     @ddt.unpack
     def test_project_id(self, project_id, content_id, course_id):
         project_details = ProjectDetails(id=project_id, content_id=content_id, course_id=course_id)
-        self.project_api_mock.get_project_by_content_id.return_value = project_details
+        self.group_project_mock.project_details = project_details
 
         self.assertEqual(self.block.project_details, project_details)
-        self.project_api_mock.get_project_by_content_id.assert_called_once_with(
-            self.block.course_id, self.group_project_mock.content_id
-        )
 
 
 @ddt.ddt
 class TestCalculateGradeGroupActivityXBlock(TestWithPatchesMixin, TestCase):
     def setUp(self):
-        self.project_api_mock = mock.Mock()
+        self.project_api_mock = mock.PropertyMock()
         self.runtime_mock = mock.Mock(spec=Runtime)
         self.grade_questions_mock = mock.PropertyMock()
         self.block = GroupActivityXBlock(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
 
-        self.project_api_mock = self.make_patch(self.block, 'project_api')
+        self.make_patch(GroupActivityXBlock, 'project_api', mock.PropertyMock(return_value=self.project_api_mock))
         self.grade_questions_mock = self.make_patch(GroupActivityXBlock, 'grade_questions', mock.PropertyMock())
         self.real_user_id_mock = self.make_patch(self.block, 'real_user_id')
         self.real_user_id_mock.side_effect = lambda u_id: u_id
@@ -240,14 +239,14 @@ class TestEventsAndCompletionGroupActivityXBlock(TestWithPatchesMixin, TestCase)
 
     def setUp(self):
         self.project_api_mock = mock.Mock()
-        self.project_api_mock.get_workgroup_by_id = mock.Mock()
+        self.project_api_mock.get_workgroup_by_id = mock.Mock(return_value=_make_workgroup([]))
         self.runtime_mock = mock.create_autospec(spec=Runtime)
         self.runtime_mock.service = mock.Mock(return_value=None)
         self.block = GroupActivityXBlock(
             self.runtime_mock, field_data=DictFieldData({'weight': 100}), scope_ids=mock.Mock()
         )
 
-        self.project_api_mock = self.make_patch(self.block, 'project_api')
+        self.make_patch(GroupActivityXBlock, 'project_api', mock.PropertyMock(return_value=self.project_api_mock))
         self.calculate_grade_mock = self.make_patch(self.block, 'calculate_grade')
         self.mark_complete = self.make_patch(self.block, 'mark_complete')
 

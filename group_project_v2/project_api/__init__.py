@@ -7,15 +7,13 @@ from group_project_v2.project_api.api_implementation import TypedProjectAPI
 
 # Looks like it's an issue, but technically it's not; this code runs in LMS, so 127.0.0.1 is always correct
 # location for API server, as it's basically executed in a neighbour thread/process/whatever.
-API_SERVER = "http://127.0.0.1:8000"
-if hasattr(settings, 'API_LOOPBACK_ADDRESS'):
-    API_SERVER = settings.API_LOOPBACK_ADDRESS
+API_SERVER = getattr(settings, 'API_LOOPBACK_ADDRESS', "http://127.0.0.1:8000")
 
 
 class ProjectAPIXBlockMixin(object):
     _project_api = None
 
-    @lazy
+    @property
     def project_api(self):
         """
         :rtype: TypedProjectAPI

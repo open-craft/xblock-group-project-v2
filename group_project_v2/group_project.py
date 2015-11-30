@@ -16,8 +16,8 @@ from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import (
     mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockShim, Constants,
-    add_resource, gettext as _,
-    get_block_content_id)
+    add_resource, gettext as _, get_block_content_id
+)
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
     EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
@@ -168,8 +168,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
     def dashboard_view(self, context):
         fragment = Fragment()
 
-        children_context = {}
-        children_context.update(context)
+        children_context = context.copy()
         self._append_context_parameters_if_not_present(children_context)
 
         activity_fragments = self._render_children('dashboard_view', children_context, self.activities)
@@ -290,7 +289,7 @@ class GroupActivityXBlock(
     @property
     def project_details(self):
         # Project is linked to top-level GroupProjectXBlock, not individual Activities
-        return self.project_api.get_project_by_content_id(self.course_id, self.project.content_id)
+        return self.project.project_details
 
     @property
     def is_ta_graded(self):
@@ -437,8 +436,7 @@ class GroupActivityXBlock(
     def dashboard_view(self, context):
         fragment = Fragment()
 
-        children_context = {}
-        children_context.update(context)
+        children_context = context.copy()
         self._append_context_parameters_if_not_present(children_context)
 
         stage_fragments = self._render_children('dashboard_view', children_context, self.stages)
