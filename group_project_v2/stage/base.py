@@ -280,10 +280,11 @@ class BaseGroupActivityStage(
         target_user_count = float(len(target_user_ids))
 
         completed_users, partially_completed_users = self.get_users_completion(target_workgroups, target_users)
-        log.info(
-            STAGE_STATS_LOG_TPL, stage=self.display_name,  target_users=target_user_ids,
-            completed=completed_users, partially_completed=partially_completed_users
+        log_format_data = dict(
+            stage=self.display_name,  target_users=target_user_ids, completed=completed_users,
+            partially_completed=partially_completed_users
         )
+        log.info(STAGE_STATS_LOG_TPL, log_format_data)
 
         completed_ratio = len(completed_users & target_user_ids) / target_user_count
         partially_completed_ratio = len(partially_completed_users & target_user_ids) / target_user_count
