@@ -377,10 +377,9 @@ class PeerReviewStage(ReviewBaseStage):
 
     def review_status(self):
         group_review_items = list(itertools.chain.from_iterable(
-            self._get_review_items_for_group(self.project_api, group.id, self.activity_content_id)
+            self.project_api.get_workgroup_review_items_for_group(group.id, self.activity_content_id)
             for group in self.review_groups
         ))
-
         return self._check_review_status([group.id for group in self.review_groups], group_review_items)
 
     def get_review_data(self, user_id):
