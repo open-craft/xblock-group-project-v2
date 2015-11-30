@@ -296,16 +296,17 @@ class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
             )
 
     def _set_project_api_responses(self, workgroups, review_items):
-        def workgroups_side_effect(user_id, course_id):
+        def workgroups_side_effect(user_id, course_id):  # pylint:disable=unused-argument
             return workgroups.get(user_id, None)
 
-        def review_items_side_effect(workgroup_id, content_id):
+        def review_items_side_effect(workgroup_id, content_id):  # pylint:disable=unused-argument
             return review_items.get(workgroup_id, [])
 
         self.project_api_mock.get_user_workgroup_for_course.side_effect = workgroups_side_effect
         self.project_api_mock.get_peer_review_items_for_group.side_effect = review_items_side_effect
 
-    def _parse_review_item_string(self, review_item_string):
+    @staticmethod
+    def _parse_review_item_string(review_item_string):
         splitted = review_item_string.split(':')
         reviewer, question, peer = splitted[:3]
         if len(splitted) > 3:
