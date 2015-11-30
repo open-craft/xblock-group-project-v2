@@ -16,7 +16,7 @@ from group_project_v2.stage_components import (
 from group_project_v2.utils import (
     loader, gettext as _, make_key,
     outsider_disallowed_protected_handler, key_error_protected_handler, conversion_protected_handler,
-    MUST_BE_OVERRIDDEN
+    MUST_BE_OVERRIDDEN, memoize_with_expiration
 )
 from group_project_v2.stage.utils import StageState, ReviewState, DISPLAY_NAME_NAME, DISPLAY_NAME_HELP
 
@@ -145,6 +145,37 @@ class ReviewBaseStage(BaseGroupActivityStage):
         """
         return {pi['question']: pi['answer'] for pi in feedback}
 
+    def get_users_completion(self, target_workgroups, target_users):
+        """
+        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] target_workgroups:
+        :param collections.Iterable[group_project_v2.project_api.dtos.ReducedUserDetails] target_users:
+        :rtype: (set[int], set[int])
+        """
+        completed_users, partially_completed_users = set(), set()
+
+        for user in target_users:
+            review_items, review_subjects = self.get_review_data(user.id)
+            grouped_review_items = {
+                self.real_user_id(anonymous_id): grouped_items
+                for anonymous_id, grouped_items in self._group_review_items_by_reviewer(review_items).iteritems()
+            }
+            this_user_reviews = grouped_review_items.get(user.id, set())
+            review_status = self._calculate_review_status(review_subjects, this_user_reviews)
+
+            if review_status == ReviewState.COMPLETED:
+                completed_users.add(user.id)
+            elif review_status == ReviewState.INCOMPLETE:
+                partially_completed_users.add(user.id)
+
+        return completed_users, partially_completed_users
+
+    def get_review_data(self, user_id):
+        """
+        :param gint user_id:
+        :rtype: (dict, set[int])
+        """
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
+
     @XBlock.json_handler
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
@@ -215,35 +246,20 @@ class TeamEvaluationStage(ReviewBaseStage):
 
         return self._check_review_status([user.id for user in self.review_subjects], peer_review_items)
 
-    def get_users_completion(self, target_workgroups, target_users):
-        completed_users, partially_completed_users = set(), set()
+    def get_review_data(self, user_id):
+        """
+        :param int user_id: User ID
+        :rtype: (dict, set[int])
+        """
+        workgroup = self.project_api.get_user_workgroup_for_course(user_id, self.course_id)
+        review_subjects = set(user.id for user in workgroup.users) - {user_id}
+        review_items = self._get_review_items_for_group(self.project_api, workgroup.id, self.activity_content_id)
+        return review_items, review_subjects
 
-        workgroup_review_items_cache = {}
-
-        def get_review_items(workgroup_id):
-            if workgroup_id not in workgroup_review_items_cache:
-                reviews = self.project_api.get_peer_review_items_for_group(workgroup_id, self.activity_content_id)
-                workgroup_review_items_cache[workgroup_id] = reviews
-
-            return workgroup_review_items_cache[workgroup_id]
-
-        for user in target_users:
-            workgroup = self.project_api.get_user_workgroup_for_course(user.id, self.course_id)
-            review_subjects = set(user.id for user in workgroup.users) - {user.id}
-            review_items = get_review_items(workgroup.id)
-            grouped_review_items = {
-                self.real_user_id(anonymous_id): grouped_items
-                for anonymous_id, grouped_items in self._group_review_items_by_reviewer(review_items).iteritems()
-            }
-            this_user_reviews = grouped_review_items.get(user.id, set())
-            review_status = self._calculate_review_status(review_subjects, this_user_reviews)
-
-            if review_status == ReviewState.COMPLETED:
-                completed_users.add(user.id)
-            elif review_status == ReviewState.INCOMPLETE:
-                partially_completed_users.add(user.id)
-
-        return completed_users, partially_completed_users
+    @staticmethod
+    @memoize_with_expiration()
+    def _get_review_items_for_group(project_api, workgroup_id, activity_content_id):
+        return project_api.get_peer_review_items_for_group(workgroup_id, activity_content_id)
 
     def validate(self):
         violations = super(TeamEvaluationStage, self).validate()
@@ -361,42 +377,28 @@ class PeerReviewStage(ReviewBaseStage):
 
     def review_status(self):
         group_review_items = list(itertools.chain.from_iterable(
-            self.project_api.get_workgroup_review_items_for_group(assess_group.id, self.activity_content_id)
-            for assess_group in self.review_groups
+            self._get_review_items_for_group(self.project_api, group.id, self.activity_content_id)
+            for group in self.review_groups
         ))
 
         return self._check_review_status([group.id for group in self.review_groups], group_review_items)
 
-    def get_users_completion(self, target_workgroups, target_users):
-        completed_users, partially_completed_users = set(), set()
+    def get_review_data(self, user_id):
+        """
+        :param int user_id:
+        :rtype: (dict, set[int])
+        """
+        review_subjects = self.project_api.get_workgroups_to_review(user_id, self.course_id, self.activity_content_id)
+        review_items = list(itertools.chain.from_iterable(
+            self._get_review_items_for_group(self.project_api, group.id, self.activity_content_id)
+            for group in review_subjects
+        ))
+        return review_items, set(group.id for group in review_subjects)
 
-        workgroup_review_items_cache = {}
-
-        def get_review_items(workgroup_id):
-            if workgroup_id not in workgroup_review_items_cache:
-                reviews = self.project_api.get_workgroup_review_items_for_group(workgroup_id, self.activity_content_id)
-                workgroup_review_items_cache[workgroup_id] = reviews
-
-            return workgroup_review_items_cache[workgroup_id]
-
-        for user in target_users:
-            review_subjects = self.project_api.get_workgroups_to_review(
-                user.id, self.course_id, self.activity_content_id
-            )
-            review_items = list(itertools.chain.from_iterable(get_review_items(group.id) for group in review_subjects))
-            grouped_review_items = {
-                self.real_user_id(anonymous_id): grouped_items
-                for anonymous_id, grouped_items in self._group_review_items_by_reviewer(review_items).iteritems()
-            }
-            this_user_reviews = grouped_review_items.get(user.id, set())
-            review_status = self._calculate_review_status([group.id for group in review_subjects], this_user_reviews)
-
-            if review_status == ReviewState.COMPLETED:
-                completed_users.add(user.id)
-            elif review_status == ReviewState.INCOMPLETE:
-                partially_completed_users.add(user.id)
-
-        return completed_users, partially_completed_users
+    @staticmethod
+    @memoize_with_expiration()
+    def _get_review_items_for_group(project_api, workgroup_id, activity_content_id):
+        return project_api.get_workgroup_review_items_for_group(workgroup_id, activity_content_id)
 
     def validate(self):
         violations = super(PeerReviewStage, self).validate()
