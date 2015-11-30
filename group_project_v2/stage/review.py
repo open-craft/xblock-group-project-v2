@@ -375,11 +375,17 @@ class PeerReviewStage(ReviewBaseStage):
     def is_graded_stage(self):
         return True
 
+    def _get_review_items(self, review_groups, with_caching=False):
+        def do_get_items(group_id):
+            if with_caching:
+                return self._get_review_items_for_group(self.project_api, group_id, self.activity_content_id)
+            else:
+                return self.project_api.get_workgroup_review_items_for_group(group_id, self.activity_content_id)
+
+        return list(itertools.chain.from_iterable(do_get_items(group.id) for group in review_groups))
+
     def review_status(self):
-        group_review_items = list(itertools.chain.from_iterable(
-            self.project_api.get_workgroup_review_items_for_group(group.id, self.activity_content_id)
-            for group in self.review_groups
-        ))
+        group_review_items = self._get_review_items(self.review_groups, with_caching=False)
         return self._check_review_status([group.id for group in self.review_groups], group_review_items)
 
     def get_review_data(self, user_id):
@@ -388,10 +394,7 @@ class PeerReviewStage(ReviewBaseStage):
         :rtype: (dict, set[int])
         """
         review_subjects = self.project_api.get_workgroups_to_review(user_id, self.course_id, self.activity_content_id)
-        review_items = list(itertools.chain.from_iterable(
-            self._get_review_items_for_group(self.project_api, group.id, self.activity_content_id)
-            for group in review_subjects
-        ))
+        review_items = self._get_review_items(review_subjects, with_caching=True)
         return review_items, set(group.id for group in review_subjects)
 
     @staticmethod
