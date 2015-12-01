@@ -1,19 +1,19 @@
-# pylint: disable=invalid-name
 import json
 from unittest import TestCase
-from datetime import datetime
 from xml.etree import ElementTree
 
 import ddt
-from freezegun import freeze_time
 import mock
+from datetime import datetime
+from freezegun import freeze_time
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
 from xblock.runtime import Runtime
 from xblock.validation import ValidationMessage
 
 from group_project_v2.group_project import GroupActivityXBlock
-from group_project_v2.project_api import ProjectAPI
+from group_project_v2.project_api import TypedProjectAPI
+from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.project_navigator import ProjectNavigatorViewXBlockBase
 from group_project_v2.stage import BaseGroupActivityStage
 from group_project_v2.stage_components import StaticContentBaseXBlock, GroupProjectSubmissionXBlock, \
@@ -34,8 +34,7 @@ class StageComponentXBlockTestBase(TestCase, TestWithPatchesMixin):
         self.block = self.block_to_test(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
         self.make_patch(self.block_to_test, 'stage', mock.PropertyMock(return_value=self.stage_mock))
 
-    # pylint: disable=no-self-use
-    def _assert_empty_fragment(self, fragment):
+    def _assert_empty_fragment(self, fragment):  # pylint: disable=no-self-use
         self.assertEqual(fragment.content, u'')
         self.assertEqual(fragment.resources, [])
 
@@ -128,11 +127,11 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
 
     def setUp(self):
         super(TestGroupProjectSubmissionXBlock, self).setUp()
-        self.project_api_mock = mock.create_autospec(ProjectAPI)
+        self.project_api_mock = mock.create_autospec(TypedProjectAPI)
         self.make_patch(self.block_to_test, 'project_api', mock.PropertyMock(return_value=self.project_api_mock))
         user_details = mock.Mock(user_label='Test label')
         self.block_to_test.project_api.get_user_details = mock.Mock(
-            spec=ProjectAPI.get_user_details, return_value=user_details
+            spec=TypedProjectAPI.get_user_details, return_value=user_details
         )
 
         self.project_api_mock.get_latest_workgroup_submissions_by_id = mock.Mock(return_value={})
@@ -140,7 +139,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
         self.stage_mock.available_now = True
         self.stage_mock.activity = mock.Mock()
         self.stage_mock.activity.user_id = self.user_id
-        self.stage_mock.activity.workgroup = {"id": self.group_id}
+        self.stage_mock.activity.workgroup = WorkgroupDetails(id=self.group_id)
         self.stage_mock.activity.course_id = self.course_id
 
     @ddt.data(1, 'qwe', 'upload 1')
@@ -232,7 +231,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
         self.stage_mock.get_new_stage_state_data = mock.Mock(return_value=stage_state)
         self.stage_mock.check_submissions_and_mark_complete = mock.Mock()
 
-        expected_persist_and_submit_file_context = {
+        expected_context = {
             "user_id": self.user_id,
             "group_id": self.group_id,
             "project_api": self.project_api_mock,
@@ -256,9 +255,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
 
             self.stage_mock.check_submissions_and_mark_complete.assert_called_once_with()
             patched_persist_and_submit_file.assert_called_once_with(
-                self.stage_mock.activity,
-                expected_persist_and_submit_file_context,
-                "QWERTY"
+                self.stage_mock.activity, expected_context, "QWERTY"
             )
 
     def test_persist_and_submit_file_propagates_exceptions(self):
@@ -377,7 +374,7 @@ class CommonFeedbackDisplayStageTests(object):
         self.activity_mock = mock.create_autospec(GroupActivityXBlock)
         self.stage_mock.activity = self.activity_mock
 
-        self.project_api_mock = mock.Mock(spec=ProjectAPI)
+        self.project_api_mock = mock.Mock(spec=TypedProjectAPI)
         self.make_patch(self.block_to_test, 'project_api', mock.PropertyMock(return_value=self.project_api_mock))
         self.block.question_id = "q1"
 
@@ -439,7 +436,7 @@ class CommonFeedbackDisplayStageTests(object):
         questions = [make_question('123', '123'), make_question('123', '123')]
         with mock.patch.object(self.block_to_test, 'activity_questions', mock.PropertyMock(return_value=questions)), \
                 self.assertRaises(ValueError):
-            _ = self.block.question
+            _ = self.block.question  # pylint:disable=invalid-name
 
     def test_question_ids_values_provider(self):
         questions = [make_question('123', 'Title 1'), make_question('456', 'Title 2'), make_question('789', 'Title 3')]
@@ -467,7 +464,7 @@ class TestGroupProjectTeamEvaluationDisplayXBlock(CommonFeedbackDisplayStageTest
     @ddt.unpack
     def test_get_feedback(self, user_id, group_id, content_id, question_id, feedback_items, expected_result):
         self.project_api_mock.get_user_peer_review_items = mock.Mock(return_value=feedback_items)
-        self.stage_mock.content_id = content_id
+        self.stage_mock.activity_content_id = content_id
         self.block.question_id = question_id
 
         with mock.patch.object(self.block_to_test, 'user_id', mock.PropertyMock(return_value=user_id)), \
@@ -499,7 +496,7 @@ class TestGroupProjectGradeEvaluationDisplayXBlock(CommonFeedbackDisplayStageTes
     @ddt.unpack
     def test_get_feedback(self, group_id, content_id, question_id, feedback_items, expected_result):
         self.project_api_mock.get_workgroup_review_items_for_group = mock.Mock(return_value=feedback_items)
-        self.stage_mock.content_id = content_id
+        self.stage_mock.activity_content_id = content_id
         self.block.question_id = question_id
 
         with mock.patch.object(self.block_to_test, 'group_id', mock.PropertyMock(return_value=group_id)):

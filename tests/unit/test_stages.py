@@ -1,28 +1,33 @@
+import itertools
+from collections import defaultdict
 from unittest import TestCase
 
 import ddt
-import itertools
 import mock
 from xblock.field_data import DictFieldData
 from xblock.validation import ValidationMessage
 
 from group_project_v2.group_project import GroupActivityXBlock
-from group_project_v2.project_api import ProjectAPI
-from group_project_v2.stage import EvaluationDisplayStage, GradeDisplayStage, TeamEvaluationStage, PeerReviewStage
+from group_project_v2.project_api import TypedProjectAPI
+from group_project_v2.project_api.dtos import WorkgroupDetails, ReducedUserDetails, CompletionDetails
+from group_project_v2.stage import EvaluationDisplayStage, GradeDisplayStage, TeamEvaluationStage, PeerReviewStage, \
+    BaseGroupActivityStage, SubmissionStage
+from group_project_v2.stage.mixins import SimpleCompletionStageMixin
 from group_project_v2.stage.utils import ReviewState, StageState
 from group_project_v2.stage_components import PeerSelectorXBlock, GroupProjectReviewQuestionXBlock, GroupSelectorXBlock
-from tests.utils import TestWithPatchesMixin, make_review_item
+from tests.utils import TestWithPatchesMixin, make_review_item as mri, make_question, make_workgroup as mk_wg
+
+USER_ID = 1
+OTHER_USER_ID = 2
+
+GROUP_ID = 10
+OTHER_GROUP_ID = 11
 
 
 class BaseStageTest(TestCase, TestWithPatchesMixin):
     block_to_test = None
-    user_id = 1
-    workgroup_data = {
-        "id": 1,
-        "users": [
-            {"id": 1}, {"id": 2}, {"id": 3}
-        ]
-    }
+    user_id = USER_ID
+    workgroup_data = mk_wg(1, [{"id": 1}, {"id": 2}, {"id": 3}])
 
     def setUp(self):
         self.runtime_mock = mock.Mock()
@@ -30,7 +35,7 @@ class BaseStageTest(TestCase, TestWithPatchesMixin):
         self.activity_mock.content_id = '123456'
         # can't use create_autospec here, as most methods are wrapped in decorators and mock fails signature checks
         # with "Too many positional arguments" because of this
-        self.project_api_mock = mock.Mock(spec_set=ProjectAPI)
+        self.project_api_mock = mock.Mock(spec_set=TypedProjectAPI)
 
         # pylint: disable=not-callable
         self.block = self.block_to_test(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
@@ -42,6 +47,85 @@ class BaseStageTest(TestCase, TestWithPatchesMixin):
         )
         self.user_id_mock = self.make_patch(
             self.block_to_test, 'user_id', mock.PropertyMock(return_value=self.user_id)
+        )
+
+        self.runtime_mock.anonymous_student_id = self.user_id
+        self.runtime_mock.get_real_user.side_effect = lambda uid: mock.Mock(id=uid)
+
+
+@ddt.ddt
+class TestSubmissionStage(BaseStageTest):
+    block_to_test = SubmissionStage
+
+    def _set_upload_ids(self, upload_ids):
+        self.submissions_mock.return_value = [mock.Mock(upload_id=upload_id) for upload_id in upload_ids]
+
+    def setUp(self):
+        super(TestSubmissionStage, self).setUp()
+        self.submissions_mock = mock.PropertyMock()
+        self.make_patch(self.block_to_test, 'submissions', self.submissions_mock)
+
+    @ddt.data(
+        # no submissions at all - not started
+        (['u1'], [mk_wg(1, [{'id': 1}])], {}, (set(), set())),
+        # all submissions for one group with one user - user completed the stage
+        (['u1'], [mk_wg(1, [{'id': 1}])], {1: ['u1']}, ({1}, set())),
+        # all submissionss for one group with two users - both users completed the stage
+        (['u1'], [mk_wg(1, [{'id': 1}, {'id': 2}])], {1: ['u1']}, ({1, 2}, set())),
+        # some submissions for one group with one user - user partially completed the stage
+        (['u1', 'u2'], [mk_wg(1, [{'id': 1}])], {1: ['u1']}, (set(), {1})),
+        # some submissions for one group with two users - both users partially completed the stage
+        (['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}])], {1: ['u1']}, (set(), {1, 2})),
+        # two groups, some submissions for g1 - users in g1 partially completed, users in g2 not started
+        (['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])], {1: ['u1']}, (set(), {1, 2})),
+        # two groups, some submissions for g1 and g2 - users both in g1 and g2 partially completed
+        (
+                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+                {1: ['u1'], 2: ['u2']}, (set(), {1, 2, 3})
+        ),
+        # two groups, all submissions for g1, some for g2 - g1 users completed, g2 users partially completed
+        (
+                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+                {1: ['u1', 'u2'], 2: ['u2']}, ({1, 2}, {3})
+        ),
+        # two groups, some submissions for g1, all for g2 - g2 users completed, g1 users partially completed
+        (
+                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+                {1: ['u1'], 2: ['u1', 'u2']}, ({3}, {1, 2})
+        ),
+        # two groups, all submissions for g2, none for g1 - g2 users completed, g1 users not started
+        (
+                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+                {2: ['u1', 'u2']}, ({3}, set())
+        ),
+        # two groups, all submissions for g1 and g2 - users in g1 and g2 completed
+        (
+                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+                {1: ['u1', 'u2'], 2: ['u1', 'u2']}, ({1, 2, 3}, set())
+        ),
+    )
+    @ddt.unpack
+    def test_get_users_completion(self, uploads, workgroups, submissions, expected_result):
+        workgroup_submissions = {
+            group_id: {upload_id: 'irrelevant' for upload_id in uploaded_submissions}
+            for group_id, uploaded_submissions in submissions.iteritems()
+        }
+
+        expected_completed, expected_partially_completed = expected_result
+        expected_calls = [mock.call(group.id) for group in workgroups]
+
+        def get_submissions_by_id(group_id):
+            return workgroup_submissions.get(group_id, {})
+
+        self._set_upload_ids(uploads)
+        self.project_api_mock.get_latest_workgroup_submissions_by_id.side_effect = get_submissions_by_id
+        completed, partially_completed = self.block.get_users_completion(workgroups, 'irrelevant')
+
+        self.assertEqual(completed, expected_completed)
+        self.assertEqual(partially_completed, expected_partially_completed)
+        self.assertEqual(
+            self.project_api_mock.get_latest_workgroup_submissions_by_id.mock_calls,
+            expected_calls
         )
 
 
@@ -118,6 +202,7 @@ class ReviewStageBaseTest(object):
             self.assertEqual(self.block.get_stage_state(), expected_stage_state)
 
 
+@ddt.ddt
 class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
     block_to_test = TeamEvaluationStage
 
@@ -161,6 +246,221 @@ class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
 
         messages = validation.messages
         self.assertEqual(len(messages), 0)
+
+    @ddt.data(
+        ([10], ["q1"], [], ReviewState.NOT_STARTED),
+        ([10], ["q1"], [mri(USER_ID, "q1", peer=10, answer='1')], ReviewState.COMPLETED),
+        ([10], ["q1"], [mri(OTHER_USER_ID, "q1", peer=10, answer='1')], ReviewState.NOT_STARTED),
+        (
+                [10], ["q1", "q2"],
+                [mri(USER_ID, "q1", peer=10, answer='1'), mri(OTHER_USER_ID, "q1", peer=10, answer='1')],
+                ReviewState.INCOMPLETE
+        ),
+        (
+                [10], ["q1"],
+                [mri(USER_ID, "q1", peer=10, answer='2'), mri(USER_ID, "q2", peer=10, answer="1")],
+                ReviewState.COMPLETED
+        ),
+        (
+                [10], ["q1", "q2"],
+                [mri(USER_ID, "q1", peer=10, answer='3')],
+                ReviewState.INCOMPLETE
+        ),
+        (
+                [10], ["q1"],
+                [mri(USER_ID, "q2", peer=10, answer='4'), mri(USER_ID, "q1", peer=11, answer='5')],
+                ReviewState.NOT_STARTED
+        ),
+        (
+                [10, 11], ["q1"],
+                [mri(USER_ID, "q1", peer=10, answer='6'), mri(USER_ID, "q1", peer=11, answer='7')],
+                ReviewState.COMPLETED
+        ),
+        (
+                [10, 11], ["q1", "q2"],
+                [mri(USER_ID, "q1", peer=10, answer='7'), mri(USER_ID, "q1", peer=11, answer='8')],
+                ReviewState.INCOMPLETE
+        ),
+    )
+    @ddt.unpack
+    def test_review_status(self, peers_to_review, questions, reviews, expected_result):
+        self.project_api_mock.get_peer_review_items_for_group.return_value = reviews
+
+        with mock.patch.object(self.block_to_test, 'review_subjects', mock.PropertyMock()) as patched_review_subjects, \
+                mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+            patched_review_subjects.return_value = [ReducedUserDetails(id=rev_id) for rev_id in peers_to_review]
+            patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
+
+            self.assertEqual(self.block.review_status(), expected_result)
+            self.project_api_mock.get_peer_review_items_for_group.assert_called_once_with(
+                self.workgroup_data.id, self.activity_mock.content_id
+            )
+
+    def _set_project_api_responses(self, workgroups, review_items):
+        def workgroups_side_effect(user_id, _course_id):
+            return workgroups.get(user_id, None)
+
+        def review_items_side_effect(workgroup_id, _content_id):
+            return review_items.get(workgroup_id, [])
+
+        self.project_api_mock.get_user_workgroup_for_course.side_effect = workgroups_side_effect
+        self.project_api_mock.get_peer_review_items_for_group.side_effect = review_items_side_effect
+
+    @staticmethod
+    def _parse_review_item_string(review_item_string):
+        splitted = review_item_string.split(':')
+        reviewer, question, peer = splitted[:3]
+        if len(splitted) > 3:
+            answer = splitted[3]
+        else:
+            answer = None
+        return mri(int(reviewer), question, peer=peer, answer=answer)
+
+    @ddt.data(
+        # no reviews - not started
+        ([1, 2], ["q1", "q2"], [], (set(), set())),
+        # some reviews - partially completed
+        ([1, 2], ["q1", "q2"], ["1:q1:2:a"], (set(), {1})),
+        # all reviews - completed
+        ([1, 2], ["q1", "q2"], ["1:q1:2:a", "1:q2:2:b"], ({1}, set())),
+        # no reviews - not started
+        ([1, 2, 3], ["q1", "q2"], [], (set(), set())),
+        # some reviews - partially completed
+        ([1, 2, 3], ["q1", "q2"], ["1:q1:2:a", "1:q2:2:b"], (set(), {1})),
+        # all reviews, but some answers are None - partially completed
+        ([1, 2, 3], ["q1", "q2"], ["1:q1:2:a", "1:q2:2:b", "1:q1:3", "1:q2:3:d"], (set(), {1})),
+        # all reviews, but some answers are empty - partially completed
+        ([1, 2, 3], ["q1", "q2"], ["1:q1:2:a", "1:q2:2:b", "1:q1:3:", "1:q2:3:d"], (set(), {1})),
+        # all reviews - completed
+        ([1, 2, 3], ["q1", "q2"], ["1:q1:2:a", "1:q2:2:b", "1:q1:3:c", "1:q2:3:d"], ({1}, set())),
+    )
+    @ddt.unpack
+    def test_users_completion_single_user(self, users_in_group, questions, review_items, expected_result):
+        user_id = 1
+        workgroup_id = 1
+        review_items = [self._parse_review_item_string(review_item_str) for review_item_str in review_items]
+
+        self._set_project_api_responses(
+            {user_id: mk_wg(workgroup_id, users=[{"id": uid} for uid in users_in_group])},
+            {workgroup_id: review_items}
+        )
+
+        expected_completed, expected_partially_completed = expected_result
+
+        with mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+            patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
+
+            completed, partially_completed = self.block.get_users_completion(
+                ['irrelevant'],
+                [ReducedUserDetails(id=user_id)]
+            )
+
+        self.assertEqual(completed, expected_completed)
+        self.assertEqual(partially_completed, expected_partially_completed)
+        # checks if caching is ok
+        self.project_api_mock.get_peer_review_items_for_group.assert_called_once_with(
+            workgroup_id, self.block.activity_content_id
+        )
+
+    @ddt.data(
+        # no reviews - both not started
+        ([1, 2], ["q1", "q2"], [], (set(), set())),
+        # u1 some reviews - u1 partially completed
+        ([1, 2], ["q1", "q2"], ["1:q1:2:a"], (set(), {1})),
+        # u1 all reviews - u1 completed, u2 - not started
+        ([1, 2], ["q1", "q2"], ["1:q1:2:a", "1:q2:2:b"], ({1}, set())),
+        # u1 some reviews, u2 some reviews - both partially completed
+        ([1, 2], ["q1", "q2"], ["1:q1:2:a", "2:q1:1:b"], (set(), {1, 2})),
+        # u1 all reviews, u2 some reviews - u1 completed, u2 partially completed
+        ([1, 2], ["q1", "q2"], ["1:q1:2:a", "1:q2:2:b", "2:q1:1:c"], ({1}, {2})),
+        # both all reviews - both completed
+        ([1, 2], ["q1", "q2"], ["1:q1:2:a", "1:q2:2:b", "2:q1:1:c", "2:q2:1:d"], ({1, 2}, set())),
+    )
+    @ddt.unpack
+    def test_users_completion_same_group_users(self, users_in_group, questions, review_items, expected_result):
+        workgroup_id = 1
+        workgroup_data = mk_wg(workgroup_id, users=[{"id": uid} for uid in users_in_group])
+        review_items = [self._parse_review_item_string(review_item_str) for review_item_str in review_items]
+
+        self._set_project_api_responses(
+            {uid: workgroup_data for uid in users_in_group},
+            {workgroup_id: review_items}
+        )
+
+        expected_completed, expected_partially_completed = expected_result
+
+        with mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+            patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
+
+            completed, partially_completed = self.block.get_users_completion(
+                ['irrelevant'],
+                [ReducedUserDetails(id=uid) for uid in users_in_group]
+            )
+
+        self.assertEqual(completed, expected_completed)
+        self.assertEqual(partially_completed, expected_partially_completed)
+        # checks if caching is ok
+        self.project_api_mock.get_peer_review_items_for_group.assert_called_once_with(
+            workgroup_id, self.block.activity_content_id
+        )
+
+    @ddt.data(
+        # no reviews - both not started
+        ([1, 3], ['q1'], {}, (set(), set())),
+        # u1 some reviews - u1 partially, u4 - not started
+        ([1, 4], ['q1', 'q2'], {GROUP_ID: ['1:q1:2:b']}, (set(), {1})),
+        # u2 all reviews - u2 completed, u3 - not started
+        ([2, 3], ['q1'], {GROUP_ID: ['2:q1:1:a']}, ({2}, set())),
+        # u3 all reviews - u3 completed, u1, u2 not started
+        ([1, 2, 3], ['q1'], {OTHER_GROUP_ID: ['3:q1:4:a']}, ({3}, set())),
+        # u1, u2, u3 all reviews - u1, u2, u3 completed
+        (
+            [1, 2, 3], ['q1'],
+            {GROUP_ID: ['1:q1:2:a', '2:q1:1:b'], OTHER_GROUP_ID: ['3:q1:4:c']}, ({1, 2, 3}, set())
+        ),
+        # u1, u2, u3 all reviews, u4 no reviews - u1, u2, u3 completed, u4 not started
+        (
+            [1, 2, 3, 4], ['q1'],
+            {GROUP_ID: ['1:q1:2:a', '2:q1:1:b'], OTHER_GROUP_ID: ['3:q1:4:c']}, ({1, 2, 3}, set())
+        ),
+        # u1 all reviews, u3 some reviews - u1 completed, u3 partially completed
+        (
+            [1, 3], ['q1', 'q2'],
+            {GROUP_ID: ['1:q1:2:a', '1:q2:2:b'], OTHER_GROUP_ID: ['3:q1:4:c']}, ({1}, {3})
+        ),
+    )
+    @ddt.unpack
+    def test_users_completion_multiple_groups(self, target_users, questions, review_items, expected_result):
+        workgroups = [
+            mk_wg(GROUP_ID, users=[{"id": 1}, {"id": 2}]),
+            mk_wg(OTHER_GROUP_ID, users=[{"id": 3}, {"id": 4}]),
+        ]
+        self._set_project_api_responses(
+            {1: workgroups[0], 2: workgroups[0], 3: workgroups[1], 4: workgroups[1]},
+            {
+                group_id: [self._parse_review_item_string(item) for item in items]
+                for group_id, items in review_items.iteritems()
+            }
+        )
+
+        expected_completed, expected_partially_completed = expected_result
+
+        with mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+            patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
+
+            completed, partially_completed = self.block.get_users_completion(
+                ['irrelevant'],
+                [ReducedUserDetails(id=uid) for uid in target_users]
+            )
+
+        self.assertEqual(completed, expected_completed)
+        self.assertEqual(partially_completed, expected_partially_completed)
+        # checks if caching is ok
+        expected_calls = [
+            mock.call(GROUP_ID, self.block.activity_content_id),
+            mock.call(OTHER_GROUP_ID, self.block.activity_content_id)
+        ]
+        self.assertEqual(self.project_api_mock.get_peer_review_items_for_group.mock_calls, expected_calls)
 
 
 @ddt.ddt
@@ -224,6 +524,262 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
 
         messages = validation.messages
         self.assertEqual(len(messages), 0)
+
+    @ddt.data(
+        ([GROUP_ID], ["q1"], {GROUP_ID: []}, ReviewState.NOT_STARTED),
+        ([GROUP_ID], ["q1"], {GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='1')]}, ReviewState.COMPLETED),
+        (
+                [GROUP_ID], ["q1"],
+                {GROUP_ID: [mri(OTHER_USER_ID, "q1", group=GROUP_ID, answer='1')]}, ReviewState.NOT_STARTED
+        ),
+        (
+                [GROUP_ID], ["q1", "q2"],
+                {GROUP_ID: [
+                    mri(USER_ID, "q1", group=GROUP_ID, answer='1'), mri(OTHER_USER_ID, "q1", group=GROUP_ID, answer='1')
+                ]},
+                ReviewState.INCOMPLETE
+        ),
+        (
+                [GROUP_ID], ["q1"],
+                {GROUP_ID: [
+                    mri(USER_ID, "q1", group=GROUP_ID, answer='2'), mri(USER_ID, "q2", group=GROUP_ID, answer="1")
+                ]},
+                ReviewState.COMPLETED
+        ),
+        (
+                [GROUP_ID], ["q1", "q2"],
+                {GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='3')]},
+                ReviewState.INCOMPLETE
+        ),
+        (
+                [GROUP_ID], ["q1"],
+                {GROUP_ID: [
+                    mri(USER_ID, "q2", group=GROUP_ID, answer='4'), mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='5')
+                ]},
+                ReviewState.NOT_STARTED
+        ),
+        (
+                [GROUP_ID, OTHER_GROUP_ID], ["q1"],
+                {
+                    GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='6')],
+                    OTHER_GROUP_ID: [mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='7')]
+                },
+                ReviewState.COMPLETED
+        ),
+        (
+                [GROUP_ID, OTHER_GROUP_ID], ["q1", "q2"],
+                {
+                    GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='7')],
+                    OTHER_GROUP_ID: [mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='8')]
+                },
+                ReviewState.INCOMPLETE
+        ),
+        (
+                [GROUP_ID, OTHER_GROUP_ID], ["q1", "q2"],
+                {
+                    GROUP_ID: [
+                        mri(USER_ID, "q1", group=GROUP_ID, answer='7'), mri(USER_ID, "q2", group=GROUP_ID, answer='7')
+                    ],
+                    OTHER_GROUP_ID: [
+                        mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='8'),
+                        mri(USER_ID, "q2", group=GROUP_ID, answer='7')
+                    ]
+                },
+                ReviewState.INCOMPLETE
+        ),
+    )
+    @ddt.unpack
+    def test_review_status(self, groups, questions, reviews, expected_result):
+        def get_reviews(group_id, _component_id):
+            return reviews.get(group_id, [])
+
+        expected_calls = [
+            mock.call(group_id, self.block.activity_content_id)
+            for group_id in groups
+        ]
+        self.project_api_mock.get_workgroup_review_items_for_group.side_effect = get_reviews
+
+        with mock.patch.object(self.block_to_test, 'review_subjects', mock.PropertyMock()) as patched_review_subjects, \
+                mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+            patched_review_subjects.return_value = [WorkgroupDetails(id=rev_id) for rev_id in groups]
+            patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
+
+            self.assertEqual(self.block.review_status(), expected_result)
+
+        self.assertEqual(self.project_api_mock.get_workgroup_review_items_for_group.mock_calls, expected_calls)
+
+    def _set_project_api_responses(self, workgroups, review_items):
+        def workgroups_side_effect(user_id, _course_id, _content_id):
+            return workgroups.get(user_id, None)
+
+        def review_items_side_effect(workgroup_id, _content_id):
+            return review_items.get(workgroup_id, [])
+
+        self.project_api_mock.get_workgroups_to_review.side_effect = workgroups_side_effect
+        self.project_api_mock.get_workgroup_review_items_for_group.side_effect = review_items_side_effect
+
+    @staticmethod
+    def _parse_review_item_string(review_item_string):
+        splitted = review_item_string.split(':')
+        reviewer, question, group = splitted[:3]
+        if len(splitted) > 3:
+            answer = splitted[3]
+        else:
+            answer = None
+        return mri(int(reviewer), question, group=group, answer=answer)
+
+    @ddt.data(
+        # no reviews - not started
+        ([GROUP_ID], ["q1"], [], (set(), set())),
+        # some reviews - partially completed
+        ([GROUP_ID], ["q1", "q2"], ["1:q1:10:a"], (set(), {1})),
+        # some reviews - partially completed; other reviewers reviews doe not affect the state
+        ([GROUP_ID], ["q1", "q2"], ["1:q1:10:a", "2:q1:10:a", "2:q2:10:a"], (set(), {1})),
+        # all reviews - completed
+        ([GROUP_ID], ["q1", "q2"], ["1:q1:10:a", "1:q2:10:a"], ({1}, set())),
+        # no reviews - not started
+        ([GROUP_ID, OTHER_GROUP_ID], ["q1", "q2"], [], (set(), set())),
+        # some reviews - partially completed
+        ([GROUP_ID, OTHER_GROUP_ID], ["q1", "q2"], ["1:q1:10:a", "1:q2:10:b"], (set(), {1})),
+        # all reviews, but some answers are None - partially completed
+        ([GROUP_ID, OTHER_GROUP_ID], ["q1"], ["1:q1:10:a", "1:q1:11"], (set(), {1})),
+        # all reviews, but some answers are empty - partially completed
+        ([GROUP_ID, OTHER_GROUP_ID], ["q1"], ["1:q1:10:a", "1:q1:11:"], (set(), {1})),
+        # all reviews - completed
+        ([GROUP_ID, OTHER_GROUP_ID], ["q1"], ["1:q1:10:a", "1:q1:11:b"], ({1}, set())),
+    )
+    @ddt.unpack
+    def test_users_completion_single_user(self, groups_to_review, questions, review_items, expected_result):
+        user_id = 1
+        review_items = [self._parse_review_item_string(review_item_str) for review_item_str in review_items]
+
+        self._set_project_api_responses(
+            {user_id: [mk_wg(group_id) for group_id in groups_to_review]},
+            {GROUP_ID: review_items}
+        )
+
+        expected_completed, expected_partially_completed = expected_result
+
+        with mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+            patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
+
+            completed, partially_completed = self.block.get_users_completion(
+                ['irrelevant'],
+                [ReducedUserDetails(id=user_id)]
+            )
+
+        self.assertEqual(completed, expected_completed)
+        self.assertEqual(partially_completed, expected_partially_completed)
+        # checks if caching is ok
+        expected_calls = [mock.call(group_id, self.block.activity_content_id) for group_id in groups_to_review]
+        self.assertEqual(self.project_api_mock.get_workgroup_review_items_for_group.mock_calls, expected_calls)
+
+    @ddt.data(
+        # no reviews - both not started
+        ([GROUP_ID], ["q1", "q2"], [], (set(), set())),
+        # u1 some reviews - u1 partially completed
+        ([GROUP_ID], ["q1", "q2"], ["1:q1:10:a"], (set(), {1})),
+        # u1 all reviews - u1 completed, u2 - not started
+        ([GROUP_ID], ["q1", "q2"], ["1:q1:10:a", "1:q2:10:b"], ({1}, set())),
+        # u1 some reviews, u2 some reviews - both partially completed
+        ([GROUP_ID], ["q1", "q2"], ["1:q1:10:a", "2:q1:10:b"], (set(), {1, 2})),
+        # u1 all reviews, u2 some reviews - u1 completed, u2 partially completed
+        ([GROUP_ID], ["q1", "q2"], ["1:q1:10:a", "1:q2:10:b", "2:q1:10:c"], ({1}, {2})),
+        # both all reviews - both completed
+        ([GROUP_ID], ["q1", "q2"], ["1:q1:10:a", "1:q2:10:b", "2:q1:10:c", "2:q2:10:d"], ({1, 2}, set())),
+    )
+    @ddt.unpack
+    def test_users_completion_same_groups(self, groups_to_review, questions, review_items, expected_result):
+        target_users = [1, 2]
+        review_items = [self._parse_review_item_string(review_item_str) for review_item_str in review_items]
+
+        self._set_project_api_responses(
+            {user_id: [mk_wg(group_id) for group_id in groups_to_review] for user_id in target_users},
+            {GROUP_ID: review_items}
+        )
+
+        expected_completed, expected_partially_completed = expected_result
+
+        with mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+            patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
+
+            completed, partially_completed = self.block.get_users_completion(
+                ['irrelevant'],
+                [ReducedUserDetails(id=uid) for uid in target_users]
+            )
+
+        self.assertEqual(completed, expected_completed)
+        self.assertEqual(partially_completed, expected_partially_completed)
+        # checks if caching is ok
+        self.project_api_mock.get_workgroup_review_items_for_group.assert_called_once_with(
+            GROUP_ID, self.block.activity_content_id
+        )
+
+    @ddt.data(
+        # no reviews - both not started
+        ([1, 3], {GROUP_ID: [1, 3]}, ['q1'], {}, (set(), set())),
+        # u1 some reviews - u1 partially, u4 - not started
+        ([1, 4], {GROUP_ID: [1, 4]}, ['q1', 'q2'], {GROUP_ID: ['1:q1:10:b']}, (set(), {1})),
+        # u2 all reviews - u2 completed, u3 - not started
+        ([2, 3], {GROUP_ID: [2, 3]}, ['q1'], {GROUP_ID: ['2:q1:10:a']}, ({2}, set())),
+        # u3 all reviews - u3 completed, u1, u2 not started
+        ([1, 2, 3], {OTHER_GROUP_ID: [1, 2, 3]}, ['q1'], {OTHER_GROUP_ID: ['3:q1:11:a']}, ({3}, set())),
+        # u1, u2, u3 all reviews - u1, u2, u3 completed
+        (
+            [1, 2, 3], {GROUP_ID: [1, 2], OTHER_GROUP_ID: [3]}, ['q1'],
+            {GROUP_ID: ['1:q1:10:a', '2:q1:10:b'], OTHER_GROUP_ID: ['3:q1:11:c']}, ({1, 2, 3}, set())
+        ),
+        # u1, u2, u3 all reviews, u4 no reviews - u1, u2, u3 completed, u4 not started
+        (
+            [1, 2, 3, 4], {GROUP_ID: [1, 2], OTHER_GROUP_ID: [3, 4]}, ['q1'],
+            {GROUP_ID: ['1:q1:10:a', '2:q1:10:b'], OTHER_GROUP_ID: ['3:q1:11:c']}, ({1, 2, 3}, set())
+        ),
+        # u1 all reviews, u3 some reviews - u1 completed, u3 partially completed
+        (
+            [1, 3], {GROUP_ID: [1, 3], OTHER_GROUP_ID: [3]}, ['q1', 'q2'],
+            {GROUP_ID: ['1:q1:10:a', '1:q2:10:b', '3:q1:10:c', '3:q2:10:d'], OTHER_GROUP_ID: ['3:q1:11:e']}, ({1}, {3})
+        ),
+        # u1 all reviews, u3 some reviews - u1 completed, u3 partially completed
+        (
+            [1, 3], {GROUP_ID: [1, 3], OTHER_GROUP_ID: [3]}, ['q1', 'q2'],
+            {GROUP_ID: ['1:q1:10:a', '1:q2:10:b', '3:q1:10:c'], OTHER_GROUP_ID: ['3:q1:11:e', '3:q2:11:d']}, ({1}, {3})
+        ),
+    )
+    @ddt.unpack
+    # pylint:disable=too-many-locals
+    def test_users_completion_multiple_groups(
+            self, target_users, group_reviewers, questions, review_items, expected_result
+    ):
+        groups_to_review = defaultdict(list)
+        for group_id, reviewers in group_reviewers.iteritems():
+            for reviewer in reviewers:
+                groups_to_review[reviewer].append(mk_wg(group_id))
+
+        self._set_project_api_responses(
+            groups_to_review,
+            {
+                group_id: [self._parse_review_item_string(item) for item in items]
+                for group_id, items in review_items.iteritems()
+            }
+        )
+
+        expected_completed, expected_partially_completed = expected_result
+
+        with mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+            patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
+
+            completed, partially_completed = self.block.get_users_completion(
+                ['irrelevant'],
+                [ReducedUserDetails(id=uid) for uid in target_users]
+            )
+
+        self.assertEqual(completed, expected_completed)
+        self.assertEqual(partially_completed, expected_partially_completed)
+        # checks if caching is ok
+        expected_calls = [
+            mock.call(group_id, self.block.activity_content_id) for group_id in group_reviewers.keys()
+        ]
+        self.assertEqual(self.project_api_mock.get_workgroup_review_items_for_group.mock_calls, expected_calls)
 
 
 @ddt.ddt
@@ -290,13 +846,11 @@ class TestEvaluationDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
             self.assertFalse(self.get_reviews_mock.called)
             self.assertFalse(self.get_reviewer_ids_mock.called)
 
-    # pylint: disable=invalid-name
     def test_can_mark_complete_no_reviewers_returns_true(self):
         self.team_members_mock.return_value = []
 
         self.assertTrue(self.block.can_mark_complete)
 
-    # pylint: disable=invalid-name
     def test_can_mark_complete_no_questions_returns_true(self):
         with mock.patch.object(self.block_to_test, 'required_questions') as patched_required_questions:
             patched_required_questions.return_value = []
@@ -305,12 +859,12 @@ class TestEvaluationDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
 
     @ddt.data(
         ([10], ["q1"], [], False),
-        ([10], ["q1"], [make_review_item(10, "q1")], True),
-        ([10], ["q1"], [make_review_item(10, "q1"), make_review_item(10, "q2")], True),
-        ([10], ["q1"], [make_review_item(11, "q1")], False),
-        ([10], ["q1"], [make_review_item(10, "q2"), make_review_item(11, "q1")], False),
-        ([10, 11], ["q1"], [make_review_item(10, "q1"), make_review_item(11, "q1")], True),
-        ([10, 11], ["q1", "q2"], [make_review_item(10, "q1"), make_review_item(11, "q1")], False),
+        ([10], ["q1"], [mri(10, "q1")], True),
+        ([10], ["q1"], [mri(10, "q1"), mri(10, "q2")], True),
+        ([10], ["q1"], [mri(11, "q1")], False),
+        ([10], ["q1"], [mri(10, "q2"), mri(11, "q1")], False),
+        ([10, 11], ["q1"], [mri(10, "q1"), mri(11, "q1")], True),
+        ([10, 11], ["q1", "q2"], [mri(10, "q1"), mri(11, "q1")], False),
     )
     @ddt.unpack
     def test_can_mark_compete_suite(self, reviewers, questions, reviews, expected_result):
@@ -349,3 +903,30 @@ class TestGradeDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
         self.activity_mock.calculate_grade.return_value = calculate_grade_result
 
         self.assertEqual(self.block.can_mark_complete, expected_result)
+
+
+@ddt.ddt
+class TestSimpleCompletionStageMixin(BaseStageTest):
+    class SimpleCompletionGuineaPig(SimpleCompletionStageMixin, BaseGroupActivityStage):
+        pass
+
+    block_to_test = SimpleCompletionGuineaPig
+
+    @ddt.data(
+        ({1}, {1}),
+        (set(), set()),
+        ({1, 2, 3, 4}, {1, 2, 3, 4}),
+        ({1, 4, 11, 92}, {1, 4, 11, 92}),
+    )
+    @ddt.unpack
+    def test_get_users_completion(self, completed_users, expected_completed_users):
+        self.project_api_mock.get_completions_by_content_id.return_value = [
+            CompletionDetails(user_id=uid) for uid in completed_users
+        ]
+
+        completed, partially = self.block.get_users_completion('irrelevant', 'irrelevant')
+        self.assertEqual(completed, expected_completed_users)
+        self.assertEqual(partially, set())
+        self.project_api_mock.get_completions_by_content_id.assert_called_once_with(
+            self.block.course_id, self.block.content_id
+        )

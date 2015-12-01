@@ -1,5 +1,7 @@
 import json
 import logging
+
+import itertools
 from lazy.lazy import lazy
 import webob
 from xblock.core import XBlock
@@ -13,7 +15,8 @@ from group_project_v2.stage_components import (
 from group_project_v2.utils import (
     loader, gettext as _, make_key,
     outsider_disallowed_protected_handler, key_error_protected_handler, conversion_protected_handler,
-    MUST_BE_OVERRIDDEN)
+    MUST_BE_OVERRIDDEN, memoize_with_expiration
+)
 from group_project_v2.stage.utils import StageState, ReviewState, DISPLAY_NAME_NAME, DISPLAY_NAME_HELP
 
 log = logging.getLogger(__name__)
@@ -27,10 +30,27 @@ class ReviewBaseStage(BaseGroupActivityStage):
     js_file = "public/js/stages/review_stage.js"
     js_init = "GroupProjectReviewStage"
 
+    REVIEW_ITEM_KEY = None
+
     STAGE_ACTION = _(u"save feedback")
     FEEDBACK_SAVED_MESSAGE = _(u'Thanks for your feedback.')
 
     TA_GRADING_NOT_ALLOWED = _(u"TA grading is not allowed for this stage")
+
+    # (has_some, has_all) -> ReviewState. have_all = True and have_some = False is obviously an error
+    REVIEW_STATE_CONDITIONS = {
+        (True, True): ReviewState.COMPLETED,
+        (True, False): ReviewState.INCOMPLETE,
+        (False, False): ReviewState.NOT_STARTED
+    }
+
+    # pretty much obvious mapping, but still it is useful to separate the two - more stage states could be theoretically
+    # added, i.e. Open, Closed, etc. THose won't have a mapping to ReviewState
+    STAGE_STATE_REVIEW_STATE_MAPPING = {
+        ReviewState.COMPLETED: StageState.COMPLETED,
+        ReviewState.INCOMPLETE: StageState.INCOMPLETE,
+        ReviewState.NOT_STARTED: StageState.NOT_STARTED,
+    }
 
     @property
     def allowed_nested_blocks(self):
@@ -67,32 +87,44 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
         return violations
 
-    def _check_review_status(self, items_to_grade, review_items, review_item_key):
-        my_feedback = {
-            make_key(peer_review_item[review_item_key], peer_review_item["question"]): peer_review_item["answer"]
-            for peer_review_item in review_items
-            if peer_review_item['reviewer'] == self.anonymous_student_id
-        }
+    def _convert_review_items_to_keys(self, review_items):
+        empty_values = (None, '')
+        return set(
+            make_key(review_item[self.REVIEW_ITEM_KEY], review_item["question"])
+            for review_item in review_items
+            if review_item["answer"] not in empty_values
+        )
 
-        required_keys = [
-            make_key(item["id"], question.question_id)
-            for item in items_to_grade
+    def _make_required_keys(self, items_to_grade):
+        return set(
+            make_key(item_id, question.question_id)
+            for item_id in items_to_grade
             for question in self.required_questions
-        ]
-        has_all = True
-        has_some = False
+        )
 
-        for key in required_keys:
-            has_answer = my_feedback.get(key, None) not in (None, '')
-            has_all = has_all and has_answer
-            has_some = has_some or has_answer
+    def _calculate_review_status(self, items_to_grade, reviewer_feedback_keys):
+        """
+        Calculates review status for all reviewers listed in review_items collection
+        :param collections.Iterable[int] items_to_grade: Ids of review subjects (teammates or other groups)
+        :param collections.Iterable[set[str]] reviewer_feedback_keys: Review feedback keys
+        :rtype: ReviewState
+        """
+        required_keys = self._make_required_keys(items_to_grade)
+        has_all = bool(required_keys) and reviewer_feedback_keys >= required_keys
+        has_some = bool(reviewer_feedback_keys & required_keys)
 
-        if has_all:
-            return ReviewState.COMPLETED
-        elif has_some:
-            return StageState.INCOMPLETE
-        else:
-            return StageState.NOT_STARTED
+        return self.REVIEW_STATE_CONDITIONS.get((has_some, has_all))
+
+    def _check_review_status(self, items_to_grade, review_items):
+        """
+        Calculates review status for current user
+        :param collections.Iterable[int] items_to_grade: Ids of review subjects (teammates or other groups)
+        :param collections.Iterable[dict] review_items: review items (answers to review questions)
+        :rtype: ReviewState
+        """
+        my_feedback = [item for item in review_items if item['reviewer'] == self.anonymous_student_id]
+        my_review_keys = self._convert_review_items_to_keys(my_feedback)
+        return self._calculate_review_status(items_to_grade, my_review_keys)
 
     def get_stage_state(self):
         review_status = self.review_status()
@@ -100,12 +132,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
         if not self.visited:
             return StageState.NOT_STARTED
 
-        if review_status == ReviewState.COMPLETED:
-            return StageState.COMPLETED
-        elif review_status == ReviewState.INCOMPLETE:
-            return StageState.INCOMPLETE
-        else:
-            return StageState.NOT_STARTED
+        return self.STAGE_STATE_REVIEW_STATE_MAPPING[review_status]
 
     def _pivot_feedback(self, feedback):  # pylint: disable=no-self-use
         """
@@ -113,11 +140,38 @@ class ReviewBaseStage(BaseGroupActivityStage):
         """
         return {pi['question']: pi['answer'] for pi in feedback}
 
+    def get_users_completion(self, target_workgroups, target_users):
+        """
+        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] target_workgroups:
+        :param collections.Iterable[group_project_v2.project_api.dtos.ReducedUserDetails] target_users:
+        :rtype: (set[int], set[int])
+        """
+        completed_users, partially_completed_users = set(), set()
+
+        for user in target_users:
+            review_items, review_subjects = self.get_review_data(user.id)
+            review_keys = self._convert_review_items_to_keys(review_items)
+            review_status = self._calculate_review_status(review_subjects, review_keys)
+
+            if review_status == ReviewState.COMPLETED:
+                completed_users.add(user.id)
+            elif review_status == ReviewState.INCOMPLETE:
+                partially_completed_users.add(user.id)
+
+        return completed_users, partially_completed_users
+
+    def get_review_data(self, user_id):
+        """
+        :param gint user_id:
+        :rtype: (dict, set[int])
+        """
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
+
     @XBlock.json_handler
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
     @conversion_protected_handler
-    def submit_review(self, submissions, context=''):  # pylint: disable=unused-argument
+    def submit_review(self, submissions, _context=''):
         # if admin grader - still allow providing grades even for non-TA-graded activities
         if self.is_admin_grader and not self.allow_admin_grader_access:
             return {'result': 'error', 'msg': self.TA_GRADING_NOT_ALLOWED}
@@ -164,9 +218,11 @@ class TeamEvaluationStage(ReviewBaseStage):
 
     STUDIO_LABEL = _(u"Team Evaluation")
 
+    REVIEW_ITEM_KEY = "user"
+
     @lazy
     def review_subjects(self):
-        return [user for user in self.workgroup["users"] if user["id"] != self.user_id]
+        return [user for user in self.workgroup.users if user.id != self.user_id]
 
     @property
     def allowed_nested_blocks(self):
@@ -175,9 +231,30 @@ class TeamEvaluationStage(ReviewBaseStage):
         return blocks
 
     def review_status(self):
-        peer_review_items = self.project_api.get_peer_review_items_for_group(self.workgroup['id'], self.content_id)
+        peer_review_items = self.project_api.get_peer_review_items_for_group(
+            self.workgroup.id, self.activity_content_id
+        )
 
-        return self._check_review_status(self.review_subjects, peer_review_items, "user")
+        return self._check_review_status([user.id for user in self.review_subjects], peer_review_items)
+
+    def get_review_data(self, user_id):
+        """
+        :param int user_id: User ID
+        :rtype: (dict, set[int])
+        """
+        workgroup = self.project_api.get_user_workgroup_for_course(user_id, self.course_id)
+        review_subjects = set(user.id for user in workgroup.users) - {user_id}
+        review_items = [
+            item
+            for item in self._get_review_items_for_group(self.project_api, workgroup.id, self.activity_content_id)
+            if self.real_user_id(item['reviewer']) == user_id
+        ]
+        return review_items, review_subjects
+
+    @staticmethod
+    @memoize_with_expiration()
+    def _get_review_items_for_group(project_api, workgroup_id, activity_content_id):
+        return project_api.get_peer_review_items_for_group(workgroup_id, activity_content_id)
 
     def validate(self):
         violations = super(TeamEvaluationStage, self).validate()
@@ -210,13 +287,13 @@ class TeamEvaluationStage(ReviewBaseStage):
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
     @conversion_protected_handler
-    def load_peer_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
+    def load_peer_feedback(self, request, _suffix=''):
         peer_id = int(request.GET["peer_id"])
         feedback = self.project_api.get_peer_review_items(
             self.anonymous_student_id,
             peer_id,
-            self.workgroup['id'],
-            self.content_id,
+            self.workgroup.id,
+            self.activity_content_id,
         )
         results = self._pivot_feedback(feedback)
 
@@ -229,8 +306,8 @@ class TeamEvaluationStage(ReviewBaseStage):
         self.project_api.submit_peer_review_items(
             self.anonymous_student_id,
             peer_id,
-            self.workgroup['id'],
-            self.content_id,
+            self.workgroup.id,
+            self.activity_content_id,
             submissions,
         )
 
@@ -248,6 +325,8 @@ class PeerReviewStage(ReviewBaseStage):
 
     STUDIO_LABEL = _(u"Peer Grading")
 
+    REVIEW_ITEM_KEY = "workgroup"
+
     @property
     def allowed_nested_blocks(self):
         blocks = super(PeerReviewStage, self).allowed_nested_blocks
@@ -262,13 +341,15 @@ class PeerReviewStage(ReviewBaseStage):
     def review_subjects(self):
         """
         Returns groups to review. May throw `class`: OutsiderDisallowedError
+        :rtype: list[group_project_v2.project_api.dtos.WorkgroupDetails]
         """
         if self.is_admin_grader:
             return [self.workgroup]
 
         try:
-            return self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.content_id)
+            return self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.activity_content_id)
         except ApiError:
+            log.exception("Error obtaining list of groups to grade - assuming no groups to grade")
             return []
 
     @property
@@ -289,14 +370,47 @@ class PeerReviewStage(ReviewBaseStage):
     def is_graded_stage(self):
         return True
 
-    def review_status(self):
-        group_review_items = []
-        for assess_group in self.review_groups:
-            group_review_items.extend(
-                self.project_api.get_workgroup_review_items_for_group(assess_group["id"], self.content_id)
-            )
+    def _get_review_items(self, review_groups, with_caching=False):
+        """
+        Gets review items for a list of groups
+        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] review_groups: Target groups
+        :param bool with_caching:
+            Underlying implementation uses get_workgroup_review_items_for_group for both cached and non-cached version.
+            However, one of the users of this method (get_review_data) might benefit from caching,
+            while the other (review_status) is affected by the issue outlined in get_workgroup_review_items_for_group
+            comment (i.e. cached value is not updated when new feedback is posted).
+            So, caching is conditionally enabled here to serve both users of this method as efficiently as possible.
+        :return:
+        """
+        def do_get_items(group_id):
+            if with_caching:
+                return self._get_review_items_for_group(self.project_api, group_id, self.activity_content_id)
+            else:
+                return self.project_api.get_workgroup_review_items_for_group(group_id, self.activity_content_id)
 
-        return self._check_review_status(self.review_groups, group_review_items, "workgroup")
+        return list(itertools.chain.from_iterable(do_get_items(group.id) for group in review_groups))
+
+    def review_status(self):
+        group_review_items = self._get_review_items(self.review_groups, with_caching=False)
+        return self._check_review_status([group.id for group in self.review_groups], group_review_items)
+
+    def get_review_data(self, user_id):
+        """
+        :param int user_id:
+        :rtype: (dict, set[int])
+        """
+        review_subjects = self.project_api.get_workgroups_to_review(user_id, self.course_id, self.activity_content_id)
+        review_items = [
+            item
+            for item in self._get_review_items(review_subjects, with_caching=True)
+            if self.real_user_id(item['reviewer']) == user_id
+        ]
+        return review_items, set(group.id for group in review_subjects)
+
+    @staticmethod
+    @memoize_with_expiration()
+    def _get_review_items_for_group(project_api, workgroup_id, activity_content_id):
+        return project_api.get_workgroup_review_items_for_group(workgroup_id, activity_content_id)
 
     def validate(self):
         violations = super(PeerReviewStage, self).validate()
@@ -332,7 +446,7 @@ class PeerReviewStage(ReviewBaseStage):
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
     @conversion_protected_handler
-    def other_submission_links(self, request, suffix=''):  # pylint: disable=unused-argument
+    def other_submission_links(self, request, _suffix=''):
         group_id = int(request.GET["group_id"])
 
         target_stages = [stage for stage in self.activity.stages if stage.submissions_stage]
@@ -352,9 +466,11 @@ class PeerReviewStage(ReviewBaseStage):
     @XBlock.handler
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
-    def load_other_group_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
+    def load_other_group_feedback(self, request, _suffix=''):
         group_id = int(request.GET["group_id"])
-        feedback = self.project_api.get_workgroup_review_items(self.anonymous_student_id, group_id, self.content_id)
+        feedback = self.project_api.get_workgroup_review_items(
+            self.anonymous_student_id, group_id, self.activity_content_id
+        )
         results = self._pivot_feedback(feedback)
 
         return webob.response.Response(body=json.dumps(results))
@@ -366,7 +482,7 @@ class PeerReviewStage(ReviewBaseStage):
         self.project_api.submit_workgroup_review_items(
             self.anonymous_student_id,
             group_id,
-            self.content_id,
+            self.activity_content_id,
             submissions
         )
 
@@ -382,7 +498,7 @@ class PeerReviewStage(ReviewBaseStage):
                         "reviewer_id": self.anonymous_student_id,
                         "is_admin_grader": self.is_admin_grader,
                         "group_id": group_id,
-                        "content_id": self.content_id,
+                        "content_id": self.activity_content_id,
                     }
                 )
 

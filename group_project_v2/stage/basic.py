@@ -57,7 +57,7 @@ class CompletionStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
 
     @XBlock.json_handler
     @outsider_disallowed_protected_handler
-    def stage_completed(self, data, suffix=''):  # pylint: disable=unused-argument
+    def stage_completed(self, _data, _suffix=''):
         if not self.available_now:
             template = self.STAGE_NOT_OPEN_MESSAGE if not self.is_open else self.STAGE_CLOSED_MESSAGE
             return {'result': 'error',  'msg': template.format(action=self.STAGE_ACTION)}
@@ -113,6 +113,9 @@ class SubmissionStage(BaseGroupActivityStage):
 
     @property
     def submissions(self):
+        """
+        :rtype: collections.Iterable[GroupProjectSubmissionXBlock]
+        """
         return self.get_children_by_category(GroupProjectSubmissionXBlock.CATEGORY)
 
     @property
@@ -150,8 +153,8 @@ class SubmissionStage(BaseGroupActivityStage):
 
     def check_submissions_and_mark_complete(self):
         if self.has_all_submissions:
-            for user in self.workgroup["users"]:
-                self.mark_complete(user["id"])
+            for user in self.workgroup.users:
+                self.mark_complete(user.id)
 
     def get_stage_state(self):
         if self.has_all_submissions:
@@ -180,3 +183,28 @@ class SubmissionStage(BaseGroupActivityStage):
         return self._render_view(
             'submission_review_view', "templates/html/stages/submissions_review_view.html", context
         )
+
+    def get_users_completion(self, target_workgroups, target_users):
+        """
+        Returns sets of completed user ids and partially completed user ids
+        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] target_workgroups:
+        :param collections.Iterable[group_project_v2.project_api.dtos.ReducedUserDetails] target_users:
+        :rtype: (set[int], set[int])
+        """
+        completed_users = []
+        partially_completed_users = []
+        upload_ids = set(submission.upload_id for submission in self.submissions)
+        for group in target_workgroups:
+            group_submissions = self.project_api.get_latest_workgroup_submissions_by_id(group.id)
+            uploaded_submissions = set(group_submissions.keys())
+
+            has_all = uploaded_submissions >= upload_ids
+            has_some = bool(uploaded_submissions & upload_ids)
+            workgroup_user_ids = [user.id for user in group.users]
+
+            if has_all:
+                completed_users.extend(workgroup_user_ids)
+            if has_some and not has_all:
+                partially_completed_users.extend(workgroup_user_ids)
+
+        return set(completed_users), set(partially_completed_users)  # removing duplicates - just in case

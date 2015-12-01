@@ -1,19 +1,21 @@
 import logging
-from datetime import timedelta
 import os
+
+import itertools
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.locator import BlockUsageLocator
 from xblock.fragment import Fragment
+from xblockutils.studio_editable import (
+    StudioContainerWithNestedXBlocksMixin, StudioContainerXBlockMixin, StudioEditableXBlockMixin
+)
 
 from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
+from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.utils import (
-    OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES,
+    OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES, MUST_BE_OVERRIDDEN,
     loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource,
-    MUST_BE_OVERRIDDEN)
-from xblockutils.studio_editable import (
-    StudioContainerWithNestedXBlocksMixin, StudioContainerXBlockMixin, StudioEditableXBlockMixin
 )
 
 log = logging.getLogger(__name__)
@@ -26,7 +28,7 @@ class ChildrenNavigationXBlockMixin(object):
         return [child for child in children if child is not None]
 
     @staticmethod
-    def get_child_category(child):  # pylint: disable=no-self-use
+    def get_child_category(child):
         field_candidates = ('category', 'plugin_name')
         try:
             return next(getattr(child, field) for field in field_candidates if hasattr(child, field))
@@ -52,7 +54,8 @@ class ChildrenNavigationXBlockMixin(object):
     def has_child_of_category(self, child_category):
         return any(self.get_child_id_block_type(child) == child_category for child in self.children)
 
-    def get_block_id_from_string(self, block_id_string):  # pylint: disable=no-self-use
+    @staticmethod
+    def get_block_id_from_string(block_id_string):
         if not block_id_string:
             return None
         try:
@@ -103,7 +106,7 @@ class UserAwareXBlockMixin(ProjectAPIXBlockMixin):
         return self._user_preferences(self.project_api, self.user_id)
 
     @staticmethod
-    @memoize_with_expiration(expires_after=timedelta(seconds=5))
+    @memoize_with_expiration()
     def _user_preferences(project_api, user_id):
         return project_api.get_user_preferences(user_id)
 
@@ -126,15 +129,21 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin):
     """
     Gets current user workgroup, respecting TA review
     """
-    FALLBACK_WORKGROUP = {"id": "0", "users": []}
+    FALLBACK_WORKGROUP = WorkgroupDetails(id=0, users=[])
 
     @property
     def group_id(self):
-        return self.workgroup['id']
+        """
+        :rtype: int
+        """
+        return self.workgroup.id
 
     @property
     def is_group_member(self):
-        return self.user_id in [u["id"] for u in self.workgroup["users"]]
+        """
+        :rtype: bool
+        """
+        return self.user_id in [u.id for u in self.workgroup.users]
 
     @staticmethod
     def _confirm_outsider_allowed(project_api, user_id, course_id):
@@ -146,12 +155,18 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin):
 
     @property
     def workgroup(self):
+        """
+        :rtype: WorkgroupDetails
+        """
         workgroup = self._get_workgroup(self.project_api, self.user_id, self.course_id)
         return workgroup if workgroup else self.FALLBACK_WORKGROUP
 
     @staticmethod
-    @memoize_with_expiration(expires_after=timedelta(seconds=5))
+    @memoize_with_expiration()
     def _get_workgroup(project_api, user_id, course_id):
+        """
+        :rtype: WorkgroupDetails
+        """
         try:
             user_prefs = UserAwareXBlockMixin._user_preferences(project_api, user_id)
 
@@ -226,15 +241,65 @@ class AdminAccessControlXBlockMixin(object):
 
 
 class NoStudioEditableSettingsMixin(object):
-    def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
+    def studio_view(self, _context):  # pylint: disable=no-self-use
         fragment = Fragment()
         fragment.add_content(NO_EDITABLE_SETTINGS)
         return fragment
 
 
-class DashboardMixin(object):
+class DashboardXBlockMixin(object):
+    """ Mixin for an XBlock that has dashboard views """
     def dashboard_view(self, context):
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
+
+    def dashboard_detail_view(self, context):
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
+
+
+class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
+    """
+    Mixin for an XBlock that can act as a root XBlock for dashboard view.
+    Dashboard root XBlock is responsible for injecting workgroups and students into the view context
+    """
+    TARGET_STUDENTS = 'target_students'
+    TARGET_WORKGROUPS = 'target_workgroups'
+
+    def _append_context_parameters_if_not_present(self, context):
+        """
+        Appends target students and target workgroups parameters, if not already present in context
+        :param dict context: XBlock view context
+        :rtype: None
+        """
+        if self.TARGET_STUDENTS not in context:
+            context[self.TARGET_STUDENTS] = list(self.all_users_in_workgroups)
+
+        if self.TARGET_WORKGROUPS not in context:
+            context[self.TARGET_WORKGROUPS] = list(self.workgroups)
+
+    @property
+    def project_details(self):
+        """
+        Gets ProjectDetails for current block
+        :rtype: group_project_v2.project_api.dtos.ProjectDetails
+        """
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
+
+    @property
+    def workgroups(self):
+        """
+        :rtype: collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails]
+        """
+        return (
+            self.project_api.get_workgroup_by_id(workgroup_id)
+            for workgroup_id in self.project_details.workgroups
+        )
+
+    @property
+    def all_users_in_workgroups(self):
+        """
+        :rtype: collections.Iterable[group_project_v2.project_api.dtos.ReducedUserDetails]
+        """
+        return itertools.chain.from_iterable(workgroup.users for workgroup in self.workgroups)
 
 
 class TemplateManagerMixin(object):
@@ -249,7 +314,6 @@ class TemplateManagerMixin(object):
 class CommonMixinCollection(
     ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin,
     StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-    WorkgroupAwareXBlockMixin, TemplateManagerMixin, DashboardMixin
+    WorkgroupAwareXBlockMixin, TemplateManagerMixin
 ):
-    def dashboard_view(self, context):  # just to make pylint and other static analyzers happy
-        raise NotImplementedError(MUST_BE_OVERRIDDEN)
+    pass

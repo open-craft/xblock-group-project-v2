@@ -1,31 +1,48 @@
 import json
 from unittest import TestCase
+
 import ddt
 import mock
+
 from group_project_v2.json_requests import GET
-from group_project_v2.project_api import ProjectAPI, WORKGROUP_API
+from group_project_v2.project_api import TypedProjectAPI
+from group_project_v2.project_api.api_implementation import WORKGROUP_API, PROJECTS_API, COURSES_API
 from tests.utils import TestWithPatchesMixin, make_review_item as mri
+import tests.unit.project_api.canned_responses as canned_responses
 
 
 @ddt.ddt
 class TestProjectApi(TestCase, TestWithPatchesMixin):
-    api_server_address = 'http://localhost/api'
+    api_server_address = 'http://localhost'
 
     def setUp(self):
-        self.project_api = ProjectAPI(self.api_server_address, dry_run=False)
+        self.project_api = TypedProjectAPI(self.api_server_address, dry_run=False)
 
-    def _patch_send_request(self, calls_and_results, misisng_callback=None):
+    def _patch_send_request(self, calls_and_results, missing_callback=None):
         # pylint: disable=unused-argument
         def side_effect(method, url_parts, data=None, query_params=None, no_trailing_slash=False):
             if url_parts in calls_and_results:
                 return calls_and_results[url_parts]
             if 'default' in calls_and_results:
                 return calls_and_results['default']
-            if misisng_callback:
-                return misisng_callback(url_parts)
+            if missing_callback:
+                return missing_callback(url_parts)
             return None
 
         return mock.patch.object(self.project_api, 'send_request', mock.Mock(side_effect=side_effect))
+
+    def _patch_do_send_request(self, urls_and_results, missing_callback=None):
+        # pylint: disable=unused-argument
+        def side_effect(method, url, data=None):
+            if url in urls_and_results:
+                return urls_and_results[url]
+            if 'default' in urls_and_results:
+                return urls_and_results['default']
+            if missing_callback:
+                return missing_callback(url)
+            raise Exception("Response not found")
+
+        return mock.patch.object(self.project_api, '_do_send_request', mock.Mock(side_effect=side_effect))
 
     @ddt.data(
         (["part1", "part2"], None, False, api_server_address+"/part1/part2/", {'error': True}),
@@ -84,13 +101,13 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
 
     def test_dry_run_does_not_send_request(self):
         method = mock.Mock()
-        proj_api = ProjectAPI(self.api_server_address, True)
+        proj_api = TypedProjectAPI(self.api_server_address, True)
         result = proj_api.send_request(method, ('123', '34'))
         method.assert_not_called()
         self.assertEqual(result, {})
 
     def test_send_delete_request_returns_none(self):
-        with mock.patch('group_project_v2.project_api.DELETE') as patched_delete:
+        with mock.patch('group_project_v2.project_api.api_implementation.DELETE') as patched_delete:
             result = self.project_api.send_request(patched_delete, ('123', '456'))
             self.assertEqual(result, None)
 
@@ -219,3 +236,148 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
 
             self.assertEqual(result, expected_result)
             patched_get_review_items.assert_called_once_with('group_id', content_id)
+
+    def assert_project_data(self, project_data, expected_values):
+        attrs_to_test = [
+            "id", "url", "created", "modified", "course_id", "content_id", "organization", "workgroups"
+        ]
+        for attr in attrs_to_test:
+            self.assertEqual(getattr(project_data, attr), expected_values[attr])
+
+    def test_get_project_details(self):
+        calls_and_results = {
+            (PROJECTS_API, 1): canned_responses.Projects.project1,
+            (PROJECTS_API, 2): canned_responses.Projects.project2
+        }
+
+        expected_calls = [
+            mock.call(GET, (PROJECTS_API, 1), no_trailing_slash=True),
+            mock.call(GET, (PROJECTS_API, 2), no_trailing_slash=True)
+        ]
+
+        with self._patch_send_request(calls_and_results) as patched_send_request:
+            project1 = self.project_api.get_project_details(1)
+            project2 = self.project_api.get_project_details(2)
+
+            self.assertEqual(patched_send_request.mock_calls, expected_calls)
+
+        self.assert_project_data(project1, canned_responses.Projects.project1)
+        self.assert_project_data(project2, canned_responses.Projects.project2)
+
+    @ddt.data(
+        ('course1', 'content1'),
+        ('course2', 'content2'),
+    )
+    @ddt.unpack
+    def test_get_project_by_content_id(self, course_id, content_id):
+        expected_parameters = {
+            'course_id': course_id,
+            'content_id': content_id
+        }
+        calls_and_results = {(PROJECTS_API,): [canned_responses.Projects.project1]}
+
+        with self._patch_send_request(calls_and_results) as patched_send_request:
+            project = self.project_api.get_project_by_content_id(course_id, content_id)
+            self.assert_project_data(project, canned_responses.Projects.project1)
+
+            patched_send_request.assert_called_once_with(GET, (PROJECTS_API,), query_params=expected_parameters)
+
+    def test_get_project_by_content_id_fail_if_more_than_one(self):
+        calls_and_results = {
+            (PROJECTS_API,): [canned_responses.Projects.project1, canned_responses.Projects.project2]
+        }
+        with self._patch_send_request(calls_and_results), \
+                self.assertRaises(AssertionError):
+            self.project_api.get_project_by_content_id('irrelevant', 'irrelevant')
+
+    def test_get_project_by_content_id_return_none_if_not_found(self):
+        calls_and_results = {(PROJECTS_API,): []}
+        with self._patch_send_request(calls_and_results):
+            project = self.project_api.get_project_by_content_id('irrelevant', 'irrelevant')
+            self.assertIsNone(project)
+
+    @ddt.data(
+        (1, canned_responses.Workgroups.workgroup1),
+        (2, canned_responses.Workgroups.workgroup2),
+    )
+    @ddt.unpack
+    def test_get_workgroup_by_id(self, group_id, expected_result):
+        calls_and_results = {
+            (WORKGROUP_API, 1): canned_responses.Workgroups.workgroup1,
+            (WORKGROUP_API, 2): canned_responses.Workgroups.workgroup2
+        }
+
+        with self._patch_send_request(calls_and_results) as patched_send_request:
+            workgroup = self.project_api.get_workgroup_by_id(group_id)
+            patched_send_request.assert_called_once_with(GET, (WORKGROUP_API, group_id))
+
+        self.assertEqual(workgroup.id, expected_result['id'])
+        self.assertEqual(workgroup.project, expected_result['project'])
+        self.assertEqual(len(workgroup.users), len(expected_result['users']))
+        self.assertEqual([user.id for user in workgroup.users], [user['id'] for user in expected_result['users']])
+
+    @ddt.data(
+        ('course1', 'content1'),
+        ('course1', 'content2'),
+        ('course2', 'content3')
+    )
+    @ddt.unpack
+    def test_get_completions_by_content_id(self, course_id, content_id):
+        def build_url(course_id, content_id):
+            return self.project_api.build_url(
+                (COURSES_API, course_id, 'completions'), query_params={'content_id': content_id}
+            )
+
+        urls_and_results = {
+            build_url('course1', 'content1'): canned_responses.Completions.non_paged1,
+            build_url('course1', 'content2'): canned_responses.Completions.non_paged2,
+            build_url('course2', 'content3'): canned_responses.Completions.empty,
+        }
+
+        expected_url = build_url(course_id, content_id)
+        expected_data = urls_and_results.get(expected_url)
+
+        with self._patch_do_send_request(urls_and_results) as patched_do_send_request:
+            completions = list(self.project_api.get_completions_by_content_id(course_id, content_id))
+            patched_do_send_request.assert_called_once_with(GET, expected_url, None)
+
+        self.assertEqual(len(completions), len(expected_data['results']))
+        self.assertEqual([comp.id for comp in completions], [data['id'] for data in expected_data['results']])
+
+    def test_get_completions_by_content_id_paged(self):
+        def build_url(course_id, content_id, page_num=None):
+            query_params = {'content_id': content_id}
+            if page_num:
+                query_params['page'] = page_num
+            return self.project_api.build_url((COURSES_API, course_id, 'completions'), query_params=query_params)
+
+        course, content = 'course1', 'content1'
+
+        urls_and_results = {
+            build_url(course, content): canned_responses.Completions.paged_page1,
+            build_url(course, content, 1): canned_responses.Completions.paged_page1,
+            build_url(course, content, 2): canned_responses.Completions.paged_page2,
+            build_url(course, content, 3): canned_responses.Completions.paged_page3,
+        }
+        all_responses = []
+        pages = [
+            canned_responses.Completions.paged_page1,
+            canned_responses.Completions.paged_page2,
+            canned_responses.Completions.paged_page3
+        ]
+        for page in pages:
+            all_responses.extend(page['results'])
+
+        expected_calls = [
+            mock.call(GET, build_url(course, content), None),
+            mock.call(GET, canned_responses.Completions.paged_page1['next'], None),
+            mock.call(GET, canned_responses.Completions.paged_page2['next'], None),
+        ]
+
+        with self._patch_do_send_request(urls_and_results) as patched_do_send_request:
+            completions = list(self.project_api.get_completions_by_content_id(course, content))
+            self.assertEqual(patched_do_send_request.mock_calls, expected_calls)
+
+        self.assertEqual(len(completions), len(all_responses))
+        self.assertEqual([comp.id for comp in completions], [data['id'] for data in all_responses])
+        self.assertEqual([comp.user_id for comp in completions], [data['user_id'] for data in all_responses])

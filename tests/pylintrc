@@ -1,0 +1,24 @@
+[REPORTS]
+reports=no
+include-ids=yes
+
+[FORMAT]
+max-line-length=120
+symbols=yes
+
+[MESSAGES CONTROL]
+disable=
+ missing-docstring,no-member,
+ fixme,
+ locally-disabled,star-args,
+ too-few-public-methods,too-many-public-methods,too-many-ancestors
+
+
+[OPTIONS]
+good-names=id,log,loader,setUp
+max-args=6
+method-rgx=_?[a-z_][a-z0-9_]{2,60}$
+function-rgx=_?[a-z_][a-z0-9_]{2,60}$
+method-name-hint=_?[a-z_][a-z0-9_]{2,60}$
+function-name-hint=_?[a-z_][a-z0-9_]{2,60}$
+

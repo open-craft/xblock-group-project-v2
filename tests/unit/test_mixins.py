@@ -1,17 +1,21 @@
 # pylint:disable=protected-access,no-self-use,invalid-name
 from unittest import TestCase
+
 import ddt
 import mock
-
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
-import group_project_v2
-from group_project_v2.mixins import ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin, \
-    WorkgroupAwareXBlockMixin
-from group_project_v2.project_api import ProjectAPI
-from group_project_v2.utils import OutsiderDisallowedError
-from tests.utils import TestWithPatchesMixin, raise_api_error
 from xblock.core import XBlock
 from xblock.runtime import Runtime
+
+import group_project_v2
+from group_project_v2.mixins import (
+    ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin,
+    WorkgroupAwareXBlockMixin, DashboardRootXBlockMixin
+)
+from group_project_v2.project_api import TypedProjectAPI
+from group_project_v2.project_api.dtos import WorkgroupDetails
+from group_project_v2.utils import OutsiderDisallowedError
+from tests.utils import TestWithPatchesMixin, raise_api_error
 
 
 def _make_block_mock(block_id, category=None):
@@ -250,7 +254,7 @@ class WorkgroupAwareXBlockMixinGuineaPig(CommonMixinGuineaPig, WorkgroupAwareXBl
 class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
     def setUp(self):
         self.block = WorkgroupAwareXBlockMixinGuineaPig()
-        self.project_api_mock = mock.create_autospec(ProjectAPI)
+        self.project_api_mock = mock.create_autospec(TypedProjectAPI)
         self.make_patch(
             WorkgroupAwareXBlockMixinGuineaPig, 'project_api',
             mock.PropertyMock(return_value=self.project_api_mock)
@@ -360,7 +364,7 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
     def test_is_group_member(self, user_id, group_members, is_member):
         self.user_id_mock.return_value = user_id
         with mock.patch.object(WorkgroupAwareXBlockMixin, 'workgroup', mock.PropertyMock()) as patched_workgroup:
-            patched_workgroup.return_value = {"id": 'irrelevant', "users": [{"id": u_id} for u_id in group_members]}
+            patched_workgroup.return_value = WorkgroupDetails(id=0, users=[{"id": u_id} for u_id in group_members])
 
             self.assertEqual(self.block.is_group_member, is_member)
 
@@ -376,3 +380,86 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
             patched_prefs.return_value = preferences
 
             self.assertEqual(self.block.is_admin_grader, expected_is_admin_grader)
+
+
+@ddt.ddt
+class TestDashboardRootXBlockMixin(TestCase, TestWithPatchesMixin):
+    class DashboardRootXBlockMixinGuineaPig(DashboardRootXBlockMixin):
+        def __init__(self):
+            self._project_details = mock.Mock()
+
+        @property
+        def project_details(self):
+            return self._project_details
+
+    def setUp(self):
+        self.block = self.DashboardRootXBlockMixinGuineaPig()
+        self.project_api_mock = mock.Mock(spec=TypedProjectAPI)
+        self.make_patch(
+            self.DashboardRootXBlockMixinGuineaPig, 'project_api',
+            mock.PropertyMock(return_value=self.project_api_mock)
+        )
+
+    @ddt.data(
+        [1, 2, 3],
+        [4, 5],
+        []
+    )
+    def test_workgroups(self, workgroup_ids):
+        def _get_workgroup_by_id(workgroup_id):
+            return {"id": workgroup_id, "users": []}
+
+        self.block.project_details.workgroups = workgroup_ids
+        self.project_api_mock.get_workgroup_by_id.side_effect = _get_workgroup_by_id
+
+        workgroups = list(self.block.workgroups)
+
+        expected_calls = [mock.call(workgroup_id) for workgroup_id in workgroup_ids]
+        expected_groups = [_get_workgroup_by_id(workgroup_id) for workgroup_id in workgroup_ids]
+        self.assertEqual(self.project_api_mock.get_workgroup_by_id.mock_calls, expected_calls)
+        self.assertEqual(workgroups, expected_groups)
+
+    @ddt.data(
+        ([1], [1]),
+        ([2], [2, 3]),
+        ([1, 2], [1, 2, 3]),
+    )
+    @ddt.unpack
+    def test_users_in_workgroups(self, workgroup_ids, expected_user_ids):
+        workgroups = {
+            1: WorkgroupDetails(id=1, users=[{'id': 1}]),
+            2: WorkgroupDetails(id=2, users=[{'id': 2}, {'id': 3}])
+        }
+
+        def _get_workgroup_by_id(workgroup_id):
+            return workgroups.get(workgroup_id, None)
+
+        self.block.project_details.workgroups = workgroup_ids
+        self.project_api_mock.get_workgroup_by_id.side_effect = _get_workgroup_by_id
+
+        users = self.block.all_users_in_workgroups
+
+        self.assertEqual([user.id for user in users], expected_user_ids)
+
+    @ddt.data(
+        ({}, ['workgroup_sentinel'], ['user_sentinel']),
+        ({DashboardRootXBlockMixin.TARGET_WORKGROUPS: ['workgroup_value']}, ['workgroup_value'], ['user_sentinel']),
+        ({DashboardRootXBlockMixin.TARGET_STUDENTS: ['user_value']}, ['workgroup_sentinel'], ['user_value']),
+        (
+                {
+                    DashboardRootXBlockMixin.TARGET_STUDENTS: ['user_value'],
+                    DashboardRootXBlockMixin.TARGET_WORKGROUPS: ['workgroup_value']
+                },
+                ['workgroup_value'], ['user_value']
+        ),
+    )
+    @ddt.unpack
+    def test_append_context_parameters_if_not_present(self, context, expected_workgroups, expected_users):
+        workgroups_sentinel = ['workgroup_sentinel']
+        users_sentinel = ['user_sentinel']
+        self.make_patch(type(self.block), 'workgroups', mock.PropertyMock(return_value=workgroups_sentinel))
+        self.make_patch(type(self.block), 'all_users_in_workgroups', mock.PropertyMock(return_value=users_sentinel))
+
+        self.block._append_context_parameters_if_not_present(context)
+        self.assertEqual(context[DashboardRootXBlockMixin.TARGET_WORKGROUPS], expected_workgroups)
+        self.assertEqual(context[DashboardRootXBlockMixin.TARGET_STUDENTS], expected_users)

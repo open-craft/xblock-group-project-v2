@@ -24,3 +24,13 @@ class SimpleCompletionStageMixin(object):
         result = super(SimpleCompletionStageMixin, self).mark_complete(user_id)
         self.completed = True
         return result
+
+    def get_users_completion(self, _target_workgroups, _target_users):
+        """
+        Returns sets of completed user ids and partially completed user ids
+        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] _target_workgroups:
+        :param collections.Iterable[group_project_v2.project_api.dtos.ReducedUserDetails] _target_users:
+        :rtype: (set[int], set[int])
+        """
+        completions = self.project_api.get_completions_by_content_id(self.course_id, self.content_id)
+        return set(completion.user_id for completion in completions), set()

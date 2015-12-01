@@ -11,12 +11,12 @@ from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import XBlockWithPreviewMixin, NestedXBlockSpec
 
-from group_project_v2.mixins import CommonMixinCollection
+from group_project_v2.mixins import CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.utils import (
     mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockShim, Constants,
-    add_resource, gettext as _
+    add_resource, gettext as _, get_block_content_id
 )
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
@@ -27,7 +27,7 @@ from group_project_v2.stage import (
 log = logging.getLogger(__name__)
 
 
-class GroupProjectXBlock(CommonMixinCollection, XBlock):
+class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin, XBlock):
     display_name = String(
         display_name="Display Name",
         help="This is a name of the project",
@@ -69,6 +69,14 @@ class GroupProjectXBlock(CommonMixinCollection, XBlock):
             NestedXBlockSpec(DiscussionXBlockShim, single_instance=True)
         ]
 
+    @property
+    def content_id(self):
+        return get_block_content_id(self)
+
+    @property
+    def project_details(self):
+        return self.project_api.get_project_by_content_id(self.course_id, self.content_id)
+
     @lazy
     def activities(self):
         all_children = [self.runtime.get_block(child_id) for child_id in self.children]
@@ -77,26 +85,6 @@ class GroupProjectXBlock(CommonMixinCollection, XBlock):
     @lazy
     def navigator(self):
         return self.get_child_of_category(GroupProjectNavigatorXBlock.CATEGORY)
-
-    def get_stage_to_display(self, target_block_id):
-        try:
-            if target_block_id:
-                target_block = self.runtime.get_block(target_block_id)
-                if self.get_child_category(target_block) in STAGE_TYPES and target_block.available_to_current_user:
-                    return target_block
-                if isinstance(target_block, GroupActivityXBlock):
-                    return target_block.default_stage
-        except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
-            log.exception(exc)
-
-        default_stage = self.default_stage
-        if default_stage:
-            return default_stage
-
-        if self.activities:
-            return self.activities[0].get_stage_to_display(target_block_id)
-
-        return None  # if there are no activities there's no stages as well - nothing we can really do
 
     @property
     def default_stage(self):
@@ -112,7 +100,7 @@ class GroupProjectXBlock(CommonMixinCollection, XBlock):
         render_context = {
             'project': self,
             'course_id': self.course_id,
-            'group_id': self.workgroup['id']
+            'group_id': self.workgroup.id
         }
 
         render_context.update(context)
@@ -180,7 +168,10 @@ class GroupProjectXBlock(CommonMixinCollection, XBlock):
     def dashboard_view(self, context):
         fragment = Fragment()
 
-        activity_fragments = self._render_children('dashboard_view', context, self.activities)
+        children_context = context.copy()
+        self._append_context_parameters_if_not_present(children_context)
+
+        activity_fragments = self._render_children('dashboard_view', children_context, self.activities)
         activity_contents = [frag.content for frag in activity_fragments]
         fragment.add_frags_resources(activity_fragments)
 
@@ -191,6 +182,9 @@ class GroupProjectXBlock(CommonMixinCollection, XBlock):
         add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment, via_url=True)
 
         return fragment
+
+    def dashboard_detail_view(self, context):
+        raise Exception("Should not be shown - detail views are not supported on GroupProject block")
 
     def validate(self):
         validation = super(GroupProjectXBlock, self).validate()
@@ -203,12 +197,34 @@ class GroupProjectXBlock(CommonMixinCollection, XBlock):
 
         return validation
 
+    def get_stage_to_display(self, target_block_id):
+        try:
+            if target_block_id:
+                target_block = self.runtime.get_block(target_block_id)
+                if self.get_child_category(target_block) in STAGE_TYPES and target_block.available_to_current_user:
+                    return target_block
+                if isinstance(target_block, GroupActivityXBlock):
+                    return target_block.default_stage
+        except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
+            log.exception(exc)
+
+        default_stage = self.default_stage
+        if default_stage:
+            return default_stage
+
+        if self.activities:
+            return self.activities[0].get_stage_to_display(target_block_id)
+
+        return None  # if there are no activities there's no stages as well - nothing we can really do
+
 
 # TODO: enable and fix these violations
-# pylint: disable=unused-argument,invalid-name
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
-class GroupActivityXBlock(CommonMixinCollection, XBlockWithPreviewMixin, ActivityNotificationsMixin, XBlock):
+class GroupActivityXBlock(
+    CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin,
+    XBlockWithPreviewMixin, ActivityNotificationsMixin, XBlock
+):
     """
     XBlock providing a group activity project for a group of students to collaborate upon
     """
@@ -267,10 +283,12 @@ class GroupActivityXBlock(CommonMixinCollection, XBlockWithPreviewMixin, Activit
 
     @property
     def content_id(self):
-        try:
-            return unicode(self.scope_ids.usage_id)
-        except Exception:  # pylint: disable=broad-except
-            return self.id
+        return get_block_content_id(self)
+
+    @property
+    def project_details(self):
+        # Project is linked to top-level GroupProjectXBlock, not individual Activities
+        return self.project.project_details
 
     @property
     def is_ta_graded(self):
@@ -417,7 +435,10 @@ class GroupActivityXBlock(CommonMixinCollection, XBlockWithPreviewMixin, Activit
     def dashboard_view(self, context):
         fragment = Fragment()
 
-        stage_fragments = self._render_children('dashboard_view', context, self.available_stages)
+        children_context = context.copy()
+        self._append_context_parameters_if_not_present(children_context)
+
+        stage_fragments = self._render_children('dashboard_view', children_context, self.stages)
         stage_contents = [frag.content for frag in stage_fragments]
         fragment.add_frags_resources(stage_fragments)
 
@@ -425,6 +446,11 @@ class GroupActivityXBlock(CommonMixinCollection, XBlockWithPreviewMixin, Activit
         fragment.add_content(self.render_template('dashboard_view', render_context))
 
         return fragment
+
+    @outsider_disallowed_protected_view
+    def dashboard_detail_view(self, context):
+        # TODO: implement detail view
+        pass
 
     def mark_complete(self, user_id):
         self.runtime.publish(self, 'progress', {'user_id': user_id})
@@ -447,8 +473,8 @@ class GroupActivityXBlock(CommonMixinCollection, XBlockWithPreviewMixin, Activit
             self.assign_grade_to_group(group_id, grade_value)
 
             workgroup = self.project_api.get_workgroup_by_id(group_id)
-            for u in workgroup["users"]:
-                self.mark_complete(u["id"])
+            for user in workgroup.users:
+                self.mark_complete(user.id)
 
     def assign_grade_to_group(self, group_id, grade_value):
         self.project_api.set_group_grade(

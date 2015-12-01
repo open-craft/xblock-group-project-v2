@@ -9,6 +9,7 @@ from freezegun import freeze_time
 import mock
 
 from group_project_v2.mixins import UserAwareXBlockMixin
+from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage, TeamEvaluationStage
 from group_project_v2.utils import ALLOWED_OUTSIDER_ROLES
 from tests.integration.base_test import BaseIntegrationTest
@@ -607,7 +608,9 @@ class PeerReviewStageTest(BaseReviewStageTest):
             return_value={UserAwareXBlockMixin.TA_REVIEW_KEY: group_id}
         )
         self.project_api_mock.get_user_roles_for_course = mock.Mock(return_value=[{'role': ALLOWED_OUTSIDER_ROLES[0]}])
-        self.project_api_mock.get_workgroup_by_id.side_effect = lambda g_id: {"id": g_id, "users": [{"id": 1}]}
+        self.project_api_mock.get_workgroup_by_id.side_effect = lambda g_id: WorkgroupDetails(
+            id=g_id, users=[{"id": 1}]
+        )
 
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
         self.assertTrue(stage_element.has_admin_grading_notification)

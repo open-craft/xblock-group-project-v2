@@ -1,10 +1,11 @@
-from mock import Mock
 import mock
+from mock import Mock
 from xblockutils.resources import ResourceLoader
+
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import UserAwareXBlockMixin
-
-from group_project_v2.project_api import ProjectAPI, UserDetails
+from group_project_v2.project_api import TypedProjectAPI
+from group_project_v2.project_api.dtos import UserDetails, WorkgroupDetails
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
 from group_project_v2.utils import ALLOWED_OUTSIDER_ROLES
 
@@ -16,7 +17,7 @@ KNOWN_USERS = {
     3: UserDetails(id=3, email="jill@example.com", is_active=True, username="Jill", full_name="Jill"),
 }
 
-WORKGROUP = {
+WORKGROUP = WorkgroupDetails(**{
     "id": 1,
     "name": "Group 1",
     "project": 1,
@@ -28,11 +29,11 @@ WORKGROUP = {
     "submissions": [],
     "workgroup_reviews": [],
     "peer_reviews": []
-}
+})
 
 OTHER_GROUPS = {
-    2: {"id": 2, "name": "Group 2"},
-    3: {"id": 3, "name": "Group 3"},
+    2: WorkgroupDetails(id=2, name="Group 2"),
+    3: WorkgroupDetails(id=3, name="Group 3"),
 }
 
 
@@ -53,7 +54,7 @@ def _get_user_details(user_id):
 
 def get_mock_project_api():
     """ Mock api with canned responses """
-    mock_api = Mock(spec=ProjectAPI)
+    mock_api = Mock(spec=TypedProjectAPI)
     mock_api.get_user_preferences = Mock(return_value={})
     mock_api.get_user_workgroup_for_course = Mock(return_value=WORKGROUP)
     mock_api.get_workgroup_by_id = Mock(return_value=WORKGROUP)
@@ -91,9 +92,10 @@ def raise_api_error(code, reason):
     raise make_api_error(code, reason)
 
 
-def make_review_item(reviewer, question, peer=None, content_id=None, answer=None):
+def make_review_item(reviewer, question, peer=None, content_id=None, answer=None, group=None):
     return {
-        'reviewer': reviewer, 'user': peer, 'question': question, 'content_id': content_id, 'answer': answer
+        'reviewer': reviewer, 'question': question, 'content_id': content_id, 'answer': answer,
+        'user': peer, 'workgroup': group
     }
 
 
@@ -109,3 +111,9 @@ def switch_to_ta_grading(project_api_mock, review_group_id=1):
         UserAwareXBlockMixin.TA_REVIEW_KEY: review_group_id
     }
     project_api_mock.get_user_roles_for_course.return_value = [{'role': role} for role in ALLOWED_OUTSIDER_ROLES]
+
+
+def make_workgroup(workgroup_id, users=None):
+    if not users:
+        users = []
+    return WorkgroupDetails(id=workgroup_id, users=users)

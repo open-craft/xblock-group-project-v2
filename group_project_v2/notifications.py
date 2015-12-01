@@ -128,10 +128,12 @@ class StageNotificationsMixin(object):
                 )
 
     @log_and_suppress_exceptions
-    def on_before_studio_delete(self, course_id, services):  # pylint: disable=unused-argument
+    def on_before_studio_delete(self, _course_id, services):
         """
         A hook into when this xblock is deleted in Studio, for xblocks to do any lifecycle
         management
+        :param CourseLocator _course_id: Course ID
+        :param dict[str, object] services: runtime services
         """
         log.info('{}.on_before_delete() on location = {}'.format(self.__class__.__name__, self.location))
 
@@ -152,12 +154,12 @@ class ActivityNotificationsMixin(object):
 
         workgroup_user_ids = []
         uploader_username = ''
-        for user in self.workgroup['users']:
+        for user in self.workgroup.users:
             # don't send to ourselves
-            if user['id'] != self.user_id:
-                workgroup_user_ids.append(user['id'])
+            if user.id != self.user_id:
+                workgroup_user_ids.append(user.id)
             else:
-                uploader_username = user['username']
+                uploader_username = user.username
 
         msg = NotificationMessage(
             msg_type=msg_type,

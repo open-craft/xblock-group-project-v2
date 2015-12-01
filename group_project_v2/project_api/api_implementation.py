@@ -1,17 +1,14 @@
-''' API calls with respect group projects'''
 import json
 from urllib import urlencode
-from datetime import timedelta
-from django.conf import settings
-from lazy.lazy import lazy
 
-from group_project_v2.utils import build_date_field, memoize_with_expiration, make_user_caption
-from group_project_v2.json_requests import GET, POST, PUT, DELETE
+import itertools
+
 from group_project_v2.api_error import api_error_protect
-
+from group_project_v2.json_requests import DELETE, GET, PUT, POST
+from group_project_v2.utils import memoize_with_expiration, build_date_field
+from group_project_v2.project_api.dtos import UserDetails, ProjectDetails, WorkgroupDetails, CompletionDetails
 
 API_PREFIX = '/'.join(['api', 'server'])
-
 WORKGROUP_API = '/'.join([API_PREFIX, 'workgroups'])
 PEER_REVIEW_API = '/'.join([API_PREFIX, 'peer_reviews'])
 WORKGROUP_REVIEW_API = '/'.join([API_PREFIX, 'workgroup_reviews'])
@@ -19,39 +16,7 @@ USERS_API = '/'.join([API_PREFIX, 'users'])
 SUBMISSION_API = '/'.join([API_PREFIX, 'submissions'])
 GROUP_API = '/'.join([API_PREFIX, 'groups'])
 COURSES_API = '/'.join([API_PREFIX, 'courses'])
-
-
-DEFAULT_EXPIRATION_TIME = timedelta(seconds=10)
-
-
-# pylint:disable=too-many-instance-attributes
-class UserDetails(object):
-    def __init__(self, **kwargs):
-        self.id = kwargs.get('id', None)
-        self.email = kwargs.get('email', None)
-        self.username = kwargs.get('username', None)
-        self.uri = kwargs.get('uri', None)
-        self.first_name = kwargs.get('first_name', None)
-        self.last_name = kwargs.get('last_name', None)
-        self._full_name = kwargs.get('full_name', None)
-        self.gender = kwargs.get('gender', None)
-        self.avatar_url = kwargs.get('avatar_url', None)
-        self.city = kwargs.get('city', None)
-        self.country = kwargs.get('country', None)
-        self.is_active = kwargs.get('is_active', None)
-        self.level_of_education = kwargs.get('level_of_education', None)
-        self.organization = kwargs.get('organization', None)
-
-    @property
-    def full_name(self):
-        if self._full_name:
-            return self._full_name
-        parts = [self.first_name, self.last_name]
-        return u" ".join([unicode(part) for part in parts if part is not None])
-
-    @property
-    def user_label(self):
-        return make_user_caption(self)
+PROJECTS_API = '/'.join([API_PREFIX, 'projects'])
 
 
 # TODO: this class crosses service boundary, but some methods post-process responses, while other do not
@@ -61,23 +26,29 @@ class UserDetails(object):
 # post-processing in order to isolate clients from response format changes. As of now, if format changes
 # virtually every method in group_project might be affected.
 class ProjectAPI(object):
+    """
+    Deprecated - do not extend or modify. Add new methods and move existing ones to TypedProjectAPI.
+    """
     def __init__(self, address, dry_run=False):
         self._api_server_address = address
         self.dry_run = dry_run
 
-    def send_request(self, method, url_parts, data=None, query_params=None, no_trailing_slash=False):
-        if self.dry_run:
-            return {}
-
+    def build_url(self, url_parts, query_params=None, no_trailing_slash=False):
         url_template = "{}/" + "{}/" * len(url_parts)
         url_parameters = [self._api_server_address]
         url_parameters.extend(url_parts)
         url = url_template.format(*url_parameters)  # pylint: disable=star-args
         if no_trailing_slash:
             url = url[:-1]
-
         if query_params:
-            url += "?"+urlencode(query_params)
+            url += "?" + urlencode(query_params)
+
+        return url
+
+    @api_error_protect
+    def _do_send_request(self, method, url, data=None):
+        if self.dry_run:
+            return {}
 
         if data is not None:
             response = method(url, data)
@@ -89,40 +60,31 @@ class ProjectAPI(object):
 
         return json.loads(response.read())
 
-    @api_error_protect
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
-    def get_user_details(self, user_id):
-        response = self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
-        return UserDetails(**response)  # pylint: disable=star-args
+    def send_request(self, method, url_parts, data=None, query_params=None, no_trailing_slash=False):
+        url = self.build_url(url_parts, query_params, no_trailing_slash)
+        return self._do_send_request(method, url, data)
 
-    @api_error_protect
     def get_user_organizations(self, user_id):
         qs_params = {'page_size': 0}
         return self.send_request(GET, (USERS_API, user_id, 'organizations'), query_params=qs_params)
 
-    @api_error_protect
     def get_user_preferences(self, user_id):
         """ gets users preferences information """
         return self.send_request(GET, (USERS_API, user_id, 'preferences'), no_trailing_slash=True)
 
-    @api_error_protect
     def get_peer_review_items_for_group(self, group_id, content_id):
         qs_params = {"content_id": content_id}
         return self.send_request(GET, (WORKGROUP_API, group_id, 'peer_reviews'), query_params=qs_params)
 
-    @api_error_protect
     def update_peer_review_assessment(self, question_data):
         return self.send_request(PUT, (PEER_REVIEW_API, question_data['id']), data=question_data)
 
-    @api_error_protect
     def create_peer_review_assessment(self, question_data):
         return self.send_request(POST, (PEER_REVIEW_API,), data=question_data)
 
-    @api_error_protect
     def delete_peer_review_assessment(self, assessment_id):
         self.send_request(DELETE, (PEER_REVIEW_API, assessment_id))
 
-    @api_error_protect
     # Do not cache - used both in submitting review and calculating grade, so if this call is cached grade calculation
     # sees old value. So, when last review is performed, grade calculation does not see it and returns "No grade yet".
     # See MCKIN-3501 and MCKIN-3471 for what would happen than.
@@ -130,38 +92,18 @@ class ProjectAPI(object):
         qs_params = {"content_id": content_id}
         return self.send_request(GET, (WORKGROUP_API, group_id, 'workgroup_reviews'), query_params=qs_params)
 
-    @api_error_protect
     def create_workgroup_review_assessment(self, question_data):
         return self.send_request(POST, (WORKGROUP_REVIEW_API, ), data=question_data)
 
-    @api_error_protect
     def update_workgroup_review_assessment(self, question_data):
         return self.send_request(PUT, (WORKGROUP_REVIEW_API, question_data['id']), data=question_data)
 
-    @api_error_protect
     def delete_workgroup_review_assessment(self, assessment_id):
         self.send_request(DELETE, (WORKGROUP_REVIEW_API, assessment_id))
 
-    @api_error_protect
-    def get_workgroup_by_id(self, group_id):
-        return self.send_request(GET, (WORKGROUP_API, group_id))
-
-    @api_error_protect
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
-    def get_user_workgroup_for_course(self, user_id, course_id):
-        qs_params = {"course_id": course_id}
-        workgroups_list = self.send_request(GET, (USERS_API, user_id, 'workgroups'), query_params=qs_params)
-
-        if not workgroups_list or workgroups_list['count'] < 1:
-            return None
-
-        return self.get_workgroup_by_id(workgroups_list['results'][0]['id'])
-
-    @api_error_protect
     def get_user_grades(self, user_id, course_id):
         return self.send_request(GET, (USERS_API, user_id, 'courses', course_id, 'grades'), no_trailing_slash=True)
 
-    @api_error_protect
     def set_group_grade(self, group_id, course_id, activity_id, grade_value, max_grade):
         grade_data = {
             "course_id": unicode(course_id),
@@ -172,17 +114,14 @@ class ProjectAPI(object):
 
         return self.send_request(POST, (WORKGROUP_API, group_id, 'grades'), data=grade_data)
 
-    @api_error_protect
     def create_submission(self, submit_hash):
         return self.send_request(POST, (SUBMISSION_API, ), data=submit_hash)
 
-    @api_error_protect
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    # Do not cache - Upload submission handler updates a list of submissions, than queries which submissions are there
     def get_workgroup_submissions(self, group_id):
         return self.send_request(GET, (WORKGROUP_API, group_id, 'submissions'))
 
-    @api_error_protect
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
+    @memoize_with_expiration()
     def get_review_assignment_groups(self, user_id, course_id, xblock_id):
         qs_params = {
             "course": course_id,
@@ -192,17 +131,9 @@ class ProjectAPI(object):
         response = self.send_request(GET, (USERS_API, user_id, 'groups'), query_params=qs_params)
         return response.get("groups", {})
 
-    @api_error_protect
-    @memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME)
-    def get_workgroups_for_assignment(self, assignment_id):
-        workgroups = self.send_request(GET, (GROUP_API, assignment_id, 'workgroups'), no_trailing_slash=True)
-        return workgroups["results"]
-
-    @api_error_protect
     def get_group_detail(self, group_id):
         return self.send_request(GET, (GROUP_API, group_id))
 
-    @api_error_protect
     def get_user_roles_for_course(self, user_id, course_id):
         qs_params = {
             "user_id": user_id,
@@ -212,17 +143,6 @@ class ProjectAPI(object):
 
     # TODO: methods below post-process api response - they should be moved outside of this class.
     # When doing the move, add tests before moving, since there are no test coverage for them
-    @api_error_protect
-    def get_workgroups_to_review(self, user_id, course_id, xblock_id):
-        assignments = self.get_review_assignment_groups(user_id, course_id, xblock_id)
-
-        workgroup_assignments = []
-        for assignment in assignments:
-            workgroup_assignments += self.get_workgroups_for_assignment(assignment["id"])
-
-        return workgroup_assignments
-
-    @api_error_protect
     def get_workgroup_reviewers(self, group_id, content_id):
         review_assignments = self.send_request(GET, (WORKGROUP_API, group_id, 'groups'), no_trailing_slash=True)
 
@@ -316,7 +236,132 @@ class ProjectAPI(object):
                 }
                 self.create_workgroup_review_assessment(question_data)
 
+
+class TypedProjectAPI(ProjectAPI):
+    """
+    This class is intended to contain methods that return typed responses.
+    Some of the methods may return non-reentrant iterables (i.e. generators) - clients are responsible to
+    convert them to reentrant collection if need more than one pass over the response
+    """
+    def _consume_paged_response(self, method, entry_url, data=None):
+        next_page_url = entry_url
+
+        while next_page_url:
+            response = self._do_send_request(method, next_page_url, data)
+            for item in response['results']:
+                yield item
+
+            next_page_url = response.get('next')
+
+    @memoize_with_expiration()
+    def get_user_details(self, user_id):
+        """
+        :param int user_id: User ID
+        :rtype: UserDetails
+        """
+        response = self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
+        return UserDetails(**response)  # pylint: disable=star-args
+
+    @memoize_with_expiration()
+    def get_project_by_content_id(self, course_id, content_id):
+        """
+        :param str course_id: Course ID
+        :param str content_id: Content ID
+        :rtype: ProjectDetails
+        """
+        query_params = {
+            'content_id': content_id,
+            'course_id': course_id
+        }
+        response = self.send_request(GET, (PROJECTS_API,), query_params=query_params)
+        assert len(response) <= 1
+        if not response:
+            return None
+
+        project = response[0]
+        return ProjectDetails(**project)
+
+    @memoize_with_expiration()
+    def get_project_details(self, project_id):
+        """
+        :param int project_id: Project ID
+        :rtype: ProjectDetails
+        """
+        response = self.send_request(GET, (PROJECTS_API, project_id), no_trailing_slash=True)
+        return ProjectDetails(**response)  # pylint: disable=star-args
+
+    @memoize_with_expiration()
+    def get_workgroup_by_id(self, group_id):
+        """
+        :param int group_id: Group ID
+        :rtype: WorkgroupDetails
+        """
+        response = self.send_request(GET, (WORKGROUP_API, group_id))
+        return WorkgroupDetails(**response)
+
+    @memoize_with_expiration()
+    def get_user_workgroup_for_course(self, user_id, course_id):
+        """
+        :param int user_id: User ID
+        :param str course_id: Course ID
+        :rtype: WorkgroupDetails
+        """
+        qs_params = {"course_id": course_id}
+        workgroups_list = self.send_request(GET, (USERS_API, user_id, 'workgroups'), query_params=qs_params)
+
+        if not workgroups_list or workgroups_list['count'] < 1:
+            return None
+
+        return self.get_workgroup_by_id(workgroups_list['results'][0]['id'])
+
+    # No caching here - can be updated mid-request
+    def get_completions_by_content_id(self, course_id, content_id):
+        """
+        :param str course_id: course ID
+        :param str content_id: content ID
+        :rtype: collections.Iterable[CompletionDetails]
+        """
+        query_parameters = {
+            'content_id': content_id
+        }
+        url = self.build_url((COURSES_API, course_id, 'completions'), query_params=query_parameters)
+
+        for item in self._consume_paged_response(GET, url):
+            yield CompletionDetails(**item)
+
+    # TODO: add tests
+    @memoize_with_expiration()
+    def get_workgroups_for_assignment(self, assignment_id):
+        """
+        :param int assignment_id: Assignment ID
+        :rtype: list[WorkgroupDetails]
+        """
+        workgroups = self.send_request(GET, (GROUP_API, assignment_id, 'workgroups'), no_trailing_slash=True)
+        return [WorkgroupDetails(**item) for item in workgroups["results"]]
+
+    # TODO: add tests
+    def get_workgroups_to_review(self, user_id, course_id, xblock_id):
+        """
+        :param int user_id: User ID
+        :param str course_id: Course ID
+        :param str xblock_id: Block ID
+        :rtype: list[WorkgroupDetails]
+        """
+        assignments = self.get_review_assignment_groups(user_id, course_id, xblock_id)
+
+        return list(
+            itertools.chain.from_iterable(
+                self.get_workgroups_for_assignment(assignment["id"])
+                for assignment in assignments
+            )
+        )
+
+    # TODO: make typed + add tests
     def get_latest_workgroup_submissions_by_id(self, group_id):
+        """
+        :param int group_id: Group ID
+        :rtype: dict[dict]
+        """
         submission_list = self.get_workgroup_submissions(group_id)
 
         submissions_by_id = {}
@@ -334,29 +379,14 @@ class ProjectAPI(object):
 
         return submissions_by_id
 
+    # TODO: add tests + do something about different type of user_details.organization attribute
     def get_member_data(self, user_id):
-        user_details = self.get_user_details(user_id)
+        """
+        :param int user_id:
+        :rtype: UserDetails
+        """
+        user_details = self.get_user_details(user_id)  # user_details.organization is an int here
         user_organizations = self.get_user_organizations(user_id)
         if user_organizations:
-            user_details.organization = user_organizations[0]['display_name']
+            user_details.organization = user_organizations[0]['display_name']  # and a string here
         return user_details
-
-
-# Looks like it's an issue, but technically it's not; this code runs in LMS, so 127.0.0.1 is always correct
-# location for API server, as it's basically executed in a neighbour thread/process/whatever.
-API_SERVER = "http://127.0.0.1:8000"
-if hasattr(settings, 'API_LOOPBACK_ADDRESS'):
-    API_SERVER = settings.API_LOOPBACK_ADDRESS
-
-
-class ProjectAPIXBlockMixin(object):
-    _project_api = None
-
-    @lazy
-    def project_api(self):
-        # project_api instance needs to be static to allow workgroup caching in WorkgroupAwareXBlockMixin
-        if ProjectAPIXBlockMixin._project_api is None:
-            author_mode = getattr(self.runtime, 'is_author_mode', False)
-            ProjectAPIXBlockMixin._project_api = ProjectAPI(API_SERVER, author_mode)
-
-        return ProjectAPIXBlockMixin._project_api

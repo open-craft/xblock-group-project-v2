@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import functools
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import xml.etree.ElementTree as ET
 
 from django.conf import settings
@@ -9,6 +9,8 @@ from django.utils.safestring import mark_safe
 from lazy.lazy import lazy
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
+
+DEFAULT_EXPIRATION_TIME = timedelta(seconds=10)
 
 log = logging.getLogger(__name__)
 loader = ResourceLoader(__name__)
@@ -207,11 +209,12 @@ def get_link_to_block(block):
     )
 
 
-def memoize_with_expiration(expires_after=None):
+def memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME):
     """
     This memoization decorator provides lightweight caching mechanism. It is not thread-safe and contain
     no cache invalidation features except cache expiration - use only on data that are unlikely to be changed
     within single request (i.e. workgroup and user data, assigned reviews, etc.)
+    :param timedelta expires_after: Caching period
     """
     def decorator(func):
         cache = func.cache = {}
@@ -242,7 +245,7 @@ def make_user_caption(user_details):
     context = {
         'id': user_details.id,
         'full_name': user_details.full_name,
-        'api_link': user_details.uri
+        'api_link': user_details.url
     }
     return mark_safe(loader.render_template("templates/html/user_label.html", context))
 
@@ -281,3 +284,7 @@ def add_resource(block, resource_type, path, fragment, via_url=False):
         action_parameter = loader.load_unicode(path)
 
     action(action_parameter)
+
+
+def get_block_content_id(block):
+    return unicode(block.scope_ids.usage_id)

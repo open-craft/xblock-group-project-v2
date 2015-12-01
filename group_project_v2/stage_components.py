@@ -1,12 +1,12 @@
-from collections import namedtuple
 import json
 import logging
+from collections import namedtuple
 from xml.etree import ElementTree
-from datetime import date
 
+import webob
+from datetime import date
 from django.utils import html
 from lazy.lazy import lazy
-import webob
 from xblock.core import XBlock
 from xblock.fields import String, Boolean, Scope, UNIQUE_ID
 from xblock.fragment import Fragment
@@ -30,6 +30,9 @@ log = logging.getLogger(__name__)
 class BaseStageComponentXBlock(XBlock):
     @lazy
     def stage(self):
+        """
+        :rtype: group_project_v2.stage.base.BaseGroupActivityStage
+        """
         return self.get_parent()
 
 
@@ -48,7 +51,7 @@ class BaseGroupProjectResourceXBlock(BaseStageComponentXBlock, StudioEditableXBl
 
     editable_fields = ('display_name', 'description')
 
-    def student_view(self, context):  # pylint: disable=unused-argument, no-self-use
+    def student_view(self, _context):  # pylint: disable=no-self-use
         return Fragment()
 
     def resources_view(self, context):
@@ -238,9 +241,9 @@ class GroupProjectSubmissionXBlock(
 
     @property
     def upload(self):
-        return self.get_upload(self.stage.activity.workgroup["id"])
+        return self.get_upload(self.stage.activity.workgroup.id)
 
-    def student_view(self, context):  # pylint: disable=unused-argument, no-self-use
+    def student_view(self, _context):  # pylint: disable=no-self-use
         return Fragment()
 
     def submissions_view(self, context):
@@ -254,7 +257,7 @@ class GroupProjectSubmissionXBlock(
         return fragment
 
     def submission_review_view(self, context):
-        group_id = context.get('group_id', self.stage.activity.workgroup["id"])
+        group_id = context.get('group_id', self.stage.activity.workgroup.id)
         fragment = Fragment()
         render_context = {'submission': self, 'upload': self.get_upload(group_id)}
         render_context.update(context)
@@ -264,9 +267,11 @@ class GroupProjectSubmissionXBlock(
         return fragment
 
     @XBlock.handler
-    def upload_submission(self, request, suffix=''):  # pylint: disable=unused-argument
+    def upload_submission(self, request, _suffix=''):
         """
         Handles submission upload and marks stage as completed if all submissions in stage have uploads.
+        :param request: HTTP request
+        :param str _suffix:
         """
         if not self.stage.available_now:
             template = self.STAGE_NOT_OPEN_TEMPLATE if not self.stage.is_open else self.STAGE_CLOSED_TEMPLATE
@@ -287,7 +292,7 @@ class GroupProjectSubmissionXBlock(
             try:
                 context = {
                     "user_id": target_activity.user_id,
-                    "group_id": target_activity.workgroup['id'],
+                    "group_id": target_activity.workgroup.id,
                     "project_api": self.project_api,
                     "course_id": target_activity.course_id
                 }
@@ -347,7 +352,7 @@ class GroupProjectSubmissionXBlock(
                     "submission_id": uploaded_file.submission_id,
                     "filename": uploaded_file.file.name,
                     "content_id": activity.content_id,
-                    "group_id": activity.workgroup['id'],
+                    "group_id": activity.workgroup.id,
                     "user_id": activity.user_id,
                 }
             )
@@ -694,7 +699,7 @@ class GroupProjectTeamEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXBl
         all_feedback = self.project_api.get_user_peer_review_items(
             self.user_id,
             self.group_id,
-            self.stage.content_id,
+            self.stage.activity_content_id,
         )
 
         return [item for item in all_feedback if item["question"] == self.question_id]
@@ -711,7 +716,7 @@ class GroupProjectGradeEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXB
     def get_feedback(self):
         all_feedback = self.project_api.get_workgroup_review_items_for_group(
             self.group_id,
-            self.stage.content_id,
+            self.stage.activity_content_id,
         )
         return [item for item in all_feedback if item["question"] == self.question_id]
 
@@ -734,7 +739,7 @@ class ProjectTeamXBlock(
         render_context = {
             'team_members': user_details + self.stage.team_members,
             'course_id': self.stage.course_id,
-            'group_id': self.stage.workgroup['id']
+            'group_id': self.stage.workgroup.id
         }
         render_context.update(context)
 

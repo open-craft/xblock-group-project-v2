@@ -1,3 +1,4 @@
+import logging
 from collections import OrderedDict
 from datetime import datetime
 from lazy.lazy import lazy
@@ -7,20 +8,31 @@ from xblock.fields import DateTime, Scope, Boolean
 from xblock.fragment import Fragment
 from xblockutils.studio_editable import XBlockWithPreviewMixin
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import CommonMixinCollection, XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin
+from group_project_v2.mixins import (
+    CommonMixinCollection, XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
+    DashboardXBlockMixin, DashboardRootXBlockMixin
+)
 from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
     GroupProjectResourceXBlock, GroupProjectVideoResourceXBlock, ProjectTeamXBlock
 )
 from group_project_v2.utils import (
     gettext as _, HtmlXBlockShim, format_date, Constants, loader,
-    outsider_disallowed_protected_view, add_resource, MUST_BE_OVERRIDDEN, get_link_to_block
+    outsider_disallowed_protected_view, add_resource, MUST_BE_OVERRIDDEN, get_link_to_block, get_block_content_id
 )
 from group_project_v2.stage.utils import StageState
 
 
+log = logging.getLogger(__name__)
+
+STAGE_STATS_LOG_TPL = (
+    "Calculating stage stats for stage %(stage)s "
+    "all - %(target_users)s, completed - %(completed)s, partially completed - %(partially_completed)s"
+)
+
+
 class BaseGroupActivityStage(
-    CommonMixinCollection, XBlockWithPreviewMixin, StageNotificationsMixin,
+    CommonMixinCollection, DashboardXBlockMixin, XBlockWithPreviewMixin, StageNotificationsMixin,
     XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
     XBlock,
 ):
@@ -82,6 +94,9 @@ class BaseGroupActivityStage(
 
     @lazy
     def activity(self):
+        """
+        :rtype: group_project_v2.group_project.GroupActivityXBlock
+        """
         return self.get_parent()
 
     @property
@@ -90,6 +105,10 @@ class BaseGroupActivityStage(
 
     @property
     def content_id(self):
+        return get_block_content_id(self)
+
+    @property
+    def activity_content_id(self):
         return self.activity.content_id
 
     @property
@@ -108,8 +127,8 @@ class BaseGroupActivityStage(
 
         try:
             result = []
-            for team_member in self.workgroup["users"]:
-                team_member_id = team_member["id"]
+            for team_member in self.workgroup.users:
+                team_member_id = team_member.id
                 if self.user_id == int(team_member_id):
                     continue
                 result.append(self.project_api.get_member_data(team_member_id))
@@ -238,8 +257,8 @@ class BaseGroupActivityStage(
     def get_stage_state(self):
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
-    def get_dashboard_stage_state(self):
-        state_stats = self.get_stage_stats()
+    def get_dashboard_stage_state(self, target_workgroups, target_users):
+        state_stats = self.get_stage_stats(target_workgroups, target_users)
         if state_stats.get(StageState.COMPLETED, 0) == 1:
             stage_state = StageState.COMPLETED
         elif state_stats.get(StageState.INCOMPLETE, 0) > 0 or state_stats.get(StageState.COMPLETED, 0) > 0:
@@ -249,13 +268,41 @@ class BaseGroupActivityStage(
 
         return stage_state, state_stats
 
-    def get_stage_stats(self):  # pylint: disable=no-self-use
-        # TODO - real stats calculation
+    def get_stage_stats(self, target_workgroups, target_users):  # pylint: disable=no-self-use
+        target_user_ids = set(user.id for user in target_users)
+        if not target_user_ids:
+            return {
+                StageState.COMPLETED: 0,
+                StageState.INCOMPLETE: 0,
+                StageState.NOT_STARTED: 0
+            }
+
+        target_user_count = float(len(target_user_ids))
+
+        completed_users, partially_completed_users = self.get_users_completion(target_workgroups, target_users)
+        log_format_data = dict(
+            stage=self.display_name,  target_users=target_user_ids, completed=completed_users,
+            partially_completed=partially_completed_users
+        )
+        log.info(STAGE_STATS_LOG_TPL, log_format_data)
+
+        completed_ratio = len(completed_users & target_user_ids) / target_user_count
+        partially_completed_ratio = len(partially_completed_users & target_user_ids) / target_user_count
+
         return {
-            StageState.COMPLETED: 0.4,
-            StageState.INCOMPLETE: 0.3,
-            StageState.NOT_STARTED: 0.3
+            StageState.COMPLETED: completed_ratio,
+            StageState.INCOMPLETE: partially_completed_ratio,
+            StageState.NOT_STARTED: 1 - completed_ratio - partially_completed_ratio
         }
+
+    def get_users_completion(self, target_workgroups, target_users):
+        """
+        Returns sets of completed user ids and partially completed user ids
+        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] target_workgroups:
+        :param collections.Iterable[group_project_v2.project_api.dtos.ReducedUserDetails] target_users:
+        :rtype: (set[int], set[int])
+        """
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
     def navigation_view(self, context):
         fragment = Fragment()
@@ -273,7 +320,10 @@ class BaseGroupActivityStage(
     def dashboard_view(self, context):
         fragment = Fragment()
 
-        state, stats = self.get_dashboard_stage_state()
+        target_workgroups = context.get(DashboardRootXBlockMixin.TARGET_WORKGROUPS)
+        target_users = context.get(DashboardRootXBlockMixin.TARGET_STUDENTS)
+
+        state, stats = self.get_dashboard_stage_state(target_workgroups, target_users)
         human_stats = OrderedDict([
             (StageState.get_human_name(StageState.NOT_STARTED), stats[StageState.NOT_STARTED]*100),
             (StageState.get_human_name(StageState.INCOMPLETE), stats[StageState.INCOMPLETE]*100),
@@ -282,8 +332,13 @@ class BaseGroupActivityStage(
         render_context = {
             'stage': self, 'stats': human_stats, 'stage_state': state, 'ta_graded': self.activity.is_ta_graded
         }
+        render_context.update(context)
         fragment.add_content(self.render_template('dashboard_view', render_context))
         return fragment
+
+    def dashboard_detail_view(self, context):
+        # TODO: implement detail view
+        pass
 
     def get_new_stage_state_data(self):
         return {
