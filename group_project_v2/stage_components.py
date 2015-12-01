@@ -41,7 +41,7 @@ class BaseGroupProjectResourceXBlock(BaseStageComponentXBlock, StudioEditableXBl
         display_name=_(u"Display Name"),
         help=_(U"This is a name of the resource"),
         scope=Scope.settings,
-        default="Group Project V2 Resource"
+        default=_(u"Group Project V2 Resource")
     )
 
     description = String(
@@ -196,7 +196,7 @@ class GroupProjectSubmissionXBlock(
         display_name=_(u"Display Name"),
         help=_(U"This is a name of the submission"),
         scope=Scope.settings,
-        default="Group Project V2 Submission"
+        default=_(u"Group Project V2 Submission")
     )
 
     description = String(
@@ -453,7 +453,7 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
 
     title = String(
         display_name=_(u"Question text"),
-        default="",
+        default=_(u""),
         scope=Scope.content
     )
 
@@ -469,7 +469,7 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
     question_content = String(
         display_name=_(u"Question content"),
         help=_(u"HTML control"),
-        default="",
+        default=_(u""),
         scope=Scope.content,
         multiline_editor="xml",
         xml_node=True

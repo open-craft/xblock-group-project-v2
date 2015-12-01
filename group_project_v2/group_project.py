@@ -29,10 +29,10 @@ log = logging.getLogger(__name__)
 
 class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin, XBlock):
     display_name = String(
-        display_name="Display Name",
-        help="This is a name of the project",
+        display_name=_(u"Display Name"),
+        help=_(u"This is a name of the project"),
         scope=Scope.settings,
-        default="Group Project V2"
+        default=_(u"Group Project V2")
     )
 
     CATEGORY = "gp-v2-project"
@@ -229,37 +229,37 @@ class GroupActivityXBlock(
     XBlock providing a group activity project for a group of students to collaborate upon
     """
     display_name = String(
-        display_name="Display Name",
-        help="This name appears in the horizontal navigation at the top of the page.",
+        display_name=_(u"Display Name"),
+        help=_(u"This name appears in the horizontal navigation at the top of the page."),
         scope=Scope.settings,
-        default="Group Project Activity"
+        default=_(u"Group Project Activity")
     )
 
     weight = Float(
-        display_name="Weight",
-        help="This is the maximum score that the user receives when he/she successfully completes the problem",
+        display_name=_(u"Weight"),
+        help=_(u"This is the maximum score that the user receives when he/she successfully completes the problem."),
         scope=Scope.settings,
         default=100.0
     )
 
     group_reviews_required_count = Integer(
-        display_name="Reviews Required Minimum",
-        help="The minimum number of group-reviews that should be applied to a set of submissions "
-             "(set to 0 to be 'TA Graded')",
+        display_name=_(u"Reviews Required Minimum"),
+        help=_(u"The minimum number of group-reviews that should be applied to a set of submissions "
+               u"(set to 0 to be 'TA Graded')"),
         scope=Scope.settings,
         default=3
     )
 
     user_review_count = Integer(
-        display_name="User Reviews Required Minimum",
-        help="The minimum number of other-group reviews that an individual user should perform",
+        display_name=_(u"User Reviews Required Minimum"),
+        help=_(u"The minimum number of other-group reviews that an individual user should perform"),
         scope=Scope.settings,
         default=1
     )
 
     due_date = DateTime(
-        display_name="Due date",
-        help="ACtivity due date",
+        display_name=_(u"Due date"),
+        help=_(u"Activity due date"),
         has_score=Scope.settings,
         default=None
     )
