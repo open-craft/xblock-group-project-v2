@@ -66,7 +66,7 @@ class WorkgroupDetails(object):
 
 
 class ReducedUserDetails(object):
-    """ User data embedded in a workgroup detail responses """
+    """ User data embedded in a workgroup detail response """
     def __init__(self, **kwargs):
         self.id = kwargs.get('id')
         self.url = kwargs.get('url')

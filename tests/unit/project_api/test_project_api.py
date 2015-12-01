@@ -324,7 +324,7 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
     @ddt.unpack
     def test_get_completions_by_content_id(self, course_id, content_id):
         def build_url(course_id, content_id):
-            return self.project_api._build_url(  # pylint:disable=protected-access
+            return self.project_api.build_url(
                 (COURSES_API, course_id, 'completions'), query_params={'content_id': content_id}
             )
 
@@ -349,9 +349,7 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             query_params = {'content_id': content_id}
             if page_num:
                 query_params['page'] = page_num
-            return self.project_api._build_url(  # pylint:disable=protected-access
-                (COURSES_API, course_id, 'completions'), query_params=query_params
-            )
+            return self.project_api.build_url((COURSES_API, course_id, 'completions'), query_params=query_params)
 
         course, content = 'course1', 'content1'
 

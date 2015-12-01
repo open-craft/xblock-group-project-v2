@@ -33,7 +33,7 @@ class ProjectAPI(object):
         self._api_server_address = address
         self.dry_run = dry_run
 
-    def _build_url(self, url_parts, query_params=None, no_trailing_slash=False):
+    def build_url(self, url_parts, query_params=None, no_trailing_slash=False):
         url_template = "{}/" + "{}/" * len(url_parts)
         url_parameters = [self._api_server_address]
         url_parameters.extend(url_parts)
@@ -61,7 +61,7 @@ class ProjectAPI(object):
         return json.loads(response.read())
 
     def send_request(self, method, url_parts, data=None, query_params=None, no_trailing_slash=False):
-        url = self._build_url(url_parts, query_params, no_trailing_slash)
+        url = self.build_url(url_parts, query_params, no_trailing_slash)
         return self._do_send_request(method, url, data)
 
     def get_user_organizations(self, user_id):
@@ -324,7 +324,7 @@ class TypedProjectAPI(ProjectAPI):
         query_parameters = {
             'content_id': content_id
         }
-        url = self._build_url((COURSES_API, course_id, 'completions'), query_params=query_parameters)
+        url = self.build_url((COURSES_API, course_id, 'completions'), query_params=query_parameters)
 
         for item in self._consume_paged_response(GET, url):
             yield CompletionDetails(**item)

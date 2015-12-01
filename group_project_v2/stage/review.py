@@ -371,6 +371,17 @@ class PeerReviewStage(ReviewBaseStage):
         return True
 
     def _get_review_items(self, review_groups, with_caching=False):
+        """
+        Gets review items for a list of groups
+        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] review_groups: Target groups
+        :param bool with_caching:
+            Underlying implementation uses get_workgroup_review_items_for_group for both cached and non-cached version.
+            However, one of the users of this method (get_review_data) might benefit from caching,
+            while the other (review_status) is affected by the issue outlined in get_workgroup_review_items_for_group
+            comment (i.e. cached value is not updated when new feedback is posted).
+            So, caching is conditionally enabled here to serve both users of this method as efficiently as possible.
+        :return:
+        """
         def do_get_items(group_id):
             if with_caching:
                 return self._get_review_items_for_group(self.project_api, group_id, self.activity_content_id)
