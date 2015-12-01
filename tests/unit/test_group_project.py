@@ -2,6 +2,7 @@ from unittest import TestCase
 
 import ddt
 import mock
+from xblock.fields import ScopeIds
 from xblock.runtime import Runtime
 from xblock.field_data import DictFieldData
 
@@ -60,7 +61,8 @@ class TestGroupActivityXBlock(TestWithPatchesMixin, TestCase):
         super(TestGroupActivityXBlock, self).setUp()
         self.project_api_mock = mock.Mock(spec=TypedProjectAPI)
         self.runtime_mock = mock.Mock(spec=Runtime)
-        self.block = GroupActivityXBlock(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
+        self.scope_ids_mock = mock.Mock(spec=ScopeIds)
+        self.block = GroupActivityXBlock(self.runtime_mock, field_data=DictFieldData({}), scope_ids=self.scope_ids_mock)
         self.make_patch(GroupActivityXBlock, 'project_api', mock.PropertyMock(return_value=self.project_api_mock))
 
         self.group_project_mock = mock.Mock(spec=GroupProjectXBlock)
@@ -153,6 +155,63 @@ class TestGroupActivityXBlock(TestWithPatchesMixin, TestCase):
         self.group_project_mock.project_details = project_details
 
         self.assertEqual(self.block.project_details, project_details)
+
+    @ddt.data('activity_1', 'activity_2', 'activity_92', 'qweasdzxc')
+    def test_dashboard_details_url_no_service(self, block_id):
+        self.runtime_mock.service = mock.Mock(return_value=None)
+        self.scope_ids_mock.usage_id = block_id
+        expected_url = GroupActivityXBlock.DEFAULT_DASHBOARD_DETAILS_URL_TPL.format(activity_id=block_id)
+
+        url = self.block.dashboard_details_url()
+
+        self.assertEqual(url, expected_url)
+        self.runtime_mock.service.assert_called_once_with(self.block, 'settings')
+
+    @ddt.data('activity_1', 'activity_2', 'activity_92', 'qweasdzxc')
+    def test_dashboard_details_url_no_settings(self, block_id):
+        settings_service = mock.Mock()
+        self.runtime_mock.service = mock.Mock(return_value=settings_service)
+        settings_service.get_settings_bucket = mock.Mock(return_value=None)
+        self.scope_ids_mock.usage_id = block_id
+        expected_url = GroupActivityXBlock.DEFAULT_DASHBOARD_DETAILS_URL_TPL.format(activity_id=block_id)
+
+        url = self.block.dashboard_details_url()
+
+        self.assertEqual(url, expected_url)
+        settings_service.get_settings_bucket.assert_called_once_with(self.block)
+
+    @ddt.data('activity_1', 'activity_2', 'activity_92', 'qweasdzxc')
+    def test_dashboard_details_url_no_settings_key(self, block_id):
+        settings_service = mock.Mock()
+        self.runtime_mock.service = mock.Mock(return_value=settings_service)
+        settings_service.get_settings_bucket = mock.Mock(return_value={})
+        self.scope_ids_mock.usage_id = block_id
+        expected_url = GroupActivityXBlock.DEFAULT_DASHBOARD_DETAILS_URL_TPL.format(activity_id=block_id)
+
+        url = self.block.dashboard_details_url()
+
+        self.assertEqual(url, expected_url)
+        settings_service.get_settings_bucket.assert_called_once_with(self.block)
+
+    @ddt.data(
+        ('activity_1', 'qwe', 'qwe'),
+        ('activity_2', 'zxc?activity_id={activity_id}', 'zxc?activity_id=activity_2'),
+        ('activity_92', '?activate_block_id={activity_id}', '?activate_block_id=activity_92'),
+        ('qweasdzxc', '/part1/part2/{activity_id}', '/part1/part2/qweasdzxc')
+    )
+    @ddt.unpack
+    def test_dashboard_details_url_setting_present(self, block_id, setting_value, expected_url):
+        settings_service = mock.Mock()
+        self.runtime_mock.service = mock.Mock(return_value=settings_service)
+        settings_service.get_settings_bucket = mock.Mock(
+            return_value={GroupActivityXBlock.DASHBOARD_DETAILS_URL_KEY: setting_value}
+        )
+        self.scope_ids_mock.usage_id = block_id
+
+        url = self.block.dashboard_details_url()
+
+        self.assertEqual(url, expected_url)
+        settings_service.get_settings_bucket.assert_called_once_with(self.block)
 
 
 @ddt.ddt

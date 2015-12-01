@@ -218,7 +218,6 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         return None  # if there are no activities there's no stages as well - nothing we can really do
 
 
-# TODO: enable and fix these violations
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
 class GroupActivityXBlock(
@@ -272,6 +271,9 @@ class GroupActivityXBlock(
     has_children = True
 
     template_location = 'activity'
+
+    DASHBOARD_DETAILS_URL_KEY = 'dashboard_details_url'
+    DEFAULT_DASHBOARD_DETAILS_URL_TPL = "/dashboard_details_view?activate_block_id={activity_id}"
 
     @property
     def id(self):
@@ -346,6 +348,19 @@ class GroupActivityXBlock(
     def peer_review_questions(self):
         stages = self.get_children_by_category(PeerReviewStage.CATEGORY)
         return list(self._chain_questions(stages, 'questions'))
+
+    def dashboard_details_url(self):
+        """
+        Gets dashboard details view URL for current activity. If settings service is not available or does not provide
+        URL template, default template is used.
+        """
+        template = self.DEFAULT_DASHBOARD_DETAILS_URL_TPL
+        settings_service = self.runtime.service(self, "settings")
+        if settings_service:
+            xblock_settings = settings_service.get_settings_bucket(self)
+            if xblock_settings and self.DASHBOARD_DETAILS_URL_KEY in xblock_settings:
+                template = xblock_settings[self.DASHBOARD_DETAILS_URL_KEY]
+        return template.format(activity_id=self.id)
 
     @staticmethod
     def _chain_questions(stages, question_type):
