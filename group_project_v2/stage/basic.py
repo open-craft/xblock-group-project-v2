@@ -57,7 +57,7 @@ class CompletionStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
 
     @XBlock.json_handler
     @outsider_disallowed_protected_handler
-    def stage_completed(self, data, suffix=''):  # pylint: disable=unused-argument
+    def stage_completed(self, _data, _suffix=''):
         if not self.available_now:
             template = self.STAGE_NOT_OPEN_MESSAGE if not self.is_open else self.STAGE_CLOSED_MESSAGE
             return {'result': 'error',  'msg': template.format(action=self.STAGE_ACTION)}

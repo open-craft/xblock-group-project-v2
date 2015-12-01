@@ -128,10 +128,12 @@ class StageNotificationsMixin(object):
                 )
 
     @log_and_suppress_exceptions
-    def on_before_studio_delete(self, course_id, services):  # pylint: disable=unused-argument
+    def on_before_studio_delete(self, _course_id, services):
         """
         A hook into when this xblock is deleted in Studio, for xblocks to do any lifecycle
         management
+        :param CourseLocator _course_id: Course ID
+        :param dict[str, object] services: runtime services
         """
         log.info('{}.on_before_delete() on location = {}'.format(self.__class__.__name__, self.location))
 

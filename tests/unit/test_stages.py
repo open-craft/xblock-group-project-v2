@@ -297,10 +297,10 @@ class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
             )
 
     def _set_project_api_responses(self, workgroups, review_items):
-        def workgroups_side_effect(user_id, course_id):  # pylint:disable=unused-argument
+        def workgroups_side_effect(user_id, _course_id):
             return workgroups.get(user_id, None)
 
-        def review_items_side_effect(workgroup_id, content_id):  # pylint:disable=unused-argument
+        def review_items_side_effect(workgroup_id, _content_id):
             return review_items.get(workgroup_id, [])
 
         self.project_api_mock.get_user_workgroup_for_course.side_effect = workgroups_side_effect
@@ -590,7 +590,7 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
     )
     @ddt.unpack
     def test_review_status(self, groups, questions, reviews, expected_result):
-        def get_reviews(group_id, component_id):  # pylint:disable=unused-argument
+        def get_reviews(group_id, _component_id):
             return reviews.get(group_id, [])
 
         expected_calls = [
@@ -609,10 +609,10 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
         self.assertEqual(self.project_api_mock.get_workgroup_review_items_for_group.mock_calls, expected_calls)
 
     def _set_project_api_responses(self, workgroups, review_items):
-        def workgroups_side_effect(user_id, course_id, content_id):  # pylint:disable=unused-argument
+        def workgroups_side_effect(user_id, _course_id, _content_id):
             return workgroups.get(user_id, None)
 
-        def review_items_side_effect(workgroup_id, content_id):  # pylint:disable=unused-argument
+        def review_items_side_effect(workgroup_id, _content_id):
             return review_items.get(workgroup_id, [])
 
         self.project_api_mock.get_workgroups_to_review.side_effect = workgroups_side_effect

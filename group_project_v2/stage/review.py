@@ -171,7 +171,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
     @conversion_protected_handler
-    def submit_review(self, submissions, context=''):  # pylint: disable=unused-argument
+    def submit_review(self, submissions, _context=''):
         # if admin grader - still allow providing grades even for non-TA-graded activities
         if self.is_admin_grader and not self.allow_admin_grader_access:
             return {'result': 'error', 'msg': self.TA_GRADING_NOT_ALLOWED}
@@ -287,7 +287,7 @@ class TeamEvaluationStage(ReviewBaseStage):
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
     @conversion_protected_handler
-    def load_peer_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
+    def load_peer_feedback(self, request, _suffix=''):
         peer_id = int(request.GET["peer_id"])
         feedback = self.project_api.get_peer_review_items(
             self.anonymous_student_id,
@@ -446,7 +446,7 @@ class PeerReviewStage(ReviewBaseStage):
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
     @conversion_protected_handler
-    def other_submission_links(self, request, suffix=''):  # pylint: disable=unused-argument
+    def other_submission_links(self, request, _suffix=''):
         group_id = int(request.GET["group_id"])
 
         target_stages = [stage for stage in self.activity.stages if stage.submissions_stage]
@@ -466,7 +466,7 @@ class PeerReviewStage(ReviewBaseStage):
     @XBlock.handler
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
-    def load_other_group_feedback(self, request, suffix=''):  # pylint: disable=unused-argument
+    def load_other_group_feedback(self, request, _suffix=''):
         group_id = int(request.GET["group_id"])
         feedback = self.project_api.get_workgroup_review_items(
             self.anonymous_student_id, group_id, self.activity_content_id

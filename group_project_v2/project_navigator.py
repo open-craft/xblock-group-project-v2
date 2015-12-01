@@ -135,7 +135,7 @@ class GroupProjectNavigatorXBlock(
 
         return fragment
 
-    def author_preview_view(self, context):  # pylint: disable=unused-argument, no-self-use
+    def author_preview_view(self, context):
         fragment = Fragment()
         children_contents = []
         for child in self._children:
@@ -247,7 +247,7 @@ class ProjectNavigatorViewXBlockBase(
 
         return fragment
 
-    def author_view(self, context):  # pylint: disable=unused-argument, no-self-use
+    def author_view(self, _context):
         """
         Studio Preview view
         """
@@ -257,7 +257,7 @@ class ProjectNavigatorViewXBlockBase(
         fragment.add_frag_resources(url_name_fragment)
         return fragment
 
-    def selector_view(self, context):  # pylint: disable=unused-argument
+    def selector_view(self, _context):
         """
         Selector view - this view is used by GroupProjectNavigatorXBlock to render selector buttons
         """
@@ -297,7 +297,7 @@ class NavigationViewXBlock(ProjectNavigatorViewXBlockBase):
     js_file = "navigation_view.js"
     initialize_js_function = "GroupProjectNavigatorNavigationView"
 
-    def student_view(self, context):  # pylint: disable=unused-argument
+    def student_view(self, context):
         """
         Student view
         """
@@ -328,7 +328,7 @@ class ResourcesViewXBlock(ProjectNavigatorViewXBlockBase):
     js_file = "resources_view.js"
     initialize_js_function = "GroupProjectNavigatorResourcesView"
 
-    def student_view(self, context):  # pylint: disable=unused-argument
+    def student_view(self, context):
         """
         Student view
         """
@@ -370,7 +370,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
     def allow_admin_grader_access(self):
         return False
 
-    def student_view(self, context):  # pylint: disable=unused-argument
+    def student_view(self, context):
         """
         Student view
         """
@@ -411,7 +411,7 @@ class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):
         # TODO: LMS support - check if TAs are available at all
         return True
 
-    def student_view(self, context):  # pylint: disable=unused-argument
+    def student_view(self, context):
         """
         Student view
         """
@@ -440,7 +440,7 @@ class PrivateDiscussionViewXBlock(ProjectNavigatorViewXBlockBase):
     def is_view_available(self):
         return self._project_has_discussion()
 
-    def selector_view(self, context):  # pylint: disable=unused-argument
+    def selector_view(self, context):
         """
         Selector view - this view is used by GroupProjectNavigatorXBlock to render selector buttons
         """

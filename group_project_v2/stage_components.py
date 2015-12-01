@@ -51,7 +51,7 @@ class BaseGroupProjectResourceXBlock(BaseStageComponentXBlock, StudioEditableXBl
 
     editable_fields = ('display_name', 'description')
 
-    def student_view(self, context):  # pylint: disable=unused-argument, no-self-use
+    def student_view(self, _context):  # pylint: disable=no-self-use
         return Fragment()
 
     def resources_view(self, context):
@@ -243,7 +243,7 @@ class GroupProjectSubmissionXBlock(
     def upload(self):
         return self.get_upload(self.stage.activity.workgroup.id)
 
-    def student_view(self, context):  # pylint: disable=unused-argument, no-self-use
+    def student_view(self, _context):  # pylint: disable=no-self-use
         return Fragment()
 
     def submissions_view(self, context):
@@ -267,9 +267,11 @@ class GroupProjectSubmissionXBlock(
         return fragment
 
     @XBlock.handler
-    def upload_submission(self, request, suffix=''):  # pylint: disable=unused-argument
+    def upload_submission(self, request, _suffix=''):
         """
         Handles submission upload and marks stage as completed if all submissions in stage have uploads.
+        :param request: HTTP request
+        :param str _suffix:
         """
         if not self.stage.available_now:
             template = self.STAGE_NOT_OPEN_TEMPLATE if not self.stage.is_open else self.STAGE_CLOSED_TEMPLATE

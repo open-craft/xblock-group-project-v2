@@ -240,7 +240,7 @@ class AdminAccessControlXBlockMixin(object):
 
 
 class NoStudioEditableSettingsMixin(object):
-    def studio_view(self, context):  # pylint: disable=unused-argument, no-self-use
+    def studio_view(self, _context):  # pylint: disable=no-self-use
         fragment = Fragment()
         fragment.add_content(NO_EDITABLE_SETTINGS)
         return fragment

@@ -219,7 +219,6 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
 
 
 # TODO: enable and fix these violations
-# pylint: disable=unused-argument,invalid-name
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
 class GroupActivityXBlock(
@@ -474,8 +473,8 @@ class GroupActivityXBlock(
             self.assign_grade_to_group(group_id, grade_value)
 
             workgroup = self.project_api.get_workgroup_by_id(group_id)
-            for u in workgroup.users:
-                self.mark_complete(u.id)
+            for user in workgroup.users:
+                self.mark_complete(user.id)
 
     def assign_grade_to_group(self, group_id, grade_value):
         self.project_api.set_group_grade(
