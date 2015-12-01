@@ -846,13 +846,11 @@ class TestEvaluationDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
             self.assertFalse(self.get_reviews_mock.called)
             self.assertFalse(self.get_reviewer_ids_mock.called)
 
-    # pylint: disable=invalid-name
     def test_can_mark_complete_no_reviewers_returns_true(self):
         self.team_members_mock.return_value = []
 
         self.assertTrue(self.block.can_mark_complete)
 
-    # pylint: disable=invalid-name
     def test_can_mark_complete_no_questions_returns_true(self):
         with mock.patch.object(self.block_to_test, 'required_questions') as patched_required_questions:
             patched_required_questions.return_value = []

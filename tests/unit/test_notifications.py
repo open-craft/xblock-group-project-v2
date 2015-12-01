@@ -47,7 +47,7 @@ class TestActivityNotificationsMixin(TestCase, TestWithPatchesMixin):
         self.notifications_service_mock.bulk_publish_notification_to_users = mock.Mock()
         self.notifications_service_mock.bulk_publish_notification_to_scope = mock.Mock()
 
-    def _get_call_args(self, target):  # pylint: disable=invalid-name
+    def _get_call_args(self, target):
         self.assertTrue(target.called)
         self.assertEqual(len(target.call_args_list), 1)
         args, _kwargs = target.call_args
@@ -59,7 +59,6 @@ class TestActivityNotificationsMixin(TestCase, TestWithPatchesMixin):
         (54, 'course3', 'yet-another-location', workgroup2, 'NotAnActivity'),
     )
     @ddt.unpack
-    # pylint: disable=invalid-name
     def test_file_upload_success_scenario(self, user_id, course_id, location, workgroup, name):
         block = ActivityNotificationsGuineaPig(user_id, course_id, location, workgroup, name)
 
@@ -86,7 +85,6 @@ class TestActivityNotificationsMixin(TestCase, TestWithPatchesMixin):
             )
 
     @ddt.data(ValueError("test"), TypeError("QWE"), AttributeError("OMG"), Exception("Very Generic"))
-    # pylint: disable=invalid-name
     def test_file_upload_notification_type_raises(self, exception):
         block = ActivityNotificationsGuineaPig('irrelevant', 'irrelevant', 'irrelevant', 'irrelevant', 'irrelevant')
         with mock.patch('logging.Logger.exception') as patched_exception_logger:
@@ -137,7 +135,6 @@ class TestActivityNotificationsMixin(TestCase, TestWithPatchesMixin):
             )
 
     @ddt.data(ValueError("test"), TypeError("QWE"), AttributeError("OMG"), Exception("Very Generic"))
-    # pylint: disable=invalid-name
     def test_grades_posted_notification_type_raises(self, exception):
         block = ActivityNotificationsGuineaPig('irrelevant', 'irrelevant', 'irrelevant', 'irrelevant', 'irrelevant')
         with mock.patch('logging.Logger.exception') as patched_exception_logger:

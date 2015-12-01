@@ -1,4 +1,3 @@
-# pylint: disable=invalid-name
 import json
 from unittest import TestCase
 from xml.etree import ElementTree
@@ -35,8 +34,7 @@ class StageComponentXBlockTestBase(TestCase, TestWithPatchesMixin):
         self.block = self.block_to_test(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
         self.make_patch(self.block_to_test, 'stage', mock.PropertyMock(return_value=self.stage_mock))
 
-    # pylint: disable=no-self-use
-    def _assert_empty_fragment(self, fragment):
+    def _assert_empty_fragment(self, fragment):  # pylint: disable=no-self-use
         self.assertEqual(fragment.content, u'')
         self.assertEqual(fragment.resources, [])
 
@@ -233,7 +231,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
         self.stage_mock.get_new_stage_state_data = mock.Mock(return_value=stage_state)
         self.stage_mock.check_submissions_and_mark_complete = mock.Mock()
 
-        expected_persist_and_submit_file_context = {
+        expected_context = {
             "user_id": self.user_id,
             "group_id": self.group_id,
             "project_api": self.project_api_mock,
@@ -257,9 +255,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
 
             self.stage_mock.check_submissions_and_mark_complete.assert_called_once_with()
             patched_persist_and_submit_file.assert_called_once_with(
-                self.stage_mock.activity,
-                expected_persist_and_submit_file_context,
-                "QWERTY"
+                self.stage_mock.activity, expected_context, "QWERTY"
             )
 
     def test_persist_and_submit_file_propagates_exceptions(self):
@@ -440,7 +436,7 @@ class CommonFeedbackDisplayStageTests(object):
         questions = [make_question('123', '123'), make_question('123', '123')]
         with mock.patch.object(self.block_to_test, 'activity_questions', mock.PropertyMock(return_value=questions)), \
                 self.assertRaises(ValueError):
-            _ = self.block.question
+            _ = self.block.question  # pylint:disable=invalid-name
 
     def test_question_ids_values_provider(self):
         questions = [make_question('123', 'Title 1'), make_question('456', 'Title 2'), make_question('789', 'Title 3')]
