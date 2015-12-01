@@ -277,6 +277,9 @@ class GroupActivityXBlock(
     def id(self):
         return self.scope_ids.usage_id
 
+    def max_score(self):
+        return self.weight
+
     @property
     def project(self):
         return self.get_parent()
@@ -482,7 +485,7 @@ class GroupActivityXBlock(
             self.course_id,
             self.content_id,
             grade_value,
-            self.weight
+            self.max_score()
         )
         # Emit analytics event...
         self.runtime.publish(
