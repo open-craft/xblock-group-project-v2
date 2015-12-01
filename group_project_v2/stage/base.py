@@ -178,6 +178,10 @@ class BaseGroupActivityStage(
     def is_graded_stage(self):  # pylint: disable=no-self-use
         return False
 
+    @property
+    def dashboard_details_view_url(self):
+        return self.activity.dashboard_details_url()
+
     def is_current_stage(self, context):
         target_stage_id = context.get(Constants.CURRENT_STAGE_ID_PARAMETER_NAME, None)
         if not target_stage_id:

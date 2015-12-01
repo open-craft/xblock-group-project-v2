@@ -220,6 +220,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
 
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
+@XBlock.wants('settings')
 class GroupActivityXBlock(
     CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin,
     XBlockWithPreviewMixin, ActivityNotificationsMixin, XBlock

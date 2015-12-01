@@ -23,7 +23,9 @@
   </table>
   <div class="group-project-stage-navigate-to-detailed-view">
     {% if stage.is_graded_stage %}
-      <span class="stage-open-detailed-view fa fa-chevron-right {% if not stage.is_open %}disabled{% endif %}"></span>
+      <a href="{{stage.dashboard_details_view_url}}">
+        <span class="stage-open-detailed-view fa fa-chevron-right {% if not stage.is_open %}disabled{% endif %}"></span>
+      </a>
     {% else %}
       &nbsp;
     {% endif %}
