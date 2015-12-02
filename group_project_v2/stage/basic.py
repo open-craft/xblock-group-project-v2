@@ -126,10 +126,6 @@ class SubmissionStage(BaseGroupActivityStage):
     def has_submissions(self):
         return bool(self.submissions)  # explicitly converting to bool to indicate that it is bool property
 
-    @property
-    def is_graded_stage(self):
-        return True
-
     def validate(self):
         violations = super(SubmissionStage, self).validate()
 
