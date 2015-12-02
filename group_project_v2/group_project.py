@@ -278,6 +278,12 @@ class GroupActivityXBlock(
         return self.scope_ids.usage_id
 
     def max_score(self):
+        """
+        Used for grading purposes:
+            * As max grade for submitting grade event. See :method:`assign_grade_to_group`
+            * As theoretical max score for grade calculation when grade is not yet available
+        :rtype: Float
+        """
         return self.weight
 
     @property
@@ -480,6 +486,12 @@ class GroupActivityXBlock(
                 self.mark_complete(user.id)
 
     def assign_grade_to_group(self, group_id, grade_value):
+        """
+        Assigns grade to group, fires required events and notifications
+        :param int group_id: Group ID
+        :param float grade_value: Grade to assign
+        :return:
+        """
         self.project_api.set_group_grade(
             group_id,
             self.course_id,
