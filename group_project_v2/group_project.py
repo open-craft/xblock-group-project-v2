@@ -184,7 +184,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         return fragment
 
     def dashboard_detail_view(self, context):
-        raise Exception("Should not be shown - detail views are not supported on GroupProject block")
+        return Fragment(u"Dashboard details view")
 
     def validate(self):
         validation = super(GroupProjectXBlock, self).validate()
@@ -361,7 +361,11 @@ class GroupActivityXBlock(
             xblock_settings = settings_service.get_settings_bucket(self)
             if xblock_settings and self.DASHBOARD_DETAILS_URL_KEY in xblock_settings:
                 template = xblock_settings[self.DASHBOARD_DETAILS_URL_KEY]
-        return template.format(activity_id=self.id)
+
+        return template.format(
+            program_id=self.user_preferences.get(self.DASHBOARD_PROGRAM_ID_KEY, None),
+            course_id=self.course_id, project_id=self.project.scope_ids.usage_id, activity_id=self.id
+        )
 
     @staticmethod
     def _chain_questions(stages, question_type):
@@ -474,8 +478,7 @@ class GroupActivityXBlock(
 
     @outsider_disallowed_protected_view
     def dashboard_detail_view(self, context):
-        # TODO: implement detail view
-        pass
+        return Fragment(u"Dashboard details view")
 
     def mark_complete(self, user_id):
         self.runtime.publish(self, 'progress', {'user_id': user_id})

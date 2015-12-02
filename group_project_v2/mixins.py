@@ -249,6 +249,8 @@ class NoStudioEditableSettingsMixin(object):
 
 class DashboardXBlockMixin(object):
     """ Mixin for an XBlock that has dashboard views """
+    DASHBOARD_PROGRAM_ID_KEY = "DASHBOARD_PROGRAM_ID"
+
     def dashboard_view(self, context):
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
@@ -316,4 +318,6 @@ class CommonMixinCollection(
     StudioEditableXBlockMixin, StudioContainerXBlockMixin,
     WorkgroupAwareXBlockMixin, TemplateManagerMixin
 ):
+    block_settings_key = 'group_project_v2'
+
     pass
