@@ -538,8 +538,28 @@ class GroupActivityXBlock(
             stages.append({"id": stage.id, 'content': fragment.content})
 
         groups_data = [
-            {'name': 'Group 1', 'users': [1, 2, 3], 'stages': {stage.id: 'incomplete' for stage in target_stages}},
-            {'name': 'Group 2', 'users': [1, 2, 3], 'stages': {stage.id: 'incomplete' for stage in target_stages}}
+            {
+                'id': 1, 'name': 'Group 1', 'stages': {stage.id: 'incomplete' for stage in target_stages},
+                'users': [
+                    {
+                        'full_name': "John Doe", 'email': "john_doe@examle.com",
+                        'stages': {stage.id: 'incomplete' for stage in target_stages}
+                    },
+                    {
+                        'full_name': "Jane Doe", 'email': "jane_doe@examle.com",
+                        'stages': {stage.id: 'incomplete' for stage in target_stages}
+                    },
+                ]
+            },
+            {
+                'id': 2, 'name': 'Group 2', 'stages': {stage.id: 'incomplete' for stage in target_stages},
+                'users': [
+                    {
+                        'full_name': "Jack Doe", 'email': "jack_doe@examle.com",
+                        'stages': {stage.id: 'incomplete' for stage in target_stages}
+                    },
+                ]
+            }
         ]
         stage_cell_width_percent = (100-30) / float(len(target_stages))
 

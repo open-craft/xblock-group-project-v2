@@ -23,11 +23,22 @@
       </tr>
       {% for group in groups %}
       <tr>
-        <td>{{ group.name }}</td>
+        <td class="group-cell">{{ group.name }}</td>
         {% for stage in stages %}
           <td>{{ group.stages|get_item:stage.id }}</td>
         {% endfor %}
       </tr>
+        {% for user in group.users %}
+          <tr class="user-data-row group_{{group.id}}">
+            <td class="user-cell">
+              <div class="user-full-name">{{ user.full_name }}</div>
+              <div class="user-email">{{ user.email }}</div>
+            </td>
+            {% for stage in stages %}
+              <td>{{ user.stages|get_item:stage.id }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
       {% endfor %}
     </table>
   </div>

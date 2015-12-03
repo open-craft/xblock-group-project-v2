@@ -156,6 +156,10 @@ table.activity-data {
 }
 
 table.activity-data td, table.activity-data th {
+    border: solid 2px #ddd;
+}
+
+table.activity-data tr.user-data-row td, table.activity-data tr.user-data-row th {
     border: solid 1px #ddd;
 }
 
@@ -183,7 +187,7 @@ table.activity-data tr th:last-child {
 
 table.activity-data tr.legend {
     border-top: none;
-    border-bottom: 2px solid #ddd;
+    border-bottom: 3px solid #ddd;
 }
 
 table.activity-data tr.legend .assigned_to_groups_label {
@@ -203,4 +207,12 @@ table.activity-data tr.legend .email_icon_explanation .email_icon {
 
 table.activity-data tr.legend td.stage_header {
     text-align: center;
+}
+
+table.activity-data tr td.group-cell {
+    color: #3384CA;
+}
+
+table.activity-data tr.tr.user-data-row {
+    display: hidden;
 }
