@@ -530,13 +530,22 @@ class GroupActivityXBlock(
 
         target_stages = [stage for stage in self.stages if stage.is_graded_stage]
         stage_fragments = self._render_children('dashboard_detail_view', children_context, target_stages)
-        stage_contents = [frag.content for frag in stage_fragments]
-        fragment.add_frags_resources(stage_fragments)
 
-        groups_data = ['group1', 'group2']
+        stages = []
+        for stage in target_stages:
+            fragment = stage.render('dashboard_detail_view', children_context)
+            fragment.add_frags_resources(stage_fragments)
+            stages.append({"id": stage.id, 'content': fragment.content})
+
+        groups_data = [
+            {'name': 'Group 1', 'users': [1, 2, 3], 'stages': {stage.id: 'incomplete' for stage in target_stages}},
+            {'name': 'Group 2', 'users': [1, 2, 3], 'stages': {stage.id: 'incomplete' for stage in target_stages}}
+        ]
+        stage_cell_width_percent = (100-30) / float(len(target_stages))
 
         render_context = {
-            'activity': self, 'stage_contents': stage_contents, 'stages_count': len(target_stages),
+            'activity': self, 'stages': stages, 'stages_count': len(stages), 'groups': groups_data,
+            'cell_width_percent': stage_cell_width_percent,
             'assigned_to_groups_label': messages.ASSIGNED_TO_GROUPS_LABEL.format(group_count=len(groups_data))
         }
         fragment.add_content(self.render_template('dashboard_detail_view', render_context))

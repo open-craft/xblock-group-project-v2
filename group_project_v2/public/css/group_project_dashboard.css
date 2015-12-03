@@ -69,7 +69,9 @@
 
 .group-project-xblock-wrapper .stage.dashboard-view .stage-data .group-project-stage-title,
 .group-project-xblock-wrapper .stage.dashboard-detail-view .stage-data .group-project-stage-title {
+    line-height: 18px;
     font-size: 14px;
+    height: 36px;
     color: #3384CA;
 }
 

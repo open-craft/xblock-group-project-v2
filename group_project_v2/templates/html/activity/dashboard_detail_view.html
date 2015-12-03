@@ -17,18 +17,18 @@
             <span class="email_icon fa fa-icon fa-envelope-o"></span> {% trans "will export a list of emails within stage of partially complete/incomplete teams" %}
           </div>
         </td>
-        {% for stage_content in stage_contents %}
-          <td class="stage_header">{{stage_content|safe}}</td>
+        {% for stage in stages %}
+          <td class="stage_header" style="width: {{cell_width_percent}}%">{{stage.content|safe}}</td>
         {% endfor %}
       </tr>
+      {% for group in groups %}
       <tr>
-        <td>Group 1</td>
-        <td>Group 2</td>
+        <td>{{ group.name }}</td>
+        {% for stage in stages %}
+          <td>{{ group.stages|get_item:stage.id }}</td>
+        {% endfor %}
       </tr>
-      <tr>
-        <td>Group 1</td>
-        <td>Group 2</td>
-      </tr>
+      {% endfor %}
     </table>
   </div>
 </div>

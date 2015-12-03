@@ -5,6 +5,7 @@ from datetime import date, datetime, timedelta
 import xml.etree.ElementTree as ET
 
 from django.conf import settings
+from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
 from lazy.lazy import lazy
 from xblock.fragment import Fragment
@@ -288,3 +289,8 @@ def add_resource(block, resource_type, path, fragment, via_url=False):
 
 def get_block_content_id(block):
     return unicode(block.scope_ids.usage_id)
+
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
