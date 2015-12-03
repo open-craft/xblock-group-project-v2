@@ -1,6 +1,7 @@
 function GroupProjectBlockDashboardDetailsView(runtime, element) {
     var group_user_rows_selector_prefix = ".user-data-row.group_";
     var group_collapsed_icon_selector = '.group-collapsed-icon';
+    var group_work_nav_icon_selector = '.grade_group_icon';
     var icons = {
         collapsed: "fa-caret-right",
         expanded: "fa-caret-down"
@@ -19,6 +20,7 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
         $(group_label).data(data_attributes.collapsed, collapsed_values.expanded);
         $(group_user_rows_selector, element).show();
         $(group_collapsed_icon_selector, group_label).removeClass(icons.collapsed).addClass(icons.expanded);
+        $(group_work_nav_icon_selector, group_label).show();
     }
 
     function collapse_group(group_label, group_id) {
@@ -26,6 +28,7 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
         $(group_label).data(data_attributes.collapsed, collapsed_values.collapsed);
         $(group_user_rows_selector, element).hide();
         $(group_collapsed_icon_selector, group_label).removeClass(icons.expanded).addClass(icons.collapsed);
+        $(group_work_nav_icon_selector, group_label).hide();
     }
 
     $(document).ready(function () {

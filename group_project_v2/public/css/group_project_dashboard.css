@@ -222,6 +222,12 @@ table.activity-data tr td .group-label {
     cursor: pointer;
 }
 
+table.activity-data tr td .group-label .grade_group_icon {
+    display: none;
+    float: right;
+    font-family: FontAwesome;
+}
+
 table.activity-data tr td .grading-group-label {
     color: #868685;
 }
@@ -229,3 +235,4 @@ table.activity-data tr td .grading-group-label {
 table.activity-data tr.user-data-row {
     display: none;
 }
+

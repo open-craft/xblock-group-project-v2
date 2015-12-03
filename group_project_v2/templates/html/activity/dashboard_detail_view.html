@@ -24,10 +24,11 @@
       {% for group in groups %}
       <tr class="data">
         <td>
-          <span class="group-label" data-group-id="{{group.id}}" data-collapsed="collapsed">
+          <div class="group-label" data-group-id="{{group.id}}" data-collapsed="collapsed">
             <span class="fa fa-icon fa-caret-right group-collapsed-icon"></span>
             {{ group|render_group:"verbose" }}
-          </span>
+            <span class="fa fa-icon fa-users grade_group_icon"></span>
+          </div>
         </td>
         {% for stage in stages %}
           <td>
