@@ -92,6 +92,16 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
 
         return get_default_stage(default_stages)
 
+    @staticmethod
+    def _render_child_fragment(child, context, fallback_message, view='student_view'):
+        if child:
+            log.debug("Rendering {child} with context: {context}".format(
+                child=child.__class__.__name__, context=context,
+            ))
+            return child.render(view, context)
+        else:
+            return Fragment(fallback_message)
+
     @outsider_disallowed_protected_view
     def student_view(self, context):
         ctx = self._sanitize_context(context)
@@ -114,15 +124,9 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
             if extra_context:
                 internal_context.update(extra_context)
 
-            if child:
-                log.debug("Rendering {child} with context: {context}".format(
-                    child=child.__class__.__name__, context=internal_context,
-                ))
-                child_fragment = child.render('student_view', internal_context)
-                fragment.add_frag_resources(child_fragment)
-                render_context[content_key] = child_fragment.content
-            else:
-                render_context[content_key] = fallback_message
+            child_fragment = self._render_child_fragment(child, internal_context, fallback_message, 'student_view')
+            fragment.add_frag_resources(child_fragment)
+            render_context[content_key] = child_fragment.content
 
         target_block_id = self.get_block_id_from_string(ctx.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME, None))
         target_stage = self.get_stage_to_display(target_block_id)
