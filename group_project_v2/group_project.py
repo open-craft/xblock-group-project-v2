@@ -181,7 +181,31 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         return fragment
 
     def dashboard_detail_view(self, context):
-        return Fragment(u"Dashboard details view")
+        ctx = self._sanitize_context(context)
+
+        fragment = Fragment()
+        render_context = {
+            'project': self,
+            'course_id': self.course_id,
+            'group_id': self.workgroup.id
+        }
+
+        render_context.update(ctx)
+
+        target_block_id = self.get_block_id_from_string(ctx.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME, None))
+        target_activity = self._get_target_block(target_block_id)
+        if target_activity is None and self.activities:
+            target_activity = self.activities[0]
+
+        activity_fragment = self._render_child_fragment_with_fallback(
+            target_activity, ctx, messages.NO_ACTIVITIES, view='dashboard_detail_view'
+        )
+        render_context['activity_content'] = activity_fragment.content
+        fragment.add_frag_resources(activity_fragment)
+
+        fragment.add_content(self.render_template('dashboard_detail_view', render_context))
+
+        return fragment
 
     def validate(self):
         validation = super(GroupProjectXBlock, self).validate()
@@ -194,16 +218,22 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
 
         return validation
 
-    def get_stage_to_display(self, target_block_id):
+    def _get_target_block(self, target_block_id):
         try:
             if target_block_id:
-                target_block = self.runtime.get_block(target_block_id)
-                if self.get_child_category(target_block) in STAGE_TYPES and target_block.available_to_current_user:
-                    return target_block
-                if isinstance(target_block, GroupActivityXBlock):
-                    return target_block.default_stage
+                return self.runtime.get_block(target_block_id)
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
+
+        return None
+
+    def get_stage_to_display(self, target_block_id):
+        target_block = self._get_target_block(target_block_id)
+        if target_block is not None:
+            if self.get_child_category(target_block) in STAGE_TYPES and target_block.available_to_current_user:
+                return target_block
+            if isinstance(target_block, GroupActivityXBlock):
+                return target_block.default_stage
 
         default_stage = self.default_stage
         if default_stage:
@@ -475,7 +505,7 @@ class GroupActivityXBlock(
 
     @outsider_disallowed_protected_view
     def dashboard_detail_view(self, context):
-        return Fragment(u"Dashboard details view")
+        return Fragment(u"Dashboard details view {}".format(self.id))
 
     def mark_complete(self, user_id):
         self.runtime.publish(self, 'progress', {'user_id': user_id})
