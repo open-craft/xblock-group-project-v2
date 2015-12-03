@@ -338,8 +338,7 @@ class BaseGroupActivityStage(
         return fragment
 
     def dashboard_detail_view(self, context):
-        # TODO: implement detail view
-        pass
+        return Fragment()
 
     def get_new_stage_state_data(self):
         return {

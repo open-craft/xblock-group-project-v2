@@ -20,6 +20,7 @@ MUST_CONTAIN_PROJECT_NAVIGATOR_BLOCK = _(u"Group Project must contain Project Na
 # Group Activity XBlock messages
 NO_STAGES = _(u"This Group Project Activity does not contain any stages")
 SHOULD_BE_INTEGER = _(u"{field_name} must be integer, {field_value} given")
+ASSIGNED_TO_GROUPS_LABEL = _(u"This project is assigned to {group_count} group(s)")
 
 # Project Navigator messages
 MUST_CONTAIN_NAVIGATION_VIEW = _(u"Project Navigator must contain Navigation view")

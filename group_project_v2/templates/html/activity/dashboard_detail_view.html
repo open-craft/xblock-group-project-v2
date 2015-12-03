@@ -1,0 +1,32 @@
+{% load i18n %}
+<div class="activity dashboard-detail-view">
+  <div class="activity-header">
+    <span class="activity-header-label">{% trans "Activity:" %}</span>
+    <span class="activity-header-title">{{ activity.display_name }}</span>
+  </div>
+  <div class="stages">
+    <table class="stage-data">
+      <tr>
+        <th>{% trans "Groups" %}:</th>
+        <th colspan="{{stages_count}}">{% trans "Graded/Required Stages" %}:</th>
+      </tr>
+      <tr class="legend">
+        <td>
+          <div class="assigned_to_groups_label">{{ assigned_to_groups_label }}</div>
+          <div class="email_icon_explanation">
+            <span class="email_icon fa fa-icon fa-envelope-o"></span> {% trans "will export a list of emails within stage of partially complete/incomplete teams" %}
+          </div>
+        </td>
+        <td>Stage placeholder</td>
+      </tr>
+      <tr>
+        <td>Group 1</td>
+        <td>Group 2</td>
+      </tr>
+      <tr>
+        <td>Group 1</td>
+        <td>Group 2</td>
+      </tr>
+    </table>
+  </div>
+</div>

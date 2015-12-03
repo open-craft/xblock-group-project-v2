@@ -204,6 +204,9 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         fragment.add_frag_resources(activity_fragment)
 
         fragment.add_content(self.render_template('dashboard_detail_view', render_context))
+        add_resource(self, 'css', 'public/css/group_project_common.css', fragment)
+        add_resource(self, 'css', 'public/css/group_project_dashboard.css', fragment)
+        add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment, via_url=True)
 
         return fragment
 
@@ -487,6 +490,21 @@ class GroupActivityXBlock(
 
         return fragment
 
+    def _render_dashboard_view(self, context, view):
+        fragment = Fragment()
+
+        children_context = context.copy()
+        self._append_context_parameters_if_not_present(children_context)
+
+        stage_fragments = self._render_children(view, children_context, self.stages)
+        stage_contents = [frag.content for frag in stage_fragments]
+        fragment.add_frags_resources(stage_fragments)
+
+        render_context = {'activity': self, 'stage_contents': stage_contents}
+        fragment.add_content(self.render_template(view, render_context))
+
+        return fragment
+
     @outsider_disallowed_protected_view
     def dashboard_view(self, context):
         fragment = Fragment()
@@ -505,7 +523,25 @@ class GroupActivityXBlock(
 
     @outsider_disallowed_protected_view
     def dashboard_detail_view(self, context):
-        return Fragment(u"Dashboard details view {}".format(self.id))
+        fragment = Fragment()
+
+        children_context = context.copy()
+        self._append_context_parameters_if_not_present(children_context)
+
+        target_stages = [stage for stage in self.stages if stage.is_graded_stage]
+        stage_fragments = self._render_children('dashboard_detail_view', children_context, target_stages)
+        stage_contents = [frag.content for frag in stage_fragments]
+        fragment.add_frags_resources(stage_fragments)
+
+        groups_data = ['group1', 'group2']
+
+        render_context = {
+            'activity': self, 'stage_contents': stage_contents, 'stages_count': len(target_stages),
+            'assigned_to_groups_label': messages.ASSIGNED_TO_GROUPS_LABEL.format(group_count=len(groups_data))
+        }
+        fragment.add_content(self.render_template('dashboard_detail_view', render_context))
+
+        return fragment
 
     def mark_complete(self, user_id):
         self.runtime.publish(self, 'progress', {'user_id': user_id})
