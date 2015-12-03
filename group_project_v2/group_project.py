@@ -11,6 +11,7 @@ from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import XBlockWithPreviewMixin, NestedXBlockSpec
 
+from group_project_v2 import messages
 from group_project_v2.mixins import CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
@@ -93,7 +94,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         return get_default_stage(default_stages)
 
     @staticmethod
-    def _render_child_fragment(child, context, fallback_message, view='student_view'):
+    def _render_child_fragment_with_fallback(child, context, fallback_message, view='student_view'):
         if child:
             log.debug("Rendering {child} with context: {context}".format(
                 child=child.__class__.__name__, context=context,
@@ -124,7 +125,9 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
             if extra_context:
                 internal_context.update(extra_context)
 
-            child_fragment = self._render_child_fragment(child, internal_context, fallback_message, 'student_view')
+            child_fragment = self._render_child_fragment_with_fallback(
+                child, internal_context, fallback_message, 'student_view'
+            )
             fragment.add_frag_resources(child_fragment)
             render_context[content_key] = child_fragment.content
 
@@ -138,27 +141,17 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         # activity should be rendered first, as some stages might report completion in student-view - this way stage
         # PN sees updated state.
         target_activity = target_stage.activity if target_stage else None
-        render_child_fragment(
-            target_activity, 'activity_content', _(u"This Group Project does not contain any activities"),
-            child_context
-        )
+        render_child_fragment(target_activity, 'activity_content', messages.NO_ACTIVITIES, child_context)
 
         # TODO: project nav is slow, mostly due to navigation view. It might make sense to rework it into
         # asynchronously loading navigation and stage states.
         project_navigator = self.get_child_of_category(GroupProjectNavigatorXBlock.CATEGORY)
         render_child_fragment(
-            project_navigator, 'project_navigator_content',
-            _(u"This Group Project V2 does not contain Project Navigator - "
-              u"please edit course outline in Studio to include one"),
-            child_context
+            project_navigator, 'project_navigator_content', messages.NO_PROJECT_NAVIGATOR, child_context
         )
 
         discussion = self.get_child_of_category(DiscussionXBlockShim.CATEGORY)
-        render_child_fragment(
-            discussion, 'discussion_content',
-            _(u"This Group Project V2 does not contain a discussion"),
-            child_context
-        )
+        render_child_fragment(discussion, 'discussion_content', messages.NO_DISCUSSION, child_context)
 
         fragment.add_content(self.render_template('student_view', render_context))
 
@@ -196,7 +189,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         if not self.has_child_of_category(GroupProjectNavigatorXBlock.CATEGORY):
             validation.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                _(u"Group Project must contain Project Navigator Block")
+                messages.MUST_CONTAIN_PROJECT_NAVIGATOR_BLOCK
             ))
 
         return validation
@@ -397,7 +390,7 @@ class GroupActivityXBlock(
         target_stage = self.get_stage_to_display(current_stage_id)
 
         if not target_stage:
-            fragment.add_content(_(u"This Group Project Activity does not contain any stages"))
+            fragment.add_content(messages.NO_STAGES)
         else:
             stage_fragment = target_stage.render('student_view', context)
             fragment.add_frag_resources(stage_fragment)

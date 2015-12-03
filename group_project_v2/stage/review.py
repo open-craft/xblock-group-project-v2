@@ -7,6 +7,8 @@ import webob
 from xblock.core import XBlock
 from xblock.fields import String, Scope, Boolean
 from xblock.validation import ValidationMessage
+
+from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.stage.base import BaseGroupActivityStage
 from group_project_v2.stage_components import (
@@ -33,9 +35,6 @@ class ReviewBaseStage(BaseGroupActivityStage):
     REVIEW_ITEM_KEY = None
 
     STAGE_ACTION = _(u"save feedback")
-    FEEDBACK_SAVED_MESSAGE = _(u'Thanks for your feedback.')
-
-    TA_GRADING_NOT_ALLOWED = _(u"TA grading is not allowed for this stage")
 
     # (has_some, has_all) -> ReviewState. have_all = True and have_some = False is obviously an error
     REVIEW_STATE_CONDITIONS = {
@@ -80,7 +79,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
         if not self.questions:
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                _(u"Questions are not specified for {class_name} '{stage_title}'").format(
+                messages.QUESTION_BLOCKS_ARE_MISSING.format(
                     class_name=self.__class__.__name__, stage_title=self.display_name
                 )
             ))
@@ -174,10 +173,10 @@ class ReviewBaseStage(BaseGroupActivityStage):
     def submit_review(self, submissions, _context=''):
         # if admin grader - still allow providing grades even for non-TA-graded activities
         if self.is_admin_grader and not self.allow_admin_grader_access:
-            return {'result': 'error', 'msg': self.TA_GRADING_NOT_ALLOWED}
+            return {'result': 'error', 'msg': messages.TA_GRADING_NOT_ALLOWED}
 
         if not self.available_now:
-            reason = self.STAGE_NOT_OPEN_TEMPLATE if not self.is_open else self.STAGE_CLOSED_TEMPLATE
+            reason = messages.STAGE_NOT_OPEN_TEMPLATE if not self.is_open else messages.STAGE_CLOSED_TEMPLATE
             return {'result': 'error', 'msg': reason.format(action=self.STAGE_ACTION)}
 
         try:
@@ -191,7 +190,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
         return {
             'result': 'success',
-            'msg': self.FEEDBACK_SAVED_MESSAGE,
+            'msg': messages.FEEDBACK_SAVED_MESSAGE,
             'new_stage_states': [self.get_new_stage_state_data()]
         }
 
@@ -265,7 +264,7 @@ class TeamEvaluationStage(ReviewBaseStage):
         if self.grade_questions:
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                _(u"Grade questions are not supported for {class_name} stage '{stage_title}'").format(
+                messages.GRADED_QUESTIONS_NOT_SUPPORTED.format(
                     class_name=self.STUDIO_LABEL, stage_title=self.display_name
                 )
             ))
@@ -273,9 +272,7 @@ class TeamEvaluationStage(ReviewBaseStage):
         if not self.has_child_of_category(PeerSelectorXBlock.CATEGORY):
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                _(
-                    u"{class_name} stage '{stage_title}' is missing required component '{peer_selector_class_name}'"
-                ).format(
+                messages.PEER_SELECTOR_BLOCK_IS_MISSING.format(
                     class_name=self.STUDIO_LABEL, stage_title=self.display_name,
                     peer_selector_class_name=PeerSelectorXBlock.STUDIO_LABEL
                 )
@@ -418,7 +415,7 @@ class PeerReviewStage(ReviewBaseStage):
         if not self.grade_questions:
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                _(u"Grade questions are required for {class_name} stage '{stage_title}'").format(
+                messages.GRADED_QUESTIONS_ARE_REQUIRED.format(
                     class_name=self.STUDIO_LABEL, stage_title=self.display_name
                 )
             ))
@@ -426,9 +423,7 @@ class PeerReviewStage(ReviewBaseStage):
         if not self.has_child_of_category(GroupSelectorXBlock.CATEGORY):
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                _(
-                    u"{class_name} stage '{stage_title}' is missing required component '{group_selector_class_name}'"
-                ).format(
+                messages.GROUP_SELECTOR_BLOCK_IS_MISSING.format(
                     class_name=self.STUDIO_LABEL, stage_title=self.display_name,
                     group_selector_class_name=GroupSelectorXBlock.STUDIO_LABEL
                 )

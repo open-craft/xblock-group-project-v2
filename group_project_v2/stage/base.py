@@ -7,6 +7,8 @@ from xblock.core import XBlock
 from xblock.fields import DateTime, Scope, Boolean
 from xblock.fragment import Fragment
 from xblockutils.studio_editable import XBlockWithPreviewMixin
+
+from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import (
     CommonMixinCollection, XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
@@ -66,14 +68,9 @@ class BaseGroupActivityStage(
 
     NAVIGATION_LABEL = None
     STUDIO_LABEL = _(u"Stage")
-    STAGE_COMPLETION_MESSAGE = _(u"This task has been marked as complete.")
 
     js_file = None
     js_init = None
-
-    STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as it's not yet opened.")
-    STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as it's closed.")
-    STAGE_URL_NAME_TEMPLATE = _(u"url_name to link to this {stage_name}:")
 
     template_location = 'stages'
 
@@ -168,7 +165,7 @@ class BaseGroupActivityStage(
 
     @property
     def url_name_caption(self):
-        return self.STAGE_URL_NAME_TEMPLATE.format(stage_name=self.STUDIO_LABEL)
+        return messages.STAGE_URL_NAME_TEMPLATE.format(stage_name=self.STUDIO_LABEL)
 
     @property
     def can_mark_complete(self):

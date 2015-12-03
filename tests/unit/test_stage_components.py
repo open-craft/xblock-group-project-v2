@@ -11,13 +11,16 @@ from xblock.fields import ScopeIds
 from xblock.runtime import Runtime
 from xblock.validation import ValidationMessage
 
+from group_project_v2 import messages
 from group_project_v2.group_project import GroupActivityXBlock
 from group_project_v2.project_api import TypedProjectAPI
 from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.project_navigator import ProjectNavigatorViewXBlockBase
 from group_project_v2.stage import BaseGroupActivityStage
-from group_project_v2.stage_components import StaticContentBaseXBlock, GroupProjectSubmissionXBlock, \
+from group_project_v2.stage_components import (
+    StaticContentBaseXBlock, GroupProjectSubmissionXBlock,
     GroupProjectReviewQuestionXBlock, GroupProjectTeamEvaluationDisplayXBlock, GroupProjectGradeEvaluationDisplayXBlock
+)
 from group_project_v2.upload_file import UploadFile
 from tests.utils import TestWithPatchesMixin, make_api_error, make_review_item as mri, make_question
 
@@ -208,10 +211,10 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
             response = self.block.upload_submission(request_mock)
             self.assertEqual(response.status_code, expected_code)
             response_body = json.loads(response.body)
-            self.assertEqual(response_body['title'], GroupProjectSubmissionXBlock.FAILED_UPLOAD_TITLE)
+            self.assertEqual(response_body['title'], messages.FAILED_UPLOAD_TITLE)
             self.assertEqual(
                 response_body['message'],
-                GroupProjectSubmissionXBlock.FAILED_UPLOAD_MESSAGE_TPL.format(error_goes_here=exception.message)
+                messages.FAILED_UPLOAD_MESSAGE_TPL.format(error_goes_here=exception.message)
             )
 
     @ddt.data(
@@ -247,7 +250,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
             response = self.block.upload_submission(request_mock)
             self.assertEqual(response.status_code, 200)
             response_payload = json.loads(response.body)
-            self.assertEqual(response_payload['title'], self.block.SUCCESSFUL_UPLOAD_TITLE)
+            self.assertEqual(response_payload['title'], messages.SUCCESSFUL_UPLOAD_TITLE)
             self.assertEqual(response_payload["submissions"], {submission_id: file_url})
             self.assertEqual(response_payload["new_stage_states"], [stage_state])
             self.assertEqual(response_payload["user_label"], 'Test label')
