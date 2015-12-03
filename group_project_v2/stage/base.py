@@ -21,7 +21,7 @@ from group_project_v2.stage_components import (
 from group_project_v2.utils import (
     gettext as _, HtmlXBlockShim, format_date, Constants, loader,
     outsider_disallowed_protected_view, add_resource, MUST_BE_OVERRIDDEN, get_link_to_block, get_block_content_id,
-    outsider_disallowed_protected_handler)
+)
 from group_project_v2.stage.utils import StageState
 
 

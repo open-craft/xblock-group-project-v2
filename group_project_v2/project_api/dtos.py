@@ -72,7 +72,12 @@ class ReducedUserDetails(object):
         self.url = kwargs.get('url')
         self.username = kwargs.get('username')
         self.email = kwargs.get('email')
+        self.first_name = kwargs.get('first_name')
+        self.last_name = kwargs.get('last_name')
 
+    @property
+    def full_name(self):
+        return u" ".join([unicode(part) for part in (self.first_name, self.last_name) if part is not None])
 
 class CompletionDetails(object):
     def __init__(self, **kwargs):

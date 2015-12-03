@@ -182,6 +182,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
 
     def dashboard_detail_view(self, context):
         ctx = self._sanitize_context(context)
+        self._append_context_parameters_if_not_present(ctx)
 
         fragment = Fragment()
         render_context = {
@@ -528,6 +529,9 @@ class GroupActivityXBlock(
         children_context = context.copy()
         self._append_context_parameters_if_not_present(children_context)
 
+        target_workgroups = context.get(DashboardRootXBlockMixin.TARGET_WORKGROUPS)
+        target_users = context.get(DashboardRootXBlockMixin.TARGET_STUDENTS)
+
         target_stages = [stage for stage in self.stages if stage.is_graded_stage]
         stage_fragments = self._render_children('dashboard_detail_view', children_context, target_stages)
 
@@ -537,33 +541,15 @@ class GroupActivityXBlock(
             fragment.add_frags_resources(stage_fragments)
             stages.append({"id": stage.id, 'content': fragment.content})
 
-        groups_data = [
-            {
-                'id': 1, 'name': 'Group 1', 'stages': {stage.id: 'incomplete' for stage in target_stages},
-                'users': [
-                    {
-                        'full_name': "John Doe", 'email': "john_doe@examle.com",
-                        'stage_states': {stage.id: 'incomplete' for stage in target_stages},
-                        'groups_to_grade': {stage.id: [] for stage in target_stages}
-                    },
-                    {
-                        'full_name': "Jane Doe", 'email': "jane_doe@examle.com",
-                        'stage_states': {stage.id: 'incomplete' for stage in target_stages},
-                        'groups_to_grade': {stage.id: [{'id': 2, 'name': 'Group 2'}] for stage in target_stages}
-                    },
-                ]
-            },
-            {
-                'id': 2, 'name': 'Group 2', 'stages': {stage.id: 'incomplete' for stage in target_stages},
-                'users': [
-                    {
-                        'full_name': "Jack Doe", 'email': "jack_doe@examle.com",
-                        'stage_states': {stage.id: 'incomplete' for stage in target_stages},
-                        'groups_to_grade': {stage.id: [{'id': 1, 'name': 'Group 1'}] for stage in target_stages}
-                    },
-                ]
-            }
-        ]
+        groups_data = self._convert_groups_to_dict(target_workgroups)
+
+        # modifies in place - functional purist in me cries :(
+        for group in groups_data:
+            group['stages'] = {stage.id: 'incomplete' for stage in target_stages}
+            for user in group['users']:
+                user['stage_states'] = {stage.id: 'incomplete' for stage in target_stages}
+                user['groups_to_grade'] = {stage.id: [{'id': 2, 'name': 'Group 2'}] for stage in target_stages}
+
         stage_cell_width_percent = (100-30) / float(len(target_stages))
 
         render_context = {
@@ -574,6 +560,23 @@ class GroupActivityXBlock(
         fragment.add_content(self.render_template('dashboard_detail_view', render_context))
 
         return fragment
+
+    def _convert_groups_to_dict(self, workgroups):
+        """
+        Converts WorkgroupDetails into dict expected by dashboard_detail_view template
+        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] wworkgroups: Workgroups
+        :rtype: list[dict]
+        """
+        return [
+            {
+                'id': group.id, 'stages': {},
+                'users': [
+                    {'full_name': user.full_name, 'email': user.email, 'stage_states': {}, 'groups_to_grade': []}
+                    for user in group.users
+                ]
+             }
+            for group in workgroups
+        ]
 
     def mark_complete(self, user_id):
         self.runtime.publish(self, 'progress', {'user_id': user_id})
