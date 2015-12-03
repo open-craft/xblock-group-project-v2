@@ -209,10 +209,22 @@ table.activity-data tr.legend td.stage_header {
     text-align: center;
 }
 
-table.activity-data tr td.group-cell {
+table.activity-data tr.data td {
+    text-align: center;
+}
+
+table.activity-data tr td:first-child {
+    text-align: left;
+}
+
+table.activity-data tr td .group-label {
     color: #3384CA;
 }
 
+table.activity-data tr td .grading-group-label {
+    color: #868685;
+}
+
 table.activity-data tr.tr.user-data-row {
-    display: hidden;
+    /*display: none;*/
 }

@@ -543,11 +543,13 @@ class GroupActivityXBlock(
                 'users': [
                     {
                         'full_name': "John Doe", 'email': "john_doe@examle.com",
-                        'stages': {stage.id: 'incomplete' for stage in target_stages}
+                        'stage_states': {stage.id: 'incomplete' for stage in target_stages},
+                        'groups_to_grade': {stage.id: [] for stage in target_stages}
                     },
                     {
                         'full_name': "Jane Doe", 'email': "jane_doe@examle.com",
-                        'stages': {stage.id: 'incomplete' for stage in target_stages}
+                        'stage_states': {stage.id: 'incomplete' for stage in target_stages},
+                        'groups_to_grade': {stage.id: [{'id': 2, 'name': 'Group 2'}] for stage in target_stages}
                     },
                 ]
             },
@@ -556,7 +558,8 @@ class GroupActivityXBlock(
                 'users': [
                     {
                         'full_name': "Jack Doe", 'email': "jack_doe@examle.com",
-                        'stages': {stage.id: 'incomplete' for stage in target_stages}
+                        'stage_states': {stage.id: 'incomplete' for stage in target_stages},
+                        'groups_to_grade': {stage.id: [{'id': 1, 'name': 'Group 1'}] for stage in target_stages}
                     },
                 ]
             }

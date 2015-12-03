@@ -18,24 +18,36 @@
           </div>
         </td>
         {% for stage in stages %}
-          <td class="stage_header" style="width: {{cell_width_percent}}%">{{stage.content|safe}}</td>
+          <td class="stage_header" style="width:{{cell_width_percent}}%">{{stage.content|safe}}</td>
         {% endfor %}
       </tr>
       {% for group in groups %}
-      <tr>
-        <td class="group-cell">{{ group.name }}</td>
+      <tr class="data">
+        <td><span class="group-label">{{ group|render_group:"verbose" }}</span></td>
         {% for stage in stages %}
-          <td>{{ group.stages|get_item:stage.id }}</td>
+          <td>
+            <span class="group-project-stage-state fa {{ group.stages|get_item:stage.id }}"></span>
+          </td>
         {% endfor %}
       </tr>
         {% for user in group.users %}
-          <tr class="user-data-row group_{{group.id}}">
+          <tr class="user-data-row data group_{{group.id}}">
             <td class="user-cell">
               <div class="user-full-name">{{ user.full_name }}</div>
               <div class="user-email">{{ user.email }}</div>
             </td>
             {% for stage in stages %}
-              <td>{{ user.stages|get_item:stage.id }}</td>
+              <td>
+                <span class="group-project-stage-state fa {{ user.stage_states|get_item:stage.id }}"></span>
+                {% with user.groups_to_grade|get_item:stage.id as groups %}
+                  {% if groups %}
+                    <span class="grading-group-label">{% trans "Grading:" %}</span>
+                    {% for group in groups %}
+                      <span class="group-label">{{ group|render_group }}</span>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+              </td>
             {% endfor %}
           </tr>
         {% endfor %}

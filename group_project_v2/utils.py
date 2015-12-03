@@ -293,4 +293,16 @@ def get_block_content_id(block):
 
 @register.filter
 def get_item(dictionary, key):
-    return dictionary.get(key)
+    try:
+        return dictionary.get(key)
+    except (AttributeError, KeyError):
+        log.exception("Error getting '%(key)s' from '%(dictionary)s'", dict(key=key, dictionary=dictionary))
+        raise
+
+
+@register.filter
+def render_group(group, verbose=False):
+    template = _(u"#{group_id}")
+    if verbose:
+        template = _(u"Group #{group_id}")
+    return template.format(group_id=group['id'])
