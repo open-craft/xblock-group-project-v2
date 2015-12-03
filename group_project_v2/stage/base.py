@@ -20,8 +20,8 @@ from group_project_v2.stage_components import (
 )
 from group_project_v2.utils import (
     gettext as _, HtmlXBlockShim, format_date, Constants, loader,
-    outsider_disallowed_protected_view, add_resource, MUST_BE_OVERRIDDEN, get_link_to_block, get_block_content_id
-)
+    outsider_disallowed_protected_view, add_resource, MUST_BE_OVERRIDDEN, get_link_to_block, get_block_content_id,
+    outsider_disallowed_protected_handler)
 from group_project_v2.stage.utils import StageState
 
 
@@ -338,7 +338,22 @@ class BaseGroupActivityStage(
         return fragment
 
     def dashboard_detail_view(self, context):
-        return Fragment()
+        """
+        Renders stage header for dashboard details view.
+        :param dict context:
+        :rtype: Fragment
+        """
+        fragment = Fragment()
+        render_context = {
+            'stage': self, 'ta_graded': self.activity.is_ta_graded,
+            'download_incomplete_emails_handler_url': self.runtime.handler_url(self, 'download_incomplete_list')
+        }
+        fragment.add_content(self.render_template('dashboard_detail_view', render_context))
+        return fragment
+
+    @XBlock.handler
+    def download_incomplete_list(self, request, suffix=''):
+        pass
 
     def get_new_stage_state_data(self):
         return {

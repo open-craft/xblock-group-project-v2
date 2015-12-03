@@ -5,7 +5,7 @@
     <span class="activity-header-title">{{ activity.display_name }}</span>
   </div>
   <div class="stages">
-    <table class="stage-data">
+    <table class="activity-data">
       <tr>
         <th>{% trans "Groups" %}:</th>
         <th colspan="{{stages_count}}">{% trans "Graded/Required Stages" %}:</th>
@@ -17,7 +17,9 @@
             <span class="email_icon fa fa-icon fa-envelope-o"></span> {% trans "will export a list of emails within stage of partially complete/incomplete teams" %}
           </div>
         </td>
-        <td>Stage placeholder</td>
+        {% for stage_content in stage_contents %}
+          <td class="stage_header">{{stage_content|safe}}</td>
+        {% endfor %}
       </tr>
       <tr>
         <td>Group 1</td>
