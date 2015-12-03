@@ -23,7 +23,12 @@
       </tr>
       {% for group in groups %}
       <tr class="data">
-        <td><span class="group-label">{{ group|render_group:"verbose" }}</span></td>
+        <td>
+          <span class="group-label" data-group-id="{{group.id}}" data-collapsed="collapsed">
+            <span class="fa fa-icon fa-caret-right group-collapsed-icon"></span>
+            {{ group|render_group:"verbose" }}
+          </span>
+        </td>
         {% for stage in stages %}
           <td>
             <span class="group-project-stage-state fa {{ group.stages|get_item:stage.id }}"></span>

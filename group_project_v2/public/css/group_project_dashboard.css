@@ -219,12 +219,13 @@ table.activity-data tr td:first-child {
 
 table.activity-data tr td .group-label {
     color: #3384CA;
+    cursor: pointer;
 }
 
 table.activity-data tr td .grading-group-label {
     color: #868685;
 }
 
-table.activity-data tr.tr.user-data-row {
-    /*display: none;*/
+table.activity-data tr.user-data-row {
+    display: none;
 }
