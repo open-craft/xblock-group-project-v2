@@ -536,69 +536,70 @@ class GroupActivityXBlock(
         target_workgroups = context.get(DashboardRootXBlockMixin.TARGET_WORKGROUPS)
         target_users = context.get(DashboardRootXBlockMixin.TARGET_STUDENTS)
 
-        target_stages = [stage for stage in self.stages if stage.is_graded_stage]
-        stage_fragments = self._render_children('dashboard_detail_view', children_context, target_stages)
-
         stages = []
         stage_stats = {}
-        for stage in target_stages:
+        for stage in self.stages:
+            if not stage.is_graded_stage:
+                continue
             fragment = stage.render('dashboard_detail_view', children_context)
-            fragment.add_frags_resources(stage_fragments)
+            fragment.add_frag_resources(fragment)
             stages.append({"id": stage.id, 'content': fragment.content})
             stage_stats[stage.id] = self._get_stage_completion_details(stage, target_workgroups, target_users)
 
-        groups_data = self._convert_groups_to_dict(target_workgroups)
-
-        # modifies in place - functional purist in me cries :(
-        self._merge_stage_data(groups_data, stage_stats, target_stages)
-
-        stage_cell_width_percent = (100-30) / float(len(target_stages))
+        groups_data = self._build_groups_data(target_workgroups, stage_stats)
 
         render_context = {
             'activity': self, 'stages': stages, 'stages_count': len(stages), 'groups': groups_data,
-            'cell_width_percent': stage_cell_width_percent,
+            'stage_cell_width_percent': (100 - 30) / float(len(stages)),  # 30% is reserved for first column
             'assigned_to_groups_label': messages.ASSIGNED_TO_GROUPS_LABEL.format(group_count=len(groups_data))
         }
         fragment.add_content(self.render_template('dashboard_detail_view', render_context))
 
         return fragment
 
-    @staticmethod
-    def _merge_stage_data(groups_data, stage_stats, target_stages):
-        def get_stat(stage_id, stat):
-            return stage_stats.get(stage_id, {}).get(stat, {})
-
-        for group in groups_data:
-            group['stages'] = {
-                stage.id: get_stat(stage.id, 'group_stats').get(group['id'], StageState.UNKNOWN)
-                for stage in target_stages
-            }
-            for user in group['users']:
-                user['stage_states'] = {
-                    stage.id: get_stat(stage.id, 'user_stats').get(user['id'], StageState.UNKNOWN)
-                    for stage in target_stages
-                }
-                user['groups_to_grade'] = {
-                    stage.id: get_stat(stage.id, 'groups_to_grade').get(user['id'], [])
-                    for stage in target_stages
-                }
-
-    def _convert_groups_to_dict(self, workgroups):
+    def _build_groups_data(self, workgroups, stage_stats):
         """
-        Converts WorkgroupDetails into dict expected by dashboard_detail_view template
-        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] wworkgroups: Workgroups
+        Converts WorkgroupDetails into dict expected by dashboard_detail_view template.
+
+        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] workgroups: Workgroups
+        :param dict stage_stats: Stage statistics - group-wise and user-wise completion data and groups_to_review
         :rtype: list[dict]
+        :returns:
+            List of dictionaries with the following format:
+                * id - Group ID
+                * stage_states - dictionary stage_id -> StateState
+                * users - dictionary with the folling format:
+                    * id - User ID
+                    * full_name - User full name
+                    * email - user email
+                    * stage_states - dictionary stage_id -> StageState
+                    * groups_to_grade - dictionary stage_id -> list of groups to grade
         """
         return [
             {
-                'id': group.id,
+                'id': workgroup.id,
+                'stage_states': {
+                    stage_id: stage_data.get('group_stats', {}).get(workgroup.id, StageState.UNKNOWN)
+                    for stage_id, stage_data in stage_stats.iteritems()
+                },
                 'users': [
-                    {'id': user.id, 'full_name': user.full_name, 'email': user.email}
-                    for user in group.users
+                    {
+                        'id': user.id, 'full_name': user.full_name, 'email': user.email,
+                        'stage_states': {
+                            stage_id: stage_data.get('user_stats', {}).get(user.id, StageState.UNKNOWN)
+                            for stage_id, stage_data in stage_stats.iteritems()
+                        },
+                        'groups_to_grade': {
+                            stage_id: stage_data.get('groups_to_grade', {}).get(user.id, [])
+                            for stage_id, stage_data in stage_stats.iteritems()
+                        }
+                    }
+                    for user in workgroup.users
                 ]
-             }
-            for group in workgroups
+            }
+            for workgroup in workgroups
         ]
+
 
     def _get_stage_completion_details(self, stage, target_workgroups, target_users):
         """

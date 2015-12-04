@@ -18,7 +18,7 @@
           </div>
         </td>
         {% for stage in stages %}
-          <td class="stage_header" style="width:{{cell_width_percent}}%">{{stage.content|safe}}</td>
+          <td class="stage_header" style="width:{{stage_cell_width_percent}}%">{{stage.content|safe}}</td>
         {% endfor %}
       </tr>
       {% for group in groups %}
@@ -32,7 +32,7 @@
         </td>
         {% for stage in stages %}
           <td>
-            <span class="group-project-stage-state fa {{ group.stages|get_item:stage.id }}"></span>
+            <span class="group-project-stage-state fa {{ group.stage_states|get_item:stage.id }}"></span>
           </td>
         {% endfor %}
       </tr>
