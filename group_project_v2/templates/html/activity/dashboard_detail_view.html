@@ -39,8 +39,10 @@
         {% for user in group.users %}
           <tr class="user-data-row data" data-group-id="{{group.id}}">
             <td class="user-cell">
+              <div class="user-email">
+                <a href="mailto: {{ user.email }}">{{ user.email }}</a>
+              </div>
               <div class="user-full-name">{{ user.full_name }}</div>
-              <div class="user-email">{{ user.email }}</div>
             </td>
             {% for stage in stages %}
               <td>
