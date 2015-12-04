@@ -19,7 +19,7 @@ from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.stage.utils import StageState
 from group_project_v2.utils import (
     mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockShim, Constants,
-    add_resource, gettext as _, get_block_content_id
+    add_resource, gettext as _, get_block_content_id, export_to_csv
 )
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
@@ -218,11 +218,29 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
 
     @XBlock.handler
     def download_incomplete_list(self, request, suffix=''):
-        target_stage_id = request.GET.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME)
-        return webob.response.Response(
-            u"Not implemented yet, but target_stage_id is {target_stage_id}".format(target_stage_id=target_stage_id),
-            charset='UTF-8', content_type="text"
+        target_stage_id = self.get_block_id_from_string(request.GET.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME))
+        target_stage = self._get_target_block(target_stage_id)
+
+        if target_stage is None:
+            return webob.response.Response(u"Stage {stage_id} not found".format(stage_id=target_stage_id), status=404)
+
+        workgroups, users = self.get_workgroups_and_students()
+        completed, partially_completed = target_stage.get_users_completion(workgroups, users)
+
+        users_to_export = [user for user in users if user.id not in completed]
+        filename = "group_project_{group_project_name}_stage_{stage_name}_incomplete_report.csv".format(
+            group_project_name=self.display_name, stage_name=target_stage.display_name
         )
+
+        return self.export_users(users_to_export, filename)
+
+    def export_users(self, users_to_export, filename):
+        response = webob.response.Response(charset='UTF-8', content_type="text/csv")
+        response.headers['Content-Disposition'] = 'attachment; filename="{filename}"'.format(filename=filename)
+        data = [['Name', 'Username', 'Email']] + [[user.first_name, user.username, user.email] for user in users_to_export]
+        export_to_csv(data, response)
+
+        return response
 
     def validate(self):
         validation = super(GroupProjectXBlock, self).validate()

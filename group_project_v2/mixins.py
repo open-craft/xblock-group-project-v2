@@ -272,11 +272,15 @@ class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
         :param dict context: XBlock view context
         :rtype: None
         """
+        workgroups, users = self.get_workgroups_and_students()
         if self.TARGET_STUDENTS not in context:
-            context[self.TARGET_STUDENTS] = list(self.all_users_in_workgroups)
+            context[self.TARGET_STUDENTS] = users
 
         if self.TARGET_WORKGROUPS not in context:
-            context[self.TARGET_WORKGROUPS] = list(self.workgroups)
+            context[self.TARGET_WORKGROUPS] = workgroups
+
+    def get_workgroups_and_students(self):
+        return list(self.workgroups), list(self.all_users_in_workgroups)
 
     @property
     def project_details(self):

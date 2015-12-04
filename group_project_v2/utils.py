@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import csv
 import functools
 import logging
 from datetime import date, datetime, timedelta
@@ -306,3 +307,14 @@ def render_group(group, verbose=False):
     if verbose:
         template = _(u"Group #{group_id}")
     return template.format(group_id=group['id'])
+
+
+def export_to_csv(data, target):
+    """
+    :param list[list] data: Data to write to csv
+    :param target: File-like object
+    """
+    writer = csv.writer(target)
+    for row in data:
+        writer.writerow(row)
+
