@@ -1,5 +1,7 @@
 import logging
 from collections import OrderedDict
+from urllib import urlencode
+
 from datetime import datetime
 from lazy.lazy import lazy
 import pytz
@@ -346,14 +348,17 @@ class BaseGroupActivityStage(
         fragment = Fragment()
         render_context = {
             'stage': self, 'ta_graded': self.activity.is_ta_graded,
-            'download_incomplete_emails_handler_url': self.runtime.handler_url(self, 'download_incomplete_list')
+            'download_incomplete_emails_handler_url': self.get_download_incomplete_emails_handler_url()
         }
         fragment.add_content(self.render_template('dashboard_detail_view', render_context))
         return fragment
 
-    @XBlock.handler
-    def download_incomplete_list(self, request, suffix=''):
-        pass
+    def get_download_incomplete_emails_handler_url(self):
+        base_url = self.runtime.handler_url(self.activity.project, 'download_incomplete_list')
+        query_params = {
+            Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME: self.id
+        }
+        return base_url + '?' + urlencode(query_params)
 
     def get_new_stage_state_data(self):
         return {

@@ -2,6 +2,7 @@
 import logging
 import itertools
 
+import webob
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from xblock.core import XBlock
@@ -214,6 +215,14 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         fragment.initialize_js('GroupProjectBlockDashboardDetailsView')
 
         return fragment
+
+    @XBlock.handler
+    def download_incomplete_list(self, request, suffix=''):
+        target_stage_id = request.GET.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME)
+        return webob.response.Response(
+            u"Not implemented yet, but target_stage_id is {target_stage_id}".format(target_stage_id=target_stage_id),
+            charset='UTF-8', content_type="text"
+        )
 
     def validate(self):
         validation = super(GroupProjectXBlock, self).validate()
@@ -550,7 +559,8 @@ class GroupActivityXBlock(
 
         return fragment
 
-    def _build_groups_data(self, workgroups, stage_stats):
+    @staticmethod
+    def _build_groups_data(workgroups, stage_stats):
         """
         Converts WorkgroupDetails into dict expected by dashboard_detail_view template.
 
@@ -593,8 +603,8 @@ class GroupActivityXBlock(
             for workgroup in workgroups
         ]
 
-
-    def _get_stage_completion_details(self, stage, target_workgroups, target_users):
+    @staticmethod
+    def _get_stage_completion_details(stage, target_workgroups, target_users):
         """
         Gets stage completion stats from individual stage
         :param group_project_v2.stage.BaseGroupActivityStage stage: Get stage stats from this stage
@@ -636,7 +646,6 @@ class GroupActivityXBlock(
             'user_stats': user_stats,
             'groups_to_grade': groups_to_grade
         }
-
 
     def mark_complete(self, user_id):
         self.runtime.publish(self, 'progress', {'user_id': user_id})
