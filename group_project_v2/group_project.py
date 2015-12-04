@@ -337,6 +337,8 @@ class GroupActivityXBlock(
 
     DASHBOARD_DETAILS_URL_KEY = 'dashboard_details_url'
     DEFAULT_DASHBOARD_DETAILS_URL_TPL = "/dashboard_details_view?activate_block_id={activity_id}"
+    TA_REVIEW_URL_KEY = 'ta_review_url'
+    DEFAULT_TA_REVIEW_URL_TPL = "ta_grading=true&activate_block_id={activate_block_id}&group_id={group_id}"
 
     @property
     def id(self):
@@ -407,22 +409,32 @@ class GroupActivityXBlock(
         stages = self.get_children_by_category(PeerReviewStage.CATEGORY)
         return list(self._chain_questions(stages, 'questions'))
 
+    def _get_setting(self, setting, default):
+        result = default
+        settings_service = self.runtime.service(self, "settings")
+        if settings_service:
+            xblock_settings = settings_service.get_settings_bucket(self)
+            if xblock_settings and setting in xblock_settings:
+                result = xblock_settings[setting]
+
+        return result
+
     def dashboard_details_url(self):
         """
         Gets dashboard details view URL for current activity. If settings service is not available or does not provide
         URL template, default template is used.
         """
-        template = self.DEFAULT_DASHBOARD_DETAILS_URL_TPL
-        settings_service = self.runtime.service(self, "settings")
-        if settings_service:
-            xblock_settings = settings_service.get_settings_bucket(self)
-            if xblock_settings and self.DASHBOARD_DETAILS_URL_KEY in xblock_settings:
-                template = xblock_settings[self.DASHBOARD_DETAILS_URL_KEY]
+        template = self._get_setting(self.DASHBOARD_DETAILS_URL_KEY, self.DEFAULT_DASHBOARD_DETAILS_URL_TPL)
 
         return template.format(
             program_id=self.user_preferences.get(self.DASHBOARD_PROGRAM_ID_KEY, None),
             course_id=self.course_id, project_id=self.project.scope_ids.usage_id, activity_id=self.id
         )
+
+    def get_ta_review_link(self, group_id, target_block_id=None):
+        target_block_id = target_block_id if target_block_id else self.id
+        template = self._get_setting(self.TA_REVIEW_URL_KEY, self.DEFAULT_TA_REVIEW_URL_TPL)
+        return template.format(course_id=self.course_id, group_id=group_id, activate_block_id=target_block_id)
 
     @staticmethod
     def _chain_questions(stages, question_type):
@@ -577,8 +589,7 @@ class GroupActivityXBlock(
 
         return fragment
 
-    @staticmethod
-    def _build_groups_data(workgroups, stage_stats):
+    def _build_groups_data(self, workgroups, stage_stats):
         """
         Converts WorkgroupDetails into dict expected by dashboard_detail_view template.
 
@@ -599,6 +610,7 @@ class GroupActivityXBlock(
         return [
             {
                 'id': workgroup.id,
+                'ta_grade_link': self.get_ta_review_link(workgroup.id),
                 'stage_states': {
                     stage_id: stage_data.get('group_stats', {}).get(workgroup.id, StageState.UNKNOWN)
                     for stage_id, stage_data in stage_stats.iteritems()
@@ -611,7 +623,10 @@ class GroupActivityXBlock(
                             for stage_id, stage_data in stage_stats.iteritems()
                         },
                         'groups_to_grade': {
-                            stage_id: stage_data.get('groups_to_grade', {}).get(user.id, [])
+                            stage_id: [
+                                {'id': group.id, 'ta_grade_link': self.get_ta_review_link(group.id, stage_id)}
+                                for group in stage_data.get('groups_to_grade', {}).get(user.id, [])
+                            ]
                             for stage_id, stage_data in stage_stats.iteritems()
                         }
                     }
@@ -645,7 +660,7 @@ class GroupActivityXBlock(
             user_stats[user.id] = state
 
             if isinstance(stage, PeerReviewStage):
-                groups_to_grade[user.id] = [{'id': group.id} for group in stage.get_review_subjects(user.id)]
+                groups_to_grade[user.id] = stage.get_review_subjects(user.id)
 
         group_stats = {}
         for group in target_workgroups:
