@@ -47,10 +47,12 @@
                 <span class="group-project-stage-state fa {{ user.stage_states|get_item:stage.id }}"></span>
                 {% with user.groups_to_grade|get_item:stage.id as groups %}
                   {% if groups %}
-                    <span class="grading-group-label">{% trans "Grading:" %}</span>
-                    {% for group in groups %}
-                      <span class="group-label">{{ group|render_group }}</span>
-                    {% endfor %}
+                    <div class="grading-group-label">
+                      {% trans "Grading:" %}
+                      {% for group in groups %}
+                        <span class="group-label">{{ group|render_group }}</span>
+                      {% endfor %}
+                    </div>
                   {% endif %}
                 {% endwith %}
               </td>
