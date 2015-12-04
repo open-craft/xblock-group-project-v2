@@ -222,6 +222,10 @@ table.activity-data tr td .group-label {
     cursor: pointer;
 }
 
+table.activity-data tr td .group-collapsed-icon {
+    width: 10px;
+}
+
 table.activity-data tr td .group-label .grade_group_icon {
     display: none;
     float: right;
@@ -236,3 +240,6 @@ table.activity-data tr.user-data-row {
     display: none;
 }
 
+table.activity-data tr.user-data-row td.user-cell {
+    padding-left: 24px;
+}
