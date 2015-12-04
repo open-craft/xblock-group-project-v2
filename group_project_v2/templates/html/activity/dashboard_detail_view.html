@@ -37,7 +37,7 @@
         {% endfor %}
       </tr>
         {% for user in group.users %}
-          <tr class="user-data-row data group_{{group.id}}">
+          <tr class="user-data-row data" data-group-id="{{group.id}}">
             <td class="user-cell">
               <div class="user-full-name">{{ user.full_name }}</div>
               <div class="user-email">{{ user.email }}</div>

@@ -1,5 +1,5 @@
 function GroupProjectBlockDashboardDetailsView(runtime, element) {
-    var group_user_rows_selector_prefix = ".user-data-row.group_";
+    var group_user_rows_selector_prefix = ".user-data-row[data-group-id=%GROUP_ID%]";
     var group_collapsed_icon_selector = '.group-collapsed-icon';
     var group_work_nav_icon_selector = '.grade_group_icon';
     var icons = {
@@ -16,7 +16,7 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
     };
 
     function expand_group(group_label, group_id) {
-        var group_user_rows_selector = group_user_rows_selector_prefix+group_id;
+        var group_user_rows_selector = group_user_rows_selector_prefix.replace('%GROUP_ID%', group_id);
         $(group_label).data(data_attributes.collapsed, collapsed_values.expanded);
         $(group_user_rows_selector, element).show();
         $(group_collapsed_icon_selector, group_label).removeClass(icons.collapsed).addClass(icons.expanded);
@@ -24,7 +24,7 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
     }
 
     function collapse_group(group_label, group_id) {
-        var group_user_rows_selector = group_user_rows_selector_prefix+group_id;
+        var group_user_rows_selector = group_user_rows_selector_prefix.replace('%GROUP_ID%', group_id);
         $(group_label).data(data_attributes.collapsed, collapsed_values.collapsed);
         $(group_user_rows_selector, element).hide();
         $(group_collapsed_icon_selector, group_label).removeClass(icons.expanded).addClass(icons.collapsed);
