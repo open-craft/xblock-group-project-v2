@@ -145,17 +145,6 @@ class TestGroupActivityXBlock(TestWithPatchesMixin, TestCase):
 
             get_stages.assert_called_with(PeerReviewStage.CATEGORY)
 
-    @ddt.data(
-        (1, 'content1', 'course1'),
-        (2, 'content2', 'course2')
-    )
-    @ddt.unpack
-    def test_project_id(self, project_id, content_id, course_id):
-        project_details = ProjectDetails(id=project_id, content_id=content_id, course_id=course_id)
-        self.group_project_mock.project_details = project_details
-
-        self.assertEqual(self.block.project_details, project_details)
-
 
 @ddt.ddt
 class TestGetDashboardURL(TestWithPatchesMixin, TestCase):
