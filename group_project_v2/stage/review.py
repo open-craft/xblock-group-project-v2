@@ -344,7 +344,7 @@ class PeerReviewStage(ReviewBaseStage):
             return [self.workgroup]
 
         try:
-            return self.project_api.get_workgroups_to_review(self.user_id, self.course_id, self.activity_content_id)
+            return self.get_review_subjects(self.user_id)
         except ApiError:
             log.exception("Error obtaining list of groups to grade - assuming no groups to grade")
             return []
@@ -396,13 +396,21 @@ class PeerReviewStage(ReviewBaseStage):
         :param int user_id:
         :rtype: (dict, set[int])
         """
-        review_subjects = self.project_api.get_workgroups_to_review(user_id, self.course_id, self.activity_content_id)
+        review_subjects = self.get_review_subjects(user_id)
         review_items = [
             item
             for item in self._get_review_items(review_subjects, with_caching=True)
             if self.real_user_id(item['reviewer']) == user_id
         ]
         return review_items, set(group.id for group in review_subjects)
+
+    def get_review_subjects(self, user_id):
+        """
+        Gets
+        :param int user_id: User ID
+        :return:
+        """
+        return self.project_api.get_workgroups_to_review(user_id, self.course_id, self.activity_content_id)
 
     @staticmethod
     @memoize_with_expiration()
