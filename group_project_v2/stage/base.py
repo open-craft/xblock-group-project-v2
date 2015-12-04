@@ -348,12 +348,12 @@ class BaseGroupActivityStage(
         fragment = Fragment()
         render_context = {
             'stage': self, 'ta_graded': self.activity.is_ta_graded,
-            'download_incomplete_emails_handler_url': self.get_download_incomplete_emails_handler_url()
+            'download_incomplete_emails_handler_url': self.get_incomplete_emails_handler_url()
         }
         fragment.add_content(self.render_template('dashboard_detail_view', render_context))
         return fragment
 
-    def get_download_incomplete_emails_handler_url(self):
+    def get_incomplete_emails_handler_url(self):
         base_url = self.runtime.handler_url(self.activity.project, 'download_incomplete_list')
         query_params = {
             Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME: self.id

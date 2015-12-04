@@ -164,7 +164,8 @@ class TestGetDashboardURL(TestWithPatchesMixin, TestCase):
         self.settings_service_mock = mock.Mock()
         self.runtime_mock.service = mock.Mock(return_value=self.settings_service_mock)
 
-    def _get_dashboard_url(self, template, program_id=None, course_id=None, project_id=None, activity_id=None):
+    @staticmethod
+    def _get_dashboard_url(template, program_id=None, course_id=None, project_id=None, activity_id=None):
         return template.format(
             program_id=program_id, course_id=course_id,  project_id=project_id, activity_id=activity_id
         )
@@ -224,7 +225,7 @@ class TestGetDashboardURL(TestWithPatchesMixin, TestCase):
         ),
     )
     @ddt.unpack
-    def test_dashboard_details_url_setting_present(
+    def test_dashboard_details_url_setting_present(  # pylint:disable=too-many-arguments
             self, setting_value, block_id, preferences_program, course_id, project_id, expected_url
     ):
         self.settings_service_mock.get_settings_bucket = mock.Mock(

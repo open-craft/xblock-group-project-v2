@@ -288,7 +288,7 @@ class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
         Gets ProjectDetails for current block
         :rtype: group_project_v2.project_api.dtos.ProjectDetails
         """
-        raise NotImplementedError(MUST_BE_OVERRIDDEN)
+        return self.project_api.get_project_by_content_id(self.course_id, self.content_id)
 
     @property
     def workgroups(self):
@@ -323,5 +323,3 @@ class CommonMixinCollection(
     WorkgroupAwareXBlockMixin, TemplateManagerMixin
 ):
     block_settings_key = 'group_project_v2'
-
-    pass

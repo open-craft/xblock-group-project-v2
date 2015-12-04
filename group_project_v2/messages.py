@@ -24,7 +24,7 @@ ASSIGNED_TO_GROUPS_LABEL = _(u"This project is assigned to {group_count} group(s
 
 # Project Navigator messages
 MUST_CONTAIN_NAVIGATION_VIEW = _(u"Project Navigator must contain Navigation view")
-NO_DISCUSSION_IN_GROUP_PROJECT =_(
+NO_DISCUSSION_IN_GROUP_PROJECT = _(
     u"Parent group project does not contain discussion XBlock - this {block_type} "
     u"will not function properly and will not be displayed to students"
 )

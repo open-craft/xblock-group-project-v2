@@ -79,6 +79,7 @@ class ReducedUserDetails(object):
     def full_name(self):
         return u" ".join([unicode(part) for part in (self.first_name, self.last_name) if part is not None])
 
+
 class CompletionDetails(object):
     def __init__(self, **kwargs):
         self.id = kwargs.get('id')

@@ -76,10 +76,6 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
     def content_id(self):
         return get_block_content_id(self)
 
-    @property
-    def project_details(self):
-        return self.project_api.get_project_by_content_id(self.course_id, self.content_id)
-
     @lazy
     def activities(self):
         all_children = [self.runtime.get_block(child_id) for child_id in self.children]
@@ -217,7 +213,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         return fragment
 
     @XBlock.handler
-    def download_incomplete_list(self, request, suffix=''):
+    def download_incomplete_list(self, request, _suffix=''):
         target_stage_id = self.get_block_id_from_string(request.GET.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME))
         target_stage = self._get_target_block(target_stage_id)
 
@@ -225,7 +221,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
             return webob.response.Response(u"Stage {stage_id} not found".format(stage_id=target_stage_id), status=404)
 
         workgroups, users = self.get_workgroups_and_students()
-        completed, partially_completed = target_stage.get_users_completion(workgroups, users)
+        completed, _partially_completed = target_stage.get_users_completion(workgroups, users)
 
         users_to_export = [user for user in users if user.id not in completed]
         filename = "group_project_{group_project_name}_stage_{stage_name}_incomplete_report.csv".format(
@@ -234,11 +230,12 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
 
         return self.export_users(users_to_export, filename)
 
-    def export_users(self, users_to_export, filename):
+    @staticmethod
+    def export_users(users_to_export, filename):
         response = webob.response.Response(charset='UTF-8', content_type="text/csv")
         response.headers['Content-Disposition'] = 'attachment; filename="{filename}"'.format(filename=filename)
-        data = [['Name', 'Username', 'Email']] + [[user.first_name, user.username, user.email] for user in users_to_export]
-        export_to_csv(data, response)
+        user_data = [[user.first_name, user.username, user.email] for user in users_to_export]
+        export_to_csv(user_data, response, headers=['Name', 'Username', 'Email'])
 
         return response
 

@@ -311,13 +311,15 @@ def render_group(group, verbose=False):
     return mark_safe(res)
 
 
-
-def export_to_csv(data, target):
+def export_to_csv(data, target, headers=None):
     """
     :param list[list] data: Data to write to csv
     :param target: File-like object
+    :param list[str] headers: Optional csv headers
     """
     writer = csv.writer(target)
+    if headers:
+        writer.writerow(headers)
+
     for row in data:
         writer.writerow(row)
-
