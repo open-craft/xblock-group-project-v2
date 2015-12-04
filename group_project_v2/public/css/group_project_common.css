@@ -33,6 +33,15 @@
     font-family: FontAwesome;
 }
 
+.group-project-stage-state.unknown {
+    color: #d32326;
+}
+
+.group-project-stage-state.unknown:before {
+    content: "\f05e";
+    font-family: FontAwesome;
+}
+
 .group-project-stage-type {
     color: #868685;
     font-size: 12px;
