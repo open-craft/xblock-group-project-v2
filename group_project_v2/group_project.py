@@ -570,9 +570,9 @@ class GroupActivityXBlock(
         for stage in self.stages:
             if not stage.is_graded_stage:
                 continue
-            fragment = stage.render('dashboard_detail_view', children_context)
-            fragment.add_frag_resources(fragment)
-            stages.append({"id": stage.id, 'content': fragment.content})
+            stage_fragment = stage.render('dashboard_detail_view', children_context)
+            stage_fragment.add_frag_resources(fragment)
+            stages.append({"id": stage.id, 'content': stage_fragment})
             stage_stats[stage.id] = self._get_stage_completion_details(stage, target_workgroups, target_users)
 
         groups_data = self._build_groups_data(target_workgroups, stage_stats)
