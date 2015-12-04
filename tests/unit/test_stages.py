@@ -236,7 +236,7 @@ class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
         message = messages[0]
 
         self.assertEqual(message.type, ValidationMessage.ERROR)
-        self.assertIn(u"Grade questions are not supported", message.text)
+        self.assertIn(u"Graded questions are not supported", message.text)
 
     def test_validation_passes(self):
         questions = [self._make_question()]
