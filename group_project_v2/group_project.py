@@ -257,7 +257,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
 @XBlock.wants('courseware_parent_info')
 @XBlock.wants('settings')
 class GroupActivityXBlock(
-    CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin,
+    CommonMixinCollection, DashboardXBlockMixin,
     XBlockWithPreviewMixin, ActivityNotificationsMixin, XBlock
 ):
     """
@@ -331,11 +331,6 @@ class GroupActivityXBlock(
     @property
     def content_id(self):
         return get_block_content_id(self)
-
-    @property
-    def project_details(self):
-        # Project is linked to top-level GroupProjectXBlock, not individual Activities
-        return self.project.project_details
 
     @property
     def is_ta_graded(self):
@@ -515,7 +510,6 @@ class GroupActivityXBlock(
         fragment = Fragment()
 
         children_context = context.copy()
-        self._append_context_parameters_if_not_present(children_context)
 
         stage_fragments = self._render_children('dashboard_view', children_context, self.stages)
         stage_contents = [frag.content for frag in stage_fragments]
@@ -531,7 +525,6 @@ class GroupActivityXBlock(
         fragment = Fragment()
 
         children_context = context.copy()
-        self._append_context_parameters_if_not_present(children_context)
 
         target_workgroups = context.get(DashboardRootXBlockMixin.TARGET_WORKGROUPS)
         target_users = context.get(DashboardRootXBlockMixin.TARGET_STUDENTS)
