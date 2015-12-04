@@ -15,6 +15,7 @@ from group_project_v2 import messages
 from group_project_v2.mixins import CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
+from group_project_v2.stage.utils import StageState
 from group_project_v2.utils import (
     mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockShim, Constants,
     add_resource, gettext as _, get_block_content_id
@@ -539,19 +540,17 @@ class GroupActivityXBlock(
         stage_fragments = self._render_children('dashboard_detail_view', children_context, target_stages)
 
         stages = []
+        stage_stats = {}
         for stage in target_stages:
             fragment = stage.render('dashboard_detail_view', children_context)
             fragment.add_frags_resources(stage_fragments)
             stages.append({"id": stage.id, 'content': fragment.content})
+            stage_stats[stage.id] = self._get_stage_completion_details(stage, target_workgroups, target_users)
 
         groups_data = self._convert_groups_to_dict(target_workgroups)
 
         # modifies in place - functional purist in me cries :(
-        for group in groups_data:
-            group['stages'] = {stage.id: 'incomplete' for stage in target_stages}
-            for user in group['users']:
-                user['stage_states'] = {stage.id: 'incomplete' for stage in target_stages}
-                user['groups_to_grade'] = {stage.id: [{'id': 2, 'name': 'Group 2'}] for stage in target_stages}
+        self._merge_stage_data(groups_data, stage_stats, target_stages)
 
         stage_cell_width_percent = (100-30) / float(len(target_stages))
 
@@ -564,6 +563,26 @@ class GroupActivityXBlock(
 
         return fragment
 
+    @staticmethod
+    def _merge_stage_data(groups_data, stage_stats, target_stages):
+        def get_stat(stage_id, stat):
+            return stage_stats.get(stage_id, {}).get(stat, {})
+
+        for group in groups_data:
+            group['stages'] = {
+                stage.id: get_stat(stage.id, 'group_stats').get(group['id'], StageState.UNKNOWN)
+                for stage in target_stages
+            }
+            for user in group['users']:
+                user['stage_states'] = {
+                    stage.id: get_stat(stage.id, 'user_stats').get(user['id'], StageState.UNKNOWN)
+                    for stage in target_stages
+                }
+                user['groups_to_grade'] = {
+                    stage.id: get_stat(stage.id, 'groups_to_grade').get(user['id'], [])
+                    for stage in target_stages
+                }
+
     def _convert_groups_to_dict(self, workgroups):
         """
         Converts WorkgroupDetails into dict expected by dashboard_detail_view template
@@ -572,14 +591,58 @@ class GroupActivityXBlock(
         """
         return [
             {
-                'id': group.id, 'stages': {},
+                'id': group.id,
                 'users': [
-                    {'full_name': user.full_name, 'email': user.email, 'stage_states': {}, 'groups_to_grade': []}
+                    {'id': user.id, 'full_name': user.full_name, 'email': user.email}
                     for user in group.users
                 ]
              }
             for group in workgroups
         ]
+
+    def _get_stage_completion_details(self, stage, target_workgroups, target_users):
+        """
+        Gets stage completion stats from individual stage
+        :param group_project_v2.stage.BaseGroupActivityStage stage: Get stage stats from this stage
+        :rtype: dict
+        :returns:
+            Dictionary with the following keys:
+            * group_stats: dict[group_id, StageState] - group-wise completion
+            * user_stats: dict[user_id, StageState] - user-wise completion
+            * groups_to_grade: dict[user_id, list[{'id': group_id}] - groups to review for each user
+        """
+        completed_users, partially_completed_users = stage.get_users_completion(target_workgroups, target_users)
+        user_stats = {}
+        groups_to_grade = {}
+        for user in target_users:
+            state = StageState.NOT_STARTED
+            if user.id in completed_users:
+                state = StageState.COMPLETED
+            elif user.id in partially_completed_users:
+                state = StageState.INCOMPLETE
+            user_stats[user.id] = state
+
+            if isinstance(stage, PeerReviewStage):
+                groups_to_grade[user.id] = [{'id': group.id} for group in stage.get_review_subjects(user.id)]
+
+        group_stats = {}
+        for group in target_workgroups:
+            user_completions = [user_stats.get(user.id, StageState.UNKNOWN) for user in group.users]
+            state = StageState.NOT_STARTED
+            if all(completion == StageState.COMPLETED for completion in user_completions):
+                state = StageState.COMPLETED
+            elif any(completion != StageState.NOT_STARTED for completion in user_completions):
+                state = StageState.INCOMPLETE
+            elif any(completion == StageState.UNKNOWN for completion in user_completions):
+                state = StageState.UNKNOWN
+            group_stats[group.id] = state
+
+        return {
+            'group_stats': group_stats,
+            'user_stats': user_stats,
+            'groups_to_grade': groups_to_grade
+        }
+
 
     def mark_complete(self, user_id):
         self.runtime.publish(self, 'progress', {'user_id': user_id})
