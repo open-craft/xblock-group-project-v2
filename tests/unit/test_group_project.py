@@ -2,7 +2,9 @@ import csv
 from unittest import TestCase
 
 import ddt
+from freezegun import freeze_time
 import mock
+from datetime import datetime
 from xblock.fields import ScopeIds
 from xblock.runtime import Runtime
 from xblock.field_data import DictFieldData
@@ -66,6 +68,7 @@ class TestGroupProjectXBlock(TestWithPatchesMixin, TestCase):
         response = self.block.download_incomplete_list(request_mock)
         self.assertEqual(response.status_code, 404)
 
+    @freeze_time(datetime(2015, 01, 01, 12, 22, 14))
     @ddt.data(
         ([1, 2, 3], [1], [2, 3]),
         ([1, 2, 3], [], [1, 2, 3]),
@@ -82,8 +85,10 @@ class TestGroupProjectXBlock(TestWithPatchesMixin, TestCase):
 
         self.runtime_mock.get_block.return_value = target_stage
 
+        # pylint: disable=maybe-no-member
         expected_filename = GroupProjectXBlock.REPORT_FILENAME.format(
-            group_project_name=self.block.display_name, stage_name=target_stage.display_name
+            group_project_name=self.block.display_name, stage_name=target_stage.display_name,
+            timestamp=datetime.utcnow().strftime(GroupProjectXBlock.CSV_TIMESTAMP_FORMAT)
         )
         with mock.patch.object(self.block, 'export_users', mock.Mock(wraps=self.block.export_users)) as export_users, \
                 mock.patch.object(self.block, 'get_workgroups_and_students') as patched_dashboard_params:

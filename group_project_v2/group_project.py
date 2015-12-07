@@ -3,6 +3,7 @@ import logging
 import itertools
 
 import webob
+from datetime import datetime
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from xblock.core import XBlock
@@ -39,8 +40,9 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
     )
 
     CATEGORY = "gp-v2-project"
-    REPORT_FILENAME = "group_project_{group_project_name}_stage_{stage_name}_incomplete_report.csv"
+    REPORT_FILENAME = "group_project_{group_project_name}_stage_{stage_name}_incomplete_report_{timestamp}.csv"
     CSV_HEADERS = ['Name', 'Username', 'Email']
+    CSV_TIMESTAMP_FORMAT = "%Y_%m_%d_%H_%M_%S"
 
     editable_fields = ('display_name', )
     has_score = False
@@ -227,7 +229,8 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
 
         users_to_export = [user for user in users if user.id not in completed]
         filename = self.REPORT_FILENAME.format(
-            group_project_name=self.display_name, stage_name=target_stage.display_name
+            group_project_name=self.display_name, stage_name=target_stage.display_name,
+            timestamp=datetime.utcnow().strftime(self.CSV_TIMESTAMP_FORMAT)
         )
 
         return self.export_users(users_to_export, filename)
