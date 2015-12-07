@@ -6,12 +6,14 @@
     margin-bottom: 15px;
 }
 
-.group-project-xblock-wrapper .activity.dashboard-view .activity-header .activity-header-label {
+.group-project-xblock-wrapper .activity.dashboard-view .activity-header .activity-header-label,
+.group-project-xblock-wrapper .activity.dashboard-detail-view .activity-header .activity-header-label {
     text-transform: uppercase;
     color: #868685;
 }
 
-.group-project-xblock-wrapper .activity.dashboard-view .activity-header .activity-header-title {
+.group-project-xblock-wrapper .activity.dashboard-view .activity-header .activity-header-title,
+.group-project-xblock-wrapper .activity.dashboard-detail-view .activity-header .activity-header-title {
     color: #3384CA;
 }
 
@@ -31,9 +33,9 @@
     width: 100%;
     background-color: white;
     padding: 15px 10px;
-    -webkit-box-shadow: 0 2px 5px 1px rgba(204,204,204,1);
-    -moz-box-shadow: 0 2px 5px 1px rgba(204,204,204,1);
-    box-shadow: 0 2px 5px 1px rgba(204,204,204,1);
+    -webkit-box-shadow: 0 2px 5px 1px rgba(204, 204, 204, 1);
+    -moz-box-shadow: 0 2px 5px 1px rgba(204, 204, 204, 1);
+    box-shadow: 0 2px 5px 1px rgba(204, 204, 204, 1);
 }
 
 .group-project-xblock-wrapper .stage.dashboard-view.group-project-non-graded-stage {
@@ -53,22 +55,28 @@
     margin-bottom: 20px;
 }
 
-.group-project-xblock-wrapper .stage.dashboard-view .stage-data div {
+.group-project-xblock-wrapper .stage.dashboard-view .stage-data div,
+.group-project-xblock-wrapper .stage.dashboard-detail-view .stage-data div {
     margin-bottom: 5px;
 }
 
-.group-project-xblock-wrapper .stage.dashboard-view .stage-data div.details {
+.group-project-xblock-wrapper .stage.dashboard-view .stage-data div.details,
+.group-project-xblock-wrapper .stage.dashboard-detail-view .stage-data div.details {
     font-size: 14px;
     color: #E37222;
     font-weight: 600;
 }
 
-.group-project-xblock-wrapper .stage.dashboard-view .stage-data .group-project-stage-title {
+.group-project-xblock-wrapper .stage.dashboard-view .stage-data .group-project-stage-title,
+.group-project-xblock-wrapper .stage.dashboard-detail-view .stage-data .group-project-stage-title {
+    line-height: 18px;
     font-size: 14px;
+    height: 36px;
     color: #3384CA;
 }
 
-.group-project-xblock-wrapper .stage.dashboard-view .stage-data .group-project-stage-ta-graded {
+.group-project-xblock-wrapper .stage.dashboard-view .stage-data .group-project-stage-ta-graded,
+.group-project-xblock-wrapper .stage.dashboard-detail-view .stage-data .group-project-stage-ta-graded {
     text-transform: uppercase;
 }
 
@@ -108,4 +116,130 @@
 
 .group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-navigate-to-detailed-view span {
     font-family: FontAwesome;
+}
+
+.group-project-xblock-wrapper .activity.dashboard-detail-view .stages {
+    margin-top: 10px;
+    padding: 15px;
+    background-color: white;
+    width: 100%;
+    -webkit-box-shadow: 0 2px 5px 1px rgba(204, 204, 204, 1);
+    -moz-box-shadow: 0 2px 5px 1px rgba(204, 204, 204, 1);
+    box-shadow: 0 2px 5px 1px rgba(204, 204, 204, 1);
+}
+
+table.activity-data {
+    width: 100%;
+    border: none;
+}
+
+table.activity-data tr {
+    background: transparent;
+}
+
+table.activity-data tr th {
+    background-color: #f3f3f3;
+    text-transform: uppercase;
+    color: #868685;
+    padding: 3px 10px;
+    font-weight: 600;
+}
+
+table.activity-data tr th:first-child,
+table.activity-data tr td:first-child {
+    width: 30%;
+}
+
+/* Only inner borders */
+table.activity-data {
+    border-collapse: collapse;
+}
+
+table.activity-data td, table.activity-data th {
+    border: solid 2px #ddd;
+}
+
+table.activity-data tr.user-data-row td, table.activity-data tr.user-data-row th {
+    border: solid 1px #ddd;
+}
+
+table.activity-data th {
+    border-bottom: 0;
+}
+
+table.activity-data tr:first-child th {
+    border-top: 0;
+}
+
+table.activity-data tr:last-child td {
+    border-bottom: 0;
+}
+
+table.activity-data tr td:first-child,
+table.activity-data tr th:first-child {
+    border-left: 0;
+}
+
+table.activity-data tr td:last-child,
+table.activity-data tr th:last-child {
+    border-right: 0;
+}
+
+table.activity-data tr.legend {
+    border-top: none;
+    border-bottom: 3px solid #ddd;
+}
+
+table.activity-data tr.legend .assigned_to_groups_label {
+    font-weight: 600;
+}
+
+table.activity-data tr.legend .email_icon_explanation {
+    margin-top: 10px;
+    color: #868685;
+    font-size: 12px;
+}
+
+table.activity-data tr.legend .email_icon_explanation .email_icon {
+    color: #3384CA;
+    font-family: FontAwesome;
+}
+
+table.activity-data tr.legend td.stage_header {
+    text-align: center;
+}
+
+table.activity-data tr.data td {
+    text-align: center;
+}
+
+table.activity-data tr td:first-child {
+    text-align: left;
+}
+
+table.activity-data tr td .group-label {
+    color: #3384CA;
+    cursor: pointer;
+}
+
+table.activity-data tr td .group-collapsed-icon {
+    width: 10px;
+}
+
+table.activity-data tr td .group-label .grade_group_icon {
+    display: none;
+    float: right;
+    font-family: FontAwesome;
+}
+
+table.activity-data tr td .grading-group-label {
+    color: #868685;
+}
+
+table.activity-data tr.user-data-row {
+    display: none;
+}
+
+table.activity-data tr.user-data-row td.user-cell {
+    padding-left: 24px;
 }

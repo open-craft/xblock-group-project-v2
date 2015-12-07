@@ -12,6 +12,8 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import (
     StudioContainerXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin, NestedXBlockSpec
 )
+
+from group_project_v2 import messages
 from group_project_v2.mixins import (
     XBlockWithComponentsMixin, ChildrenNavigationXBlockMixin,
     XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin, NoStudioEditableSettingsMixin,
@@ -154,10 +156,7 @@ class GroupProjectNavigatorXBlock(
         validation = super(GroupProjectNavigatorXBlock, self).validate()
 
         if not self.has_child_of_category(NavigationViewXBlock.CATEGORY):
-            validation.add(ValidationMessage(
-                ValidationMessage.ERROR,
-                _(u"Project Navigator must contain Navigation view")
-            ))
+            validation.add(ValidationMessage(ValidationMessage.ERROR, messages.MUST_CONTAIN_NAVIGATION_VIEW))
 
         return validation
 
@@ -454,8 +453,7 @@ class PrivateDiscussionViewXBlock(ProjectNavigatorViewXBlockBase):
         if not self._project_has_discussion():
             validation.add(ValidationMessage(
                 ValidationMessage.WARNING,
-                _(u"Parent group project does not contain discussion XBlock - this {block_type} will not "
-                  u"function properly and will not be displayed to students").format(block_type=self.STUDIO_LABEL)
+                messages.NO_DISCUSSION_IN_GROUP_PROJECT.format(block_type=self.STUDIO_LABEL)
             ))
 
         return validation

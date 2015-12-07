@@ -3,6 +3,8 @@ import logging
 from lazy.lazy import lazy
 from xblock.fields import String, Scope
 from xblock.validation import ValidationMessage
+
+from group_project_v2 import messages
 from group_project_v2.stage.utils import DISPLAY_NAME_NAME, DISPLAY_NAME_HELP
 from group_project_v2.stage.base import BaseGroupActivityStage
 from group_project_v2.stage.mixins import SimpleCompletionStageMixin
@@ -45,7 +47,7 @@ class FeedbackDisplayBaseStage(SimpleCompletionStageMixin, BaseGroupActivityStag
         if not self.feedback_display_blocks:
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                _(u"Feedback display blocks are not specified for {class_name} '{stage_title}'").format(
+                messages.FEEDBACK_BLOCKS_ARE_MISSING.format(
                     class_name=self.__class__.__name__, stage_title=self.display_name
                 )
             ))

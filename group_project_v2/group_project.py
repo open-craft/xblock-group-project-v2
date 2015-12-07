@@ -2,6 +2,8 @@
 import logging
 import itertools
 
+import webob
+from datetime import datetime
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from xblock.core import XBlock
@@ -11,12 +13,14 @@ from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import XBlockWithPreviewMixin, NestedXBlockSpec
 
+from group_project_v2 import messages
 from group_project_v2.mixins import CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
+from group_project_v2.stage.utils import StageState
 from group_project_v2.utils import (
     mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockShim, Constants,
-    add_resource, gettext as _, get_block_content_id
+    add_resource, gettext as _, get_block_content_id, export_to_csv
 )
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
@@ -36,6 +40,9 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
     )
 
     CATEGORY = "gp-v2-project"
+    REPORT_FILENAME = "group_project_{group_project_name}_stage_{stage_name}_incomplete_report_{timestamp}.csv"
+    CSV_HEADERS = ['Name', 'Username', 'Email']
+    CSV_TIMESTAMP_FORMAT = "%Y_%m_%d_%H_%M_%S"
 
     editable_fields = ('display_name', )
     has_score = False
@@ -73,10 +80,6 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
     def content_id(self):
         return get_block_content_id(self)
 
-    @property
-    def project_details(self):
-        return self.project_api.get_project_by_content_id(self.course_id, self.content_id)
-
     @lazy
     def activities(self):
         all_children = [self.runtime.get_block(child_id) for child_id in self.children]
@@ -91,6 +94,16 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         default_stages = [activity.default_stage for activity in self.activities]
 
         return get_default_stage(default_stages)
+
+    @staticmethod
+    def _render_child_fragment_with_fallback(child, context, fallback_message, view='student_view'):
+        if child:
+            log.debug("Rendering {child} with context: {context}".format(
+                child=child.__class__.__name__, context=context,
+            ))
+            return child.render(view, context)
+        else:
+            return Fragment(fallback_message)
 
     @outsider_disallowed_protected_view
     def student_view(self, context):
@@ -114,15 +127,11 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
             if extra_context:
                 internal_context.update(extra_context)
 
-            if child:
-                log.debug("Rendering {child} with context: {context}".format(
-                    child=child.__class__.__name__, context=internal_context,
-                ))
-                child_fragment = child.render('student_view', internal_context)
-                fragment.add_frag_resources(child_fragment)
-                render_context[content_key] = child_fragment.content
-            else:
-                render_context[content_key] = fallback_message
+            child_fragment = self._render_child_fragment_with_fallback(
+                child, internal_context, fallback_message, 'student_view'
+            )
+            fragment.add_frag_resources(child_fragment)
+            render_context[content_key] = child_fragment.content
 
         target_block_id = self.get_block_id_from_string(ctx.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME, None))
         target_stage = self.get_stage_to_display(target_block_id)
@@ -134,27 +143,17 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         # activity should be rendered first, as some stages might report completion in student-view - this way stage
         # PN sees updated state.
         target_activity = target_stage.activity if target_stage else None
-        render_child_fragment(
-            target_activity, 'activity_content', _(u"This Group Project does not contain any activities"),
-            child_context
-        )
+        render_child_fragment(target_activity, 'activity_content', messages.NO_ACTIVITIES, child_context)
 
         # TODO: project nav is slow, mostly due to navigation view. It might make sense to rework it into
         # asynchronously loading navigation and stage states.
         project_navigator = self.get_child_of_category(GroupProjectNavigatorXBlock.CATEGORY)
         render_child_fragment(
-            project_navigator, 'project_navigator_content',
-            _(u"This Group Project V2 does not contain Project Navigator - "
-              u"please edit course outline in Studio to include one"),
-            child_context
+            project_navigator, 'project_navigator_content', messages.NO_PROJECT_NAVIGATOR, child_context
         )
 
         discussion = self.get_child_of_category(DiscussionXBlockShim.CATEGORY)
-        render_child_fragment(
-            discussion, 'discussion_content',
-            _(u"This Group Project V2 does not contain a discussion"),
-            child_context
-        )
+        render_child_fragment(discussion, 'discussion_content', messages.NO_DISCUSSION, child_context)
 
         fragment.add_content(self.render_template('student_view', render_context))
 
@@ -184,7 +183,66 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         return fragment
 
     def dashboard_detail_view(self, context):
-        raise Exception("Should not be shown - detail views are not supported on GroupProject block")
+        ctx = self._sanitize_context(context)
+        self._append_context_parameters_if_not_present(ctx)
+
+        fragment = Fragment()
+        render_context = {
+            'project': self,
+            'course_id': self.course_id,
+            'group_id': self.workgroup.id
+        }
+
+        render_context.update(ctx)
+
+        target_block_id = self.get_block_id_from_string(ctx.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME, None))
+        target_activity = self._get_target_block(target_block_id)
+        if target_activity is None and self.activities:
+            target_activity = self.activities[0]
+
+        activity_fragment = self._render_child_fragment_with_fallback(
+            target_activity, ctx, messages.NO_ACTIVITIES, view='dashboard_detail_view'
+        )
+        render_context['activity_content'] = activity_fragment.content
+        fragment.add_frag_resources(activity_fragment)
+
+        fragment.add_content(self.render_template('dashboard_detail_view', render_context))
+        add_resource(self, 'css', 'public/css/group_project_common.css', fragment)
+        add_resource(self, 'css', 'public/css/group_project_dashboard.css', fragment)
+        add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment, via_url=True)
+        add_resource(self, 'javascript', 'public/js/group_project_dashboard_detail.js', fragment)
+
+        fragment.initialize_js('GroupProjectBlockDashboardDetailsView')
+
+        return fragment
+
+    @XBlock.handler
+    def download_incomplete_list(self, request, _suffix=''):
+        target_stage_id = self.get_block_id_from_string(request.GET.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME))
+        target_stage = self._get_target_block(target_stage_id)
+
+        if target_stage is None:
+            return webob.response.Response(u"Stage {stage_id} not found".format(stage_id=target_stage_id), status=404)
+
+        workgroups, users = self.get_workgroups_and_students()
+        completed, _partially_completed = target_stage.get_users_completion(workgroups, users)
+
+        users_to_export = [user for user in users if user.id not in completed]
+        filename = self.REPORT_FILENAME.format(
+            group_project_name=self.display_name, stage_name=target_stage.display_name,
+            timestamp=datetime.utcnow().strftime(self.CSV_TIMESTAMP_FORMAT)
+        )
+
+        return self.export_users(users_to_export, filename)
+
+    @classmethod
+    def export_users(cls, users_to_export, filename):
+        response = webob.response.Response(charset='UTF-8', content_type="text/csv")
+        response.headers['Content-Disposition'] = 'attachment; filename="{filename}"'.format(filename=filename)
+        user_data = [[user.full_name, user.username, user.email] for user in users_to_export]
+        export_to_csv(user_data, response, headers=cls.CSV_HEADERS)
+
+        return response
 
     def validate(self):
         validation = super(GroupProjectXBlock, self).validate()
@@ -192,21 +250,27 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         if not self.has_child_of_category(GroupProjectNavigatorXBlock.CATEGORY):
             validation.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                _(u"Group Project must contain Project Navigator Block")
+                messages.MUST_CONTAIN_PROJECT_NAVIGATOR_BLOCK
             ))
 
         return validation
 
-    def get_stage_to_display(self, target_block_id):
+    def _get_target_block(self, target_block_id):
         try:
             if target_block_id:
-                target_block = self.runtime.get_block(target_block_id)
-                if self.get_child_category(target_block) in STAGE_TYPES and target_block.available_to_current_user:
-                    return target_block
-                if isinstance(target_block, GroupActivityXBlock):
-                    return target_block.default_stage
+                return self.runtime.get_block(target_block_id)
         except (InvalidKeyError, KeyError, NoSuchUsage) as exc:
             log.exception(exc)
+
+        return None
+
+    def get_stage_to_display(self, target_block_id):
+        target_block = self._get_target_block(target_block_id)
+        if target_block is not None:
+            if self.get_child_category(target_block) in STAGE_TYPES and target_block.available_to_current_user:
+                return target_block
+            if isinstance(target_block, GroupActivityXBlock):
+                return target_block.default_stage
 
         default_stage = self.default_stage
         if default_stage:
@@ -218,11 +282,11 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         return None  # if there are no activities there's no stages as well - nothing we can really do
 
 
-# TODO: enable and fix these violations
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
+@XBlock.wants('settings')
 class GroupActivityXBlock(
-    CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin,
+    CommonMixinCollection, DashboardXBlockMixin,
     XBlockWithPreviewMixin, ActivityNotificationsMixin, XBlock
 ):
     """
@@ -273,6 +337,11 @@ class GroupActivityXBlock(
 
     template_location = 'activity'
 
+    DASHBOARD_DETAILS_URL_KEY = 'dashboard_details_url'
+    DEFAULT_DASHBOARD_DETAILS_URL_TPL = "/dashboard_details_view?activate_block_id={activity_id}"
+    TA_REVIEW_URL_KEY = 'ta_review_url'
+    DEFAULT_TA_REVIEW_URL_TPL = "ta_grading=true&activate_block_id={activate_block_id}&group_id={group_id}"
+
     @property
     def id(self):
         return self.scope_ids.usage_id
@@ -293,11 +362,6 @@ class GroupActivityXBlock(
     @property
     def content_id(self):
         return get_block_content_id(self)
-
-    @property
-    def project_details(self):
-        # Project is linked to top-level GroupProjectXBlock, not individual Activities
-        return self.project.project_details
 
     @property
     def is_ta_graded(self):
@@ -347,6 +411,33 @@ class GroupActivityXBlock(
         stages = self.get_children_by_category(PeerReviewStage.CATEGORY)
         return list(self._chain_questions(stages, 'questions'))
 
+    def _get_setting(self, setting, default):
+        result = default
+        settings_service = self.runtime.service(self, "settings")
+        if settings_service:
+            xblock_settings = settings_service.get_settings_bucket(self)
+            if xblock_settings and setting in xblock_settings:
+                result = xblock_settings[setting]
+
+        return result
+
+    def dashboard_details_url(self):
+        """
+        Gets dashboard details view URL for current activity. If settings service is not available or does not provide
+        URL template, default template is used.
+        """
+        template = self._get_setting(self.DASHBOARD_DETAILS_URL_KEY, self.DEFAULT_DASHBOARD_DETAILS_URL_TPL)
+
+        return template.format(
+            program_id=self.user_preferences.get(self.DASHBOARD_PROGRAM_ID_KEY, None),
+            course_id=self.course_id, project_id=self.project.scope_ids.usage_id, activity_id=self.id
+        )
+
+    def get_ta_review_link(self, group_id, target_block_id=None):
+        target_block_id = target_block_id if target_block_id else self.id
+        template = self._get_setting(self.TA_REVIEW_URL_KEY, self.DEFAULT_TA_REVIEW_URL_TPL)
+        return template.format(course_id=self.course_id, group_id=group_id, activate_block_id=target_block_id)
+
     @staticmethod
     def _chain_questions(stages, question_type):
         return itertools.chain.from_iterable(getattr(stage, question_type, ()) for stage in stages)
@@ -373,7 +464,7 @@ class GroupActivityXBlock(
         target_stage = self.get_stage_to_display(current_stage_id)
 
         if not target_stage:
-            fragment.add_content(_(u"This Group Project Activity does not contain any stages"))
+            fragment.add_content(messages.NO_STAGES)
         else:
             stage_fragment = target_stage.render('student_view', context)
             fragment.add_frag_resources(stage_fragment)
@@ -440,12 +531,26 @@ class GroupActivityXBlock(
 
         return fragment
 
+    def _render_dashboard_view(self, context, view):
+        fragment = Fragment()
+
+        children_context = context.copy()
+        self._append_context_parameters_if_not_present(children_context)
+
+        stage_fragments = self._render_children(view, children_context, self.stages)
+        stage_contents = [frag.content for frag in stage_fragments]
+        fragment.add_frags_resources(stage_fragments)
+
+        render_context = {'activity': self, 'stage_contents': stage_contents}
+        fragment.add_content(self.render_template(view, render_context))
+
+        return fragment
+
     @outsider_disallowed_protected_view
     def dashboard_view(self, context):
         fragment = Fragment()
 
         children_context = context.copy()
-        self._append_context_parameters_if_not_present(children_context)
 
         stage_fragments = self._render_children('dashboard_view', children_context, self.stages)
         stage_contents = [frag.content for frag in stage_fragments]
@@ -458,8 +563,127 @@ class GroupActivityXBlock(
 
     @outsider_disallowed_protected_view
     def dashboard_detail_view(self, context):
-        # TODO: implement detail view
-        pass
+        fragment = Fragment()
+
+        children_context = context.copy()
+
+        target_workgroups = context.get(DashboardRootXBlockMixin.TARGET_WORKGROUPS)
+        target_users = context.get(DashboardRootXBlockMixin.TARGET_STUDENTS)
+
+        stages = []
+        stage_stats = {}
+        for stage in self.stages:
+            if not stage.is_graded_stage:
+                continue
+            stage_fragment = stage.render('dashboard_detail_view', children_context)
+            stage_fragment.add_frag_resources(fragment)
+            stages.append({"id": stage.id, 'content': stage_fragment.content})
+            stage_stats[stage.id] = self._get_stage_completion_details(stage, target_workgroups, target_users)
+
+        groups_data = self._build_groups_data(target_workgroups, stage_stats)
+
+        render_context = {
+            'activity': self,
+            'stages': stages,
+            'stages_count': len(stages),
+            'groups': groups_data,
+            'stage_cell_width_percent': (100 - 30) / float(len(stages)),  # 30% is reserved for first column
+            'assigned_to_groups_label': messages.ASSIGNED_TO_GROUPS_LABEL.format(group_count=len(groups_data))
+        }
+        fragment.add_content(self.render_template('dashboard_detail_view', render_context))
+
+        return fragment
+
+    def _build_groups_data(self, workgroups, stage_stats):
+        """
+        Converts WorkgroupDetails into dict expected by dashboard_detail_view template.
+
+        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] workgroups: Workgroups
+        :param dict stage_stats: Stage statistics - group-wise and user-wise completion data and groups_to_review
+        :rtype: list[dict]
+        :returns:
+            List of dictionaries with the following format:
+                * id - Group ID
+                * stage_states - dictionary stage_id -> StateState
+                * users - dictionary with the following format:
+                    * id - User ID
+                    * full_name - User full name
+                    * email - user email
+                    * stage_states - dictionary stage_id -> StageState
+                    * groups_to_grade - dictionary stage_id -> list of groups to grade
+        """
+        return [
+            {
+                'id': workgroup.id,
+                'ta_grade_link': self.get_ta_review_link(workgroup.id),
+                'stage_states': {
+                    stage_id: stage_data.get('group_stats', {}).get(workgroup.id, StageState.UNKNOWN)
+                    for stage_id, stage_data in stage_stats.iteritems()
+                },
+                'users': [
+                    {
+                        'id': user.id, 'full_name': user.full_name, 'email': user.email,
+                        'stage_states': {
+                            stage_id: stage_data.get('user_stats', {}).get(user.id, StageState.UNKNOWN)
+                            for stage_id, stage_data in stage_stats.iteritems()
+                        },
+                        'groups_to_grade': {
+                            stage_id: [
+                                {'id': group.id, 'ta_grade_link': self.get_ta_review_link(group.id, stage_id)}
+                                for group in stage_data.get('groups_to_grade', {}).get(user.id, [])
+                            ]
+                            for stage_id, stage_data in stage_stats.iteritems()
+                        }
+                    }
+                    for user in workgroup.users
+                ]
+            }
+            for workgroup in workgroups
+        ]
+
+    @staticmethod
+    def _get_stage_completion_details(stage, target_workgroups, target_users):
+        """
+        Gets stage completion stats from individual stage
+        :param group_project_v2.stage.BaseGroupActivityStage stage: Get stage stats from this stage
+        :rtype: dict
+        :returns:
+            Dictionary with the following keys:
+            * group_stats: dict[group_id, StageState] - group-wise completion
+            * user_stats: dict[user_id, StageState] - user-wise completion
+            * groups_to_grade: dict[user_id, list[{'id': group_id}] - groups to review for each user
+        """
+        completed_users, partially_completed_users = stage.get_users_completion(target_workgroups, target_users)
+        user_stats = {}
+        groups_to_grade = {}
+        for user in target_users:
+            state = StageState.NOT_STARTED
+            if user.id in completed_users:
+                state = StageState.COMPLETED
+            elif user.id in partially_completed_users:
+                state = StageState.INCOMPLETE
+            user_stats[user.id] = state
+
+            if isinstance(stage, PeerReviewStage):
+                groups_to_grade[user.id] = stage.get_review_subjects(user.id)
+
+        group_stats = {}
+        for group in target_workgroups:
+            user_completions = [user_stats.get(user.id, StageState.UNKNOWN) for user in group.users]
+            state = StageState.NOT_STARTED
+            if all(completion == StageState.COMPLETED for completion in user_completions):
+                state = StageState.COMPLETED
+            elif any(completion != StageState.NOT_STARTED for completion in user_completions):
+                state = StageState.INCOMPLETE
+            elif any(completion == StageState.UNKNOWN for completion in user_completions):
+                state = StageState.UNKNOWN
+            group_stats[group.id] = state
+
+        return {
+            'group_stats': group_stats,
+            'user_stats': user_stats,
+            'groups_to_grade': groups_to_grade
+        }
 
     def mark_complete(self, user_id):
         self.runtime.publish(self, 'progress', {'user_id': user_id})

@@ -13,6 +13,7 @@ from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin, XBlockWithPreviewMixin
 
+from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import WorkgroupAwareXBlockMixin, NoStudioEditableSettingsMixin
 from group_project_v2.project_api import ProjectAPIXBlockMixin
@@ -116,10 +117,7 @@ class GroupProjectVideoResourceXBlock(BaseGroupProjectResourceXBlock):
 
     def validate_field_data(self, validation, data):
         if not data.video_id:
-            validation.add(ValidationMessage(
-                ValidationMessage.ERROR,
-                _(u"Video Resource Block must contain Ooyala content ID")
-            ))
+            validation.add(ValidationMessage(ValidationMessage.ERROR, messages.MUST_CONTAIN_CONTENT_ID))
 
         return validation
 
@@ -212,17 +210,6 @@ class GroupProjectSubmissionXBlock(
 
     editable_fields = ('display_name', 'description', 'upload_id')
 
-    STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as stage is not yet opened.")
-    STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as stage is closed.")
-
-    SUCCESSFUL_UPLOAD_TITLE = _(u"Upload complete")
-    FAILED_UPLOAD_TITLE = _(u"Upload failed.")
-    SUCCESSFUL_UPLOAD_MESSAGE_TPL = _(
-        u"Your deliverable has been successfully uploaded. You can attach an updated version of the "
-        u"deliverable by clicking the <span class='icon {icon}'></span> icon at any time before the deadline."
-    )
-    FAILED_UPLOAD_MESSAGE_TPL = _(u"Error uploading file: {error_goes_here}")
-
     SUBMISSION_RECEIVED_EVENT = "activity.received_submission"
 
     def get_upload(self, group_id):
@@ -274,19 +261,19 @@ class GroupProjectSubmissionXBlock(
         :param str _suffix:
         """
         if not self.stage.available_now:
-            template = self.STAGE_NOT_OPEN_TEMPLATE if not self.stage.is_open else self.STAGE_CLOSED_TEMPLATE
+            template = messages.STAGE_NOT_OPEN_TEMPLATE if not self.stage.is_open else messages.STAGE_CLOSED_TEMPLATE
             response_data = {'result': 'error', 'message': template.format(action=self.stage.STAGE_ACTION)}
             failure_code = 422  # 422 = unprocessable entity
 
         elif not self.stage.is_group_member:
-            response_data = {'result': 'error', 'message': _(u"Only group members can upload files")}
+            response_data = {'result': 'error', 'message': messages.NON_GROUP_MEMBER_UPLOAD}
             failure_code = 403  # 403 - forbidden
 
         else:
             target_activity = self.stage.activity
             response_data = {
-                "title": self.SUCCESSFUL_UPLOAD_TITLE,
-                "message": self.SUCCESSFUL_UPLOAD_MESSAGE_TPL.format(icon='fa fa-paperclip')
+                "title": messages.SUCCESSFUL_UPLOAD_TITLE,
+                "message": messages.SUCCESSFUL_UPLOAD_MESSAGE_TPL.format(icon='fa fa-paperclip')
             }
             failure_code = 0
             try:
@@ -314,11 +301,11 @@ class GroupProjectSubmissionXBlock(
                 failure_code = 500
                 if isinstance(exception, ApiError):
                     failure_code = exception.code
-                error_message = getattr(exception, "message", _(u"Unknown error"))
+                error_message = getattr(exception, "message", messages.UNKNOWN_ERROR)
 
                 response_data.update({
-                    "title": self.FAILED_UPLOAD_TITLE,
-                    "message": self.FAILED_UPLOAD_MESSAGE_TPL.format(error_goes_here=error_message)
+                    "title": messages.FAILED_UPLOAD_TITLE,
+                    "message": messages.FAILED_UPLOAD_MESSAGE_TPL.format(error_goes_here=error_message)
                 })
 
         response = webob.response.Response(body=json.dumps(response_data))
@@ -621,10 +608,7 @@ class GroupProjectBaseFeedbackDisplayXBlock(
     @outsider_disallowed_protected_view
     def student_view(self, context):
         if self.question is None:
-            return Fragment(
-                u'This component is misconfigured and can\'t be displayed.  '
-                u'It needs to be fixed by the course authors.'
-            )
+            return Fragment(messages.COMPONENT_MISCONFIGURED)
 
         raw_feedback = self.get_feedback()
 
@@ -668,7 +652,7 @@ class GroupProjectBaseFeedbackDisplayXBlock(
             return self.student_view(context)
 
         fragment = Fragment()
-        fragment.add_content(_(u"Question is not selected"))
+        fragment.add_content(messages.QUESTION_NOT_SELECTED)
         return fragment
 
     def studio_view(self, context):

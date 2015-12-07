@@ -1,5 +1,7 @@
 import logging
 from collections import OrderedDict
+from urllib import urlencode
+
 from datetime import datetime
 from lazy.lazy import lazy
 import pytz
@@ -7,6 +9,8 @@ from xblock.core import XBlock
 from xblock.fields import DateTime, Scope, Boolean
 from xblock.fragment import Fragment
 from xblockutils.studio_editable import XBlockWithPreviewMixin
+
+from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import (
     CommonMixinCollection, XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
@@ -18,7 +22,7 @@ from group_project_v2.stage_components import (
 )
 from group_project_v2.utils import (
     gettext as _, HtmlXBlockShim, format_date, Constants, loader,
-    outsider_disallowed_protected_view, add_resource, MUST_BE_OVERRIDDEN, get_link_to_block, get_block_content_id
+    outsider_disallowed_protected_view, add_resource, MUST_BE_OVERRIDDEN, get_link_to_block, get_block_content_id,
 )
 from group_project_v2.stage.utils import StageState
 
@@ -66,14 +70,9 @@ class BaseGroupActivityStage(
 
     NAVIGATION_LABEL = None
     STUDIO_LABEL = _(u"Stage")
-    STAGE_COMPLETION_MESSAGE = _(u"This task has been marked as complete.")
 
     js_file = None
     js_init = None
-
-    STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as it's not yet opened.")
-    STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as it's closed.")
-    STAGE_URL_NAME_TEMPLATE = _(u"url_name to link to this {stage_name}:")
 
     template_location = 'stages'
 
@@ -168,7 +167,7 @@ class BaseGroupActivityStage(
 
     @property
     def url_name_caption(self):
-        return self.STAGE_URL_NAME_TEMPLATE.format(stage_name=self.STUDIO_LABEL)
+        return messages.STAGE_URL_NAME_TEMPLATE.format(stage_name=self.STUDIO_LABEL)
 
     @property
     def can_mark_complete(self):
@@ -177,6 +176,10 @@ class BaseGroupActivityStage(
     @property
     def is_graded_stage(self):  # pylint: disable=no-self-use
         return False
+
+    @property
+    def dashboard_details_view_url(self):
+        return self.activity.dashboard_details_url()
 
     def is_current_stage(self, context):
         target_stage_id = context.get(Constants.CURRENT_STAGE_ID_PARAMETER_NAME, None)
@@ -337,8 +340,25 @@ class BaseGroupActivityStage(
         return fragment
 
     def dashboard_detail_view(self, context):
-        # TODO: implement detail view
-        pass
+        """
+        Renders stage header for dashboard details view.
+        :param dict context:
+        :rtype: Fragment
+        """
+        fragment = Fragment()
+        render_context = {
+            'stage': self, 'ta_graded': self.activity.is_ta_graded,
+            'download_incomplete_emails_handler_url': self.get_incomplete_emails_handler_url()
+        }
+        fragment.add_content(self.render_template('dashboard_detail_view', render_context))
+        return fragment
+
+    def get_incomplete_emails_handler_url(self):
+        base_url = self.runtime.handler_url(self.activity.project, 'download_incomplete_list')
+        query_params = {
+            Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME: self.id
+        }
+        return base_url + '?' + urlencode(query_params)
 
     def get_new_stage_state_data(self):
         return {

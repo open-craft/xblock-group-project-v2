@@ -13,7 +13,7 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
             running_uploads.splice(index, 1);
         }
 
-        if (running_uploads.length == 0) {
+        if (running_uploads.length === 0) {
             $action_buttons.css('visibility', 'hidden');
         }
     }

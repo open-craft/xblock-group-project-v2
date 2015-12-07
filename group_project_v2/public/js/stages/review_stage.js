@@ -1,6 +1,6 @@
 function GroupProjectReviewStage(runtime, element) {
     // Set up gettext in case it isn't available in the client runtime:
-    if (typeof gettext == "undefined") {
+    if (typeof gettext === "undefined") {
         window.gettext = function gettext_stub(string) { return string; };
     }
 
@@ -12,7 +12,7 @@ function GroupProjectReviewStage(runtime, element) {
 
     var $form = $(".review",  element);
     var $submit_btn = $form.find('button.submit');
-    var is_peer_review = $form.data('review-type') == 'peer_review';
+    var is_peer_review = $form.data('review-type') === 'peer_review';
     var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
     var message_box = $(".message", group_project_dom);
 
@@ -85,7 +85,7 @@ function GroupProjectReviewStage(runtime, element) {
             data: args,
             dataType: 'json',
             success: function (data) {
-                if (data.result && data.result == "error") {
+                if (data.result && data.result === "error") {
                     if (data.msg) {
                         show_message(data.msg);
                     }

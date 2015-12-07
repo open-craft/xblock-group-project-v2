@@ -1,0 +1,67 @@
+{% load i18n %}
+<div class="activity dashboard-detail-view">
+  <div class="activity-header">
+    <span class="activity-header-label">{% trans "Activity:" %}</span>
+    <span class="activity-header-title">{{ activity.display_name }}</span>
+  </div>
+  <div class="stages">
+    <table class="activity-data">
+      <tr>
+        <th>{% trans "Groups" %}:</th>
+        <th colspan="{{stages_count}}">{% trans "Graded/Required Stages" %}:</th>
+      </tr>
+      <tr class="legend">
+        <td>
+          <div class="assigned_to_groups_label">{{ assigned_to_groups_label }}</div>
+          <div class="email_icon_explanation">
+            <span class="email_icon fa fa-icon fa-envelope-o"></span> {% trans "will export a list of emails within stage of partially complete/incomplete teams" %}
+          </div>
+        </td>
+        {% for stage in stages %}
+          <td class="stage_header" style="width:{{stage_cell_width_percent}}%">{{stage.content|safe}}</td>
+        {% endfor %}
+      </tr>
+      {% for group in groups %}
+      <tr class="data">
+        <td>
+          <div class="group-label" data-group-id="{{group.id}}" data-collapsed="collapsed">
+            <span class="fa fa-icon fa-caret-right group-collapsed-icon"></span>
+            {{ group|render_group:"verbose" }}
+            <span class="fa fa-icon fa-users grade_group_icon"></span>
+          </div>
+        </td>
+        {% for stage in stages %}
+          <td>
+            <span class="group-project-stage-state fa {{ group.stage_states|get_item:stage.id }}"></span>
+          </td>
+        {% endfor %}
+      </tr>
+        {% for user in group.users %}
+          <tr class="user-data-row data" data-group-id="{{group.id}}">
+            <td class="user-cell">
+              <div class="user-email">
+                <a href="mailto: {{ user.email }}">{{ user.email }}</a>
+              </div>
+              <div class="user-full-name">{{ user.full_name }}</div>
+            </td>
+            {% for stage in stages %}
+              <td>
+                <span class="group-project-stage-state fa {{ user.stage_states|get_item:stage.id }}"></span>
+                {% with user.groups_to_grade|get_item:stage.id as groups %}
+                  {% if groups %}
+                    <div class="grading-group-label">
+                      {% trans "Grading:" %}
+                      {% for group in groups %}
+                        <span class="group-label">{{ group|render_group }}</span>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                {% endwith %}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      {% endfor %}
+    </table>
+  </div>
+</div>

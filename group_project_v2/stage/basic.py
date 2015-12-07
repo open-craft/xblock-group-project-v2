@@ -3,6 +3,8 @@ from xblock.core import XBlock
 from xblock.fields import String, Scope
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
+
+from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.stage.base import BaseGroupActivityStage
 from group_project_v2.stage.mixins import SimpleCompletionStageMixin
@@ -59,7 +61,7 @@ class CompletionStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
     @outsider_disallowed_protected_handler
     def stage_completed(self, _data, _suffix=''):
         if not self.available_now:
-            template = self.STAGE_NOT_OPEN_MESSAGE if not self.is_open else self.STAGE_CLOSED_MESSAGE
+            template = messages.STAGE_NOT_OPEN_TEMPLATE if not self.is_open else messages.STAGE_CLOSED_TEMPLATE
             return {'result': 'error',  'msg': template.format(action=self.STAGE_ACTION)}
 
         try:
@@ -67,7 +69,7 @@ class CompletionStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
                 self.mark_complete()
             return {
                 'result': 'success',
-                'msg': self.STAGE_COMPLETION_MESSAGE,
+                'msg': messages.STAGE_COMPLETION_MESSAGE,
                 'new_stage_states': [self.get_new_stage_state_data()]
             }
         except ApiError as exception:
@@ -132,7 +134,7 @@ class SubmissionStage(BaseGroupActivityStage):
         if not self.submissions:
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                _(u"Submissions are not specified for {class_name} '{stage_title}'").format(
+                messages.SUBMISSIONS_BLOCKS_ARE_MISSING.format(
                     class_name=self.__class__.__name__, stage_title=self.display_name
                 )
             ))

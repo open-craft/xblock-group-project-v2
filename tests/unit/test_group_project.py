@@ -1,15 +1,20 @@
+import csv
 from unittest import TestCase
 
 import ddt
+from freezegun import freeze_time
 import mock
+from datetime import datetime
+from xblock.fields import ScopeIds
 from xblock.runtime import Runtime
 from xblock.field_data import DictFieldData
 
 from group_project_v2.group_project import GroupActivityXBlock, GroupProjectXBlock
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.dtos import ProjectDetails, WorkgroupDetails
+from group_project_v2.project_api.dtos import ProjectDetails, WorkgroupDetails, ReducedUserDetails
 from group_project_v2.stage import BaseGroupActivityStage, TeamEvaluationStage, PeerReviewStage
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
+from group_project_v2.utils import Constants
 from tests.utils import TestWithPatchesMixin, make_review_item
 
 
@@ -36,7 +41,9 @@ class TestGroupProjectXBlock(TestWithPatchesMixin, TestCase):
         super(TestGroupProjectXBlock, self).setUp()
         self.runtime_mock = mock.Mock(spec=Runtime)
         self.project_api_mock = mock.Mock(spec=TypedProjectAPI)
-        self.block = GroupProjectXBlock(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
+        self.block = GroupProjectXBlock(
+            self.runtime_mock, field_data=DictFieldData({'display_name': 'Group Project'}), scope_ids=mock.Mock()
+        )
         self.make_patch(GroupProjectXBlock, 'project_api', mock.PropertyMock(return_value=self.project_api_mock))
 
     @ddt.data(
@@ -53,6 +60,85 @@ class TestGroupProjectXBlock(TestWithPatchesMixin, TestCase):
             self.block.course_id, self.block.content_id
         )
 
+    def test_download_incomplete_list_no_stage(self):
+        request_mock = mock.Mock()
+        request_mock.GET = {Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME: 'missing_stage_id'}
+        self.runtime_mock.get_block.return_value = None
+
+        response = self.block.download_incomplete_list(request_mock)
+        self.assertEqual(response.status_code, 404)
+
+    @freeze_time(datetime(2015, 01, 01, 12, 22, 14))
+    @ddt.data(
+        ([1, 2, 3], [1], [2, 3]),
+        ([1, 2, 3], [], [1, 2, 3]),
+        ([1, 2, 3], [1, 2, 3], []),
+    )
+    @ddt.unpack
+    def test_download_incomplete_list(self, all_users_ids, completed_users_ids, users_to_export_ids):
+        request_mock = mock.Mock()
+        request_mock.GET = {Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME: 'target_stage_id'}
+
+        target_stage = mock.Mock(spec=BaseGroupActivityStage)
+        target_stage.display_name = 'Stage 1'
+        target_stage.get_users_completion.return_value = (set(completed_users_ids), {'irrelevant'})
+
+        self.runtime_mock.get_block.return_value = target_stage
+
+        # pylint: disable=maybe-no-member
+        expected_filename = GroupProjectXBlock.REPORT_FILENAME.format(
+            group_project_name=self.block.display_name, stage_name=target_stage.display_name,
+            timestamp=datetime.utcnow().strftime(GroupProjectXBlock.CSV_TIMESTAMP_FORMAT)
+        )
+        with mock.patch.object(self.block, 'export_users', mock.Mock(wraps=self.block.export_users)) as export_users, \
+                mock.patch.object(self.block, 'get_workgroups_and_students') as patched_dashboard_params:
+            patched_dashboard_params.return_value = (
+                ['irrelevant'],
+                [ReducedUserDetails(id=uid, first_name="irrelevant", last_name="irrelevant") for uid in all_users_ids]
+            )
+
+            response = self.block.download_incomplete_list(request_mock)
+            actual_parameters = export_users.call_args_list
+
+        self.assertEqual(response.status_code, 200)
+        self.runtime_mock.get_block.assert_called_with('target_stage_id')
+        self.assertEqual(len(actual_parameters), 1)
+        args, kwargs = actual_parameters[0]
+        self.assertEqual(len(args), 2)
+        self.assertEqual(kwargs, {})
+        self.assertEqual(set([user.id for user in args[0]]), set(users_to_export_ids))
+        self.assertEqual(args[1], expected_filename)
+
+    def test_download_incomplete_list_csv_contents(self):
+        request_mock = mock.Mock()
+        request_mock.GET = {Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME: 'target_stage_id'}
+
+        target_stage = mock.Mock(spec=BaseGroupActivityStage)
+        target_stage.display_name = 'Stage 1'
+        target_stage.get_users_completion.return_value = ({1}, {'irrelevant'})
+        all_users = [
+            ReducedUserDetails(id=1, first_name="U1", last_name="U1", username='U1', email="u1@example.org"),
+            ReducedUserDetails(id=2, first_name="U2", last_name="U2", username='U2', email="u2@example.org"),
+            ReducedUserDetails(id=3, first_name="U3", last_name="U3", username='U3', email="u3@example.org"),
+        ]
+
+        def csv_repr(user):
+            return {"Name": user.full_name, 'Email': user.email, 'Username': user.username}
+
+        self.runtime_mock.get_block.return_value = target_stage
+
+        with mock.patch.object(self.block, 'get_workgroups_and_students') as patched_dashboard_params:
+            patched_dashboard_params.return_value = (['irrelevant'], all_users)
+
+            response = self.block.download_incomplete_list(request_mock)
+
+        self.assertEqual(response.status_code, 200)
+        reader = csv.DictReader([line for line in response.body.split("\n")])
+        lines = [line for line in reader]
+        self.assertEqual(reader.fieldnames, GroupProjectXBlock.CSV_HEADERS)
+        self.assertEqual(lines[0], csv_repr(all_users[1]))
+        self.assertEqual(lines[1], csv_repr(all_users[2]))
+
 
 @ddt.ddt
 class TestGroupActivityXBlock(TestWithPatchesMixin, TestCase):
@@ -60,7 +146,8 @@ class TestGroupActivityXBlock(TestWithPatchesMixin, TestCase):
         super(TestGroupActivityXBlock, self).setUp()
         self.project_api_mock = mock.Mock(spec=TypedProjectAPI)
         self.runtime_mock = mock.Mock(spec=Runtime)
-        self.block = GroupActivityXBlock(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
+        self.scope_ids_mock = mock.Mock(spec=ScopeIds)
+        self.block = GroupActivityXBlock(self.runtime_mock, field_data=DictFieldData({}), scope_ids=self.scope_ids_mock)
         self.make_patch(GroupActivityXBlock, 'project_api', mock.PropertyMock(return_value=self.project_api_mock))
 
         self.group_project_mock = mock.Mock(spec=GroupProjectXBlock)
@@ -143,16 +230,101 @@ class TestGroupActivityXBlock(TestWithPatchesMixin, TestCase):
 
             get_stages.assert_called_with(PeerReviewStage.CATEGORY)
 
+
+@ddt.ddt
+class TestGetDashboardURL(TestWithPatchesMixin, TestCase):
+    def setUp(self):
+        super(TestGetDashboardURL, self).setUp()
+        self.runtime_mock = mock.Mock(spec=Runtime)
+        self.runtime_mock.course_id = 'course_id'
+        self.scope_ids_mock = mock.Mock(spec=ScopeIds)
+        self.block = GroupActivityXBlock(self.runtime_mock, field_data=DictFieldData({}), scope_ids=self.scope_ids_mock)
+        self.user_pref_mock = self.make_patch(
+            GroupActivityXBlock, 'user_preferences', mock.PropertyMock(return_value={})
+        )
+        self.project_mock = mock.Mock()
+        self.project_mock.scope_ids.usage_id = 'project1'
+        self.make_patch(GroupActivityXBlock, 'project', self.project_mock)
+
+        self.settings_service_mock = mock.Mock()
+        self.runtime_mock.service = mock.Mock(return_value=self.settings_service_mock)
+
+    @staticmethod
+    def _get_dashboard_url(template, program_id=None, course_id=None, project_id=None, activity_id=None):
+        return template.format(
+            program_id=program_id, course_id=course_id,  project_id=project_id, activity_id=activity_id
+        )
+
+    @ddt.data('activity_1', 'activity_2', 'activity_92', 'qweasdzxc')
+    def test_dashboard_details_url_no_service(self, block_id):
+        self.runtime_mock.service.return_value = None
+        self.scope_ids_mock.usage_id = block_id
+        expected_url = self._get_dashboard_url(
+            GroupActivityXBlock.DEFAULT_DASHBOARD_DETAILS_URL_TPL,
+            activity_id=block_id
+        )
+
+        url = self.block.dashboard_details_url()
+
+        self.assertEqual(url, expected_url)
+        self.runtime_mock.service.assert_called_once_with(self.block, 'settings')
+
+    @ddt.data('activity_1', 'activity_2', 'activity_92', 'qweasdzxc')
+    def test_dashboard_details_url_no_settings(self, block_id):
+        self.settings_service_mock.get_settings_bucket = mock.Mock(return_value=None)
+        self.scope_ids_mock.usage_id = block_id
+        expected_url = self._get_dashboard_url(
+            GroupActivityXBlock.DEFAULT_DASHBOARD_DETAILS_URL_TPL,
+            activity_id=block_id
+        )
+
+        url = self.block.dashboard_details_url()
+
+        self.assertEqual(url, expected_url)
+        self.settings_service_mock.get_settings_bucket.assert_called_once_with(self.block)
+
+    @ddt.data('activity_1', 'activity_2', 'activity_92', 'qweasdzxc')
+    def test_dashboard_details_url_no_settings_key(self, block_id):
+        self.settings_service_mock.get_settings_bucket = mock.Mock(return_value={})
+        self.scope_ids_mock.usage_id = block_id
+        expected_url = self._get_dashboard_url(
+            GroupActivityXBlock.DEFAULT_DASHBOARD_DETAILS_URL_TPL,
+            activity_id=block_id
+        )
+
+        url = self.block.dashboard_details_url()
+
+        self.assertEqual(url, expected_url)
+        self.settings_service_mock.get_settings_bucket.assert_called_once_with(self.block)
+
     @ddt.data(
-        (1, 'content1', 'course1'),
-        (2, 'content2', 'course2')
+        ('qwe', 'na', 'na', 'na', 'na', 'qwe'),
+        ('zxc?activity_id={activity_id}', 'activity_2', 'na', 'na', 'na', 'zxc?activity_id=activity_2'),
+        ('?activate_block_id={activity_id}', 'activity_92', 'na', 'na', 'na', '?activate_block_id=activity_92'),
+        ('/part1/part2/{activity_id}', 'qweasdzxc', 'na', 'na', 'na', '/part1/part2/qweasdzxc'),
+        ('/{program_id}/part2/{activity_id}', 'act_1', 'prog_1', 'na', 'na', '/prog_1/part2/act_1'),
+        ('/{program_id}/{course_id}/{activity_id}', 'act_2', 'prog_2', 'c_2', 'na', '/prog_2/c_2/act_2'),
+        (
+                '/{program_id}/{course_id}/{project_id}?act={activity_id}',
+                'act_3', 'prog_3', 'c_3', 'proj_3', '/prog_3/c_3/proj_3?act=act_3'
+        ),
     )
     @ddt.unpack
-    def test_project_id(self, project_id, content_id, course_id):
-        project_details = ProjectDetails(id=project_id, content_id=content_id, course_id=course_id)
-        self.group_project_mock.project_details = project_details
+    def test_dashboard_details_url_setting_present(  # pylint:disable=too-many-arguments
+            self, setting_value, block_id, preferences_program, course_id, project_id, expected_url
+    ):
+        self.settings_service_mock.get_settings_bucket = mock.Mock(
+            return_value={GroupActivityXBlock.DASHBOARD_DETAILS_URL_KEY: setting_value}
+        )
+        self.scope_ids_mock.usage_id = block_id
+        self.project_mock.scope_ids.usage_id = project_id
+        self.runtime_mock.course_id = course_id
+        self.user_pref_mock.return_value = {self.block.DASHBOARD_PROGRAM_ID_KEY: preferences_program}
 
-        self.assertEqual(self.block.project_details, project_details)
+        url = self.block.dashboard_details_url()
+
+        self.assertEqual(url, expected_url)
+        self.settings_service_mock.get_settings_bucket.assert_called_once_with(self.block)
 
 
 @ddt.ddt

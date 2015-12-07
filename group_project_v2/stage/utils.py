@@ -5,6 +5,7 @@ class StageState(object):
     NOT_STARTED = 'not_started'
     INCOMPLETE = 'incomplete'
     COMPLETED = 'completed'
+    UNKNOWN = 'unknown'
 
     HUMAN_NAMES_MAP = {
         NOT_STARTED: _("Not started"),

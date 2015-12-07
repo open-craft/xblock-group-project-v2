@@ -249,6 +249,8 @@ class NoStudioEditableSettingsMixin(object):
 
 class DashboardXBlockMixin(object):
     """ Mixin for an XBlock that has dashboard views """
+    DASHBOARD_PROGRAM_ID_KEY = "DASHBOARD_PROGRAM_ID"
+
     def dashboard_view(self, context):
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
@@ -270,11 +272,15 @@ class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
         :param dict context: XBlock view context
         :rtype: None
         """
+        workgroups, users = self.get_workgroups_and_students()
         if self.TARGET_STUDENTS not in context:
-            context[self.TARGET_STUDENTS] = list(self.all_users_in_workgroups)
+            context[self.TARGET_STUDENTS] = users
 
         if self.TARGET_WORKGROUPS not in context:
-            context[self.TARGET_WORKGROUPS] = list(self.workgroups)
+            context[self.TARGET_WORKGROUPS] = workgroups
+
+    def get_workgroups_and_students(self):
+        return list(self.workgroups), list(self.all_users_in_workgroups)
 
     @property
     def project_details(self):
@@ -282,7 +288,7 @@ class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
         Gets ProjectDetails for current block
         :rtype: group_project_v2.project_api.dtos.ProjectDetails
         """
-        raise NotImplementedError(MUST_BE_OVERRIDDEN)
+        return self.project_api.get_project_by_content_id(self.course_id, self.content_id)
 
     @property
     def workgroups(self):
@@ -316,4 +322,4 @@ class CommonMixinCollection(
     StudioEditableXBlockMixin, StudioContainerXBlockMixin,
     WorkgroupAwareXBlockMixin, TemplateManagerMixin
 ):
-    pass
+    block_settings_key = 'group_project_v2'

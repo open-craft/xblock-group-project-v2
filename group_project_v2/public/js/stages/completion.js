@@ -1,6 +1,6 @@
 function GroupProjectCompletionStage(runtime, element) {
     // Set up gettext in case it isn't available in the client runtime:
-    if (typeof gettext == "undefined") {
+    if (typeof gettext === "undefined") {
         window.gettext = function gettext_stub(string) { return string; };
     }
 
@@ -28,7 +28,7 @@ function GroupProjectCompletionStage(runtime, element) {
                 var msg = (data.msg) ? data.msg : gettext('This task has been marked as complete.');
                 show_message(msg);
 
-                if (data.result == 'error'){
+                if (data.result === 'error'){
                     return;
                 }
 

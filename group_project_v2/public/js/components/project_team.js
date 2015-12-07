@@ -53,7 +53,7 @@ function ProjectTeamXBlock(runtime, element) {
     });
 
     modal_dialogs.find('textarea').on('keyup', function () {
-        if ($(this).val() == '') {
+        if ($(this).val() === '') {
             $(this).parent('form').find('input[type=submit]').prop('disabled', 'disabled');
         }
         else {

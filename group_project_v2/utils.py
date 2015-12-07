@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+import csv
 import functools
 import logging
 from datetime import date, datetime, timedelta
 import xml.etree.ElementTree as ET
 
 from django.conf import settings
+from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
 from lazy.lazy import lazy
 from xblock.fragment import Fragment
@@ -288,3 +290,36 @@ def add_resource(block, resource_type, path, fragment, via_url=False):
 
 def get_block_content_id(block):
     return unicode(block.scope_ids.usage_id)
+
+
+@register.filter
+def get_item(dictionary, key):
+    try:
+        return dictionary.get(key)
+    except (AttributeError, KeyError):
+        log.exception("Error getting '%(key)s' from '%(dictionary)s'", dict(key=key, dictionary=dictionary))
+        raise
+
+
+@register.filter
+def render_group(group, verbose=False):
+    text_template = _(u"#{group_id}")
+    if verbose:
+        text_template = _(u"Group #{group_id}")
+    link_text = text_template.format(group_id=group['id'])
+    res = u'<a href="{ta_grade_link}">{link_text}</a>'.format(ta_grade_link=group['ta_grade_link'], link_text=link_text)
+    return mark_safe(res)
+
+
+def export_to_csv(data, target, headers=None):
+    """
+    :param list[list] data: Data to write to csv
+    :param target: File-like object
+    :param list[str] headers: Optional csv headers
+    """
+    writer = csv.writer(target)
+    if headers:
+        writer.writerow(headers)
+
+    for row in data:
+        writer.writerow(row)
