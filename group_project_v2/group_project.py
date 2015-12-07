@@ -583,7 +583,10 @@ class GroupActivityXBlock(
         groups_data = self._build_groups_data(target_workgroups, stage_stats)
 
         render_context = {
-            'activity': self, 'stages': stages, 'stages_count': len(stages), 'groups': groups_data,
+            'activity': self,
+            'stages': stages,
+            'stages_count': len(stages),
+            'groups': groups_data,
             'stage_cell_width_percent': (100 - 30) / float(len(stages)),  # 30% is reserved for first column
             'assigned_to_groups_label': messages.ASSIGNED_TO_GROUPS_LABEL.format(group_count=len(groups_data))
         }
