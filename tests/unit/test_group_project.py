@@ -1,3 +1,4 @@
+import csv
 from unittest import TestCase
 
 import ddt
@@ -8,9 +9,10 @@ from xblock.field_data import DictFieldData
 
 from group_project_v2.group_project import GroupActivityXBlock, GroupProjectXBlock
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.dtos import ProjectDetails, WorkgroupDetails
+from group_project_v2.project_api.dtos import ProjectDetails, WorkgroupDetails, ReducedUserDetails
 from group_project_v2.stage import BaseGroupActivityStage, TeamEvaluationStage, PeerReviewStage
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
+from group_project_v2.utils import Constants
 from tests.utils import TestWithPatchesMixin, make_review_item
 
 
@@ -37,7 +39,9 @@ class TestGroupProjectXBlock(TestWithPatchesMixin, TestCase):
         super(TestGroupProjectXBlock, self).setUp()
         self.runtime_mock = mock.Mock(spec=Runtime)
         self.project_api_mock = mock.Mock(spec=TypedProjectAPI)
-        self.block = GroupProjectXBlock(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
+        self.block = GroupProjectXBlock(
+            self.runtime_mock, field_data=DictFieldData({'display_name': 'Group Project'}), scope_ids=mock.Mock()
+        )
         self.make_patch(GroupProjectXBlock, 'project_api', mock.PropertyMock(return_value=self.project_api_mock))
 
     @ddt.data(
@@ -53,6 +57,83 @@ class TestGroupProjectXBlock(TestWithPatchesMixin, TestCase):
         self.project_api_mock.get_project_by_content_id.assert_called_once_with(
             self.block.course_id, self.block.content_id
         )
+
+    def test_download_incomplete_list_no_stage(self):
+        request_mock = mock.Mock()
+        request_mock.GET = {Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME: 'missing_stage_id'}
+        self.runtime_mock.get_block.return_value = None
+
+        response = self.block.download_incomplete_list(request_mock)
+        self.assertEqual(response.status_code, 404)
+
+    @ddt.data(
+        ([1, 2, 3], [1], [2, 3]),
+        ([1, 2, 3], [], [1, 2, 3]),
+        ([1, 2, 3], [1, 2, 3], []),
+    )
+    @ddt.unpack
+    def test_download_incomplete_list(self, all_users_ids, completed_users_ids, users_to_export_ids):
+        request_mock = mock.Mock()
+        request_mock.GET = {Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME: 'target_stage_id'}
+
+        target_stage = mock.Mock(spec=BaseGroupActivityStage)
+        target_stage.display_name = 'Stage 1'
+        target_stage.get_users_completion.return_value = (set(completed_users_ids), {'irrelevant'})
+
+        self.runtime_mock.get_block.return_value = target_stage
+
+        expected_filename = GroupProjectXBlock.REPORT_FILENAME.format(
+            group_project_name=self.block.display_name, stage_name=target_stage.display_name
+        )
+        with mock.patch.object(self.block, 'export_users', mock.Mock(wraps=self.block.export_users)) as export_users, \
+                mock.patch.object(self.block, 'get_workgroups_and_students') as patched_dashboard_params:
+            patched_dashboard_params.return_value = (
+                ['irrelevant'],
+                [ReducedUserDetails(id=uid, first_name="irrelevant", last_name="irrelevant") for uid in all_users_ids]
+            )
+
+            response = self.block.download_incomplete_list(request_mock)
+            actual_parameters = export_users.call_args_list
+
+        self.assertEqual(response.status_code, 200)
+        self.runtime_mock.get_block.assert_called_with('target_stage_id')
+        self.assertEqual(len(actual_parameters), 1)
+        args, kwargs = actual_parameters[0]
+        self.assertEqual(len(args), 2)
+        self.assertEqual(kwargs, {})
+        users_to_export, filename = args
+        self.assertEqual(set([user.id for user in users_to_export]), set(users_to_export_ids))
+        self.assertEqual(filename, expected_filename)
+
+    def test_donwload_incomplete_list_csv_contents(self):
+        request_mock = mock.Mock()
+        request_mock.GET = {Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME: 'target_stage_id'}
+
+        target_stage = mock.Mock(spec=BaseGroupActivityStage)
+        target_stage.display_name = 'Stage 1'
+        target_stage.get_users_completion.return_value = ({1}, {'irrelevant'})
+        all_users = [
+            ReducedUserDetails(id=1, first_name="U1", last_name="U1", username='U1', email="u1@example.org"),
+            ReducedUserDetails(id=2, first_name="U2", last_name="U2", username='U2', email="u2@example.org"),
+            ReducedUserDetails(id=3, first_name="U3", last_name="U3", username='U3', email="u3@example.org"),
+        ]
+
+        def csv_repr(user):
+            return {"Name": user.full_name, 'Email': user.email, 'Username': user.username}
+
+        self.runtime_mock.get_block.return_value = target_stage
+
+        with mock.patch.object(self.block, 'get_workgroups_and_students') as patched_dashboard_params:
+            patched_dashboard_params.return_value = (['irrelevant'], all_users)
+
+            response = self.block.download_incomplete_list(request_mock)
+
+        self.assertEqual(response.status_code, 200)
+        reader = csv.DictReader([line for line in response.body.split("\n")])
+        lines = [line for line in reader]
+        self.assertEqual(reader.fieldnames, GroupProjectXBlock.CSV_HEADERS)
+        self.assertEqual(lines[0], csv_repr(all_users[1]))
+        self.assertEqual(lines[1], csv_repr(all_users[2]))
 
 
 @ddt.ddt
