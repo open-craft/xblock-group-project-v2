@@ -50,7 +50,7 @@ GRADED_QUESTIONS_ARE_REQUIRED = _(u"Grade questions are required for {class_name
 MUST_CONTAIN_CONTENT_ID = _(u"Video Resource Block must contain Ooyala content ID.")
 NON_GROUP_MEMBER_UPLOAD = _(u"Only group members can upload files.")
 QUESTION_NOT_SELECTED = _(u"Question is not selected.")
-SUCCESSFUL_UPLOAD_TITLE = _(u"Upload complete") # no full stop (period) by design
+SUCCESSFUL_UPLOAD_TITLE = _(u"Upload complete")  # no full stop (period) by design
 FAILED_UPLOAD_TITLE = _(u"Upload failed.")
 SUCCESSFUL_UPLOAD_MESSAGE_TPL = _(
     u"Your deliverable has been successfully uploaded. You can attach an updated version of the "
