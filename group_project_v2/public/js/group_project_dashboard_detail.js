@@ -36,7 +36,7 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
             var group_id = $(this).data(data_attributes.group_id);
             var state = $(this).data(data_attributes.collapsed);
 
-            if (state == collapsed_values.expanded) {
+            if (state === collapsed_values.expanded) {
                 collapse_group(this, group_id);
             }
             else{

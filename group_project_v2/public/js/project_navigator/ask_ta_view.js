@@ -3,7 +3,7 @@ function GroupProjectNavigatorAskTAView(runtime, element) {
         textarea = $("textarea", form);
 
     $(textarea).on('keyup', function () {
-        if ($(this).val() == '') {
+        if ($(this).val() === '') {
             $(this).parent('form').find('input[type=submit]').prop('disabled', 'disabled');
         }
         else {
