@@ -101,9 +101,8 @@ class TestGroupProjectXBlock(TestWithPatchesMixin, TestCase):
         args, kwargs = actual_parameters[0]
         self.assertEqual(len(args), 2)
         self.assertEqual(kwargs, {})
-        users_to_export, filename = args
-        self.assertEqual(set([user.id for user in users_to_export]), set(users_to_export_ids))
-        self.assertEqual(filename, expected_filename)
+        self.assertEqual(set([user.id for user in args[0]]), set(users_to_export_ids))
+        self.assertEqual(args[1], expected_filename)
 
     def test_donwload_incomplete_list_csv_contents(self):
         request_mock = mock.Mock()
