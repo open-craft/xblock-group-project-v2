@@ -602,7 +602,7 @@ class GroupActivityXBlock(
             List of dictionaries with the following format:
                 * id - Group ID
                 * stage_states - dictionary stage_id -> StateState
-                * users - dictionary with the folling format:
+                * users - dictionary with the following format:
                     * id - User ID
                     * full_name - User full name
                     * email - user email
