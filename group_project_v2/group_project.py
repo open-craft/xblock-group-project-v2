@@ -572,7 +572,7 @@ class GroupActivityXBlock(
                 continue
             stage_fragment = stage.render('dashboard_detail_view', children_context)
             stage_fragment.add_frag_resources(fragment)
-            stages.append({"id": stage.id, 'content': stage_fragment})
+            stages.append({"id": stage.id, 'content': stage_fragment.content})
             stage_stats[stage.id] = self._get_stage_completion_details(stage, target_workgroups, target_users)
 
         groups_data = self._build_groups_data(target_workgroups, stage_stats)
