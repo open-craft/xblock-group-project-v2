@@ -109,7 +109,7 @@ class TestGroupProjectXBlock(TestWithPatchesMixin, TestCase):
         self.assertEqual(set([user.id for user in args[0]]), set(users_to_export_ids))
         self.assertEqual(args[1], expected_filename)
 
-    def test_donwload_incomplete_list_csv_contents(self):
+    def test_download_incomplete_list_csv_contents(self):
         request_mock = mock.Mock()
         request_mock.GET = {Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME: 'target_stage_id'}
 
