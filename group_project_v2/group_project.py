@@ -40,6 +40,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
 
     CATEGORY = "gp-v2-project"
     REPORT_FILENAME = "group_project_{group_project_name}_stage_{stage_name}_incomplete_report.csv"
+    CSV_HEADERS = ['Name', 'Username', 'Email']
 
     editable_fields = ('display_name', )
     has_score = False
@@ -231,12 +232,12 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
 
         return self.export_users(users_to_export, filename)
 
-    @staticmethod
-    def export_users(users_to_export, filename):
+    @classmethod
+    def export_users(cls, users_to_export, filename):
         response = webob.response.Response(charset='UTF-8', content_type="text/csv")
         response.headers['Content-Disposition'] = 'attachment; filename="{filename}"'.format(filename=filename)
         user_data = [[user.full_name, user.username, user.email] for user in users_to_export]
-        export_to_csv(user_data, response, headers=['Name', 'Username', 'Email'])
+        export_to_csv(user_data, response, headers=cls.CSV_HEADERS)
 
         return response
 
