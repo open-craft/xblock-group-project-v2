@@ -27,8 +27,8 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
     };
 
     var search_selector = {
-        email: "tr[data-email*='%SEARCH_CRITERIA%']",
-        full_name: "tr[data-fullname*='%SEARCH_CRITERIA%']"
+        email: "tr[data-email]",
+        full_name: "tr[data-fullname]"
     };
 
     function format(template, replacements) {
@@ -63,7 +63,6 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
     }
 
     function collapse_all_groups() {
-        debugger;
         var group_rows = $(selectors.table).find("tr.group-data-row");
         for (var i = 0; i< group_rows.length; i++) {
             var $row = $(group_rows[i]);
@@ -95,16 +94,22 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
         });
 
         $(document).on(search_event, function(target, search_criteria) {
-            var replacements = {'SEARCH_CRITERIA': search_criteria};
+            var search_regex = new RegExp(search_criteria, "i");
             collapse_all_groups();
             clear_search_highlighting();
-            var search_hits = $(selectors.table).find(format(search_selector.email, replacements))
-                .add(format(search_selector.full_name, replacements));
+            var search_hits = $(selectors.table)
+                .find(search_selector.email)
+                .add(search_selector.full_name)
+                .filter(function() {
+                    return (
+                        search_regex.test($(this).data('email')) ||
+                        search_regex.test($(this).data('fullname'))
+                    );
+                });
 
             search_hits.addClass(search_hit_class);
 
             for (var i=0; i<search_hits.length; i++) {
-                debugger;
                 var group_id = $(search_hits[i]).data(data_attributes.group_id);
                 expand_group(group_id);
             }
