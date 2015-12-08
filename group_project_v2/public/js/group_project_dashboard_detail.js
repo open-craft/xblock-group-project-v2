@@ -1,7 +1,18 @@
 function GroupProjectBlockDashboardDetailsView(runtime, element) {
-    var group_user_rows_selector_prefix = ".user-data-row[data-group-id=%GROUP_ID%]";
-    var group_collapsed_icon_selector = '.group-collapsed-icon';
-    var group_work_nav_icon_selector = '.grade_group_icon';
+    var selectors = {
+        user_row_tpl: "tr.user-data-row[data-group-id=%GROUP_ID%]",
+        group_row_tpl: "tr.group-data-row[data-group-id=%GROUP_ID%]",
+        group_collapsed_icon: '.group-collapsed-icon',
+        nav_icon: '.grade_group_icon',
+        table: "table.activity-data",
+        user_row: "tr.user-data-row",
+        group_row: "tr.group-data-row",
+        group_label: ".group-label"
+    };
+
+    var search_event = 'group_project_v2.details_view.search';
+    var search_clear_event = 'group_project_v2.details_view.search_clear';
+    var search_hit_class = 'search-hit';
     var icons = {
         collapsed: "fa-caret-right",
         expanded: "fa-caret-down"
@@ -15,33 +26,92 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
         expanded: 'expanded'
     };
 
-    function expand_group(group_label, group_id) {
-        var group_user_rows_selector = group_user_rows_selector_prefix.replace('%GROUP_ID%', group_id);
-        $(group_label).data(data_attributes.collapsed, collapsed_values.expanded);
-        $(group_user_rows_selector, element).show();
-        $(group_collapsed_icon_selector, group_label).removeClass(icons.collapsed).addClass(icons.expanded);
-        $(group_work_nav_icon_selector, group_label).show();
+    var search_selector = {
+        email: "tr[data-email*='%SEARCH_CRITERIA%']",
+        full_name: "tr[data-fullname*='%SEARCH_CRITERIA%']"
+    };
+
+    function format(template, replacements) {
+        var temp_result = template;
+        for (var key in replacements){
+            if (!replacements.hasOwnProperty(key)) {
+                continue;
+            }
+            temp_result = temp_result.replace('%'+key+'%', replacements[key]);
+        }
+        return temp_result
     }
 
-    function collapse_group(group_label, group_id) {
-        var group_user_rows_selector = group_user_rows_selector_prefix.replace('%GROUP_ID%', group_id);
-        $(group_label).data(data_attributes.collapsed, collapsed_values.collapsed);
+    function expand_group(group_id) {
+        var group_user_rows_selector = format(selectors.user_row_tpl, {'GROUP_ID': group_id});
+        var group_row_selector = format(selectors.group_row_tpl, {'GROUP_ID': group_id});
+        var group_label = $(group_row_selector, element).find(selectors.group_label);
+        $(group_row_selector).data(data_attributes.collapsed, collapsed_values.expanded);
+        $(group_user_rows_selector, element).show();
+        $(selectors.group_collapsed_icon, group_label).removeClass(icons.collapsed).addClass(icons.expanded);
+        $(selectors.nav_icon, group_label).show();
+    }
+
+    function collapse_group(group_id) {
+        var group_user_rows_selector = format(selectors.user_row_tpl, {'GROUP_ID': group_id});
+        var group_row_selector = format(selectors.group_row_tpl, {'GROUP_ID': group_id});
+        var group_label = $(group_row_selector, element).find(selectors.group_label);
+        $(group_row_selector).data(data_attributes.collapsed, collapsed_values.collapsed);
         $(group_user_rows_selector, element).hide();
-        $(group_collapsed_icon_selector, group_label).removeClass(icons.expanded).addClass(icons.collapsed);
-        $(group_work_nav_icon_selector, group_label).hide();
+        $(selectors.group_collapsed_icon, group_label).removeClass(icons.expanded).addClass(icons.collapsed);
+        $(selectors.nav_icon, group_label).hide();
+    }
+
+    function collapse_all_groups() {
+        debugger;
+        var group_rows = $(selectors.table).find("tr.group-data-row");
+        for (var i = 0; i< group_rows.length; i++) {
+            var $row = $(group_rows[i]);
+            var group_id = $row.data(data_attributes.group_id);
+            collapse_group(group_id);
+        }
+    }
+
+    function clear_search_highlighting() {
+        $("table.activity-data", element).find(selectors.user_row).removeClass(search_hit_class);
     }
 
     $(document).ready(function () {
-        $(".group-label", element).click(function () {
-            var group_id = $(this).data(data_attributes.group_id);
-            var state = $(this).data(data_attributes.collapsed);
+        $(selectors.group_label, element).click(function () {
+            var $row = $(this).parents(selectors.group_row);
+            var group_id = $row.data(data_attributes.group_id);
+            var state = $row.data(data_attributes.collapsed);
 
             if (state === collapsed_values.expanded) {
-                collapse_group(this, group_id);
+                collapse_group(group_id);
             }
             else{
-                expand_group(this, group_id);
+                expand_group(group_id);
             }
         });
+
+        $(selectors.nav_icon, element).click(function(ev) {
+            ev.stopPropagation();
+        });
+
+        $(document).on(search_event, function(target, search_criteria) {
+            var replacements = {'SEARCH_CRITERIA': search_criteria};
+            collapse_all_groups();
+            clear_search_highlighting();
+            var search_hits = $(selectors.table).find(format(search_selector.email, replacements))
+                .add(format(search_selector.full_name, replacements));
+
+            search_hits.addClass(search_hit_class);
+
+            for (var i=0; i<search_hits.length; i++) {
+                debugger;
+                var group_id = $(search_hits[i]).data(data_attributes.group_id);
+                expand_group(group_id);
+            }
+        });
+
+        $(document).on(search_clear_event, function() {
+            clear_search_highlighting();
+        })
     });
 }
