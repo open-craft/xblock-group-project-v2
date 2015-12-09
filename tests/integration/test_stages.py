@@ -652,8 +652,8 @@ class PeerReviewStageTest(BaseReviewStageTest):
             self.assertEqual(publish_kwargs, {})
             self.assertIsInstance(publish_args[0], PeerReviewStage)
             self.assertEqual(publish_args[0].id, stage_element.id)
-            self.assertEqual('progress', publish_args[1])
-            self.assertEqual({'user_id': user_id}, publish_args[2])
+            self.assertEqual(publish_args[1], 'progress')
+            self.assertEqual(publish_args[2], {'user_id': user_id})
 
         self.project_api_mock.submit_workgroup_review_items.assert_called_with(
             str(user_id),
