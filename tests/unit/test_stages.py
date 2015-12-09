@@ -24,6 +24,9 @@ GROUP_ID = 10
 OTHER_GROUP_ID = 11
 
 
+patch_obj = mock.patch.object  # pylint:disable=invalid-name
+
+
 class BaseStageTest(TestCase, TestWithPatchesMixin):
     block_to_test = None
     user_id = USER_ID
@@ -141,13 +144,13 @@ class ReviewStageChildrenMockContextManager(object):
             return child_category in self._child_categories
 
         has_child_mock = mock.Mock()
-        patch_has_child = mock.patch.object(self._block, 'has_child_of_category', has_child_mock)
+        patch_has_child = patch_obj(self._block, 'has_child_of_category', has_child_mock)
         has_child_mock.side_effect = _has_child_of_category
         self._patchers.append(patch_has_child)
 
         questions_mock = mock.PropertyMock()
         questions_mock.return_value = self._questions
-        patch_questions = mock.patch.object(type(self._block), 'questions', questions_mock)
+        patch_questions = patch_obj(type(self._block), 'questions', questions_mock)
         self._patchers.append(patch_questions)
 
         for patch in self._patchers:
@@ -177,7 +180,7 @@ class ReviewStageBaseTest(object):
     def test_marks_visited_on_student_view(self, can_mark_complete, should_set_visited):
         can_mark_mock = mock.PropertyMock(return_value=can_mark_complete)
         self.assertFalse(self.block.visited)  # precondition check
-        with mock.patch.object(self.block_to_test, 'can_mark_complete', can_mark_mock):
+        with patch_obj(self.block_to_test, 'can_mark_complete', can_mark_mock):
             self.block.student_view({})
 
             self.assertEqual(self.block.visited, should_set_visited)
@@ -194,8 +197,8 @@ class ReviewStageBaseTest(object):
     def test_stage_state(self, review_stage_state, visited, expected_stage_state):
         self.block.visited = visited
         patched_review_subjects = mock.PropertyMock()
-        with mock.patch.object(self.block_to_test, 'review_status') as patched_review_status, \
-                mock.patch.object(self.block_to_test, 'review_subjects', patched_review_subjects):
+        with patch_obj(self.block_to_test, 'review_status') as patched_review_status, \
+                patch_obj(self.block_to_test, 'review_subjects', patched_review_subjects):
             patched_review_status.return_value = review_stage_state
             patched_review_subjects.return_value = [{'id': 1}, {'id': 2}]
 
@@ -286,8 +289,8 @@ class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
     def test_review_status(self, peers_to_review, questions, reviews, expected_result):
         self.project_api_mock.get_peer_review_items_for_group.return_value = reviews
 
-        with mock.patch.object(self.block_to_test, 'review_subjects', mock.PropertyMock()) as patched_review_subjects, \
-                mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+        with patch_obj(self.block_to_test, 'review_subjects', mock.PropertyMock()) as patched_review_subjects, \
+                patch_obj(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
             patched_review_subjects.return_value = [ReducedUserDetails(id=rev_id) for rev_id in peers_to_review]
             patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
 
@@ -347,7 +350,7 @@ class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
 
         expected_completed, expected_partially_completed = expected_result
 
-        with mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+        with patch_obj(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
             patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
 
             completed, partially_completed = self.block.get_users_completion(
@@ -389,7 +392,7 @@ class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
 
         expected_completed, expected_partially_completed = expected_result
 
-        with mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+        with patch_obj(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
             patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
 
             completed, partially_completed = self.block.get_users_completion(
@@ -445,7 +448,7 @@ class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
 
         expected_completed, expected_partially_completed = expected_result
 
-        with mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+        with patch_obj(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
             patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
 
             completed, partially_completed = self.block.get_users_completion(
@@ -480,12 +483,18 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
     def test_stage_state_no_reviews_assigned(self, review_stage_state, visited):
         self.block.visited = visited
         patched_review_subjects = mock.PropertyMock()
-        with mock.patch.object(self.block_to_test, 'review_status') as patched_review_status, \
-                mock.patch.object(self.block_to_test, 'review_subjects', patched_review_subjects):
+        with patch_obj(self.block_to_test, 'review_status') as patched_review_status, \
+                patch_obj(self.block_to_test, 'review_subjects', patched_review_subjects):
             patched_review_status.return_value = review_stage_state
             patched_review_subjects.return_value = []
 
             self.assertEqual(self.block.get_stage_state(), StageState.NOT_STARTED)
+
+    @ddt.data(True, False)
+    def test_can_mark_complete_admin_grader(self, available_now):
+        with patch_obj(self.block_to_test, 'is_admin_grader', mock.PropertyMock(return_value=True)), \
+                patch_obj(self.block_to_test, 'available_now', mock.PropertyMock(return_value=available_now)):
+            self.assertEqual(self.block.can_mark_complete, True)
 
     def test_validation(self):
         questions = [self._make_question(graded=True)]
@@ -599,8 +608,8 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
         ]
         self.project_api_mock.get_workgroup_review_items_for_group.side_effect = get_reviews
 
-        with mock.patch.object(self.block_to_test, 'review_subjects', mock.PropertyMock()) as patched_review_subjects, \
-                mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+        with patch_obj(self.block_to_test, 'review_subjects', mock.PropertyMock()) as patched_review_subjects, \
+                patch_obj(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
             patched_review_subjects.return_value = [WorkgroupDetails(id=rev_id) for rev_id in groups]
             patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
 
@@ -660,7 +669,7 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
 
         expected_completed, expected_partially_completed = expected_result
 
-        with mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+        with patch_obj(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
             patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
 
             completed, partially_completed = self.block.get_users_completion(
@@ -700,7 +709,7 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
 
         expected_completed, expected_partially_completed = expected_result
 
-        with mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+        with patch_obj(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
             patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
 
             completed, partially_completed = self.block.get_users_completion(
@@ -765,7 +774,7 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
 
         expected_completed, expected_partially_completed = expected_result
 
-        with mock.patch.object(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+        with patch_obj(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
             patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
 
             completed, partially_completed = self.block.get_users_completion(
@@ -818,7 +827,7 @@ class EvaluationStagesBaseTestMixin(object):
     @ddt.unpack
     def test_marks_complete_on_student_view(self, can_mark_complete, should_call_mark_complete):
         can_mark_mock = mock.PropertyMock(return_value=can_mark_complete)
-        with mock.patch.object(self.block_to_test, 'can_mark_complete', can_mark_mock):
+        with patch_obj(self.block_to_test, 'can_mark_complete', can_mark_mock):
             self.block.student_view({})
 
             if should_call_mark_complete:
@@ -852,7 +861,7 @@ class TestEvaluationDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
         self.assertTrue(self.block.can_mark_complete)
 
     def test_can_mark_complete_no_questions_returns_true(self):
-        with mock.patch.object(self.block_to_test, 'required_questions') as patched_required_questions:
+        with patch_obj(self.block_to_test, 'required_questions') as patched_required_questions:
             patched_required_questions.return_value = []
 
             self.assertTrue(self.block.can_mark_complete)
@@ -871,7 +880,7 @@ class TestEvaluationDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
         self.get_reviewer_ids_mock.return_value = reviewers
         self.get_reviews_mock.return_value = reviews
 
-        with mock.patch.object(
+        with patch_obj(
             self.block_to_test, 'required_questions', mock.PropertyMock()
         ) as patched_required_questions:
             patched_required_questions.return_value = questions
