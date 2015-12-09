@@ -7,6 +7,7 @@ import textwrap
 import ddt
 from freezegun import freeze_time
 import mock
+from workbench.runtime import WorkbenchRuntime
 
 from group_project_v2.mixins import UserAwareXBlockMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
@@ -623,27 +624,42 @@ class PeerReviewStageTest(BaseReviewStageTest):
 
         self.select_review_subject(group)
 
-        expected_submissions = {
+        submissions = {
             "group_score": "100",
             "group_q1": "Y",
             "group_q2": "Awesome"
         }
 
         questions = stage_element.form.questions
-        questions[0].control.select_option(expected_submissions["group_score"])
-        questions[1].control.select_option(expected_submissions["group_q1"])
-        questions[2].control.fill_text(expected_submissions["group_q2"])
+        questions[0].control.select_option(submissions["group_score"])
+        questions[1].control.select_option(submissions["group_q1"])
+        questions[2].control.fill_text(submissions["group_q2"])
 
         self.assertTrue(stage_element.form.submit.is_displayed())
         self.assertEqual(stage_element.form.submit.text, "Submit")  # first time here - should read Submit
 
-        self.click_submit(stage_element)
+        # mocking response after submitting
+        self.project_api_mock.get_workgroup_review_items_for_group.return_value = [
+            {"reviewer": str(user_id), "answer": answer, 'question': question, "workgroup": stage_element.form.group_id}
+            for question, answer in submissions.iteritems()
+        ]
+
+        with mock.patch.object(WorkbenchRuntime, 'publish') as patched_method:
+            self.click_submit(stage_element)
+
+            self.assertTrue(patched_method.called)
+            publish_args, publish_kwargs = patched_method.call_args
+            self.assertEqual(publish_kwargs, {})
+            self.assertIsInstance(publish_args[0], PeerReviewStage)
+            self.assertEqual(publish_args[0].id, stage_element.id)
+            self.assertEqual('progress', publish_args[1])
+            self.assertEqual({'user_id': user_id}, publish_args[2])
 
         self.project_api_mock.submit_workgroup_review_items.assert_called_with(
             str(user_id),
             stage_element.form.group_id,
             self.activity_id,
-            expected_submissions
+            submissions
         )
 
 
