@@ -11,9 +11,11 @@ function GroupProjectQuestionEdit(runtime, element) {
 
         // TODO: This is a workaround to update the textarea as StudioEditableXBlockMixin will be looking for value
         // there. StudioEditableXBlockMixin should probably provide CodeMirror integration
+        // jshint unused:vars
         cm.on("change", function(instance, changeObj) {
             $(xmlEditorTextarea).val(instance.getValue());
             $(xmlEditorTextarea).trigger('change');
         });
+        // jshint unused:true
     }
 }

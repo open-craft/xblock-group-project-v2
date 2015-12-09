@@ -54,7 +54,7 @@ function GroupProjectSubmissionBlock(runtime, element) {
             $('.' + data.paramName + '_progress', target_form).css({width: '0%'}).removeClass('complete failed');
             $('.' + data.paramName + '_progress_box', target_form).css({visibility: 'visible'});
 
-            $(document).one('perform_uploads', function (ev) {
+            $(document).one('perform_uploads', function () {
                 var uploadXHR = data.submit();
 
                 uploadXHR
@@ -84,7 +84,7 @@ function GroupProjectSubmissionBlock(runtime, element) {
 
                         uploadComplete(jqXHR);
                     })
-                    .fail(function (jqXHR, textStatus, errorThrown) {
+                    .fail(function (jqXHR) {
                         uploadFailed(jqXHR);
                     });
 
