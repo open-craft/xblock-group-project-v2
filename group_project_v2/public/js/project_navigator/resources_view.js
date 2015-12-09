@@ -24,7 +24,9 @@ function GroupProjectNavigatorResourcesView(runtime, element) {
 
         player.append($('<div id="'+ooyala_player_target_element_id+'"/>'));
 
-        if (typeof OO === 'undefined') return;
+        if (typeof OO === 'undefined') {
+            return;
+        }
         // TODO: manually using ooyala - replace with Ooyala player XBlock when it's autostart setting is fixed
         // and play-stop-destroy events are exposed.
         var parameters = {width: '100%', height: '100%', autoplay: true};

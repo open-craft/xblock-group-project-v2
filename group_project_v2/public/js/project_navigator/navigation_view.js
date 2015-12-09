@@ -7,8 +7,9 @@ function GroupProjectNavigatorNavigationView(runtime, element) {
             var activity_wrapper = $(".group-project-activity-wrapper[data-activity-id='"+activity_id+"']", element),
                 stage_item = $(".group-project-stage[data-stage-id='"+stage_id+"']", activity_wrapper);
 
-            if (!stage_item)
+            if (!stage_item) {
                 return;
+            }
 
             var status_icon = $(".group-project-stage-state", stage_item);
             status_icon.removeClass("not-started incomplete completed");
