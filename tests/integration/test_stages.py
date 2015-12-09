@@ -604,7 +604,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
         self.submit_and_assert_completion_published(stage_element, user_id)
 
     def test_ta_grading(self):
-        user_id, group_id = 1, 3
+        user_id, group_id = 22, 3
         self.project_api_mock.get_user_preferences = mock.Mock(
             return_value={UserAwareXBlockMixin.TA_REVIEW_KEY: group_id}
         )
