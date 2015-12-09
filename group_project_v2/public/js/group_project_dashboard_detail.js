@@ -62,7 +62,7 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
         var group_row_selector = format(selectors.group_row_tpl, {'GROUP_ID': group_id});
         var group_label = $(group_row_selector, element).find(selectors.group_label);
 
-        $(group_row_selector).data(data_attributes.collapsed, attr_value);
+        $(group_row_selector, element).data(data_attributes.collapsed, attr_value);
         $(selectors.group_collapsed_icon, group_label)
             .removeClass(icon_classes.collapsed).removeClass(icon_classes.expanded)
             .addClass(icon_class);
@@ -85,7 +85,7 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
     }
 
     function collapse_all_groups() {
-        var group_rows = $(selectors.table).find("tr.group-data-row");
+        var group_rows = $(selectors.table, element).find("tr.group-data-row");
         for (var i = 0; i< group_rows.length; i++) {
             var $row = $(group_rows[i]);
             var group_id = $row.data(data_attributes.group_id);
