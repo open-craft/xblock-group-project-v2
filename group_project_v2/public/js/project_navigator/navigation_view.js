@@ -1,3 +1,4 @@
+/* exported GroupProjectNavigatorNavigationView */
 function GroupProjectNavigatorNavigationView(runtime, element) {
     "use strict";
     $(document).on(

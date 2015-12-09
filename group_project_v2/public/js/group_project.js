@@ -1,3 +1,4 @@
+/* exported GroupProjectBlock */
 function GroupProjectBlock(runtime, element) {
     "use strict";
     var activate_project_nav_view_event = 'group_project_v2.project_navigator.activate_view';

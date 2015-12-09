@@ -1,3 +1,4 @@
+/* exported GroupProjectNavigatorBlock */
 function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
     "use strict";
     var initial_view = 'navigation';

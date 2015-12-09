@@ -1,3 +1,4 @@
+/* exported GroupProjectNavigatorSubmissionsView */
 function GroupProjectNavigatorSubmissionsView(runtime, element) {
     "use strict";
     var upload_started_event = 'group_project_v2.submission.upload_started';

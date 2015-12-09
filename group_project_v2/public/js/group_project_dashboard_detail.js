@@ -1,3 +1,7 @@
+/* exported
+    GroupProjectBlockDashboardDetailsConstants, GroupProjectBlockDashboardDetailsHelpers,
+    GroupProjectBlockDashboardDetailsView
+*/
 var GroupProjectBlockDashboardDetailsConstants = {
     selectors: {
         user_row_tpl: "tr.user-data-row[data-group-id=%GROUP_ID%]",

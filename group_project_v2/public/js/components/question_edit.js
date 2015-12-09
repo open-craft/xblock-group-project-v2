@@ -1,3 +1,5 @@
+/* globals CodeMirror, StudioEditableXBlockMixin */
+/* exported GroupProjectQuestionEdit */
 function GroupProjectQuestionEdit(runtime, element) {
     "use strict";
     StudioEditableXBlockMixin(runtime, element);

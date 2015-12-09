@@ -1,3 +1,4 @@
+/* exported XBlockWithComponentsEdit */
 function XBlockWithComponentsEdit(runtime, element) {
     "use strict";
     var $buttons = $(".add-xblock-component-button", element);

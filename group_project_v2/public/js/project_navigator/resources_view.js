@@ -1,3 +1,5 @@
+/* globals OO */
+/* exported GroupProjectNavigatorResourcesView */
 function GroupProjectNavigatorResourcesView(runtime, element) {
     "use strict";
     var ooyala_player_target_element_id = 'group-project-resources-view-ooyala-player';
