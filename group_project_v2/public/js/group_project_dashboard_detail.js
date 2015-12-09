@@ -119,9 +119,9 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
             var search_regex = new RegExp(search_criteria, "i");
             collapse_all_groups();
             clear_search_highlighting();
-            var search_hits = $(selectors.table)
-                .find(search_selector.email)
-                .add(search_selector.full_name)
+            var table = $(selectors.table, element);
+            var search_hits =$(search_selector.email, table)
+                .add($(search_selector.full_name, table))
                 .filter(function() {
                     return (
                         search_regex.test($(this).data('email')) ||
