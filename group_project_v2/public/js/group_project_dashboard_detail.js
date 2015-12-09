@@ -57,30 +57,31 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
 
     var format = GroupProjectBlockDashboardDetailsHelpers.format;
 
-    function expand_group(group_id) {
+    function toggle_group(group_id, attr_value, icon_class, show_hidden_elements) {
         var group_user_rows_selector = format(selectors.user_row_tpl, {'GROUP_ID': group_id});
         var group_row_selector = format(selectors.group_row_tpl, {'GROUP_ID': group_id});
         var group_label = $(group_row_selector, element).find(selectors.group_label);
 
-        $(group_row_selector).data(data_attributes.collapsed, collapsed_values.expanded);
+        $(group_row_selector).data(data_attributes.collapsed, attr_value);
         $(selectors.group_collapsed_icon, group_label)
-            .removeClass(icon_classes.collapsed).addClass(icon_classes.expanded);
+            .removeClass(icon_classes.collapsed).removeClass(icon_classes.expanded)
+            .addClass(icon_class);
 
-        $(group_user_rows_selector, element).show();
-        $(selectors.nav_icon, group_label).show();
+        var elements = $(group_user_rows_selector, element).add($(selectors.nav_icon, group_label));
+        if (show_hidden_elements) {
+            elements.show();
+        }
+        else {
+            elements.hide();
+        }
+    }
+
+    function expand_group(group_id) {
+        toggle_group(group_id, collapsed_values.expanded, icon_classes.expanded, true);
     }
 
     function collapse_group(group_id) {
-        var group_user_rows_selector = format(selectors.user_row_tpl, {'GROUP_ID': group_id});
-        var group_row_selector = format(selectors.group_row_tpl, {'GROUP_ID': group_id});
-        var group_label = $(group_row_selector, element).find(selectors.group_label);
-
-        $(group_row_selector).data(data_attributes.collapsed, collapsed_values.collapsed);
-        $(selectors.group_collapsed_icon, group_label)
-            .removeClass(icon_classes.expanded).addClass(icon_classes.collapsed);
-
-        $(group_user_rows_selector, element).hide();
-        $(selectors.nav_icon, group_label).hide();
+        toggle_group(group_id, collapsed_values.collapsed, icon_classes.collapsed, false);
     }
 
     function collapse_all_groups() {
