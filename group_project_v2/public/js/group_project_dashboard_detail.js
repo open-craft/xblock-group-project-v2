@@ -37,7 +37,7 @@ var GroupProjectBlockDashboardDetailsHelpers = {
             }
             temp_result = temp_result.replace('%'+key+'%', replacements[key]);
         }
-        return temp_result
+        return temp_result;
     }
 };
 
@@ -139,6 +139,6 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
 
         $(document).on(events.clear_search, function() {
             clear_search_highlighting();
-        })
+        });
     });
 }

@@ -50,5 +50,5 @@ function GroupProjectCompletionStage(runtime, element) {
                 show_message(msg);
             }
         });
-    })
+    });
 }

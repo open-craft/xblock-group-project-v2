@@ -27,6 +27,6 @@ function GroupProjectNavigatorAskTAView(runtime, element) {
                 setTimeout(function () {
                     modal.foundation('reveal', 'open');
                 }, 350);
-            })
+            });
     });
 }

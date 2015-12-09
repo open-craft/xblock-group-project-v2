@@ -41,7 +41,7 @@ function XBlockWithComponentsEdit(runtime, element) {
 
             if (childExists) {
                 $(this).attr('disabled', 'disabled');
-                $(this).addClass('disabled')
+                $(this).addClass('disabled');
             }
             else {
                 $(this).removeAttr('disabled');

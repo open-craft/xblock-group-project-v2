@@ -139,9 +139,9 @@ function GroupProjectReviewStage(runtime, element) {
         $.each(items, function (i, v) {
             data[v.name] = v.value;
         });
-        data["review_subject_id"] = $("ul.review_subjects li.selected", $form).data('id');
+        data.review_subject_id = $("ul.review_subjects li.selected", $form).data('id');
 
-        if (!data["review_subject_id"]) {
+        if (!data.review_subject_id) {
             var message = is_peer_review ? SELECT_PEER_TO_REVIEW : SELECT_GROUP_TO_REVIEW;
             show_message(message);
             return;
@@ -212,5 +212,5 @@ function GroupProjectReviewStage(runtime, element) {
         if (options.length) {
             options[0].click();
         }
-    })
+    });
 }
