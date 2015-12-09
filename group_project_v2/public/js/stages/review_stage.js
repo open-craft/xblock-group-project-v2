@@ -100,7 +100,7 @@ function GroupProjectReviewStage(runtime, element) {
                     load_data_into_form(data);
                 }
             },
-            error: function (data) {
+            error: function () {
                 show_message(gettext('We encountered an error loading feedback.'));
             }
         }).done(function () {
@@ -169,10 +169,10 @@ function GroupProjectReviewStage(runtime, element) {
                     }
                 }
             },
-            error: function (data) {
+            error: function () {
                 show_message(gettext('We encountered an error saving your feedback.'));
             },
-            complete: function (data) {
+            complete: function () {
                 $form.find(':submit').prop('disabled', false).html(DATA_PRESENT_SUBMIT);
             }
         });
@@ -196,7 +196,7 @@ function GroupProjectReviewStage(runtime, element) {
                 $content.html(data.html).show();
                 review_submissions_dialog.show();
             },
-            error: function (data) {
+            error: function () {
                 show_message(gettext('We encountered an error.'));
             }
         });
