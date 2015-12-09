@@ -1,4 +1,5 @@
 function ProjectTeamXBlock(runtime, element) {
+    "use strict";
     var email_member_modal_selector = ".group-project-team-email-member-modal";
     var email_group_modal_selector = ".group-project-team-email-group-modal";
 

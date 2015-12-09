@@ -1,4 +1,5 @@
 function GroupProjectNavigatorSubmissionsView(runtime, element) {
+    "use strict";
     var upload_started_event = 'group_project_v2.submission.upload_started';
     var upload_failed_event = 'group_project_v2.submission.upload_failed';
     var upload_complete_event = 'group_project_v2.submission.upload_complete';

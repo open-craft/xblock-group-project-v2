@@ -1,4 +1,5 @@
 function GroupProjectNavigatorAskTAView(runtime, element) {
+    "use strict";
     var form = $(".contact-ta-form", element),
         textarea = $("textarea", form);
 

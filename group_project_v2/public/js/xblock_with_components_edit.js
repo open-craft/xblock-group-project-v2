@@ -1,4 +1,5 @@
 function XBlockWithComponentsEdit(runtime, element) {
+    "use strict";
     var $buttons = $(".add-xblock-component-button", element);
 
     function isSingleInstance(button) {

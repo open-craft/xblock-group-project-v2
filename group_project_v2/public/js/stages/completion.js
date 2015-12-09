@@ -1,4 +1,5 @@
 function GroupProjectCompletionStage(runtime, element) {
+    "use strict";
     // Set up gettext in case it isn't available in the client runtime:
     if (typeof gettext === "undefined") {
         window.gettext = function gettext_stub(string) { return string; };

@@ -1,4 +1,5 @@
 function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
+    "use strict";
     var initial_view = 'navigation';
     var selector_item_query = ".group-project-navigator-view-selector .view-selector-item";
     var activate_project_nav_view_event = 'group_project_v2.project_navigator.activate_view';

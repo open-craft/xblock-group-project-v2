@@ -1,4 +1,5 @@
 function GroupProjectNavigatorNavigationView(runtime, element) {
+    "use strict";
     $(document).on(
         'group_project_v2.project_navigator.stage_status_update',
         function(target, activity_id, stage_id, new_state) {

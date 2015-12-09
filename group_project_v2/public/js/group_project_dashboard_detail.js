@@ -30,6 +30,7 @@ var GroupProjectBlockDashboardDetailsConstants = {
 
 var GroupProjectBlockDashboardDetailsHelpers = {
     format: function (template, replacements) {
+        "use strict";
         var temp_result = template;
         for (var key in replacements){
             if (!replacements.hasOwnProperty(key)) {
@@ -42,6 +43,7 @@ var GroupProjectBlockDashboardDetailsHelpers = {
 };
 
 function GroupProjectBlockDashboardDetailsView(runtime, element) {
+    "use strict";
     var selectors = GroupProjectBlockDashboardDetailsConstants.selectors;
 
     var search_hit_class = GroupProjectBlockDashboardDetailsConstants.search_hit_class ;
