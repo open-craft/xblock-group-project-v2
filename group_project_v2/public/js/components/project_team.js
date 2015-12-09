@@ -33,7 +33,8 @@ function ProjectTeamXBlock(runtime, element) {
         showModal(email_member_modal_selector);
     });
 
-    var modal_dialogs = $(email_member_modal_selector, group_project_dom).add(email_group_modal_selector, group_project_dom);
+    var modal_dialogs = $(email_member_modal_selector, group_project_dom)
+        .add(email_group_modal_selector, group_project_dom);
 
     modal_dialogs.find('form').submit(function(ev){
         ev.preventDefault();

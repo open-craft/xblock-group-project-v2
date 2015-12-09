@@ -111,7 +111,8 @@ function GroupProjectReviewStage(runtime, element) {
     $('.select_peer,.select_group', element).on('click', function (ev) {
         var $this = $(this);
         var is_peer = $this.hasClass('select_peer');
-        $('.select_peer,.select_group').removeClass('selected'); // removing selection from other peers/groups. NOT a bug
+        // removing selection from other peers/groups. NOT a bug
+        $('.select_peer,.select_group').removeClass('selected');
         $this.addClass('selected');
 
         var load_operation = load_data_for_peer;

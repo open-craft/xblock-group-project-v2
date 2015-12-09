@@ -77,7 +77,7 @@ function GroupProjectSubmissionBlock(runtime, element) {
                                 var location = data.submissions[submission_id];
                                 $('.' + submission_id + '_name', target_form).parent(".upload_item_wrapper")
                                     .data('location', location)
-                                    .attr('data-location', location); // need to set attr here as there are css rules for [data-location] attribute
+                                    .attr('data-location', location); // need to set attr as there are css rule
                             }
                         }
 
