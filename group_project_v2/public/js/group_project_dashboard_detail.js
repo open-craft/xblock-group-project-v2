@@ -1,5 +1,5 @@
-function GroupProjectBlockDashboardDetailsView(runtime, element) {
-    var selectors = {
+var GroupProjectBlockDashboardDetailsConstants = {
+    selectors: {
         user_row_tpl: "tr.user-data-row[data-group-id=%GROUP_ID%]",
         group_row_tpl: "tr.group-data-row[data-group-id=%GROUP_ID%]",
         group_collapsed_icon: '.group-collapsed-icon',
@@ -8,30 +8,28 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
         user_row: "tr.user-data-row",
         group_row: "tr.group-data-row",
         group_label: ".group-label"
-    };
-
-    var search_event = 'group_project_v2.details_view.search';
-    var search_clear_event = 'group_project_v2.details_view.search_clear';
-    var search_hit_class = 'search-hit';
-    var icons = {
-        collapsed: "fa-caret-right",
-        expanded: "fa-caret-down"
-    };
-    var data_attributes = {
+    },
+    data_attributes: {
         collapsed: 'collapsed',
         group_id: 'group-id'
-    };
-    var collapsed_values = {
+    },
+    collapsed_values: {
         collapsed: 'collapsed',
         expanded: 'expanded'
-    };
+    },
+    icon_classes: {
+        collapsed: "fa-caret-right",
+        expanded: "fa-caret-down"
+    },
+    events: {
+        search: 'group_project_v2.details_view.search',
+        clear_search: 'group_project_v2.details_view.search_clear'
+    },
+    search_hit_class: 'search-hit'
+};
 
-    var search_selector = {
-        email: "tr[data-email]",
-        full_name: "tr[data-fullname]"
-    };
-
-    function format(template, replacements) {
+var GroupProjectBlockDashboardDetailsHelpers = {
+    format: function (template, replacements) {
         var temp_result = template;
         for (var key in replacements){
             if (!replacements.hasOwnProperty(key)) {
@@ -41,14 +39,34 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
         }
         return temp_result
     }
+};
+
+function GroupProjectBlockDashboardDetailsView(runtime, element) {
+    var selectors = GroupProjectBlockDashboardDetailsConstants.selectors;
+
+    var search_hit_class = GroupProjectBlockDashboardDetailsConstants.search_hit_class ;
+    var icon_classes = GroupProjectBlockDashboardDetailsConstants.icon_classes;
+    var data_attributes = GroupProjectBlockDashboardDetailsConstants.data_attributes;
+    var collapsed_values = GroupProjectBlockDashboardDetailsConstants.collapsed_values;
+    var events = GroupProjectBlockDashboardDetailsConstants.events;
+
+    var search_selector = {
+        email: "tr[data-email]",
+        full_name: "tr[data-fullname]"
+    };
+
+    var format = GroupProjectBlockDashboardDetailsHelpers.format;
 
     function expand_group(group_id) {
         var group_user_rows_selector = format(selectors.user_row_tpl, {'GROUP_ID': group_id});
         var group_row_selector = format(selectors.group_row_tpl, {'GROUP_ID': group_id});
         var group_label = $(group_row_selector, element).find(selectors.group_label);
+
         $(group_row_selector).data(data_attributes.collapsed, collapsed_values.expanded);
+        $(selectors.group_collapsed_icon, group_label)
+            .removeClass(icon_classes.collapsed).addClass(icon_classes.expanded);
+
         $(group_user_rows_selector, element).show();
-        $(selectors.group_collapsed_icon, group_label).removeClass(icons.collapsed).addClass(icons.expanded);
         $(selectors.nav_icon, group_label).show();
     }
 
@@ -56,9 +74,12 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
         var group_user_rows_selector = format(selectors.user_row_tpl, {'GROUP_ID': group_id});
         var group_row_selector = format(selectors.group_row_tpl, {'GROUP_ID': group_id});
         var group_label = $(group_row_selector, element).find(selectors.group_label);
+
         $(group_row_selector).data(data_attributes.collapsed, collapsed_values.collapsed);
+        $(selectors.group_collapsed_icon, group_label)
+            .removeClass(icon_classes.expanded).addClass(icon_classes.collapsed);
+
         $(group_user_rows_selector, element).hide();
-        $(selectors.group_collapsed_icon, group_label).removeClass(icons.expanded).addClass(icons.collapsed);
         $(selectors.nav_icon, group_label).hide();
     }
 
@@ -93,7 +114,7 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
             ev.stopPropagation();
         });
 
-        $(document).on(search_event, function(target, search_criteria) {
+        $(document).on(events.search, function(target, search_criteria) {
             var search_regex = new RegExp(search_criteria, "i");
             collapse_all_groups();
             clear_search_highlighting();
@@ -115,7 +136,7 @@ function GroupProjectBlockDashboardDetailsView(runtime, element) {
             }
         });
 
-        $(document).on(search_clear_event, function() {
+        $(document).on(events.clear_search, function() {
             clear_search_highlighting();
         })
     });

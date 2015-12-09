@@ -21,6 +21,7 @@ module.exports = function(config) {
       'group_project_v2/public/js/vendor/jquery.fileupload.js',
 
       'group_project_v2/public/js/**/*.js',
+      'group_project_v2/public/css/**/*.css',
 
       'tests/js/*.js',
       'tests/js/fixtures/*.html'
