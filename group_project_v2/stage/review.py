@@ -366,6 +366,12 @@ class PeerReviewStage(ReviewBaseStage):
     @property
     def is_graded_stage(self):
         return True
+    
+    @property
+    def can_mark_complete(self):
+        if self.is_admin_grader:
+            return True
+        return super(PeerReviewStage, self).can_mark_complete
 
     def _get_review_items(self, review_groups, with_caching=False):
         """
