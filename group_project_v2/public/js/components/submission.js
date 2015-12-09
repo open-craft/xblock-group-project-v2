@@ -73,11 +73,12 @@ function GroupProjectSubmissionBlock(runtime, element) {
 
                         if (data.submissions) {
                             for (var submission_id in data.submissions) {
-                                if (!data.submissions.hasOwnProperty(submission_id)) return;
-                                var location = data.submissions[submission_id];
-                                $('.' + submission_id + '_name', target_form).parent(".upload_item_wrapper")
-                                    .data('location', location)
-                                    .attr('data-location', location); // need to set attr as there are css rule
+                                if (data.submissions.hasOwnProperty(submission_id)) {
+                                    var location = data.submissions[submission_id];
+                                    $('.' + submission_id + '_name', target_form).parent(".upload_item_wrapper")
+                                        .data('location', location)
+                                        .attr('data-location', location); // need to set attr as there are css rule
+                                }
                             }
                         }
 

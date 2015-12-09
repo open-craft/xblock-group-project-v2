@@ -60,11 +60,12 @@ function GroupProjectReviewStage(runtime, element) {
     function load_data_into_form(data_for_form) {
         $form.find('.answer').val(null);
         for (var data_item in data_for_form) {
-            if (!data_for_form.hasOwnProperty(data_item)) continue;
-            $form.find('button.submit').html(DATA_PRESENT_SUBMIT);
-            // NOTE: use of ids specified by designer here
-            var $form_item = $form.find("#" + data_item);
-            $form_item.val(data_for_form[data_item]);
+            if (data_for_form.hasOwnProperty(data_item)) {
+                $form.find('button.submit').html(DATA_PRESENT_SUBMIT);
+                // NOTE: use of ids specified by designer here
+                var $form_item = $form.find("#" + data_item);
+                $form_item.val(data_for_form[data_item]);
+            }
         }
         validate_form_answers();
     }
