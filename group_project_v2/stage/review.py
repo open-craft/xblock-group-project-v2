@@ -366,7 +366,7 @@ class PeerReviewStage(ReviewBaseStage):
     @property
     def is_graded_stage(self):
         return True
-    
+
     @property
     def can_mark_complete(self):
         if self.is_admin_grader:
