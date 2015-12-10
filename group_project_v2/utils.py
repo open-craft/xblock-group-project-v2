@@ -306,9 +306,7 @@ def render_group(group, verbose=False):
     text_template = _(u"#{group_id}")
     if verbose:
         text_template = _(u"Group #{group_id}")
-    link_text = text_template.format(group_id=group['id'])
-    res = u'<a href="{ta_grade_link}">{link_text}</a>'.format(ta_grade_link=group['ta_grade_link'], link_text=link_text)
-    return mark_safe(res)
+    return text_template.format(group_id=group['id'])
 
 
 def export_to_csv(data, target, headers=None):

@@ -1,4 +1,6 @@
+/* exported ProjectTeamXBlock */
 function ProjectTeamXBlock(runtime, element) {
+    "use strict";
     var email_member_modal_selector = ".group-project-team-email-member-modal";
     var email_group_modal_selector = ".group-project-team-email-group-modal";
 
@@ -31,7 +33,8 @@ function ProjectTeamXBlock(runtime, element) {
         showModal(email_member_modal_selector);
     });
 
-    var modal_dialogs = $(email_member_modal_selector, group_project_dom).add(email_group_modal_selector, group_project_dom);
+    var modal_dialogs = $(email_member_modal_selector, group_project_dom)
+        .add(email_group_modal_selector, group_project_dom);
 
     modal_dialogs.find('form').submit(function(ev){
         ev.preventDefault();

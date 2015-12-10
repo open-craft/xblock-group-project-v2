@@ -10,10 +10,11 @@ install:
     - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/requirements.txt"
     - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/test-requirements.txt"
     - "python setup.py sdist && pip install dist/xblock-group-project-v2-0.3.tar.gz"
-    - "npm install karma karma-jasmine karma-firefox-launcher karma-requirejs karma-jquery"
+    - "npm install karma karma-jasmine karma-firefox-launcher karma-requirejs karma-jquery jasmine-jquery jshint"
 script:
     - pep8 group_project_v2 tests --max-line-length=120
     - pylint group_project_v2 --rcfile=pylintrc
+    - ./node_modules/jshint/bin/jshint group_project_v2
     - pylint tests --rcfile=tests/pylintrc
     - ./node_modules/.bin/karma start tests/js/karma.conf.js
     - python run_tests.py --with-coverage --cover-package=group_project_v2

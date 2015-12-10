@@ -243,3 +243,7 @@ table.activity-data tr.user-data-row {
 table.activity-data tr.user-data-row td.user-cell {
     padding-left: 24px;
 }
+
+table.activity-data tr.search-hit {
+    background-color: #fffec9;
+}

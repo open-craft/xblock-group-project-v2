@@ -22,12 +22,12 @@
         {% endfor %}
       </tr>
       {% for group in groups %}
-      <tr class="data">
+      <tr class="group-data-row data" data-group-id="{{group.id}}" data-collapsed="collapsed">
         <td>
-          <div class="group-label" data-group-id="{{group.id}}" data-collapsed="collapsed">
+          <div class="group-label">
             <span class="fa fa-icon fa-caret-right group-collapsed-icon"></span>
             {{ group|render_group:"verbose" }}
-            <span class="fa fa-icon fa-users grade_group_icon"></span>
+            <a href="{{group.ta_grade_link}}" class="fa fa-icon fa-users grade_group_icon"></a>
           </div>
         </td>
         {% for stage in stages %}
@@ -37,7 +37,7 @@
         {% endfor %}
       </tr>
         {% for user in group.users %}
-          <tr class="user-data-row data" data-group-id="{{group.id}}">
+          <tr class="user-data-row data" data-group-id="{{group.id}}" data-fullname="{{user.full_name}}" data-email="{{user.email}}">
             <td class="user-cell">
               <div class="user-email">
                 <a href="mailto: {{ user.email }}">{{ user.email }}</a>
@@ -52,7 +52,9 @@
                     <div class="grading-group-label">
                       {% trans "Grading:" %}
                       {% for group in groups %}
-                        <span class="group-label">{{ group|render_group }}</span>
+                        <span class="group-label">
+                          <a href="{{group.ta_grade_link}}">{{ group|render_group }}</a>
+                        </span>
                       {% endfor %}
                     </div>
                   {% endif %}

@@ -14,14 +14,17 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'node_modules/karma-jquery/jquery/jquery-1.11.0.js',
+      'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
 
       'group_project_v2/public/js/vendor/jquery.ui.widget.js',
       'group_project_v2/public/js/vendor/jquery.iframe-transport.js',
       'group_project_v2/public/js/vendor/jquery.fileupload.js',
 
       'group_project_v2/public/js/**/*.js',
+      'group_project_v2/public/css/**/*.css',
 
-      'tests/js/*.js'
+      'tests/js/*.js',
+      'tests/js/fixtures/*.html'
     ],
 
     plugins:[
@@ -76,4 +79,4 @@ module.exports = function(config) {
     // if true, Karma captures browsers, runs the tests and exits
     singleRun: true
   })
-}
+};

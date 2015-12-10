@@ -1,4 +1,6 @@
+/* exported GroupProjectNavigatorAskTAView */
 function GroupProjectNavigatorAskTAView(runtime, element) {
+    "use strict";
     var form = $(".contact-ta-form", element),
         textarea = $("textarea", form);
 
@@ -27,6 +29,6 @@ function GroupProjectNavigatorAskTAView(runtime, element) {
                 setTimeout(function () {
                     modal.foundation('reveal', 'open');
                 }, 350);
-            })
+            });
     });
 }

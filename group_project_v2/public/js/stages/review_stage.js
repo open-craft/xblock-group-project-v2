@@ -1,4 +1,6 @@
+/* exported GroupProjectReviewStage */
 function GroupProjectReviewStage(runtime, element) {
+    "use strict";
     // Set up gettext in case it isn't available in the client runtime:
     if (typeof gettext === "undefined") {
         window.gettext = function gettext_stub(string) { return string; };
@@ -58,11 +60,12 @@ function GroupProjectReviewStage(runtime, element) {
     function load_data_into_form(data_for_form) {
         $form.find('.answer').val(null);
         for (var data_item in data_for_form) {
-            if (!data_for_form.hasOwnProperty(data_item)) continue;
-            $form.find('button.submit').html(DATA_PRESENT_SUBMIT);
-            // NOTE: use of ids specified by designer here
-            var $form_item = $form.find("#" + data_item);
-            $form_item.val(data_for_form[data_item]);
+            if (data_for_form.hasOwnProperty(data_item)) {
+                $form.find('button.submit').html(DATA_PRESENT_SUBMIT);
+                // NOTE: use of ids specified by designer here
+                var $form_item = $form.find("#" + data_item);
+                $form_item.val(data_for_form[data_item]);
+            }
         }
         validate_form_answers();
     }
@@ -97,7 +100,7 @@ function GroupProjectReviewStage(runtime, element) {
                     load_data_into_form(data);
                 }
             },
-            error: function (data) {
+            error: function () {
                 show_message(gettext('We encountered an error loading feedback.'));
             }
         }).done(function () {
@@ -109,7 +112,8 @@ function GroupProjectReviewStage(runtime, element) {
     $('.select_peer,.select_group', element).on('click', function (ev) {
         var $this = $(this);
         var is_peer = $this.hasClass('select_peer');
-        $('.select_peer,.select_group').removeClass('selected'); // removing selection from other peers/groups. NOT a bug
+        // removing selection from other peers/groups. NOT a bug
+        $('.select_peer,.select_group').removeClass('selected');
         $this.addClass('selected');
 
         var load_operation = load_data_for_peer;
@@ -139,9 +143,9 @@ function GroupProjectReviewStage(runtime, element) {
         $.each(items, function (i, v) {
             data[v.name] = v.value;
         });
-        data["review_subject_id"] = $("ul.review_subjects li.selected", $form).data('id');
+        data.review_subject_id = $("ul.review_subjects li.selected", $form).data('id');
 
-        if (!data["review_subject_id"]) {
+        if (!data.review_subject_id) {
             var message = is_peer_review ? SELECT_PEER_TO_REVIEW : SELECT_GROUP_TO_REVIEW;
             show_message(message);
             return;
@@ -165,10 +169,10 @@ function GroupProjectReviewStage(runtime, element) {
                     }
                 }
             },
-            error: function (data) {
+            error: function () {
                 show_message(gettext('We encountered an error saving your feedback.'));
             },
-            complete: function (data) {
+            complete: function () {
                 $form.find(':submit').prop('disabled', false).html(DATA_PRESENT_SUBMIT);
             }
         });
@@ -192,7 +196,7 @@ function GroupProjectReviewStage(runtime, element) {
                 $content.html(data.html).show();
                 review_submissions_dialog.show();
             },
-            error: function (data) {
+            error: function () {
                 show_message(gettext('We encountered an error.'));
             }
         });
@@ -212,5 +216,5 @@ function GroupProjectReviewStage(runtime, element) {
         if (options.length) {
             options[0].click();
         }
-    })
+    });
 }
