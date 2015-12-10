@@ -40,6 +40,7 @@
 
 .group-project-xblock-wrapper .stage.dashboard-view.group-project-non-graded-stage {
     background-color: #f3f3f3;
+    height: 275px;
 }
 
 .group-project-xblock-wrapper .stage.dashboard-view .stage-status {
@@ -112,6 +113,7 @@
     text-align: right;
     color: #3384CA;
     font-size: 18px;
+    line-height: 20px;
 }
 
 .group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-navigate-to-detailed-view span {
