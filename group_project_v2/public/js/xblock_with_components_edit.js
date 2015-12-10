@@ -32,8 +32,8 @@ function XBlockWithComponentsEdit(runtime, element) {
             var childExists = false;
 
             // FIXME: This is potentially buggy - if some XBlock's category is a substring of some other XBlock category
-            // it will exhibit wrong behavior. However, it's not possible to do anything about that unless
-            // studio runtime announces which block was deleted, not it's parent.
+            // it will exhibit the wrong behavior. However, it's not possible to do anything about that unless
+            // studio runtime announces which block was deleted, not its parent.
             for (var i = 0; i < nestedBlockLocations.length; i++) {
                 if (nestedBlockLocations[i].indexOf(category) > -1) {
                     childExists = true;
