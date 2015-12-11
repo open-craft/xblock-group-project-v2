@@ -3,7 +3,7 @@
 }
 
 .group-project-xblock-wrapper .activity.dashboard-view {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .group-project-xblock-wrapper .activity.dashboard-view .activity-header .activity-header-label,
@@ -25,7 +25,7 @@
     display: inline-block;
     padding-right: 15px;
     width: 25%;
-    margin: 15px 0 0;
+    margin: 10px 0;
     float: left;
 }
 
@@ -40,6 +40,7 @@
 
 .group-project-xblock-wrapper .stage.dashboard-view.group-project-non-graded-stage {
     background-color: #f3f3f3;
+    height: 275px;
 }
 
 .group-project-xblock-wrapper .stage.dashboard-view .stage-status {
@@ -112,6 +113,7 @@
     text-align: right;
     color: #3384CA;
     font-size: 18px;
+    line-height: 20px;
 }
 
 .group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-navigate-to-detailed-view span {
