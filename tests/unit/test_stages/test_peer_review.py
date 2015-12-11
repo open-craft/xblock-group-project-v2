@@ -5,12 +5,11 @@ import ddt
 import mock
 from xblock.validation import ValidationMessage
 
-from group_project_v2.project_api.dtos import WorkgroupDetails, ReducedUserDetails
+from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.stage import PeerReviewStage
 from group_project_v2.stage.utils import ReviewState, StageState
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock, GroupSelectorXBlock
-from tests.unit.test_stages.base import BaseStageTest, ReviewStageBaseTest, ReviewStageChildrenMockContextManager, \
-    ReviewStageUserCompletionStatsMixin
+from tests.unit.test_stages.base import BaseStageTest, ReviewStageBaseTest, ReviewStageUserCompletionStatsMixin
 from tests.utils import make_review_item as mri, make_question, make_workgroup as mk_wg
 from tests.unit.test_stages.utils import GROUP_ID, USER_ID, OTHER_USER_ID, OTHER_GROUP_ID, patch_obj
 
@@ -45,40 +44,22 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
     def test_validation(self):
         questions = [self._make_question(graded=True)]
         categories = [GroupProjectReviewQuestionXBlock.CATEGORY]
-        with ReviewStageChildrenMockContextManager(self.block, categories, questions):
-            validation = self.block.validate()
-
-        messages = validation.messages
-        self.assertEqual(len(messages), 1)
-        message = messages[0]
-
-        self.assertEqual(message.type, ValidationMessage.ERROR)
-        self.assertIn(
+        expected_message = ValidationMessage(
+            ValidationMessage.ERROR,
             u"missing required component '{gs_name}'".format(gs_name=GroupSelectorXBlock.STUDIO_LABEL),
-            message.text
         )
+        self.validate_and_check_message(categories, questions, expected_message)
 
     def test_validation_no_graded_questions(self):
         questions = [self._make_question(graded=False)]
         categories = [GroupProjectReviewQuestionXBlock.CATEGORY, GroupSelectorXBlock.CATEGORY]
-        with ReviewStageChildrenMockContextManager(self.block, categories, questions):
-            validation = self.block.validate()
-
-        messages = validation.messages
-        self.assertEqual(len(messages), 1)
-        message = messages[0]
-
-        self.assertEqual(message.type, ValidationMessage.ERROR)
-        self.assertIn(u"Grade questions are required", message.text)
+        expected_message = ValidationMessage(ValidationMessage.ERROR, u"Grade questions are required")
+        self.validate_and_check_message(categories, questions, expected_message)
 
     def test_validation_passes(self):
         questions = [self._make_question(graded=True)]
         categories = [GroupProjectReviewQuestionXBlock.CATEGORY, GroupSelectorXBlock.CATEGORY]
-        with ReviewStageChildrenMockContextManager(self.block, categories, questions):
-            validation = self.block.validate()
-
-        messages = validation.messages
-        self.assertEqual(len(messages), 0)
+        self.validate_and_check_message(categories, questions)
 
 
 @ddt.ddt

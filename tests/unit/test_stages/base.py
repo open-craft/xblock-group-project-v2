@@ -51,6 +51,19 @@ class ReviewStageBaseTest(object):
         }
         return GroupProjectReviewQuestionXBlock(self.runtime_mock, DictFieldData(fields), scope_ids=mock.Mock())
 
+    def validate_and_check_message(self, categories, questions, expected_message=None):
+        with ReviewStageChildrenMockContextManager(self.block, categories, questions):
+            validation = self.block.validate()
+
+        if expected_message:
+            messages = validation.messages
+            self.assertEqual(len(messages), 1)
+            message = messages[0]
+            self.assertEqual(message.type, expected_message.type)
+            self.assertIn(expected_message.text, message.text)
+        else:
+            self.assertEqual(len(validation.messages), 0)
+
     @ddt.data(
         (False, False),
         (True, True)
