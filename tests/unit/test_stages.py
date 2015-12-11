@@ -470,9 +470,6 @@ class TestTeamEvaluationStage(ReviewStageBaseTest, BaseStageTest):
 class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
     block_to_test = PeerReviewStage
 
-    def setUp(self):
-        super(TestPeerReviewStage, self).setUp()
-
     @ddt.data(
         *itertools.product(
             (ReviewState.NOT_STARTED, ReviewState.INCOMPLETE, ReviewState.COMPLETED),
@@ -533,6 +530,35 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
 
         messages = validation.messages
         self.assertEqual(len(messages), 0)
+
+
+@ddt.ddt
+class TestPeerReivewStageReviewStatus(ReviewStageBaseTest, BaseStageTest):
+    block_to_test = PeerReviewStage
+
+    def setUp(self):
+        super(TestPeerReivewStageReviewStatus, self).setUp()
+        self.activity_mock.is_ta_graded = False
+
+    def _set_project_api_responses(self, workgroups, review_items):
+        def workgroups_side_effect(user_id, _course_id, _content_id):
+            return workgroups.get(user_id, None)
+
+        def review_items_side_effect(workgroup_id, _content_id):
+            return review_items.get(workgroup_id, [])
+
+        self.project_api_mock.get_workgroups_to_review.side_effect = workgroups_side_effect
+        self.project_api_mock.get_workgroup_review_items_for_group.side_effect = review_items_side_effect
+
+    @staticmethod
+    def _parse_review_item_string(review_item_string):
+        splitted = review_item_string.split(':')
+        reviewer, question, group = splitted[:3]
+        if len(splitted) > 3:
+            answer = splitted[3]
+        else:
+            answer = None
+        return mri(int(reviewer), question, group=group, answer=answer)
 
     @ddt.data(
         ([GROUP_ID], ["q1"], {GROUP_ID: []}, ReviewState.NOT_STARTED),
@@ -616,26 +642,6 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
             self.assertEqual(self.block.review_status(), expected_result)
 
         self.assertEqual(self.project_api_mock.get_workgroup_review_items_for_group.mock_calls, expected_calls)
-
-    def _set_project_api_responses(self, workgroups, review_items):
-        def workgroups_side_effect(user_id, _course_id, _content_id):
-            return workgroups.get(user_id, None)
-
-        def review_items_side_effect(workgroup_id, _content_id):
-            return review_items.get(workgroup_id, [])
-
-        self.project_api_mock.get_workgroups_to_review.side_effect = workgroups_side_effect
-        self.project_api_mock.get_workgroup_review_items_for_group.side_effect = review_items_side_effect
-
-    @staticmethod
-    def _parse_review_item_string(review_item_string):
-        splitted = review_item_string.split(':')
-        reviewer, question, group = splitted[:3]
-        if len(splitted) > 3:
-            answer = splitted[3]
-        else:
-            answer = None
-        return mri(int(reviewer), question, group=group, answer=answer)
 
     @ddt.data(
         # no reviews - not started
@@ -789,6 +795,70 @@ class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
             mock.call(group_id, self.block.activity_content_id) for group_id in group_reviewers.keys()
         ]
         self.assertEqual(self.project_api_mock.get_workgroup_review_items_for_group.mock_calls, expected_calls)
+
+    @ddt.data(
+        # no ta reviewers - not started
+        ([], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1'], {}, (set(), set())),
+        # no reviews - not started
+        ([1], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1'], {}, (set(), set())),
+        # complete review for one group - all users in group completed
+        ([1], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1'], {GROUP_ID: ['1:q1:10:a']}, ({1}, set())),
+        # partial review for one group - all users in group partially completed
+        ([1], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a']}, (set(), {1})),
+        # complete review for one group with multiple questions - all users in group completed
+        ([1], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1', 'q2'], {GROUP_ID:['1:q1:10:a', '1:q2:10:b']}, ({1}, set())),
+        # complete review for one group with multiple users and multiple questions- all users in group completed
+        (
+            [1], [mk_wg(GROUP_ID, [{"id": 1}, {"id": 2}])], ['q1', 'q2'],
+            {GROUP_ID: ['1:q1:10:a', '1:q2:10:b']}, ({1, 2}, set())
+        ),
+        # multiple groups - one group complete, one not started
+        (
+            [1], [mk_wg(GROUP_ID, [{"id": 1}]), mk_wg(OTHER_GROUP_ID, [{"id": 2}])], ['q1'],
+            {GROUP_ID: ['1:q1:10:a']}, ({1}, set())
+        ),
+        # multiple groups - one group complete, one incomplete
+        (
+            [1], [mk_wg(GROUP_ID, [{"id": 1}]), mk_wg(OTHER_GROUP_ID, [{"id": 2}, {"id": 3}])], ['q1', 'q2'],
+            {GROUP_ID: ['1:q1:10:a', '1:q2:10:b'], OTHER_GROUP_ID: ['1:q1:11:a']}, ({1}, {2, 3})
+        ),
+        # different reviewers, multiple groups - one complete, one incomplete
+        (
+            [1, 2], [mk_wg(GROUP_ID, [{"id": 1}]), mk_wg(OTHER_GROUP_ID, [{"id": 2}, {"id": 3}])], ['q1', 'q2'],
+            {GROUP_ID: ['1:q1:10:a', '1:q2:10:b'], OTHER_GROUP_ID: ['2:q1:11:a']}, ({1}, {2, 3})
+        ),
+        # multiple reviewers, same group, one rev not started, one incomplete - incomplete
+        ([1, 2], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a']}, (set(), {1})),
+        # multiple reviewers, same group, one rev not started, one complete - complete
+        ([1, 2], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a', '1:q2:10:b']}, ({1}, set())),
+        # multiple reviewers, same group, one rev incomplete, one complete - complete
+        (
+            [1, 2], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1', 'q2'],
+            {GROUP_ID: ['1:q1:10:a', '2:q1:10:b', '2:q2:10:c']}, ({1}, set())
+        )
+    )
+    @ddt.unpack
+    def test_ta_completion_stats(self, ta_reviewers, groups_to_review, questions, review_items, expected_result):
+        self.activity_mock.is_ta_graded = True
+
+        self._set_project_api_responses(
+            groups_to_review,
+            {
+                group_id: [self._parse_review_item_string(item) for item in items]
+                for group_id, items in review_items.iteritems()
+            }
+        )
+        expected_completed, expected_partially_completed = expected_result
+
+        with patch_obj(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions, \
+                patch_obj(self.block, '_confirm_outsider_allowed') as patched_outsider_allowed:
+            patched_outsider_allowed.side_effect = lambda _api, user_id, _course_id: user_id in ta_reviewers
+            patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
+
+            completed, partially_completed = self.block.get_users_completion(groups_to_review, ['irrelevant'])
+
+        self.assertEqual(completed, expected_completed)
+        self.assertEqual(partially_completed, expected_partially_completed)
 
 
 @ddt.ddt
