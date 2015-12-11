@@ -1,3 +1,7 @@
+/* global
+    GroupProjectBlockDashboardDetailsConstants, GroupProjectBlockDashboardDetailsHelpers,
+     GroupProjectBlockDashboardDetailsView
+ */
 var gp_constants = GroupProjectBlockDashboardDetailsConstants;
 var gp_helpers = GroupProjectBlockDashboardDetailsHelpers;
 
@@ -182,7 +186,7 @@ describe('GroupProjectBlockDashboardDetailsView Tests', function(){
                 group_row = group_rows[i];
                 group_id = $(group_row).data(gp_constants.data_attributes.group_id);
 
-                var assertion = (group_id != search_hit_group_id) ? assert_group_collapsed : assert_group_expanded;
+                var assertion = (group_id !== search_hit_group_id) ? assert_group_collapsed : assert_group_expanded;
                 assertion(group_id);
             }
         });

@@ -1,3 +1,4 @@
+/* global GroupProjectBlock, GroupProjectNavigatorBlock */
 describe("Suite self-test", function() {
     'use strict';
     it("loads GroupProjectBlock", function() {
