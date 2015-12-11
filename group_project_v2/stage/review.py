@@ -402,7 +402,7 @@ class PeerReviewStage(ReviewBaseStage):
     def _calculate_group_review_status(self, ta_review_keys, target_workgroups):
         group_statuses = {}
         for group in target_workgroups:
-            for reviewer, reviewer_keys in ta_review_keys.iteritems():
+            for reviewer_keys in ta_review_keys.values():
                 group_review_status = self._calculate_review_status([group.id], reviewer_keys)
                 if group_review_status == ReviewState.COMPLETED:
                     group_statuses[group.id] = ReviewState.COMPLETED
