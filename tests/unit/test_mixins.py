@@ -317,7 +317,7 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
         self.project_api_mock.get_user_preferences.return_value = {WorkgroupAwareXBlockMixin.TA_REVIEW_KEY: 1}
 
         with mock.patch.object(WorkgroupAwareXBlockMixin, '_confirm_outsider_allowed') as patched_check:
-            patched_check.side_effect = OutsiderDisallowedError("QWERTY")
+            patched_check.return_value = False
 
             self.assertRaises(OutsiderDisallowedError, lambda: self.block.workgroup)
             patched_check.assert_called_with(self.project_api_mock, self.block.user_id, self.block.course_id)
@@ -344,15 +344,12 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
         (3, 'course_id', ['role1', 'role2'], ['123', '456']),
     )
     @ddt.unpack
-    def test_confirm_outsider_allowed_raises(self, user_id, course_id, user_roles, allowed_roles):
+    def test_confirm_outsider_allowed_fails(self, user_id, course_id, user_roles, allowed_roles):
         self.project_api_mock.get_user_roles_for_course.return_value = [
             {'role': role} for role in user_roles
         ]
         with mock.patch.object(group_project_v2.mixins, 'ALLOWED_OUTSIDER_ROLES', allowed_roles):
-            self.assertRaises(
-                OutsiderDisallowedError,
-                lambda: self.block._confirm_outsider_allowed(self.project_api_mock, user_id, course_id)
-            )
+            self.assertFalse(self.block._confirm_outsider_allowed(self.project_api_mock, user_id, course_id))
 
     @ddt.data(
         (1, [1, 2], True),

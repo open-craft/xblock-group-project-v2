@@ -150,8 +150,7 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin):
         granted_roles = {r["role"] for r in project_api.get_user_roles_for_course(user_id, course_id)}
         allowed_roles = set(ALLOWED_OUTSIDER_ROLES)
 
-        if not (allowed_roles & granted_roles):
-            raise OutsiderDisallowedError("User does not have an allowed role")
+        return bool(allowed_roles & granted_roles)
 
     @property
     def workgroup(self):
@@ -171,7 +170,8 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin):
             user_prefs = UserAwareXBlockMixin._user_preferences(project_api, user_id)
 
             if UserAwareXBlockMixin.TA_REVIEW_KEY in user_prefs:
-                WorkgroupAwareXBlockMixin._confirm_outsider_allowed(project_api, user_id, course_id)
+                if not WorkgroupAwareXBlockMixin._confirm_outsider_allowed(project_api, user_id, course_id):
+                    raise OutsiderDisallowedError("User does not have an allowed role")
                 result = project_api.get_workgroup_by_id(user_prefs[UserAwareXBlockMixin.TA_REVIEW_KEY])
             else:
                 result = project_api.get_user_workgroup_for_course(user_id, course_id)
