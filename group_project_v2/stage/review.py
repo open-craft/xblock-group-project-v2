@@ -2,6 +2,8 @@ import json
 import logging
 
 import itertools
+from collections import defaultdict
+
 from lazy.lazy import lazy
 import webob
 from xblock.core import XBlock
@@ -396,6 +398,53 @@ class PeerReviewStage(ReviewBaseStage):
     def review_status(self):
         group_review_items = self._get_review_items(self.review_groups, with_caching=False)
         return self._check_review_status([group.id for group in self.review_groups], group_review_items)
+
+    def _calculate_group_review_status(self, ta_review_keys, target_workgroups):
+        group_statuses = {}
+        for group in target_workgroups:
+            for reviewer_keys in ta_review_keys.values():
+                group_review_status = self._calculate_review_status([group.id], reviewer_keys)
+                if group_review_status == ReviewState.COMPLETED:
+                    group_statuses[group.id] = ReviewState.COMPLETED
+                    break
+                if group_review_status == ReviewState.INCOMPLETE:
+                    group_statuses[group.id] = ReviewState.INCOMPLETE  # but no break - could be improved by other TA
+        return group_statuses
+
+    def _get_ta_review_keys(self, target_workgroups):
+        review_items = self._get_review_items(target_workgroups, with_caching=False)
+
+        grouped_items = defaultdict(list)
+        for item in review_items:
+            grouped_items[item['reviewer']].append(item)
+
+        ta_review_keys = {
+            reviewer: self._convert_review_items_to_keys(review_items)
+            for reviewer, items in grouped_items.iteritems()
+            if self._confirm_outsider_allowed(self.project_api, self.real_user_id(reviewer), self.course_id)
+        }
+        return ta_review_keys
+
+    def get_users_completion(self, target_workgroups, target_users):
+        if not self.activity.is_ta_graded:
+            return super(PeerReviewStage, self).get_users_completion(target_workgroups, target_users)
+
+        ta_review_keys = self._get_ta_review_keys(target_workgroups)
+        group_statuses = self._calculate_group_review_status(ta_review_keys, target_workgroups)
+
+        completed_users, partially_completed_users = set(), set()
+        for group in target_workgroups:
+            if group.id not in group_statuses:
+                continue
+
+            group_users = set(user.id for user in group.users)
+
+            if group_statuses[group.id] == ReviewState.COMPLETED:
+                completed_users |= group_users
+            if group_statuses[group.id] == ReviewState.INCOMPLETE:
+                partially_completed_users |= group_users
+
+        return completed_users, partially_completed_users
 
     def get_review_data(self, user_id):
         """
