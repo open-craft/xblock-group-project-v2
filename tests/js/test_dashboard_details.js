@@ -2,6 +2,7 @@ var gp_constants = GroupProjectBlockDashboardDetailsConstants;
 var gp_helpers = GroupProjectBlockDashboardDetailsHelpers;
 
 describe('GroupProjectBlockDashboardDetailsView Tests', function(){
+    'use strict';
     it("loads GroupProjectBlockDashboardDetailsView", function() {
         expect(GroupProjectBlockDashboardDetailsView).not.toBeUndefined();
         expect(GroupProjectBlockDashboardDetailsConstants).not.toBeUndefined();
