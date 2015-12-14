@@ -1,4 +1,7 @@
 BLOCKS = {
+    'gp-v2-project': 'group_project_v2.group_project:GroupProjectXBlock',
+    'gp-v2-activity': 'group_project_v2.group_project:GroupActivityXBlock',
+
     'gp-v2-stage-basic': 'group_project_v2.stage:BasicStage',
     'gp-v2-stage-completion': 'group_project_v2.stage:CompletionStage',
     'gp-v2-stage-submission': 'group_project_v2.stage:SubmissionStage',
