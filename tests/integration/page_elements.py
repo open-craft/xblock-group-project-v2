@@ -197,13 +197,18 @@ class OtherTeamStageSubmissionsElement(BaseElement):
 class OtherTeamSubmissionElement(BaseElement):
     def __init__(self, browser, element):
         super(OtherTeamSubmissionElement, self).__init__(browser, element)
+        self._uploaded_by = None
         try:
             self.element.find_element_by_css_selector(".no_submission")
             self.no_upload = True
         except NoSuchElementException:
-            self.no_upload = False
             self._link = self.element.find_element_by_tag_name("a")
-            self._uploaded_by = self.element.find_element_by_css_selector(".upload_item_data")
+            self.no_upload = False
+
+            try:
+                self._uploaded_by = self.element.find_element_by_css_selector(".upload_item_data")
+            except NoSuchElementException:
+                pass
 
     @property
     def title(self):
@@ -227,7 +232,13 @@ class OtherTeamSubmissionElement(BaseElement):
     def uploaded_by(self):
         if self.no_upload:
             return None
-        return self._uploaded_by.text
+        if self._uploaded_by is not None:
+            return self._uploaded_by.text
+        return None
+
+    @property
+    def upload_data_available(self):
+        return self._uploaded_by is not None
 
 
 class ReviewFormElement(BaseElement):

@@ -61,21 +61,11 @@ class TestOtherGroupSubmissionLinks(SingleScenarioTestSuite):
         budget_upload = stage1_submissions.uploads[1]
         marketing_pitch_upload = stage2_submissions.uploads[0]
 
-        def _assert_upload(upload, no_upload, title, link, filename, uploaded_by):
+        def _assert_upload(upload, no_upload, title):
             self.assertEqual(upload.no_upload, no_upload)
             self.assertEqual(upload.title, title)
-            if not no_upload:
-                self.assertEqual(upload.link, link)
-                self.assertEqual(upload.filename, filename)
-                self.assertEqual(upload.uploaded_by, uploaded_by)
+            self.assertFalse(upload.upload_data_available)
 
-        uploaded_by_tpl = "Uploaded by {user} on {date}"
-        _assert_upload(
-            issue_tree_upload, False, "Issue Tree", 'http://issue_tree.csv', 'issue_tree.csv',
-            uploaded_by_tpl.format(user=KNOWN_USERS[1].full_name, date="Jan 01")
-        )
-        _assert_upload(budget_upload, True, "Budget (This file has not been submitted by this group)", None, None, None)
-        _assert_upload(
-            marketing_pitch_upload, False, "Marketing Pitch", 'http://marketing_pitch.doc', 'marketing_pitch.doc',
-            uploaded_by_tpl.format(user=KNOWN_USERS[2].full_name, date="Jan 02")
-        )
+        _assert_upload(issue_tree_upload, False, "Issue Tree")
+        _assert_upload(budget_upload, True, "Budget (This file has not been submitted by this group)")
+        _assert_upload(marketing_pitch_upload, False, "Marketing Pitch")

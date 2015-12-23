@@ -3,10 +3,7 @@
   <div>
     <a href="{{ upload.location }}"{% if submission.description %} title="{{ submission.description }}"{% endif %} target="_blank">{{ submission.display_name }}</a>
     {% if upload.file_name %}
-      <span class="upload_filename">({{ upload.file_name }})</span> -
-      <span class="upload_item_data">
-        {% trans "Uploaded by" %} {{ upload.user_details.user_label|safe }} on {{ upload.submission_date }}
-      </span>
+      <span class="upload_filename">({{ upload.file_name }})</span>
     {% endif %}
   </div>
 {% else %}
