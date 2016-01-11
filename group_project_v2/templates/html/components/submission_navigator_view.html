@@ -9,7 +9,7 @@
     <div class="upload_item_wrapper" {% if upload.location %} data-location="{{ upload.location }}" {% endif %}>
       <input
         class="{{ submission.upload_id }}_name" placeholder="Browse computer to upload file..."
-        disabled="disabled" type="text"
+        readonly="readonly" type="text"
         {% if upload.file_name %}
           value="{{ upload.file_name }}" data-original-value="{{ upload.file_name }}"
         {% endif %}
