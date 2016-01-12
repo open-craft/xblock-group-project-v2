@@ -16,9 +16,13 @@ from group_project_v2.stage import (
 )
 from group_project_v2.stage.utils import StageState
 from tests.integration.base_test import SingleScenarioTestSuite, BaseIntegrationTest
-from tests.integration.page_elements import NavigationViewElement, ResourcesViewElement, SubmissionsViewElement, \
-    GroupProjectElement
-from tests.utils import KNOWN_USERS, TestWithPatchesMixin, switch_to_ta_grading
+from tests.integration.page_elements import (
+    NavigationViewElement, ResourcesViewElement, SubmissionsViewElement, GroupProjectElement
+)
+from tests.utils import (
+    KNOWN_USERS, TestWithPatchesMixin, switch_to_ta_grading, get_other_windows, expect_new_browser_window,
+    switch_to_other_window
+)
 
 
 class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
@@ -199,6 +203,33 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
         self.assertEqual(budget.title, "Budget")
         self.assertEqual(budget.file_location, None)
         self.assertEqual(budget.uploaded_by, '')
+
+    def test_download_submission(self):
+        issue_tree_loc = self.submissions['issue_tree']['document_url']
+        self.project_api_mock.get_latest_workgroup_submissions_by_id.return_value = self.submissions
+
+        self._prepare_page()
+
+        submissions_view = self.page.project_navigator.get_view_by_type(ViewTypes.SUBMISSIONS, SubmissionsViewElement)
+        self.page.project_navigator.get_view_selector_by_type(ViewTypes.SUBMISSIONS).click()
+
+        activities = submissions_view.activities
+        self.assertEqual(activities[0].activity_name, "Activity 1".upper())
+        self.assertEqual(activities[1].activity_name, "Activity 2".upper())
+
+        self.assertEqual(activities[1].submissions, [])
+
+        activity1_submissions = activities[0].submissions
+        issue_tree, _marketing_pitch, _budget = activity1_submissions
+
+        with expect_new_browser_window(self.browser, timeout=3):
+            issue_tree.file_upload_input.click()
+
+        new_window = get_other_windows(self.browser)[0]
+
+        with switch_to_other_window(self.browser, new_window):
+            current_url = self.browser.current_url
+            self.assertEqual(current_url, issue_tree_loc)
 
 
 @ddt.ddt

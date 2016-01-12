@@ -469,6 +469,14 @@ class SubmissionUploadItemElement(BaseElement):
         return self.element.find_element_by_css_selector(".upload_item_wrapper").get_attribute("data-location")
 
     @property
+    def upload_item_wrapper(self):
+        return self.element.find_element_by_css_selector(".upload_item_wrapper")
+
+    @property
+    def file_upload_input(self):
+        return self.upload_item_wrapper.find_element_by_css_selector("input")
+
+    @property
     def uploaded_by(self):
         try:
             return self.element.find_element_by_css_selector(".upload_item_data").text.strip()

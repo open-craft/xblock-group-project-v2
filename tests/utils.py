@@ -1,5 +1,8 @@
+from contextlib import contextmanager
+
 import mock
 from mock import Mock
+from selenium.webdriver.support.wait import WebDriverWait
 from xblockutils.resources import ResourceLoader
 
 from group_project_v2.api_error import ApiError
@@ -117,3 +120,28 @@ def make_workgroup(workgroup_id, users=None):
     if not users:
         users = []
     return WorkgroupDetails(id=workgroup_id, users=users)
+
+
+@contextmanager
+def expect_new_browser_window(browser, timeout=30):
+    old_window_handle = browser.current_window_handle
+
+    def new_window_available(brwsr):
+        handles = brwsr.window_handles
+        return any(handle != old_window_handle for handle in handles)
+
+    yield
+    WebDriverWait(browser, timeout).until(new_window_available, message="No window was opened")
+
+
+@contextmanager
+def switch_to_other_window(browser, other_window):
+    old_window_handle = browser.current_window_handle
+    browser.switch_to_window(other_window)
+    yield
+    browser.switch_to_window(old_window_handle)
+
+
+def get_other_windows(browser):
+    current_window_handle = browser.current_window_handle
+    return [handle for handle in browser.window_handles if handle != current_window_handle]
