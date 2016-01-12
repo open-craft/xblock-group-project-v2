@@ -20,6 +20,10 @@ function ProjectTeamXBlock(runtime, element) {
         $(target_modal, group_project_dom).show();
     }
 
+    function clearText(target_modal) {
+        $(target_modal, group_project_dom).find('textarea').val('');
+    }
+
     $(".group-project-team-email-group", element).click(function(ev){
         ev.preventDefault();
         showModal(email_group_modal_selector);
@@ -37,6 +41,7 @@ function ProjectTeamXBlock(runtime, element) {
         .add(email_group_modal_selector, group_project_dom);
 
     modal_dialogs.find('form').submit(function(ev){
+        var $this = this;
         ev.preventDefault();
         $(".csrfmiddlewaretoken", $(this)).val($.cookie('apros_csrftoken'));
         var data = $(this).serialize();
@@ -46,6 +51,7 @@ function ProjectTeamXBlock(runtime, element) {
             data: data
         }).done(function (data) {
             show_message(data.message, '');
+            clearText($this);
         }).fail(function (data) {
             show_message(data.message, 'Error', 'error');
         });
