@@ -16,7 +16,7 @@ describe('GroupProjectBlockDashboardDetailsView Tests', function(){
         var hold = hold_ready || true;
         var fixtures_loader = jasmine.getFixtures();
         fixtures_loader.fixturesPath = "base/tests/js/fixtures";
-        fixtures_loader.load("generic.html");
+        fixtures_loader.load(fixture);
         if (hold) {
             $.holdReady(false);
         }
@@ -55,7 +55,7 @@ describe('GroupProjectBlockDashboardDetailsView Tests', function(){
 
     describe("Collapse/Expand Group", function() {
         beforeEach(function() {
-            load_fixture("generic.html");
+            load_fixture("dashboard_detail_view.html");
             initialize_block();
         });
 
@@ -95,7 +95,7 @@ describe('GroupProjectBlockDashboardDetailsView Tests', function(){
 
     describe("User search", function() {
         beforeEach(function() {
-            load_fixture("generic.html");
+            load_fixture("dashboard_detail_view.html");
             initialize_block();
         });
 
