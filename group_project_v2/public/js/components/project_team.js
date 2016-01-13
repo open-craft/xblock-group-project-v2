@@ -1,8 +1,12 @@
 /* exported ProjectTeamXBlock, ProjectTeamXBlockConstants */
 var ProjectTeamXBlockConstants = {
-    modal_popup_selectors: {
-        teammate: ".group-project-team-email-member-modal",
-        group: ".group-project-team-email-group-modal"
+    teammate: {
+        modal: ".group-project-team-email-member-modal",
+        anchor: ".group-project-team-member-email a[data-email]"
+    },
+    group: {
+        modal: ".group-project-team-email-group-modal",
+        anchor: ".group-project-team-email-group"
     }
 };
 
@@ -28,21 +32,21 @@ function ProjectTeamXBlock(runtime, element) {
         $(target_modal, group_project_dom).find('textarea').val('');
     }
 
-    $(".group-project-team-email-group", element).click(function(ev){
+    $(ProjectTeamXBlockConstants.group.anchor, element).click(function(ev){
         ev.preventDefault();
-        showModal(ProjectTeamXBlockConstants.modal_popup_selectors.group);
+        showModal(ProjectTeamXBlockConstants.group.modal);
     });
 
-    $(".group-project-team-member-email a[data-email]", element).click(function(ev){
+    $(ProjectTeamXBlockConstants.teammate.anchor, element).click(function(ev){
         ev.preventDefault();
-        var form = $(ProjectTeamXBlockConstants.modal_popup_selectors.teammate, group_project_dom).find('form'),
+        var form = $(ProjectTeamXBlockConstants.teammate.modal, group_project_dom).find('form'),
             member_email = $(this).data('email');
         $(".member-email", form).val(member_email);
-        showModal(ProjectTeamXBlockConstants.modal_popup_selectors.teammate);
+        showModal(ProjectTeamXBlockConstants.teammate.modal);
     });
 
-    var modal_dialogs = $(ProjectTeamXBlockConstants.modal_popup_selectors.teammate, group_project_dom)
-        .add(ProjectTeamXBlockConstants.modal_popup_selectors.group, group_project_dom);
+    var modal_dialogs = $(ProjectTeamXBlockConstants.teammate.modal, group_project_dom)
+        .add(ProjectTeamXBlockConstants.group.modal, group_project_dom);
 
     modal_dialogs.find('form').submit(function(ev){
         var $this = this;
