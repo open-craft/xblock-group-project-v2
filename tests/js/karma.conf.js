@@ -25,12 +25,14 @@ module.exports = function(config) {
       'group_project_v2/public/js/**/*.js',
       'group_project_v2/public/css/**/*.css',
 
-      'tests/js/*.js',
+      'tests/js/utils.js',
+      'tests/js/test_*.js',
       'tests/js/fixtures/*.html'
     ],
 
     plugins:[
        'karma-jasmine',
+       'karma-coverage',
        'karma-requirejs',
        'karma-jquery',
        'karma-firefox-launcher'
@@ -46,13 +48,23 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
+      'group_project_v2/public/js/*.js': ['coverage'],
+      'group_project_v2/public/js/!(vendor)/*.js': ['coverage']
     },
 
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['dots'],
+    reporters: ['dots', 'coverage'],
+
+    coverageReporter: {
+      dir : 'coverage/',
+      reporters: [
+        {type: 'html', subdir: 'html'},
+        {type: 'text', subdir: '.', file: 'karma_coverage.txt'}
+      ]
+    },
 
 
     // web server port

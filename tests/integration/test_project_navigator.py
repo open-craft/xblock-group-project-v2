@@ -17,8 +17,8 @@ from group_project_v2.stage import (
 from group_project_v2.stage.utils import StageState
 from tests.integration.base_test import SingleScenarioTestSuite, BaseIntegrationTest
 from tests.integration.page_elements import (
-    NavigationViewElement, ResourcesViewElement, SubmissionsViewElement, GroupProjectElement
-)
+    NavigationViewElement, ResourcesViewElement, SubmissionsViewElement, GroupProjectElement,
+    AskTAViewElement)
 from tests.utils import (
     KNOWN_USERS, TestWithPatchesMixin, switch_to_ta_grading, get_other_windows, expect_new_browser_window,
     switch_to_other_window
@@ -230,6 +230,33 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
         with switch_to_other_window(self.browser, new_window):
             current_url = self.browser.current_url
             self.assertEqual(current_url, issue_tree_loc)
+
+    def test_ask_ta_view(self):
+        self._prepare_page()
+
+        ask_ta_view = self.page.project_navigator.get_view_by_type(ViewTypes.ASK_TA, AskTAViewElement)
+
+        # open Ask TA, fill in the text, close the view and make sure it was cleared
+        self.page.project_navigator.get_view_selector_by_type(ViewTypes.ASK_TA).click()
+        self.assertEqual(ask_ta_view.message, '')
+        ask_ta_view.message = "Some message"
+        self.assertEqual(ask_ta_view.message, "Some message")
+        ask_ta_view.close_view()
+        self.assertEqual(ask_ta_view.message, '')
+
+        # open again and check if it is cleared when user opens other view
+        self.page.project_navigator.get_view_selector_by_type(ViewTypes.ASK_TA).click()
+        self.assertEqual(ask_ta_view.message, '')
+        ask_ta_view.message = "Some message"
+        self.assertEqual(ask_ta_view.message, "Some message")
+        self.page.project_navigator.get_view_selector_by_type(ViewTypes.RESOURCES).click()
+        self.assertEqual(ask_ta_view.message, '')
+
+        # open again and submit message
+        self.page.project_navigator.get_view_selector_by_type(ViewTypes.ASK_TA).click()
+        ask_ta_view.message = "Some message"
+        ask_ta_view.submit_message()
+        # TODO: and I have no idea yet how to check for AJAX parameters; looks like it is a work for JS test
 
 
 @ddt.ddt

@@ -1,9 +1,17 @@
-/* exported ProjectTeamXBlock */
+/* exported ProjectTeamXBlock, ProjectTeamXBlockConstants */
+var ProjectTeamXBlockConstants = {
+    teammate: {
+        modal: ".group-project-team-email-member-modal",
+        anchor: ".group-project-team-member-email a[data-email]"
+    },
+    group: {
+        modal: ".group-project-team-email-group-modal",
+        anchor: ".group-project-team-email-group"
+    }
+};
+
 function ProjectTeamXBlock(runtime, element) {
     "use strict";
-    var email_member_modal_selector = ".group-project-team-email-member-modal";
-    var email_group_modal_selector = ".group-project-team-email-group-modal";
-
     var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
     var message_box = $(".message", group_project_dom);
 
@@ -20,25 +28,30 @@ function ProjectTeamXBlock(runtime, element) {
         $(target_modal, group_project_dom).show();
     }
 
-    $(".group-project-team-email-group", element).click(function(ev){
+    function clearText(target_modal) {
+        $(target_modal, group_project_dom).find('textarea').val('');
+    }
+
+    $(ProjectTeamXBlockConstants.group.anchor, element).click(function(ev){
         ev.preventDefault();
-        showModal(email_group_modal_selector);
+        showModal(ProjectTeamXBlockConstants.group.modal);
     });
 
-    $(".group-project-team-member-email a[data-email]", element).click(function(ev){
+    $(ProjectTeamXBlockConstants.teammate.anchor, element).click(function(ev){
         ev.preventDefault();
-        var form = $(email_member_modal_selector, group_project_dom).find('form'),
+        var form = $(ProjectTeamXBlockConstants.teammate.modal, group_project_dom).find('form'),
             member_email = $(this).data('email');
         $(".member-email", form).val(member_email);
-        showModal(email_member_modal_selector);
+        showModal(ProjectTeamXBlockConstants.teammate.modal);
     });
 
-    var modal_dialogs = $(email_member_modal_selector, group_project_dom)
-        .add(email_group_modal_selector, group_project_dom);
+    var modal_dialogs = $(ProjectTeamXBlockConstants.teammate.modal, group_project_dom)
+        .add(ProjectTeamXBlockConstants.group.modal, group_project_dom);
 
     modal_dialogs.find('form').submit(function(ev){
+        var $this = this;
         ev.preventDefault();
-        $(".csrfmiddlewaretoken", $(this)).val($.cookie('apros_csrftoken'));
+        $(".csrfmiddlewaretoken", $this).val($.cookie('apros_csrftoken'));
         var data = $(this).serialize();
         $.ajax({
             url: $(this).attr('action'),
@@ -46,6 +59,7 @@ function ProjectTeamXBlock(runtime, element) {
             data: data
         }).done(function (data) {
             show_message(data.message, '');
+            clearText($this);
         }).fail(function (data) {
             show_message(data.message, 'Error', 'error');
         });

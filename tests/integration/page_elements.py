@@ -409,6 +409,24 @@ class SubmissionsViewElement(ProjectNavigatorViewElement):
     activity_element_type = ProjectNavigatorSubmissionsActivityElement
 
 
+class AskTAViewElement(ProjectNavigatorViewElement):
+    activity_element_type = None  # this view does not render individual activities
+
+    def _get_textarea(self):
+        return self._element.find_element_by_css_selector("form.contact-ta-form textarea[name='ta_message']")
+
+    @property
+    def message(self):
+        return self._get_textarea().get_attribute('value')
+
+    @message.setter
+    def message(self, value):
+        self._get_textarea().send_keys(value)
+
+    def submit_message(self):
+        self._element.find_element_by_css_selector("form.contact-ta-form input[type=submit]").click()
+
+
 class StageItemElement(BaseElement):
     def __init__(self, browser, element):
         super(StageItemElement, self).__init__(browser, element)
