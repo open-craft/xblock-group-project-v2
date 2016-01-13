@@ -19,7 +19,6 @@ var FixtureConstants = {
 
 describe("ProjectTeamXBlock", function() {
     'use strict';
-    'use strict';
     it("loads ProjectTeamXBlock", function() {
         expect(ProjectTeamXBlock).not.toBeUndefined();
     });
@@ -104,10 +103,10 @@ describe("ProjectTeamXBlock", function() {
                     var ajax_call = $.ajax.calls.mostRecent();
                     expect(ajax_call).toBeDefined();
                     var ajax_args = ajax_call.args[0];
-                    var data = TestUtils.parseUrlEncoded(ajax_args['data']);
-                    expect(ajax_args['url']).toEqual(FixtureConstants.urls.email_teammate);
+                    var data = TestUtils.parseUrlEncoded(ajax_args.data);
+                    expect(ajax_args.url).toEqual(FixtureConstants.urls.email_teammate);
                     expect(data["member-email"]).toEqual(parameters.email);
-                    expect(data["member_message"]).toEqual(parameters.text);
+                    expect(data.member_message).toEqual(parameters.text);
                     expect(textarea.val()).toEqual(''); // clears textarea on successful submission
                 });
             }
@@ -182,9 +181,9 @@ describe("ProjectTeamXBlock", function() {
                     var ajax_call = $.ajax.calls.mostRecent();
                     expect(ajax_call).toBeDefined();
                     var ajax_args = ajax_call.args[0];
-                    var data = TestUtils.parseUrlEncoded(ajax_args['data']);
-                    expect(ajax_args['url']).toEqual(FixtureConstants.urls.email_group);
-                    expect(data["group_message"]).toEqual(parameters.text);
+                    var data = TestUtils.parseUrlEncoded(ajax_args.data);
+                    expect(ajax_args.url).toEqual(FixtureConstants.urls.email_group);
+                    expect(data.group_message).toEqual(parameters.text);
                     expect(textarea.val()).toEqual(''); // clears textarea on successful submission
                 });
             }

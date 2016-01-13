@@ -1,5 +1,6 @@
 /* exported TestUtils */
 function TestUtilsConstructor() {
+    "use strict";
     var fixtures_loader = jasmine.getFixtures();
     fixtures_loader.fixturesPath = "base/tests/js/fixtures";
 
@@ -16,7 +17,7 @@ function TestUtilsConstructor() {
                 decodeURIComponent(urlencoded).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}'
             );
         }
-    }
+    };
 }
 
 var TestUtils = TestUtilsConstructor();
