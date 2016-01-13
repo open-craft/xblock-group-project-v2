@@ -1,9 +1,13 @@
-/* exported ProjectTeamXBlock */
+/* exported ProjectTeamXBlock, ProjectTeamXBlockConstants */
+var ProjectTeamXBlockConstants = {
+    modal_popup_selectors: {
+        teammate: ".group-project-team-email-member-modal",
+        group: ".group-project-team-email-group-modal"
+    }
+};
+
 function ProjectTeamXBlock(runtime, element) {
     "use strict";
-    var email_member_modal_selector = ".group-project-team-email-member-modal";
-    var email_group_modal_selector = ".group-project-team-email-group-modal";
-
     var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
     var message_box = $(".message", group_project_dom);
 
@@ -26,24 +30,24 @@ function ProjectTeamXBlock(runtime, element) {
 
     $(".group-project-team-email-group", element).click(function(ev){
         ev.preventDefault();
-        showModal(email_group_modal_selector);
+        showModal(ProjectTeamXBlockConstants.modal_popup_selectors.group);
     });
 
     $(".group-project-team-member-email a[data-email]", element).click(function(ev){
         ev.preventDefault();
-        var form = $(email_member_modal_selector, group_project_dom).find('form'),
+        var form = $(ProjectTeamXBlockConstants.modal_popup_selectors.teammate, group_project_dom).find('form'),
             member_email = $(this).data('email');
         $(".member-email", form).val(member_email);
-        showModal(email_member_modal_selector);
+        showModal(ProjectTeamXBlockConstants.modal_popup_selectors.teammate);
     });
 
-    var modal_dialogs = $(email_member_modal_selector, group_project_dom)
-        .add(email_group_modal_selector, group_project_dom);
+    var modal_dialogs = $(ProjectTeamXBlockConstants.modal_popup_selectors.teammate, group_project_dom)
+        .add(ProjectTeamXBlockConstants.modal_popup_selectors.group, group_project_dom);
 
     modal_dialogs.find('form').submit(function(ev){
         var $this = this;
         ev.preventDefault();
-        $(".csrfmiddlewaretoken", $(this)).val($.cookie('apros_csrftoken'));
+        $(".csrfmiddlewaretoken", $this).val($.cookie('apros_csrftoken'));
         var data = $(this).serialize();
         $.ajax({
             url: $(this).attr('action'),

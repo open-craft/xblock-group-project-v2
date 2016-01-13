@@ -10,6 +10,11 @@ function TestUtilsConstructor() {
             if (hold) {
                 $.holdReady(false);
             }
+        },
+        parseUrlEncoded: function(urlencoded) {
+            return JSON.parse('{"' +
+                decodeURIComponent(urlencoded).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}'
+            );
         }
     }
 }
