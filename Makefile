@@ -10,7 +10,7 @@ js-requirements:
 test: test-requirements test_fast
 
 test_fast:
-	./node_modules/.bin/karma start tests/js/karma.conf.js
+	./node_modules/.bin/karma start tests/js/karma.conf.js  --single-run
 ifdef XVFB
 	xvfb-run --server-args="-screen 0, 1024x800x24" ./run_tests.py --with-coverage --cover-package=group_project_v2
 else
