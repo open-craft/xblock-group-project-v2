@@ -25,7 +25,8 @@ module.exports = function(config) {
       'group_project_v2/public/js/**/*.js',
       'group_project_v2/public/css/**/*.css',
 
-      'tests/js/*.js',
+      'tests/js/utils.js',
+      'tests/js/test_*.js',
       'tests/js/fixtures/*.html'
     ],
 

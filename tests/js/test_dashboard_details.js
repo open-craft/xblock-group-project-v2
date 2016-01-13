@@ -1,6 +1,6 @@
 /* global
     GroupProjectBlockDashboardDetailsConstants, GroupProjectBlockDashboardDetailsHelpers,
-     GroupProjectBlockDashboardDetailsView
+    GroupProjectBlockDashboardDetailsView, TestUtils
  */
 var gp_constants = GroupProjectBlockDashboardDetailsConstants;
 var gp_helpers = GroupProjectBlockDashboardDetailsHelpers;
@@ -11,16 +11,6 @@ describe('GroupProjectBlockDashboardDetailsView Tests', function(){
         expect(GroupProjectBlockDashboardDetailsView).not.toBeUndefined();
         expect(GroupProjectBlockDashboardDetailsConstants).not.toBeUndefined();
     });
-
-    function load_fixture(fixture, hold_ready) {
-        var hold = hold_ready || true;
-        var fixtures_loader = jasmine.getFixtures();
-        fixtures_loader.fixturesPath = "base/tests/js/fixtures";
-        fixtures_loader.load(fixture);
-        if (hold) {
-            $.holdReady(false);
-        }
-    }
 
     function initialize_block() {
         var top_level_element = $(".xblock-dashboard_detail_view");
@@ -55,7 +45,7 @@ describe('GroupProjectBlockDashboardDetailsView Tests', function(){
 
     describe("Collapse/Expand Group", function() {
         beforeEach(function() {
-            load_fixture("dashboard_detail_view.html");
+            TestUtils.load_fixture("dashboard_detail_view.html");
             initialize_block();
         });
 
@@ -95,7 +85,7 @@ describe('GroupProjectBlockDashboardDetailsView Tests', function(){
 
     describe("User search", function() {
         beforeEach(function() {
-            load_fixture("dashboard_detail_view.html");
+            TestUtils.load_fixture("dashboard_detail_view.html");
             initialize_block();
         });
 
