@@ -235,7 +235,7 @@ class GroupProjectSubmissionXBlock(
 
     def submissions_view(self, context):
         fragment = Fragment()
-        uploading_allowed = self.stage.available_now and self.stage.is_group_member
+        uploading_allowed = (self.stage.available_now and self.stage.is_group_member) or self.stage.is_admin_grader
         render_context = {'submission': self, 'upload': self.upload, 'disabled': not uploading_allowed}
         render_context.update(context)
         fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
@@ -265,7 +265,7 @@ class GroupProjectSubmissionXBlock(
             response_data = {'result': 'error', 'message': template.format(action=self.stage.STAGE_ACTION)}
             failure_code = 422  # 422 = unprocessable entity
 
-        elif not self.stage.is_group_member:
+        elif not self.stage.is_group_member and not self.stage.is_admin_grader:
             response_data = {'result': 'error', 'message': messages.NON_GROUP_MEMBER_UPLOAD}
             failure_code = 403  # 403 - forbidden
 

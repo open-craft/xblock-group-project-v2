@@ -367,7 +367,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
 
     @property
     def allow_admin_grader_access(self):
-        return False
+        return True
 
     def student_view(self, context):
         """

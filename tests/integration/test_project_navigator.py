@@ -324,9 +324,12 @@ class TestProjectNavigator(BaseIntegrationTest, TestWithPatchesMixin):
 
         self.assertEqual(
             view_types,
-            (NavigationViewXBlock.type, ResourcesViewXBlock.type, PrivateDiscussionViewXBlock.type)
+            (
+                NavigationViewXBlock.type, SubmissionsViewXBlock.type, ResourcesViewXBlock.type,
+                PrivateDiscussionViewXBlock.type
+            )
         )
         self.assertEqual(
             view_selector_types,
-            (ResourcesViewXBlock.type, PrivateDiscussionViewXBlock.type)
+            (SubmissionsViewXBlock.type, ResourcesViewXBlock.type, PrivateDiscussionViewXBlock.type)
         )

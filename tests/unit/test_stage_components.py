@@ -186,6 +186,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
 
     def test_upload_submission_stage_is_not_group_member(self):
         self.stage_mock.is_group_member = False
+        self.stage_mock.is_admin_grader = False
 
         response = self.block.upload_submission(mock.Mock())
         self.assertEqual(response.status_code, 403)
@@ -218,13 +219,18 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
             )
 
     @ddt.data(
-        ("sub1", "file.html", "new_stage_state1"),
-        ("sub2", "other_file.so", {"activity_id": 'A1', "stage_id": 'S1', 'state': 'complete'}),
+        ("sub1", "file.html", "new_stage_state1", False),
+        ("sub2", "other_file.so", {"activity_id": 'A1', "stage_id": 'S1', 'state': 'complete'}, False),
+        ("sub1", "file_ta.so", {"activity_id": 'A1', "stage_id": 'S1', 'state': 'complete'}, True),
+        ("sub2", "other_file_ta.so", {"activity_id": 'A1', "stage_id": 'S1', 'state': 'complete'}, True),
     )
     @ddt.unpack
     @freeze_time("2015-08-01")
-    def test_upload_submission_success_scenario(self, submission_id, file_url, stage_state):
+    def test_upload_submission_success_scenario(self, submission_id, file_url, stage_state, is_admin_grader):
         upload_id = "upload_id"
+
+        self.stage_mock.is_admin_grader = is_admin_grader
+        self.stage_mock.is_group_member = not is_admin_grader
 
         request_mock = mock.Mock()
         request_mock.params = {upload_id: mock.Mock()}
