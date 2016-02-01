@@ -6,6 +6,8 @@ import textwrap
 
 import ddt
 import mock
+from datetime import datetime
+from freezegun import freeze_time
 
 from group_project_v2.project_navigator import (
     ViewTypes, ResourcesViewXBlock, SubmissionsViewXBlock, AskTAViewXBlock, PrivateDiscussionViewXBlock,
@@ -25,6 +27,7 @@ from tests.utils import (
 )
 
 
+@ddt.ddt
 class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
     scenario = "example_1.xml"
 
@@ -171,11 +174,17 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
         self.assertEqual(activity1_resources[3].url, "http://download/mygrading.html")
         self.assertEqual(activity1_resources[3].title, "Grading Criteria")
 
-    def test_submissions_view(self):
+    @ddt.data(True, False)
+    @freeze_time(datetime(2014, 05, 23))
+    def test_submissions_view(self, as_ta):
+        student_id = 1
+        if as_ta:
+            switch_to_ta_grading(self.project_api_mock)
+            student_id = 100
         issue_tree_loc = self.submissions['issue_tree']['document_url']
         self.project_api_mock.get_latest_workgroup_submissions_by_id.return_value = self.submissions
 
-        self._prepare_page()
+        self._prepare_page(student_id=student_id)
 
         submissions_view = self.page.project_navigator.get_view_by_type(ViewTypes.SUBMISSIONS, SubmissionsViewElement)
         self.page.project_navigator.get_view_selector_by_type(ViewTypes.SUBMISSIONS).click()
@@ -189,20 +198,16 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
         activity1_submissions = activities[0].submissions
         issue_tree, marketing_pitch, budget = activity1_submissions
 
-        self.assertEqual(issue_tree.title, "Issue Tree")
-        self.assertEqual(issue_tree.file_location, issue_tree_loc)
-        self.assertEqual(
-            issue_tree.uploaded_by,
-            "Uploaded by {user} on {date}".format(user=KNOWN_USERS[1].full_name, date="May 22 2014")
-        )
+        def _assert_submission(submission, title, location, uploaded_by):
+            self.assertEqual(submission.title, title)
+            self.assertEqual(submission.file_location, location)
+            self.assertEqual(submission.uploaded_by, uploaded_by)
+            self.assertTrue(submission.upload_enabled)
 
-        self.assertEqual(marketing_pitch.title, "Marketing Pitch")
-        self.assertEqual(marketing_pitch.file_location, None)
-        self.assertEqual(marketing_pitch.uploaded_by, '')
-
-        self.assertEqual(budget.title, "Budget")
-        self.assertEqual(budget.file_location, None)
-        self.assertEqual(budget.uploaded_by, '')
+        issue_tree_uploaded = "Uploaded by {user} on {date}".format(user=KNOWN_USERS[1].full_name, date="May 22")
+        _assert_submission(issue_tree, "Issue Tree", issue_tree_loc, issue_tree_uploaded)
+        _assert_submission(marketing_pitch, "Marketing Pitch", None, '')
+        _assert_submission(budget, "Budget", None, '')
 
     def test_download_submission(self):
         issue_tree_loc = self.submissions['issue_tree']['document_url']
@@ -324,9 +329,12 @@ class TestProjectNavigator(BaseIntegrationTest, TestWithPatchesMixin):
 
         self.assertEqual(
             view_types,
-            (NavigationViewXBlock.type, ResourcesViewXBlock.type, PrivateDiscussionViewXBlock.type)
+            (
+                NavigationViewXBlock.type, SubmissionsViewXBlock.type, ResourcesViewXBlock.type,
+                PrivateDiscussionViewXBlock.type
+            )
         )
         self.assertEqual(
             view_selector_types,
-            (ResourcesViewXBlock.type, PrivateDiscussionViewXBlock.type)
+            (SubmissionsViewXBlock.type, ResourcesViewXBlock.type, PrivateDiscussionViewXBlock.type)
         )

@@ -501,6 +501,11 @@ class SubmissionUploadItemElement(BaseElement):
         except NoSuchElementException:
             return None
 
+    @property
+    def upload_enabled(self):
+        upload_ctrl = self.element.find_element_by_css_selector(".file_upload")
+        return not upload_ctrl.get_attribute('disabled')
+
     def upload_file(self, location):
         upload_item = self.element.find_element_by_css_selector(".file_upload")
         upload_item.clear()
