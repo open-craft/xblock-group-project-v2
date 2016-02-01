@@ -142,3 +142,11 @@ class ReviewStageUserCompletionStatsMixin(object):
             )
         self.assertEqual(completed, expected_completed)
         self.assertEqual(partially_completed, expected_partially_completed)
+
+    def assert_group_completion(self, group, questions, expected_result):
+        with patch_obj(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
+            patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
+
+            group_completion = self.block.get_group_completion(group)
+
+        self.assertEqual(group_completion, expected_result)

@@ -675,7 +675,7 @@ class GroupActivityXBlock(
         students_provided_grades, group_received_grades = {}, {}
         for group in target_workgroups:
             if isinstance(stage, PeerReviewStage):
-                group_received_grades[group.id] = stage.get_group_completions(group)
+                group_received_grades[group.id] = stage.get_group_completion(group)
 
             user_completions = [user_stats.get(user.id, StageState.UNKNOWN) for user in group.users]
             student_review_state = StageState.NOT_STARTED

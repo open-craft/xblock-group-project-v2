@@ -402,80 +402,45 @@ class PeerReviewStage(ReviewBaseStage):
 
         return self._calculate_review_status(review_subjects_ids, review_items)
 
-    def _calculate_ta_review_statuses(self, target_workgroups):
-        ta_reviews = self._get_ta_reviews(target_workgroups)
-        group_statuses = {}
-        for group in target_workgroups:
-            for ta_review_items in ta_reviews.values():
-                group_review_status = self._calculate_review_status([group.id], ta_review_items)
-                if group_review_status == ReviewState.COMPLETED:
-                    group_statuses[group.id] = ReviewState.COMPLETED
-                    break
-                if group_review_status == ReviewState.INCOMPLETE:
-                    group_statuses[group.id] = ReviewState.INCOMPLETE  # but no break - could be improved by other TA
-        return group_statuses
-
-    def _get_ta_reviews(self, target_workgroups):
-        review_items = self._get_review_items(target_workgroups, with_caching=True)
+    def _get_ta_reviews(self, target_workgroup):
+        review_items = self._get_review_items([target_workgroup], with_caching=True)
 
         grouped_items = defaultdict(list)
         for item in review_items:
             grouped_items[item['reviewer']].append(item)
 
         ta_reviews = {
-            reviewer: review_items
+            reviewer: items
             for reviewer, items in grouped_items.iteritems()
             if self._confirm_outsider_allowed(self.project_api, self.real_user_id(reviewer), self.course_id)
         }
         return ta_reviews
 
-    def get_users_completion(self, target_workgroups, target_users):
-        if not self.activity.is_ta_graded:
-            return super(PeerReviewStage, self).get_users_completion(target_workgroups, target_users)
-
-        group_statuses = self._calculate_ta_review_statuses(target_workgroups)
-
-        completed_users, partially_completed_users = set(), set()
-        for group in target_workgroups:
-            if group.id not in group_statuses:
-                continue
-
-            group_users = set(user.id for user in group.users)
-
-            if group_statuses[group.id] == ReviewState.COMPLETED:
-                completed_users |= group_users
-            if group_statuses[group.id] == ReviewState.INCOMPLETE:
-                partially_completed_users |= group_users
-
-        return completed_users, partially_completed_users
-
-    def get_group_completions(self, group):
+    def get_group_completion(self, group):
         if not self.activity.is_ta_graded:
             reviewer_ids = [
                 user['id'] for user in self.project_api.get_workgroup_reviewers(group.id, self.activity_content_id)
             ]
             reviews_for_group = self._get_review_items([group], with_caching=True)
-            # check each reviewer individually...
             review_results = [
                 self._calculate_review_status([group.id], self._get_reviews_by_user(reviews_for_group, reviewer_id))
                 for reviewer_id in reviewer_ids
             ]
+            # if review_results is empty (e.g. no reviewers are configured) all will return True, and any will return
+            # False. It would result in a "broken" state (has_all, but not has_some) - it is cleared later
+            has_some = any(status != ReviewState.NOT_STARTED for status in review_results)
             has_all = all(status == ReviewState.COMPLETED for status in review_results)
-            has_some = any(status == ReviewState.COMPLETED for status in review_results)
         else:
-            # here we check each TA one by one; ony one TA review is required to consider group reviewed
-            has_all, has_some = False, False
-            ta_reviews_dict = self._get_ta_reviews([group])
-            for ta_reviewer_id, ta_reviews in ta_reviews_dict.iteritems():
-                required_keys = set(itertools.product([group.id], self.required_questions))
-                review_item_keys = set(self._convert_review_items_to_keys(ta_reviews))
+            ta_reviews = self._get_ta_reviews(group)
+            review_results = [
+                self._calculate_review_status([group.id], ta_review_items)
+                for ta_review_items in ta_reviews.values()
+            ]
+            has_some = any(status != ReviewState.NOT_STARTED for status in review_results)
+            # any completed TA review counts as "stage completed"
+            has_all = any(status == ReviewState.COMPLETED for status in review_results)
 
-                has_all = has_all or bool(required_keys) and review_item_keys >= required_keys
-                has_some = has_some or bool(review_item_keys & required_keys)
-
-                if has_all:
-                    break  # shortcut - if any TA have reviewed the group we can skip other TAs
-
+        has_all = has_some and has_all  # has_all should never be True if has_some is False
         review_state = self.REVIEW_STATE_CONDITIONS.get((has_some, has_all))
         return self.STAGE_STATE_REVIEW_STATE_MAPPING.get(review_state)
 
