@@ -10,7 +10,7 @@ from group_project_v2.stage import PeerReviewStage
 from group_project_v2.stage.utils import ReviewState, StageState
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock, GroupSelectorXBlock
 from tests.unit.test_stages.base import BaseStageTest, ReviewStageBaseTest, ReviewStageUserCompletionStatsMixin
-from tests.utils import make_review_item as mri, make_question, make_workgroup as mk_wg, KNOWN_USERS
+from tests.utils import make_review_item as mri, make_question, make_workgroup as mk_wg
 from tests.unit.test_stages.utils import GROUP_ID, USER_ID, OTHER_USER_ID, OTHER_GROUP_ID, patch_obj
 
 
