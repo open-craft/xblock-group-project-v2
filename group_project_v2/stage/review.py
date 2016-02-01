@@ -157,6 +157,12 @@ class ReviewBaseStage(BaseGroupActivityStage):
         """
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
+    def _get_reviews_by_user(self, review_items, user_id):
+        return [
+            item for item in review_items
+            if self.real_user_id(item['reviewer']) == user_id
+        ]
+
     @XBlock.json_handler
     @outsider_disallowed_protected_handler
     @key_error_protected_handler
@@ -234,12 +240,9 @@ class TeamEvaluationStage(ReviewBaseStage):
         """
         workgroup = self.project_api.get_user_workgroup_for_course(user_id, self.course_id)
         review_subjects_ids = set(user.id for user in workgroup.users) - {user_id}
-        review_items = [
-            item
-            for item in self._get_review_items_for_group(self.project_api, workgroup.id, self.activity_content_id)
-            if self.real_user_id(item['reviewer']) == user_id
-        ]
-        return review_subjects_ids, review_items
+        review_items = self._get_review_items_for_group(self.project_api, workgroup.id, self.activity_content_id)
+        review_items_by_user = self._get_reviews_by_user(review_items, user_id)
+        return review_subjects_ids, review_items_by_user
 
     @staticmethod
     @memoize_with_expiration()
@@ -446,18 +449,45 @@ class PeerReviewStage(ReviewBaseStage):
 
         return completed_users, partially_completed_users
 
+    def get_group_completions(self, group):
+        if not self.activity.is_ta_graded:
+            reviewer_ids = [
+                user['id'] for user in self.project_api.get_workgroup_reviewers(group.id, self.activity_content_id)
+            ]
+            reviews_for_group = self._get_review_items([group], with_caching=True)
+            # check each reviewer individually...
+            review_results = [
+                self._calculate_review_status([group.id], self._get_reviews_by_user(reviews_for_group, reviewer_id))
+                for reviewer_id in reviewer_ids
+            ]
+            has_all = all(status == ReviewState.COMPLETED for status in review_results)
+            has_some = any(status == ReviewState.COMPLETED for status in review_results)
+        else:
+            # here we check each TA one by one; ony one TA review is required to consider group reviewed
+            has_all, has_some = False, False
+            ta_reviews_dict = self._get_ta_reviews([group])
+            for ta_reviewer_id, ta_reviews in ta_reviews_dict.iteritems():
+                required_keys = set(itertools.product([group.id], self.required_questions))
+                review_item_keys = set(self._convert_review_items_to_keys(ta_reviews))
+
+                has_all = has_all or bool(required_keys) and review_item_keys >= required_keys
+                has_some = has_some or bool(review_item_keys & required_keys)
+
+                if has_all:
+                    break  # shortcut - if any TA have reviewed the group we can skip other TAs
+
+        review_state = self.REVIEW_STATE_CONDITIONS.get((has_some, has_all))
+        return self.STAGE_STATE_REVIEW_STATE_MAPPING.get(review_state)
+
     def get_review_data(self, user_id):
         """
         :param int user_id:
         :rtype: (set[int], dict)
         """
         review_subjects = self.get_review_subjects(user_id)
-        review_items = [
-            item
-            for item in self._get_review_items(review_subjects, with_caching=True)
-            if self.real_user_id(item['reviewer']) == user_id
-        ]
-        return set(group.id for group in review_subjects), review_items
+        review_items = self._get_review_items(review_subjects, with_caching=True)
+        reviews_by_user = self._get_reviews_by_user(review_items, user_id)
+        return set(group.id for group in review_subjects), reviews_by_user
 
     @staticmethod
     @memoize_with_expiration()

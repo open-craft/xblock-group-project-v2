@@ -34,7 +34,9 @@
           <td>
             {% with stage_states=group.stage_states|get_item:stage.id %}
               <span class="group-project-stage-state fa {{ stage_states.students_provided_grades }}"></span>
-              <span class="group-project-stage-state fa {{ stage_states.group_received_grades }}"></span>
+              {% if stage_states.group_received_grades %}
+                <span class="group-project-stage-state fa {{ stage_states.group_received_grades }}"></span>
+              {% endif %}
             {% endwith %}
           </td>
         {% endfor %}
