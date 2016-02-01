@@ -1,11 +1,18 @@
 XVFB := $(shell command -v xvfb-run 2> /dev/null)
 
+clean:
+	-rm -rf dist coverage 2> /dev/null
+	-rm .coverage tests.integration.* workbench.log 2> /dev/null
+
 requirements: .requirements-timestamp
 
 test-requirements: .test-requirements-timestamp
 
 js-requirements:
 	npm install karma karma-jasmine karma-firefox-launcher karma-requirejs karma-jquery jasmine-jquery jshint
+
+setup-self:
+	python setup.py sdist && pip install dist/xblock-group-project-v2-0.4.tar.gz
 
 test: test-requirements test_fast
 
@@ -30,4 +37,4 @@ coverage-report:
 	pip install -r "$<"
 	touch "$@"
 
-.PHONY: requirements test-requirements js-requirements test quality coverage-report
+.PHONY: clean requirements test-requirements setup-self js-requirements test quality coverage-report
