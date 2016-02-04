@@ -38,9 +38,13 @@
     box-shadow: 0 2px 5px 1px rgba(204, 204, 204, 1);
 }
 
+
+.group-project-xblock-wrapper .stage.dashboard-view {
+    height: 275px;
+}
+
 .group-project-xblock-wrapper .stage.dashboard-view.group-project-non-graded-stage {
     background-color: #f3f3f3;
-    height: 275px;
 }
 
 .group-project-xblock-wrapper .stage.dashboard-view .stage-status {

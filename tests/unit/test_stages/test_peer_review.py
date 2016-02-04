@@ -295,54 +295,74 @@ class TestPeerReviewStageReviewStatus(ReviewStageBaseTest, ReviewStageUserComple
         self.assertEqual(self.project_api_mock.get_workgroup_review_items_for_group.mock_calls, expected_calls)
 
     @ddt.data(
-        # no ta reviewers - not started
-        ([], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1'], {}, (set(), set())),
+        # no reviewers - not started
+        ([], ['q1'], {}, StageState.NOT_STARTED),
         # no reviews - not started
-        ([1], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1'], {}, (set(), set())),
-        # complete review for one group - all users in group completed
-        ([1], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1'], {GROUP_ID: ['1:q1:10:a']}, ({1}, set())),
-        # partial review for one group - all users in group partially completed
-        ([1], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a']}, (set(), {1})),
-        # complete review for one group with multiple questions - all users in group completed
-        ([1], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a', '1:q2:10:b']}, ({1}, set())),
-        # complete review for one group with multiple users and multiple questions- all users in group completed
-        (
-            [1], [mk_wg(GROUP_ID, [{"id": 1}, {"id": 2}])], ['q1', 'q2'],
-            {GROUP_ID: ['1:q1:10:a', '1:q2:10:b']}, ({1, 2}, set())
-        ),
-        # multiple groups - one group complete, one not started
-        (
-            [1], [mk_wg(GROUP_ID, [{"id": 1}]), mk_wg(OTHER_GROUP_ID, [{"id": 2}])], ['q1'],
-            {GROUP_ID: ['1:q1:10:a']}, ({1}, set())
-        ),
-        # multiple groups - one group complete, one incomplete
-        (
-            [1], [mk_wg(GROUP_ID, [{"id": 1}]), mk_wg(OTHER_GROUP_ID, [{"id": 2}, {"id": 3}])], ['q1', 'q2'],
-            {GROUP_ID: ['1:q1:10:a', '1:q2:10:b'], OTHER_GROUP_ID: ['1:q1:11:a']}, ({1}, {2, 3})
-        ),
-        # different reviewers, multiple groups - one complete, one incomplete
-        (
-            [1, 2], [mk_wg(GROUP_ID, [{"id": 1}]), mk_wg(OTHER_GROUP_ID, [{"id": 2}, {"id": 3}])], ['q1', 'q2'],
-            {GROUP_ID: ['1:q1:10:a', '1:q2:10:b'], OTHER_GROUP_ID: ['2:q1:11:a']}, ({1}, {2, 3})
-        ),
-        # multiple reviewers, same group, one rev not started, one incomplete - incomplete
-        ([1, 2], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a']}, (set(), {1})),
-        # multiple reviewers, same group, one rev not started, one complete - complete
-        ([1, 2], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a', '1:q2:10:b']}, ({1}, set())),
-        # multiple reviewers, same group, one rev incomplete, one complete - complete
-        (
-            [1, 2], [mk_wg(GROUP_ID, [{"id": 1}])], ['q1', 'q2'],
-            {GROUP_ID: ['1:q1:10:a', '2:q1:10:b', '2:q2:10:c']}, ({1}, set())
-        )
+        ([1], ['q1'], {}, StageState.NOT_STARTED),
+        # complete review for one group - completed
+        ([1], ['q1'], {GROUP_ID: ['1:q1:10:a']}, StageState.COMPLETED),
+        # partial review for one group - partially complete
+        ([1], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a']}, StageState.INCOMPLETE),
+        # complete review for one group with multiple questions - completed
+        ([1], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a', '1:q2:10:b']}, StageState.COMPLETED),
+        # multiple reviewers - no reviews - not started
+        ([1, 2], ['q1'], {}, StageState.NOT_STARTED),
+        # multiple reviewers - one partial, other not started - partially complete
+        ([1, 2], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a']}, StageState.INCOMPLETE),
+        # multiple reviewers - both partial - partially complete
+        ([1, 2], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a', '2:q2:10:b']}, StageState.INCOMPLETE),
+        # multiple reviewers - one complete, one partial - partially complete
+        ([1, 2], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a', '1:q2:10:b', '2:q2:10:b']}, StageState.INCOMPLETE),
+        # multiple reviewers - both complete - complete
+        ([1, 2], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a', '1:q2:10:b', '2:q1:10:c', '2:q2:10:d']}, StageState.COMPLETED),
     )
     @ddt.unpack
-    def test_ta_completion_stats(self, ta_reviewers, groups_to_review, questions, review_items, expected_result):
+    def test_get_group_completions(self, reviewers, questions, review_items, expected_result):
+        group = mk_wg(GROUP_ID, [{"id": 1}])
+        self.project_api_mock.get_workgroup_reviewers.return_value = [{'id': user_id} for user_id in reviewers]
+
+        self._set_project_api_responses(
+            group,
+            {
+                group.id: [self._parse_review_item_string(item) for item in items]
+                for group_id, items in review_items.iteritems()
+            }
+        )
+
+        self.assert_group_completion(group, questions, expected_result)
+        self.project_api_mock.get_workgroup_reviewers.assert_called_once_with(group.id, self.block.activity_content_id)
+
+    @ddt.data(
+        # no ta reviewers - not started
+        ([], ['q1'], {}, StageState.NOT_STARTED),
+        # no reviews - not started
+        ([1], ['q1'], {}, StageState.NOT_STARTED),
+        # complete review for one group - completed
+        ([1], ['q1'], {GROUP_ID: ['1:q1:10:a']}, StageState.COMPLETED),
+        # partial review for one group - partially complete
+        ([1], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a']}, StageState.INCOMPLETE),
+        # complete review for one group with multiple questions - completed
+        ([1], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a', '1:q2:10:b']}, StageState.COMPLETED),
+        # multiple TAs - no reviews - not started
+        ([1, 2], ['q1'], {}, StageState.NOT_STARTED),
+        # multiple TAs - one partial, other not started - partially complete
+        ([1, 2], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a']}, StageState.INCOMPLETE),
+        # multiple TAs - both partial - partially complete
+        ([1, 2], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a', '2:q2:10:b']}, StageState.INCOMPLETE),
+        # multiple TAs - one complete, other partial - complete
+        ([1, 2], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a', '1:q2:10:b', '2:q2:10:c']}, StageState.COMPLETED),
+        # multiple reviewers - both complete - complete
+        ([1, 2], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a', '1:q2:10:b', '2:q2:10:c', '2:q2:10:d']}, StageState.COMPLETED),
+    )
+    @ddt.unpack
+    def test_ta_get_group_completions(self, ta_reviewers, questions, review_items, expected_result):
+        group_to_review = mk_wg(GROUP_ID, [{"id": 1}])
         self.activity_mock.is_ta_graded = True
 
         self._set_project_api_responses(
-            groups_to_review,
+            group_to_review,
             {
-                group_id: [self._parse_review_item_string(item) for item in items]
+                group_to_review.id: [self._parse_review_item_string(item) for item in items]
                 for group_id, items in review_items.iteritems()
             }
         )
@@ -350,4 +370,4 @@ class TestPeerReviewStageReviewStatus(ReviewStageBaseTest, ReviewStageUserComple
         with patch_obj(self.block, '_confirm_outsider_allowed') as patched_outsider_allowed:
             patched_outsider_allowed.side_effect = lambda _api, user_id, _course_id: user_id in ta_reviewers
 
-            self.assert_users_completion(expected_result, questions, ['irrelevant'], workgroups=groups_to_review)
+            self.assert_group_completion(group_to_review, questions, expected_result)

@@ -103,29 +103,19 @@ class ReviewBaseStage(BaseGroupActivityStage):
             for question in self.required_questions
         )
 
-    def _calculate_review_status(self, items_to_grade, reviewer_feedback_keys):
+    def _calculate_review_status(self, review_subject_ids, review_items):
         """
         Calculates review status for all reviewers listed in review_items collection
-        :param collections.Iterable[int] items_to_grade: Ids of review subjects (teammates or other groups)
-        :param collections.Iterable[set[str]] reviewer_feedback_keys: Review feedback keys
+        :param collections.Iterable[int] review_subject_ids: Ids of review subjects (teammates or other groups)
+        :param collections.Iterable[dict] review_items: Review feedback items
         :rtype: ReviewState
         """
-        required_keys = self._make_required_keys(items_to_grade)
-        has_all = bool(required_keys) and reviewer_feedback_keys >= required_keys
-        has_some = bool(reviewer_feedback_keys & required_keys)
+        required_keys = self._make_required_keys(review_subject_ids)
+        review_item_keys = self._convert_review_items_to_keys(review_items)
+        has_all = bool(required_keys) and review_item_keys >= required_keys
+        has_some = bool(review_item_keys & required_keys)
 
         return self.REVIEW_STATE_CONDITIONS.get((has_some, has_all))
-
-    def _check_review_status(self, items_to_grade, review_items):
-        """
-        Calculates review status for current user
-        :param collections.Iterable[int] items_to_grade: Ids of review subjects (teammates or other groups)
-        :param collections.Iterable[dict] review_items: review items (answers to review questions)
-        :rtype: ReviewState
-        """
-        my_feedback = [item for item in review_items if item['reviewer'] == self.anonymous_student_id]
-        my_review_keys = self._convert_review_items_to_keys(my_feedback)
-        return self._calculate_review_status(items_to_grade, my_review_keys)
 
     def get_stage_state(self):
         review_status = self.review_status()
@@ -150,9 +140,8 @@ class ReviewBaseStage(BaseGroupActivityStage):
         completed_users, partially_completed_users = set(), set()
 
         for user in target_users:
-            review_items, review_subjects = self.get_review_data(user.id)
-            review_keys = self._convert_review_items_to_keys(review_items)
-            review_status = self._calculate_review_status(review_subjects, review_keys)
+            review_subjects_ids, review_items = self.get_review_data(user.id)
+            review_status = self._calculate_review_status(review_subjects_ids, review_items)
 
             if review_status == ReviewState.COMPLETED:
                 completed_users.add(user.id)
@@ -164,9 +153,15 @@ class ReviewBaseStage(BaseGroupActivityStage):
     def get_review_data(self, user_id):
         """
         :param gint user_id:
-        :rtype: (dict, set[int])
+        :rtype: (set[int], dict)
         """
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
+
+    def _get_reviews_by_user(self, review_items, user_id):
+        return [
+            item for item in review_items
+            if self.real_user_id(item['reviewer']) == user_id
+        ]
 
     @XBlock.json_handler
     @outsider_disallowed_protected_handler
@@ -232,25 +227,22 @@ class TeamEvaluationStage(ReviewBaseStage):
         return blocks
 
     def review_status(self):
-        peer_review_items = self.project_api.get_peer_review_items_for_group(
-            self.workgroup.id, self.activity_content_id
-        )
+        review_subjects_ids = [user.id for user in self.review_subjects]
+        all_review_items = self.project_api.get_peer_review_items_for_group(self.workgroup.id, self.activity_content_id)
+        review_items = [item for item in all_review_items if item['reviewer'] == self.anonymous_student_id]
 
-        return self._check_review_status([user.id for user in self.review_subjects], peer_review_items)
+        return self._calculate_review_status(review_subjects_ids, review_items)
 
     def get_review_data(self, user_id):
         """
         :param int user_id: User ID
-        :rtype: (dict, set[int])
+        :rtype: (set[int], dict)
         """
         workgroup = self.project_api.get_user_workgroup_for_course(user_id, self.course_id)
-        review_subjects = set(user.id for user in workgroup.users) - {user_id}
-        review_items = [
-            item
-            for item in self._get_review_items_for_group(self.project_api, workgroup.id, self.activity_content_id)
-            if self.real_user_id(item['reviewer']) == user_id
-        ]
-        return review_items, review_subjects
+        review_subjects_ids = set(user.id for user in workgroup.users) - {user_id}
+        review_items = self._get_review_items_for_group(self.project_api, workgroup.id, self.activity_content_id)
+        review_items_by_user = self._get_reviews_by_user(review_items, user_id)
+        return review_subjects_ids, review_items_by_user
 
     @staticmethod
     @memoize_with_expiration()
@@ -336,6 +328,26 @@ class PeerReviewStage(ReviewBaseStage):
     def allow_admin_grader_access(self):
         return True
 
+    @property
+    def is_graded_stage(self):
+        return True
+
+    @property
+    def available_to_current_user(self):
+        if not super(PeerReviewStage, self).available_to_current_user:
+            return False
+
+        if not self.is_admin_grader and self.activity.is_ta_graded:
+            return False
+
+        return True
+
+    @property
+    def can_mark_complete(self):
+        if self.is_admin_grader:
+            return True
+        return super(PeerReviewStage, self).can_mark_complete
+
     @lazy
     def review_subjects(self):
         """
@@ -355,25 +367,13 @@ class PeerReviewStage(ReviewBaseStage):
     def review_groups(self):
         return self.review_subjects
 
-    @property
-    def available_to_current_user(self):
-        if not super(PeerReviewStage, self).available_to_current_user:
-            return False
-
-        if not self.is_admin_grader and self.activity.is_ta_graded:
-            return False
-
-        return True
-
-    @property
-    def is_graded_stage(self):
-        return True
-
-    @property
-    def can_mark_complete(self):
-        if self.is_admin_grader:
-            return True
-        return super(PeerReviewStage, self).can_mark_complete
+    def get_review_subjects(self, user_id):
+        """
+        Gets a list of workgroups to review for selected user
+        :param int user_id: User ID
+        :return: list[WorkgroupDetails]
+        """
+        return self.project_api.get_workgroups_to_review(user_id, self.course_id, self.activity_content_id)
 
     def _get_review_items(self, review_groups, with_caching=False):
         """
@@ -396,76 +396,63 @@ class PeerReviewStage(ReviewBaseStage):
         return list(itertools.chain.from_iterable(do_get_items(group.id) for group in review_groups))
 
     def review_status(self):
-        group_review_items = self._get_review_items(self.review_groups, with_caching=False)
-        return self._check_review_status([group.id for group in self.review_groups], group_review_items)
+        review_subjects_ids = [group.id for group in self.review_groups]
+        all_review_items = self._get_review_items(self.review_groups, with_caching=False)
+        review_items = [item for item in all_review_items if item['reviewer'] == self.anonymous_student_id]
 
-    def _calculate_group_review_status(self, ta_review_keys, target_workgroups):
-        group_statuses = {}
-        for group in target_workgroups:
-            for reviewer_keys in ta_review_keys.values():
-                group_review_status = self._calculate_review_status([group.id], reviewer_keys)
-                if group_review_status == ReviewState.COMPLETED:
-                    group_statuses[group.id] = ReviewState.COMPLETED
-                    break
-                if group_review_status == ReviewState.INCOMPLETE:
-                    group_statuses[group.id] = ReviewState.INCOMPLETE  # but no break - could be improved by other TA
-        return group_statuses
+        return self._calculate_review_status(review_subjects_ids, review_items)
 
-    def _get_ta_review_keys(self, target_workgroups):
-        review_items = self._get_review_items(target_workgroups, with_caching=False)
+    def _get_ta_reviews(self, target_workgroup):
+        review_items = self._get_review_items([target_workgroup], with_caching=True)
 
         grouped_items = defaultdict(list)
         for item in review_items:
             grouped_items[item['reviewer']].append(item)
 
-        ta_review_keys = {
-            reviewer: self._convert_review_items_to_keys(review_items)
+        ta_reviews = {
+            reviewer: items
             for reviewer, items in grouped_items.iteritems()
             if self._confirm_outsider_allowed(self.project_api, self.real_user_id(reviewer), self.course_id)
         }
-        return ta_review_keys
+        return ta_reviews
 
-    def get_users_completion(self, target_workgroups, target_users):
+    def get_group_completion(self, group):
         if not self.activity.is_ta_graded:
-            return super(PeerReviewStage, self).get_users_completion(target_workgroups, target_users)
+            reviewer_ids = [
+                user['id'] for user in self.project_api.get_workgroup_reviewers(group.id, self.activity_content_id)
+            ]
+            reviews_for_group = self._get_review_items([group], with_caching=True)
+            review_results = [
+                self._calculate_review_status([group.id], self._get_reviews_by_user(reviews_for_group, reviewer_id))
+                for reviewer_id in reviewer_ids
+            ]
+            # if review_results is empty (e.g. no reviewers are configured) all will return True, and any will return
+            # False. It would result in a "broken" state (has_all, but not has_some) - it is cleared later
+            has_some = any(status != ReviewState.NOT_STARTED for status in review_results)
+            has_all = all(status == ReviewState.COMPLETED for status in review_results)
+        else:
+            ta_reviews = self._get_ta_reviews(group)
+            review_results = [
+                self._calculate_review_status([group.id], ta_review_items)
+                for ta_review_items in ta_reviews.values()
+            ]
+            has_some = any(status != ReviewState.NOT_STARTED for status in review_results)
+            # any completed TA review counts as "stage completed"
+            has_all = any(status == ReviewState.COMPLETED for status in review_results)
 
-        ta_review_keys = self._get_ta_review_keys(target_workgroups)
-        group_statuses = self._calculate_group_review_status(ta_review_keys, target_workgroups)
-
-        completed_users, partially_completed_users = set(), set()
-        for group in target_workgroups:
-            if group.id not in group_statuses:
-                continue
-
-            group_users = set(user.id for user in group.users)
-
-            if group_statuses[group.id] == ReviewState.COMPLETED:
-                completed_users |= group_users
-            if group_statuses[group.id] == ReviewState.INCOMPLETE:
-                partially_completed_users |= group_users
-
-        return completed_users, partially_completed_users
+        has_all = has_some and has_all  # has_all should never be True if has_some is False
+        review_state = self.REVIEW_STATE_CONDITIONS.get((has_some, has_all))
+        return self.STAGE_STATE_REVIEW_STATE_MAPPING.get(review_state)
 
     def get_review_data(self, user_id):
         """
         :param int user_id:
-        :rtype: (dict, set[int])
+        :rtype: (set[int], dict)
         """
         review_subjects = self.get_review_subjects(user_id)
-        review_items = [
-            item
-            for item in self._get_review_items(review_subjects, with_caching=True)
-            if self.real_user_id(item['reviewer']) == user_id
-        ]
-        return review_items, set(group.id for group in review_subjects)
-
-    def get_review_subjects(self, user_id):
-        """
-        Gets
-        :param int user_id: User ID
-        :return:
-        """
-        return self.project_api.get_workgroups_to_review(user_id, self.course_id, self.activity_content_id)
+        review_items = self._get_review_items(review_subjects, with_caching=True)
+        reviews_by_user = self._get_reviews_by_user(review_items, user_id)
+        return set(group.id for group in review_subjects), reviews_by_user
 
     @staticmethod
     @memoize_with_expiration()

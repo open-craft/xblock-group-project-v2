@@ -617,7 +617,12 @@ class GroupActivityXBlock(
                 'id': workgroup.id,
                 'ta_grade_link': self.get_ta_review_link(workgroup.id),
                 'stage_states': {
-                    stage_id: stage_data.get('group_stats', {}).get(workgroup.id, StageState.UNKNOWN)
+                    stage_id: {
+                        'students_provided_grades':
+                            stage_data.get('students_provided_grades', {}).get(workgroup.id, StageState.UNKNOWN),
+                        'group_received_grades':
+                            stage_data.get('group_received_grades', {}).get(workgroup.id, StageState.UNKNOWN),
+                    }
                     for stage_id, stage_data in stage_stats.iteritems()
                 },
                 'users': [
@@ -667,20 +672,24 @@ class GroupActivityXBlock(
             if isinstance(stage, PeerReviewStage):
                 groups_to_grade[user.id] = stage.get_review_subjects(user.id)
 
-        group_stats = {}
+        students_provided_grades, group_received_grades = {}, {}
         for group in target_workgroups:
+            if isinstance(stage, PeerReviewStage):
+                group_received_grades[group.id] = stage.get_group_completion(group)
+
             user_completions = [user_stats.get(user.id, StageState.UNKNOWN) for user in group.users]
-            state = StageState.NOT_STARTED
+            student_review_state = StageState.NOT_STARTED
             if all(completion == StageState.COMPLETED for completion in user_completions):
-                state = StageState.COMPLETED
+                student_review_state = StageState.COMPLETED
             elif any(completion != StageState.NOT_STARTED for completion in user_completions):
-                state = StageState.INCOMPLETE
+                student_review_state = StageState.INCOMPLETE
             elif any(completion == StageState.UNKNOWN for completion in user_completions):
-                state = StageState.UNKNOWN
-            group_stats[group.id] = state
+                student_review_state = StageState.UNKNOWN
+            students_provided_grades[group.id] = student_review_state
 
         return {
-            'group_stats': group_stats,
+            'students_provided_grades': students_provided_grades,
+            'group_received_grades': group_received_grades,
             'user_stats': user_stats,
             'groups_to_grade': groups_to_grade
         }
