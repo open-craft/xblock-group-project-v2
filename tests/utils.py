@@ -14,14 +14,35 @@ from group_project_v2.utils import ALLOWED_OUTSIDER_ROLES
 
 loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
 
+
+class TestConstants(object):
+    class Users(object):
+        USER1_ID = 1
+        USER2_ID = 2
+        USER3_ID = 3
+
+    class Groups(object):
+        GROUP1_ID = 1
+        GROUP2_ID = 2
+        GROUP3_ID = 3
+
 KNOWN_USERS = {
-    1: UserDetails(id=1, email="jane@example.com", is_active=True, username="Jane", full_name="Jane"),
-    2: UserDetails(id=2, email="jack@example.com", is_active=True, username="Jack", full_name="Jack"),
-    3: UserDetails(id=3, email="jill@example.com", is_active=True, username="Jill", full_name="Jill"),
+    TestConstants.Users.USER1_ID: UserDetails(
+        id=TestConstants.Users.USER1_ID, email="jane@example.com",
+        is_active=True, username="Jane", full_name="Jane"
+    ),
+    TestConstants.Users.USER2_ID: UserDetails(
+        id=TestConstants.Users.USER2_ID, email="jack@example.com",
+        is_active=True, username="Jack", full_name="Jack"
+    ),
+    TestConstants.Users.USER3_ID: UserDetails(
+        id=TestConstants.Users.USER3_ID, email="jill@example.com",
+        is_active=True, username="Jill", full_name="Jill"
+    ),
 }
 
 WORKGROUP = WorkgroupDetails(**{
-    "id": 1,
+    "id": TestConstants.Groups.GROUP1_ID,
     "name": "Group 1",
     "project": 1,
     "groups": [],
@@ -35,8 +56,8 @@ WORKGROUP = WorkgroupDetails(**{
 })
 
 OTHER_GROUPS = {
-    2: WorkgroupDetails(id=2, name="Group 2"),
-    3: WorkgroupDetails(id=3, name="Group 3"),
+    TestConstants.Groups.GROUP2_ID: WorkgroupDetails(id=TestConstants.Groups.GROUP2_ID, name="Group 2"),
+    TestConstants.Groups.GROUP3_ID: WorkgroupDetails(id=TestConstants.Groups.GROUP3_ID, name="Group 3"),
 }
 
 
