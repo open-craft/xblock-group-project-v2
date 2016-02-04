@@ -157,6 +157,7 @@ class ProjectAPI(object):
 
         return reviewers
 
+    # TODO: these two methods are a different filters on top of the same method - might make sense to combine them
     def get_peer_review_items(self, reviewer_id, peer_id, group_id, content_id):
         teammate_evaluation_items = self.get_peer_review_items_for_group(group_id, content_id)
         return [
