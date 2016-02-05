@@ -362,37 +362,53 @@ class GroupProjectSubmissionXBlock(
         return uploaded_file
 
 
-class PeerSelectorXBlock(
-    BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin, UserAwareXBlockMixin
-):
+class ReviewSubjectSeletorXBlockBase(BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin):
+    """
+    Base class for review selector blocks
+    """
+    @property
+    def review_subjects(self):
+        raise NotImplementedError(MUST_BE_OVERRIDDEN)
+
+    @XBlock.handler
+    def get_statuses(self, request, _suffix=''):
+        response_data = {
+            review_subject.id: self.stage.get_review_state(review_subject.id)
+            for review_subject in self.review_subjects
+        }
+        return webob.response.Response(body=json.dumps(response_data))
+
+    def student_view(self, context):
+        fragment = Fragment()
+        render_context = {'selector': self, 'review_subjects': self.get_review_subject_repr()}
+        render_context.update(context)
+        add_resource(self, 'css', "public/css/components/review_subject_selector.css", fragment)
+        add_resource(self, 'javascript', "public/js/components/review_subject_selector.js", fragment)
+        fragment.add_content(loader.render_template(self.STUDENT_TEMPLATE, render_context))
+        fragment.initialize_js('ReviewSubjectSelectorXBlock')
+        return fragment
+
+
+class PeerSelectorXBlock(ReviewSubjectSeletorXBlockBase, UserAwareXBlockMixin):
     CATEGORY = "gp-v2-peer-selector"
     STUDIO_LABEL = _(u"Teammate selector")
     display_name_with_default = _(u"Teammate selector XBlock")
     STUDENT_TEMPLATE = "templates/html/components/peer_selector.html"
 
     @property
-    def peers(self):
+    def review_subjects(self):
         return self.stage.team_members
 
-    def peers_view_representation(self, peers):
+    def get_review_subject_repr(self):
         return [
             {
                 'id': peer.id,
                 'username': peer.username,
                 'user_label': make_user_caption(peer),
-                'avatar_url': peer.avatar_url,
-                'review_state': self.stage.get_review_state(peer.id)
+                'avatar_url': peer.avatar_url
             }
-            for peer in peers
+            for peer in self.review_subjects
         ]
-
-    def student_view(self, context):
-        fragment = Fragment()
-        render_context = {'selector': self, 'peers': self.peers_view_representation(self.peers)}
-        render_context.update(context)
-        add_resource(self, 'css', "public/css/components/review_subject_selector.css", fragment)
-        fragment.add_content(loader.render_template(self.STUDENT_TEMPLATE, render_context))
-        return fragment
 
     def author_view(self, context):
         fake_peers = [
@@ -401,38 +417,24 @@ class PeerSelectorXBlock(
         ]
         render_context = {
             'demo': True,
-            'peers': fake_peers
+            'review_subjects': fake_peers
         }
         render_context.update(context)
         return self.student_view(render_context)
 
 
-class GroupSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin):
+class GroupSelectorXBlock(ReviewSubjectSeletorXBlockBase):
     CATEGORY = "gp-v2-group-selector"
     STUDIO_LABEL = _(u"Group selector")
     display_name_with_default = _(u"Group selector XBlock")
     STUDENT_TEMPLATE = "templates/html/components/group_selector.html"
 
     @property
-    def groups(self):
+    def review_subjects(self):
         return self.stage.review_groups
 
-    def groups_view_representation(self, groups):
-        return [
-            {
-                'id': group.id,
-                'review_state': self.stage.get_review_state(group.id)
-            }
-            for group in groups
-        ]
-
-    def student_view(self, context):
-        fragment = Fragment()
-        render_context = {'selector': self, 'groups': self.groups_view_representation(self.groups)}
-        render_context.update(context)
-        add_resource(self, 'css', "public/css/components/review_subject_selector.css", fragment)
-        fragment.add_content(loader.render_template(self.STUDENT_TEMPLATE, render_context))
-        return fragment
+    def get_review_subject_repr(self):
+        return [{'id': group.id} for group in self.review_subjects]
 
     def author_view(self, context):
         fake_groups = [
@@ -441,7 +443,7 @@ class GroupSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin, NoSt
         ]
         render_context = {
             'demo': True,
-            'groups': fake_groups
+            'review_subjects': fake_groups
         }
         render_context.update(context)
         return self.student_view(render_context)

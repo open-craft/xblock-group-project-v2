@@ -6,11 +6,11 @@
 
   <div>
     {% if demo %}<div>{% trans "Demo contents" %}</div>{% endif %}
-    {% if peers %}
+    {% if review_subjects %}
       <ul class="peers review_subjects">
-        {% for peer in peers %}
-        <li class="select_peer {% cycle 'odd' 'even' %}" title="{{ peer.username }}" data-id="{{ peer.id }}" data-username="{{ peer.username }}">
-          <span class="group-project-review-state fa {{ peer.review_state }}"></span>
+        {% for peer in review_subjects %}
+        <li class="review_subject select_peer {% cycle 'odd' 'even' %}" title="{{ peer.username }}" data-id="{{ peer.id }}" data-username="{{ peer.username }}">
+          <span class="group-project-review-state fa"></span>
           {% comment %}
             FIXME: Slightly not a11y friendly: if language have different rules for writing up index numbers.
             Should be something more like _("Teammate {index_number}:").format(index_number=number)
