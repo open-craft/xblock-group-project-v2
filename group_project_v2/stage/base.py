@@ -1,8 +1,7 @@
 import logging
 from collections import OrderedDict
 from urllib import urlencode
-
-from datetime import datetime
+from datetime import datetime, timedelta
 from lazy.lazy import lazy
 import pytz
 from xblock.core import XBlock
@@ -155,7 +154,12 @@ class BaseGroupActivityStage(
         if not self.is_group_member:
             return False
 
-        return (self.close_date is not None) and (self.close_date < datetime.utcnow().replace(tzinfo=pytz.UTC))
+        if self.close_date is None:
+            return False
+
+        # A stage is closed at the end of the closing day.
+
+        return self.close_date + timedelta(days=1) <= datetime.utcnow().replace(tzinfo=pytz.UTC)
 
     @property
     def completed(self):

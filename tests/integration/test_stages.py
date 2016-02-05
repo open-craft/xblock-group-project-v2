@@ -89,6 +89,12 @@ class CommonStageTest(StageTestBase):
         (datetime.datetime(2014, 6, 22), None, datetime.datetime(2015, 6, 12), "due Jun 12 2015"),
         # after close - should be closed June 12
         (datetime.datetime(2015, 6, 13), None, datetime.datetime(2015, 6, 12), "closed on Jun 12"),
+        # phase is open at the end of the close date day
+        (datetime.datetime(2015, 6, 13, 23, 59), datetime.datetime(2015, 6, 11),
+         datetime.datetime(2015, 6, 13), "due Jun 13"),
+        # phase is closed at the day after close day
+        (datetime.datetime(2015, 6, 14), datetime.datetime(2015, 6, 11),
+         datetime.datetime(2015, 6, 13), "closed on Jun 13"),
     )
     @ddt.unpack
     def test_open_close_label(self, mock_now, open_date, close_date, expected_label):
