@@ -1,7 +1,9 @@
 from unittest import TestCase
-
+from datetime import datetime
 import ddt
+import freezegun
 import mock
+import pytz
 from xblock.field_data import DictFieldData
 
 from group_project_v2.group_project import GroupActivityXBlock
@@ -95,6 +97,37 @@ class ReviewStageBaseTest(object):
             patched_review_subjects.return_value = [{'id': 1}, {'id': 2}]
 
             self.assertEqual(self.block.get_stage_state(), expected_stage_state)
+
+    @ddt.data(
+        # Phase is not open a second before opening day
+        (datetime(2015, 11, 10, 23, 59), datetime(2015, 11, 11), datetime(2015, 11, 11), False, False),
+        # A single day phase, that starts on 00:00 and ends at 23:59, phase is open and did not close
+        (datetime(2015, 11, 11, 0, 0), datetime(2015, 11, 11), datetime(2015, 11, 11), True, False),
+        (datetime(2015, 11, 11, 23, 59), datetime(2015, 11, 11), datetime(2015, 11, 11), True, False),
+        # A single day phase, that starts on 00:00 and ends at 23:59, phase is closed
+        (datetime(2015, 11, 12), datetime(2015, 11, 11), datetime(2015, 11, 11), True, True),
+        # Is not open before open date
+        (datetime(2015, 11, 10), datetime(2015, 11, 11), datetime(2015, 11, 12), False, False),
+        # Is closed after close date
+        (datetime(2015, 11, 11), datetime(2015, 11, 10), datetime(2015, 11, 10), True, True),
+        # Phase without an open nor close date is always open and never closes
+        (datetime(2015, 11, 10), None, None, True, False),
+        # Phase with a close date is not closed before close date
+        (datetime(2015, 11, 10), None, datetime(2015, 11, 12), True, False),
+        # Phase with a close date closed after the close date
+        (datetime(2015, 11, 13), None, datetime(2015, 11, 12), True, True),
+        # Phase is an open date is not open before it
+        (datetime(2015, 11, 10), datetime(2015, 11, 11), None, False, False),
+        # Phase is open after open date
+        (datetime(2015, 11, 10), datetime(2015, 11, 11), None, False, False),
+    )
+    @ddt.unpack
+    def test_stage_date_states(self, frozen_now, open_date, close_date, is_open, is_closed):
+        with freezegun.freeze_time(frozen_now.replace(tzinfo=pytz.UTC)):
+            self.block.open_date = None if open_date is None else open_date.replace(tzinfo=pytz.UTC)
+            self.block.close_date = None if close_date is None else close_date.replace(tzinfo=pytz.UTC)
+            self.assertEqual(self.block.is_open, is_open)
+            self.assertEqual(self.block.is_closed, is_closed)
 
 
 class ReviewStageChildrenMockContextManager(object):
