@@ -15,11 +15,12 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, XBlockWithPre
 
 from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import WorkgroupAwareXBlockMixin, NoStudioEditableSettingsMixin
+from group_project_v2.mixins import WorkgroupAwareXBlockMixin, NoStudioEditableSettingsMixin, UserAwareXBlockMixin
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
-from group_project_v2.utils import get_link_to_block, FieldValuesContextManager, MUST_BE_OVERRIDDEN, add_resource
+from group_project_v2.utils import get_link_to_block, FieldValuesContextManager, MUST_BE_OVERRIDDEN, add_resource, \
+    make_user_caption
 from group_project_v2.utils import (
     outer_html, gettext as _, loader, format_date, build_date_field, mean,
     outsider_disallowed_protected_view
@@ -361,7 +362,9 @@ class GroupProjectSubmissionXBlock(
         return uploaded_file
 
 
-class PeerSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin):
+class PeerSelectorXBlock(
+    BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin, UserAwareXBlockMixin
+):
     CATEGORY = "gp-v2-peer-selector"
     STUDIO_LABEL = _(u"Teammate selector")
     display_name_with_default = _(u"Teammate selector XBlock")
@@ -371,9 +374,21 @@ class PeerSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStu
     def peers(self):
         return self.stage.team_members
 
+    def peers_view_representation(self, peers):
+        return [
+            {
+                'id': peer.id,
+                'username': peer.username,
+                'user_label': make_user_caption(peer),
+                'avatar_url': peer.avatar_url,
+                'review_state': self.stage.get_review_state(peer.id)
+            }
+            for peer in peers
+        ]
+
     def student_view(self, context):
         fragment = Fragment()
-        render_context = {'selector': self, 'peers': self.peers}
+        render_context = {'selector': self, 'peers': self.peers_view_representation(self.peers)}
         render_context.update(context)
         add_resource(self, 'css', "public/css/components/review_subject_selector.css", fragment)
         fragment.add_content(loader.render_template(self.STUDENT_TEMPLATE, render_context))
@@ -402,9 +417,18 @@ class GroupSelectorXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin, NoSt
     def groups(self):
         return self.stage.review_groups
 
+    def groups_view_representation(self, groups):
+        return [
+            {
+                'id': group.id,
+                'review_state': self.stage.get_review_state(group.id)
+            }
+            for group in groups
+        ]
+
     def student_view(self, context):
         fragment = Fragment()
-        render_context = {'selector': self, 'groups': self.groups}
+        render_context = {'selector': self, 'groups': self.groups_view_representation(self.groups)}
         render_context.update(context)
         add_resource(self, 'css', "public/css/components/review_subject_selector.css", fragment)
         fragment.add_content(loader.render_template(self.STUDENT_TEMPLATE, render_context))
