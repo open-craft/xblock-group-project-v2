@@ -1,4 +1,9 @@
-/* exported ReviewSubjectSelectorXBlock */
+/* exported ReviewSubjectSelectorXBlock, ReviewSubjectSelectorConstants */
+var ReviewSubjectSelectorConstants = {
+    status_icon_class: "group-project-review-state",
+    refresh_statuses_event: "group_project_v2.review.refresh_status"
+};
+
 function ReviewSubjectSelectorXBlock(runtime, element) {
     "use strict";
     // Set up gettext in case it isn't available in the client runtime:
@@ -8,9 +13,8 @@ function ReviewSubjectSelectorXBlock(runtime, element) {
 
     var ERROR_REFRESHING_STATUSES = gettext("Error refreshing statuses");
 
-    var refresh_statuses_event = "group_project_v2.review.refresh_status";
     var get_statuses_endpoint = runtime.handlerUrl(element, "get_statuses");
-    var status_icon_class = "group-project-review-state";
+    var status_icon_class = ReviewSubjectSelectorConstants.status_icon_class;
 
     var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
     var message_box = $(".message", group_project_dom);
@@ -25,7 +29,7 @@ function ReviewSubjectSelectorXBlock(runtime, element) {
     }
 
     function resetCssClasses() {
-        $("."+status_icon_class, element).removeClass().addClass(status_icon_class);
+        $("."+status_icon_class, element).removeClass().addClass(status_icon_class).addClass('fa');
     }
 
     function displaySpinners() {
@@ -37,7 +41,7 @@ function ReviewSubjectSelectorXBlock(runtime, element) {
         $("."+status_icon_class, $review_subject_wrapper).removeClass('fa-spin fa-spinner').addClass(status_css_class);
     }
 
-    $(document).on(refresh_statuses_event, function() {
+    $(document).on(ReviewSubjectSelectorConstants.refresh_statuses_event, function() {
         resetCssClasses();
         displaySpinners();
         $.ajax({
@@ -55,5 +59,5 @@ function ReviewSubjectSelectorXBlock(runtime, element) {
         });
     });
 
-    $(document).trigger(refresh_statuses_event);
+    $(document).trigger(ReviewSubjectSelectorConstants.refresh_statuses_event);
 }
