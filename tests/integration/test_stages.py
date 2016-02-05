@@ -244,7 +244,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         if initial_items:
             store.update(initial_items)
 
-        def get_review_items(unused_reviewer_id, peer_id, unused_group_id, unused_content_id):
+        def get_review_items(_reviewer_id, peer_id, _group_id, _content_id):
             return store.get(peer_id, [])
 
         def submit_peer_review_items(reviewer_id, peer_id, group_id, content_id, data):
@@ -519,7 +519,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
         if initial_items:
             store.update(initial_items)
 
-        def get_review_items(unused_reviewer_id, group_id, unused_content_id):
+        def get_review_items(_reviewer_id, group_id, _content_id):
             return store.get(group_id, [])
 
         def submit_review_items(reviewer_id, group_id, content_id, data):

@@ -371,7 +371,7 @@ class ReviewSubjectSeletorXBlockBase(BaseStageComponentXBlock, XBlockWithPreview
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
     @XBlock.handler
-    def get_statuses(self, request, _suffix=''):
+    def get_statuses(self, _request, _suffix=''):
         response_data = {
             review_subject.id: self.stage.get_review_state(review_subject.id)
             for review_subject in self.review_subjects
