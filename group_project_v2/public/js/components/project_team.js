@@ -1,3 +1,4 @@
+/* global GroupProjectCommon */
 /* exported ProjectTeamXBlock, ProjectTeamXBlockConstants */
 var ProjectTeamXBlockConstants = {
     teammate: {
@@ -12,16 +13,10 @@ var ProjectTeamXBlockConstants = {
 
 function ProjectTeamXBlock(runtime, element) {
     "use strict";
-    var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
-    var message_box = $(".message", group_project_dom);
+    var group_project_dom = GroupProjectCommon.get_root_element(element);
 
     function show_message(msg, title, title_css_class) {
-        message_box.find('.message_text').html(msg);
-        message_box.find('.message_title').html(title);
-        if (title_css_class) {
-            message_box.find('.message_title').addClass(title_css_class);
-        }
-        message_box.show();
+        GroupProjectCommon.Messages.show_message(msg, title, title_css_class);
     }
 
     function showModal(target_modal){

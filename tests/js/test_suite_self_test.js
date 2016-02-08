@@ -1,4 +1,4 @@
-/* global GroupProjectBlock, GroupProjectNavigatorBlock, TestUtils */
+/* global GroupProjectBlock, GroupProjectCommon, GroupProjectNavigatorBlock, TestUtils */
 /* Contains assertions about the suite itself - mostly if required components are available */
 describe("Suite self-test", function() {
     'use strict';
@@ -11,7 +11,7 @@ describe("Suite self-test", function() {
     }
 
     /* XBlocks */
-    var loads = [GroupProjectBlock, GroupProjectNavigatorBlock];
+    var loads = [GroupProjectBlock, GroupProjectCommon, GroupProjectNavigatorBlock];
 
     loads.forEach(load_test);
 
