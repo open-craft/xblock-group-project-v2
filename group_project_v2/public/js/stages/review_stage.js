@@ -1,29 +1,16 @@
+/* global GroupProjectCommon */
 /* exported GroupProjectReviewStage */
 function GroupProjectReviewStage(runtime, element) {
     "use strict";
-    // Set up gettext in case it isn't available in the client runtime:
-    if (typeof gettext === "undefined") {
-        window.gettext = function gettext_stub(string) { return string; };
-    }
-
-    var DATA_PRESENT_SUBMIT = gettext('Resubmit');
-    var NO_DATA_PRESENT_SUBMIT = gettext('Submit');
-
-    var SELECT_PEER_TO_REVIEW = gettext("Please select Teammate to review");
-    var SELECT_GROUP_TO_REVIEW = gettext("Please select Group to review");
+    var DATA_PRESENT_SUBMIT = GroupProjectCommon.gettext('Resubmit');
+    var NO_DATA_PRESENT_SUBMIT = GroupProjectCommon.gettext('Submit');
 
     var $form = $(".review",  element);
     var $submit_btn = $form.find('button.submit');
     var is_peer_review = $form.data('review-type') === 'peer_review';
-    var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
-    var message_box = $(".message", group_project_dom);
 
-    var refresh_statuses_event = "group_project_v2.review.refresh_status";
-
-    function show_message(msg) {
-        message_box.find('.message_text').html(msg);
-        message_box.show();
-    }
+    var messages = GroupProjectCommon.Review.messages;
+    var show_message = GroupProjectCommon.Messages.show_message;
 
     function validate_form_answers() {
         var answers = $form.find('.required .answer');
@@ -95,7 +82,7 @@ function GroupProjectReviewStage(runtime, element) {
                         show_message(data.msg);
                     }
                     else {
-                        show_message(gettext('We encountered an error loading feedback.'));
+                        show_message(messages.ERROR_LOADING_FEEDBACK);
                     }
                 }
                 else {
@@ -103,7 +90,7 @@ function GroupProjectReviewStage(runtime, element) {
                 }
             },
             error: function () {
-                show_message(gettext('We encountered an error loading feedback.'));
+                show_message(messages.ERROR_LOADING_FEEDBACK);
             }
         }).done(function () {
             $('.group-project-xblock-wrapper', element).removeClass('waiting');
@@ -148,7 +135,7 @@ function GroupProjectReviewStage(runtime, element) {
         data.review_subject_id = $("ul.review_subjects li.selected", $form).data('id');
 
         if (!data.review_subject_id) {
-            var message = is_peer_review ? SELECT_PEER_TO_REVIEW : SELECT_GROUP_TO_REVIEW;
+            var message = is_peer_review ? messages.SELECT_PEER_TO_REVIEW : messages.SELECT_GROUP_TO_REVIEW;
             show_message(message);
             return;
         }
@@ -158,7 +145,7 @@ function GroupProjectReviewStage(runtime, element) {
             url: runtime.handlerUrl(element, $form.data('action')),
             data: JSON.stringify(data),
             success: function (data) {
-                var msg = (data.msg) ? data.msg : gettext('Thanks for your feedback!');
+                var msg = (data.msg) ? data.msg : messages.THANKS_FOR_FEEDBACK;
                 show_message(msg);
 
                 if (data.new_stage_states) {
@@ -172,11 +159,11 @@ function GroupProjectReviewStage(runtime, element) {
                 }
             },
             error: function () {
-                show_message(gettext('We encountered an error saving your feedback.'));
+                show_message(messages.ERROR_SAVING_FEEDBACK);
             },
             complete: function () {
                 $form.find(':submit').prop('disabled', false).html(DATA_PRESENT_SUBMIT);
-                $(document).trigger(refresh_statuses_event);
+                $(document).trigger(GroupProjectCommon.Review.events.refresh_status);
             }
         });
 
@@ -200,7 +187,7 @@ function GroupProjectReviewStage(runtime, element) {
                 review_submissions_dialog.show();
             },
             error: function () {
-                show_message(gettext('We encountered an error.'));
+                show_message(messages.ERROR_LOADING_SUBMISSIONS);
             }
         });
     });

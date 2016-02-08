@@ -1,10 +1,7 @@
+/* global GroupProjectCommon */
 /* exported GroupProjectNavigatorSubmissionsView */
 function GroupProjectNavigatorSubmissionsView(runtime, element) {
     "use strict";
-    var upload_started_event = 'group_project_v2.submission.upload_started';
-    var upload_failed_event = 'group_project_v2.submission.upload_failed';
-    var upload_complete_event = 'group_project_v2.submission.upload_complete';
-
     var $action_buttons = $(".action_buttons", element);
 
     var running_uploads = [];
@@ -20,13 +17,13 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
         }
     }
 
-    $(document).on(upload_started_event, function(e, uploadXHR){
+    $(document).on(GroupProjectCommon.Submission.events.upload_started, function(e, uploadXHR){
         running_uploads.push(uploadXHR);
         $action_buttons.css('visibility', 'visible');
     });
 
-    $(document).on(upload_failed_event, handle_upload_end);
-    $(document).on(upload_complete_event, handle_upload_end);
+    $(document).on(GroupProjectCommon.Submission.events.upload_failed, handle_upload_end);
+    $(document).on(GroupProjectCommon.Submission.events.upload_complete, handle_upload_end);
 
     $('.cancel_upload', element).on('click', function () {
         for (var i=0; i<running_uploads.length; i++) {
