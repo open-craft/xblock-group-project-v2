@@ -1,6 +1,10 @@
 {% load i18n %}
 {% if stage.is_admin_grader %}
+{% if stage.activity.is_ta_graded %}
 <div class="grading_override ta_graded">{% trans "Grading View" %}</div>
+{% else %}
+<div class="grading_override">{% trans "TA Grading override view" %}</div>
+{% endif %}
 {% endif %}
 
 <div class="review other_group_review" data-review-type="group_review" data-action="submit_review" data-method="POST">

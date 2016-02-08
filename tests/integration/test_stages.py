@@ -18,13 +18,13 @@ from group_project_v2.stage.utils import ReviewState
 from group_project_v2.utils import ALLOWED_OUTSIDER_ROLES
 from tests.integration.base_test import BaseIntegrationTest
 from tests.integration.page_elements import GroupProjectElement, ReviewStageElement, ProjectTeamElement
-from tests.utils import KNOWN_USERS, OTHER_GROUPS, TestConstants, make_review_item as mri
+from tests.utils import KNOWN_USERS, OTHER_GROUPS, TestConstants, make_review_item as mri, WORKGROUP
 
 
 class StageTestBase(BaseIntegrationTest):
     PROJECT_TEMPLATE = textwrap.dedent("""
         <gp-v2-project xmlns:opt="http://code.edx.org/xblock/option">
-            <gp-v2-activity display_name="Activity">
+            <gp-v2-activity display_name="Activity" {activity_args}>
                 <{stage_type} {stage_args}>
                     {stage_data}
                 </{stage_type}>
@@ -34,19 +34,26 @@ class StageTestBase(BaseIntegrationTest):
     stage_type = None
     page = None
 
-    def build_scenario_xml(self, stage_data, title="Stage Title", **kwargs):
+    def build_scenario_xml(self, stage_data, title="Stage Title", activity_kwargs=None, **kwargs):
         """
         Builds scenario XML with specified Stage parameters
         """
+        if activity_kwargs is None:
+            activity_kwargs = {}
+
+        def format_args(arg_dict):
+            return " ".join(
+                ["{}='{}'".format(arg_name, arg_value) for arg_name, arg_value in arg_dict.iteritems()])
+
         stage_arguments = {'display_name': title}
         stage_arguments.update(kwargs)
-        stage_args_str = " ".join(
-            ["{}='{}'".format(arg_name, arg_value) for arg_name, arg_value in stage_arguments.iteritems()]
-        )
+        stage_args_str = format_args(stage_arguments)
+        activity_args = format_args(activity_kwargs)
 
         return self.PROJECT_TEMPLATE.format(
             stage_type=self.stage_type.CATEGORY,
-            stage_args=stage_args_str, stage_data=stage_data
+            stage_args=stage_args_str, stage_data=stage_data,
+            activity_args=activity_args
         )
 
     def go_to_view(self, view_name='student_view', student_id=1):
@@ -452,8 +459,8 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         self.submit_and_assert_completion_published(stage_element, user_id)
 
 
-@ddt.ddt
-class PeerReviewStageTest(BaseReviewStageTest):
+class BasePeerReviewStageTest(BaseReviewStageTest):
+
     stage_type = PeerReviewStage
     stage_element = ReviewStageElement
 
@@ -512,13 +519,11 @@ class PeerReviewStageTest(BaseReviewStageTest):
     REQUIRED_QUESTION_ID2 = 'group_q1'
 
     def setUp(self):
-        super(PeerReviewStageTest, self).setUp()
+        super(BasePeerReviewStageTest, self).setUp()
         self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=OTHER_GROUPS.values())
         self.project_api_mock.get_workgroup_reviewers = mock.Mock(return_value=[
             {"id": user.id} for user in KNOWN_USERS.values()
         ])
-
-        self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML), load_immediately=False)
 
     def _setup_review_items_store(self, initial_items=None):
         store = defaultdict(list)
@@ -542,6 +547,13 @@ class PeerReviewStageTest(BaseReviewStageTest):
     def _assert_group_statuses(self, stage_element, expected_statuses):
         group_statuses = {int(group.subject_id): group.review_status for group in stage_element.groups}
         self.assertEqual(group_statuses, expected_statuses)
+
+
+@ddt.ddt
+class PeerReviewStageTest(BasePeerReviewStageTest):
+    def setUp(self):
+        super(PeerReviewStageTest, self).setUp()
+        self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML), load_immediately=False)
 
     def test_renderigng_questions(self):
         stage_element = self.get_stage(self.go_to_view())
@@ -726,7 +738,52 @@ class PeerReviewStageTest(BaseReviewStageTest):
 
         self.submit_and_assert_completion_published(stage_element, user_id)
 
+
+class TestTAGradedPeerReview(BasePeerReviewStageTest):
+    def setUp(self):
+        super(TestTAGradedPeerReview, self).setUp()
+
+        self.project_api_mock.get_user_preferences = mock.Mock(return_value={
+            "TA_REVIEW_WORKGROUP": [WORKGROUP.id]
+        })
+        self.project_api_mock.get_user_roles_for_course = mock.Mock(return_value=[
+            {"role": "assistant"}
+        ])
+
+    def __prepare_scenario_for_peer_graded_activity(self):
+        activity_kwargs = dict(group_reviews_required_count=1)
+        xml = self.build_scenario_xml(self.STAGE_DATA_XML, activity_kwargs=activity_kwargs)
+        self.load_scenario_xml(xml, load_immediately=False)
+
+    def __prepare_scenario_for_ta_graded_activity(self):
+        activity_kwargs = dict(group_reviews_required_count=0)
+        xml = self.build_scenario_xml(self.STAGE_DATA_XML, activity_kwargs=activity_kwargs)
+        self.load_scenario_xml(xml, load_immediately=False)
+
+    def test_ta_override_header(self):
+        self.__prepare_scenario_for_peer_graded_activity()
+        user_id = 1
+        page = self.go_to_view(student_id=user_id)
+        stage_element = self.get_stage(page)
+
+        element = stage_element.element.find_element_by_css_selector('div.grading_override')
+
+        self.assertEqual(element.text, 'TA Grading override view')
+        self.assertNotIn("ta_graded", element.get_attribute('class'))
+
+    def test_ta_grading_header(self):
+        self.__prepare_scenario_for_ta_graded_activity()
+        user_id = 1
+        page = self.go_to_view(student_id=user_id)
+        stage_element = self.get_stage(page)
+
+        element = stage_element.element.find_element_by_css_selector('div.grading_override')
+
+        self.assertEqual(element.text, 'Grading View')
+        self.assertIn("ta_graded", element.get_attribute('class'))
+
     def test_ta_grading(self):
+        self.__prepare_scenario_for_ta_graded_activity()
         user_id, group_id = 22, 3
         self.project_api_mock.get_user_preferences = mock.Mock(
             return_value={UserAwareXBlockMixin.TA_REVIEW_KEY: group_id}
