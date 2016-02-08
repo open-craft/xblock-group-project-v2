@@ -11,9 +11,12 @@ class ReducedUserDetails(object):
         self.email = kwargs.get('email')
         self.first_name = kwargs.get('first_name')
         self.last_name = kwargs.get('last_name')
+        self._full_name = kwargs.get('full_name', None)
 
     @property
     def full_name(self):
+        if self._full_name:
+            return self._full_name
         return u" ".join([unicode(part) for part in (self.first_name, self.last_name) if part is not None])
 
 
@@ -21,7 +24,6 @@ class ReducedUserDetails(object):
 class UserDetails(ReducedUserDetails):
     def __init__(self, **kwargs):
         super(UserDetails, self).__init__(**kwargs)
-        self._full_name = kwargs.get('full_name', None)
         self.gender = kwargs.get('gender', None)
         self.avatar_url = kwargs.get('avatar_url', None)
         self.city = kwargs.get('city', None)
@@ -29,12 +31,6 @@ class UserDetails(ReducedUserDetails):
         self.is_active = kwargs.get('is_active', None)
         self.level_of_education = kwargs.get('level_of_education', None)
         self.organization = kwargs.get('organization', None)
-
-    @property
-    def full_name(self):
-        if self._full_name:
-            return self._full_name
-        return super(UserDetails, self).full_name
 
     @property
     def user_label(self):
