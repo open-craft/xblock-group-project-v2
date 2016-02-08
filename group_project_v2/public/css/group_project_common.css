@@ -1,4 +1,5 @@
-.group-project-stage-state {
+.group-project-stage-state,
+.group-project-review-state {
     display: inline-block;
     font-size: 16px;
     margin-left: 5px;
@@ -6,38 +7,54 @@
     margin-right: 2px;
 }
 
-.group-project-stage-state.not_started {
+.group-project-stage-state.not_started,
+.group-project-review-state.not_started
+{
     color: #ccc;
 }
 
-.group-project-stage-state.not_started:before {
+.group-project-stage-state.not_started:before,
+.group-project-review-state.not_started:before
+{
     content: "\f111";
     font-family: FontAwesome;
 }
 
-.group-project-stage-state.completed {
+.group-project-stage-state.completed,
+.group-project-review-state.completed
+{
     color: #629b2a;
 }
 
-.group-project-stage-state.completed:before {
+.group-project-stage-state.completed:before,
+.group-project-review-state.completed:before
+{
     content: "\f058";
     font-family: FontAwesome;
 }
 
-.group-project-stage-state.incomplete {
+.group-project-stage-state.incomplete,
+.group-project-review-state.incomplete
+{
     color: #b6d332;
 }
 
-.group-project-stage-state.incomplete:before {
+.group-project-stage-state.incomplete:before,
+.group-project-review-state.incomplete:before
+{
     content: "\f111";
     font-family: FontAwesome;
 }
 
-.group-project-stage-state.unknown {
+.group-project-stage-state.unknown,
+.group-project-review-state.unknown
+{
     color: #d32326;
 }
 
-.group-project-stage-state.unknown:before {
+.group-project-stage-state.unknown:before,
+.group-project-review-state.unknown:before
+{
     content: "\f05e";
     font-family: FontAwesome;
 }

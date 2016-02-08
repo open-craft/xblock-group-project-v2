@@ -2,16 +2,28 @@
 from group_project_v2.utils import make_user_caption
 
 
-# pylint:disable=too-many-instance-attributes
-class UserDetails(object):
+class ReducedUserDetails(object):
+    """ User data embedded in a workgroup detail response """
     def __init__(self, **kwargs):
-        self.id = kwargs.get('id', None)
-        self.email = kwargs.get('email', None)
-        self.username = kwargs.get('username', None)
-        self.url = kwargs.get('uri', None)
-        self.first_name = kwargs.get('first_name', None)
-        self.last_name = kwargs.get('last_name', None)
+        self.id = kwargs.get('id')
+        self.url = kwargs.get('url')
+        self.username = kwargs.get('username')
+        self.email = kwargs.get('email')
+        self.first_name = kwargs.get('first_name')
+        self.last_name = kwargs.get('last_name')
         self._full_name = kwargs.get('full_name', None)
+
+    @property
+    def full_name(self):
+        if self._full_name:
+            return self._full_name
+        return u" ".join([unicode(part) for part in (self.first_name, self.last_name) if part is not None])
+
+
+# pylint:disable=too-many-instance-attributes
+class UserDetails(ReducedUserDetails):
+    def __init__(self, **kwargs):
+        super(UserDetails, self).__init__(**kwargs)
         self.gender = kwargs.get('gender', None)
         self.avatar_url = kwargs.get('avatar_url', None)
         self.city = kwargs.get('city', None)
@@ -19,12 +31,6 @@ class UserDetails(object):
         self.is_active = kwargs.get('is_active', None)
         self.level_of_education = kwargs.get('level_of_education', None)
         self.organization = kwargs.get('organization', None)
-
-    @property
-    def full_name(self):
-        if self._full_name:
-            return self._full_name
-        return u" ".join([unicode(part) for part in (self.first_name, self.last_name) if part is not None])
 
     @property
     def user_label(self):
@@ -63,21 +69,6 @@ class WorkgroupDetails(object):
         self.submissions = kwargs.get('submissions')
         self.workgroup_reviews = kwargs.get('workgroup_reviews')
         self.peer_reviews = kwargs.get('peer_reviews')
-
-
-class ReducedUserDetails(object):
-    """ User data embedded in a workgroup detail response """
-    def __init__(self, **kwargs):
-        self.id = kwargs.get('id')
-        self.url = kwargs.get('url')
-        self.username = kwargs.get('username')
-        self.email = kwargs.get('email')
-        self.first_name = kwargs.get('first_name')
-        self.last_name = kwargs.get('last_name')
-
-    @property
-    def full_name(self):
-        return u" ".join([unicode(part) for part in (self.first_name, self.last_name) if part is not None])
 
 
 class CompletionDetails(object):

@@ -244,6 +244,12 @@ class TeamEvaluationStage(ReviewBaseStage):
         review_items_by_user = self._get_reviews_by_user(review_items, user_id)
         return review_subjects_ids, review_items_by_user
 
+    def get_review_state(self, review_subject_id):
+        review_items = self.project_api.get_peer_review_items(
+            self.anonymous_student_id, review_subject_id, self.group_id, self.activity_content_id
+        )
+        return self._calculate_review_status([review_subject_id], review_items)
+
     @staticmethod
     @memoize_with_expiration()
     def _get_review_items_for_group(project_api, workgroup_id, activity_content_id):
@@ -401,6 +407,12 @@ class PeerReviewStage(ReviewBaseStage):
         review_items = [item for item in all_review_items if item['reviewer'] == self.anonymous_student_id]
 
         return self._calculate_review_status(review_subjects_ids, review_items)
+
+    def get_review_state(self, review_subject_id):
+        review_items = self.project_api.get_workgroup_review_items(
+            self.anonymous_student_id, review_subject_id, self.activity_content_id
+        )
+        return self._calculate_review_status([review_subject_id], review_items)
 
     def _get_ta_reviews(self, target_workgroup):
         review_items = self._get_review_items([target_workgroup], with_caching=True)

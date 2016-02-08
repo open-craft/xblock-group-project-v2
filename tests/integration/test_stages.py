@@ -1,6 +1,8 @@
 """
 Tests for stage contents and interaction
 """
+from collections import defaultdict
+
 import datetime
 import textwrap
 
@@ -12,10 +14,11 @@ from workbench.runtime import WorkbenchRuntime
 from group_project_v2.mixins import UserAwareXBlockMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage, TeamEvaluationStage
+from group_project_v2.stage.utils import ReviewState
 from group_project_v2.utils import ALLOWED_OUTSIDER_ROLES
 from tests.integration.base_test import BaseIntegrationTest
 from tests.integration.page_elements import GroupProjectElement, ReviewStageElement, ProjectTeamElement
-from tests.utils import KNOWN_USERS, OTHER_GROUPS
+from tests.utils import KNOWN_USERS, OTHER_GROUPS, TestConstants, make_review_item as mri
 
 
 class StageTestBase(BaseIntegrationTest):
@@ -30,8 +33,6 @@ class StageTestBase(BaseIntegrationTest):
     """)
     stage_type = None
     page = None
-
-    DEFAULT_STAGE_ID = 'stage_id'
 
     def build_scenario_xml(self, stage_data, title="Stage Title", **kwargs):
         """
@@ -235,11 +236,37 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         </gp-v2-review-question>
     """)
 
+    REQUIRED_QUESTION_ID1 = "peer_score"
+    REQUIRED_QUESTION_ID2 = "peer_q1"
+
     def setUp(self):
         super(TeamEvaluationStageTest, self).setUp()
         self.project_api_mock.get_peer_review_items = mock.Mock(return_value={})
 
-        self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML))
+        self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML), load_immediately=False)
+
+    def _setup_review_items_store(self, initial_items=None):
+        store = defaultdict(list)
+        if initial_items:
+            store.update(initial_items)
+
+        def get_review_items(_reviewer_id, peer_id, _group_id, _content_id):
+            return store.get(peer_id, [])
+
+        def submit_peer_review_items(reviewer_id, peer_id, group_id, content_id, data):
+            new_items = [
+                mri(reviewer_id, question_id, peer=peer_id, content_id=content_id, answer=answer, group=group_id)
+                for question_id, answer in data.iteritems()
+                if len(answer) > 0
+            ]
+            store[peer_id].extend(new_items)
+
+        self.project_api_mock.get_peer_review_items = mock.Mock(side_effect=get_review_items)
+        self.project_api_mock.submit_peer_review_items = mock.Mock(side_effect=submit_peer_review_items)
+
+    def _assert_teammate_statuses(self, stage_element, expected_statuses):
+        teammate_statuses = {int(peer.subject_id): peer.review_status for peer in stage_element.peers}
+        self.assertEqual(teammate_statuses, expected_statuses)
 
     def test_rendering_questions(self):
         stage_element = self.get_stage(self.go_to_view())
@@ -262,6 +289,27 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         self.assertEqual(questions[2].control.name, "peer_q2")
         self.assertEqual(questions[2].control.tag_name, "textarea")
 
+    def test_teammate_review_statuses(self):
+        user_id = TestConstants.Users.USER1_ID
+        reviews = {
+            TestConstants.Users.USER2_ID: [
+                mri(user_id, self.REQUIRED_QUESTION_ID1, peer=TestConstants.Users.USER2_ID, answer='not empty'),
+            ],
+            TestConstants.Users.USER3_ID: [
+                mri(user_id, self.REQUIRED_QUESTION_ID1, peer=TestConstants.Users.USER3_ID, answer='not empty'),
+                mri(user_id, self.REQUIRED_QUESTION_ID2, peer=TestConstants.Users.USER3_ID, answer='other')
+            ],
+        }
+        self._setup_review_items_store(reviews)
+
+        stage_element = self.get_stage(self.go_to_view(student_id=user_id))
+
+        expected_statuses = {
+            TestConstants.Users.USER2_ID: ReviewState.INCOMPLETE,
+            TestConstants.Users.USER3_ID: ReviewState.COMPLETED
+        }
+        self._assert_teammate_statuses(stage_element, expected_statuses)
+
     @ddt.data(*KNOWN_USERS.keys())  # pylint: disable=star-args
     def test_interaction(self, user_id):
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
@@ -281,6 +329,10 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
     @ddt.data(*KNOWN_USERS.keys())  # pylint: disable=star-args
     def test_submission(self, user_id):
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
+        self._setup_review_items_store()
+
+        initial_statuses = {usr_id: ReviewState.NOT_STARTED for usr_id in KNOWN_USERS.keys() if usr_id != user_id}
+        self._assert_teammate_statuses(stage_element, initial_statuses)  # precondition check
 
         peer = stage_element.peers[0]
         self.select_review_subject(peer)
@@ -308,6 +360,10 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
             expected_submissions
         )
 
+        expected_statuses = {usr_id: ReviewState.NOT_STARTED for usr_id in KNOWN_USERS.keys() if usr_id != user_id}
+        expected_statuses[int(peer.subject_id)] = ReviewState.COMPLETED  # status is refreshed after submission
+        self._assert_teammate_statuses(stage_element, expected_statuses)
+
     def test_persistence_and_resubmission(self):
         user_id = 1
         expected_submissions = {
@@ -317,7 +373,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         }
 
         self.project_api_mock.get_peer_review_items.return_value = [
-            {"question": question, "answer": answer}
+            {"question": question, "answer": answer, "user": TestConstants.Users.USER2_ID}
             for question, answer in expected_submissions.iteritems()
         ]
 
@@ -452,6 +508,9 @@ class PeerReviewStageTest(BaseReviewStageTest):
         </gp-v2-review-question>
     """)
 
+    REQUIRED_QUESTION_ID1 = 'group_score'
+    REQUIRED_QUESTION_ID2 = 'group_q1'
+
     def setUp(self):
         super(PeerReviewStageTest, self).setUp()
         self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=OTHER_GROUPS.values())
@@ -460,6 +519,29 @@ class PeerReviewStageTest(BaseReviewStageTest):
         ])
 
         self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML), load_immediately=False)
+
+    def _setup_review_items_store(self, initial_items=None):
+        store = defaultdict(list)
+        if initial_items:
+            store.update(initial_items)
+
+        def get_review_items(_reviewer_id, group_id, _content_id):
+            return store.get(group_id, [])
+
+        def submit_review_items(reviewer_id, group_id, content_id, data):
+            new_items = [
+                mri(reviewer_id, question_id, content_id=content_id, answer=answer, group=group_id)
+                for question_id, answer in data.iteritems()
+                if len(answer) > 0
+            ]
+            store[group_id].extend(new_items)
+
+        self.project_api_mock.get_workgroup_review_items = mock.Mock(side_effect=get_review_items)
+        self.project_api_mock.submit_workgroup_review_items = mock.Mock(side_effect=submit_review_items)
+
+    def _assert_group_statuses(self, stage_element, expected_statuses):
+        group_statuses = {int(group.subject_id): group.review_status for group in stage_element.groups}
+        self.assertEqual(group_statuses, expected_statuses)
 
     def test_renderigng_questions(self):
         stage_element = self.get_stage(self.go_to_view())
@@ -482,6 +564,29 @@ class PeerReviewStageTest(BaseReviewStageTest):
         self.assertEqual(questions[2].control.name, "group_q2")
         self.assertEqual(questions[2].control.tag_name, "textarea")
 
+    def test_group_statuses(self):
+        user_id = TestConstants.Users.USER1_ID
+        reviews = {
+            TestConstants.Groups.GROUP2_ID: [
+                mri(user_id, self.REQUIRED_QUESTION_ID1, group=TestConstants.Groups.GROUP2_ID, answer='not empty'),
+            ],
+            TestConstants.Groups.GROUP3_ID: [
+                mri(user_id, self.REQUIRED_QUESTION_ID1, group=TestConstants.Groups.GROUP3_ID, answer='not empty'),
+                mri(user_id, self.REQUIRED_QUESTION_ID2, group=TestConstants.Groups.GROUP3_ID, answer='other')
+            ],
+        }
+
+        self._setup_review_items_store(reviews)
+
+        self.project_api_mock.get_workgroup_reviewers = mock.Mock(return_value=[{"id": user_id}])
+        stage_element = self.get_stage(self.go_to_view(student_id=user_id))
+
+        expected_statuses = {
+            TestConstants.Groups.GROUP2_ID: ReviewState.INCOMPLETE,
+            TestConstants.Groups.GROUP3_ID: ReviewState.COMPLETED
+        }
+        self._assert_group_statuses(stage_element, expected_statuses)
+
     def test_interaction(self):
         stage_element = self.get_stage(self.go_to_view())
 
@@ -495,10 +600,16 @@ class PeerReviewStageTest(BaseReviewStageTest):
             self.assertEqual(stage_element.form.group_id, group_id)
 
     def test_submission(self):
-        user_id = 1
+        user_id = TestConstants.Users.USER1_ID
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
+        self._setup_review_items_store()
 
         group = stage_element.groups[0]
+        initial_statuses = {
+            TestConstants.Groups.GROUP2_ID: ReviewState.NOT_STARTED,
+            TestConstants.Groups.GROUP3_ID: ReviewState.NOT_STARTED
+        }
+        self._assert_group_statuses(stage_element, initial_statuses)
         self.select_review_subject(group)
 
         expected_submissions = {
@@ -524,6 +635,12 @@ class PeerReviewStageTest(BaseReviewStageTest):
             expected_submissions
         )
 
+        expected_statuses = {
+            TestConstants.Groups.GROUP2_ID: ReviewState.COMPLETED,  # status is refreshed after submission
+            TestConstants.Groups.GROUP3_ID: ReviewState.NOT_STARTED
+        }
+        self._assert_group_statuses(stage_element, expected_statuses)
+
     def test_persistence_and_resubmission(self):
         user_id = 1
         expected_submissions = {
@@ -533,7 +650,7 @@ class PeerReviewStageTest(BaseReviewStageTest):
         }
 
         self.project_api_mock.get_workgroup_review_items.return_value = [
-            {"question": question, "answer": answer}
+            {"question": question, "answer": answer, "workgroup": TestConstants.Groups.GROUP2_ID}
             for question, answer in expected_submissions.iteritems()
         ]
 

@@ -6,7 +6,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 from group_project_v2.project_navigator import ViewTypes
-from group_project_v2.stage.utils import StageState
+from group_project_v2.stage.utils import StageState, ReviewState
 
 
 class BaseElement(object):
@@ -166,6 +166,8 @@ class ReviewStageElement(StageElement):
 
 class ReviewObjectSelectorElement(BaseElement):
     """ Wrapper around review object selector elements """
+    allowed_state_classes = {ReviewState.NOT_STARTED, ReviewState.INCOMPLETE, ReviewState.COMPLETED}
+
     @property
     def name(self):
         return self.element.get_attribute('title')
@@ -173,6 +175,14 @@ class ReviewObjectSelectorElement(BaseElement):
     @property
     def subject_id(self):
         return self.element.get_attribute('data-id')
+
+    @property
+    def review_status(self):
+        state_icon_element = self.element.find_element_by_css_selector(".group-project-review-state")
+        css_classes = state_icon_element.get_attribute("class").split()
+        review_classes = [css_class for css_class in css_classes if css_class in self.allowed_state_classes]
+        assert len(review_classes) <= 1
+        return review_classes[0] if review_classes else ReviewState.NOT_STARTED
 
     def open_group_submissions(self):
         self.element.find_element_by_css_selector(".view_other_submissions").click()

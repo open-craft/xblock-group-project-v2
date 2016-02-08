@@ -18,6 +18,8 @@ function GroupProjectReviewStage(runtime, element) {
     var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
     var message_box = $(".message", group_project_dom);
 
+    var refresh_statuses_event = "group_project_v2.review.refresh_status";
+
     function show_message(msg) {
         message_box.find('.message_text').html(msg);
         message_box.show();
@@ -174,6 +176,7 @@ function GroupProjectReviewStage(runtime, element) {
             },
             complete: function () {
                 $form.find(':submit').prop('disabled', false).html(DATA_PRESENT_SUBMIT);
+                $(document).trigger(refresh_statuses_event);
             }
         });
 

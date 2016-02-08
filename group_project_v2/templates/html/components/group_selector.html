@@ -6,10 +6,11 @@
 
   <div>
     {% if demo %}<div>{% trans "Demo contents" %}</div>{% endif %}
-    {% if groups %}
+    {% if review_subjects %}
       <ul class="groups review_subjects">
-        {% for group in groups %}
-        <li class="select_group {% cycle 'odd' 'even' %}" data-id="{{ group.id }}">
+        {% for group in review_subjects %}
+        <li class="review_subject select_group {% cycle 'odd' 'even' %}" data-id="{{ group.id }}">
+          <span class="group-project-review-state fa"></span>
           {% comment %}
             FIXME: Slightly not a11y friendly: if language have different rules for writing up index numbers.
             Should be something more like _("Group {index_number}:").format(index_number=number)
