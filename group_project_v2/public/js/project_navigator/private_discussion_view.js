@@ -1,8 +1,9 @@
-/* global GroupProjectCommon */
 /* exported GroupProjectPrivateDiscussionView */
 function GroupProjectPrivateDiscussionView(runtime, element) {
     "use strict";
+    var show_group_project_discussion = 'group_project_v2.discussion.show';
+
     $(".view-selector-item", element).click(function(){
-        GroupProjectCommon.Discussion.show_discussion();
+        $(document).trigger(show_group_project_discussion);
     });
 }

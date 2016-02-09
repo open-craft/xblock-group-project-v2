@@ -161,7 +161,6 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         add_resource(self, 'css', 'public/css/group_project_common.css', fragment)
         add_resource(self, 'css', 'public/css/vendor/font-awesome/font-awesome.css', fragment, via_url=True)
         add_resource(self, 'javascript', 'public/js/group_project.js', fragment)
-        add_resource(self, 'javascript', 'public/js/group_project_common.js', fragment)
         fragment.initialize_js("GroupProjectBlock")
         return fragment
 

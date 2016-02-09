@@ -1,7 +1,7 @@
-/* global GroupProjectCommon */
 /* exported GroupProjectNavigatorAskTAView */
 function GroupProjectNavigatorAskTAView(runtime, element) {
     "use strict";
+    var project_nav_switching_view = 'group_project_v2.project_navigator.switch_view';
     var view_identifier = 'ask-ta';
 
     var form = $(".contact-ta-form", element),
@@ -35,7 +35,7 @@ function GroupProjectNavigatorAskTAView(runtime, element) {
             });
     });
 
-    $(document).on(GroupProjectCommon.ProjectNavigator.events.switch_view, function(target, event_data) {
+    $(document).on(project_nav_switching_view, function(target, event_data) {
         if (event_data.old_view === view_identifier) {
             $(textarea).val('');
         }

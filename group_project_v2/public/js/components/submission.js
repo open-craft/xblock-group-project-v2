@@ -1,7 +1,34 @@
-/* global GroupProjectCommon */
 /* exported GroupProjectSubmissionBlock */
 function GroupProjectSubmissionBlock(runtime, element) {
     "use strict";
+    // Set up gettext in case it isn't available in the client runtime:
+    if (typeof gettext === "undefined") {
+        window.gettext = function gettext_stub(string) { return string; };
+    }
+
+    function uploadStarted(uploadXHR) {
+        $(document).trigger('group_project_v2.submission.upload_started', uploadXHR);
+    }
+
+    function uploadFailed(uploadXHR){
+        $(document).trigger('group_project_v2.submission.upload_failed', uploadXHR);
+    }
+
+    function uploadComplete(uploadXHR) {
+        $(document).trigger('group_project_v2.submission.upload_complete', uploadXHR);
+    }
+
+    // TODO: restore `parents` query when/if project navigator is rendered as a child of Group Project XBlock
+    var group_project_dom = $(".group-project-xblock-wrapper");
+    var message_box = $(".message", group_project_dom);
+    function show_message(msg, title, title_css_class) {
+        message_box.find('.message_text').html(msg);
+        message_box.find('.message_title').html(title);
+        if (title_css_class) {
+            message_box.find('.message_title').addClass(title_css_class);
+        }
+        message_box.show();
+    }
 
     function getMessageFromJson(jqXHR){
         return jqXHR.responseJSON ? jqXHR.responseJSON.message : jqXHR.responseText;
@@ -55,13 +82,13 @@ function GroupProjectSubmissionBlock(runtime, element) {
                             }
                         }
 
-                        $(document).trigger(GroupProjectCommon.Submission.events.upload_complete, jqXHR);
+                        uploadComplete(jqXHR);
                     })
                     .fail(function (jqXHR) {
-                        $(document).trigger(GroupProjectCommon.Submission.events.upload_failed, jqXHR);
+                        uploadFailed(jqXHR);
                     });
 
-                $(document).trigger(GroupProjectCommon.Submission.events.upload_started, uploadXHR);
+                uploadStarted(uploadXHR);
             });
 
             $(document).trigger('perform_uploads');
@@ -77,24 +104,24 @@ function GroupProjectSubmissionBlock(runtime, element) {
             var input = $('.' + data.paramName + '_name', target_form);
             input.attr('data-original-value', input.val());
             var message = getMessageFromJson(data.jqXHR),
-                title = getMessageTitleFromJson(data.jqXHR, GroupProjectCommon.gettext("Error"));
-            GroupProjectCommon.Messages.show_message(message, title);
+                title = getMessageTitleFromJson(data.jqXHR, gettext("Error"));
+            show_message(message, title);
         },
         fail: function (e, data) {
             var target_form = $(e.target);
             $('.' + data.paramName[0] + '_progress', target_form).css('width', '100%').addClass('failed');
             var message, title;
             if (data.jqXHR.status === 0 && data.jqXHR.statusText === 'abort') {
-                title = GroupProjectCommon.gettext('Upload cancelled.');
-                message = GroupProjectCommon.gettext("Upload cancelled by user.");
+                title = gettext('Upload cancelled.');
+                message = gettext("Upload cancelled by user.");
             }
             else {
                 message = getMessageFromJson(data.jqXHR);
-                title = getMessageTitleFromJson(data.jqXHR, GroupProjectCommon.gettext("Error"));
+                title = getMessageTitleFromJson(data.jqXHR, gettext("Error"));
             }
 
             target_form.prop('title', message);
-            GroupProjectCommon.Messages.show_message(message, title, 'error');
+            show_message(message, title, 'error');
         }
     };
 

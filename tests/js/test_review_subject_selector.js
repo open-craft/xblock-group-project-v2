@@ -1,4 +1,4 @@
-/* global ReviewSubjectSelectorXBlock, ReviewSubjectSelectorConstants, GroupProjectCommon, TestUtils */
+/* global ReviewSubjectSelectorXBlock, ReviewSubjectSelectorConstants, TestUtils */
 var ReviewStatus = {
     NOT_STARTED: 'not_started',
     INCOMPLETE: 'incomplete',
@@ -67,7 +67,7 @@ describe("Review subject selector", function() {
                 statuses[1] = ReviewStatus.COMPLETED;
                 statuses[2] = ReviewStatus.COMPLETED;
 
-                $(document).trigger(GroupProjectCommon.Review.events.refresh_status);
+                $(document).trigger(ReviewSubjectSelectorConstants.refresh_statuses_event);
 
                 var ajax_call = $.ajax.calls.mostRecent();
                 expect(ajax_call).toBeDefined();

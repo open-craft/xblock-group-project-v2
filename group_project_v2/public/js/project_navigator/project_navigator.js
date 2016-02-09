@@ -1,9 +1,12 @@
-/* global GroupProjectCommon */
 /* exported GroupProjectNavigatorBlock */
 function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
     "use strict";
     var initial_view = 'navigation';
     var selector_item_query = ".group-project-navigator-view-selector .view-selector-item";
+    var activate_project_nav_view_event = 'group_project_v2.project_navigator.activate_view';
+    var hide_group_project_discussion = 'group_project_v2.discussion.hide';
+    var project_nav_switching_view = 'group_project_v2.project_navigator.switch_view';
+
     var view_elements = $(".group-project-navigator-view", element),
         views = {},
         selected_view = null,
@@ -11,9 +14,7 @@ function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
 
     function switch_to_view(target_view, skip_content_switching) {
         var view_data = views[target_view];
-        $(document).trigger(
-            GroupProjectCommon.ProjectNavigator.events.switch_view, {new_view: target_view, old_view: selected_view}
-        );
+        $(document).trigger(project_nav_switching_view, {new_view: target_view, old_view: selected_view});
 
         selected_view = target_view;
 
@@ -42,7 +43,7 @@ function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
         switch_to_view(initial_view);
     });
 
-    $(document).on(GroupProjectCommon.ProjectNavigator.events.activate_view, function(target, target_block_id) {
+    $(document).on(activate_project_nav_view_event, function(target, target_block_id) {
         var escaped_block_id = target_block_id.replace(/\//g, ";_");
         var target_block = $("[data-view-id='"+escaped_block_id+"']");
         if (target_block) {
@@ -50,7 +51,7 @@ function GroupProjectNavigatorBlock(runtime, element, initialization_args) {
         }
     });
 
-    $(document).on(GroupProjectCommon.Discussion.events.hide_discussion, function(){
+    $(document).on(hide_group_project_discussion, function(){
         switch_to_view(initial_view);
     });
 
