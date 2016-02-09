@@ -1,4 +1,4 @@
-/* globals OO */
+/* global OO */
 /* exported GroupProjectNavigatorResourcesView */
 function GroupProjectNavigatorResourcesView(runtime, element) {
     "use strict";
