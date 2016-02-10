@@ -9,7 +9,7 @@ from group_project_v2.api_error import ApiError
 from group_project_v2.stage.base import BaseGroupActivityStage
 from group_project_v2.stage.mixins import SimpleCompletionStageMixin
 from group_project_v2.stage_components import SubmissionsStaticContentXBlock, GroupProjectSubmissionXBlock
-from group_project_v2.utils import gettext as _, outsider_disallowed_protected_handler, loader
+from group_project_v2.utils import gettext as _, groupwork_protected_handler, loader
 from group_project_v2.stage.utils import StageState, DISPLAY_NAME_NAME, DISPLAY_NAME_HELP
 
 log = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ class CompletionStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
     STAGE_ACTION = _(u"mark stage as complete")
 
     @XBlock.json_handler
-    @outsider_disallowed_protected_handler
+    @groupwork_protected_handler
     def stage_completed(self, _data, _suffix=''):
         if not self.available_now:
             template = messages.STAGE_NOT_OPEN_TEMPLATE if not self.is_open else messages.STAGE_CLOSED_TEMPLATE

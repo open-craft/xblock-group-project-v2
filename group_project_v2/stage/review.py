@@ -18,7 +18,7 @@ from group_project_v2.stage_components import (
 )
 from group_project_v2.utils import (
     loader, gettext as _, make_key,
-    outsider_disallowed_protected_handler, key_error_protected_handler, conversion_protected_handler,
+    groupwork_protected_handler, key_error_protected_handler, conversion_protected_handler,
     MUST_BE_OVERRIDDEN, memoize_with_expiration
 )
 from group_project_v2.stage.utils import StageState, ReviewState, DISPLAY_NAME_NAME, DISPLAY_NAME_HELP
@@ -164,7 +164,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
         ]
 
     @XBlock.json_handler
-    @outsider_disallowed_protected_handler
+    @groupwork_protected_handler
     @key_error_protected_handler
     @conversion_protected_handler
     def submit_review(self, submissions, _context=''):
@@ -281,7 +281,7 @@ class TeamEvaluationStage(ReviewBaseStage):
         return violations
 
     @XBlock.handler
-    @outsider_disallowed_protected_handler
+    @groupwork_protected_handler
     @key_error_protected_handler
     @conversion_protected_handler
     def load_peer_feedback(self, request, _suffix=''):
@@ -424,7 +424,7 @@ class PeerReviewStage(ReviewBaseStage):
         ta_reviews = {
             reviewer: items
             for reviewer, items in grouped_items.iteritems()
-            if self._confirm_outsider_allowed(self.project_api, self.real_user_id(reviewer), self.course_id)
+            if self.is_user_ta(self.real_user_id(reviewer), self.course_id)
         }
         return ta_reviews
 
@@ -500,7 +500,7 @@ class PeerReviewStage(ReviewBaseStage):
         return super(PeerReviewStage, self).get_stage_state()
 
     @XBlock.handler
-    @outsider_disallowed_protected_handler
+    @groupwork_protected_handler
     @key_error_protected_handler
     @conversion_protected_handler
     def other_submission_links(self, request, _suffix=''):
@@ -521,7 +521,7 @@ class PeerReviewStage(ReviewBaseStage):
         return webob.response.Response(body=json.dumps({"html": html_output}))
 
     @XBlock.handler
-    @outsider_disallowed_protected_handler
+    @groupwork_protected_handler
     @key_error_protected_handler
     def load_other_group_feedback(self, request, _suffix=''):
         group_id = int(request.GET["group_id"])

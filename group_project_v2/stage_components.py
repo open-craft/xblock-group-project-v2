@@ -23,7 +23,7 @@ from group_project_v2.utils import get_link_to_block, FieldValuesContextManager,
     make_user_caption
 from group_project_v2.utils import (
     outer_html, gettext as _, loader, format_date, build_date_field, mean,
-    outsider_disallowed_protected_view
+    groupwork_protected_view
 )
 
 log = logging.getLogger(__name__)
@@ -631,7 +631,7 @@ class GroupProjectBaseFeedbackDisplayXBlock(
 
         return matching_questions[0]
 
-    @outsider_disallowed_protected_view
+    @groupwork_protected_view
     def student_view(self, context):
         if self.question is None:
             return Fragment(messages.COMPONENT_MISCONFIGURED)

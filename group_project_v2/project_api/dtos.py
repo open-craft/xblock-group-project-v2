@@ -80,3 +80,16 @@ class CompletionDetails(object):
         self.stage = kwargs.get('stage')
         self.created = kwargs.get('created')
         self.modified = kwargs.get('modified')
+
+
+class OrganisationDetails(object):
+    def __init__(self, **kwargs):
+        self.name = kwargs.get('name')
+        self.display_name = kwargs.get('display_name')
+        self.user_ids = set(kwargs.get('users'))
+
+
+class UserGroupDetails(object):
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id')
+        self.name = kwargs.get('name')

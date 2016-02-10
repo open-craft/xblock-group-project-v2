@@ -7,15 +7,18 @@ from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
 from xblock.core import XBlock
 from xblock.runtime import Runtime
 
-import group_project_v2
 from group_project_v2.mixins import (
     ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin,
-    WorkgroupAwareXBlockMixin, DashboardRootXBlockMixin
+    WorkgroupAwareXBlockMixin, DashboardRootXBlockMixin,
+    AuthXBlockMixin
 )
 from group_project_v2.project_api import TypedProjectAPI
 from group_project_v2.project_api.dtos import WorkgroupDetails
-from group_project_v2.utils import OutsiderDisallowedError
-from tests.utils import TestWithPatchesMixin, raise_api_error
+from group_project_v2.utils import GroupworkAccessDeniedError
+from tests.utils import (
+    TestWithPatchesMixin, raise_api_error, MockedAuthXBlockMixin,
+    get_mock_project_api
+)
 
 
 def _make_block_mock(block_id, category=None):
@@ -287,15 +290,9 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
         self.assertEqual(self.block.workgroup, workgroup)
 
         self.project_api_mock.get_user_preferences.assert_called_once_with(user_id)
-        self.project_api_mock.get_user_workgroup_for_course.assert_called_once_with(user_id, course_id)
-
-        self.project_api_mock.get_user_preferences.reset_mock()
-        self.project_api_mock.get_user_workgroup_for_course.reset_mock()
-
-        self.assertEqual(self.block.workgroup, workgroup)  # checks caching
-
-        self.project_api_mock.get_user_preferences.assert_not_called()
-        self.project_api_mock.get_user_workgroup_for_course.assert_not_called()
+        self.project_api_mock.get_user_workgroup_for_course.assert_called_once_with(
+            user_id, course_id
+        )
 
     @ddt.data(
         (1, {'users': [1], 'id': 12}),
@@ -308,7 +305,7 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
         }
         self.project_api_mock.get_workgroup_by_id.return_value = workgroup
 
-        with mock.patch.object(WorkgroupAwareXBlockMixin, '_confirm_outsider_allowed'):
+        with mock.patch.object(WorkgroupAwareXBlockMixin, 'is_user_ta'):
             # patched_check is noop if everything is ok, so we're letting it return a mock, or whatever it pleases
             self.assertEqual(self.block.workgroup, workgroup)
             self.project_api_mock.get_workgroup_by_id.assert_called_once_with(pref_group_id)
@@ -316,11 +313,11 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
     def test_outsider_disallowed_propagates(self):
         self.project_api_mock.get_user_preferences.return_value = {WorkgroupAwareXBlockMixin.TA_REVIEW_KEY: 1}
 
-        with mock.patch.object(WorkgroupAwareXBlockMixin, '_confirm_outsider_allowed') as patched_check:
+        with mock.patch.object(WorkgroupAwareXBlockMixin, 'is_user_ta') as patched_check:
             patched_check.return_value = False
 
-            self.assertRaises(OutsiderDisallowedError, lambda: self.block.workgroup)
-            patched_check.assert_called_with(self.project_api_mock, self.block.user_id, self.block.course_id)
+            self.assertRaises(GroupworkAccessDeniedError, lambda: self.block.workgroup)
+            patched_check.assert_called_with(self.block.user_id, self.block.course_id)
 
     @ddt.data(
         (1, 'qwe', ['role1'], ['role1', 'role2']),
@@ -328,13 +325,13 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
         (3, 'course_id', ['123', '456'], ['123', '456']),
     )
     @ddt.unpack
-    def test_confirm_outsider_allowed(self, user_id, course_id, user_roles, allowed_roles):
+    def test_is_ta(self, user_id, course_id, user_roles, allowed_roles):
         self.project_api_mock.get_user_roles_for_course.return_value = [
             {'role': role} for role in user_roles
         ]
-        with mock.patch.object(group_project_v2.mixins, 'ALLOWED_OUTSIDER_ROLES', allowed_roles):
+        with mock.patch.object(AuthXBlockMixin, 'ta_roles', allowed_roles):
             # should not raise
-            self.block._confirm_outsider_allowed(self.project_api_mock, user_id, course_id)
+            self.block.is_user_ta(user_id, course_id)
 
             self.project_api_mock.get_user_roles_for_course.assert_called_once_with(user_id, course_id)
 
@@ -344,12 +341,12 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
         (3, 'course_id', ['role1', 'role2'], ['123', '456']),
     )
     @ddt.unpack
-    def test_confirm_outsider_allowed_fails(self, user_id, course_id, user_roles, allowed_roles):
+    def test_is_ta_fails(self, user_id, course_id, user_roles, allowed_roles):
         self.project_api_mock.get_user_roles_for_course.return_value = [
             {'role': role} for role in user_roles
         ]
-        with mock.patch.object(group_project_v2.mixins, 'ALLOWED_OUTSIDER_ROLES', allowed_roles):
-            self.assertFalse(self.block._confirm_outsider_allowed(self.project_api_mock, user_id, course_id))
+        with mock.patch.object(AuthXBlockMixin, 'ta_roles', allowed_roles):
+            self.assertFalse(self.block.is_user_ta(user_id, course_id))
 
     @ddt.data(
         (1, [1, 2], True),
@@ -381,7 +378,7 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
 
 @ddt.ddt
 class TestDashboardRootXBlockMixin(TestCase, TestWithPatchesMixin):
-    class DashboardRootXBlockMixinGuineaPig(DashboardRootXBlockMixin):
+    class DashboardRootXBlockMixinGuineaPig(MockedAuthXBlockMixin, DashboardRootXBlockMixin):
         def __init__(self):
             self._project_details = mock.Mock()
 
@@ -391,7 +388,7 @@ class TestDashboardRootXBlockMixin(TestCase, TestWithPatchesMixin):
 
     def setUp(self):
         self.block = self.DashboardRootXBlockMixinGuineaPig()
-        self.project_api_mock = mock.Mock(spec=TypedProjectAPI)
+        self.project_api_mock = get_mock_project_api()
         self.make_patch(
             self.DashboardRootXBlockMixinGuineaPig, 'project_api',
             mock.PropertyMock(return_value=self.project_api_mock)
@@ -438,25 +435,17 @@ class TestDashboardRootXBlockMixin(TestCase, TestWithPatchesMixin):
 
         self.assertEqual([user.id for user in users], expected_user_ids)
 
-    @ddt.data(
-        ({}, ['workgroup_sentinel'], ['user_sentinel']),
-        ({DashboardRootXBlockMixin.TARGET_WORKGROUPS: ['workgroup_value']}, ['workgroup_value'], ['user_sentinel']),
-        ({DashboardRootXBlockMixin.TARGET_STUDENTS: ['user_value']}, ['workgroup_sentinel'], ['user_value']),
-        (
-                {
-                    DashboardRootXBlockMixin.TARGET_STUDENTS: ['user_value'],
-                    DashboardRootXBlockMixin.TARGET_WORKGROUPS: ['workgroup_value']
-                },
-                ['workgroup_value'], ['user_value']
-        ),
-    )
-    @ddt.unpack
-    def test_append_context_parameters_if_not_present(self, context, expected_workgroups, expected_users):
-        workgroups_sentinel = ['workgroup_sentinel']
-        users_sentinel = ['user_sentinel']
-        self.make_patch(type(self.block), 'workgroups', mock.PropertyMock(return_value=workgroups_sentinel))
-        self.make_patch(type(self.block), 'all_users_in_workgroups', mock.PropertyMock(return_value=users_sentinel))
+    def test_add_students_and_workgroups_to_context(self):
+        context = {}
+        workgroup_value = [
+            WorkgroupDetails(id=1, users=[{'id': 1}]),
+            WorkgroupDetails(id=2, users=[{'id': 2}, {'id': 3}])
+        ]
+        users_value = ['user_sentinel']
+        self.make_patch(type(self.block), 'workgroups', mock.PropertyMock(return_value=workgroup_value))
+        self.make_patch(type(self.block), 'all_users_in_workgroups', mock.PropertyMock(return_value=users_value))
 
-        self.block._append_context_parameters_if_not_present(context)
-        self.assertEqual(context[DashboardRootXBlockMixin.TARGET_WORKGROUPS], expected_workgroups)
-        self.assertEqual(context[DashboardRootXBlockMixin.TARGET_STUDENTS], expected_users)
+        self.block._add_students_and_workgroups_to_context(context)
+        self.assertEqual(context[DashboardRootXBlockMixin.TARGET_WORKGROUPS], workgroup_value)
+        self.assertEqual(context[DashboardRootXBlockMixin.TARGET_STUDENTS], users_value)
+        self.assertEqual(context[DashboardRootXBlockMixin.FILTERED_STUDENTS], set())

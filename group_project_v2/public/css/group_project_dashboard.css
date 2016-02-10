@@ -246,6 +246,10 @@ table.activity-data tr.user-data-row {
     display: none;
 }
 
+table.activity-data tr.user-data-row.filtered-out td a{
+    color: #868685;
+}
+
 table.activity-data tr.user-data-row td.user-cell {
     padding-left: 24px;
 }

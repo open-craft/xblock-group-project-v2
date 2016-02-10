@@ -6,11 +6,10 @@ from selenium.webdriver.support.wait import WebDriverWait
 from xblockutils.resources import ResourceLoader
 
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import UserAwareXBlockMixin
+from group_project_v2.mixins import UserAwareXBlockMixin, AuthXBlockMixin
 from group_project_v2.project_api import TypedProjectAPI
 from group_project_v2.project_api.dtos import UserDetails, WorkgroupDetails
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
-from group_project_v2.utils import ALLOWED_OUTSIDER_ROLES
 
 loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
 
@@ -90,9 +89,11 @@ def get_mock_project_api():
     mock_api.get_peer_review_items_for_group = Mock(return_value={})
     mock_api.get_workgroup_review_items = Mock(return_value={})
     mock_api.get_workgroup_review_items_for_group = Mock(return_value={})
-    mock_api.get_user_organizations = Mock(return_value=[{'display_name': "Org1"}])
+    mock_api.get_user_organizations = Mock(return_value=[{'display_name': "Org1", "id": 1}])
     mock_api.get_workgroup_reviewers = Mock(return_value={})
     mock_api.get_member_data = Mock(side_effect=_get_user_details)
+    mock_api.get_user_groups = Mock(return_value=tuple())
+    mock_api.get_user_permissions = Mock(return_value=tuple())
 
     return mock_api
 
@@ -134,7 +135,9 @@ def switch_to_ta_grading(project_api_mock, review_group_id=1):
     project_api_mock.get_user_preferences.return_value = {
         UserAwareXBlockMixin.TA_REVIEW_KEY: review_group_id
     }
-    project_api_mock.get_user_roles_for_course.return_value = [{'role': role} for role in ALLOWED_OUTSIDER_ROLES]
+    project_api_mock.get_user_roles_for_course.return_value = [
+        {'role': role} for role in AuthXBlockMixin.DEFAULT_TA_ROLE  # pylint:disable=protected-access
+    ]
 
 
 def make_workgroup(workgroup_id, users=None):
@@ -166,3 +169,23 @@ def switch_to_other_window(browser, other_window):
 def get_other_windows(browser):
     current_window_handle = browser.current_window_handle
     return [handle for handle in browser.window_handles if handle != current_window_handle]
+
+
+# pylint:disable=no-self-use
+class MockedAuthXBlockMixin(AuthXBlockMixin):
+
+    @property
+    def ta_roles(self):
+        return self.DEFAULT_TA_ROLE
+
+    @property
+    def user_id(self):
+        return 0
+
+    @property
+    def see_dashboard_role_perms(self):
+        return []
+
+    @property
+    def see_dashboard_for_all_orgs_perms(self):
+        return []

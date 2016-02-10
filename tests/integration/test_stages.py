@@ -11,11 +11,10 @@ from freezegun import freeze_time
 import mock
 from workbench.runtime import WorkbenchRuntime
 
-from group_project_v2.mixins import UserAwareXBlockMixin
+from group_project_v2.mixins import UserAwareXBlockMixin, AuthXBlockMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage, TeamEvaluationStage
 from group_project_v2.stage.utils import ReviewState
-from group_project_v2.utils import ALLOWED_OUTSIDER_ROLES
 from tests.integration.base_test import BaseIntegrationTest
 from tests.integration.page_elements import GroupProjectElement, ReviewStageElement, ProjectTeamElement
 from tests.utils import KNOWN_USERS, OTHER_GROUPS, TestConstants, make_review_item as mri, WORKGROUP
@@ -788,7 +787,9 @@ class TestTAGradedPeerReview(BasePeerReviewStageTest):
         self.project_api_mock.get_user_preferences = mock.Mock(
             return_value={UserAwareXBlockMixin.TA_REVIEW_KEY: group_id}
         )
-        self.project_api_mock.get_user_roles_for_course = mock.Mock(return_value=[{'role': ALLOWED_OUTSIDER_ROLES[0]}])
+        self.project_api_mock.get_user_roles_for_course = mock.Mock(return_value=[
+            {'role': AuthXBlockMixin.DEFAULT_TA_ROLE[0]}  # pylint:disable=protected-access
+        ])
         self.project_api_mock.get_workgroup_by_id.side_effect = lambda g_id: WorkgroupDetails(
             id=g_id, users=[{"id": 1}]
         )
@@ -796,7 +797,7 @@ class TestTAGradedPeerReview(BasePeerReviewStageTest):
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
         self.assertTrue(stage_element.has_admin_grading_notification)
 
-        self.project_api_mock.get_workgroup_by_id.assert_called_once_with(group_id)
+        self.project_api_mock.get_workgroup_by_id.assert_called_with(group_id)
 
         self.assertEqual(len(stage_element.groups), 1)
         group = stage_element.groups[0]
@@ -863,7 +864,9 @@ class ProjectTeamBlockTest(StageTestBase):
         Ensure block shows team members.
         """
         user_id = 1
-        self.project_api_mock.get_user_roles_for_course = mock.Mock(return_value=[{'role': ALLOWED_OUTSIDER_ROLES[0]}])
+        self.project_api_mock.get_user_roles_for_course = mock.Mock(return_value=[
+            {'role': AuthXBlockMixin.DEFAULT_TA_ROLE[0]}  # pylint:disable=protected-access
+        ])
         self.project_api_mock.get_workgroup_by_id.side_effect = lambda g_id: {"id": g_id, "users": [{"id": 1}]}
         stage_element = self.get_stage(self.go_to_view(student_id=user_id), stage_element_type=ProjectTeamElement)
         self.assertEqual(stage_element.team_members, [u'Jane', u'Jack', u'Jill'])

@@ -6,7 +6,10 @@ import itertools
 from group_project_v2.api_error import api_error_protect
 from group_project_v2.json_requests import DELETE, GET, PUT, POST
 from group_project_v2.utils import memoize_with_expiration, build_date_field
-from group_project_v2.project_api.dtos import UserDetails, ProjectDetails, WorkgroupDetails, CompletionDetails
+from group_project_v2.project_api.dtos import (
+    UserDetails, ProjectDetails, WorkgroupDetails, CompletionDetails,
+    OrganisationDetails, UserGroupDetails
+)
 
 API_PREFIX = '/'.join(['api', 'server'])
 WORKGROUP_API = '/'.join([API_PREFIX, 'workgroups'])
@@ -17,6 +20,7 @@ SUBMISSION_API = '/'.join([API_PREFIX, 'submissions'])
 GROUP_API = '/'.join([API_PREFIX, 'groups'])
 COURSES_API = '/'.join([API_PREFIX, 'courses'])
 PROJECTS_API = '/'.join([API_PREFIX, 'projects'])
+ORGANIZATIONS_API = '/'.join([API_PREFIX, 'organizations'])
 
 
 # TODO: this class crosses service boundary, but some methods post-process responses, while other do not
@@ -64,6 +68,7 @@ class ProjectAPI(object):
         url = self.build_url(url_parts, query_params, no_trailing_slash)
         return self._do_send_request(method, url, data)
 
+    @memoize_with_expiration()
     def get_user_organizations(self, user_id):
         qs_params = {'page_size': 0}
         return self.send_request(GET, (USERS_API, user_id, 'organizations'), query_params=qs_params)
@@ -391,3 +396,34 @@ class TypedProjectAPI(ProjectAPI):
         if user_organizations:
             user_details.organization = user_organizations[0]['display_name']  # and a string here
         return user_details
+
+    @memoize_with_expiration()
+    def get_organization_by_id(self, org_id):
+        """
+        :param org_id:
+        :return: Requested organization
+        :rtype: OrganisationDetails
+        """
+        return OrganisationDetails(**self.send_request(GET, (ORGANIZATIONS_API, org_id)))
+
+    def get_user_permissions(self, user_id):
+        return self.get_user_groups(user_id, "permission")
+
+    @memoize_with_expiration()
+    def get_user_groups(self, user_id, group_type=None):
+        """
+        :param user_id: User id
+        :param str group_type: Optional filter for group type. Defults to None,
+                               which means no filter.
+        :return: List of UserGroupDetails
+        :rtype: Iterable[UserGroupDetails]
+        """
+        data = {}
+        if group_type is not None:
+            data = {
+                "type": group_type
+            }
+
+        response_json = self.send_request(GET, (USERS_API, user_id, 'groups'), query_params=data)
+        list_of_groups = response_json['groups']
+        return list(UserGroupDetails(**group_dict) for group_dict in list_of_groups)

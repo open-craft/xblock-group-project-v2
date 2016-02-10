@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import itertools
+from operator import itemgetter
 
 import webob
 from datetime import datetime
@@ -14,12 +15,15 @@ from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import XBlockWithPreviewMixin, NestedXBlockSpec
 
 from group_project_v2 import messages
-from group_project_v2.mixins import CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin
+from group_project_v2.mixins import (
+    CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin,
+    AuthXBlockMixin
+)
 from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.stage.utils import StageState
 from group_project_v2.utils import (
-    mean, make_key, outsider_disallowed_protected_view, get_default_stage, DiscussionXBlockShim, Constants,
+    mean, make_key, groupwork_protected_view, get_default_stage, DiscussionXBlockShim, Constants,
     add_resource, gettext as _, get_block_content_id, export_to_csv
 )
 from group_project_v2.stage import (
@@ -31,6 +35,7 @@ from group_project_v2.stage import (
 log = logging.getLogger(__name__)
 
 
+@XBlock.wants("settings")
 class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin, XBlock):
     display_name = String(
         display_name=_(u"Display Name"),
@@ -61,11 +66,16 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         lists. This breaks the approach of passing context as intact as possible to children by making a copy and adding
         necessary children data. So, this method serves as a filter and converter for context coming from LMS.
         """
+
         if not context:
             return {}
-
+        raw_client_id = context.get(Constants.CURRENT_CLIENT_FILTER_ID_PARAMETER_NAME)
+        client_id = None
+        if raw_client_id is not None and raw_client_id.strip():
+            client_id = int(raw_client_id)
         return {
-            Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME: context.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME, None)
+            Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME: context.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME, None),
+            Constants.CURRENT_CLIENT_FILTER_ID_PARAMETER_NAME: client_id
         }
 
     @property
@@ -105,7 +115,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         else:
             return Fragment(fallback_message)
 
-    @outsider_disallowed_protected_view
+    @groupwork_protected_view
     def student_view(self, context):
         ctx = self._sanitize_context(context)
 
@@ -165,11 +175,16 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         fragment.initialize_js("GroupProjectBlock")
         return fragment
 
+    @groupwork_protected_view
+    @AuthXBlockMixin.check_dashboard_access_for_current_user
     def dashboard_view(self, context):
         fragment = Fragment()
 
-        children_context = context.copy()
-        self._append_context_parameters_if_not_present(children_context)
+        children_context = self._sanitize_context(context)
+        # TODO: Dashboard view does not filtering right now, to add filtering
+        # you need to add organization id here :) and then work with new
+        # context
+        self._add_students_and_workgroups_to_context(children_context, None)
 
         activity_fragments = self._render_children('dashboard_view', children_context, self.activities)
         activity_contents = [frag.content for frag in activity_fragments]
@@ -183,9 +198,12 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
 
         return fragment
 
+    @groupwork_protected_view
+    @AuthXBlockMixin.check_dashboard_access_for_current_user
     def dashboard_detail_view(self, context):
         ctx = self._sanitize_context(context)
-        self._append_context_parameters_if_not_present(ctx)
+        self._add_students_and_workgroups_to_context(
+            ctx, ctx[Constants.CURRENT_CLIENT_FILTER_ID_PARAMETER_NAME])
 
         fragment = Fragment()
         render_context = {
@@ -412,16 +430,6 @@ class GroupActivityXBlock(
         stages = self.get_children_by_category(PeerReviewStage.CATEGORY)
         return list(self._chain_questions(stages, 'questions'))
 
-    def _get_setting(self, setting, default):
-        result = default
-        settings_service = self.runtime.service(self, "settings")
-        if settings_service:
-            xblock_settings = settings_service.get_settings_bucket(self)
-            if xblock_settings and setting in xblock_settings:
-                result = xblock_settings[setting]
-
-        return result
-
     def dashboard_details_url(self):
         """
         Gets dashboard details view URL for current activity. If settings service is not available or does not provide
@@ -454,7 +462,7 @@ class GroupActivityXBlock(
 
         return self.default_stage
 
-    @outsider_disallowed_protected_view
+    @groupwork_protected_view
     def student_view(self, context):
         """
         Player view, displayed to the student
@@ -478,7 +486,7 @@ class GroupActivityXBlock(
 
         return fragment
 
-    @outsider_disallowed_protected_view
+    @groupwork_protected_view
     def navigation_view(self, context):
         fragment = Fragment()
 
@@ -494,7 +502,7 @@ class GroupActivityXBlock(
 
         return fragment
 
-    @outsider_disallowed_protected_view
+    @groupwork_protected_view
     def resources_view(self, context):
         fragment = Fragment()
 
@@ -510,7 +518,7 @@ class GroupActivityXBlock(
 
         return fragment
 
-    @outsider_disallowed_protected_view
+    @groupwork_protected_view
     def submissions_view(self, context):
         fragment = Fragment()
 
@@ -532,22 +540,8 @@ class GroupActivityXBlock(
 
         return fragment
 
-    def _render_dashboard_view(self, context, view):
-        fragment = Fragment()
-
-        children_context = context.copy()
-        self._append_context_parameters_if_not_present(children_context)
-
-        stage_fragments = self._render_children(view, children_context, self.stages)
-        stage_contents = [frag.content for frag in stage_fragments]
-        fragment.add_frags_resources(stage_fragments)
-
-        render_context = {'activity': self, 'stage_contents': stage_contents}
-        fragment.add_content(self.render_template(view, render_context))
-
-        return fragment
-
-    @outsider_disallowed_protected_view
+    @groupwork_protected_view
+    @AuthXBlockMixin.check_dashboard_access_for_current_user
     def dashboard_view(self, context):
         fragment = Fragment()
 
@@ -562,7 +556,8 @@ class GroupActivityXBlock(
 
         return fragment
 
-    @outsider_disallowed_protected_view
+    @groupwork_protected_view
+    @AuthXBlockMixin.check_dashboard_access_for_current_user
     def dashboard_detail_view(self, context):
         fragment = Fragment()
 
@@ -570,6 +565,7 @@ class GroupActivityXBlock(
 
         target_workgroups = context.get(DashboardRootXBlockMixin.TARGET_WORKGROUPS)
         target_users = context.get(DashboardRootXBlockMixin.TARGET_STUDENTS)
+        filtered_users = children_context[DashboardRootXBlockMixin.FILTERED_STUDENTS]
 
         stages = []
         stage_stats = {}
@@ -581,13 +577,16 @@ class GroupActivityXBlock(
             stages.append({"id": stage.id, 'content': stage_fragment.content})
             stage_stats[stage.id] = self._get_stage_completion_details(stage, target_workgroups, target_users)
 
-        groups_data = self._build_groups_data(target_workgroups, stage_stats)
+        groups_data = self._build_groups_data(target_workgroups, stage_stats, filtered_users)
+
+        visible_groups = [group for group in groups_data if group["group_visible"]]
 
         render_context = {
             'activity': self,
             'stages': stages,
             'stages_count': len(stages),
-            'groups': groups_data,
+            'groups': visible_groups,
+            'filtered_out_workgroups': len(groups_data) - len(visible_groups),
             'stage_cell_width_percent': (100 - 30) / float(len(stages)),  # 30% is reserved for first column
             'assigned_to_groups_label': messages.ASSIGNED_TO_GROUPS_LABEL.format(group_count=len(groups_data))
         }
@@ -595,7 +594,62 @@ class GroupActivityXBlock(
 
         return fragment
 
-    def _build_groups_data(self, workgroups, stage_stats):
+    def _render_user(self, user, stage_stats, filtered_users):
+        """
+        :param group_project_v2.project_api.dtos.ReducedUserDetail user:
+
+        :return: dict
+        """
+
+        return {
+            'id': user.id, 'full_name': user.full_name, 'email': user.email,
+            'is_filtered_out': user.id in filtered_users,
+            'stage_states': {
+                stage_id: stage_data.get('user_stats', {}).get(user.id, StageState.UNKNOWN)
+                for stage_id, stage_data in stage_stats.iteritems()
+            },
+            'groups_to_grade': {
+                stage_id: [
+                    {'id': group.id, 'ta_grade_link': self.get_ta_review_link(group.id, stage_id)}
+                    for group in stage_data.get('groups_to_grade', {}).get(user.id, [])
+                ]
+                for stage_id, stage_data in stage_stats.iteritems()
+            }
+        }
+
+    def _render_workgroup(self, workgroup, stage_stats, children_context):
+        """
+
+        :param group_project_v2.project_api.dtos.WorkgroupDetails workgroup:
+        :return: dict
+        """
+
+        users = [
+            self._render_user(user, stage_stats, children_context)
+            for user in workgroup.users
+        ]
+
+        users.sort(key=itemgetter('is_filtered_out'))
+
+        group_visible = any((not user['is_filtered_out'] for user in users))
+
+        return {
+            'id': workgroup.id,
+            'ta_grade_link': self.get_ta_review_link(workgroup.id),
+            'group_visible': group_visible,
+            'stage_states': {
+                stage_id: {
+                    'students_provided_grades':
+                        stage_data.get('students_provided_grades', {}).get(workgroup.id, StageState.UNKNOWN),
+                    'group_received_grades':
+                        stage_data.get('group_received_grades', {}).get(workgroup.id, StageState.UNKNOWN),
+                }
+                for stage_id, stage_data in stage_stats.iteritems()
+            },
+            'users': users
+        }
+
+    def _build_groups_data(self, workgroups, stage_stats, filtered_users):
         """
         Converts WorkgroupDetails into dict expected by dashboard_detail_view template.
 
@@ -614,36 +668,7 @@ class GroupActivityXBlock(
                     * groups_to_grade - dictionary stage_id -> list of groups to grade
         """
         return [
-            {
-                'id': workgroup.id,
-                'ta_grade_link': self.get_ta_review_link(workgroup.id),
-                'stage_states': {
-                    stage_id: {
-                        'students_provided_grades':
-                            stage_data.get('students_provided_grades', {}).get(workgroup.id, StageState.UNKNOWN),
-                        'group_received_grades':
-                            stage_data.get('group_received_grades', {}).get(workgroup.id, StageState.UNKNOWN),
-                    }
-                    for stage_id, stage_data in stage_stats.iteritems()
-                },
-                'users': [
-                    {
-                        'id': user.id, 'full_name': user.full_name, 'email': user.email,
-                        'stage_states': {
-                            stage_id: stage_data.get('user_stats', {}).get(user.id, StageState.UNKNOWN)
-                            for stage_id, stage_data in stage_stats.iteritems()
-                        },
-                        'groups_to_grade': {
-                            stage_id: [
-                                {'id': group.id, 'ta_grade_link': self.get_ta_review_link(group.id, stage_id)}
-                                for group in stage_data.get('groups_to_grade', {}).get(user.id, [])
-                            ]
-                            for stage_id, stage_data in stage_stats.iteritems()
-                        }
-                    }
-                    for user in workgroup.users
-                ]
-            }
+            self._render_workgroup(workgroup, stage_stats, filtered_users)
             for workgroup in workgroups
         ]
 
