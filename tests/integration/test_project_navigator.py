@@ -108,6 +108,8 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
         self.project_api_mock.get_latest_workgroup_submissions_by_id.return_value = self.submissions
         self.make_patch(PeerReviewStage, '_pivot_feedback', mock.Mock(return_value={}))
         self.make_patch(TeamEvaluationStage, '_pivot_feedback', mock.Mock(return_value={}))
+        self.make_patch(PeerReviewStage, 'get_review_state', mock.Mock(return_value={}))
+        self.make_patch(TeamEvaluationStage, 'get_review_state', mock.Mock(return_value={}))
 
         self._prepare_page()
 
