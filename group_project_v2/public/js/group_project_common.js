@@ -60,7 +60,7 @@ var GroupProjectCommon = {
             SELECT_GROUP_TO_REVIEW: gettext('Please select Group to review'),
 
             THANKS_FOR_FEEDBACK: gettext('Thanks for your feedback!'),
-            ERROR_LOADING_FEEDBACK: gettext('We encountered an error loading feedback.'),
+            ERROR_LOADING_FEEDBACK: gettext('We encountered an error loading your feedback.'),
             ERROR_SAVING_FEEDBACK: gettext('We encountered an error saving your feedback.'),
             ERROR_LOADING_SUBMISSIONS: gettext('We encountered an error.')
         }
