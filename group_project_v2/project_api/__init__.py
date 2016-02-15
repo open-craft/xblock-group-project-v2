@@ -1,7 +1,5 @@
-''' API calls with respect group projects'''
-
+""" Project API client """
 from django.conf import settings
-from lazy.lazy import lazy
 
 from group_project_v2.project_api.api_implementation import TypedProjectAPI
 

@@ -1,31 +1,18 @@
+/* global GroupProjectCommon */
 /* exported ReviewSubjectSelectorXBlock, ReviewSubjectSelectorConstants */
 var ReviewSubjectSelectorConstants = {
-    status_icon_class: "group-project-review-state",
-    refresh_statuses_event: "group_project_v2.review.refresh_status"
+    status_icon_class: "group-project-review-state"
 };
 
 function ReviewSubjectSelectorXBlock(runtime, element) {
     "use strict";
-    // Set up gettext in case it isn't available in the client runtime:
-    if (typeof gettext === "undefined") {
-        window.gettext = function gettext_stub(string) { return string; };
-    }
-
-    var ERROR_REFRESHING_STATUSES = gettext("Error refreshing statuses");
+    var ERROR_REFRESHING_STATUSES = GroupProjectCommon.gettext("Error refreshing statuses");
 
     var get_statuses_endpoint = runtime.handlerUrl(element, "get_statuses");
     var status_icon_class = ReviewSubjectSelectorConstants.status_icon_class;
 
-    var group_project_dom = $(element).parents(".group-project-xblock-wrapper");
-    var message_box = $(".message", group_project_dom);
-
     function show_message(msg, title, title_css_class) {
-        message_box.find('.message_text').html(msg);
-        message_box.find('.message_title').html(title);
-        if (title_css_class) {
-            message_box.find('.message_title').addClass(title_css_class);
-        }
-        message_box.show();
+        GroupProjectCommon.Messages.show_message(msg, title, title_css_class);
     }
 
     function resetCssClasses() {
@@ -41,7 +28,7 @@ function ReviewSubjectSelectorXBlock(runtime, element) {
         $("."+status_icon_class, $review_subject_wrapper).removeClass('fa-spin fa-spinner').addClass(status_css_class);
     }
 
-    $(document).on(ReviewSubjectSelectorConstants.refresh_statuses_event, function() {
+    $(document).on(GroupProjectCommon.Review.events.refresh_status, function() {
         resetCssClasses();
         displaySpinners();
         $.ajax({
@@ -59,5 +46,5 @@ function ReviewSubjectSelectorXBlock(runtime, element) {
         });
     });
 
-    $(document).trigger(ReviewSubjectSelectorConstants.refresh_statuses_event);
+    $(document).trigger(GroupProjectCommon.Review.events.refresh_status);
 }

@@ -4,9 +4,12 @@ clean:
 	-rm -rf dist coverage 2> /dev/null
 	-rm .coverage tests.integration.* workbench.log 2> /dev/null
 
-requirements: .requirements-timestamp
+requirements:
+	pip install -r requirements/base.txt
+	pip install -e .
 
-test-requirements: .test-requirements-timestamp
+test-requirements:
+	pip install -r requirements/test.txt
 
 js-requirements:
 	npm install karma karma-jasmine karma-firefox-launcher karma-requirejs karma-jquery jasmine-jquery jshint
@@ -32,9 +35,5 @@ quality:
 
 coverage-report:
 	coverage report -m
-
-.%-timestamp: %.txt
-	pip install -r "$<"
-	touch "$@"
 
 .PHONY: clean requirements test-requirements setup-self js-requirements test quality coverage-report
