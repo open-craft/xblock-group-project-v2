@@ -15,8 +15,8 @@ from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.utils import (
-    GroupworkAccessDeniedError, MUST_BE_OVERRIDDEN,
-    loader, groupwork_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource, Constants
+    MUST_BE_OVERRIDDEN, NO_EDITABLE_SETTINGS, Constants, GroupworkAccessDeniedError,
+    loader, groupwork_protected_view, add_resource
 )
 
 log = logging.getLogger(__name__)
@@ -104,12 +104,7 @@ class UserAwareXBlockMixin(ProjectAPIXBlockMixin):
 
     @lazy
     def user_preferences(self):
-        return self._user_preferences(self.project_api, self.user_id)
-
-    @staticmethod
-    @memoize_with_expiration()
-    def _user_preferences(project_api, user_id):
-        return project_api.get_user_preferences(user_id)
+        return self.project_api.get_user_preferences(self.user_id)
 
     @property
     def is_admin_grader(self):
@@ -346,7 +341,7 @@ class WorkgroupAwareXBlockMixin(AuthXBlockMixin, UserAwareXBlockMixin, CourseAwa
         :rtype: WorkgroupDetails
         """
         try:
-            user_prefs = UserAwareXBlockMixin._user_preferences(self.project_api, self.user_id)
+            user_prefs = self.user_preferences
             if UserAwareXBlockMixin.TA_REVIEW_KEY in user_prefs:
                 self.check_ta_access(self.user_id, self.course_id)
                 return self.project_api.get_workgroup_by_id(
