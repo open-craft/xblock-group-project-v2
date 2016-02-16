@@ -265,8 +265,8 @@ class BaseGroupActivityStage(
     def get_stage_state(self):
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
-    def get_dashboard_stage_state(self, target_workgroups, target_users):
-        state_stats = self.get_stage_stats(target_workgroups, target_users)
+    def get_dashboard_stage_state(self, target_workgroups, target_students):
+        state_stats = self.get_stage_stats(target_workgroups, target_students)
         if state_stats.get(StageState.COMPLETED, 0) == 1:
             stage_state = StageState.COMPLETED
         elif state_stats.get(StageState.INCOMPLETE, 0) > 0 or state_stats.get(StageState.COMPLETED, 0) > 0:
@@ -330,9 +330,12 @@ class BaseGroupActivityStage(
         fragment = Fragment()
 
         target_workgroups = context.get(DashboardRootXBlockMixin.TARGET_WORKGROUPS)
-        target_users = context.get(DashboardRootXBlockMixin.TARGET_STUDENTS)
+        target_students = context.get(DashboardRootXBlockMixin.TARGET_STUDENTS)
+        filtered_students = context.get(DashboardRootXBlockMixin.FILTERED_STUDENTS)
 
-        state, stats = self.get_dashboard_stage_state(target_workgroups, target_users)
+        students_to_display = [student for student in target_students if student.id not in filtered_students]
+
+        state, stats = self.get_dashboard_stage_state(target_workgroups, students_to_display)
         human_stats = OrderedDict([
             (StageState.get_human_name(StageState.NOT_STARTED), stats[StageState.NOT_STARTED]*100),
             (StageState.get_human_name(StageState.INCOMPLETE), stats[StageState.INCOMPLETE]*100),

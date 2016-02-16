@@ -16,7 +16,7 @@ from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.utils import (
     GroupworkAccessDeniedError, MUST_BE_OVERRIDDEN,
-    loader, groupwork_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource,
+    loader, groupwork_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource, Constants
 )
 
 log = logging.getLogger(__name__)
@@ -450,13 +450,9 @@ class DashboardRootXBlockMixin(AuthXBlockMixin, UserAwareXBlockMixin):
 
     FILTERED_STUDENTS = "filtered_students"
 
-    def _add_students_and_workgroups_to_context(self, context, filter_by_organization_id=None):
+    def _add_students_and_workgroups_to_context(self, context):
         """
         :param dict context: XBlock view context
-        :param int filter_by_organization_id:
-            If not None students not belonging to organization represented by
-            given id will be filtered out from dashboard view.
-
         :rtype: None
         """
         workgroups, students = self.get_workgroups_and_students()
@@ -464,6 +460,9 @@ class DashboardRootXBlockMixin(AuthXBlockMixin, UserAwareXBlockMixin):
         context[self.TARGET_STUDENTS] = list(students)
         context[self.TARGET_WORKGROUPS] = list(workgroups)
         context[self.FILTERED_STUDENTS] = set()
+
+        # If not None students not belonging to organization represented by given id will be filtered out
+        filter_by_organization_id = context.get(Constants.CURRENT_CLIENT_FILTER_ID_PARAMETER_NAME, None)
 
         if filter_by_organization_id is None:
             filter_by_organization_id = None
