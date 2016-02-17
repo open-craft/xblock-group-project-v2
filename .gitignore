@@ -3,11 +3,10 @@ dist
 *.pyc
 *~
 .coverage
-htmlcov
-htmlcov*
+coverage
 *.log
 *.log.*
 .DS_Store
 
-tests.*.png
+tests.*
 node_modules
