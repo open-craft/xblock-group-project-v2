@@ -559,9 +559,9 @@ class GroupActivityXBlock(
 
         children_context = context.copy()
 
-        target_workgroups = context.get(DashboardRootXBlockMixin.TARGET_WORKGROUPS)
-        target_users = context.get(DashboardRootXBlockMixin.TARGET_STUDENTS)
-        filtered_users = children_context[DashboardRootXBlockMixin.FILTERED_STUDENTS]
+        target_workgroups = context.get(Constants.TARGET_WORKGROUPS)
+        target_users = context.get(Constants.TARGET_STUDENTS)
+        filtered_users = children_context[Constants.FILTERED_STUDENTS]
 
         stages = []
         stage_stats = {}

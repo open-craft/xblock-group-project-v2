@@ -13,7 +13,7 @@ from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import (
     CommonMixinCollection, XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
-    DashboardXBlockMixin, DashboardRootXBlockMixin, AuthXBlockMixin
+    DashboardXBlockMixin, AuthXBlockMixin
 )
 from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
@@ -329,9 +329,9 @@ class BaseGroupActivityStage(
     def dashboard_view(self, context):
         fragment = Fragment()
 
-        target_workgroups = context.get(DashboardRootXBlockMixin.TARGET_WORKGROUPS)
-        target_students = context.get(DashboardRootXBlockMixin.TARGET_STUDENTS)
-        filtered_students = context.get(DashboardRootXBlockMixin.FILTERED_STUDENTS)
+        target_workgroups = context.get(Constants.TARGET_WORKGROUPS)
+        target_students = context.get(Constants.TARGET_STUDENTS)
+        filtered_students = context.get(Constants.FILTERED_STUDENTS)
 
         students_to_display = [student for student in target_students if student.id not in filtered_students]
 

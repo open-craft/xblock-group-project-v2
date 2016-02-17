@@ -14,7 +14,7 @@ from group_project_v2.mixins import (
 )
 from group_project_v2.project_api import TypedProjectAPI
 from group_project_v2.project_api.dtos import WorkgroupDetails
-from group_project_v2.utils import GroupworkAccessDeniedError
+from group_project_v2.utils import GroupworkAccessDeniedError, Constants
 from tests.utils import (
     TestWithPatchesMixin, raise_api_error, MockedAuthXBlockMixin,
     get_mock_project_api
@@ -446,6 +446,6 @@ class TestDashboardRootXBlockMixin(TestCase, TestWithPatchesMixin):
         self.make_patch(type(self.block), 'all_users_in_workgroups', mock.PropertyMock(return_value=users_value))
 
         self.block._add_students_and_workgroups_to_context(context)
-        self.assertEqual(context[DashboardRootXBlockMixin.TARGET_WORKGROUPS], workgroup_value)
-        self.assertEqual(context[DashboardRootXBlockMixin.TARGET_STUDENTS], users_value)
-        self.assertEqual(context[DashboardRootXBlockMixin.FILTERED_STUDENTS], set())
+        self.assertEqual(context[Constants.TARGET_WORKGROUPS], workgroup_value)
+        self.assertEqual(context[Constants.TARGET_STUDENTS], users_value)
+        self.assertEqual(context[Constants.FILTERED_STUDENTS], set())
