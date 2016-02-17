@@ -266,6 +266,11 @@ class BaseGroupActivityStage(
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
     def get_dashboard_stage_state(self, target_workgroups, target_students):
+        """
+        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] target_workgroups:
+        :param collections.Iterable[group_project_v2.project_api.dtos.ReducedUserDetails] target_students:
+        :return (str, dict[str, float]): Stage state and detailed stage stats as returned by `get_stage_stats`
+        """
         state_stats = self.get_stage_stats(target_workgroups, target_students)
         if state_stats.get(StageState.COMPLETED, 0) == 1:
             stage_state = StageState.COMPLETED
@@ -276,8 +281,15 @@ class BaseGroupActivityStage(
 
         return stage_state, state_stats
 
-    def get_stage_stats(self, target_workgroups, target_users):  # pylint: disable=no-self-use
-        target_user_ids = set(user.id for user in target_users)
+    def get_stage_stats(self, target_workgroups, target_students):  # pylint: disable=no-self-use
+        """
+        Calculates stage state stats for given workgroups and students
+        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] target_workgroups:
+        :param collections.Iterable[group_project_v2.project_api.dtos.ReducedUserDetails] target_students:
+        :return dict[str, float]:
+            Percentage of students completed, partially completed and not started the stage as floats in range[0..1]
+        """
+        target_user_ids = set(user.id for user in target_students)
         if not target_user_ids:
             return {
                 StageState.COMPLETED: 0,
@@ -287,7 +299,7 @@ class BaseGroupActivityStage(
 
         target_user_count = float(len(target_user_ids))
 
-        completed_users, partially_completed_users = self.get_users_completion(target_workgroups, target_users)
+        completed_users, partially_completed_users = self.get_users_completion(target_workgroups, target_students)
         log_format_data = dict(
             stage=self.display_name, target_users=target_user_ids, completed=completed_users,
             partially_completed=partially_completed_users
@@ -313,6 +325,11 @@ class BaseGroupActivityStage(
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
     def navigation_view(self, context):
+        """
+        Renders stage content for navigation view
+        :param dict context:
+        :rtype: Fragment
+        """
         fragment = Fragment()
         rendering_context = {
             'stage': self,
@@ -327,6 +344,11 @@ class BaseGroupActivityStage(
 
     @AuthXBlockMixin.check_dashboard_access_for_current_user
     def dashboard_view(self, context):
+        """
+        Renders stage content for dashboard view.
+        :param dict context:
+        :rtype: Fragment
+        """
         fragment = Fragment()
 
         target_workgroups = context.get(Constants.TARGET_WORKGROUPS)
