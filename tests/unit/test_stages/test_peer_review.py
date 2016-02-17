@@ -367,7 +367,7 @@ class TestPeerReviewStageReviewStatus(ReviewStageBaseTest, ReviewStageUserComple
             }
         )
 
-        with patch_obj(self.block, '_confirm_outsider_allowed') as patched_outsider_allowed:
-            patched_outsider_allowed.side_effect = lambda _api, user_id, _course_id: user_id in ta_reviewers
+        with patch_obj(self.block, 'is_user_ta') as patched_outsider_allowed:
+            patched_outsider_allowed.side_effect = lambda user_id, _course_id: user_id in ta_reviewers
 
             self.assert_group_completion(group_to_review, questions, expected_result)

@@ -42,7 +42,7 @@
         {% endfor %}
       </tr>
         {% for user in group.users %}
-          <tr class="user-data-row data" data-group-id="{{group.id}}" data-fullname="{{user.full_name}}" data-email="{{user.email}}">
+          <tr class="user-data-row data{% if user.is_filtered_out %} filtered-out{%endif%}" data-group-id="{{group.id}}" data-fullname="{{user.full_name}}" data-email="{{user.email}}">
             <td class="user-cell">
               <div class="user-email">
                 <a href="mailto: {{ user.email }}">{{ user.email }}</a>
@@ -69,6 +69,23 @@
           </tr>
         {% endfor %}
       {% endfor %}
+      {% if filtered_out_workgroups %}
+      <tr class="data" data-group-id="{{group.id}}" data-collapsed="collapsed">
+        <td colspan="{{stages|length|add:'1'}}">
+        {% if groups|length %}
+          {% blocktrans count counter=filtered_out_workgroups %}
+            Additionally there is a single work group filtered by company filter.
+          {% plural %}
+            Additionally there were {{counter}} work groups filtered by company filter.
+          {% endblocktrans %}
+        {% else %}
+          {% blocktrans %}
+            All work groups have been filtered by the company filter.
+          {% endblocktrans %}
+        {% endif %}
+          </td>
+        </tr>
+      {% endif %}
     </table>
   </div>
 </div>

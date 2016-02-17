@@ -13,7 +13,7 @@ from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import (
     CommonMixinCollection, XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
-    DashboardXBlockMixin, DashboardRootXBlockMixin
+    DashboardXBlockMixin, DashboardRootXBlockMixin, AuthXBlockMixin
 )
 from group_project_v2.notifications import StageNotificationsMixin
 from group_project_v2.stage_components import (
@@ -21,7 +21,7 @@ from group_project_v2.stage_components import (
 )
 from group_project_v2.utils import (
     gettext as _, HtmlXBlockShim, format_date, Constants, loader,
-    outsider_disallowed_protected_view, add_resource, MUST_BE_OVERRIDDEN, get_link_to_block, get_block_content_id,
+    groupwork_protected_view, add_resource, MUST_BE_OVERRIDDEN, get_link_to_block, get_block_content_id,
 )
 from group_project_v2.stage.utils import StageState
 
@@ -34,6 +34,7 @@ STAGE_STATS_LOG_TPL = (
 )
 
 
+@XBlock.wants("settings")
 class BaseGroupActivityStage(
     CommonMixinCollection, DashboardXBlockMixin, XBlockWithPreviewMixin, StageNotificationsMixin,
     XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
@@ -206,11 +207,11 @@ class BaseGroupActivityStage(
 
         return fragment
 
-    @outsider_disallowed_protected_view
+    @groupwork_protected_view
     def student_view(self, context):
         return self._view_render(context)
 
-    @outsider_disallowed_protected_view
+    @groupwork_protected_view
     def author_preview_view(self, context):
         # if we use student_view or author_view Studio will wrap it in HTML that we don't want in the preview
         fragment = self._view_render(context, "preview_view")
@@ -219,7 +220,7 @@ class BaseGroupActivityStage(
         fragment.add_frag_resources(url_name_fragment)
         return fragment
 
-    @outsider_disallowed_protected_view
+    @groupwork_protected_view
     def author_edit_view(self, context):
         fragment = super(BaseGroupActivityStage, self).author_edit_view(context)
         url_name_fragment = self.get_url_name_fragment(self.url_name_caption)
@@ -288,7 +289,7 @@ class BaseGroupActivityStage(
 
         completed_users, partially_completed_users = self.get_users_completion(target_workgroups, target_users)
         log_format_data = dict(
-            stage=self.display_name,  target_users=target_user_ids, completed=completed_users,
+            stage=self.display_name, target_users=target_user_ids, completed=completed_users,
             partially_completed=partially_completed_users
         )
         log.info(STAGE_STATS_LOG_TPL, log_format_data)
@@ -324,6 +325,7 @@ class BaseGroupActivityStage(
         fragment.add_content(loader.render_template("templates/html/stages/navigation_view.html", rendering_context))
         return fragment
 
+    @AuthXBlockMixin.check_dashboard_access_for_current_user
     def dashboard_view(self, context):
         fragment = Fragment()
 
@@ -343,6 +345,7 @@ class BaseGroupActivityStage(
         fragment.add_content(self.render_template('dashboard_view', render_context))
         return fragment
 
+    @AuthXBlockMixin.check_dashboard_access_for_current_user
     def dashboard_detail_view(self, context):
         """
         Renders stage header for dashboard details view.

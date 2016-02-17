@@ -5,7 +5,6 @@ import logging
 from datetime import date, datetime, timedelta
 import xml.etree.ElementTree as ET
 
-from django.conf import settings
 from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
 from lazy.lazy import lazy
@@ -16,11 +15,6 @@ DEFAULT_EXPIRATION_TIME = timedelta(seconds=10)
 
 log = logging.getLogger(__name__)
 loader = ResourceLoader(__name__)
-
-
-ALLOWED_OUTSIDER_ROLES = getattr(settings, "ALLOWED_OUTSIDER_ROLES", None)
-if ALLOWED_OUTSIDER_ROLES is None:
-    ALLOWED_OUTSIDER_ROLES = ["assistant"]
 
 
 # Make '_' a no-op so we can scrape strings
@@ -38,6 +32,7 @@ MUST_BE_OVERRIDDEN = gettext(u"Must be overridden in inherited class")
 # TODO: collect all constants here?
 class Constants(object):
     ACTIVATE_BLOCK_ID_PARAMETER_NAME = 'activate_block_id'
+    CURRENT_CLIENT_FILTER_ID_PARAMETER_NAME = 'client_filter_id'
     CURRENT_STAGE_ID_PARAMETER_NAME = 'current_stage'
 
 
@@ -51,10 +46,10 @@ class DiscussionXBlockShim(object):
     STUDIO_LABEL = gettext(u"Discussion")
 
 
-class OutsiderDisallowedError(Exception):
+class GroupworkAccessDeniedError(Exception):
     def __init__(self, detail):
         self.value = detail
-        super(OutsiderDisallowedError, self).__init__()
+        super(GroupworkAccessDeniedError, self).__init__()
 
     def __str__(self):
         return "Outsider Denied Access: {}".format(self.value)
@@ -108,15 +103,20 @@ def mean(value_array):
         return None
 
 
-def outsider_disallowed_protected_view(func):
+def groupwork_protected_view(func):
+    """
+    Decorator for a view function, if this function will raise a
+    GroupworkAccessDeniedError this function will return a proper error
+    template.
+    """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except OutsiderDisallowedError as ode:
+        except GroupworkAccessDeniedError as exc:
             error_fragment = Fragment()
             error_fragment.add_content(
-                loader.render_template('/templates/html/loading_error.html', {'error_message': unicode(ode)}))
+                loader.render_template('/templates/html/loading_error.html', {'error_message': unicode(exc)}))
             error_fragment.add_javascript(loader.load_unicode('public/js/group_project_error.js'))
             error_fragment.initialize_js('GroupProjectError')
             return error_fragment
@@ -124,15 +124,19 @@ def outsider_disallowed_protected_view(func):
     return wrapper
 
 
-def outsider_disallowed_protected_handler(func):
+def groupwork_protected_handler(func):
+    """
+    Decorator for a view handler, if this function will raise a
+    GroupworkAccessDeniedError this function will return a proper error json.
+    """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except OutsiderDisallowedError as ode:
+        except GroupworkAccessDeniedError as exc:
             return {
                 'result': 'error',
-                'message': ode.message
+                'message': exc.message
             }
 
     return wrapper

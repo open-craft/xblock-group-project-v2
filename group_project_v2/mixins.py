@@ -1,7 +1,8 @@
+import functools
 import logging
 import os
-
 import itertools
+
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.locator import BlockUsageLocator
@@ -14,8 +15,8 @@ from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.utils import (
-    OutsiderDisallowedError, ALLOWED_OUTSIDER_ROLES, MUST_BE_OVERRIDDEN,
-    loader, outsider_disallowed_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource,
+    GroupworkAccessDeniedError, MUST_BE_OVERRIDDEN,
+    loader, groupwork_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource,
 )
 
 log = logging.getLogger(__name__)
@@ -125,7 +126,201 @@ class UserAwareXBlockMixin(ProjectAPIXBlockMixin):
         return self._known_real_user_ids[anonymous_student_id]
 
 
-class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin):
+class SettingsMixin(object):
+
+    def _get_setting(self, setting, default):
+        result = default
+        settings_service = self.runtime.service(self, "settings")
+        if settings_service:
+            xblock_settings = settings_service.get_settings_bucket(self)
+            if xblock_settings and setting in xblock_settings:
+                result = xblock_settings[setting]
+        return result
+
+
+class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin):
+
+    DEFAULT_TA_ROLE = ('assistant',)
+
+    _ACCESS_DASHBOARD_ROLE_GROUPS_KEY = "access_dashboard_groups"
+    _ACCESS_DASHBOARD_FOR_ALL_ORGS_GROUPS_KEY = "access_dashboard_for_all_orgs_groups"
+    _TA_ROLES_KEY = 'ta_roles'
+
+    @property
+    def see_dashboard_role_perms(self):
+        """
+        :return: Returns a list of group names, user needs to be a member of
+                 any group from this list to access dashboard.
+                 Additionally he will see this dashboard
+                 filtered so he only sees students from organizations he
+                 belongs to.
+        :rtype: Iterable[str]
+        """
+        return self._get_setting(self._ACCESS_DASHBOARD_ROLE_GROUPS_KEY, [])
+
+    @property
+    def see_dashboard_for_all_orgs_perms(self):
+        """
+        :return: Returns a list of group names, user needs to be a member of
+                 any group from this list to access dashboard.
+                 Members of these group will see dashboard with users
+                 from all organizations.
+        :rtype: Iterable[str]
+        """
+        return self._get_setting(self._ACCESS_DASHBOARD_FOR_ALL_ORGS_GROUPS_KEY, [])
+
+    @property
+    def ta_roles(self):
+        """
+
+        .. note:
+
+            This returns different thing than self.see_dashboard_for_all_orgs
+            this returns a **course** role, and rest contains a user group.
+
+        :return: Returns a list of group names. Normally to access a group work
+                 view user will need to belong to a team. If user is a member
+                 of this any group from the list he will be able to access group
+                 work for role group work team.
+        :rtype: Iterable[str]
+        """
+        return self._get_setting(self._TA_ROLES_KEY, self.DEFAULT_TA_ROLE)
+
+    def can_access_dashboard(self, user_id):
+        """
+        :param user_id:
+        :return: True if user can access dashboard.
+        :rtype: bool
+        """
+        user_groups = self._user_groups(user_id)
+        return bool(user_groups & self._access_dashboard_roles)
+
+    @staticmethod
+    def check_dashboard_access_for_current_user(func):
+
+        @functools.wraps(func)
+        def check_dashboard_access_wrapper(self, *args, **kwargs):
+            if not self.can_access_dashboard(self.user_id):
+                raise GroupworkAccessDeniedError("User can't access dashboard")
+            return func(self, *args, **kwargs)
+
+        return check_dashboard_access_wrapper
+
+    def is_user_ta(self, user_id, course_id):
+        """
+        :return: True if user is a TA for a gven course
+        :rtype: bool
+        """
+
+        granted_roles = {r["role"] for r in self.project_api.get_user_roles_for_course(user_id, course_id)}
+        allowed_roles = set(self.ta_roles)
+        return bool(allowed_roles & granted_roles)
+
+    def check_ta_access(self, user_id, course_id):
+        """
+        :return: None
+        :raise GroupworkAccessDeniedError: If user can't access a groupwork item
+        if he is not part of the team.
+        """
+        if not self.is_user_ta(user_id, course_id):
+            raise GroupworkAccessDeniedError("User can't access this group work")
+
+    def get_organization_filter_for_user(self, user_id, additional_filter=None):
+        """
+        :param Iterable[int] additional_filter:
+            Iterable of organization ids that are filtered additionally.
+        :return: Returns object that can be used if user_id has access to
+                 an organization. This callable returns bool an expects to be
+                 called with organization id.
+        :rtype: Callable[[int], bool]
+        """
+        if self._can_user_access_all_orgs(user_id):
+            allowed_org_ids = None
+        else:
+            allowed_orgs = self.project_api.get_user_organizations(user_id)
+            allowed_org_ids = set(org['id'] for org in allowed_orgs)
+        return self.OrganizationFilter(self.project_api, user_id, allowed_org_ids, additional_filter)
+
+    class OrganizationFilter(object):
+
+        """
+        A class that checks whether an user can access an organization.
+
+        Contains two sets: one with organizations user has access to, and second
+        with organizations that user has explicitily filtered for.
+
+        Value None means "all organizations" --- since there can be a large
+        number of organizations, we avoid keeping "all organizations" that way.
+        """
+
+        def __init__(self, project_api, user_id, allowed_org_ids, filter_org_ids=None):
+            """
+            :param TypedProjectApi project_api:
+            :param user_id:
+            :param set[int] allowed_org_ids:
+            :param set[int] filter_org_ids:
+            """
+            self.project_api = project_api
+            self.user_id = user_id
+            self.filter_org_ids = set(filter_org_ids) if filter_org_ids is not None else None
+            """
+            :type: set[int] or None
+            """  # pylint: disable=pointless-string-statement
+            self.allowed_org_ids = set(allowed_org_ids) if allowed_org_ids is not None else None
+            """
+            :type: set[int] or None
+            """  # pylint: disable=pointless-string-statement
+
+        def can_access_other_user(self, user_id):
+            """
+            :param user_id:
+            :return: True if this user can access user with id of ``user_id``.
+                     This user is the user for which this ``OrganizationFilter``
+                     was created (see: self.user_id).
+            :rtype bool:
+            """
+            orgs = self.project_api.get_user_organizations(user_id)
+            return any(self.can_access_other_organization(org['id']) for org in orgs)
+
+        def can_access_other_organization(self, organization_id):
+            """
+            :param organization_id:
+            :return: True if user can see this org
+            :rtype bool:
+            """
+            if self.allowed_org_ids is not None and organization_id not in self.allowed_org_ids:
+                return False
+            if self.filter_org_ids is not None and organization_id not in self.filter_org_ids:
+                return False
+            return True
+
+    def _user_groups(self, user_id):
+        """
+        :param user_id:
+        :return: A set containing a name of each group user belongs to.
+        :rtype: set[str]
+        """
+        return set(group.name for group in self.project_api.get_user_permissions(user_id))
+
+    def _can_user_access_all_orgs(self, user_id):
+        """
+        :param user_id:
+        :return: True if user can access all organizations
+        :rtype: bool
+        """
+        return bool(set(self.see_dashboard_for_all_orgs_perms) & set(self._user_groups(user_id)))
+
+    @property
+    def _access_dashboard_roles(self):
+        """
+        :return: Set containing all names of groups allowing user to
+                 access the dashboard.
+        :rtype: set[str]
+        """
+        return set(itertools.chain(self.see_dashboard_role_perms, self.see_dashboard_for_all_orgs_perms))
+
+
+class WorkgroupAwareXBlockMixin(AuthXBlockMixin, UserAwareXBlockMixin, CourseAwareXBlockMixin):
     """
     Gets current user workgroup, respecting TA review
     """
@@ -145,43 +340,30 @@ class WorkgroupAwareXBlockMixin(UserAwareXBlockMixin, CourseAwareXBlockMixin):
         """
         return self.user_id in [u.id for u in self.workgroup.users]
 
-    @staticmethod
-    def _confirm_outsider_allowed(project_api, user_id, course_id):
-        granted_roles = {r["role"] for r in project_api.get_user_roles_for_course(user_id, course_id)}
-        allowed_roles = set(ALLOWED_OUTSIDER_ROLES)
-
-        return bool(allowed_roles & granted_roles)
-
     @property
     def workgroup(self):
         """
         :rtype: WorkgroupDetails
         """
-        workgroup = self._get_workgroup(self.project_api, self.user_id, self.course_id)
-        return workgroup if workgroup else self.FALLBACK_WORKGROUP
-
-    @staticmethod
-    @memoize_with_expiration()
-    def _get_workgroup(project_api, user_id, course_id):
-        """
-        :rtype: WorkgroupDetails
-        """
         try:
-            user_prefs = UserAwareXBlockMixin._user_preferences(project_api, user_id)
-
+            user_prefs = UserAwareXBlockMixin._user_preferences(self.project_api, self.user_id)
             if UserAwareXBlockMixin.TA_REVIEW_KEY in user_prefs:
-                if not WorkgroupAwareXBlockMixin._confirm_outsider_allowed(project_api, user_id, course_id):
-                    raise OutsiderDisallowedError("User does not have an allowed role")
-                result = project_api.get_workgroup_by_id(user_prefs[UserAwareXBlockMixin.TA_REVIEW_KEY])
+                self.check_ta_access(self.user_id, self.course_id)
+                return self.project_api.get_workgroup_by_id(
+                    user_prefs[UserAwareXBlockMixin.TA_REVIEW_KEY]
+                )
             else:
-                result = project_api.get_user_workgroup_for_course(user_id, course_id)
-        except OutsiderDisallowedError:
+                workgroup = self.project_api.get_user_workgroup_for_course(
+                    self.user_id, self.course_id
+                )
+                if workgroup is None:
+                    return self.FALLBACK_WORKGROUP
+                return workgroup
+        except GroupworkAccessDeniedError:
             raise
         except ApiError as exception:
             log.exception(exception)
-            result = None
-
-        return result
+            return self.FALLBACK_WORKGROUP
 
 
 class XBlockWithComponentsMixin(StudioContainerWithNestedXBlocksMixin):
@@ -191,7 +373,7 @@ class XBlockWithComponentsMixin(StudioContainerWithNestedXBlocksMixin):
     def loader(self):
         return loader
 
-    @outsider_disallowed_protected_view
+    @groupwork_protected_view
     def author_edit_view(self, context):
         """
         Add some HTML to the author view that allows authors to add child blocks.
@@ -201,7 +383,7 @@ class XBlockWithComponentsMixin(StudioContainerWithNestedXBlocksMixin):
         add_resource(self, 'css', 'public/css/group_project_edit.css', fragment)
         return fragment
 
-    @outsider_disallowed_protected_view
+    @groupwork_protected_view
     def author_preview_view(self, context):
         fragment = super(XBlockWithComponentsMixin, self).author_preview_view(context)
         add_resource(self, 'css', 'public/css/group_project.css', fragment)
@@ -258,7 +440,7 @@ class DashboardXBlockMixin(object):
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
 
 
-class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
+class DashboardRootXBlockMixin(AuthXBlockMixin, UserAwareXBlockMixin):
     """
     Mixin for an XBlock that can act as a root XBlock for dashboard view.
     Dashboard root XBlock is responsible for injecting workgroups and students into the view context
@@ -266,18 +448,38 @@ class DashboardRootXBlockMixin(ProjectAPIXBlockMixin):
     TARGET_STUDENTS = 'target_students'
     TARGET_WORKGROUPS = 'target_workgroups'
 
-    def _append_context_parameters_if_not_present(self, context):
+    FILTERED_STUDENTS = "filtered_students"
+
+    def _add_students_and_workgroups_to_context(self, context, filter_by_organization_id=None):
         """
-        Appends target students and target workgroups parameters, if not already present in context
         :param dict context: XBlock view context
+        :param int filter_by_organization_id:
+            If not None students not belonging to organization represented by
+            given id will be filtered out from dashboard view.
+
         :rtype: None
         """
-        workgroups, users = self.get_workgroups_and_students()
-        if self.TARGET_STUDENTS not in context:
-            context[self.TARGET_STUDENTS] = users
+        workgroups, students = self.get_workgroups_and_students()
 
-        if self.TARGET_WORKGROUPS not in context:
-            context[self.TARGET_WORKGROUPS] = workgroups
+        context[self.TARGET_STUDENTS] = list(students)
+        context[self.TARGET_WORKGROUPS] = list(workgroups)
+        context[self.FILTERED_STUDENTS] = set()
+
+        if filter_by_organization_id is None:
+            filter_by_organization_id = None
+        else:
+            filter_by_organization_id = [filter_by_organization_id]
+
+        org_filter = self.get_organization_filter_for_user(self.user_id, filter_by_organization_id)
+
+        filtered_students = set()
+
+        for workgroup in workgroups:
+            for user in workgroup.users:
+                if not org_filter.can_access_other_user(user.id):
+                    filtered_students.add(user.id)
+
+        context[self.FILTERED_STUDENTS] = filtered_students
 
     def get_workgroups_and_students(self):
         return list(self.workgroups), list(self.all_users_in_workgroups)
@@ -320,6 +522,6 @@ class TemplateManagerMixin(object):
 class CommonMixinCollection(
     ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin,
     StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-    WorkgroupAwareXBlockMixin, TemplateManagerMixin
+    WorkgroupAwareXBlockMixin, TemplateManagerMixin, SettingsMixin
 ):
     block_settings_key = 'group_project_v2'
