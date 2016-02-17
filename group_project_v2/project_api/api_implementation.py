@@ -73,6 +73,7 @@ class ProjectAPI(object):
         qs_params = {'page_size': 0}
         return self.send_request(GET, (USERS_API, user_id, 'organizations'), query_params=qs_params)
 
+    @memoize_with_expiration()
     def get_user_preferences(self, user_id):
         """ gets users preferences information """
         return self.send_request(GET, (USERS_API, user_id, 'preferences'), no_trailing_slash=True)

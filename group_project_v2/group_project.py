@@ -181,10 +181,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         fragment = Fragment()
 
         children_context = self._sanitize_context(context)
-        # TODO: Dashboard view does not filtering right now, to add filtering
-        # you need to add organization id here :) and then work with new
-        # context
-        self._add_students_and_workgroups_to_context(children_context, None)
+        self._add_students_and_workgroups_to_context(children_context)
 
         activity_fragments = self._render_children('dashboard_view', children_context, self.activities)
         activity_contents = [frag.content for frag in activity_fragments]
@@ -202,8 +199,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
     @AuthXBlockMixin.check_dashboard_access_for_current_user
     def dashboard_detail_view(self, context):
         ctx = self._sanitize_context(context)
-        self._add_students_and_workgroups_to_context(
-            ctx, ctx[Constants.CURRENT_CLIENT_FILTER_ID_PARAMETER_NAME])
+        self._add_students_and_workgroups_to_context(ctx)
 
         fragment = Fragment()
         render_context = {
@@ -563,9 +559,9 @@ class GroupActivityXBlock(
 
         children_context = context.copy()
 
-        target_workgroups = context.get(DashboardRootXBlockMixin.TARGET_WORKGROUPS)
-        target_users = context.get(DashboardRootXBlockMixin.TARGET_STUDENTS)
-        filtered_users = children_context[DashboardRootXBlockMixin.FILTERED_STUDENTS]
+        target_workgroups = context.get(Constants.TARGET_WORKGROUPS)
+        target_users = context.get(Constants.TARGET_STUDENTS)
+        filtered_users = children_context[Constants.FILTERED_STUDENTS]
 
         stages = []
         stage_stats = {}

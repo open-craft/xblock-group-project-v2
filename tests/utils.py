@@ -20,6 +20,8 @@ class TestConstants(object):
         USER2_ID = 2
         USER3_ID = 3
 
+        UNKNOWN_USER = 200
+
     class Groups(object):
         GROUP1_ID = 1
         GROUP2_ID = 2

@@ -15,8 +15,8 @@ from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.utils import (
-    GroupworkAccessDeniedError, MUST_BE_OVERRIDDEN,
-    loader, groupwork_protected_view, NO_EDITABLE_SETTINGS, memoize_with_expiration, add_resource,
+    MUST_BE_OVERRIDDEN, NO_EDITABLE_SETTINGS, Constants, GroupworkAccessDeniedError,
+    loader, groupwork_protected_view, add_resource
 )
 
 log = logging.getLogger(__name__)
@@ -104,12 +104,7 @@ class UserAwareXBlockMixin(ProjectAPIXBlockMixin):
 
     @lazy
     def user_preferences(self):
-        return self._user_preferences(self.project_api, self.user_id)
-
-    @staticmethod
-    @memoize_with_expiration()
-    def _user_preferences(project_api, user_id):
-        return project_api.get_user_preferences(user_id)
+        return self.project_api.get_user_preferences(self.user_id)
 
     @property
     def is_admin_grader(self):
@@ -346,7 +341,7 @@ class WorkgroupAwareXBlockMixin(AuthXBlockMixin, UserAwareXBlockMixin, CourseAwa
         :rtype: WorkgroupDetails
         """
         try:
-            user_prefs = UserAwareXBlockMixin._user_preferences(self.project_api, self.user_id)
+            user_prefs = self.user_preferences
             if UserAwareXBlockMixin.TA_REVIEW_KEY in user_prefs:
                 self.check_ta_access(self.user_id, self.course_id)
                 return self.project_api.get_workgroup_by_id(
@@ -445,25 +440,19 @@ class DashboardRootXBlockMixin(AuthXBlockMixin, UserAwareXBlockMixin):
     Mixin for an XBlock that can act as a root XBlock for dashboard view.
     Dashboard root XBlock is responsible for injecting workgroups and students into the view context
     """
-    TARGET_STUDENTS = 'target_students'
-    TARGET_WORKGROUPS = 'target_workgroups'
-
-    FILTERED_STUDENTS = "filtered_students"
-
-    def _add_students_and_workgroups_to_context(self, context, filter_by_organization_id=None):
+    def _add_students_and_workgroups_to_context(self, context):
         """
         :param dict context: XBlock view context
-        :param int filter_by_organization_id:
-            If not None students not belonging to organization represented by
-            given id will be filtered out from dashboard view.
-
         :rtype: None
         """
         workgroups, students = self.get_workgroups_and_students()
 
-        context[self.TARGET_STUDENTS] = list(students)
-        context[self.TARGET_WORKGROUPS] = list(workgroups)
-        context[self.FILTERED_STUDENTS] = set()
+        context[Constants.TARGET_STUDENTS] = list(students)
+        context[Constants.TARGET_WORKGROUPS] = list(workgroups)
+        context[Constants.FILTERED_STUDENTS] = set()
+
+        # If not None students not belonging to organization represented by given id will be filtered out
+        filter_by_organization_id = context.get(Constants.CURRENT_CLIENT_FILTER_ID_PARAMETER_NAME, None)
 
         if filter_by_organization_id is None:
             filter_by_organization_id = None
@@ -479,7 +468,7 @@ class DashboardRootXBlockMixin(AuthXBlockMixin, UserAwareXBlockMixin):
                 if not org_filter.can_access_other_user(user.id):
                     filtered_students.add(user.id)
 
-        context[self.FILTERED_STUDENTS] = filtered_students
+        context[Constants.FILTERED_STUDENTS] = filtered_students
 
     def get_workgroups_and_students(self):
         return list(self.workgroups), list(self.all_users_in_workgroups)

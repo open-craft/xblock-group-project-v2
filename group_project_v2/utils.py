@@ -35,6 +35,10 @@ class Constants(object):
     CURRENT_CLIENT_FILTER_ID_PARAMETER_NAME = 'client_filter_id'
     CURRENT_STAGE_ID_PARAMETER_NAME = 'current_stage'
 
+    TARGET_STUDENTS = 'target_students'
+    TARGET_WORKGROUPS = 'target_workgroups'
+    FILTERED_STUDENTS = "filtered_students"
+
 
 class HtmlXBlockShim(object):
     CATEGORY = 'html'
