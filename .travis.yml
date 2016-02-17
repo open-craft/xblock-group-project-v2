@@ -17,7 +17,7 @@ script:
     - pylint tests --rcfile=tests/pylintrc
     - ./node_modules/jshint/bin/jshint group_project_v2 tests
     - ./node_modules/.bin/karma start tests/js/karma.conf.js --single-run
-    - cat coverage/karma_coverage.txt
+    - cat coverage/js/karma_coverage.txt
     - python run_tests.py --with-coverage --cover-package=group_project_v2
 notifications:
   email: false

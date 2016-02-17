@@ -59,7 +59,7 @@ module.exports = function(config) {
     reporters: ['dots', 'coverage'],
 
     coverageReporter: {
-      dir : 'coverage/',
+      dir : 'coverage/js/',
       reporters: [
         {type: 'html', subdir: 'html'},
         {type: 'text', subdir: '.', file: 'karma_coverage.txt'}

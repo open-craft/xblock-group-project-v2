@@ -26,6 +26,7 @@ ifdef XVFB
 else
 	./run_tests.py --with-coverage --cover-package=group_project_v2
 endif
+	coverage html
 
 quality:
 	pep8 group_project_v2 tests --max-line-length=120
