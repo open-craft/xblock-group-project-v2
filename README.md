@@ -1,12 +1,11 @@
-xblock-group-project-v2
-=======================
+# xblock-group-project-v2
+
 
 This XBLock is experimental reimplementation of [Group Project XBlock](https://github.com/edx-solutions/xblock-group-project).
 
 It does *not* work properly in LMS yet.
 
-Features
---------
+## Features
 
 * Structure - group project is organized around activities and stages. 
     * Activities are the larger chunks, used to distinguish between logically bound parts of group project. Activities 
@@ -36,22 +35,19 @@ Features
     * Private discussions - connect with teammates.
     * Ask Teaching Assistant - ask course staff for help in seconds.
 
-Installation
-------------
+## Installation
 
-Configuration
-=============
+# Configuration
 
 In order to have a working Group Project, one need three components:
 1. Author the XBlock in Studio
 2. Set up environment configuration variables
 3. Configure Group Project in Apros (3rd party LMS) 
 
-Authoring
----------
+## Authoring
 
-Configuration variables
------------------------
+
+## Configuration variables
 
 There are two sources of configuration variables: django settings and XBlock-specific settings available 
 through [SettingsService][settings-service].
@@ -107,21 +103,17 @@ Example configuration:
       }
     }
 
-Apros configuration
--------------------
+## Apros configuration
+
 
 See corresponding document in Apros (TBD)
 
-Development
-===========
+# Development
 
-Development Install
--------------------
 
-Running Tests
--------------
+## Development Install
 
-Continuous Integration build
-----------------------------
 
-    
+## Running Tests
+
+## Continuous Integration build
