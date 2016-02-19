@@ -35,22 +35,31 @@ It does *not* work properly in LMS yet.
     * Private discussions - connect with teammates.
     * Ask Teaching Assistant - ask course staff for help in seconds.
 
-## Installation
+## Setup
 
-# Configuration
+In order to use Group Project XBlock v2 in a course, XBlock must be installed into LMS environment and enabled in 
+course's advanced settings. Also, Group Project XBlock uses a number of instance-specific configuration variables, so 
+setting them is considered a part of setup process.
 
-In order to have a working Group Project, one need three components:
-1. Author the XBlock in Studio
-2. Set up environment configuration variables
-3. Configure Group Project in Apros (3rd party LMS) 
+### Installing XBlock into LMS
 
-## Authoring
+If you're using edx-solutions/edx-platform fork, Group Project v2 XBlock is already installed. Otherwise, installing 
+Group Project XBlock v2 is done the very same way other XBlocks are installed:
 
+1. Open terminal (or shell) to the LMS instance.
+2. Switch to LMS virtualenv
+3. pip install -e git+https://github.com/open-craft/xblock-group-project-v2.git@ **version_hash** #egg=xblock-group-project-v2
 
-## Configuration variables
+*version_hash* is the hash of the git commit. By the time of writing, latest stable version was `4322ca8092c5385d5602143077e388017fcb1249`,
+so the above command looked like this:
+
+    pip install -e git+https://github.com/open-craft/xblock-group-project-v2.git@4322ca8092c5385d5602143077e388017fcb1249#egg=xblock-group-project-v2
+    
+### Setting configuration variables
 
 There are two sources of configuration variables: django settings and XBlock-specific settings available 
-through [SettingsService][settings-service].
+through [SettingsService][settings-service]. Both types of settings can be set via LMS environment file `lms.env.json`
+or (not recommended) directly in instance Django settings.
 
 [settings-service]: https://github.com/edx/edx-platform/blob/master/common/lib/xmodule/xmodule/services.py#L7
 
@@ -102,9 +111,56 @@ Example configuration:
         "ta_roles": ["assistant"]
       }
     }
+    
+    
+### Enabling Group Project XBlock v2 in course
+
+To enable the use of Group Project XBlock v2 in the course:
+
+1. Open the course in Studio.
+2. In the top menu choose Settings -> Advances Settings
+3. Add `gp-v2-project` to "Advanced Module List"
+4. Optionally, add `ooyala-player` to "Advanced Module List" - this player is used for video resources
+
+As a result, `Advanced Module List` option should look like that (provided there are no other advanced modules are 
+enabled for course): 
+![Advanced Module List Image](/docs/images/advanced_module_list.png)
+
+
+### (Optional) Notifications integration
+
+Group Project XBlock v2 sends a number of notifications via edx-notifications app. In order to make those notifications
+appear correctly, make sure `NOTIFICATION_CLICK_LINK_URL_MAPS` Django setting contains the following record:
+
+    'open-edx.xblock.group-project-v2.*': '/courses/{course_id}/group_work?activate_block_id={location}'
+    
+If you're using edx-solutions/edx-platform fork, appropriate value is already set. Otherwise, note that 
+`NOTIFICATION_CLICK_LINK_URL_MAPS` are read from `lms.env.json`, so they should be modified there.    
+
+Example:
+
+```
+NOTIFICATION_CLICK_LINK_URL_MAPS = {
+    'open-edx.studio.announcements.*': '/courses/{course_id}/announcements',
+    'open-edx.lms.leaderboard.*': '/courses/{course_id}/cohort',
+    'open-edx.lms.discussions.*': '/courses/{course_id}/discussion/{commentable_id}/threads/{thread_id}',
+    'open-edx.xblock.group-project.*': '/courses/{course_id}/group_work?seqid={activity_location}',
+    'open-edx.xblock.group-project-v2.*': '/courses/{course_id}/group_work?activate_block_id={location}',
+}
+```  
+
+
+# Configuration
+
+In order to have a working Group Project, one need three components:
+1. Author the XBlock in Studio
+2. Set up environment configuration variables (covered earlier)
+3. Configure Group Project in Apros (3rd party LMS) 
+
+## Authoring
+
 
 ## Apros configuration
-
 
 See corresponding document in Apros (TBD)
 
