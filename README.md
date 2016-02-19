@@ -8,6 +8,34 @@ It does *not* work properly in LMS yet.
 Features
 --------
 
+* Structure - group project is organized around activities and stages. 
+    * Activities are the larger chunks, used to distinguish between logically bound parts of group project. Activities 
+      can contain one or more stages. Grading happens at activity level, i.e. one grade per activity.
+    * Stages are smaller building blocks, representing individual steps towards project completion.
+* Collaborative learning - students are organized into workgroups (aka cohorts) to work on a set of problems in a
+  collaborative way.
+* Team communication - group project interface allows sending emails to individual teammates or entire workgroup.
+* Private discussions - private (aka cohorted) discussions can be configured for the group prohect, to provide platform 
+  for discussing the assignments between teammates, and avoid spoiling the results/ideas to other workgroups or future
+  course students.
+* Resources - course authors can provide a set of resources - videos or documents - to help orient students, provide 
+  deliverable templates, or just share some relevant information about the assignment.
+* File submissions - outcomes are uploaded to the server, to facilitate sharing them between teammembers and for future
+  grading.
+* Peer feedback - workgroup members can provide anonymous feedback to each other.
+* Grading - activities are either peer-graded or staff-graded:
+    * Staff grading - staff members with appropriate roles are asked to provide grade for the workgroup.
+    * Peer grading - students are asked to evaluate other workgroups' work.
+    * Staff-grading fallback - if some of the students fail to provide grades to other workgroup, staff members can 
+      interfere and provide missing grades.
+* Omnipresent features - Group Project Navigator is always displayed and provides quick access to most commonly 
+  used features:
+    * Project navigation - jump to any stage in any activity in one click.
+    * Resources panel - all the resources in one place.
+    * Submissions panel - upload, view and change deliverables as you go.
+    * Private discussions - connect with teammates.
+    * Ask Teaching Assistant - ask course staff for help in seconds.
+
 Installation
 ------------
 
