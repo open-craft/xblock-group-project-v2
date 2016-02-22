@@ -236,6 +236,8 @@ Short summary: developing on Group Project XBlock v2 and running tests requires,
 
 Other dependencies are installed via `pip install` or `npm install`.
 
+Group Project XBlock v2 contains a Makefile to help with most common operations.
+
 ## Development Install
 
 In new virtualenv (or in actual install, if you're feeling brave/careless)
@@ -297,3 +299,13 @@ to do that better are welcome).
 [karma-test-runner]: https://karma-runner.github.io/0.13/index.html
 
 ## Continuous Integration build
+
+Travis CI build is configured to run on each PR against master. CI build installs Group Project XBlock v2 from scratch,
+runs unit, js and integration tests and checks code quality. CI build fails if there are any failing tests or quality
+code violations are reported.
+
+Sometimes CI build fails while tests run on development machine pass. To debug such problems, the first step is to 
+replicate CI build installation process and run as close as possible:
+    * Commands run by CI are listed in `.travis.yml -> install` section.
+    * Commands to run tests and quality checks are listed in `.travis.yml -> script` section.
+
