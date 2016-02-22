@@ -221,6 +221,19 @@ Available stages and their intended use:
 
 Detailed list of available XBlocks are [available in the docs folder](/docs/XBlocks.md).
 
+Group Project XBlock v2 uses standard Studio editing capabilities:
+
+<img src="/docs/images/studio_edit1.png" width="400" alt="Studio screenshot displaying project navigator XBlock, with outlined "View" (red outline) and "Edit" (blue outline) buttons">
+
+* Edit button (blue outline) is used to edit XBlock settings, i.e. "Display name", "Open Date", "Close Date", etc.
+* View button (red outline) allows to "jump into" an XBlock and view it's nested XBlocks, allowing to add, configure, 
+    reorder and delete them.
+
+This screenshot shows the same Group Project Navigator XBlock "from the inside", displaying Project Navigator Views
+added to the navigator. 
+
+<img src="/docs/images/studio_edit2.png" width="400" aria-hidden="true">
+
 ## Apros configuration
 
 See corresponding document in Apros (TBD)
