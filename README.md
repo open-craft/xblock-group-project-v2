@@ -320,6 +320,57 @@ Available stage types:
             
 #### Stage components
 
+The following XBlocks are building blocks of stages. They correspond to a signle stage only, and generally useless 
+outside stage context.
+
+* `Resource` - resource XBlocks provides means to attaching documents to Group Project. Those can be some general 
+    document related to group project context, grading criteria rubric, deliverable template, or any other kind of
+    document.
+    * Settings:
+        * `Display Name` - human-friendly resource name - displayed in Project Navigator Resources View
+        * `Resource Description` - a longer human-friendly description of the resource - displayed in Project Navigator 
+            Resources View
+        * `Resource Location` - url to view/download the resource.
+* `Video Resource` - same as `Resource` XBlock, but represents a video resource. Instead of downloading it opens a video
+    viewer. Requires third-party `Ooyala Player` to be installed.
+    * Settings:
+        * `Display Name` - human-friendly resource name - displayed in Project Navigator Resources View
+        * `Resource Description` - a longer human-friendly description of the resource - displayed in Project Navigator 
+            Resources View
+        * `Resource Location` - url to view/download the resource.
+* `Submissions Help Text` - static (developer-defined) help text instructing students to open Project Navigator 
+    Submissions view to upload submissions. Help text contains a link that opens the view automatically.
+    * Settings - none
+    
+    ![Upload help text screenshot](/docs/images/stage_components/upload_help_text.png)
+* `Grade Rubric Help Text` - static (developer-defined) help text instructing students to open Project Navigator
+    Resources view to access group project documetns on grading. Help text contains a link that opens the view 
+    automatically.
+    * Settings - none
+* `Submission` - component that encapsulates single group project submission.
+    * Settings:
+        * `Display Name` - human-friendly submission name - displayed in Project Navigator Submisssions View
+        * `Submission Description` - a longer human-friendly description of a submission - displayed in Project 
+            Navigator Submisssions View
+        * `Upload ID` - upload identifier - used to identify submission to uploads API. Submissions with same upload ID
+            will be updated simultaneously, so it is best to assign some unique value here. Not displayed anywhere, so
+            does not need to be human-comprehensible (i.e. random strings are good idea)
+* `Teammate Selector` - displays a list of teammates and allows switching between them. Only usable in conjunction with
+    `Team Evaluation` stage and `Review Question` blocks. When teammate is selected, `Team Evaluation` stage downloads 
+    current student's responses to `Review Question` and sets corresponding `Review Question` values. Displays current
+    student progress of reviewing other teammates by displaying completion icons next to each teammate.
+    * Settings - none
+    
+    ![Teammate selector screenshot](/docs/images/stage_components/teammate_selector.png)
+* `Group Selector` - displays a list of groups and allows switching between them. Only usable in conjunction with
+    `Peer Grading` stage and `Review Question` blocks. When group is selected, `Peer Grading` stage downloads 
+    current student's responses to `Review Question` and sets corresponding `Review Question` values. Displays current
+    student progress of reviewing other teammates by displaying completion icons next to each teammate. Allows reviewing
+    group submissions by clicking "View team submissions"
+    * Settings - none
+    
+    ![Group selector screenshot](/docs/images/stage_components/group_selector.png)
+
 ## Apros configuration
 
 See corresponding document in Apros (TBD)
