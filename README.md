@@ -159,6 +159,166 @@ In order to have a working Group Project, one need three components:
 
 ## Authoring
 
+Group Project XBlock v2 relies heavily on "nested XBlocks" feature, provided by edX Platform and XBlocks ecosystem.
+To be precise, Group Project is built from smaller XBlocks, each implementing some smaller subset of Group project 
+functionality: peer grading, submissions upload, team discussions, etc. Most of these features are internal to Group 
+Project XBlock v2 package, but some more advanced features reuse other XBlocks.
+
+Overall, the project structure is the following:
+
+* Group Project XBlock
+    * Group Activity XBlock 1
+        * Stage XBlock 1
+        * Stage XBlock 2
+            * Stage component XBlock
+            * Stage component XBlock
+        * Stage XBlock 3
+    * Group Activity XBlock 2
+        * Stage XBlock 4
+            * Stage Component XBlock
+        * Stage XBlock 5
+    * Project Navigator XBlock
+        * Project Navigation View Xblock
+        * Submissions View XBlock
+        * Resources View XBlock
+        * Private Discussion View XBlock
+    * Discussion XBlock
+    
+In this example Group Project with two activities, Project Navigator and Private Discussions is shown. Activity 1 
+is composed of three stages, Activity 2 is composed of two stages. Some stages have stage components - even smaller
+building blocks, varied by stage type. Project Navigator have most of the Project Navigator available.
+
+### Group Project building blocks
+
+The following blocks are a part of Group Project XBlock v2.
+
+#### Top-level XBlocks
+
+* ` Group Project` - top level XBlock, represents entire group project as a whole
+    * Settings:
+        * `Display Name` - human-friendly name for Group Project - displayed in admin console.
+    * Components: 
+        * `Group Project Activity` - multiple instances.
+        * [`Group Project Navigator`](#project-navigator-and-views) - single instance
+        * `Discussion` - external XBlock: see https://github.com/edx-solutions/xblock-discussion; single instance
+* `Group Project Activity` - represents single activity in group project, grading happens at this level, hence the block
+    carries settings for grading
+    * Components:
+        * `Display Name` - human-friendly activity name - appears in admin console and in Project Navigator (i.e. 
+            visible both to students and course staff)
+        * `Weight` - grading attribute - the higher the weight the more influential this activity compared to other
+            graded exercises in the same grading bucket (including group project activities and graded excercises)
+        * `Reviews Required Minimum` - Peer Grading attribute - sets a number of reviews to be received by a workgroup
+            so it can be graded. If set to 0 (zero), activity is considered TA-graded.
+        * `User Reviews Required Minimum` - Peer Grading attribute - the minimum number of other-group reviews that an 
+            individual student should perform.
+        * `Due Date` - Activity due date - displayed to students in Apros progress page. Does not actually prevent users
+            from uploading submissions, casting reviews and other group project related activities as it is superceded 
+            by individual stages due dates. Informational only.
+    * Components:
+        * [Stages XBlocks](#stages-xblocks) - multiple instances
+        
+#### Project Navigator and Views
+
+Project Navigator XBlock is designed to allow quick access to Navigation and other commonly used group project features.
+
+* `Group Project Navigator` - top level Project Navigator XBlock. Can contain multiple Project Navigator View XBlocks 
+    (one per type at most), and allows switching between the views.
+    * Settings - none
+    * Components (single instance per type):
+        * `Navigation View` - provides group project navigation capabilities. **Required.**
+        * `Submission View` - lists all the required submissions, provides options to upload a submission, 
+            review and re-upload previous submissions.
+        * `Resources View` - lists all the resources configured for group project.
+        * `Ask a TA View` - provides simple interface to message course TA.
+        * `Private Discussion View` - opens private discussion XBlock. Requires `Discussion` to be added to root `Group
+            project` XBlock.
+            
+**Important note:** Neither `Group Project Navigator` nor navigation view XBlocks have any configurable settings.
+        
+#### Stages XBlocks
+
+Stages XBlocks provides core functionality to the group project. There are multiple types of stages, each encapsulating 
+one of the possible steps towards project completion. Unlike other XBlocks, stages have some common settings and can
+use some common components:
+
+* Common settings:
+    * `Display Name` - human-friendly stage name - appears in admin console and in Project Navigator (i.e. 
+        visible both to students and course staff). Default: some sensible name for a stage (different per stage type)
+    * `Open Date` - sets stage open date - the date when stage becomes available to the students, so that students can
+        start perform actions on that stage (upload submission, cast a review, etc.). Default: no open date - stage is
+        available right away. 
+    * `Close Date` - sets stage close date - the date when stage becomes closed, so students can no longer perform 
+        actions on that stage. Default: no close date - stage is always available. 
+    * `Hide stage type label` - governs stage appearance in Project Navigator view. If set to True, stage Display Name
+        will be prefixed with stage type (i.e. `Overview`, `Task`, `Review`, etc.) in project navigation. 
+        Otherwise, Display Name is displayed as is. Default: True
+* Common components:
+    * `HTML` - HTML XBlock provided by edX platform - contains arbitrary HTML markup (text, images, etc.)
+    * `Resource` - group project resource XBlock - see [Stage components](#stage-components) section for details
+    * `VideoResource` - group project resource XBlock - see [Stage components](#stage-components) section for details
+    * `Project Team` - project team XBlock - see [Stage components](#stage-components) section for details
+        
+Available stage types:
+
+* `Text` - simple stage displaying a course author-defined text, images, etc.
+    * Settings - no stage-specific settings
+    * Components - no stage-specific components
+    * Completion criteria: completed when user first visits it when the stage is open.
+* `Completion` - similar to `Text` staqge, but requires user interaction to be marked as completed - checking a 
+    checkbox. Note that checkbox becomes disabled when checked, so it's not possible for a student to cancel 
+    "stage completed" action.
+    * Settings - no stage-specific settings
+    * Components - no stage-specific components
+    * Completion criteria: completed when user checks a checkbox "Yes, I have completed this task"
+* `Deliverable` - stage that specifies the list of group submissions.
+    * Settings - no stage-specific settings
+    * Components:
+        * `Submissions Help Text` - static (developer-defined) help text instructing students to open Project Navigator
+            Submissions view to upload submissions. Help text contains a link that opens the view automatically.
+        * `Submission` - specifies one deliverable (aka submission) - see [Stage components](#stage-components) section 
+            for details.
+    * Completion criteria: completed when all the submissions are uploaded. Note that submissions are required on group
+        basis rather than on individual basis, so all the students in the group get this stage completed as soon as
+        any of them uploads last submission. It does not matter which student uploads the submission - all uploads
+        count towards entire group progress.
+* `Team Evaluation` - allows students to provide anonymous feedback to their teammates.
+    * Settings - no stage-specific settings
+    * Components:
+        * `Teammate selector` - displays a list of teammates. **Required, one at most**
+        * `Grade Rubric Help Text` - static (developer-defined) help text instructing students to open Project Navigator
+            Resources view to access group project documetns on grading. Help text contains a link that opens the view 
+            automatically.
+        * `Review Question` - represents review question - see [Stage components](#stage-components) section for details
+    * Completion criteria: completed when student provided answers to all required questions for all teammates.
+* `Peer Grading` - allows students and/or TAs to provide anonymous feedback and grades to other groups.
+    * Settings - no stage-specific settings
+    * Components:
+        * `Group selector` - displays a list of groups student should grade. **Required, one at most**
+        * `Grade Rubric Help Text` - static (developer-defined) help text instructing students to open Project Navigator
+            Resources view to access group project documetns on grading. Help text contains a link that opens the view 
+            automatically.
+        * `Review Question` - represents review question - see [Stage components](#stage-components) section for details
+    * Completion criteria: completed when student provided answers to all required questions for all groups assigned 
+        for review.
+* `Evaluation Display` - displays teammate feedback for students
+    * Settings - no stage-specific settings
+    * Components:
+        * `Team Evaluation Display` - block that displays teammates' answers to one of the review questions. 
+            See [Stage components](#stage-components) section for details.
+    * Completion criteria: completed when user first visits it when the stage is open and teammates have competed their
+        reviews - provided answers to all the required questions chosen in `Team Evaluation Display` blocks.
+* `Grade Display` - displays group feedback and grades from students and/or TAs 
+    * Settings - no stage-specific settings
+    * Components:
+        * `Grade Evaluation Display` - block that displays other students' and/or TAs answers to one of the review 
+            questions. See [Stage components](#stage-components) section for details.
+    * Completion criteria: completed when user first visits it when the stage is open and grades are available - when 
+        other students and/or TAs provided answers to all the required questions chosen in `Grade Evaluation Display` 
+        blocks.
+            
+            
+#### Stage components
 
 ## Apros configuration
 
