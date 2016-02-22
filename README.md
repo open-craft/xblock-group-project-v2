@@ -227,10 +227,73 @@ See corresponding document in Apros (TBD)
 
 # Development
 
+Short summary: developing on Group Project XBlock v2 and running tests requires, at the minimum:
+
+* python>=2.7,<3.0
+* pip>=6.0
+* node.js>=0.10
+* npm>=1.3.10 (might work with older versions, but not checked)
+
+Other dependencies are installed via `pip install` or `npm install`.
 
 ## Development Install
 
+In new virtualenv (or in actual install, if you're feeling brave/careless)
+
+    pip install -r requirements/dev.txt 
+
+should get you up and running. It installs requirements both from `base.txt` (contains "production" dependencies) and 
+`test.txt` (test dependencies), as well as Group Project XBlock v2 itself.
 
 ## Running Tests
+
+Group Project XBlock v2 contains three kinds of tests: python unit tests, javascript tests an integration tests.
+
+Unit tests are located in `tests/unit` folder. They are lighter, but only test one program "unit" at a time (a signle 
+method or property usually). They run relatively fast, so it is a good idea to run them frequently during development 
+process.
+
+Integration tests are built on top of selenium and [bok_choy][bok-choy]. They execute a real web server running a XBlock
+workbench, so they run time is significantly larger than that of unittests.
+
+Helper file `run_tests.py` is provided to run python unittests and integration tests. It runs Django and workbench
+under the hood, so it accepts the same parameters as Django unit test runner.
+
+Examples:
+
+    ./run_tests.py tests/unit - runs all tests in unittest suite
+    ./run_tests.py tests/unit/test_mixins.py - runs all tests in test_mixins.py file 
+    ./run_tests.py tests/unit/test_mixins.py:TestChildrenNavigationXBlockMixin - runs all tests in TestChildrenNavigationXBlockMixin class
+    ./run_tests.py tests/unit/test_mixins.py:TestChildrenNavigationXBlockMixin.test_child_category - runs single test
+    
+    ./run_tests.py --with-coverage --cover-package=group_project_v2 - run all tests with coverage
+
+Since selenium tests open an actual browser, running them will impede other activities at the machine, as each new 
+browser window opened for each test will capture focus. Thus, it is advices to run integration tests using `xvfb-run`. 
+Note that some tests will fail if screen size is insufficient, so recommended screen size is 1920x1080x24:
+
+     xvfb-run --server-args="-screen 0, 1920x1080x24" ./run_tests.py tests/integration --with-coverage --cover-package=group_project_v2
+
+[bok-choy]: https://github.com/edx/bok-choy
+
+Javascript tests exercise various javascript components of Group Project XBlock. They are written using [jasmine test
+framework][jasmine-test-framework] and are executed by [karma test runner][karma-test-runner]. Karma runs in node.js,
+so a compatible version of node.js and npm should be installed.
+
+Karma can run tests in two modes: continuous and single run. Single run mode executes all the tests once and than 
+terminates, presenting the results of run. In continuous mode, karma installs watchers on all the files included for the
+test run (both actual source files and files with tests) and re-runs the tests each time any file is updated.
+
+It is advised to use continuous mode for development. To start karma runner in development mode, issue the following
+
+    ./node_modules/.bin/karma start tests/js/karma.conf.js
+    
+Note that by default `karma-coverage` plugin is enabled. As a result, debugging JS tests might be problematic, as it
+modifies the source files on the fly by inserting coverage API calls. Simplest way to workaroud that is to comment 
+`coverage` reporter in `tests/js/karma.conf.js -> reporters` for the duration of debugging session (suggestions on how 
+to do that better are welcome). 
+
+[jasmine-test-framework]: http://jasmine.github.io/edge/introduction.html
+[karma-test-runner]: https://karma-runner.github.io/0.13/index.html
 
 ## Continuous Integration build
