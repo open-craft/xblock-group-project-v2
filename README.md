@@ -298,6 +298,26 @@ to do that better are welcome).
 [jasmine-test-framework]: http://jasmine.github.io/edge/introduction.html
 [karma-test-runner]: https://karma-runner.github.io/0.13/index.html
 
+## Code quality checks
+
+Code quality assertion tools are used to check both python (pep8 and pylint) and javascript (jshint) code quality.
+ 
+Both `group_project_v2` (actual code) and `tests` (tests, obviously) packages are checked. `pep8` is run with default 
+settings, except for `max-line-length=120`. `pylint` uses different pylintrc files for [group_project_v2 package]
+[gp-v2-pylintrc] and [tests package][tests-pylintrc].
+
+[gp-v2-pylintrc]: pylintrc
+[tests-pylintrc]: tests/pylintrc
+
+Javascript: same as with python code, both actual; code in `group_project_v2/public/js` and tests in `tests/js` are 
+checked, except for the vendor files in `group_project_v2/public/js/vendor`. Roughly equivalent jshintrc files are
+used for [actual code][gp-v2-jshintrc] and [tests][tests-jshintrc]
+
+[gp-v2-jshintrc]: .jshintrc
+[tests-jshintrc]: tests/.jshintrc
+
+[jshintrc]: .jshintrc
+
 ## Continuous Integration build
 
 Travis CI build is configured to run on each PR against master. CI build installs Group Project XBlock v2 from scratch,
