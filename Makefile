@@ -12,7 +12,7 @@ test-requirements:
 	pip install -r requirements/test.txt
 
 js-requirements:
-	npm install karma karma-jasmine karma-firefox-launcher karma-requirejs karma-jquery jasmine-jquery jshint
+	npm install
 
 setup-self:
 	python setup.py sdist && pip install dist/xblock-group-project-v2-0.4.tar.gz
