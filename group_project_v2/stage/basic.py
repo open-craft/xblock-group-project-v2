@@ -114,6 +114,10 @@ class SubmissionStage(BaseGroupActivityStage):
         return blocks
 
     @property
+    def is_graded_stage(self):
+        return True
+
+    @property
     def submissions(self):
         """
         :rtype: collections.Iterable[GroupProjectSubmissionXBlock]
