@@ -4,6 +4,7 @@ dist
 *~
 .coverage
 coverage
+coverage.xml
 *.log
 *.log.*
 .DS_Store
