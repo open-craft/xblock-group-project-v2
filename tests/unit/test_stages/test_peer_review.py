@@ -317,7 +317,7 @@ class TestPeerReviewStageReviewStatus(ReviewStageBaseTest, ReviewStageUserComple
         ([1, 2], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a', '1:q2:10:b', '2:q1:10:c', '2:q2:10:d']}, StageState.COMPLETED),
     )
     @ddt.unpack
-    def test_get_group_completions(self, reviewers, questions, review_items, expected_result):
+    def test_get_external_group_status(self, reviewers, questions, review_items, expected_result):
         group = mk_wg(GROUP_ID, [{"id": 1}])
         self.project_api_mock.get_workgroup_reviewers.return_value = [{'id': user_id} for user_id in reviewers]
 
@@ -355,7 +355,7 @@ class TestPeerReviewStageReviewStatus(ReviewStageBaseTest, ReviewStageUserComple
         ([1, 2], ['q1', 'q2'], {GROUP_ID: ['1:q1:10:a', '1:q2:10:b', '2:q2:10:c', '2:q2:10:d']}, StageState.COMPLETED),
     )
     @ddt.unpack
-    def test_ta_get_group_completions(self, ta_reviewers, questions, review_items, expected_result):
+    def test_ta_get_external_group_status(self, ta_reviewers, questions, review_items, expected_result):
         group_to_review = mk_wg(GROUP_ID, [{"id": 1}])
         self.activity_mock.is_ta_graded = True
 

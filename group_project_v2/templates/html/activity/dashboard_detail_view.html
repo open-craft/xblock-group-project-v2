@@ -33,9 +33,11 @@
         {% for stage in stages %}
           <td>
             {% with stage_states=group.stage_states|get_item:stage.id %}
-              <span class="group-project-stage-state fa {{ stage_states.students_provided_grades }}"></span>
-              {% if stage_states.group_received_grades %}
-                <span class="group-project-stage-state fa {{ stage_states.group_received_grades }}"></span>
+              <span class="group-project-stage-state fa {{ stage_states.internal_status }}"></span>
+              {% if stage_states.external_status != StageState.NOT_AVAILABLE %}
+                <span class="group-project-stage-state-label  {{ stage_states.external_status }}">
+                  {{ stage_states.external_status_label }}
+                </span>
               {% endif %}
             {% endwith %}
           </td>

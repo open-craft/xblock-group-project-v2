@@ -24,7 +24,7 @@ from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.stage.utils import StageState
 from group_project_v2.utils import (
     mean, make_key, groupwork_protected_view, get_default_stage, DiscussionXBlockShim, Constants,
-    add_resource, gettext as _, get_block_content_id, export_to_csv
+    add_resource, gettext as _, get_block_content_id, export_to_csv, named_tuple_with_docstring
 )
 from group_project_v2.stage import (
     BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
@@ -295,6 +295,21 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
             return self.activities[0].get_stage_to_display(target_block_id)
 
         return None  # if there are no activities there's no stages as well - nothing we can really do
+
+
+StageCompletionDetailsData = named_tuple_with_docstring(  # pylint: disable=invalid-name
+    "StageCompletionDetailsData",
+    ['internal_group_status', 'external_group_status', 'external_group_status_label', 'user_stats', 'groups_to_grade'],
+    """
+    StageCompletionDetailsData members
+    * internal_group_status: dict[group_id, StageState] - group-wise internal completion status - aggregate
+        of individual student statuses
+    * external_group_status: dict[group_id, StageState] - group-wise external completion status. Not all stages
+        have external statuses, see stage's get_external_group_status for meaning of external status.
+    * user_stats: dict[user_id, StageState] - user-wise completion
+    * groups_to_grade: dict[user_id, list[{'id': group_id}] - groups to review for each user
+    """
+)
 
 
 @XBlock.wants('notifications')
@@ -574,11 +589,11 @@ class GroupActivityXBlock(
             stage_stats[stage.id] = self._get_stage_completion_details(stage, target_workgroups, target_users)
 
         groups_data = self._build_groups_data(target_workgroups, stage_stats, filtered_users)
-
         visible_groups = [group for group in groups_data if group["group_visible"]]
 
         render_context = {
             'activity': self,
+            'StageState': StageState,
             'stages': stages,
             'stages_count': len(stages),
             'groups': visible_groups,
@@ -590,38 +605,40 @@ class GroupActivityXBlock(
 
         return fragment
 
-    def _render_user(self, user, stage_stats, filtered_users):
+    def _render_user(self, user, stage_stats, filtered_students):
         """
         :param group_project_v2.project_api.dtos.ReducedUserDetail user:
-
+        :param dict[str, StageCompletionDetailsData] stage_stats: Stage completion statistics
+        :param set[int] filtered_students:  users filtered out from view
         :return: dict
         """
 
         return {
             'id': user.id, 'full_name': user.full_name, 'email': user.email,
-            'is_filtered_out': user.id in filtered_users,
+            'is_filtered_out': user.id in filtered_students,
             'stage_states': {
-                stage_id: stage_data.get('user_stats', {}).get(user.id, StageState.UNKNOWN)
+                stage_id: stage_data.user_stats.get(user.id, StageState.UNKNOWN)
                 for stage_id, stage_data in stage_stats.iteritems()
             },
             'groups_to_grade': {
                 stage_id: [
                     {'id': group.id, 'ta_grade_link': self.get_ta_review_link(group.id, stage_id)}
-                    for group in stage_data.get('groups_to_grade', {}).get(user.id, [])
+                    for group in stage_data.groups_to_grade.get(user.id, [])
                 ]
                 for stage_id, stage_data in stage_stats.iteritems()
             }
         }
 
-    def _render_workgroup(self, workgroup, stage_stats, children_context):
+    def _render_workgroup(self, workgroup, stage_stats, filtered_students):
         """
-
         :param group_project_v2.project_api.dtos.WorkgroupDetails workgroup:
+        :param dict[str, StageCompletionDetailsData] stage_stats: Stage completion statistics
+        :param set[int] filtered_students:  users filtered out from view
         :return: dict
         """
 
         users = [
-            self._render_user(user, stage_stats, children_context)
+            self._render_user(user, stage_stats, filtered_students)
             for user in workgroup.users
         ]
 
@@ -635,10 +652,9 @@ class GroupActivityXBlock(
             'group_visible': group_visible,
             'stage_states': {
                 stage_id: {
-                    'students_provided_grades':
-                        stage_data.get('students_provided_grades', {}).get(workgroup.id, StageState.UNKNOWN),
-                    'group_received_grades':
-                        stage_data.get('group_received_grades', {}).get(workgroup.id, StageState.UNKNOWN),
+                    'internal_status': stage_data.internal_group_status.get(workgroup.id, StageState.UNKNOWN),
+                    'external_status': stage_data.external_group_status.get(workgroup.id, StageState.NOT_AVAILABLE),
+                    'external_status_label': stage_data.external_group_status_label.get(workgroup.id, ""),
                 }
                 for stage_id, stage_data in stage_stats.iteritems()
             },
@@ -650,7 +666,11 @@ class GroupActivityXBlock(
         Converts WorkgroupDetails into dict expected by dashboard_detail_view template.
 
         :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] workgroups: Workgroups
-        :param dict stage_stats: Stage statistics - group-wise and user-wise completion data and groups_to_review
+        :param dict[str, StageCompletionDetailsData] stage_stats: Stage statistics - group-wise and user-wise completion
+            data and groups_to_review.
+        :param set[int] filtered_users: users filtered out from view - depending on actual view
+            (dashboard or dashboard details) such students are either completely excluded, or included but diplayed
+            differently
         :rtype: list[dict]
         :returns:
             List of dictionaries with the following format:
@@ -668,22 +688,20 @@ class GroupActivityXBlock(
             for workgroup in workgroups
         ]
 
-    @staticmethod
-    def _get_stage_completion_details(stage, target_workgroups, target_users):
+    @classmethod
+    def _get_stage_completion_details(cls, stage, target_workgroups, target_students):
         """
         Gets stage completion stats from individual stage
         :param group_project_v2.stage.BaseGroupActivityStage stage: Get stage stats from this stage
-        :rtype: dict
-        :returns:
-            Dictionary with the following keys:
-            * group_stats: dict[group_id, StageState] - group-wise completion
-            * user_stats: dict[user_id, StageState] - user-wise completion
-            * groups_to_grade: dict[user_id, list[{'id': group_id}] - groups to review for each user
+        :param collections.Iterable[group_project_v2.project_api.dtos.WorkgroupDetails] target_workgroups:
+        :param collections.Iterable[group_project_v2.project_api.dtos.ReducedUserDetails] target_students:
+        :rtype: StageCompletionDetailsData
+        :returns: Stage completion stats
         """
-        completed_users, partially_completed_users = stage.get_users_completion(target_workgroups, target_users)
+        completed_users, partially_completed_users = stage.get_users_completion(target_workgroups, target_students)
         user_stats = {}
         groups_to_grade = {}
-        for user in target_users:
+        for user in target_students:
             state = StageState.NOT_STARTED
             if user.id in completed_users:
                 state = StageState.COMPLETED
@@ -694,11 +712,22 @@ class GroupActivityXBlock(
             if isinstance(stage, PeerReviewStage):
                 groups_to_grade[user.id] = stage.get_review_subjects(user.id)
 
-        students_provided_grades, group_received_grades = {}, {}
-        for group in target_workgroups:
-            if isinstance(stage, PeerReviewStage):
-                group_received_grades[group.id] = stage.get_group_completion(group)
+        external_group_status, external_group_status_label, internal_group_status = cls._get_group_statuses(
+            stage, target_workgroups, user_stats
+        )
 
+        return StageCompletionDetailsData(
+            internal_group_status=internal_group_status,
+            external_group_status=external_group_status,
+            external_group_status_label=external_group_status_label,
+            user_stats=user_stats,
+            groups_to_grade=groups_to_grade
+        )
+
+    @classmethod
+    def _get_group_statuses(cls, stage, target_workgroups, user_stats):
+        internal_group_status, external_group_status, external_group_status_label = {}, {}, {}
+        for group in target_workgroups:
             user_completions = [user_stats.get(user.id, StageState.UNKNOWN) for user in group.users]
             student_review_state = StageState.NOT_STARTED
             if all(completion == StageState.COMPLETED for completion in user_completions):
@@ -707,14 +736,12 @@ class GroupActivityXBlock(
                 student_review_state = StageState.INCOMPLETE
             elif any(completion == StageState.UNKNOWN for completion in user_completions):
                 student_review_state = StageState.UNKNOWN
-            students_provided_grades[group.id] = student_review_state
+            internal_group_status[group.id] = student_review_state
 
-        return {
-            'students_provided_grades': students_provided_grades,
-            'group_received_grades': group_received_grades,
-            'user_stats': user_stats,
-            'groups_to_grade': groups_to_grade
-        }
+            external_status = stage.get_external_group_status(group)
+            external_group_status[group.id] = external_status
+            external_group_status_label[group.id] = stage.get_external_status_label(external_status)
+        return external_group_status, external_group_status_label, internal_group_status
 
     def mark_complete(self, user_id):
         self.runtime.publish(self, 'progress', {'user_id': user_id})

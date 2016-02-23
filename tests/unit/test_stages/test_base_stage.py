@@ -180,3 +180,9 @@ class TestBaseGroupActivityStage(BaseStageTest):
             self.block.dashboard_view(context)
 
         patched_stats.assert_called_once_with(workgroups, expected_students)
+
+    def test_get_external_group_status(self):
+        self.assertEqual(self.block.get_external_group_status('irrelevant'), StageState.NOT_AVAILABLE)
+
+    def test_get_external_status_label(self):
+        self.assertEqual(self.block.get_external_status_label('irrelevant'), self.block.DEFAULT_EXTERNAL_STATUS_LABEL)
