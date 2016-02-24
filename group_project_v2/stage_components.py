@@ -71,19 +71,19 @@ class GroupProjectResourceXBlock(BaseGroupProjectResourceXBlock):
     PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/resource.html'
 
     resource_location = String(
-        display_name=_(u"Resource location"),
+        display_name=_(u"Resource Location"),
         help=_(u"A url to download/view the resource"),
         scope=Scope.settings,
     )
 
     grading_criteria = Boolean(
-        display_name=_(u"Grading criteria?"),
+        display_name=_(u"Grading Criteria?"),
         help=_(u"If true, resource will be treated as grading criteria"),
         scope=Scope.settings,
         default=False
     )
 
-    editable_fields = ('display_name', 'description', 'resource_location', 'grading_criteria')
+    editable_fields = ('display_name', 'description', 'resource_location', )
 
     def author_view(self, context):
         return self.resources_view(context)
@@ -199,7 +199,7 @@ class GroupProjectSubmissionXBlock(
     )
 
     description = String(
-        display_name=_(u"Resource Description"),
+        display_name=_(u"Submission Description"),
         scope=Scope.settings
     )
 
@@ -391,8 +391,8 @@ class ReviewSubjectSeletorXBlockBase(BaseStageComponentXBlock, XBlockWithPreview
 
 class PeerSelectorXBlock(ReviewSubjectSeletorXBlockBase, UserAwareXBlockMixin):
     CATEGORY = "gp-v2-peer-selector"
-    STUDIO_LABEL = _(u"Teammate selector")
-    display_name_with_default = _(u"Teammate selector XBlock")
+    STUDIO_LABEL = _(u"Teammate Selector")
+    display_name_with_default = _(u"Teammate Selector XBlock")
     STUDENT_TEMPLATE = "templates/html/components/peer_selector.html"
 
     @property
@@ -425,8 +425,8 @@ class PeerSelectorXBlock(ReviewSubjectSeletorXBlockBase, UserAwareXBlockMixin):
 
 class GroupSelectorXBlock(ReviewSubjectSeletorXBlockBase):
     CATEGORY = "gp-v2-group-selector"
-    STUDIO_LABEL = _(u"Group selector")
-    display_name_with_default = _(u"Group selector XBlock")
+    STUDIO_LABEL = _(u"Group Selector")
+    display_name_with_default = _(u"Group Selector XBlock")
     STUDENT_TEMPLATE = "templates/html/components/group_selector.html"
 
     @property
@@ -465,22 +465,20 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
     )
 
     title = String(
-        display_name=_(u"Question text"),
+        display_name=_(u"Question Text"),
         default=_(u""),
         scope=Scope.content
     )
 
-    # Label could be an HTML child XBlock, content could be a XBlock encapsulating HTML input/select/textarea
-    # unfortunately, there aren't any XBlocks for HTML controls, hence reusing GP V1 approach
     assessment_title = String(
-        display_name=_(u"Assessment question text"),
+        display_name=_(u"Assessment Question Text"),
         help=_(u"Overrides question title when displayed in assessment mode"),
         default=None,
         scope=Scope.content
     )
 
     question_content = String(
-        display_name=_(u"Question content"),
+        display_name=_(u"Question Content"),
         help=_(u"HTML control"),
         default=_(u""),
         scope=Scope.content,
@@ -502,7 +500,7 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
     )
 
     single_line = Boolean(
-        display_name=_(u"Single line"),
+        display_name=_(u"Single Line"),
         help=_(u"If True question label and content will be displayed on single line, allowing for more compact layout."
                u"Only affects presentation."),
         default=False,
@@ -510,7 +508,7 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
     )
 
     question_css_classes = String(
-        display_name=_(u"CSS classes"),
+        display_name=_(u"CSS Classes"),
         help=_(u"CSS classes to be set on question element. Only affects presentation."),
         scope=Scope.content
     )
@@ -592,14 +590,14 @@ class GroupProjectBaseFeedbackDisplayXBlock(
     QUESTION_ID_IS_NOT_UNIQUE = _(u"Question ID is not unique")
 
     question_id = String(
-        display_name=_(u"Question"),
+        display_name=_(u"Question ID"),
         help=_(u"Question to be assessed"),
         scope=Scope.content,
         default=DEFAULT_QUESTION_ID_VALUE
     )
 
     show_mean = Boolean(
-        display_name=_(u"Show mean value"),
+        display_name=_(u"Show Mean Value"),
         help=_(u"If True, converts review answers to numbers and calculates mean value"),
         default=False,
         scope=Scope.content

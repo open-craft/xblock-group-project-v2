@@ -12,7 +12,7 @@ test-requirements:
 	pip install -r requirements/test.txt
 
 js-requirements:
-	npm install karma karma-jasmine karma-firefox-launcher karma-requirejs karma-jquery jasmine-jquery jshint
+	npm install
 
 setup-self:
 	python setup.py sdist && pip install dist/xblock-group-project-v2-0.4.tar.gz
@@ -29,8 +29,8 @@ endif
 	coverage html
 
 diff-cover:
-	coverage xml
-	diff-cover --compare-branch=master coverage.xml
+	coverage xml -o coverage/py/cobertura/coverage.xml
+	diff-cover --compare-branch=master coverage/py/cobertura/coverage.xml coverage/js/cobertura/coverage.xml
 
 quality:
 	pep8 group_project_v2 tests --max-line-length=120
