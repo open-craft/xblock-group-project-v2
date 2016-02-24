@@ -11,13 +11,13 @@ Other dependencies are installed via `pip install -r requirements/dev.txt` and `
 
 Group Project XBlock v2 contains a Makefile to help with most common operations: 
 
-    * `make` to install everything, run tests, check code quality and collect coverage report
-    * `make test_fast` to run all tests without provisioning environment (i.e. env should be already provisioned)
-    * `make quality` to run all quality checks - fails fast, so does not always output all the problems. When fixing
-        quality violations make sure to run `make quality` again until clean pass.
-    * `make clean` - cleans tests and coverage results.  
+* `make` to install everything, run tests, check code quality and collect coverage report
+* `make test_fast` to run all tests without provisioning environment (i.e. env should be already provisioned)
+* `make quality` to run all quality checks - fails fast, so does not always output all the problems. When fixing
+    quality violations make sure to run `make quality` again until clean pass.
+* `make clean` - cleans tests and coverage results.  
 
-## Development Install
+## Installation
 
 In new virtualenv (or in actual install, if you're feeling brave/careless)
 
@@ -28,14 +28,14 @@ should get you up and running. It installs requirements both from `base.txt` (co
 
 ## Running Tests
 
-Group Project XBlock v2 contains three kinds of tests: python unit tests, javascript tests an integration tests.
+Group Project XBlock v2 contains three kinds of tests: python unit tests, javascript tests and integration tests.
 
-Unit tests are located in `tests/unit` folder. They are lighter, but only test one program "unit" at a time (a signle 
+Unit tests are located in `tests/unit` folder. They are lighter, but only test one program "unit" at a time (a single 
 method or property usually). They run relatively fast, so it is a good idea to run them frequently during development 
 process.
 
 Integration tests are built on top of selenium and [bok_choy][bok-choy]. They execute a real web server running a XBlock
-workbench, so they run time is significantly larger than that of unittests.
+workbench, so their run time is significantly larger than that of unittests.
 
 Helper file `run_tests.py` is provided to run python unittests and integration tests. It runs Django and workbench
 under the hood, so it accepts the same parameters as Django unit test runner.
@@ -50,7 +50,7 @@ Examples:
     ./run_tests.py --with-coverage --cover-package=group_project_v2 - run all tests with coverage
 
 Since selenium tests open an actual browser, running them will impede other activities at the machine, as each new 
-browser window opened for each test will capture focus. Thus, it is advices to run integration tests using `xvfb-run`. 
+browser window opened for each test will capture focus. Thus, it is advisable to run integration tests using `xvfb-run`. 
 Note that some tests will fail if screen size is insufficient, so recommended screen size is 1920x1080x24:
 
      xvfb-run --server-args="-screen 0, 1920x1080x24" ./run_tests.py tests/integration --with-coverage --cover-package=group_project_v2
@@ -70,7 +70,7 @@ It is advised to use continuous mode for development. To start karma runner in d
     ./node_modules/.bin/karma start tests/js/karma.conf.js
     
 Note that by default `karma-coverage` plugin is enabled. As a result, debugging JS tests might be problematic, as it
-modifies the source files on the fly by inserting coverage API calls. Simplest way to workaroud that is to comment 
+modifies the source files on the fly by inserting coverage API calls. Simplest way to work around that is to comment 
 `coverage` reporter in `tests/js/karma.conf.js -> reporters` for the duration of debugging session (suggestions on how 
 to do that better are welcome). 
 
@@ -88,9 +88,9 @@ settings, except for `max-line-length=120`. `pylint` uses different pylintrc fil
 [gp-v2-pylintrc]: pylintrc
 [tests-pylintrc]: tests/pylintrc
 
-Javascript: same as with python code, both actual; code in `group_project_v2/public/js` and tests in `tests/js` are 
+Javascript: same as with python code, both actual code in `group_project_v2/public/js` and tests in `tests/js` are 
 checked, except for the vendor files in `group_project_v2/public/js/vendor`. Roughly equivalent jshintrc files are
-used for [actual code][gp-v2-jshintrc] and [tests][tests-jshintrc]
+used for [actual code][gp-v2-jshintrc] and [tests][tests-jshintrc].
 
 [gp-v2-jshintrc]: .jshintrc
 [tests-jshintrc]: tests/.jshintrc
@@ -100,11 +100,11 @@ used for [actual code][gp-v2-jshintrc] and [tests][tests-jshintrc]
 ## Continuous Integration build
 
 Travis CI build is configured to run on each PR against master. CI build installs Group Project XBlock v2 from scratch,
-runs unit, js and integration tests and checks code quality. CI build fails if there are any failing tests or quality
-code violations are reported.
+runs unit, js and integration tests and checks code quality. CI build fails if there are any failing tests or code 
+quality violations.
 
 Sometimes CI build fails while tests run on development machine pass. To debug such problems, the first step is to 
 replicate CI build installation process and run as close as possible:
 
-* Commands run by CI are listed in `.travis.yml -> install` section.
+* Commands to prepare an environment are listed in `.travis.yml -> install` section.
 * Commands to run tests and quality checks are listed in `.travis.yml -> script` section.

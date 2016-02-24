@@ -4,7 +4,7 @@ The following blocks are a part of Group Project XBlock v2.
 
 ## Top-level XBlocks
 
-* ` Group Project` - top level XBlock, represents entire group project as a whole
+* ` Group Project` - top level XBlock, represents group project as a whole.
     * Settings:
         * `Display Name` - human-friendly name for Group Project - displayed in admin console.
     * Components: 
@@ -13,20 +13,20 @@ The following blocks are a part of Group Project XBlock v2.
         * `Discussion` - external XBlock: see https://github.com/edx-solutions/xblock-discussion; single instance
 * `Group Project Activity` - represents single activity in group project, grading happens at this level, hence the block
     carries settings for grading
-    * Components:
+    * Settings:
         * `Display Name` - human-friendly activity name - appears in admin console and in Project Navigator (i.e. 
             visible both to students and course staff)
-        * `Weight` - grading attribute - the higher the weight the more influential this activity compared to other
-            graded exercises in the same grading bucket (including group project activities and graded excercises)
+        * `Weight` - grading attribute - the higher the weight the more influential this activity will be compared to 
+            other graded exercises in the same grading bucket (including group project activities and graded exercises)
         * `Reviews Required Minimum` - Peer Grading attribute - sets a number of reviews to be received by a workgroup
             so it can be graded. If set to 0 (zero), activity is considered TA-graded.
-        * `User Reviews Required Minimum` - Peer Grading attribute - the minimum number of other-group reviews that an 
-            individual student should perform.
+        * `User Reviews Required Minimum` - Peer Grading attribute - the minimum number of reviews for other groups 
+            an individual student should perform.
         * `Due Date` - Activity due date - displayed to students in Apros progress page. Does not actually prevent users
-            from uploading submissions, casting reviews and other group project related activities as it is superceded 
+            from uploading submissions, casting reviews and other group project related activities as it is superseded 
             by individual stages due dates. Informational only.
     * Components:
-        * [Stages XBlocks](#stages-xblocks) - multiple instances
+        * [Stage XBlocks](#stages-xblocks) - multiple instances
         
 ## Project Navigator and Views
 
@@ -46,9 +46,9 @@ Project Navigator XBlock is designed to allow quick access to Navigation and oth
             
 **Important note:** Neither `Group Project Navigator` nor navigation view XBlocks have any configurable settings.
         
-## Stages XBlocks
+## Stage XBlocks
 
-Stages XBlocks provides core functionality to the group project. There are multiple types of stages, each encapsulating 
+Stage XBlocks provide core functionality to the group project. There are multiple types of stages, each encapsulating 
 one of the possible steps towards project completion. Unlike other XBlocks, stages have some common settings and can
 use some common components:
 
@@ -75,7 +75,7 @@ Available stage types:
     * Settings - no stage-specific settings
     * Components - no stage-specific components
     * Completion criteria: completed when user first visits it when the stage is open.
-* `Completion` - similar to `Text` staqge, but requires user interaction to be marked as completed - checking a 
+* `Completion` - similar to `Text` stage, but requires user interaction to be marked as completed - checking a 
     checkbox. Note that checkbox becomes disabled when checked, so it's not possible for a student to cancel 
     "stage completed" action.
     * Settings - no stage-specific settings
@@ -91,13 +91,13 @@ Available stage types:
     * Completion criteria: completed when all the submissions are uploaded. Note that submissions are required on group
         basis rather than on individual basis, so all the students in the group get this stage completed as soon as
         any of them uploads last submission. It does not matter which student uploads the submission - all uploads
-        count towards entire group progress.
+        count towards the entire group's progress.
 * `Team Evaluation` - allows students to provide anonymous feedback to their teammates.
     * Settings - no stage-specific settings
     * Components:
         * `Teammate selector` - displays a list of teammates. **Required, one at most**
         * `Grade Rubric Help Text` - static (developer-defined) help text instructing students to open Project Navigator
-            Resources view to access group project documetns on grading. Help text contains a link that opens the view 
+            Resources view to access group project documents on grading. Help text contains a link that opens the view 
             automatically.
         * `Review Question` - represents review question - see [Stage components](#stage-components) section for details
     * Completion criteria: completed when student provided answers to all required questions for all teammates.
@@ -106,34 +106,35 @@ Available stage types:
     * Components:
         * `Group selector` - displays a list of groups student should grade. **Required, one at most**
         * `Grade Rubric Help Text` - static (developer-defined) help text instructing students to open Project Navigator
-            Resources view to access group project documetns on grading. Help text contains a link that opens the view 
+            Resources view to access group project documents on grading. Help text contains a link that opens the view 
             automatically.
         * `Review Question` - represents review question - see [Stage components](#stage-components) section for details
     * Completion criteria: completed when student provided answers to all required questions for all groups assigned 
         for review.
-* `Evaluation Display` - displays teammate feedback for students
+* `Evaluation Display` - displays feedback from other teammates for students
     * Settings - no stage-specific settings
     * Components:
         * `Team Evaluation Display` - block that displays teammates' answers to one of the review questions. 
             See [Stage components](#stage-components) section for details.
-    * Completion criteria: completed when user first visits it when the stage is open and teammates have competed their
-        reviews - provided answers to all the required questions chosen in `Team Evaluation Display` blocks.
+    * Completion criteria: completed when user first visits it when the stage is open and teammates have completed their
+        reviews, i.e., when teammates have provided answers to all the required questions chosen in 
+        `Team Evaluation Display` blocks.
 * `Grade Display` - displays group feedback and grades from students and/or TAs 
     * Settings - no stage-specific settings
     * Components:
         * `Grade Evaluation Display` - block that displays other students' and/or TAs answers to one of the review 
             questions. See [Stage components](#stage-components) section for details.
-    * Completion criteria: completed when user first visits it when the stage is open and grades are available - when 
-        other students and/or TAs provided answers to all the required questions chosen in `Grade Evaluation Display` 
-        blocks.
+    * Completion criteria: completed when user first visits it when the stage is open and grades are available, i.e. 
+        when other students and/or TAs provided answers to all the required questions chosen in 
+        `Grade Evaluation Display` blocks.
             
             
 ## Stage components
 
-The following XBlocks are building blocks of stages. They correspond to a signle stage only, and generally useless 
+The following XBlocks are building blocks of stages. They correspond to a single stage only, and are generally useless 
 outside stage context.
 
-* `Resource` - resource XBlocks provides means to attaching documents to Group Project. Those can be some general 
+* `Resource` - resource XBlocks provides means to attach documents to Group Project. Those can be some general 
     document related to group project context, grading criteria rubric, deliverable template, or any other kind of
     document.
     * Settings:
@@ -155,7 +156,7 @@ outside stage context.
     ![Upload help text screenshot](/docs/images/stage_components/upload_help_text.png)
     
 * `Grade Rubric Help Text` - static (developer-defined) help text instructing students to open Project Navigator
-    Resources view to access group project documetns on grading. Help text contains a link that opens the view 
+    Resources view to access group project documents on grading. Help text contains a link that opens the view 
     automatically.
     * No author-customizable settings
 * `Submission` - component that encapsulates single group project submission.
@@ -176,7 +177,7 @@ outside stage context.
 * `Group Selector` - displays a list of groups and allows switching between them. Only usable in conjunction with
     `Peer Grading` stage and `Review Question` blocks. When group is selected, `Peer Grading` stage downloads 
     current student's responses to `Review Question` and sets corresponding `Review Question` values. Displays current
-    student progress of reviewing other teammates by displaying completion icons next to each teammate. Allows reviewing
+    student progress of reviewing other teams by displaying completion icons next to each team. Allows reviewing
     group submissions by clicking "View team submissions"
     * No author-customizable settings
     
@@ -185,13 +186,12 @@ outside stage context.
 * `Review Question` - represents single review question.
     * `Question ID` - question identifier. Defaults to automatically generated random string
     * `Question Text` - question text
-    * `Assessment Question Text` - this setting can be used to override `Question Text` when answers displayed for 
-        evaluation. E.g. `Question Text`: "Was it easy to communicate wit this teammate?" can be overridden with 
-        `Assessment Question Text`: "Was it easy to communicate with you?".
-    * `Question Content` - question content. HTML markup that must contain some HTML input control (`input`, 
-        `select` or `textarea`). The value of the control becomes the response to the question.
+    * `Assessment Question Text` - this setting can be used to override `Question Text` when answers are displayed to 
+        the team or teammate being reviewed. E.g. `Question Text`: "Was it easy to communicate wit this teammate?" 
+        can be overridden with `Assessment Question Text`: "Was it easy to communicate with you?".
+    * `Question Content` - HTML input control (`input`, `select` or `textarea`) for entering response to the question.
     * `Required` - boolean flag. If True, the question is required - it is enforced to be not empty in UI and is 
-        used in stage state calculation.
+        used to determine if the stage is completed by the student.
     * `Grading` - boolean flag. If True, this question is a grading question - it should provide answer as a decimal
         number and it is used for grading.
     * `Single Line` - boolean flag. If set to True, question label and content are placed on the same horizontal 
@@ -209,8 +209,8 @@ outside stage context.
             
     ![Review feedback screenshot](/docs/images/stage_components/display_blocks.png)
             
-* `Project Team` - this block displays current project team - all student teammembers (including himself) and allows
-    sending emails to individual teammates and to the team as a whole.
+* `Project Team` - this block displays current project team - all student team members including current student - and 
+    allows sending emails to individual teammates and to the team as a whole.
     * No author-customizable settings
     
     ![Project team screenshot](/docs/images/stage_components/project_team.png)
