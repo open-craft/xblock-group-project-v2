@@ -18,7 +18,7 @@ Group Project XBlock v2 contains a Makefile to help with most common operations:
 * `make clean` - cleans tests and coverage results.  
 * `make diff-cover` - provides coverage report only for files and lines changed in the current branch compared to 
     master. In order to get correct results, run entire test suite with `--coverage` flag first, and make sure to update
-    `master` branch to latest version (and rebase working branch, if necessary). Only analyzes python changes so far.
+    `master` branch to latest version (and rebase working branch, if necessary).
 
 ## Installation
 

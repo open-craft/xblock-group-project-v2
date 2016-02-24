@@ -29,8 +29,8 @@ endif
 	coverage html
 
 diff-cover:
-	coverage xml
-	diff-cover --compare-branch=master coverage.xml
+	coverage xml -o coverage/py/cobertura/coverage.xml
+	diff-cover --compare-branch=master coverage/py/cobertura/coverage.xml coverage/js/cobertura/coverage.xml
 
 quality:
 	pep8 group_project_v2 tests --max-line-length=120

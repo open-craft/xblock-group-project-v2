@@ -62,7 +62,8 @@ module.exports = function(config) {
       dir : 'coverage/js/',
       reporters: [
         {type: 'html', subdir: 'html'},
-        {type: 'text', subdir: '.', file: 'karma_coverage.txt'}
+        {type: 'text', subdir: '.', file: 'karma_coverage.txt'},
+        {type: 'cobertura', subdir: 'cobertura', file: 'coverage.xml'}
       ]
     },
 
