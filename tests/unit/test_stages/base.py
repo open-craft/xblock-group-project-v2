@@ -180,6 +180,6 @@ class ReviewStageUserCompletionStatsMixin(object):
         with patch_obj(self.block_to_test, 'required_questions', mock.PropertyMock()) as patched_questions:
             patched_questions.return_value = [make_question(q_id, 'irrelevant') for q_id in questions]
 
-            group_completion = self.block.get_group_completion(group)
+            group_completion = self.block.get_external_group_status(group)
 
         self.assertEqual(group_completion, expected_result)

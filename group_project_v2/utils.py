@@ -2,6 +2,8 @@
 import csv
 import functools
 import logging
+from collections import namedtuple
+
 from datetime import date, datetime, timedelta
 import xml.etree.ElementTree as ET
 
@@ -329,3 +331,10 @@ def export_to_csv(data, target, headers=None):
 
     for row in data:
         writer.writerow(row)
+
+
+def named_tuple_with_docstring(type_name, field_names, docstring, verbose=False, rename=False):
+    named_tuple_type = namedtuple(type_name+"_", field_names, verbose=verbose, rename=rename)
+
+    wrapper_class = type(type_name, (named_tuple_type,), {"__doc__": docstring})
+    return wrapper_class

@@ -70,6 +70,8 @@ class BaseGroupActivityStage(
 
     NAVIGATION_LABEL = None
     STUDIO_LABEL = _(u"Stage")
+    EXTERNAL_STATUSES_LABEL_MAPPING = {}
+    DEFAULT_EXTERNAL_STATUS_LABEL = ""
 
     js_file = None
     js_init = None
@@ -323,6 +325,24 @@ class BaseGroupActivityStage(
         :rtype: (set[int], set[int])
         """
         raise NotImplementedError(MUST_BE_OVERRIDDEN)
+
+    def get_external_group_status(self, group):  # pylint: disable=unused-argument, no-self-use
+        """
+        Calculates external group status for the Stage.
+        Meaning of external status varies by Stage - see actual implementations docstrings.
+        :param group_project_v2.project_api.dtos.WorkgroupDetails group: workgroup
+        :rtype: StageState
+        """
+        return StageState.NOT_AVAILABLE
+
+    def get_external_status_label(self, status):
+        """
+        Gets human-friendly label for external status.
+        Label vary by stage, so consult with actual implementaiton for details
+        :param StageState status: external stage status
+        :rtype: str
+        """
+        return self.EXTERNAL_STATUSES_LABEL_MAPPING.get(status, self.DEFAULT_EXTERNAL_STATUS_LABEL)
 
     def navigation_view(self, context):
         """

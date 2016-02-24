@@ -103,6 +103,13 @@ class SubmissionStage(BaseGroupActivityStage):
     NAVIGATION_LABEL = _(u'Task')
     STUDIO_LABEL = _(u"Deliverable")
 
+    EXTERNAL_STATUSES_LABEL_MAPPING = {
+        StageState.NOT_STARTED: _("Pending Upload"),
+        StageState.INCOMPLETE: _("Pending Upload"),
+        StageState.COMPLETED: _("Uploaded"),
+    }
+    DEFAULT_EXTERNAL_STATUS_LABEL = _("Unknown")
+
     submissions_stage = True
 
     STAGE_ACTION = _(u"upload submission")
@@ -112,6 +119,10 @@ class SubmissionStage(BaseGroupActivityStage):
         blocks = super(SubmissionStage, self).allowed_nested_blocks
         blocks.extend([SubmissionsStaticContentXBlock, GroupProjectSubmissionXBlock])
         return blocks
+
+    @property
+    def is_graded_stage(self):
+        return True
 
     @property
     def submissions(self):
@@ -191,18 +202,34 @@ class SubmissionStage(BaseGroupActivityStage):
         """
         completed_users = []
         partially_completed_users = []
-        upload_ids = set(submission.upload_id for submission in self.submissions)
         for group in target_workgroups:
-            group_submissions = self.project_api.get_latest_workgroup_submissions_by_id(group.id)
-            uploaded_submissions = set(group_submissions.keys())
-
-            has_all = uploaded_submissions >= upload_ids
-            has_some = bool(uploaded_submissions & upload_ids)
+            group_stage_state = self.get_external_group_status(group)
             workgroup_user_ids = [user.id for user in group.users]
 
-            if has_all:
+            if group_stage_state == StageState.COMPLETED:
                 completed_users.extend(workgroup_user_ids)
-            if has_some and not has_all:
+            if group_stage_state == StageState.INCOMPLETE:
                 partially_completed_users.extend(workgroup_user_ids)
 
         return set(completed_users), set(partially_completed_users)  # removing duplicates - just in case
+
+    def get_external_group_status(self, group):
+        """
+        Calculates external group status for the Stage.
+        For Submissions stage, external status is the same as internal one: "have workgroup submitted all uploads?"
+        :param group_project_v2.project_api.dtos.WorkgroupDetails group: workgroup
+        :rtype: StageState
+        """
+        upload_ids = set(submission.upload_id for submission in self.submissions)
+        group_submissions = self.project_api.get_latest_workgroup_submissions_by_id(group.id)
+        uploaded_submissions = set(group_submissions.keys())
+
+        has_all = uploaded_submissions >= upload_ids
+        has_some = bool(uploaded_submissions & upload_ids)
+
+        if has_all:
+            return StageState.COMPLETED
+        elif has_some:
+            return StageState.INCOMPLETE
+        else:
+            return StageState.NOT_STARTED

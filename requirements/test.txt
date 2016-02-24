@@ -2,6 +2,7 @@ mock
 ddt
 freezegun
 selenium==2.52.0
+diff-cover
 
 -e git+https://github.com/edx/xblock-sdk.git@ffdaa80b9857c4d6b6cb7307c742bd187ef40aed#egg=xblock_sdk
 -e git+https://github.com/edx/opaque-keys.git@1254ed4d615a428591850656f39f26509b86d30a#egg=opaque-keys

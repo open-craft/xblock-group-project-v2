@@ -320,6 +320,13 @@ class PeerReviewStage(ReviewBaseStage):
     CATEGORY = 'gp-v2-stage-peer-review'
     STAGE_CONTENT_TEMPLATE = 'templates/html/stages/peer_review.html'
 
+    EXTERNAL_STATUSES_LABEL_MAPPING = {
+        StageState.NOT_STARTED: _("Pending Review"),
+        StageState.INCOMPLETE: _("Pending Review"),
+        StageState.COMPLETED: _("Review Complete"),
+    }
+    DEFAULT_EXTERNAL_STATUS_LABEL = _("Unknown")
+
     STUDIO_LABEL = _(u"Peer Grading")
 
     REVIEW_ITEM_KEY = "workgroup"
@@ -428,7 +435,13 @@ class PeerReviewStage(ReviewBaseStage):
         }
         return ta_reviews
 
-    def get_group_completion(self, group):
+    def get_external_group_status(self, group):
+        """
+        Calculates external group status for the Stage.
+        For Peer Grading stage, external status means "have students in other groups provided grades to this group?"
+        :param group_project_v2.project_api.dtos.WorkgroupDetails group: workgroup
+        :rtype: StageState
+        """
         if not self.activity.is_ta_graded:
             reviewer_ids = [
                 user['id'] for user in self.project_api.get_workgroup_reviewers(group.id, self.activity_content_id)

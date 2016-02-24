@@ -72,3 +72,18 @@
 .group-project-stage-dates {
     color: #E37222;
 }
+
+.group-project-stage-state-label {
+    padding: 0.25em;
+    border: 1px solid #E37222;
+    border-radius: .5em;
+    background-color: #ffd;
+    color: #E37222;
+    width: 9em;
+    display: inline-block;
+}
+
+.group-project-stage-state-label.completed {
+    color: #629b2a;
+    border-color: #629b2a;
+}
