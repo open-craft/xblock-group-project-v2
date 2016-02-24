@@ -16,6 +16,9 @@ Group Project XBlock v2 contains a Makefile to help with most common operations:
 * `make quality` to run all quality checks - fails fast, so does not always output all the problems. When fixing
     quality violations make sure to run `make quality` again until clean pass.
 * `make clean` - cleans tests and coverage results.  
+* `make diff-cover` - provides coverage report only for files and lines changed in the current branch compared to 
+    master. In order to get correct results, run entire test suite with `--coverage` flag first, and make sure to update
+    `master` branch to latest version (and rebase working branch, if necessary). Only analyzes python changes so far.
 
 ## Installation
 
