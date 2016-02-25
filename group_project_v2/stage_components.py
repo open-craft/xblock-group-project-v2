@@ -357,7 +357,7 @@ class GroupProjectSubmissionXBlock(
         # in the list of services
         notifications_service = self.runtime.service(self, 'notifications')
         if notifications_service:
-            activity.fire_file_upload_notification(notifications_service)
+            self.stage.fire_file_upload_notification(notifications_service)
 
         return uploaded_file
 

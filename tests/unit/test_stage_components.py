@@ -299,7 +299,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
     def test_persist_and_submit_file_success_path(self, upload_id):
         self.block.upload_id = upload_id
         self.stage_mock.activity.content_id = 'content_id 12'
-        self.stage_mock.activity.fire_file_upload_notification = mock.Mock()
+        self.stage_mock.fire_file_upload_notification = mock.Mock()
         context_mock = mock.Mock()
         file_stream_mock = mock.Mock()
 
@@ -333,7 +333,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
                 }
             )
 
-            self.stage_mock.activity.fire_file_upload_notification.assert_called_with(notification_service_mock)
+            self.stage_mock.fire_file_upload_notification.assert_called_with(notification_service_mock)
 
 
 @ddt.ddt
