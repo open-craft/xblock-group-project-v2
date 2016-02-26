@@ -144,11 +144,11 @@ class StageNotificationsMixin(object):
             for timer_suffix in (NotificationTimers.OPEN, NotificationTimers.DUE, NotificationTimers.COMING_DUE):
                 notifications_service.cancel_timed_notification(self._get_stage_timer_name(timer_suffix))
 
-
-class ActivityNotificationsMixin(object):
-    # While we *should* send notification, if there is some error here, we don't want to blow the whole thing up.
     @log_and_suppress_exceptions
     def fire_file_upload_notification(self, notifications_service):
+
+        log.info('{}.fire_file_upload_notification on location = {}'.format(self.__class__.__name__, self.location))
+
         # this NotificationType is registered in the list of default Open edX Notifications
         msg_type = notifications_service.get_notification_type(NotificationMessageTypes.FILE_UPLOADED)
 
@@ -167,7 +167,7 @@ class ActivityNotificationsMixin(object):
             payload={
                 '_schema_version': 1,
                 'action_username': uploader_username,
-                'activity_name': self.display_name,
+                'activity_name': self.activity.display_name,
             }
         )
         location = unicode(self.location) if self.location else ''
@@ -177,6 +177,8 @@ class ActivityNotificationsMixin(object):
         # will have only a very small handful of workgroup users
         notifications_service.bulk_publish_notification_to_users(workgroup_user_ids, msg)
 
+
+class ActivityNotificationsMixin(object):
     # While we *should* send notification, if there is some error here, we don't want to blow the whole thing up.
     @log_and_suppress_exceptions
     def fire_grades_posted_notification(self, group_id, notifications_service):
