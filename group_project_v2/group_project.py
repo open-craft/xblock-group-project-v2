@@ -2,9 +2,9 @@
 import logging
 import itertools
 from operator import itemgetter
+from datetime import datetime
 
 import webob
-from datetime import datetime
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from xblock.core import XBlock
@@ -441,6 +441,18 @@ class GroupActivityXBlock(
         stages = self.get_children_by_category(PeerReviewStage.CATEGORY)
         return list(self._chain_questions(stages, 'questions'))
 
+    @property
+    def grade_display_stages(self):
+        return self.get_children_by_category(GradeDisplayStage.CATEGORY)
+
+    @property
+    def max_grade_display_date(self):
+        """
+        Gets max grade display date.
+        """
+        stage_open_dates = [stage.open_date for stage in self.grade_display_stages if stage.open_date]
+        return max(stage_open_dates) if stage_open_dates else None
+
     def dashboard_details_url(self):
         """
         Gets dashboard details view URL for current activity. If settings service is not available or does not provide
@@ -793,7 +805,7 @@ class GroupActivityXBlock(
         )
         notifications_service = self.runtime.service(self, 'notifications')
         if notifications_service:
-            self.fire_grades_posted_notification(group_id, notifications_service)
+            self.fire_grades_posted_notification(group_id, notifications_service, self.max_grade_display_date)
 
     def calculate_grade(self, group_id):  # pylint:disable=too-many-locals,too-many-branches
         review_item_data = self.project_api.get_workgroup_review_items_for_group(group_id, self.content_id)

@@ -1,10 +1,10 @@
 import csv
 from unittest import TestCase
+from datetime import datetime
 
 import ddt
 from freezegun import freeze_time
 import mock
-from datetime import datetime
 from xblock.fields import ScopeIds
 from xblock.runtime import Runtime
 from xblock.field_data import DictFieldData
@@ -15,7 +15,7 @@ from group_project_v2.project_api.dtos import ProjectDetails, WorkgroupDetails, 
 from group_project_v2.stage import BaseGroupActivityStage, TeamEvaluationStage, PeerReviewStage
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
 from group_project_v2.utils import Constants
-from tests.utils import TestWithPatchesMixin, make_review_item
+from tests.utils import TestWithPatchesMixin, make_review_item, parse_datetime
 
 
 def _make_question(question_id):
@@ -229,6 +229,30 @@ class TestGroupActivityXBlock(TestWithPatchesMixin, TestCase):
             self.assertEqual(result, expected_result)
 
             get_stages.assert_called_with(PeerReviewStage.CATEGORY)
+
+    @ddt.data(
+        (None, []),
+        (None, [None, None, None]),
+        ('2016-02-27 08:00:00', ['2016-02-26 04:30:48', None, '2016-02-27 08:00:00']),
+        ('2016-10-29 04:30:48', ['2016-02-26 04:30:48', None, '2016-10-29 04:30:48', None]),
+        ('2016-10-29 04:30:48', ['2016-02-26 04:30:48', '2016-10-29 04:30:48', '2016-02-29 04:30:48']),
+        ('2016-10-29 04:30:48', ['2016-10-29 04:30:48', '2016-02-26 04:30:48', '2016-02-29 04:30:48']),
+        ('2016-10-29 04:30:48', ['2016-02-26 04:30:48', '2016-02-29 04:30:48', '2016-10-29 04:30:48']),
+        ('2016-10-29 04:30:48', ['2016-02-26 04:30:48', '2016-10-29 04:30:48', '2016-10-29 04:30:48']),
+        ('2016-11-30 04:30:48', ['2016-11-30 04:30:48', '2016-10-29 04:30:48', '2016-02-26 04:30:48']),
+        ('2016-12-29 12:30:49', ['2016-12-29 12:30:47', '2016-12-29 12:30:48', '2016-12-29 12:30:49']),
+    )
+    @ddt.unpack
+    def test_max_grade_display_date_property(self, expected_result, grade_display_dates):
+        stages = []
+        for display_datetime in grade_display_dates:
+            stage_mock = mock.create_autospec(BaseGroupActivityStage)
+            stage_mock.open_date = parse_datetime(display_datetime)
+            stages.append(stage_mock)
+
+        with mock.patch.object(self.block, 'get_children_by_category', mock.Mock()) as get_stages:
+            get_stages.return_value = stages
+            self.assertEqual(self.block.max_grade_display_date, parse_datetime(expected_result))
 
 
 @ddt.ddt
@@ -460,15 +484,20 @@ class TestEventsAndCompletionGroupActivityXBlock(TestWithPatchesMixin, TestCase)
     def test_sends_notifications_message(self, group_id):
         self.calculate_grade_mock.return_value = 100
         # self.runtime_mock.service.return_value = None
-        with mock.patch.object(self.block, 'fire_grades_posted_notification') as grades_posted_mock:
-            self.block.calculate_and_send_grade(group_id)
-            self.runtime_mock.service.assert_called_with(self.block, 'notifications')
-            grades_posted_mock.assert_not_called()
+        test_max_grade_display_date = datetime.now()
+        with mock.patch.object(GroupActivityXBlock, 'max_grade_display_date',
+                               mock.PropertyMock(return_value=test_max_grade_display_date)):
+            with mock.patch.object(self.block, 'fire_grades_posted_notification') as grades_posted_mock:
+                self.block.calculate_and_send_grade(group_id)
+                self.runtime_mock.service.assert_called_with(self.block, 'notifications')
+                grades_posted_mock.assert_not_called()
 
-            notifications_service_mock = mock.Mock()
-            self.runtime_mock.service.return_value = notifications_service_mock
+                notifications_service_mock = mock.Mock()
+                self.runtime_mock.service.return_value = notifications_service_mock
 
-            self.block.calculate_and_send_grade(group_id)
+                self.block.calculate_and_send_grade(group_id)
 
-            self.runtime_mock.service.assert_called_with(self.block, 'notifications')
-            grades_posted_mock.assert_called_once_with(group_id, notifications_service_mock)
+                self.runtime_mock.service.assert_called_with(self.block, 'notifications')
+                grades_posted_mock.assert_called_once_with(
+                    group_id, notifications_service_mock, test_max_grade_display_date
+                )

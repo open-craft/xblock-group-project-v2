@@ -8,7 +8,7 @@ from group_project_v2.notifications import (
     NotificationScopes,
 )
 from group_project_v2.project_api.dtos import WorkgroupDetails
-from tests.utils import TestWithPatchesMixin
+from tests.utils import TestWithPatchesMixin, parse_datetime
 from edx_notifications.data import NotificationType
 
 
@@ -60,13 +60,16 @@ class BaseNotificationsTestCase(TestCase):
         self.notifications_service_mock = mock.Mock()
         self.notifications_service_mock.get_notification_type = mock.Mock(side_effect=get_notification_type)
         self.notifications_service_mock.bulk_publish_notification_to_users = mock.Mock()
-        self.notifications_service_mock.bulk_publish_notification_to_scope = mock.Mock()
+        self.notifications_service_mock.publish_timed_notification = mock.Mock()
 
-    def _get_call_args(self, target):
+    def _get_call_args(self, target, including_kwargs=False):
         self.assertTrue(target.called)
         self.assertEqual(len(target.call_args_list), 1)
         args, _kwargs = target.call_args
-        return args
+        if including_kwargs:
+            return args, _kwargs
+        else:
+            return args
 
 
 @ddt.ddt
@@ -133,34 +136,38 @@ class TestStageNotificationsMixin(BaseNotificationsTestCase, TestWithPatchesMixi
 
 
 @ddt.ddt
-class TestActivityNotificationsMixin(TestStageNotificationsMixin, TestWithPatchesMixin):
+class TestActivityNotificationsMixin(BaseNotificationsTestCase, TestWithPatchesMixin):
 
     def setUp(self):
         super(TestActivityNotificationsMixin, self).setUp()
 
     @ddt.data(
-        (1, 'course1', 'some-location', 'Activity1'),
-        (2, 'course2', 'other-location', 'Activity2'),
-        (17, 'course3', 'yet-another-location', 'NotAnActivity'),
+        (1, 'course1', 'some-location', 'Activity1', '2016-02-26 04:30:48'),
+        (2, 'course2', 'other-location', 'Activity2', None),
+        (17, 'course3', 'yet-another-location', 'NotAnActivity', None),
     )
     @ddt.unpack
-    def test_grades_posted_success_scenario(self, group_id, course_id, location, name):
+    def test_grades_posted_success_scenario(self, group_id, course_id, location, name, send_at):
         block = ActivityNotificationsGuineaPig('irrelevant', course_id, location, 'irrelevant', name)
 
         with mock.patch('edx_notifications.data.NotificationMessage.add_click_link_params') as patched_link_params:
-            block.fire_grades_posted_notification(group_id, self.notifications_service_mock)
+
+            block.fire_grades_posted_notification(group_id, self.notifications_service_mock, parse_datetime(send_at))
 
             self.notifications_service_mock.get_notification_type.assert_called_once_with(
                 NotificationMessageTypes.GRADES_POSTED
             )
 
-            scope, scope_args, message = self._get_call_args(
-                self.notifications_service_mock.bulk_publish_notification_to_scope
+            args, kwargs = self._get_call_args(
+                self.notifications_service_mock.publish_timed_notification,
+                including_kwargs=True,
             )
 
-            self.assertEqual(scope, NotificationScopes.WORKGROUP)
-            self.assertEqual(scope_args, {'workgroup_id': group_id})
-
+            self.assertEquals(args, ())  # no positional arguments
+            self.assertEqual(kwargs['scope_name'], NotificationScopes.WORKGROUP)
+            self.assertEqual(kwargs['scope_context'], {'workgroup_id': group_id})
+            self.assertIsNotNone(kwargs['send_at'])
+            message = kwargs['msg']
             self.assertEqual(message.msg_type.name, NotificationMessageTypes.GRADES_POSTED)
             self.assertEqual(message.namespace, unicode(course_id))
             self.assertEqual(message.payload['activity_name'], name)
@@ -176,15 +183,14 @@ class TestActivityNotificationsMixin(TestStageNotificationsMixin, TestWithPatche
             self.notifications_service_mock.get_notification_type.side_effect = \
                 lambda msg_type: self.raise_exception(exception)
 
-            block.fire_grades_posted_notification('irrelevant', self.notifications_service_mock)
+            block.fire_grades_posted_notification('irrelevant', self.notifications_service_mock, None)
             patched_exception_logger.assert_called_once_with(exception)
 
     @ddt.data(ValueError("test"), TypeError("QWE"), AttributeError("OMG"), Exception("Very Generic"))
     def test_grades_posted_publish_raises(self, exception):
         block = ActivityNotificationsGuineaPig(1, 'irrelevant', 'irrelevant', WORK_GROUP1, 'irrelevant')
         with mock.patch('logging.Logger.exception') as patched_exception_logger:
-            self.notifications_service_mock.bulk_publish_notification_to_scope.side_effect = \
-                lambda unused_1, unused_2, unused_3: self.raise_exception(exception)
+            self.notifications_service_mock.publish_timed_notification.side_effect = exception
 
-            block.fire_grades_posted_notification('irrelevant', self.notifications_service_mock)
+            block.fire_grades_posted_notification('irrelevant', self.notifications_service_mock, None)
             patched_exception_logger.assert_called_once_with(exception)
