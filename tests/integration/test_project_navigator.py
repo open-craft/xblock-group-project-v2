@@ -7,6 +7,8 @@ import textwrap
 import ddt
 import mock
 from datetime import datetime
+
+import os
 from freezegun import freeze_time
 
 from group_project_v2.project_navigator import (
@@ -20,7 +22,8 @@ from group_project_v2.stage.utils import StageState
 from tests.integration.base_test import SingleScenarioTestSuite, BaseIntegrationTest
 from tests.integration.page_elements import (
     NavigationViewElement, ResourcesViewElement, SubmissionsViewElement, GroupProjectElement,
-    AskTAViewElement)
+    AskTAViewElement, ModalDialogElement
+)
 from tests.utils import (
     KNOWN_USERS, TestWithPatchesMixin, switch_to_ta_grading, get_other_windows, expect_new_browser_window,
     switch_to_other_window
@@ -264,6 +267,90 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
         ask_ta_view.message = "Some message"
         ask_ta_view.submit_message()
         # TODO: and I have no idea yet how to check for AJAX parameters; looks like it is a work for JS test
+
+
+class TestSubmissionUpload(SingleScenarioTestSuite, TestWithPatchesMixin):
+    scenario = "example_with_active_submissions.xml"
+
+    @property
+    def submissions(self):
+        """
+        Submission stage contains three submissions: issue_tree, marketing_pitch and budget.
+        This property simulates single submission sent by first user in group
+        """
+        return {
+            "issue_tree": {
+                "id": "issue_tree", "document_url": self.live_server_url+"/issue_tree_location",
+                "document_filename": "issue_tree.doc", "modified": "2014-05-22T11:44:14Z",
+                "user_details": KNOWN_USERS[1]
+            }
+        }
+
+    @property
+    def image_path(self):  # pylint: disable=no-self-use
+        return os.path.join(os.path.split(__file__)[0], 'example-image.gif')
+
+    def prepare_submission(self):
+        student_id = 1
+
+        self.project_api_mock.get_latest_workgroup_submissions_by_id.return_value = self.submissions
+
+        self._prepare_page(student_id=student_id)
+
+        submissions_view = self.page.project_navigator.get_view_by_type(ViewTypes.SUBMISSIONS, SubmissionsViewElement)
+        self.page.project_navigator.get_view_selector_by_type(ViewTypes.SUBMISSIONS).click()
+
+        activities = submissions_view.activities
+        self.assertEqual(activities[0].activity_name, "Activity 1".upper())
+
+        # Sanity check
+        self.assertEqual(len(activities[0].submissions), 3)
+
+        activity1_submissions = activities[0].submissions
+        _issue_tree, marketing_pitch, _budget = activity1_submissions
+
+        return marketing_pitch
+
+    def test_upload_submissions(self):
+
+        marketing_pitch = self.prepare_submission()
+
+        marketing_pitch.upload_file_and_return_modal(self.image_path)
+
+        modal = ModalDialogElement(self.browser)
+
+        self.assertEqual(modal.title, u'UPLOAD COMPLETE')
+        self.assertIn(u'Your deliverable has been successfully uploaded', modal.message)
+
+    def test_upload_submissions_csrf(self):
+
+        marketing_pitch = self.prepare_submission()
+
+        with self.settings(ROOT_URLCONF='tests.integration.urlconf_overrides.csrf_failure'):
+            marketing_pitch.upload_file_and_return_modal(self.image_path)
+
+        modal = ModalDialogElement(self.browser)
+        self.assertEqual(modal.title, u'ERROR')
+        self.assertIn(u'An error occurred while uploading your file', modal.message)
+        self.assertIn(u'Technical details: CSRF verification failed', modal.message)
+        # In case message rendering text changed to escape html, this will
+        # fail and notify of the error
+        self.assertNotRegexpMatches(modal.message, r".*<\s*p\s*/?>")
+
+    def test_upload_submissions_plain403(self):
+
+        marketing_pitch = self.prepare_submission()
+
+        with self.settings(ROOT_URLCONF='tests.integration.urlconf_overrides.permission_denied'):
+            marketing_pitch.upload_file_and_return_modal(self.image_path)
+
+        modal = ModalDialogElement(self.browser)
+        self.assertEqual(modal.title, u'ERROR')
+        self.assertIn(u'An error occurred while uploading your file', modal.message)
+        self.assertIn(u'Technical details: 403 error', modal.message)
+        # In case message rendering text changed to escape html, this will
+        # fail and notify of the error
+        self.assertNotRegexpMatches(modal.message, r".*<\s*p\s*/?>")
 
 
 @ddt.ddt
