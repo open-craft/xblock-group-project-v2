@@ -3,12 +3,65 @@
 function GroupProjectSubmissionBlock(runtime, element) {
     "use strict";
 
-    function getMessageFromJson(jqXHR){
-        return jqXHR.responseJSON ? jqXHR.responseJSON.message : jqXHR.responseText;
-    }
+    /**
+     * This function is responsible for formatting the modal dialog for user.
+     */
+    function prepareMessageObject(jqXHR, default_title){
 
-    function getMessageTitleFromJson(jqXHR, default_title){
-        return (jqXHR.responseJSON && jqXHR.responseJSON.title) ? jqXHR.responseJSON.title : default_title;
+        function getMessageFromJson(jqXHR){
+            return jqXHR.responseJSON ? jqXHR.responseJSON.message : jqXHR.responseText;
+        }
+
+        function getMessageTitleFromJson(jqXHR, default_title) {
+            return (jqXHR.responseJSON && jqXHR.responseJSON.title) ? jqXHR.responseJSON.title : default_title;
+        }
+
+        function filterMessageObject(message){
+            if(message.status === 0 && message.statusText === 'abort') {
+                message.title = GroupProjectCommon.gettext('Upload cancelled.');
+                message.content = GroupProjectCommon.gettext('Upload cancelled by user.');
+            }
+            if (message.status === 403) {
+                var base_message = GroupProjectCommon.gettext(
+                    "An error occurred while uploading your file. Please " +
+                    "refresh the page and try again. If it still does not " +
+                    "upload, please contact your Course TA."
+                );
+                var technical_details = '';
+                // Exact CSRF response message may vary, and may be different
+                // between different environments. We can assume that it should
+                // contain CSRF string.
+                if (message.content.indexOf('CSRF') !== -1){
+                    technical_details += GroupProjectCommon.gettext(' Technical details: CSRF verification failed.');
+                }else{
+                    technical_details += GroupProjectCommon.gettext(' Technical details: 403 error.');
+                }
+
+                message.content = "<p>" + base_message + "</p><p>" + technical_details + "</p>";
+            }
+            return message;
+        }
+
+        if (typeof jqXHR.responseJSON === 'undefined'){
+            // This is inconsistency between Apros and Workbench, in Apros
+            // requests have responseJSON and in Workbench do not.
+            try {
+                jqXHR.responseJSON = $.parseJSON(jqXHR.responseText);
+            } catch (e){
+                jqXHR.responseJSON = null;
+            }
+        }
+
+        var message = {
+            "status": jqXHR.status,
+            "statusText": jqXHR.statusText,
+            "content": getMessageFromJson(jqXHR),
+            "title": getMessageTitleFromJson(jqXHR, default_title)
+        };
+
+        message = filterMessageObject(message);
+
+        return message;
     }
 
     var upload_data = {
@@ -76,25 +129,15 @@ function GroupProjectSubmissionBlock(runtime, element) {
             $('.' + data.paramName + '_progress', target_form).css('width', '100%').addClass('complete');
             var input = $('.' + data.paramName + '_name', target_form);
             input.attr('data-original-value', input.val());
-            var message = getMessageFromJson(data.jqXHR),
-                title = getMessageTitleFromJson(data.jqXHR, GroupProjectCommon.gettext("Error"));
-            GroupProjectCommon.Messages.show_message(message, title);
+            var message = prepareMessageObject(data.jqXHR, GroupProjectCommon.gettext("Error"));
+            GroupProjectCommon.Messages.show_message(message.content, message.title);
         },
         fail: function (e, data) {
             var target_form = $(e.target);
             $('.' + data.paramName[0] + '_progress', target_form).css('width', '100%').addClass('failed');
-            var message, title;
-            if (data.jqXHR.status === 0 && data.jqXHR.statusText === 'abort') {
-                title = GroupProjectCommon.gettext('Upload cancelled.');
-                message = GroupProjectCommon.gettext("Upload cancelled by user.");
-            }
-            else {
-                message = getMessageFromJson(data.jqXHR);
-                title = getMessageTitleFromJson(data.jqXHR, GroupProjectCommon.gettext("Error"));
-            }
-
-            target_form.prop('title', message);
-            GroupProjectCommon.Messages.show_message(message, title, 'error');
+            var message = prepareMessageObject(data.jqXHR, GroupProjectCommon.gettext("Error"));
+            target_form.prop('title', message.message);
+            GroupProjectCommon.Messages.show_message(message.content, message.title, 'error');
         }
     };
 

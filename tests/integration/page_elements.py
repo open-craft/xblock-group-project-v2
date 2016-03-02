@@ -516,10 +516,34 @@ class SubmissionUploadItemElement(BaseElement):
         upload_ctrl = self.element.find_element_by_css_selector(".file_upload")
         return not upload_ctrl.get_attribute('disabled')
 
-    def upload_file(self, location):
+    def upload_file_and_return_modal(self, location):
+
         upload_item = self.element.find_element_by_css_selector(".file_upload")
+        self.browser.execute_script(
+            "return $(arguments[0]).show()", upload_item)
         upload_item.clear()
         upload_item.send_keys(location)
+        return ModalDialogElement(self.browser)
+
+
+class ModalDialogElement(BaseElement):
+
+    def __init__(self, browser, element=None):
+        if element is None:
+            element = browser.find_element_by_css_selector(".message")
+        super(ModalDialogElement, self).__init__(browser, element)
+
+    def close(self):
+        elem = self.element.find_element_by_css_selector(".close-box")
+        self.browser.execute_script("return $(arguments[0]).click();", elem)
+
+    @property
+    def title(self):
+        return self.element.find_element_by_css_selector(".message_title").text
+
+    @property
+    def message(self):
+        return self.element.find_element_by_css_selector(".message_text").text
 
 
 class ProjectTeamElement(BaseElement):
