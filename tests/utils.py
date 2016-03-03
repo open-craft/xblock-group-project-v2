@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from datetime import datetime
 
 import mock
 from mock import Mock
@@ -171,6 +172,10 @@ def switch_to_other_window(browser, other_window):
 def get_other_windows(browser):
     current_window_handle = browser.current_window_handle
     return [handle for handle in browser.window_handles if handle != current_window_handle]
+
+
+def parse_datetime(datetime_string):
+    return datetime.strptime(datetime_string, "%Y-%m-%d %H:%M:%S") if datetime_string else None
 
 
 # pylint:disable=no-self-use

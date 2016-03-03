@@ -1,7 +1,7 @@
 import logging
+from datetime import datetime, timedelta
 import pytz
 
-from datetime import datetime, timedelta
 from group_project_v2.utils import log_and_suppress_exceptions
 
 try:
@@ -25,6 +25,7 @@ class NotificationMessageTypes(object):
 class NotificationTimers(object):
     OPEN = 'open'
     DUE = 'due'
+    GRADE = 'grade'
     COMING_DUE = 'coming-due'
 
 
@@ -179,9 +180,15 @@ class StageNotificationsMixin(object):
 
 
 class ActivityNotificationsMixin(object):
+    def _get_activity_timer_name(self, timer_name_suffix):
+        return '{location}-{timer_name_suffix}'.format(
+            location=unicode(self.location),
+            timer_name_suffix=timer_name_suffix
+        )
+
     # While we *should* send notification, if there is some error here, we don't want to blow the whole thing up.
     @log_and_suppress_exceptions
-    def fire_grades_posted_notification(self, group_id, notifications_service):
+    def fire_grades_posted_notification(self, group_id, notifications_service, send_at_date):
         # this NotificationType is registered in the list of default Open edX Notifications
         msg_type = notifications_service.get_notification_type(NotificationMessageTypes.GRADES_POSTED)
         msg = NotificationMessage(
@@ -195,9 +202,15 @@ class ActivityNotificationsMixin(object):
         location = unicode(self.location) if self.location else ''
         add_click_link_params(msg, unicode(self.course_id), location)
 
-        # Bulk publish to the 'group_project_workgroup' user scope
-        notifications_service.bulk_publish_notification_to_scope(
-            NotificationScopes.WORKGROUP,
-            {'workgroup_id': group_id},
-            msg
+        send_at_date = send_at_date if send_at_date else datetime.now()
+        send_at_date_tz = send_at_date.replace(tzinfo=pytz.UTC)
+        notifications_service.publish_timed_notification(
+            msg=msg,
+            send_at=send_at_date_tz,
+            scope_name=NotificationScopes.WORKGROUP,
+            scope_context={
+                'workgroup_id': group_id,
+            },
+            timer_name=self._get_activity_timer_name(NotificationTimers.GRADE),
+            ignore_if_past_due=True  # don't send if we're already late!
         )
