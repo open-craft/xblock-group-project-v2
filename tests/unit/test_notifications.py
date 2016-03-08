@@ -167,6 +167,7 @@ class TestActivityNotificationsMixin(BaseNotificationsTestCase, TestWithPatchesM
             self.assertEqual(kwargs['scope_name'], NotificationScopes.WORKGROUP)
             self.assertEqual(kwargs['scope_context'], {'workgroup_id': group_id})
             self.assertIsNotNone(kwargs['send_at'])
+            self.assertEqual(kwargs['ignore_if_past_due'], bool(send_at))
             message = kwargs['msg']
             self.assertEqual(message.msg_type.name, NotificationMessageTypes.GRADES_POSTED)
             self.assertEqual(message.namespace, unicode(course_id))
