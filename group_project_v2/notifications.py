@@ -202,7 +202,11 @@ class ActivityNotificationsMixin(object):
         location = unicode(self.location) if self.location else ''
         add_click_link_params(msg, unicode(self.course_id), location)
 
-        send_at_date = send_at_date if send_at_date else datetime.now()
+        ignore_if_past_due = True
+        if not send_at_date:
+            send_at_date = datetime.now()
+            ignore_if_past_due = False
+
         send_at_date_tz = send_at_date.replace(tzinfo=pytz.UTC)
         notifications_service.publish_timed_notification(
             msg=msg,
@@ -212,5 +216,5 @@ class ActivityNotificationsMixin(object):
                 'workgroup_id': group_id,
             },
             timer_name=self._get_activity_timer_name(NotificationTimers.GRADE),
-            ignore_if_past_due=True  # don't send if we're already late!
+            ignore_if_past_due=ignore_if_past_due  # don't send if we're already late!
         )
