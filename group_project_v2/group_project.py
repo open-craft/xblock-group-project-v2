@@ -19,7 +19,6 @@ from group_project_v2.mixins import (
     CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin,
     AuthXBlockMixin
 )
-from group_project_v2.notifications import ActivityNotificationsMixin
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
 from group_project_v2.stage.utils import StageState
 from group_project_v2.utils import (
@@ -317,7 +316,7 @@ StageCompletionDetailsData = named_tuple_with_docstring(  # pylint: disable=inva
 @XBlock.wants('settings')
 class GroupActivityXBlock(
     CommonMixinCollection, DashboardXBlockMixin,
-    XBlockWithPreviewMixin, ActivityNotificationsMixin, XBlock
+    XBlockWithPreviewMixin, XBlock
 ):
     """
     XBlock providing a group activity project for a group of students to collaborate upon
@@ -445,13 +444,16 @@ class GroupActivityXBlock(
     def grade_display_stages(self):
         return self.get_children_by_category(GradeDisplayStage.CATEGORY)
 
-    @property
-    def max_grade_display_date(self):
+    def get_grade_display_stage(self):
         """
-        Gets max grade display date.
+        returns grade display stage with max open date.
         """
-        stage_open_dates = [stage.open_date for stage in self.grade_display_stages if stage.open_date]
-        return max(stage_open_dates) if stage_open_dates else None
+        stages = self.grade_display_stages
+        if stages:
+            grade_display_stage = max(stages, key=lambda stage: stage.open_date if stage.open_date else datetime.min)
+        else:
+            grade_display_stage = None
+        return grade_display_stage
 
     def dashboard_details_url(self):
         """
@@ -804,8 +806,9 @@ class GroupActivityXBlock(
             }
         )
         notifications_service = self.runtime.service(self, 'notifications')
-        if notifications_service:
-            self.fire_grades_posted_notification(group_id, notifications_service, self.max_grade_display_date)
+        grade_display_stage = self.get_grade_display_stage()
+        if notifications_service and grade_display_stage:
+            grade_display_stage.fire_grades_posted_notification(group_id, notifications_service)
 
     def calculate_grade(self, group_id):  # pylint:disable=too-many-locals,too-many-branches
         review_item_data = self.project_api.get_workgroup_review_items_for_group(group_id, self.content_id)

@@ -175,7 +175,10 @@ def get_other_windows(browser):
 
 
 def parse_datetime(datetime_string):
-    return datetime.strptime(datetime_string, "%Y-%m-%d %H:%M:%S") if datetime_string else None
+    return (
+        datetime.strptime(datetime_string.split(".")[0], "%Y-%m-%d %H:%M:%S")
+        if isinstance(datetime_string, basestring) else None
+    )
 
 
 # pylint:disable=no-self-use
