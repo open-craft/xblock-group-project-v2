@@ -178,43 +178,41 @@ class StageNotificationsMixin(object):
         # will have only a very small handful of workgroup users
         notifications_service.bulk_publish_notification_to_users(workgroup_user_ids, msg)
 
-
-class ActivityNotificationsMixin(object):
-    def _get_activity_timer_name(self, timer_name_suffix):
-        return '{location}-{timer_name_suffix}'.format(
-            location=unicode(self.location),
-            timer_name_suffix=timer_name_suffix
+    @log_and_suppress_exceptions
+    def fire_grades_posted_notification(self, group_id, notifications_service):
+        log.info(
+            '{}.fire_grades_posted_notification on location = {} and group id = {}'.format(
+                self.__class__.__name__, self.location,
+                group_id,
+            )
         )
 
-    # While we *should* send notification, if there is some error here, we don't want to blow the whole thing up.
-    @log_and_suppress_exceptions
-    def fire_grades_posted_notification(self, group_id, notifications_service, send_at_date):
-        # this NotificationType is registered in the list of default Open edX Notifications
         msg_type = notifications_service.get_notification_type(NotificationMessageTypes.GRADES_POSTED)
         msg = NotificationMessage(
             msg_type=msg_type,
             namespace=unicode(self.course_id),
             payload={
                 '_schema_version': 1,
-                'activity_name': self.display_name,
+                'activity_name': self.activity.display_name,
             }
         )
         location = unicode(self.location) if self.location else ''
         add_click_link_params(msg, unicode(self.course_id), location)
 
+        send_at_date = self.open_date.replace(tzinfo=pytz.UTC) if self.open_date else None
         ignore_if_past_due = True
-        if not send_at_date:
-            send_at_date = datetime.now()
+        current_datetime = datetime.now().replace(tzinfo=pytz.UTC)
+        if not send_at_date or current_datetime > send_at_date:
+            send_at_date = current_datetime
             ignore_if_past_due = False
 
-        send_at_date_tz = send_at_date.replace(tzinfo=pytz.UTC)
         notifications_service.publish_timed_notification(
             msg=msg,
-            send_at=send_at_date_tz,
+            send_at=send_at_date,
             scope_name=NotificationScopes.WORKGROUP,
             scope_context={
                 'workgroup_id': group_id,
             },
-            timer_name=self._get_activity_timer_name(NotificationTimers.GRADE),
-            ignore_if_past_due=ignore_if_past_due  # don't send if we're already late!
+            timer_name=self._get_stage_timer_name(NotificationTimers.GRADE),
+            ignore_if_past_due=ignore_if_past_due
         )

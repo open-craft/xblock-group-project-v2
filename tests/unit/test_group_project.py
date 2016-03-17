@@ -1,6 +1,7 @@
 import csv
 from unittest import TestCase
 from datetime import datetime
+import pytz
 
 import ddt
 from freezegun import freeze_time
@@ -243,7 +244,7 @@ class TestGroupActivityXBlock(TestWithPatchesMixin, TestCase):
         ('2016-12-29 12:30:49', ['2016-12-29 12:30:47', '2016-12-29 12:30:48', '2016-12-29 12:30:49']),
     )
     @ddt.unpack
-    def test_max_grade_display_date_property(self, expected_result, grade_display_dates):
+    def test_get_grade_display_stage(self, expected_result, grade_display_dates):
         stages = []
         for display_datetime in grade_display_dates:
             stage_mock = mock.create_autospec(BaseGroupActivityStage)
@@ -252,7 +253,9 @@ class TestGroupActivityXBlock(TestWithPatchesMixin, TestCase):
 
         with mock.patch.object(self.block, 'get_children_by_category', mock.Mock()) as get_stages:
             get_stages.return_value = stages
-            self.assertEqual(self.block.max_grade_display_date, parse_datetime(expected_result))
+            self.assertEqual(
+                getattr(self.block.get_grade_display_stage(), "open_date", None), parse_datetime(expected_result)
+            )
 
 
 @ddt.ddt
@@ -484,10 +487,11 @@ class TestEventsAndCompletionGroupActivityXBlock(TestWithPatchesMixin, TestCase)
     def test_sends_notifications_message(self, group_id):
         self.calculate_grade_mock.return_value = 100
         # self.runtime_mock.service.return_value = None
-        test_max_grade_display_date = datetime.now()
-        with mock.patch.object(GroupActivityXBlock, 'max_grade_display_date',
-                               mock.PropertyMock(return_value=test_max_grade_display_date)):
-            with mock.patch.object(self.block, 'fire_grades_posted_notification') as grades_posted_mock:
+        stage_mock = mock.create_autospec(BaseGroupActivityStage)
+        stage_mock.open_date = datetime.now().replace(tzinfo=pytz.UTC)  # pylint: disable=maybe-no-member
+
+        with mock.patch.object(GroupActivityXBlock, 'get_grade_display_stage', return_value=stage_mock):
+            with mock.patch.object(stage_mock, 'fire_grades_posted_notification') as grades_posted_mock:
                 self.block.calculate_and_send_grade(group_id)
                 self.runtime_mock.service.assert_called_with(self.block, 'notifications')
                 grades_posted_mock.assert_not_called()
@@ -499,5 +503,5 @@ class TestEventsAndCompletionGroupActivityXBlock(TestWithPatchesMixin, TestCase)
 
                 self.runtime_mock.service.assert_called_with(self.block, 'notifications')
                 grades_posted_mock.assert_called_once_with(
-                    group_id, notifications_service_mock, test_max_grade_display_date
+                    group_id, notifications_service_mock
                 )
