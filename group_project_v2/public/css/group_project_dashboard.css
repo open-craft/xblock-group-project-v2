@@ -200,13 +200,13 @@ table.activity-data tr.legend .assigned_to_groups_label {
     font-weight: 600;
 }
 
-table.activity-data tr.legend .email_icon_explanation {
+table.activity-data tr.legend .download_icon_explanation {
     margin-top: 10px;
     color: #868685;
     font-size: 12px;
 }
 
-table.activity-data tr.legend .email_icon_explanation .email_icon {
+table.activity-data tr.legend .download_icon_explanation .download_icon {
     color: #3384CA;
     font-family: FontAwesome;
 }
