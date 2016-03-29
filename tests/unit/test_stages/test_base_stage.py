@@ -88,6 +88,12 @@ class TestBaseGroupActivityStage(BaseStageTest):
         super(TestBaseGroupActivityStage, self).setUp()
         self.render_template_patch = self.make_patch(self.block, 'render_template')
 
+    def test_stage_is_not_graded(self):
+        self.assertFalse(self.block.is_graded_stage)
+
+    def test_stage_is_not_shown_on_detail_dashboard(self):
+        self.assertFalse(self.block.shown_on_detail_view)
+
     # invalid name in order to match camlCase naming of assertSomething methods
     def assertDictionaryEqual(self, actual, expected, strict=False):  # pylint: disable=invalid-name
         """

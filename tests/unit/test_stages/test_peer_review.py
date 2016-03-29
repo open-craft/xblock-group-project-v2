@@ -18,6 +18,12 @@ from tests.unit.test_stages.utils import GROUP_ID, USER_ID, OTHER_USER_ID, OTHER
 class TestPeerReviewStage(ReviewStageBaseTest, BaseStageTest):
     block_to_test = PeerReviewStage
 
+    def test_stage_is_graded(self):
+        self.assertTrue(self.block.is_graded_stage)
+
+    def test_stage_is_shown_on_detail_dashboard(self):
+        self.assertTrue(self.block.shown_on_detail_view)
+
     @ddt.data(
         *itertools.product(
             (ReviewState.NOT_STARTED, ReviewState.INCOMPLETE, ReviewState.COMPLETED),
