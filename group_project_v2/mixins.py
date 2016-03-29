@@ -133,13 +133,28 @@ class SettingsMixin(object):
         return result
 
 
-class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin):
+class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMixin):
 
-    DEFAULT_TA_ROLE = ('assistant',)
+    DEFAULT_TA_ROLE = ("assistant", )
 
     _ACCESS_DASHBOARD_ROLE_GROUPS_KEY = "access_dashboard_groups"
     _ACCESS_DASHBOARD_FOR_ALL_ORGS_GROUPS_KEY = "access_dashboard_for_all_orgs_groups"
-    _TA_ROLES_KEY = 'ta_roles'
+    _ACCESS_DASHBOARD_TA_ROLES = "access_dashboard_ta_groups"
+    _TA_ROLES_KEY = "ta_roles"
+
+    @property
+    def see_dashboard_ta_perms(self):
+        """
+        :return: Returns a list of group names, user needs to be a member of
+                 any group from this list to access dashboard.
+                 Additionally if he is in one of these groups he needs to
+                 have a appropriate role for the course to see the dashboard.
+
+                 Essentially he needs to pass ``check_ta_access`` test.
+
+        :rtype: set[str]
+        """
+        return set(self._get_setting(self._ACCESS_DASHBOARD_TA_ROLES, []))
 
     @property
     def see_dashboard_role_perms(self):
@@ -149,9 +164,9 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin):
                  Additionally he will see this dashboard
                  filtered so he only sees students from organizations he
                  belongs to.
-        :rtype: Iterable[str]
+        :rtype: set[str]
         """
-        return self._get_setting(self._ACCESS_DASHBOARD_ROLE_GROUPS_KEY, [])
+        return set(self._get_setting(self._ACCESS_DASHBOARD_ROLE_GROUPS_KEY, []))
 
     @property
     def see_dashboard_for_all_orgs_perms(self):
@@ -160,9 +175,9 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin):
                  any group from this list to access dashboard.
                  Members of these group will see dashboard with users
                  from all organizations.
-        :rtype: Iterable[str]
+        :rtype: set[str]
         """
-        return self._get_setting(self._ACCESS_DASHBOARD_FOR_ALL_ORGS_GROUPS_KEY, [])
+        return set(self._get_setting(self._ACCESS_DASHBOARD_FOR_ALL_ORGS_GROUPS_KEY, []))
 
     @property
     def ta_roles(self):
@@ -188,7 +203,16 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin):
         :rtype: bool
         """
         user_groups = self._user_groups(user_id)
-        return bool(user_groups & self._access_dashboard_roles)
+
+        # These users can access dashboard for every course
+        if bool(user_groups & self._access_dashboard_roles):
+            return True
+
+        # These users can access dashboard only if they are TA
+        if bool(user_groups & self.see_dashboard_ta_perms):
+            return self.is_user_ta(user_id, self.course_id)
+
+        return False
 
     @staticmethod
     def check_dashboard_access_for_current_user(func):
