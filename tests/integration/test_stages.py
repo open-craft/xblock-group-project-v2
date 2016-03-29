@@ -745,9 +745,7 @@ class TestTAGradedPeerReview(BasePeerReviewStageTest):
         self.project_api_mock.get_user_preferences = mock.Mock(return_value={
             "TA_REVIEW_WORKGROUP": [WORKGROUP.id]
         })
-        self.project_api_mock.get_user_roles_for_course = mock.Mock(return_value=[
-            {"role": "assistant"}
-        ])
+        self.project_api_mock.get_user_roles_for_course = mock.Mock(return_value={"assistant"})
 
     def __prepare_scenario_for_peer_graded_activity(self):
         activity_kwargs = dict(group_reviews_required_count=1)
@@ -787,9 +785,7 @@ class TestTAGradedPeerReview(BasePeerReviewStageTest):
         self.project_api_mock.get_user_preferences = mock.Mock(
             return_value={UserAwareXBlockMixin.TA_REVIEW_KEY: group_id}
         )
-        self.project_api_mock.get_user_roles_for_course = mock.Mock(return_value=[
-            {'role': AuthXBlockMixin.DEFAULT_TA_ROLE[0]}  # pylint:disable=protected-access
-        ])
+        self.project_api_mock.get_user_roles_for_course = mock.Mock(return_value=set(AuthXBlockMixin.DEFAULT_TA_ROLE))
         self.project_api_mock.get_workgroup_by_id.side_effect = lambda g_id: WorkgroupDetails(
             id=g_id, users=[{"id": 1}]
         )
@@ -864,9 +860,7 @@ class ProjectTeamBlockTest(StageTestBase):
         Ensure block shows team members.
         """
         user_id = 1
-        self.project_api_mock.get_user_roles_for_course = mock.Mock(return_value=[
-            {'role': AuthXBlockMixin.DEFAULT_TA_ROLE[0]}  # pylint:disable=protected-access
-        ])
+        self.project_api_mock.get_user_roles_for_course = mock.Mock(return_value=set(AuthXBlockMixin.DEFAULT_TA_ROLE))
         self.project_api_mock.get_workgroup_by_id.side_effect = lambda g_id: {"id": g_id, "users": [{"id": 1}]}
         stage_element = self.get_stage(self.go_to_view(student_id=user_id), stage_element_type=ProjectTeamElement)
         self.assertEqual(stage_element.team_members, [u'Jane', u'Jack', u'Jill'])

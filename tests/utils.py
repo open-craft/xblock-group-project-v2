@@ -97,6 +97,7 @@ def get_mock_project_api():
     mock_api.get_member_data = Mock(side_effect=_get_user_details)
     mock_api.get_user_groups = Mock(return_value=tuple())
     mock_api.get_user_permissions = Mock(return_value=tuple())
+    mock_api.get_user_roles_for_course = Mock(return_value=set())
 
     return mock_api
 
@@ -138,9 +139,7 @@ def switch_to_ta_grading(project_api_mock, review_group_id=1):
     project_api_mock.get_user_preferences.return_value = {
         UserAwareXBlockMixin.TA_REVIEW_KEY: review_group_id
     }
-    project_api_mock.get_user_roles_for_course.return_value = [
-        {'role': role} for role in AuthXBlockMixin.DEFAULT_TA_ROLE  # pylint:disable=protected-access
-    ]
+    project_api_mock.get_user_roles_for_course.return_value = set(AuthXBlockMixin.DEFAULT_TA_ROLE)
 
 
 def make_workgroup(workgroup_id, users=None):
