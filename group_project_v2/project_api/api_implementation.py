@@ -140,13 +140,6 @@ class ProjectAPI(object):
     def get_group_detail(self, group_id):
         return self.send_request(GET, (GROUP_API, group_id))
 
-    def get_user_roles_for_course(self, user_id, course_id):
-        qs_params = {
-            "user_id": user_id,
-        }
-
-        return self.send_request(GET, (COURSES_API, course_id, 'roles'), query_params=qs_params)
-
     # TODO: methods below post-process api response - they should be moved outside of this class.
     # When doing the move, add tests before moving, since there are no test coverage for them
     def get_workgroup_reviewers(self, group_id, content_id):
@@ -397,6 +390,25 @@ class TypedProjectAPI(ProjectAPI):
         if user_organizations:
             user_details.organization = user_organizations[0]['display_name']  # and a string here
         return user_details
+
+    @memoize_with_expiration()
+    def get_user_roles_for_course(self, user_id, course_id):
+        """
+        Returns role names user has for a given course.
+
+        :param int user_id: User Id
+        :param int course_id: Course id
+
+        :rtype: set[str]
+        """
+
+        qs_params = {
+            "user_id": user_id,
+        }
+        return set(
+            role['role']
+            for role in self.send_request(GET, (COURSES_API, course_id, 'roles'), query_params=qs_params)
+        )
 
     @memoize_with_expiration()
     def get_organization_by_id(self, org_id):

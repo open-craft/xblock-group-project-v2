@@ -231,7 +231,7 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMix
         :rtype: bool
         """
 
-        granted_roles = {r["role"] for r in self.project_api.get_user_roles_for_course(user_id, course_id)}
+        granted_roles = self.project_api.get_user_roles_for_course(user_id, course_id)
         allowed_roles = set(self.ta_roles)
         return bool(allowed_roles & granted_roles)
 
