@@ -182,7 +182,22 @@ class BaseGroupActivityStage(
 
     @property
     def is_graded_stage(self):  # pylint: disable=no-self-use
+        """
+        If a stage is graded it is shown as graded on the the main dashboard, this property also is used by default
+        implementation of ``shown_on_detail_view``.
+
+        :rtype: bool
+        """
         return False
+
+    @property
+    def shown_on_detail_view(self):
+        """
+        If true details of this stage are shown on the dashboard detail view, by default it returns ``is_graded_stage``.
+
+        :rtype: bool
+        """
+        return self.is_graded_stage
 
     @property
     def dashboard_details_view_url(self):
