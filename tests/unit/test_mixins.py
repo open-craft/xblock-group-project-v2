@@ -453,7 +453,6 @@ class TestAuthXBlockMixin(TestCase, TestWithPatchesMixin):
         self.project_api_mock.get_user_roles_for_course.assert_called_once_with(self.USER_ID, self.COURSE_ID)
 
 
-
 @ddt.ddt
 class TestAuthXBlockMixinSettings(TestCase, TestWithPatchesMixin):
 
