@@ -137,10 +137,10 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMix
 
     DEFAULT_TA_ROLE = ("assistant", )
 
-    _ACCESS_DASHBOARD_ROLE_GROUPS_KEY = "access_dashboard_groups"
-    _ACCESS_DASHBOARD_FOR_ALL_ORGS_GROUPS_KEY = "access_dashboard_for_all_orgs_groups"
-    _ACCESS_DASHBOARD_TA_ROLES = "access_dashboard_ta_groups"
-    _TA_ROLES_KEY = "ta_roles"
+    ACCESS_DASHBOARD_ROLE_GROUPS_KEY = "access_dashboard_groups"
+    ACCESS_DASHBOARD_FOR_ALL_ORGS_GROUPS_KEY = "access_dashboard_for_all_orgs_groups"
+    ACCESS_DASHBOARD_TA_GROUPS_KEY = "access_dashboard_ta_groups"
+    COURSE_ACCESS_TA_ROLES_KEY = "ta_roles"
 
     @property
     def see_dashboard_ta_perms(self):
@@ -154,7 +154,7 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMix
 
         :rtype: set[str]
         """
-        return set(self._get_setting(self._ACCESS_DASHBOARD_TA_ROLES, []))
+        return set(self._get_setting(self.ACCESS_DASHBOARD_TA_GROUPS_KEY, []))
 
     @property
     def see_dashboard_role_perms(self):
@@ -166,7 +166,7 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMix
                  belongs to.
         :rtype: set[str]
         """
-        return set(self._get_setting(self._ACCESS_DASHBOARD_ROLE_GROUPS_KEY, []))
+        return set(self._get_setting(self.ACCESS_DASHBOARD_ROLE_GROUPS_KEY, []))
 
     @property
     def see_dashboard_for_all_orgs_perms(self):
@@ -177,7 +177,7 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMix
                  from all organizations.
         :rtype: set[str]
         """
-        return set(self._get_setting(self._ACCESS_DASHBOARD_FOR_ALL_ORGS_GROUPS_KEY, []))
+        return set(self._get_setting(self.ACCESS_DASHBOARD_FOR_ALL_ORGS_GROUPS_KEY, []))
 
     @property
     def ta_roles(self):
@@ -188,13 +188,10 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMix
             This returns different thing than self.see_dashboard_for_all_orgs
             this returns a **course** role, and rest contains a user group.
 
-        :return: Returns a list of group names. Normally to access a group work
-                 view user will need to belong to a team. If user is a member
-                 of this any group from the list he will be able to access group
-                 work for role group work team.
+        :return:
         :rtype: Iterable[str]
         """
-        return self._get_setting(self._TA_ROLES_KEY, self.DEFAULT_TA_ROLE)
+        return set(self._get_setting(self.COURSE_ACCESS_TA_ROLES_KEY, self.DEFAULT_TA_ROLE))
 
     def can_access_dashboard(self, user_id):
         """

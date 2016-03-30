@@ -405,10 +405,8 @@ class TypedProjectAPI(ProjectAPI):
         qs_params = {
             "user_id": user_id,
         }
-        return set(
-            role['role']
-            for role in self.send_request(GET, (COURSES_API, course_id, 'roles'), query_params=qs_params)
-        )
+        response = self.send_request(GET, (COURSES_API, course_id, 'roles'), query_params=qs_params)
+        return set(role['role'] for role in response)
 
     @memoize_with_expiration()
     def get_organization_by_id(self, org_id):

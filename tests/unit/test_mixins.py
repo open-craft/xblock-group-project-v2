@@ -380,9 +380,11 @@ class TestAuthXBlockMixin(TestCase, TestWithPatchesMixin):
 
     class AuthXBlockMixinGuineaPig(AuthXBlockMixin):
 
+        COURSE_ID = 4321
+
         @property
         def course_id(self):
-            return 4321
+            return self.COURSE_ID
 
         @property
         def see_dashboard_for_all_orgs_perms(self):
@@ -449,6 +451,47 @@ class TestAuthXBlockMixin(TestCase, TestWithPatchesMixin):
         self.assertFalse(self.block.can_access_dashboard(self.USER_ID))
         self.project_api_mock.get_user_permissions.assert_called_once_with(self.USER_ID)
         self.project_api_mock.get_user_roles_for_course.assert_called_once_with(self.USER_ID, self.COURSE_ID)
+
+
+
+@ddt.ddt
+class TestAuthXBlockMixinSettings(TestCase, TestWithPatchesMixin):
+
+    def setUp(self):
+        self.block = AuthXBlockMixin()
+        self.block._get_setting = mock.MagicMock()
+
+    def test_see_dashboard_ta_perms(self):
+        expected = {"foo", "bar"}
+        self.block._get_setting.return_value = list(expected)
+        self.assertEqual(self.block.see_dashboard_ta_perms, expected)
+        self.block._get_setting.assert_called_once_with(
+            AuthXBlockMixin.ACCESS_DASHBOARD_TA_GROUPS_KEY, []
+        )
+
+    def test_see_dashboard_role_perms(self):
+        expected = {"foo", "bar"}
+        self.block._get_setting.return_value = list(expected)
+        self.assertEqual(self.block.see_dashboard_role_perms, expected)
+        self.block._get_setting.assert_called_once_with(
+            AuthXBlockMixin.ACCESS_DASHBOARD_ROLE_GROUPS_KEY, []
+        )
+
+    def test_see_dashboard_for_all_orgs_perms(self):
+        expected = {"foo", "bar"}
+        self.block._get_setting.return_value = list(expected)
+        self.assertEqual(self.block.see_dashboard_for_all_orgs_perms, expected)
+        self.block._get_setting.assert_called_once_with(
+            AuthXBlockMixin.ACCESS_DASHBOARD_FOR_ALL_ORGS_GROUPS_KEY, []
+        )
+
+    def test_ta_roles(self):
+        expected = {"foo", "bar"}
+        self.block._get_setting.return_value = list(expected)
+        self.assertEqual(self.block.ta_roles, expected)
+        self.block._get_setting.assert_called_once_with(
+            AuthXBlockMixin.COURSE_ACCESS_TA_ROLES_KEY, AuthXBlockMixin.DEFAULT_TA_ROLE
+        )
 
 
 @ddt.ddt
