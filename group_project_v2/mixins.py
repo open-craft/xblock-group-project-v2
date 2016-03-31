@@ -137,9 +137,9 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMix
 
     DEFAULT_TA_ROLE = ("assistant", )
 
-    ACCESS_DASHBOARD_ROLE_GROUPS_KEY = "access_dashboard_groups"
-    ACCESS_DASHBOARD_FOR_ALL_ORGS_GROUPS_KEY = "access_dashboard_for_all_orgs_groups"
-    ACCESS_DASHBOARD_TA_GROUPS_KEY = "access_dashboard_ta_groups"
+    ACCESS_DASHBOARD_ROLE_PERMS_KEY = "access_dashboard_groups"
+    ACCESS_DASHBOARD_FOR_ALL_ORGS_PERMS_KEY = "access_dashboard_for_all_orgs_groups"
+    ACCESS_DASHBOARD_TA_PERMS_KEY = "access_dashboard_ta_groups"
     COURSE_ACCESS_TA_ROLES_KEY = "ta_roles"
 
     @property
@@ -156,7 +156,7 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMix
 
         :rtype: set[str]
         """
-        return set(self._get_setting(self.ACCESS_DASHBOARD_TA_GROUPS_KEY, []))
+        return set(self._get_setting(self.ACCESS_DASHBOARD_TA_PERMS_KEY, []))
 
     @property
     def see_dashboard_role_perms(self):
@@ -169,7 +169,7 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMix
                  belongs to.
         :rtype: set[str]
         """
-        return set(self._get_setting(self.ACCESS_DASHBOARD_ROLE_GROUPS_KEY, []))
+        return set(self._get_setting(self.ACCESS_DASHBOARD_ROLE_PERMS_KEY, []))
 
     @property
     def see_dashboard_for_all_orgs_perms(self):
@@ -180,7 +180,7 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMix
                  from all organizations.
         :rtype: set[str]
         """
-        return set(self._get_setting(self.ACCESS_DASHBOARD_FOR_ALL_ORGS_GROUPS_KEY, []))
+        return set(self._get_setting(self.ACCESS_DASHBOARD_FOR_ALL_ORGS_PERMS_KEY, []))
 
     @property
     def ta_roles(self):

@@ -372,55 +372,59 @@ class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
             self.assertEqual(self.block.is_admin_grader, expected_is_admin_grader)
 
 
+class AuthXBlockMixinGuineaPig(AuthXBlockMixin):
+    COURSE_ID = 4321
+
+    ALL_ORGS_PERM = "all_orgs_perm"
+    SINGLE_ORG_PERM = "single_role_perm"
+    TA_PERM = "ta_perm"
+    TA_ROLE = "ta_role"
+
+    def __init__(self, project_api):
+        self._project_api = project_api
+
+    @property
+    def course_id(self):
+        return self.COURSE_ID
+
+    @property
+    def see_dashboard_for_all_orgs_perms(self):
+        return {self.ALL_ORGS_PERM}
+
+    @property
+    def ta_roles(self):
+        return {self.TA_ROLE}
+
+    @property
+    def see_dashboard_ta_perms(self):
+        return {self.TA_PERM}
+
+    @property
+    def see_dashboard_role_perms(self):
+        return {self.SINGLE_ORG_PERM}
+
+    @property
+    def project_api(self):
+        return self._project_api
+
+
 @ddt.ddt
 class TestAuthXBlockMixin(TestCase, TestWithPatchesMixin):
 
     USER_ID = 1234
-    COURSE_ID = 4321
-
-    class AuthXBlockMixinGuineaPig(AuthXBlockMixin):
-
-        COURSE_ID = 4321
-
-        @property
-        def course_id(self):
-            return self.COURSE_ID
-
-        @property
-        def see_dashboard_for_all_orgs_perms(self):
-            return set(["all_orgs_perm"])
-
-        @property
-        def ta_roles(self):
-            return set(["ta_role"])
-
-        @property
-        def see_dashboard_ta_perms(self):
-            return set(["ta_perm"])
-
-        @property
-        def see_dashboard_role_perms(self):
-            return set(["single_role_perm"])
-
-        def __init__(self, project_api):
-            self._project_api = project_api
-
-        @property
-        def project_api(self):
-            return self._project_api
 
     def setUp(self):
         self.project_api_mock = get_mock_project_api()
-        self.block = self.AuthXBlockMixinGuineaPig(self.project_api_mock)
+        self.block = AuthXBlockMixinGuineaPig(self.project_api_mock)
 
     def test_outsider_not_allowed(self):
         self.assertFalse(self.block.can_access_dashboard(self.USER_ID))
         self.project_api_mock.get_user_permissions.assert_called_once_with(self.USER_ID)
 
     @ddt.data(
-        (("all_orgs_perm", ), True),
-        (("all_orgs_perm", "foo", "bar"), True),
-        (("single_role_perm", "foo", "bar"), True),
+        ((AuthXBlockMixinGuineaPig.ALL_ORGS_PERM, ), True),
+        ((AuthXBlockMixinGuineaPig.ALL_ORGS_PERM, "foo", "bar"), True),
+        ((AuthXBlockMixinGuineaPig.SINGLE_ORG_PERM, "foo", "bar"), True),
         (("foo", "bar"), False),
         ([], False),
     )
@@ -436,21 +440,27 @@ class TestAuthXBlockMixin(TestCase, TestWithPatchesMixin):
 
     def test_ta_allowed(self):
         self.project_api_mock.get_user_permissions.return_value = [
-            UserGroupDetails(id=1, name="ta_perm")
+            UserGroupDetails(id=1, name=AuthXBlockMixinGuineaPig.TA_PERM)
         ]
-        self.project_api_mock.get_user_roles_for_course.return_value = {'ta_role'}
+        self.project_api_mock.get_user_roles_for_course.return_value = {
+            AuthXBlockMixinGuineaPig.TA_ROLE
+        }
         self.assertTrue(self.block.can_access_dashboard(self.USER_ID))
         self.project_api_mock.get_user_permissions.assert_called_once_with(self.USER_ID)
-        self.project_api_mock.get_user_roles_for_course.assert_called_once_with(self.USER_ID, self.COURSE_ID)
+        self.project_api_mock.get_user_roles_for_course.assert_called_once_with(
+            self.USER_ID, self.block.COURSE_ID
+        )
 
     def test_ta_not_allowed(self):
         self.project_api_mock.get_user_permissions.return_value = [
-            UserGroupDetails(id=1, name="ta_perm")
+            UserGroupDetails(id=1, name=AuthXBlockMixinGuineaPig.TA_PERM)
         ]
         self.project_api_mock.get_user_roles_for_course.return_value = set()
         self.assertFalse(self.block.can_access_dashboard(self.USER_ID))
         self.project_api_mock.get_user_permissions.assert_called_once_with(self.USER_ID)
-        self.project_api_mock.get_user_roles_for_course.assert_called_once_with(self.USER_ID, self.COURSE_ID)
+        self.project_api_mock.get_user_roles_for_course.assert_called_once_with(
+            self.USER_ID, self.block.COURSE_ID
+        )
 
 
 @ddt.ddt
@@ -465,7 +475,7 @@ class TestAuthXBlockMixinSettings(TestCase, TestWithPatchesMixin):
         self.block._get_setting.return_value = list(expected)
         self.assertEqual(self.block.see_dashboard_ta_perms, expected)
         self.block._get_setting.assert_called_once_with(
-            AuthXBlockMixin.ACCESS_DASHBOARD_TA_GROUPS_KEY, []
+            AuthXBlockMixin.ACCESS_DASHBOARD_TA_PERMS_KEY, []
         )
 
     def test_see_dashboard_role_perms(self):
@@ -473,7 +483,7 @@ class TestAuthXBlockMixinSettings(TestCase, TestWithPatchesMixin):
         self.block._get_setting.return_value = list(expected)
         self.assertEqual(self.block.see_dashboard_role_perms, expected)
         self.block._get_setting.assert_called_once_with(
-            AuthXBlockMixin.ACCESS_DASHBOARD_ROLE_GROUPS_KEY, []
+            AuthXBlockMixin.ACCESS_DASHBOARD_ROLE_PERMS_KEY, []
         )
 
     def test_see_dashboard_for_all_orgs_perms(self):
@@ -481,7 +491,7 @@ class TestAuthXBlockMixinSettings(TestCase, TestWithPatchesMixin):
         self.block._get_setting.return_value = list(expected)
         self.assertEqual(self.block.see_dashboard_for_all_orgs_perms, expected)
         self.block._get_setting.assert_called_once_with(
-            AuthXBlockMixin.ACCESS_DASHBOARD_FOR_ALL_ORGS_GROUPS_KEY, []
+            AuthXBlockMixin.ACCESS_DASHBOARD_FOR_ALL_ORGS_PERMS_KEY, []
         )
 
     def test_ta_roles(self):
