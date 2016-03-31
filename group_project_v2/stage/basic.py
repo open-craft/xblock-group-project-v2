@@ -122,6 +122,10 @@ class SubmissionStage(BaseGroupActivityStage):
 
     @property
     def is_graded_stage(self):
+        return False
+
+    @property
+    def shown_on_detail_view(self):  # pylint: disable=no-self-use
         return True
 
     @property

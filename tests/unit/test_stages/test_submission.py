@@ -18,6 +18,12 @@ class TestSubmissionStage(BaseStageTest):
         self.submissions_mock = mock.PropertyMock()
         self.make_patch(self.block_to_test, 'submissions', self.submissions_mock)
 
+    def test_stage_is_not_graded(self):
+        self.assertFalse(self.block.is_graded_stage)
+
+    def test_stage_is_shown_on_detail_dashboard(self):
+        self.assertTrue(self.block.shown_on_detail_view)
+
     @ddt.data(
         # no submissions at all - not started
         (['u1'], [mk_wg(1, [{'id': 1}])], {}, (set(), set())),

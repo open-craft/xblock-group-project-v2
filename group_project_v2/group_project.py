@@ -595,7 +595,7 @@ class GroupActivityXBlock(
         stages = []
         stage_stats = {}
         for stage in self.stages:
-            if not stage.is_graded_stage:
+            if not stage.shown_on_detail_view:
                 continue
             stage_fragment = stage.render('dashboard_detail_view', children_context)
             stage_fragment.add_frag_resources(fragment)
