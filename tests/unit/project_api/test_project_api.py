@@ -381,3 +381,17 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
         self.assertEqual(len(completions), len(all_responses))
         self.assertEqual([comp.id for comp in completions], [data['id'] for data in all_responses])
         self.assertEqual([comp.user_id for comp in completions], [data['user_id'] for data in all_responses])
+
+    def test_get_user_roles_for_course(self):
+        user_id = 1234
+        course_id = 4321
+        self.project_api.send_request = mock.Mock(return_value=[
+            {'role': 'foo', 'id': user_id},
+            {'role': 'bar', 'id': user_id},
+            {'role': 'baz', 'id': user_id},
+        ])
+        response = self.project_api.get_user_roles_for_course(user_id, course_id)
+        self.assertEqual(response, {'foo', 'bar', 'baz'})
+        self.project_api.send_request.assert_called_once_with(
+            GET, ('api/server/courses', course_id, 'roles'), query_params={'user_id': user_id}
+        )
