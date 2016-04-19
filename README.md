@@ -122,7 +122,11 @@ The following XBlock settings are used:
 * `access_dashboard_for_all_orgs_groups`: list of strings -  List of instance-wide roles that grant access to any 
     organization.
 
-* `access_dashboard_groups`: list of strings - List of instance-wide roles that grant access to admin dashboard
+* `access_dashboard_groups`: list of strings - List of instance-wide roles that grant access to admin dashboard.
+  Members of these roles will only see users from their own organisation. 
+
+* `access_dashboard_ta_groups`: lis of strings - List of instance-wide roles that grant access to admin dashboard.
+  Members of these roles will be able to visit the dashboard only if they are TA for particular course (see `ta_roles`). 
 
 If both `access_dashboard_for_all_orgs_groups` and `access_dashboard_role_groups` are empty or missing, admin dashboard 
 is effectively disabled.
@@ -135,6 +139,7 @@ Example configuration:
         "ta_review_url": "/courses/{course_id}/group_work/{group_id}?activate_block_id={activate_block_id}",
         "access_dashboard_for_all_orgs_groups": ["mcka_role_mcka_admin"],
         "access_dashboard_groups": ["mcka_role_client_admin", "mcka_role_internal_admin"],
+        "access_dashboard_ta_groups": ["mcka_role_mcka_ta"],
         "ta_roles": ["assistant"]
       }
     }
