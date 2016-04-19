@@ -1,0 +1,17 @@
+{% load i18n %}
+<div class="stage dashboard-detail-view">
+  <div class="stage-data">
+    <div>
+      <a href="{{ download_incomplete_emails_handler_url }}">
+        <span class="download_icon fa fa-icon fa-download"></span>
+      </a>
+    </div>
+    <div class="group-project-stage-title">{{ stage.display_name }}</div>
+    <div class="group-project-stage-dates details">
+      {% if stage.close_date %}{{ stage.formatted_close_date }}{% else %}&nbsp;{% endif %}
+    </div>
+    <div class="group-project-stage-ta-graded details">
+      {% if ta_graded %}{% trans "TA Graded" %}{% else %}&nbsp;{% endif %}
+    </div>
+  </div>
+</div>

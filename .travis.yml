@@ -1,0 +1,25 @@
+language: python
+python:
+    - "2.7"
+before_install:
+    - "export DISPLAY=:99"
+    - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1920x1080x16"
+install:
+    - "pip install -r requirements/base.txt"
+    - "pip install -r requirements/test.txt"
+    - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/requirements.txt"
+    - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/test-requirements.txt"
+    - "python setup.py sdist && pip install dist/xblock-group-project-v2-0.4.tar.gz"
+    - "npm install"
+script:
+    - pep8 group_project_v2 tests --max-line-length=120
+    - pylint group_project_v2 --rcfile=pylintrc
+    - pylint tests --rcfile=tests/pylintrc
+    - ./node_modules/jshint/bin/jshint group_project_v2 tests
+    - ./node_modules/.bin/karma start tests/js/karma.conf.js --single-run
+    - cat coverage/js/karma_coverage.txt
+    - python run_tests.py --with-coverage --cover-package=group_project_v2
+notifications:
+  email: false
+addons:
+  firefox: "36.0"

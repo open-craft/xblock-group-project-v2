@@ -1,0 +1,111 @@
+.group-project-navigator-wrapper {
+    border: 1px solid #ccc;
+    color: #868685;
+    background-color: white;
+    box-shadow: 0 2px 5px 0 #ccc;
+}
+
+.group-project-navigator-header {
+    background-color: #66a5b5;
+    text-transform: uppercase;
+    color: white;
+    padding: 15px 10px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.group-project-navigator-header .marker {
+    float: right;
+    margin-right: 8px;
+    font-size: 20px;
+}
+
+.group-project-navigator-views {
+    overflow: auto;
+    height: 500px;
+}
+
+.group-project-navigator-view {
+    display: none;
+    padding: 0 10px;
+}
+
+.group-project-navigator-view-selector {
+    margin: 0;
+    padding: 12px 10px;
+    background-color: #f3f3f3;
+    text-align: center;
+}
+
+.group-project-navigator-view-selector li {
+    list-style: none;
+    display: inline-block;
+    min-width: 35px;
+    width: 23%;  /* should fit four in one line + some extra space for margins */
+    height: 30px;
+    /* looks like FA icons have slightly shifted to bottom baseline, so they are not aligned with ordinary text */
+    vertical-align: bottom;
+}
+
+.group-project-navigator-view-selector li span.view-selector-item {
+    display: inline-block;
+    width: 100%;
+    padding: 0.7em 2em;
+    background-color: #eee;
+    cursor: pointer;
+    border-radius: 3px;
+    color: #555;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    line-height: 18px;
+}
+
+.group-project-navigator-view-selector li span.view-selector-item.active {
+    background-color: #555;
+    color: #eee;
+}
+
+.group-project-navigator-view ul {
+    margin: 0;
+}
+
+.group-project-navigator-view .group-project-navigator-view-header {
+    padding: 8px 10px;
+    margin: 0 -10px;
+}
+
+.group-project-navigator-view .group-project-navigator-view-title {
+    color: #66a5b5;
+    font-size: 16px;
+}
+
+.group-project-navigator-view .group-project-navigator-view-close {
+    color: #AAAAAA;
+    font-size: 16px;
+    float: right;
+    cursor: pointer;
+}
+
+.group-project-navigator-view .group-project-activity-header {
+    text-transform: uppercase;
+    background-color: #f3f3f3;
+    padding: 3px 10px;
+    margin: 0 -10px 5px -10px;
+    color: #868685;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.group-project-navigator-view .group-project-activity-header:after {
+    content: ":";
+}
+
+.group-project-navigator-view .group-project-activity-content {
+    margin-bottom: 5px;
+}
+
+.group-project-navigator-wrapper.author-view .group-project-navigator-view {
+    display: block;
+}

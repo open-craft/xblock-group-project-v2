@@ -1,0 +1,27 @@
+{% load i18n %}
+{% if stage.is_admin_grader %}
+{% if stage.activity.is_ta_graded %}
+<div class="grading_override ta_graded">{% trans "Grading View" %}</div>
+{% else %}
+<div class="grading_override">{% trans "TA Grading override view" %}</div>
+{% endif %}
+{% endif %}
+
+<div class="review other_group_review" data-review-type="group_review" data-action="submit_review" data-method="POST">
+  {% for child_content in children_contents %}{{ child_content|safe }}{% endfor %}
+  <hr/>
+  <button class="submit" {% if stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
+</div>
+
+
+<div class="review_submissions_dialog">
+  <div class="modal-bg"></div>
+  <div class="xblock-reveal reveal-modal open small">
+    <div class="close-box close_review_dialog">
+      <i class="fa fa-times-circle"></i>
+    </div>
+    <div class="title">{% trans "Group Submissions" %}</div>
+    <div>{% trans "Please review the file(s) below to evaluate the group's work." %}</div>
+    <div class="other_submission_links"></div>
+  </div>
+</div>

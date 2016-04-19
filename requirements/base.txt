@@ -1,0 +1,2 @@
+-e git+https://github.com/edx/xblock-utils.git@08e5a5a9fc8ab46b627435427fd7e04c20809009#egg=xblock-utils
+lazy>=1.1

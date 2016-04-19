@@ -1,0 +1,15 @@
+{% load i18n %}
+<div class="group-project-activity-wrapper" data-activity-id="{{ activity.id }}">
+  <div class="group-project-activity-header">{{ activity.display_name }}</div>
+  {% if has_submissions %}
+    <ul class="group-project-activity-content group-project-submissions">
+      {% for submission_content in submission_contents %}
+        <li>{{ submission_content|safe }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="group-project-activity-content">
+      {% trans "No uploads required for this activity" %}
+    </div>
+  {% endif %}
+</div>

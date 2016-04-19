@@ -1,0 +1,98 @@
+.group-project-submissions-view ul.group-project-submissions li {
+    border-bottom: 1px solid #ccc;
+    list-style: none;
+    padding: 5px 0;
+}
+
+.group-project-submissions-view ul.group-project-submissions li:last-of-type {
+    border-bottom: none;
+}
+
+.group-project-submissions-view .action_buttons {
+    /* should not be visible by default, but still consume space to avoid resizing view - hence using visibility, not display*/
+    visibility: hidden;
+}
+
+.group-project-submissions-view .uploader {
+    font-size: 14px;
+}
+
+.group-project-submissions-view .uploader .file-progress-box {
+    background-color: transparent;
+    height: 5px;
+    visibility: hidden;
+}
+
+.group-project-submissions-view .uploader .file-progress-box .file-progress {
+    background-color: #cccccc;
+    width: 13%;
+    height: 5px;
+}
+
+.group-project-submissions-view .uploader .file-progress-box .file-progress.complete {
+    background-color: #999999;
+}
+
+.group-project-submissions-view .uploader .file-progress-box .file-progress.failed {
+    background-color: #B85433;
+}
+
+.group-project-submissions-view .uploader .upload_title {
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+.group-project-submissions-view .uploader .uploader-upload-controls-wrapper {
+    min-width: 180px;
+    padding-right: 35px; /* placing label in wrapper padding: 30px label width + 5px "margin" */
+}
+
+.group-project-submissions-view .uploader .upload_item_wrapper {
+    display: inline-block;
+    padding: 0;
+    width: 100%;
+    /* right margin won't work here - update uploader-upload-controls-wrapper padding-right and .uploader label margin-right */
+}
+
+.group-project-submissions-view .uploader label {
+    width: 30px;
+    margin-right: -35px;  /* to stick it to right border, this should be the same as uploader-upload-controls-wrapper right padding */
+    display: inline-block;
+    text-align: right;
+    vertical-align: top;
+    float: right;
+}
+
+.group-project-submissions-view .uploader label span {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    line-height: 30px;
+    margin-bottom: 0;
+    font-size: 14px;
+}
+
+.group-project-submissions-view .uploader input[type=text] {
+    width: 100%;
+    background-color: transparent;
+    color: #3384ca;
+    margin-bottom: 0;
+    height: 30px;
+    font-style: italic;
+    font-size: 12px;
+}
+
+.group-project-submissions-view .uploader .upload_item_wrapper[data-location] input[type=text] {
+    cursor: pointer;
+    font-style: normal;
+    font-weight: bold;
+}
+
+.group-project-submissions-view .uploader .description {
+    font-size: 11px;
+    font-style: italic;
+}
+
+.group-project-submissions-view .uploader .upload_item_data {
+    font-size: 12px;
+}

@@ -1,0 +1,13 @@
+{% load i18n %}
+<div class="group-project-activity-wrapper" data-activity-id="{{ activity.id }}">
+  <div class="group-project-activity-header">{{ activity.display_name }}</div>
+  {% if has_resources %}
+    <ul class="group-project-activity-content group-project-resources">
+      {% for resource_content in resource_contents %}
+        <li>{{ resource_content|safe }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="group-project-activity-content">{% trans "No resources for this activity" %}</div>
+  {% endif %}
+</div>

@@ -4,6 +4,7 @@
 
 import os
 from setuptools import setup
+from group_project_v2.app_config import ENTRYPOINTS
 
 
 # Functions #########################################################
@@ -22,15 +23,16 @@ def package_data(pkg, root_list):
 # Main ##############################################################
 
 setup(
-    name='xblock-group-project',
-    version='0.1',
-    description='XBlock - Group Project',
-    packages=['group_project'],
+    name='xblock-group-project-v2',
+    version='0.4',
+    description='XBlock - Group Project V2',
+    packages=['group_project_v2'],
     install_requires=[
         'XBlock',
+        'xblock-utils',
     ],
     entry_points={
-        'xblock.v1': 'group-project = group_project:GroupProjectBlock',
+        'xblock.v1': ENTRYPOINTS
     },
-    package_data=package_data("group_project", ["static", "templates", "public", "res"]),
+    package_data=package_data("group_project_v2", ["templates", "public"]),
 )

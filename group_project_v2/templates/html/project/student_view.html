@@ -1,0 +1,72 @@
+{% load i18n %}
+<div class="group-project-xblock-wrapper">
+  <!-- floats to the right -->
+  <div class="group-project-navigator">
+    {{project_navigator_content|safe}}
+  </div>
+
+  <div class="group-project-content">
+    {{ activity_content|safe }}
+  </div>
+
+  <div id="group-project-discussion">
+    <div class="modal-bg"></div>
+    <div class="xblock-reveal reveal-modal open">
+      <div class="close-box">
+        <i class="fa fa-times-circle"></i>
+      </div>
+      {{ discussion_content|safe }}
+    </div>
+  </div>
+
+  <div class="message">
+    <div class="modal-bg"></div>
+    <div class="xblock-reveal reveal-modal open">
+      <div class="close-box">
+        <i class="fa fa-times-circle"></i>
+      </div>
+      <div class="message_title"></div>
+      <div class="message_text"></div>
+      <div class="action_buttons">
+        <button class="button radius small">{% trans "OK" %}</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="group-project-team-email-dialog group-project-team-email-group-modal">
+    <div class="modal-bg"></div>
+    <div class="xblock-reveal reveal-modal open">
+      <div class="close-box">
+        <i class="fa fa-times-circle"></i>
+      </div>
+      <h2 class="group-project-team-email-modal-title">{% trans "Message your group" %}</h2>
+      <hr/>
+      <div class="group-project-team-email-modal-subtitle">{% trans "Send any questions or messages to your group." %}</div>
+      <div class="error"></div>
+      <form class="email-member-form" action="/courses/{{ course_id }}/group_email/{{ group_id }}" method="POST">
+        <input type="hidden" class="csrfmiddlewaretoken" name="csrfmiddlewaretoken" value="">
+        <textarea placeholder='{% trans "Enter your message for the group here" %}' name="group_message"></textarea>
+        <input class="button radius small" type="submit" value='{% trans "Submit" %}' disabled="disabled">
+      </form>
+    </div>
+  </div>
+
+  <div class="group-project-team-email-dialog group-project-team-email-member-modal">
+    <div class="modal-bg"></div>
+    <div class="xblock-reveal reveal-modal open">
+      <div class="close-box">
+        <i class="fa fa-times-circle"></i>
+      </div>
+      <h2 class="group-project-team-email-modal-title">{% trans "Message your group member"%}</h2>
+      <hr/>
+      <div class="group-project-team-email-modal-subtitle">{% trans "Send any questions or messages to your group member." %}</div>
+      <div class="error"></div>
+      <form class="email-member-form" action="/courses/{{ course_id }}/group_member_email/{{ group_id }}" method="POST">
+        <input type="hidden" class="csrfmiddlewaretoken" name="csrfmiddlewaretoken" value="">
+        <input type="hidden" class="member-email" name="member-email" value="">
+        <textarea placeholder='{% trans "Enter your message here" %}' name="member_message"></textarea>
+        <input class="button radius small" type="submit" value='{% trans "Submit" %}' disabled="disabled">
+      </form>
+    </div>
+  </div>
+</div>

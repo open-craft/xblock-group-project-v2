@@ -1,0 +1,12 @@
+{% load i18n %}
+<div class="group-project-other-team-submissions">
+{% if submission_stage_contents %}
+  {% for submission_stage_content in submission_stage_contents %}
+    <div class="other-team-submission">
+      {{ submission_stage_content|safe }}
+    </div>
+  {% endfor %}
+{% else %}
+  {% trans "Current Group Project Activity does not have any submission stages" %}
+{% endif %}
+</div>

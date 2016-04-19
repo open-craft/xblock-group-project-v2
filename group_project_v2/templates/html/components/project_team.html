@@ -1,0 +1,28 @@
+{% load i18n %}
+<div class="group-project-team-wrapper">
+  <a href="#" class="group-project-team-email-group">{% trans "Email your entire team" %}</a>
+  {% for team_member in team_members %}
+    <div class="group-project-team-member">
+      <div class="group-project-team-member-avatar">
+        <img class="avatar" {% if team_member.avatar_url %} src="{{team_member.avatar_url }}" {% endif %}/>
+      </div>
+      <div class="group-project-team-member-data">
+        <div class="group-project-team-member-info">
+          <div class="group-project-team-member-name">{{ team_member.full_name }}</div>
+          <div class="group-project-team-member-title">
+            {% if team_member.title %}{{ team_member.title }}{% endif %}
+          </div>
+          <div class="group-project-team-member-organization">
+            {% if team_member.organization %}{{ team_member.organization }}{% endif %}
+          </div>
+          <div class="group-project-team-member-city">
+            {% if team_member.city %}{{ team_member.city }}{% endif %}
+          </div>
+        </div>
+        <div class="group-project-team-member-email">
+          <a href="#" data-email="{{ team_member.email }}">{% trans "Email" %}</a>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>

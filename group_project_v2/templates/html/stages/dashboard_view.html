@@ -1,0 +1,33 @@
+{% load i18n %}
+<div class="stage dashboard-view {% if not stage.is_graded_stage %}group-project-non-graded-stage{% endif %}">
+  <div class="stage-status">
+    <span class="stage-status-label">{% trans "Status:" %}</span>
+    <span class="group-project-stage-state fa {{ stage_state }}"></span>
+  </div>
+  <div class="stage-data">
+    <div class="group-project-stage-title">{{ stage.display_name }}</div>
+    <div class="group-project-stage-dates details">
+      {% if stage.close_date %}{{ stage.formatted_close_date }}{% else %}&nbsp;{% endif %}
+    </div>
+    <div class="group-project-stage-ta-graded details">
+      {% if ta_graded %}{% trans "TA Graded" %}{% else %}&nbsp;{% endif %}
+    </div>
+  </div>
+  <table class="group-project-stage-stats">
+    {% for stat_label, stat_value in stats.items %}
+      <tr class="group-project-stage-stat">
+        <td class="group-project-stage-stat-label">{{ stat_label }}</td>
+        <td class="group-project-stage-stat-value">{{ stat_value|floatformat:"0" }}%</td>
+      </tr>
+    {% endfor %}
+  </table>
+  <div class="group-project-stage-navigate-to-detailed-view">
+    {% if stage.is_graded_stage %}
+      <a href="{{stage.dashboard_details_view_url}}">
+        <span class="stage-open-detailed-view fa fa-chevron-right {% if not stage.is_open %}disabled{% endif %}"></span>
+      </a>
+    {% else %}
+      &nbsp;
+    {% endif %}
+  </div>
+</div>

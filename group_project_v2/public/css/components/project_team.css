@@ -1,0 +1,74 @@
+.group-project-team-wrapper {
+    margin-top: 20px;
+}
+
+.group-project-team-wrapper .group-project-team-email-group {
+    text-align: right;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.group-project-team-wrapper .group-project-team-member {
+    border-top: 1px solid #ccc;
+    padding: 15px 0 8px 0;
+}
+
+.group-project-team-wrapper .group-project-team-member-avatar {
+    width: 40px;
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 20px;
+    margin-right: 10px;
+}
+
+.group-project-team-wrapper .group-project-team-member-data {
+    display: inline-block;
+    font-size: 10px;
+}
+
+.group-project-team-wrapper .group-project-team-member-data .group-project-team-member-info {
+    height: 110px;
+}
+
+.group-project-team-wrapper .group-project-team-member-data .group-project-team-member-username a,
+.group-project-team-wrapper .group-project-team-member-data .group-project-team-member-username a:visited {
+    font-size: 10px;
+}
+
+.group-project-team-wrapper .group-project-team-member-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.group-project-team-wrapper .group-project-team-member-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #868685;
+}
+
+.group-project-team-wrapper .group-project-team-member-city {
+    text-transform: uppercase;
+    font-size: 12px;
+    color: #999999;
+}
+
+.group-project-team-wrapper  .group-project-team-member-organization {
+    text-transform: uppercase;
+    font-size: 10px;
+    color: #868685;
+}
+
+.group-project-team-email-dialog .group-project-team-email-modal-subtitle {
+    margin-bottom: 10px;
+}
+
+.group-project-team-email-dialog .email-member-form textarea {
+    height: 120px;
+}
+
+.group-project-team-wrapper .group-project-team-member-email a,
+.group-project-team-wrapper .group-project-team-email-group {
+    font-size: 13px;
+    font-weight: bold;
+}

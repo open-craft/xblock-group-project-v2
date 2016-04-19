@@ -1,0 +1,16 @@
+{% load i18n %}
+<div class="group-project-assessment">
+  <div class="group-project-question-title">{{ question_title }}</div>
+  <div class="group-project-assessment-answers">
+    {% if assessment.show_mean %}
+      <span class="group-project-answer-mean highlight">{% trans "Grade:" %} {{ mean|floatformat:"0" }}</span>
+      <span class="group-project-answer-wrapper">
+        ({% for answer in feedback %}<span class="group-project-answer comma">{{ answer }}</span>{% endfor %})
+      </span>
+    {% else %}
+      {% for answer in feedback %}
+        <span class="group-project-answer quote">{{ answer }}</span>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>

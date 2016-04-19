@@ -1,0 +1,8 @@
+{% load i18n %}
+<div class="feedback_stage group_assessment">
+  {% for child_content in children_contents %}{{ child_content|safe }}{% endfor %}
+</div>
+
+<hr/>
+
+<div class="highlight group-project-final-grade">{% trans "Final Grade:" %} {{ final_grade|floatformat:"0" }}</div>

@@ -1,0 +1,93 @@
+{% load i18n %}
+<div class="activity dashboard-detail-view">
+  <div class="activity-header">
+    <span class="activity-header-label">{% trans "Activity:" %}</span>
+    <span class="activity-header-title">{{ activity.display_name }}</span>
+  </div>
+  <div class="stages">
+    <table class="activity-data">
+      <tr>
+        <th>{% trans "Groups" %}:</th>
+        <th colspan="{{stages_count}}">{% trans "Graded/Required Stages" %}:</th>
+      </tr>
+      <tr class="legend">
+        <td>
+          <div class="assigned_to_groups_label">{{ assigned_to_groups_label }}</div>
+          <div class="download_icon_explanation">
+            <span class="download_icon fa fa-icon fa-download"></span> {% trans "will export a list of emails within stage of partially complete/incomplete teams" %}
+          </div>
+        </td>
+        {% for stage in stages %}
+          <td class="stage_header" style="width:{{stage_cell_width_percent}}%">{{stage.content|safe}}</td>
+        {% endfor %}
+      </tr>
+      {% for group in groups %}
+      <tr class="group-data-row data" data-group-id="{{group.id}}" data-collapsed="collapsed">
+        <td>
+          <div class="group-label">
+            <span class="fa fa-icon fa-caret-right group-collapsed-icon"></span>
+            {{ group|render_group:"verbose" }}
+            <a href="{{group.ta_grade_link}}" class="fa fa-icon fa-users grade_group_icon"></a>
+          </div>
+        </td>
+        {% for stage in stages %}
+          <td>
+            {% with stage_states=group.stage_states|get_item:stage.id %}
+              <span class="group-project-stage-state fa {{ stage_states.internal_status }}"></span>
+              {% if stage_states.external_status != StageState.NOT_AVAILABLE %}
+                <span class="group-project-stage-state-label  {{ stage_states.external_status }}">
+                  {{ stage_states.external_status_label }}
+                </span>
+              {% endif %}
+            {% endwith %}
+          </td>
+        {% endfor %}
+      </tr>
+        {% for user in group.users %}
+          <tr class="user-data-row data{% if user.is_filtered_out %} filtered-out{%endif%}" data-group-id="{{group.id}}" data-fullname="{{user.full_name}}" data-email="{{user.email}}">
+            <td class="user-cell">
+              <div class="user-email">
+                <a href="mailto: {{ user.email }}">{{ user.email }}</a>
+              </div>
+              <div class="user-full-name">{{ user.full_name }}</div>
+            </td>
+            {% for stage in stages %}
+              <td>
+                <span class="group-project-stage-state fa {{ user.stage_states|get_item:stage.id }}"></span>
+                {% with user.groups_to_grade|get_item:stage.id as groups %}
+                  {% if groups %}
+                    <div class="grading-group-label">
+                      {% trans "Grading:" %}
+                      {% for group in groups %}
+                        <span class="group-label">
+                          <a href="{{group.ta_grade_link}}">{{ group|render_group }}</a>
+                        </span>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                {% endwith %}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      {% endfor %}
+      {% if filtered_out_workgroups %}
+      <tr class="data" data-group-id="{{group.id}}" data-collapsed="collapsed">
+        <td colspan="{{stages|length|add:'1'}}">
+        {% if groups|length %}
+          {% blocktrans count counter=filtered_out_workgroups %}
+            Additionally there is a single work group filtered by company filter.
+          {% plural %}
+            Additionally there were {{counter}} work groups filtered by company filter.
+          {% endblocktrans %}
+        {% else %}
+          {% blocktrans %}
+            All work groups have been filtered by the company filter.
+          {% endblocktrans %}
+        {% endif %}
+          </td>
+        </tr>
+      {% endif %}
+    </table>
+  </div>
+</div>

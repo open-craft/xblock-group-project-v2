@@ -1,0 +1,5 @@
+<div class="review peer_review" data-review-type="peer_review" data-action="submit_review" data-method="POST">
+  {% for child_content in children_contents %}{{ child_content|safe }}{% endfor %}
+  <hr/>
+  <button class="submit" {% if stage.is_closed %}disabled="disabled"{% endif %}>Submit</button>
+</div>

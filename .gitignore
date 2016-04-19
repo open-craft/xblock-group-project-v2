@@ -1,3 +1,13 @@
-xblock_group_projects.egg-info
+*.egg-info
+dist
 *.pyc
 *~
+.coverage
+coverage
+coverage.xml
+*.log
+*.log.*
+.DS_Store
+
+tests.*
+node_modules

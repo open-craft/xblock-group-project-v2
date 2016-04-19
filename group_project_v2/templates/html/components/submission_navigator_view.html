@@ -1,0 +1,31 @@
+{% load i18n %}
+<div class="uploader {{submission.upload_id}}_uploader">
+  <div class="upload_title">{{ submission.display_name }}:</div>
+  <div class="uploader-upload-controls-wrapper">
+    <!-- label floats to right -->
+    <label for="{{ submission.upload_id }}">
+      <span class="side button tiny radius {{ submission.upload_id }}_label fa fa-paperclip" {% if disabled %} disabled="disabled"{% endif %}></span>
+    </label>
+    <div class="upload_item_wrapper" {% if upload.location %} data-location="{{ upload.location }}" {% endif %}>
+      <input
+        class="{{ submission.upload_id }}_name" placeholder="Browse computer to upload file..."
+        readonly="readonly" type="text"
+        {% if upload.file_name %}
+          value="{{ upload.file_name }}" data-original-value="{{ upload.file_name }}"
+        {% endif %}
+      />
+      <div class="{{ submission.upload_id }}_progress_box file-progress-box">
+        <div class="{{ submission.upload_id }}_progress file-progress"></div>
+      </div>
+    </div>
+    <input style="display:none;" class="file_upload" name="{{ submission.upload_id }}" id="{{ submission.upload_id }}" type="file" {% if disabled %} disabled="disabled"{% endif %}/>
+  </div>
+  {% if submission.description %}
+    <div class="description">{{ submission.description }}</div>
+  {% endif %}
+  <div class="{{submission.upload_id}}_uploaded_by upload_item_data">
+    {% if upload.location %}
+      {% trans "Uploaded by" %} {{ upload.user_details.user_label }} on {{ upload.submission_date }}
+    {% endif %}
+  </div>
+</div>

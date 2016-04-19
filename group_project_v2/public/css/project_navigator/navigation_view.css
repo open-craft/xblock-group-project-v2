@@ -1,0 +1,34 @@
+.group-project-navigation-view ul.group-project-activity-content li {
+    border-bottom: 1px solid #ccc;
+    list-style: none;
+}
+
+.group-project-navigation-view ul.group-project-activity-content li:last-of-type {
+    border-bottom: none;
+}
+
+.group-project-navigation-view .group-project-stage {
+    margin: 0 -10px;
+    /* 30px left padding = 20px for state icon and 10 px to compensate for negative margin */
+    padding: 4px 10px 4px 30px;
+}
+
+.group-project-navigation-view .group-project-stage.current {
+    background-color: #fffec9;
+}
+
+.group-project-navigation-view  .group-project-stage-state {
+    margin-left: -20px;
+}
+
+
+
+.group-project-navigation-view .group-project-stage.disabled .group-project-stage-title a,
+.group-project-navigation-view .group-project-stage.disabled .group-project-stage-title a:hover {
+    color: #868685;
+}
+
+.group-project-navigation-view .group-project-stage-dates {
+    font-size: 12px;
+    font-weight: 600;
+}
