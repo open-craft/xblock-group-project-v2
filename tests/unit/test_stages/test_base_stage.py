@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 import ddt
 import mock
+from group_project_v2.project_api.dtos import ReducedUserDetails
 
 from group_project_v2.stage import BaseGroupActivityStage
 from group_project_v2.stage.utils import StageState
@@ -36,10 +37,13 @@ class DummyStageBlock(BaseGroupActivityStage):
 def make_stats(completed, partially_complete, not_started):
     """
     Helper method to build stats dictionary as returned by get_dashboard_stage_state
-    :param float completed: ratio of students completed the stage as float in [0..1] interval
-    :param float partially_complete: ratio of students partially completed the stage as float in [0..1] interval
-    :param float not_started: ratio of student not started the stage as float in [0..1] interval
-    :rtype: dict[str, float]
+    :param completed: ratio of students completed the stage as float in [0..1] interval
+    :type completed: float | None
+    :param partially_complete: ratio of students partially completed the stage as float in [0..1] interval
+    :type partially_complete: float | None
+    :param not_started: ratio of student not started the stage as float in [0..1] interval
+    :type not_started: float | None
+    :rtype: dict[str, float | None]
     :return: Ratios of students complete, partially competed and not started the stage
     """
     return {
@@ -48,6 +52,16 @@ def make_stats(completed, partially_complete, not_started):
         StageState.COMPLETED: completed
     }
 
+def make_reduced_user_details(**kwargs):
+    defaults = {
+        'id': 1,
+        'username': 'test.user',
+        'email': 'test.user@example.com',
+        'first_name': 'test',
+        'last_name': 'user'
+    }
+    defaults.update(kwargs)
+    return ReducedUserDetails(**kwargs)
 
 def make_context(workgroups, target_students, filtered_students):
     """
@@ -62,22 +76,6 @@ def make_context(workgroups, target_students, filtered_students):
         Constants.TARGET_STUDENTS: target_students,
         Constants.FILTERED_STUDENTS: filtered_students
     }
-
-
-def get_human_stats(completed, partially_complete, not_started):
-    """
-    Helper method - converts machine-friendly stage stats to human-friendly stage stats
-    :param float completed: ratio of students completed the stage as float in [0..1] interval
-    :param float partially_complete: ratio of students partially completed the stage as float in [0..1] interval
-    :param float not_started: ratio of student not started the stage as float in [0..1] interval
-    :rtype: dict[str, float]
-    """
-    return OrderedDict([
-        (StageState.get_human_name(StageState.NOT_STARTED), not_started*100),
-        (StageState.get_human_name(StageState.INCOMPLETE), partially_complete*100),
-        (StageState.get_human_name(StageState.COMPLETED), completed*100),
-    ])
-
 
 @ddt.ddt
 class TestBaseGroupActivityStage(BaseStageTest):
@@ -130,9 +128,7 @@ class TestBaseGroupActivityStage(BaseStageTest):
 
         context = make_context(workgroups, target_students, [])
 
-        expected_human_stats = get_human_stats(
-            stats[StageState.COMPLETED], stats[StageState.INCOMPLETE], stats[StageState.NOT_STARTED]
-        )
+        expected_human_stats = BaseGroupActivityStage.make_human_stats(stats)
         expected_context = {
             'stage': self.block, 'stats': expected_human_stats, 'stage_state': state, 'ta_graded': is_ta_graded
         }
@@ -149,6 +145,23 @@ class TestBaseGroupActivityStage(BaseStageTest):
         self.assertEqual(len(args), 2)
         self.assertEqual(args[0], 'dashboard_view')
         self.assertDictionaryEqual(args[1], expected_context)
+
+    @ddt.data(
+        (make_stats(0.4, 0.3, 0.4), (40, 30, 40)),
+        (make_stats(0.1, 0.1, 0.8), (80, 10, 10)),
+        (make_stats(None, None, None), (None, None, None))
+    )
+    @ddt.unpack
+    def test_make_human_stats(self, stats, human_stats_data):
+        stats_order = (StageState.NOT_STARTED, StageState.INCOMPLETE, StageState.COMPLETED)
+        expected_human_stats = BaseGroupActivityStage.make_human_stats(stats)
+
+        self.assertEqual(len(expected_human_stats), len(stats_order))
+
+        for idx, human_stat in enumerate(expected_human_stats.items()):
+            stat_name, stat_value = human_stat
+            self.assertEqual(stat_name, StageState.get_human_name(stats_order[idx]))
+            self.assertAlmostEqual(stat_value, human_stats_data[idx])
 
     @ddt.data(
         # not filtered - pass all students
@@ -186,6 +199,35 @@ class TestBaseGroupActivityStage(BaseStageTest):
             self.block.dashboard_view(context)
 
         patched_stats.assert_called_once_with(workgroups, expected_students)
+
+    @ddt.data(
+        ([1], [1], [], make_stats(1, 0, 0), True),
+        (range(10), range(3), range(3, 6), make_stats(.3, .3, .4), True),
+        ([], [], [], make_stats(None, None, None), False),
+    )
+    @ddt.unpack
+    def test_get_stage_stats(
+            self, all_user_ids, completed_user_ids, partial_user_ids, expected_stats, completions_called):
+        all_users = [make_reduced_user_details(id=id) for id in all_user_ids]
+        completed_user_ids = set(completed_user_ids)
+        partial_user_ids = set(partial_user_ids)
+        patched_completions = self.make_patch(self.block, 'get_users_completion')
+        self.block.display_name = "dummy block"
+        patched_completions.return_value = (completed_user_ids, partial_user_ids)
+
+        # marker object
+        target_workgroups = object()
+
+        stats = self.block.get_stage_stats(target_workgroups, all_users)
+        if completions_called:
+            patched_completions.assert_called_once_with(target_workgroups, all_users)
+        else:
+            self.assertFalse(patched_completions.called)
+
+        self.assertEqual(len(expected_stats), len(stats))
+
+        for stat, value in stats.items():
+            self.assertAlmostEqual(value, expected_stats[stat])
 
     def test_get_external_group_status(self):
         self.assertEqual(self.block.get_external_group_status('irrelevant'), StageState.NOT_AVAILABLE)

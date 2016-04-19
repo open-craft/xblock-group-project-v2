@@ -17,7 +17,14 @@
     {% for stat_label, stat_value in stats.items %}
       <tr class="group-project-stage-stat">
         <td class="group-project-stage-stat-label">{{ stat_label }}</td>
-        <td class="group-project-stage-stat-value">{{ stat_value|floatformat:"0" }}%</td>
+        <td class="group-project-stage-stat-value">
+          {% if stat_value != None %}
+            {{ stat_value|floatformat:"0" }}%
+          {% else %}
+            {# &#8709 is a HTML entity for empty set #}
+            <span title="{% trans "No students match search criteria" %}">&#8709;</span>
+          {% endif %}
+        </td>
       </tr>
     {% endfor %}
   </table>

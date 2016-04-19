@@ -309,22 +309,24 @@ class BaseGroupActivityStage(
         target_user_ids = set(user.id for user in target_students)
         if not target_user_ids:
             return {
-                StageState.COMPLETED: 0,
-                StageState.INCOMPLETE: 0,
-                StageState.NOT_STARTED: 0
+                StageState.COMPLETED: None,
+                StageState.INCOMPLETE: None,
+                StageState.NOT_STARTED: None
             }
 
         target_user_count = float(len(target_user_ids))
 
-        completed_users, partially_completed_users = self.get_users_completion(target_workgroups, target_students)
+        completed_users_ids, partially_completed_users_ids = self.get_users_completion(
+            target_workgroups, target_students
+        )
         log_format_data = dict(
-            stage=self.display_name, target_users=target_user_ids, completed=completed_users,
-            partially_completed=partially_completed_users
+            stage=self.display_name, target_users=target_user_ids, completed=completed_users_ids,
+            partially_completed=partially_completed_users_ids
         )
         log.info(STAGE_STATS_LOG_TPL, log_format_data)
 
-        completed_ratio = len(completed_users & target_user_ids) / target_user_count
-        partially_completed_ratio = len(partially_completed_users & target_user_ids) / target_user_count
+        completed_ratio = len(completed_users_ids & target_user_ids) / target_user_count
+        partially_completed_ratio = len(partially_completed_users_ids & target_user_ids) / target_user_count
 
         return {
             StageState.COMPLETED: completed_ratio,
@@ -377,6 +379,20 @@ class BaseGroupActivityStage(
         fragment.add_content(loader.render_template("templates/html/stages/navigation_view.html", rendering_context))
         return fragment
 
+    @classmethod
+    def make_human_stats(cls, stats):
+        """
+        Readies stats dictionary for presentation, by sorting it's contents, and converting
+        ratios to percentages.
+        """
+        return OrderedDict([
+            (
+               StageState.get_human_name(stage),
+               stats[stage] * 100 if stats[stage] is not None else None
+            )
+            for stage in (StageState.NOT_STARTED, StageState.INCOMPLETE, StageState.COMPLETED)
+        ])
+
     @AuthXBlockMixin.check_dashboard_access_for_current_user
     def dashboard_view(self, context):
         """
@@ -393,11 +409,7 @@ class BaseGroupActivityStage(
         students_to_display = [student for student in target_students if student.id not in filtered_students]
 
         state, stats = self.get_dashboard_stage_state(target_workgroups, students_to_display)
-        human_stats = OrderedDict([
-            (StageState.get_human_name(StageState.NOT_STARTED), stats[StageState.NOT_STARTED]*100),
-            (StageState.get_human_name(StageState.INCOMPLETE), stats[StageState.INCOMPLETE]*100),
-            (StageState.get_human_name(StageState.COMPLETED), stats[StageState.COMPLETED]*100),
-        ])
+        human_stats = self.make_human_stats(stats)
         render_context = {
             'stage': self, 'stats': human_stats, 'stage_state': state, 'ta_graded': self.activity.is_ta_graded
         }
