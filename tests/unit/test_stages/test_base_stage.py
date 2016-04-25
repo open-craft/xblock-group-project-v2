@@ -52,6 +52,7 @@ def make_stats(completed, partially_complete, not_started):
         StageState.COMPLETED: completed
     }
 
+
 def make_reduced_user_details(**kwargs):
     defaults = {
         'id': 1,
@@ -62,6 +63,7 @@ def make_reduced_user_details(**kwargs):
     }
     defaults.update(kwargs)
     return ReducedUserDetails(**kwargs)
+
 
 def make_context(workgroups, target_students, filtered_students):
     """
@@ -76,6 +78,7 @@ def make_context(workgroups, target_students, filtered_students):
         Constants.TARGET_STUDENTS: target_students,
         Constants.FILTERED_STUDENTS: filtered_students
     }
+
 
 @ddt.ddt
 class TestBaseGroupActivityStage(BaseStageTest):
@@ -154,14 +157,19 @@ class TestBaseGroupActivityStage(BaseStageTest):
     @ddt.unpack
     def test_make_human_stats(self, stats, human_stats_data):
         stats_order = (StageState.NOT_STARTED, StageState.INCOMPLETE, StageState.COMPLETED)
-        expected_human_stats = BaseGroupActivityStage.make_human_stats(stats)
+        actual_human_stats = BaseGroupActivityStage.make_human_stats(stats)
 
-        self.assertEqual(len(expected_human_stats), len(stats_order))
+        expected_human_stats = OrderedDict([
+            (StageState.get_human_name(stats_order[idx]), human_stats_data[idx])
+            for idx in range(3)
+        ])
+
+        self.assertEqual(actual_human_stats.keys(), expected_human_stats.keys())
 
         for idx, human_stat in enumerate(expected_human_stats.items()):
             stat_name, stat_value = human_stat
-            self.assertEqual(stat_name, StageState.get_human_name(stats_order[idx]))
-            self.assertAlmostEqual(stat_value, human_stats_data[idx])
+            actual_stat_value = actual_human_stats[stat_name]
+            self.assertAlmostEqual(stat_value, actual_stat_value)
 
     @ddt.data(
         # not filtered - pass all students
@@ -208,15 +216,14 @@ class TestBaseGroupActivityStage(BaseStageTest):
     @ddt.unpack
     def test_get_stage_stats(
             self, all_user_ids, completed_user_ids, partial_user_ids, expected_stats, completions_called):
-        all_users = [make_reduced_user_details(id=id) for id in all_user_ids]
+        all_users = [make_reduced_user_details(id=user_id) for user_id in all_user_ids]
         completed_user_ids = set(completed_user_ids)
         partial_user_ids = set(partial_user_ids)
         patched_completions = self.make_patch(self.block, 'get_users_completion')
         self.block.display_name = "dummy block"
         patched_completions.return_value = (completed_user_ids, partial_user_ids)
 
-        # marker object
-        target_workgroups = object()
+        target_workgroups = tuple()
 
         stats = self.block.get_stage_stats(target_workgroups, all_users)
         if completions_called:

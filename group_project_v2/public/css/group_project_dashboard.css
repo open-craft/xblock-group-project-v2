@@ -111,6 +111,7 @@
 .group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-stats td.group-project-stage-stat-value {
     color: #000;
     font-weight: bold;
+    text-align: right;
 }
 
 .group-project-xblock-wrapper .stage.dashboard-view .group-project-stage-navigate-to-detailed-view {
