@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.2">
+  <zoom_level>8</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>488</x>
+      <y>144</y>
+      <w>160</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>TeamEvaluationStage</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>792</x>
+      <y>144</y>
+      <w>152</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>EvaluationDisplayStage</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>480</x>
+      <y>224</y>
+      <w>240</w>
+      <h>288</h>
+    </coordinates>
+    <panel_attributes>GroupProjectReviewQuestionXBlock
+"Review Question" in studio
+--
+- str: question_id -- a unique identifier
+  not visible to user
+- str: title -- question text
+- str: assessment_title -- override for
+  question text when displaying 
+  question in review
+- html: question_content -- HTML input 
+  used for the question (input, select, ...)
+- bool: required -- if false reviewer
+  may omit answering this question. 
+- bool: graded -- if true response will be 
+  interpreted as a number and used for 
+  grading
+- bool: single_line -- if true title and 
+  question_content will be displayed in a 
+  single line. 
+- str: CSS Classes: additional css classes
+--
+Displays and allows to fill a single review
+question</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>216</x>
+      <y>312</y>
+      <w>216</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>GradeRubricStaticContentXBlock
+"Grade Rubric Help Text" in studio
+--
+Developer defined text that instructs 
+users how to interact with grading. </panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>208</x>
+      <y>136</y>
+      <w>168</w>
+      <h>88</h>
+    </coordinates>
+    <panel_attributes>PeerSelectorXBlock
+"Teammate selector"
+--
+Allows student to select 
+peer to grade in Team 
+Evaluation stage. </panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>368</x>
+      <y>144</y>
+      <w>136</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>150.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>600</x>
+      <y>160</y>
+      <w>40</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1..n</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>392</x>
+      <y>160</y>
+      <w>128</w>
+      <h>168</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>140.0;10.0;140.0;40.0;10.0;40.0;10.0;190.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>832</x>
+      <y>216</y>
+      <w>264</w>
+      <h>96</h>
+    </coordinates>
+    <panel_attributes>GroupProjectTeamEvaluationDisplayXBlock
+"Team Evaluation Display" in studio
+--
+Displays responses that all peers wrote in a 
+single review question in a context of Team 
+Evaluation</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>712</x>
+      <y>280</y>
+      <w>136</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;&gt;&gt;&gt;
+m2=1
+m1=1
+via question_id attr</panel_attributes>
+    <additional_attributes>150.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>832</x>
+      <y>344</y>
+      <w>264</w>
+      <h>96</h>
+    </coordinates>
+    <panel_attributes>GroupProjectGradeEvaluationDisplayXBlock
+"Grade Evaluation Display" in studio
+--
+Displays responses that all peers wrote in a 
+single review question in a context of
+Peer Grading</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>712</x>
+      <y>384</y>
+      <w>136</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;&gt;&gt;&gt;
+m2=1
+m1=1
+via question_id attr</panel_attributes>
+    <additional_attributes>150.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>216</x>
+      <y>544</y>
+      <w>168</w>
+      <h>88</h>
+    </coordinates>
+    <panel_attributes>GroupSelectorXBlock
+"Group selector"
+--
+Allows student to select 
+team to grade in Peer 
+Grading stage</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>472</x>
+      <y>568</y>
+      <w>208</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>PeerReviewStage 
+"Peer Grading" in Studio
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>376</x>
+      <y>576</y>
+      <w>112</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>120.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>384</x>
+      <y>384</y>
+      <w>160</w>
+      <h>200</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>180.0;230.0;180.0;170.0;10.0;170.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>616</x>
+      <y>504</y>
+      <w>40</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1..n</panel_attributes>
+    <additional_attributes>10.0;80.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>864</x>
+      <y>160</y>
+      <w>40</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1..n</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>776</x>
+      <y>568</y>
+      <w>208</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>GradeDisplayStage 
+"Grade Display" in Studio
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>872</x>
+      <y>432</y>
+      <w>40</w>
+      <h>152</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1..n</panel_attributes>
+    <additional_attributes>10.0;170.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1128</x>
+      <y>272</y>
+      <w>256</w>
+      <h>104</h>
+    </coordinates>
+    <panel_attributes>GroupProjectBaseFeedbackDisplayXBlock
+--
+- str: question_id -- this xblock will display
+  review for this question
+- bool: mean -- if true will display average 
+  score from question, if false will display 
+  individual responses. </panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1088</x>
+      <y>256</y>
+      <w>56</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>50.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1088</x>
+      <y>352</y>
+      <w>56</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>50.0;10.0;10.0;40.0</additional_attributes>
+  </element>
+</diagram>

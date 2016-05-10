@@ -28,6 +28,8 @@ The following blocks are a part of Group Project XBlock v2.
     * Components:
         * [Stage XBlocks](#stages-xblocks) - multiple instances
         
+![Top level XBlocks UML diagram](images/uml/group-project-overview.png)        
+        
 ## Project Navigator and Views
 
 Project Navigator XBlock is designed to allow quick access to Navigation and other commonly used group project features.
@@ -63,11 +65,16 @@ use some common components:
     * `Hide stage type label` - governs stage appearance in Project Navigator view. If set to True, stage Display Name
         will be prefixed with stage type (i.e. `Overview`, `Task`, `Review`, etc.) in project navigation. 
         Otherwise, Display Name is displayed as is. Default: True
+
+![Stage XBlocks summary](images/uml/group-project-stages.png)               
+        
 * Common components:
     * `HTML` - HTML XBlock provided by edX platform - contains arbitrary HTML markup (text, images, etc.)
     * `Resource` - group project resource XBlock - see [Stage components](#stage-components) section for details
     * `VideoResource` - group project resource XBlock - see [Stage components](#stage-components) section for details
     * `Project Team` - project team XBlock - see [Stage components](#stage-components) section for details
+    
+![Common components](images/uml/common-stage-components.png)
         
 Available stage types:
 
@@ -92,6 +99,8 @@ Available stage types:
         basis rather than on individual basis, so all the students in the group get this stage completed as soon as
         any of them uploads last submission. It does not matter which student uploads the submission - all uploads
         count towards the entire group's progress.
+        
+    ![Deliverable stage](images/uml/submission-stage.png)
 * `Team Evaluation` - allows students to provide anonymous feedback to their teammates.
     * Settings - no stage-specific settings
     * Components:
@@ -128,6 +137,7 @@ Available stage types:
         when other students and/or TAs provided answers to all the required questions chosen in 
         `Grade Evaluation Display` blocks.
             
+![Evaluation stage components](images/uml/evaluation-stage-components.png)                        
             
 ## Stage components
 
@@ -148,7 +158,7 @@ outside stage context.
         * `Display Name` - human-friendly resource name - displayed in Project Navigator Resources View
         * `Resource Description` - a longer human-friendly description of the resource - displayed in Project Navigator 
             Resources View
-        * `Resource Location` - url to view/download the resource.
+        * `video_id` - Ooyala Video ID to show to students
 * `Submissions Help Text` - static (developer-defined) help text instructing students to open Project Navigator 
     Submissions view to upload submissions. Help text contains a link that opens the view automatically.
     * Settings - none
