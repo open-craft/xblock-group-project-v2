@@ -1,8 +1,8 @@
 # Group Work v2 deployment 
 
 The current implementation of Group Work v2 depends on some Open edX APIs and features that are only available in the
-`edx-solutions` fork of the platform. Some of the administrative tasks are also currently only usable within the
-proprietary Apros LMS interface.
+`edx-solutions` fork of the platform. Some of the administrative tasks are currently implemented in the proprietary
+Apros interface LMS interface.
 
 In order to have a working Group Project, you'll need to complete three steps:
 
