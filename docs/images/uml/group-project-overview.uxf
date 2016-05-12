@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.2">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>500</x>
+      <y>160</y>
+      <w>250</w>
+      <h>190</h>
+    </coordinates>
+    <panel_attributes>GroupProjectXBlock
+--
+- display_name -- name 
+  of the project
+--
+Root XBlock for this package,
+represents group project as 
+as whole. 
+
+Handles rendering of the student
+view, displaying selected stage
+and project navigator. 
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>210</x>
+      <y>440</y>
+      <w>270</w>
+      <h>210</h>
+    </coordinates>
+    <panel_attributes>GroupProjectNavigatorXBlock
+--
+Required child of Group project 
+XBlock. 
+
+Allows user to:
+- navigate between stages
+- access private discussion form
+- get in touch with the TA
+-x Download resources attached 
+  to the project 
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>520</x>
+      <y>440</y>
+      <w>250</w>
+      <h>210</h>
+    </coordinates>
+    <panel_attributes>DiscussionXBlock
+--
+An external dependency:
+edx-solutions/xblock-discussion. 
+
+Provides private discussion forum 
+for the group members. 
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>800</x>
+      <y>440</y>
+      <w>280</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>GroupActivityXBlock
+--
+- Represents a single activity
+- Grading is done at this level 
+--
+See group-project-stages diagram</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>340</x>
+      <y>260</y>
+      <w>180</w>
+      <h>200</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>160.0;10.0;10.0;10.0;10.0;180.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>610</x>
+      <y>340</y>
+      <w>30</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;100.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>740</x>
+      <y>260</y>
+      <w>220</w>
+      <h>200</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1..n</panel_attributes>
+    <additional_attributes>10.0;10.0;180.0;10.0;180.0;180.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>800</x>
+      <y>620</y>
+      <w>280</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>Stage
+--
+- Represents a page user sees
+- Completions (user progress) is 
+  done at this level. 
+--
+See group-project-stages diagram</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>930</x>
+      <y>520</y>
+      <w>50</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1..n</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;100.0</additional_attributes>
+  </element>
+</diagram>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.2">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>290</x>
+      <y>20</y>
+      <w>240</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>VideoResource
+--
+- str: display_name -- resource 
+  name visible to the user
+- str: description -- longer 
+  description 
+- std: video_id -- Ooyala video ID
+--
+Displays a Video to student</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>300</x>
+      <y>230</y>
+      <w>210</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>OOyalaXblock</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>380</x>
+      <y>150</y>
+      <w>140</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>must be present
+for video to load</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>20</x>
+      <y>20</y>
+      <w>240</w>
+      <h>170</h>
+    </coordinates>
+    <panel_attributes>Resource
+--
+- str: display_name -- resource 
+  name visible to the user
+- str: description -- longer 
+  description 
+- URL: resource_location --
+  URL to download the resource
+--
+Allows student to download a 
+resource</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>560</x>
+      <y>20</y>
+      <w>240</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>ProjectTeamXBlock
+"Project Team" in Studio
+--
+Displays all team members. 
+Allows students to send e-mails
+to each other</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

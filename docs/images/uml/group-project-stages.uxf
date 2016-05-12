@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.2">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>950</x>
+      <y>490</y>
+      <w>260</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>BasicStage 
+Text in Studio
+--
+**Completion: **
+Completed when visited 
+by user</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>930</x>
+      <y>220</y>
+      <w>260</w>
+      <h>220</h>
+    </coordinates>
+    <panel_attributes>BaseGroupActivityStage
+--
+Base class for all stages
+--
+- str: display_name -- user
+  visible stage name 
+- datetime: open_date -- date
+  when stage opens for submissions.
+  When empty stage is open straight
+  away. 
+- datetime: close_date date 
+  when stage closes for submissions. 
+  When empty stage never closes. 
+- bool: hide_stage_label
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>950</x>
+      <y>600</y>
+      <w>260</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>CompletionStage 
+"Completion" in Studio
+--
+**Completion: **
+Like Basic Stage, but completed 
+when user marks stage as 
+completed. </panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>710</x>
+      <y>770</y>
+      <w>260</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>SubmissionStage 
+"Deliverable" in Studio
+--
+**Completion: **
+Whole team completes this stage 
+when all deliverables are uploaded. </panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>180</x>
+      <y>250</y>
+      <w>260</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>PeerReviewStage 
+"Peer Grading" in Studio
+--
+**Completion: **
+Completed when student answers 
+all questions for all groups
+he's been assigned to review.</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>780</x>
+      <y>510</y>
+      <w>50</w>
+      <h>280</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=0..n</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;260.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>840</x>
+      <y>510</y>
+      <w>130</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=0..n</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;40.0;110.0;40.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>810</x>
+      <y>510</y>
+      <w>160</w>
+      <h>180</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=0..n</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;150.0;140.0;150.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>580</x>
+      <y>240</y>
+      <w>280</w>
+      <h>280</h>
+    </coordinates>
+    <panel_attributes>GroupActivityXBlock
+--
+- str: display_name -- name  
+  of the activity
+- int: weight -- maximal score 
+  for the activity for a student
+- datetime: due_date -- when 
+  assignment is due
+- int: user_review_count -- how many 
+  peers need to evaluate user 
+  performance
+- int: group_reviews_required_count
+  how many peer reviews are required
+  to grade this activity. Zero means
+  that activity is TA graded. 
+--
+- Represents a single activity
+- Grading is done at this level 
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>110</x>
+      <y>720</y>
+      <w>260</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>EvaluationDisplayStage 
+"Evaluation Display" in Studio
+--
+**Completion: **
+When user accesses the page after
+teammates completed the reviews</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>920</x>
+      <y>460</y>
+      <w>320</w>
+      <h>280</h>
+    </coordinates>
+    <panel_attributes>Misc stages 
+halign=left</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>60</x>
+      <y>680</y>
+      <w>620</w>
+      <h>200</h>
+    </coordinates>
+    <panel_attributes>Team Evaluation</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>150</x>
+      <y>200</y>
+      <w>320</w>
+      <h>360</h>
+    </coordinates>
+    <panel_attributes>Feedback stages</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>380</x>
+      <y>720</y>
+      <w>260</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>TeamEvaluationStage 
+"Team Evaluation" in Studio
+--
+**Completion: **
+Student completes that stage when 
+he submitted all evaluations. </panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>450</x>
+      <y>510</y>
+      <w>330</w>
+      <h>230</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=0..n</panel_attributes>
+    <additional_attributes>310.0;10.0;310.0;140.0;10.0;140.0;10.0;210.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>130</x>
+      <y>510</y>
+      <w>530</w>
+      <h>230</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=0..n</panel_attributes>
+    <additional_attributes>510.0;10.0;510.0;90.0;10.0;90.0;10.0;210.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>180</x>
+      <y>390</y>
+      <w>260</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>GradeDisplayStage 
+"Grade Display" in Studio
+--
+**Completion: **
+When user accesses the page after
+teammates completed the reviews</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>430</x>
+      <y>300</y>
+      <w>170</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=0..n</panel_attributes>
+    <additional_attributes>150.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>430</x>
+      <y>420</y>
+      <w>170</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=0..n</panel_attributes>
+    <additional_attributes>150.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+</diagram>
