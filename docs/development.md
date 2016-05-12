@@ -1,6 +1,6 @@
 # Development
 
-Developing on Group Project XBlock v2 and running tests requires, at the minimum:
+Developing with Group Project XBlock v2 and running tests requires, at the minimum:
 
 * python>=2.7,<3.0
 * pip>=6.0
@@ -17,17 +17,17 @@ Group Project XBlock v2 contains a Makefile to help with most common operations:
     quality violations make sure to run `make quality` again until clean pass.
 * `make clean` - cleans tests and coverage results.  
 * `make diff-cover` - provides coverage report only for files and lines changed in the current branch compared to 
-    master. In order to get correct results, run entire test suite with `--coverage` flag first, and make sure to update
-    `master` branch to latest version (and rebase working branch, if necessary).
+    master. In order to get correct results, run entire test suite with  the`--coverage` flag first, and make sure to
+    update the `master` branch to its latest version (and rebase the working branch, if necessary).
 
 ## Installation
 
-In new virtualenv (or in actual install, if you're feeling brave/careless)
+After activating the desired virtualenv, run:
 
     pip install -r requirements/dev.txt 
 
-should get you up and running. It installs requirements both from `base.txt` (contains "production" dependencies) and 
-`test.txt` (test dependencies), as well as Group Project XBlock v2 itself.
+which should get you up and running. It installs requirements both from `base.txt` (contains "production"
+dependencies) and `test.txt` (test dependencies), as well as Group Project XBlock v2 itself.
 
 ## Running Tests
 
@@ -38,10 +38,10 @@ method or property usually). They run relatively fast, so it is a good idea to r
 process.
 
 Integration tests are built on top of selenium and [bok_choy][bok-choy]. They execute a real web server running a XBlock
-workbench, so their run time is significantly larger than that of unittests.
+workbench, so their run time is significantly longer than that of the unit tests.
 
-Helper file `run_tests.py` is provided to run python unittests and integration tests. It runs Django and workbench
-under the hood, so it accepts the same parameters as Django unit test runner.
+A helper script called `run_tests.py` is provided to run python unit tests and integration tests. It runs Django and
+the edX XBlock SDK workbench under the hood, so it accepts the same parameters as the Django unit test runner.
 
 Examples:
 
@@ -60,13 +60,13 @@ Note that some tests will fail if screen size is insufficient, so recommended sc
 
 [bok-choy]: https://github.com/edx/bok-choy
 
-Javascript tests exercise various javascript components of Group Project XBlock. They are written using [jasmine test
-framework][jasmine-test-framework] and are executed by [karma test runner][karma-test-runner]. Karma runs in node.js,
-so a compatible version of node.js and npm should be installed.
+Javascript tests exercise various javascript components of Group Project XBlock. They are written using the [jasmine
+test framework][jasmine-test-framework] and are executed by [karma test runner][karma-test-runner]. Karma runs in
+node.js, so a compatible version of node.js and npm should be installed.
 
-Karma can run tests in two modes: continuous and single run. Single run mode executes all the tests once and than 
-terminates, presenting the results of run. In continuous mode, karma installs watchers on all the files included for the
-test run (both actual source files and files with tests) and re-runs the tests each time any file is updated.
+Karma can run tests in two modes: continuous and single run. Single run mode executes all the tests once and then 
+terminates, presenting the results of run. In continuous mode, karma installs watchers on all the files included for
+the test run (both actual source files and files with tests) and re-runs the tests each time any file is updated.
 
 It is advised to use continuous mode for development. To start karma runner in development mode, issue the following
 
@@ -107,7 +107,7 @@ runs unit, js and integration tests and checks code quality. CI build fails if t
 quality violations.
 
 Sometimes CI build fails while tests run on development machine pass. To debug such problems, the first step is to 
-replicate CI build installation process and run as close as possible:
+replicate CI build installation process and run as closely as possible:
 
 * Commands to prepare an environment are listed in `.travis.yml -> install` section.
 * Commands to run tests and quality checks are listed in `.travis.yml -> script` section.
