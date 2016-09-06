@@ -1,0 +1,128 @@
+<diagram program="umletino" version="14.2"><zoom_level>10</zoom_level><help_text>
+</help_text><element><id>UMLDeployment</id><coordinates><x>280</x><y>20</y><w>870</w><h>410</h></coordinates><panel_attributes>&lt;&lt;Application&gt;&gt;
+Apros</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>320</x><y>200</y><w>200</w><h>110</h></coordinates><panel_attributes>symbol=component
+style=wordwrap
+group=2
+Legacy Status Report
+
+* Student completion: aggregate and individual
+* TA interface: stats, review links, mass email</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLDeployment</id><coordinates><x>280</x><y>440</y><w>870</w><h>400</h></coordinates><panel_attributes>&lt;&lt;Application&gt;&gt;
+edX-solutions LMS</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>320</x><y>110</y><w>200</w><h>80</h></coordinates><panel_attributes>symbol=component
+style=wordwrap
+group=2
+Workgroup Editor
+
+* Project management
+* Workgroup management</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>300</x><y>70</y><w>240</w><h>340</h></coordinates><panel_attributes>symbol=artifact
+group=2
+Dashboard V1</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>320</x><y>320</y><w>200</w><h>80</h></coordinates><panel_attributes>symbol=component
+style=wordwrap
+group=2
+Assignment Editor
+
+* Generates review assignments
+* Downloadable status report</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>880</x><y>70</y><w>240</w><h>340</h></coordinates><panel_attributes>symbol=component
+Learner Interface</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>960</x><y>510</y><w>170</w><h>310</h></coordinates><panel_attributes>&lt;&lt;Runtime&gt;&gt;
+group=3
+symbol=component
+XBlock Runtime</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>970</x><y>560</y><w>150</w><h>50</h></coordinates><panel_attributes>symbol=component
+group=3
+&lt;&lt;Service&gt;&gt;
+Settings Service</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>970</x><y>620</y><w>150</w><h>50</h></coordinates><panel_attributes>symbol=component
+group=3
+&lt;&lt;Service&gt;&gt;
+Notifications Service</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>690</x><y>510</y><w>180</w><h>210</h></coordinates><panel_attributes>symbol=artifact
+group=5
+Group Work XBlock</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>710</x><y>560</y><w>140</w><h>40</h></coordinates><panel_attributes>symbol=component
+group=5
+Group Activity</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>710</x><y>610</y><w>140</w><h>40</h></coordinates><panel_attributes>symbol=component
+group=5
+Group Activity</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>710</x><y>660</y><w>140</w><h>40</h></coordinates><panel_attributes>symbol=component
+group=5
+Group Activity</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>690</x><y>760</y><w>180</w><h>60</h></coordinates><panel_attributes>symbol=component
+&lt;&lt;Service&gt;&gt;
+Django File storage API</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLDeployment</id><coordinates><x>30</x><y>20</y><w>240</w><h>820</h></coordinates><panel_attributes>&lt;&lt;Data Storage&gt;&gt;
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>50</x><y>460</y><w>190</w><h>210</h></coordinates><panel_attributes>symbol=artifact
+style=wordwrap
+&lt;&lt;MySQL Database&gt;&gt;
+edX LMS DB
+
+* LMS Users
+* LMS Groups (represent programs, projects, workgroups, review assignments, etc.)
+* XBlock User state
+* Workgroup Submissions
+* Review feedback
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>60</x><y>190</y><w>170</w><h>90</h></coordinates><panel_attributes>style=wordwrap
+Contains no GW-related data
+
+Displayed for comprehensiveness
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>50</x><y>70</y><w>190</w><h>220</h></coordinates><panel_attributes>symbol=artifact
+&lt;&lt;MySQL Database&gt;&gt;
+Apros DB
+
+* Apros Users and Groups
+* Accounts
+* Client SSO settings</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>230</x><y>570</y><w>90</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+</panel_attributes><additional_attributes>10;20;70;20</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>50</x><y>680</y><w>190</w><h>140</h></coordinates><panel_attributes>symbol=artifact
+&lt;&lt;MongoDB Database&gt;&gt;
+Modulestore
+
+* Course structure
+* Discussion threads</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>230</x><y>740</y><w>90</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+</panel_attributes><additional_attributes>10;20;70;20</additional_attributes></element><element><id>Relation</id><coordinates><x>0</x><y>520</y><w>1060</w><h>360</h></coordinates><panel_attributes>lt=&lt;-
+</panel_attributes><additional_attributes>50;10;10;10;10;340;1040;340;1040;300</additional_attributes></element><element><id>Relation</id><coordinates><x>860</x><y>540</y><w>120</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+instantiates</panel_attributes><additional_attributes>10;20;100;20</additional_attributes></element><element><id>Relation</id><coordinates><x>860</x><y>630</y><w>130</w><h>40</h></coordinates><panel_attributes>lt=&lt;.
+uses</panel_attributes><additional_attributes>110;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>860</x><y>570</y><w>130</w><h>40</h></coordinates><panel_attributes>lt=&lt;.
+uses</panel_attributes><additional_attributes>110;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>770</x><y>710</y><w>50</w><h>70</h></coordinates><panel_attributes>lt=&lt;.
+uses</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>300</x><y>510</y><w>350</w><h>310</h></coordinates><panel_attributes>symbol=component
+group=1
+edX-solutions API</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>320</x><y>550</y><w>150</w><h>50</h></coordinates><panel_attributes>symbol=artifact
+group=1
+Projects API
+/api/server/projects/*</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>480</x><y>550</y><w>150</w><h>50</h></coordinates><panel_attributes>symbol=artifact
+group=1
+Organizations API
+/api/server/organizations/*</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>480</x><y>610</y><w>150</w><h>50</h></coordinates><panel_attributes>symbol=artifact
+group=1
+Submissions API
+/api/server/submissions/*</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>320</x><y>610</y><w>150</w><h>50</h></coordinates><panel_attributes>symbol=artifact
+group=1
+Workgroups API
+/api/server/workgroups/*</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>480</x><y>670</y><w>150</w><h>50</h></coordinates><panel_attributes>symbol=artifact
+group=1
+Users API
+/api/server/users/*</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>320</x><y>670</y><w>150</w><h>50</h></coordinates><panel_attributes>symbol=artifact
+group=1
+Groups API
+/api/server/groups/*</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>320</x><y>730</y><w>310</w><h>80</h></coordinates><panel_attributes>symbol=artifact
+group=1
+Review APIs
+/api/server/workgroup_reviews/*
+/api/server/submission_reviews/*
+/api/server/peer_reviews/*</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1040</x><y>660</y><w>30</w><h>50</h></coordinates><panel_attributes></panel_attributes><additional_attributes>10;10;10;30</additional_attributes></element><element><id>Relation</id><coordinates><x>420</x><y>400</y><w>30</w><h>130</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;110;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>610</x><y>400</y><w>30</w><h>130</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;110;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>800</x><y>400</y><w>30</w><h>130</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;110;10;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>610</x><y>110</y><w>200</w><h>80</h></coordinates><panel_attributes>symbol=component
+style=wordwrap
+Status Report
+
+* Student completion: aggregate
+
+
+group=6</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>610</x><y>200</y><w>200</w><h>110</h></coordinates><panel_attributes>symbol=component
+style=wordwrap
+Detailed Status Report
+
+* Student completion: individual
+* TA interface: stats, review links, mass email
+group=6</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>590</x><y>70</y><w>240</w><h>340</h></coordinates><panel_attributes>symbol=artifact
+Dashboard V2
+group=6</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>0</x><y>760</y><w>1060</w><h>120</h></coordinates><panel_attributes>lt=&lt;-
+</panel_attributes><additional_attributes>50;10;10;10;10;100;1040;100;1040;60</additional_attributes></element><element><id>UMLNote</id><coordinates><x>970</x><y>690</y><w>150</w><h>90</h></coordinates><panel_attributes>style=wordwrap
+Notifications service is only used by GW XBlock displayed in Learner Interface</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>830</x><y>300</y><w>190</w><h>230</h></coordinates><panel_attributes>lt=&lt;-
+</panel_attributes><additional_attributes>10;210;10;180;170;180;170;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>900</x><y>110</y><w>200</w><h>200</h></coordinates><panel_attributes>symbol=component
+style=wordwrap
+jQuery.XBlock
+
+* Loads XBlock from LMS endpoint
+* Rewrites URLs if needed
+* Renders and displays XBlock to a learner
+* Provides JS XBlock runtime (provides URLs for backend handlers, emits events)</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>640</x><y>570</y><w>70</w><h>40</h></coordinates><panel_attributes>lt=&lt;.
+uses</panel_attributes><additional_attributes>10;20;50;20</additional_attributes></element></diagram>
