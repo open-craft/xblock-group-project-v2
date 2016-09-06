@@ -14,7 +14,9 @@ In order to have a working Group Project, you'll need to complete three steps:
 
 See corresponding document in Apros (TBD)
 
-![High level deployment overview](images/uml/high-level-architecture.png)
+# High-level architecture overview
+
+![High level deployment overview](images/uml/deployment-diagram.png)
 
 # Setup
 
