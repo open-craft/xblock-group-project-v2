@@ -57,6 +57,11 @@ templates, or just share some relevant information about the assignment.
 
 The results of work produced by students are uploaded to the server to facilitate sharing them among team members
 and for future grading.
+
+**Admin Dashboard**
+
+Admin dashboard provides course staff with information about student progress through the problem - both at workgroup
+and individual level. Detailed information available in the [admin dashboard documentation](/docs/admin_dashboard.md). 
       
 **Omnipresent features**
 
@@ -166,9 +171,13 @@ Refer to [development documentation][dev-docs] for more details.
 # Additional in-depth documentation
 
 1. [Authoring][authoring]
-2. [Information on development][dev-docs]
+2. [Admin Dashboard][admin-dashboard]
 3. [Deployment information][deployment]
+4. [Information on development][dev-docs]
+5. [XBlocks in this package][xblocks-docs]
 
 [authoring]: /docs/authoring.md
-[dev-docs]: /docs/development.md
+[admin-dashboard]: /docs/admin-dashboard.md
 [deployment]: /docs/deployment.md
+[dev-docs]: /docs/development.md
+[xblocks-docs]: /docs/XBlocks.md
