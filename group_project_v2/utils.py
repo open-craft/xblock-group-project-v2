@@ -2,6 +2,7 @@
 import csv
 import functools
 import logging
+import urlparse
 from collections import namedtuple
 
 from datetime import date, datetime, timedelta
@@ -338,3 +339,11 @@ def named_tuple_with_docstring(type_name, field_names, docstring, verbose=False,
 
     wrapper_class = type(type_name, (named_tuple_type,), {"__doc__": docstring})
     return wrapper_class
+
+
+def is_absolute(url):
+    """
+    :param url[str] url to asses
+    Returns a boolean value indicating if given `url` is absolute or not.
+    """
+    return bool(urlparse.urlparse(url).netloc)
