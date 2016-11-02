@@ -5,7 +5,7 @@ import itertools
 
 from group_project_v2.api_error import api_error_protect
 from group_project_v2.json_requests import DELETE, GET, PUT, POST
-from group_project_v2.utils import memoize_with_expiration, build_date_field
+from group_project_v2.utils import memoize_with_expiration, build_date_field, is_absolute
 from group_project_v2.project_api.dtos import (
     UserDetails, ProjectDetails, WorkgroupDetails, CompletionDetails,
     OrganisationDetails, UserGroupDetails
@@ -38,12 +38,11 @@ class ProjectAPI(object):
         self.dry_run = dry_run
 
     def build_url(self, url_parts, query_params=None, no_trailing_slash=False):
-        url_template = "{}/" + "{}/" * len(url_parts)
-        url_parameters = [self._api_server_address]
-        url_parameters.extend(url_parts)
-        url = url_template.format(*url_parameters)  # pylint: disable=star-args
-        if no_trailing_slash:
-            url = url[:-1]
+        url = "/".join(url_parts)
+        if not is_absolute(url):
+            url = self._api_server_address + "/" + url
+        if not no_trailing_slash:
+            url += "/"
         if query_params:
             url += "?" + urlencode(query_params)
 
