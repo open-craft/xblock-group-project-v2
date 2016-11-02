@@ -38,7 +38,7 @@ class ProjectAPI(object):
         self.dry_run = dry_run
 
     def build_url(self, url_parts, query_params=None, no_trailing_slash=False):
-        url = "/".join(url_parts)
+        url = "/".join([str(url_part) for url_part in url_parts])
         if not is_absolute(url):
             url = self._api_server_address + "/" + url
         if not no_trailing_slash:
