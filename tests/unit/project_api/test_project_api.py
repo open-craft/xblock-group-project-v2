@@ -47,6 +47,8 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
     @ddt.data(
         (["part1", "part2"], None, False, api_server_address+"/part1/part2/", {'error': True}),
         (["part1", "part2"], None, True, api_server_address+"/part1/part2", {'success': True}),
+        (["part1", 1234, "part2"], None, True, api_server_address+"/part1/1234/part2", {'error': True}),
+        (["part1", "part2", 1234], None, True, api_server_address+"/part1/part2/1234", {'success': True}),
         ([api_server_address, "part1", "part2"], None, False, api_server_address+"/part1/part2/", {'success': True}),
         (["part1", "part2", "part3"], None, False, api_server_address+"/part1/part2/part3/", {'error': True}),
         (["part1"], {'qwe': 'rty'}, False, api_server_address+"/part1/?qwe=rty", {'success': True, 'data': [1, 2, 3]}),
