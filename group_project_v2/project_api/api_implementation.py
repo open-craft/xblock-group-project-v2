@@ -273,11 +273,11 @@ class TypedProjectAPI(ProjectAPI):
             'course_id': course_id
         }
         response = self.send_request(GET, (PROJECTS_API,), query_params=query_params)
-        assert len(response) <= 1
-        if not response:
+        assert len(response['results']) <= 1
+        if not response['results']:
             return None
 
-        project = response[0]
+        project = response['results'][0]
         return ProjectDetails(**project)
 
     @memoize_with_expiration()
