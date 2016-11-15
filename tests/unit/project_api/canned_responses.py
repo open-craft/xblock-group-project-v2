@@ -1,21 +1,79 @@
 class Projects(object):
     project1 = {
-        "id": 1,
-        "url": "/api/server/projects/1/",
-        "created": None, "modified": None,
-        "course_id": "MyCompany/GP2/T2",
-        "content_id": "i4x://MyCompany/GP2/gp-v2-project/abcdefghijklmnopqrstuvwxyz12345",
-        "organization": "Org1",
-        "workgroups": [1, 2, 3]
+        "count": 1,
+        "num_pages": 1,
+        "current_page": 1,
+        "results": [
+            {
+                "id": 1,
+                "url": "/api/server/projects/1/",
+                "created": None, "modified": None,
+                "course_id": "MyCompany/GP2/T2",
+                "content_id": "i4x://MyCompany/GP2/gp-v2-project/abcdefghijklmnopqrstuvwxyz12345",
+                "organization": "Org1",
+                "workgroups": [1, 2, 3]
+            }
+        ],
+        "next": None,
+        "start": 0,
+        "previous": None
     }
     project2 = {
-        "id": 2,
-        "url": "/api/server/projects/2/",
-        "created": "2015-08-04T13:26:01Z", "modified": "2015-08-04T13:26:01Z",
-        "course_id": "course1",
-        "content_id": "i4x://MyCompany/GP2/gp-v2-project/41fe8cae0614470c9aeb72bd078b0348",
-        "organization": None,
-        "workgroups": [20, 21, 22]
+        "count": 1,
+        "num_pages": 1,
+        "current_page": 1,
+        "results": [
+            {
+                "id": 2,
+                "url": "/api/server/projects/2/",
+                "created": "2015-08-04T13:26:01Z", "modified": "2015-08-04T13:26:01Z",
+                "course_id": "course1",
+                "content_id": "i4x://MyCompany/GP2/gp-v2-project/41fe8cae0614470c9aeb72bd078b0348",
+                "organization": None,
+                "workgroups": [20, 21, 22]
+            }
+        ],
+        "next": None,
+        "start": 0,
+        "previous": None
+    }
+    two_projects = {
+        "count": 2,
+        "num_pages": 1,
+        "current_page": 1,
+        "results": [
+            {
+                "id": 1,
+                "url": "/api/server/projects/1/",
+                "created": None, "modified": None,
+                "course_id": "MyCompany/GP2/T2",
+                "content_id": "i4x://MyCompany/GP2/gp-v2-project/abcdefghijklmnopqrstuvwxyz12345",
+                "organization": "Org1",
+                "workgroups": [1, 2, 3]
+            },
+            {
+                "id": 2,
+                "url": "/api/server/projects/2/",
+                "created": None, "modified": None,
+                "course_id": "MyCompany/GP2/T2",
+                "content_id": "i4x://MyCompany/GP2/gp-v2-project/abcdefghijklmnopqrstuvwxyz12346",
+                "organization": "Org1",
+                "workgroups": [1, 2, 3]
+            }
+
+        ],
+        "next": None,
+        "start": 0,
+        "previous": None
+    }
+    zero_projects = {
+        "count": 0,
+        "num_pages": 1,
+        "current_page": 1,
+        "results": [],
+        "next": None,
+        "start": 0,
+        "previous": None
     }
 
 

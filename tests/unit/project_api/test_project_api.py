@@ -250,8 +250,8 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
 
     def test_get_project_details(self):
         calls_and_results = {
-            (PROJECTS_API, 1): canned_responses.Projects.project1,
-            (PROJECTS_API, 2): canned_responses.Projects.project2
+            (PROJECTS_API, 1): canned_responses.Projects.project1['results'][0],
+            (PROJECTS_API, 2): canned_responses.Projects.project2['results'][0]
         }
 
         expected_calls = [
@@ -265,8 +265,8 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
 
             self.assertEqual(patched_send_request.mock_calls, expected_calls)
 
-        self.assert_project_data(project1, canned_responses.Projects.project1)
-        self.assert_project_data(project2, canned_responses.Projects.project2)
+        self.assert_project_data(project1, canned_responses.Projects.project1['results'][0])
+        self.assert_project_data(project2, canned_responses.Projects.project2['results'][0])
 
     @ddt.data(
         ('course1', 'content1'),
@@ -278,24 +278,24 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             'course_id': course_id,
             'content_id': content_id
         }
-        calls_and_results = {(PROJECTS_API,): [canned_responses.Projects.project1]}
+        calls_and_results = {(PROJECTS_API,): canned_responses.Projects.project1}
 
         with self._patch_send_request(calls_and_results) as patched_send_request:
             project = self.project_api.get_project_by_content_id(course_id, content_id)
-            self.assert_project_data(project, canned_responses.Projects.project1)
+            self.assert_project_data(project, canned_responses.Projects.project1['results'][0])
 
             patched_send_request.assert_called_once_with(GET, (PROJECTS_API,), query_params=expected_parameters)
 
     def test_get_project_by_content_id_fail_if_more_than_one(self):
         calls_and_results = {
-            (PROJECTS_API,): [canned_responses.Projects.project1, canned_responses.Projects.project2]
+            (PROJECTS_API,): canned_responses.Projects.two_projects
         }
         with self._patch_send_request(calls_and_results), \
                 self.assertRaises(AssertionError):
             self.project_api.get_project_by_content_id('irrelevant', 'irrelevant')
 
     def test_get_project_by_content_id_return_none_if_not_found(self):
-        calls_and_results = {(PROJECTS_API,): []}
+        calls_and_results = {(PROJECTS_API,): canned_responses.Projects.zero_projects}
         with self._patch_send_request(calls_and_results):
             project = self.project_api.get_project_by_content_id('irrelevant', 'irrelevant')
             self.assertIsNone(project)
