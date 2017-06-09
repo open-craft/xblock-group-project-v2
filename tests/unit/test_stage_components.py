@@ -130,7 +130,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
     course_id = "a course"
 
     def _make_file(self):  # pylint:disable=no-self-use
-        return open(os.path.join(os.path.split(__file__)[0], "../resources/", 'sample_upload.png'))
+        return open(os.path.join(os.path.split(__file__)[0], "../resources/", 'image.png'))
 
     def setUp(self):
         super(TestGroupProjectSubmissionXBlock, self).setUp()

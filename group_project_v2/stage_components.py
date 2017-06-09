@@ -224,7 +224,7 @@ class GroupProjectSubmissionXBlock(
             # Images
             "image/png", "image/jpeg", "image/tiff",
             # Excel
-            "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             # Word
             "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             # PowerPoint
@@ -233,7 +233,7 @@ class GroupProjectSubmissionXBlock(
             # PDF
             "application/pdf"
         ),
-        "extensions": ("png", "jpg", "tif", "tiff", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "pdf",)
+        "extensions": ("png", "jpg", "jpeg", "tif", "tiff", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "pdf",)
     }
 
     validator = FileTypeValidator(
