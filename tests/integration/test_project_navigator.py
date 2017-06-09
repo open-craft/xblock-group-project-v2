@@ -288,7 +288,7 @@ class TestSubmissionUpload(SingleScenarioTestSuite, TestWithPatchesMixin):
 
     @property
     def image_path(self):  # pylint: disable=no-self-use
-        return os.path.join(os.path.split(__file__)[0], 'example-image.gif')
+        return os.path.join(os.path.split(__file__)[0], "../resources/", 'sample_upload.png')
 
     def prepare_submission(self):
         student_id = 1

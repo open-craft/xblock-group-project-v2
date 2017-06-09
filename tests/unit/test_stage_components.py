@@ -1,4 +1,5 @@
 import json
+import os
 from unittest import TestCase
 from xml.etree import ElementTree
 
@@ -128,6 +129,9 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
     user_id = "student_1"
     course_id = "a course"
 
+    def _make_file(self):  # pylint:disable=no-self-use
+        return open(os.path.join(os.path.split(__file__)[0], "../resources/", 'sample_upload.png'))
+
     def setUp(self):
         super(TestGroupProjectSubmissionXBlock, self).setUp()
         self.project_api_mock = mock.create_autospec(TypedProjectAPI)
@@ -202,7 +206,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
 
         request_mock = mock.Mock()
         request_mock.params = {upload_id: mock.Mock()}
-        request_mock.params[upload_id].file = "QWERTY"
+        request_mock.params[upload_id].file = self._make_file()
 
         self.block.upload_id = upload_id
 
@@ -234,7 +238,8 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
 
         request_mock = mock.Mock()
         request_mock.params = {upload_id: mock.Mock()}
-        request_mock.params[upload_id].file = "QWERTY"
+        uploaded_file = self._make_file()
+        request_mock.params[upload_id].file = uploaded_file
 
         self.block.upload_id = upload_id
         self.stage_mock.get_new_stage_state_data = mock.Mock(return_value=stage_state)
@@ -264,12 +269,12 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
 
             self.stage_mock.check_submissions_and_mark_complete.assert_called_once_with()
             patched_persist_and_submit_file.assert_called_once_with(
-                self.stage_mock.activity, expected_context, "QWERTY"
+                self.stage_mock.activity, expected_context, uploaded_file
             )
 
     def test_persist_and_submit_file_propagates_exceptions(self):
         context_mock = mock.Mock()
-        file_stream_mock = mock.Mock()
+        uploaded_file = self._make_file()
 
         with mock.patch('group_project_v2.stage_components.UploadFile') as upload_file_class_mock:
             upload_file_mock = mock.create_autospec(UploadFile)
@@ -279,7 +284,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
             upload_file_class_mock.return_value = upload_file_mock
 
             with self.assertRaises(Exception) as raises_cm:
-                self.block.persist_and_submit_file(self.stage_mock.activity, context_mock, file_stream_mock)
+                self.block.persist_and_submit_file(self.stage_mock.activity, context_mock, uploaded_file)
                 exception = raises_cm.exception
                 expected_message = "Error storing file {} - {}".format(upload_file_mock.file.name, "some error")
                 self.assertEqual(exception.message, expected_message)
@@ -288,7 +293,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
             upload_file_mock.submit = mock.Mock(side_effect=Exception("other error"))
 
             with self.assertRaises(Exception) as raises_cm:
-                self.block.persist_and_submit_file(self.stage_mock.activity, context_mock, file_stream_mock)
+                self.block.persist_and_submit_file(self.stage_mock.activity, context_mock, uploaded_file)
                 exception = raises_cm.exception
                 expected_message = "Error recording file information {} - {}".format(
                     upload_file_mock.file.name, "other error"
@@ -301,7 +306,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
         self.stage_mock.activity.content_id = 'content_id 12'
         self.stage_mock.fire_file_upload_notification = mock.Mock()
         context_mock = mock.Mock()
-        file_stream_mock = mock.Mock()
+        uploaded_file = self._make_file()
 
         self.runtime_mock.publish = mock.Mock()
         notification_service_mock = mock.Mock()
@@ -314,9 +319,9 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
             upload_file_mock.file.name = 'file_name'
             upload_file_class_mock.return_value = upload_file_mock
 
-            result = self.block.persist_and_submit_file(self.stage_mock.activity, context_mock, file_stream_mock)
+            result = self.block.persist_and_submit_file(self.stage_mock.activity, context_mock, uploaded_file)
             self.assertEqual(result, upload_file_mock)
-            upload_file_class_mock.assert_called_once_with(file_stream_mock, upload_id, context_mock)
+            upload_file_class_mock.assert_called_once_with(uploaded_file, upload_id, context_mock)
 
             upload_file_mock.save_file.assert_called_once_with()
             upload_file_mock.submit.assert_called_once_with()
