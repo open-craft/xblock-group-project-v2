@@ -6,6 +6,8 @@ from xml.etree import ElementTree
 import ddt
 import mock
 from datetime import datetime
+
+import pytz
 from freezegun import freeze_time
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
@@ -151,7 +153,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
 
     @ddt.data(1, 'qwe', 'upload 1')
     def test_upload(self, upload_id):
-        upload_datetime = datetime(2015, 11, 19, 22, 54, 13)  # need to be offset-naive
+        upload_datetime = datetime(2015, 11, 19, 22, 54, 13, tzinfo=pytz.UTC)
         self.block.upload_id = upload_id
         self.project_api_mock.get_latest_workgroup_submissions_by_id.return_value = {
             upload_id: {
