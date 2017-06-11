@@ -8,6 +8,7 @@ from collections import namedtuple
 from datetime import date, datetime, timedelta
 import xml.etree.ElementTree as ET
 
+from dateutil import parser
 from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
 from lazy.lazy import lazy
@@ -84,8 +85,8 @@ def outer_html(node):
 def build_date_field(json_date_string_value):
     """ converts json date string to date object """
     try:
-        return datetime.strptime(json_date_string_value, '%Y-%m-%dT%H:%M:%SZ')
-    except ValueError:
+        return parser.parse(json_date_string_value)
+    except (ValueError, OverflowError):
         return None
 
 

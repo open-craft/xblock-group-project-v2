@@ -5,8 +5,11 @@ from xml.etree import ElementTree
 
 import webob
 from datetime import date
+
+from django.core.exceptions import ValidationError
 from django.utils import html
 from lazy.lazy import lazy
+from upload_validator import FileTypeValidator
 from xblock.core import XBlock
 from xblock.fields import String, Boolean, Scope, UNIQUE_ID
 from xblock.fragment import Fragment
@@ -15,7 +18,9 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, XBlockWithPre
 
 from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import WorkgroupAwareXBlockMixin, NoStudioEditableSettingsMixin, UserAwareXBlockMixin
+from group_project_v2.mixins import (
+    WorkgroupAwareXBlockMixin, NoStudioEditableSettingsMixin, UserAwareXBlockMixin
+)
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
@@ -213,6 +218,29 @@ class GroupProjectSubmissionXBlock(
 
     SUBMISSION_RECEIVED_EVENT = "activity.received_submission"
 
+    # TODO: Make configurable via XBlock settings
+    DEFAULT_FILE_FILTERS = {
+        "mime-types": (
+            # Images
+            "image/png", "image/jpeg", "image/tiff",
+            # Excel
+            "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            # Word
+            "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            # PowerPoint
+            "application/vnd.ms-powerpoint",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            # PDF
+            "application/pdf"
+        ),
+        "extensions": ("png", "jpg", "jpeg", "tif", "tiff", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "pdf",)
+    }
+
+    validator = FileTypeValidator(
+        allowed_types=DEFAULT_FILE_FILTERS["mime-types"],
+        allowed_extensions=[".{}".format(ext) for ext in DEFAULT_FILE_FILTERS["extensions"]]
+    )
+
     def get_upload(self, group_id):
         submission_map = self.project_api.get_latest_workgroup_submissions_by_id(group_id)
         submission_data = submission_map.get(self.upload_id, None)
@@ -254,6 +282,25 @@ class GroupProjectSubmissionXBlock(
         # element
         return fragment
 
+    def _validate_upload(self, request):
+        if not self.stage.available_now:
+            template = messages.STAGE_NOT_OPEN_TEMPLATE if not self.stage.is_open else messages.STAGE_CLOSED_TEMPLATE
+            # 422 = unprocessable entity
+            return 422, {'result': 'error', 'message': template.format(action=self.stage.STAGE_ACTION)}
+
+        if not self.stage.is_group_member and not self.stage.is_admin_grader:
+            # 403 - forbidden
+            return 403, {'result': 'error', 'message': messages.NON_GROUP_MEMBER_UPLOAD}
+
+        try:
+            self.validator(request.params[self.upload_id].file)
+        except ValidationError as validationError:
+            message = validationError.message % validationError.params
+            # 400 - BAD REQUEST
+            return 400, {'result': 'error', 'message': message}
+
+        return None, None
+
     @XBlock.handler
     def upload_submission(self, request, _suffix=''):
         """
@@ -261,16 +308,9 @@ class GroupProjectSubmissionXBlock(
         :param request: HTTP request
         :param str _suffix:
         """
-        if not self.stage.available_now:
-            template = messages.STAGE_NOT_OPEN_TEMPLATE if not self.stage.is_open else messages.STAGE_CLOSED_TEMPLATE
-            response_data = {'result': 'error', 'message': template.format(action=self.stage.STAGE_ACTION)}
-            failure_code = 422  # 422 = unprocessable entity
+        failure_code, response_data = self._validate_upload(request)
 
-        elif not self.stage.is_group_member and not self.stage.is_admin_grader:
-            response_data = {'result': 'error', 'message': messages.NON_GROUP_MEMBER_UPLOAD}
-            failure_code = 403  # 403 - forbidden
-
-        else:
+        if failure_code is None and response_data is None:
             target_activity = self.stage.activity
             response_data = {
                 "title": messages.SUCCESSFUL_UPLOAD_TITLE,

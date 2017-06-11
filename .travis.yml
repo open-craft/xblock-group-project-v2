@@ -7,9 +7,9 @@ before_install:
 install:
     - "pip install -r requirements/base.txt"
     - "pip install -r requirements/test.txt"
-    - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/requirements.txt"
-    - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/test-requirements.txt"
-    - "python setup.py sdist && pip install dist/xblock-group-project-v2-0.4.tar.gz"
+    - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/requirements/base.txt"
+    - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/requirements/test.txt"
+    - "python setup.py sdist && pip install dist/xblock-group-project-v2-0.4.1.tar.gz"
     - "npm install"
 script:
     - pep8 group_project_v2 tests --max-line-length=120
@@ -18,6 +18,8 @@ script:
     - ./node_modules/jshint/bin/jshint group_project_v2 tests
     - ./node_modules/.bin/karma start tests/js/karma.conf.js --single-run
     - cat coverage/js/karma_coverage.txt
+    - mkdir var
+    - touch workbench.log
     - python run_tests.py --with-coverage --cover-package=group_project_v2
 notifications:
   email: false

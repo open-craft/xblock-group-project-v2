@@ -1,11 +1,15 @@
 from unittest import TestCase
 import ddt
 import mock
+from datetime import datetime
+
+import pytz
+from dateutil.tz import tzoffset
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
 from xblock.core import XBlock
 from xblock.field_data import DictFieldData
 from xblock.fields import String
-from group_project_v2.utils import FieldValuesContextManager, get_block_content_id
+from group_project_v2.utils import FieldValuesContextManager, get_block_content_id, build_date_field
 
 
 class DummyXBlock(XBlock):
@@ -43,3 +47,22 @@ class TestUtils(TestCase):
         block = mock.Mock()
         block.scope_ids.usage_id = usage
         self.assertEqual(get_block_content_id(block), unicode(usage))
+
+    @ddt.data(
+        ("2017-01-01T00:00:00", datetime(2017, 1, 1, 0, 0, 0, 0, tzinfo=None)),
+        ("2017-01-01T00:00:00Z", datetime(2017, 1, 1, 0, 0, 0, 0, tzinfo=pytz.UTC)),
+        ("2016-11-28T14:53:22.763Z", datetime(2016, 11, 28, 14, 53, 22, 763000, tzinfo=pytz.UTC)),
+        ("2015-03-09T05:06:07.000001Z", datetime(2015, 3, 9, 5, 6, 7, 1, tzinfo=pytz.UTC)),
+        (
+                "2015-03-09T05:06:07.123456+08:00",
+                datetime(2015, 3, 9, 5, 6, 7, 123456, tzinfo=tzoffset(None, 28800))
+        ),
+        ("", None),
+        ("qwertyuiop", None),
+        ("1234567890", None),
+        ("1234567890000000", None),  # this one overflows dateutil.parser
+    )
+    @ddt.unpack
+    def test_build_date_field(self, json_string, expected):
+        actual = build_date_field(json_string)
+        self.assertEqual(actual, expected)

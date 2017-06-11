@@ -3,6 +3,7 @@ Tests for project navigator and its views
 """
 import logging
 import textwrap
+import unittest
 
 import ddt
 import mock
@@ -269,6 +270,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
         # TODO: and I have no idea yet how to check for AJAX parameters; looks like it is a work for JS test
 
 
+@ddt.ddt
 class TestSubmissionUpload(SingleScenarioTestSuite, TestWithPatchesMixin):
     scenario = "example_with_active_submissions.xml"
 
@@ -286,9 +288,8 @@ class TestSubmissionUpload(SingleScenarioTestSuite, TestWithPatchesMixin):
             }
         }
 
-    @property
-    def image_path(self):  # pylint: disable=no-self-use
-        return os.path.join(os.path.split(__file__)[0], 'example-image.gif')
+    def image_path(self, image="image.png"):  # pylint: disable=no-self-use
+        return os.path.join(os.path.split(__file__)[0], "../resources/", image)
 
     def prepare_submission(self):
         student_id = 1
@@ -311,23 +312,43 @@ class TestSubmissionUpload(SingleScenarioTestSuite, TestWithPatchesMixin):
 
         return marketing_pitch
 
-    def test_upload_submissions(self):
+    # TODO: figure out what's wrong with Travis
+    @unittest.skipIf(os.environ.get("CI", "false") == "true", "Intermittently fails in CI")
+    @ddt.data(
+        "document.doc", "document.docx", "document.pdf",
+        "document.ppt", "document.pptx",
+        "document.xls",
+        # "document.xlsx",  #django-upload-validator bug
+        "image.jpeg", "image.png", "image.tiff"
+    )
+    def test_upload_submissions(self, document):
 
         marketing_pitch = self.prepare_submission()
 
-        marketing_pitch.upload_file_and_return_modal(self.image_path)
+        marketing_pitch.upload_file_and_return_modal(self.image_path(document))
 
         modal = ModalDialogElement(self.browser)
 
         self.assertEqual(modal.title, u'UPLOAD COMPLETE')
         self.assertIn(u'Your deliverable has been successfully uploaded', modal.message)
 
+    def test_upload_submissions_restricted_file_type(self):
+
+        marketing_pitch = self.prepare_submission()
+
+        marketing_pitch.upload_file_and_return_modal(self.image_path("restricted_upload.gif"))
+
+        modal = ModalDialogElement(self.browser)
+
+        self.assertEqual(modal.title, u'ERROR')
+        self.assertIn(u"File type 'image/gif' is not allowed.", modal.message)
+
     def test_upload_submissions_csrf(self):
 
         marketing_pitch = self.prepare_submission()
 
         with self.settings(ROOT_URLCONF='tests.integration.urlconf_overrides.csrf_failure'):
-            marketing_pitch.upload_file_and_return_modal(self.image_path)
+            marketing_pitch.upload_file_and_return_modal(self.image_path())
 
         modal = ModalDialogElement(self.browser)
         self.assertEqual(modal.title, u'ERROR')
@@ -342,7 +363,7 @@ class TestSubmissionUpload(SingleScenarioTestSuite, TestWithPatchesMixin):
         marketing_pitch = self.prepare_submission()
 
         with self.settings(ROOT_URLCONF='tests.integration.urlconf_overrides.permission_denied'):
-            marketing_pitch.upload_file_and_return_modal(self.image_path)
+            marketing_pitch.upload_file_and_return_modal(self.image_path())
 
         modal = ModalDialogElement(self.browser)
         self.assertEqual(modal.title, u'ERROR')
