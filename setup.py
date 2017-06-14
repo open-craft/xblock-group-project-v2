@@ -24,19 +24,25 @@ def package_data(pkg, root_list):
 
 setup(
     name='xblock-group-project-v2',
-    version='0.4.1',
+    version='0.4.2',
     description='XBlock - Group Project V2',
     packages=['group_project_v2'],
     install_requires=[
-        'XBlock',
-        'xblock-utils',
-        'django-upload-validator'
+        'Django>=1.8,<2.0',
+        'lazy>=1.1',
+        'python-dateutil>=2.1,<3.0',
+        'WebOb>=1.6,<2.0',
+        'pytz',
+        'XBlock>=0.4,<2.0',
+        'xblock-utils>=0.9',
+        'django-upload-validator>=0.1',
+        'edx-opaque-keys>=0.4'
     ],
     entry_points={
         'xblock.v1': ENTRYPOINTS
     },
     dependency_links = [
-        'https://github.com/mckinseyacademy/django-upload-validator/tarball/b7152b63af6698116337def90a3e6f42ccc06f81#egg=django-upload-validator-0.1.0'
+        'https://github.com/edx/xblock-utils/tarball/v1.0.5#egg=xblock-utils-1.0.5'
     ],
     package_data=package_data("group_project_v2", ["templates", "public"]),
 )
