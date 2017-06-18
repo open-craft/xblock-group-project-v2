@@ -10,8 +10,10 @@
         "karma-requirejs": ">=0.2.5",
         "karma-jquery": ">=0.1",
         "karma-coverage": ">=0.5",
+        "jasmine-core": ">=2.6.0",
         "jasmine-jquery": ">=2.1",
-        "jshint": ">=2.9"
+        "jshint": ">=2.9",
+        "requirejs": ">=2.1"
     },
     "repository": {
         "type": "git",

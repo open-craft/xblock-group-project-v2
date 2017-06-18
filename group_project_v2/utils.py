@@ -84,6 +84,13 @@ def outer_html(node):
 
 def build_date_field(json_date_string_value):
     """ converts json date string to date object """
+    # QUIRK: dateutil behaves slightly differently between 2.1 and 2.6. When empty string is parsed
+    # 2.1 returns beginning of the day, localtime
+    # 2.6 raises value error
+    # THis check is here to make this behavior consistent
+    if not json_date_string_value:
+        return None
+
     try:
         return parser.parse(json_date_string_value)
     except (ValueError, OverflowError):
