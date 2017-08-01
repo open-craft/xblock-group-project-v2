@@ -3,7 +3,7 @@
 # Imports ###########################################################
 
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 from group_project_v2.app_config import ENTRYPOINTS
 
 
@@ -24,9 +24,9 @@ def package_data(pkg, root_list):
 
 setup(
     name='xblock-group-project-v2',
-    version='0.4.2',
+    version='0.4.3',
     description='XBlock - Group Project V2',
-    packages=['group_project_v2'],
+    packages=find_packages(),
     install_requires=[
         'Django>=1.8,<2.0',
         'lazy>=1.1',
