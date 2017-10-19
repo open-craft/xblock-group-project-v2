@@ -25,7 +25,7 @@ class UserDetails(ReducedUserDetails):
     def __init__(self, **kwargs):
         super(UserDetails, self).__init__(**kwargs)
         self.gender = kwargs.get('gender', None)
-        self.avatar_url = kwargs.get('avatar_url', None)
+        self.profile_image_url = kwargs.get('profile_image', {}).get('image_url_medium', None)
         self.city = kwargs.get('city', None)
         self.country = kwargs.get('country', None)
         self.is_active = kwargs.get('is_active', None)

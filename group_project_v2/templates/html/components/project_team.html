@@ -4,7 +4,7 @@
   {% for team_member in team_members %}
     <div class="group-project-team-member">
       <div class="group-project-team-member-avatar">
-        <img class="avatar" {% if team_member.avatar_url %} src="{{team_member.avatar_url }}" {% endif %}/>
+        <img class="avatar" {% if team_member.profile_image_url %} src="{{team_member.profile_image_url }}" {% endif %}/>
       </div>
       <div class="group-project-team-member-data">
         <div class="group-project-team-member-info">
