@@ -445,7 +445,7 @@ class PeerSelectorXBlock(ReviewSubjectSeletorXBlockBase, UserAwareXBlockMixin):
                 'id': peer.id,
                 'username': peer.username,
                 'user_label': make_user_caption(peer),
-                'profile_image_url': peer.profile_image.image_url_medium if hasattr(peer, 'profile_image') else None
+                'profile_image_url': peer.profile_image_url
             }
             for peer in self.review_subjects
         ]
