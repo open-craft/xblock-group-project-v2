@@ -373,6 +373,18 @@ class TestSubmissionUpload(SingleScenarioTestSuite, TestWithPatchesMixin):
         # fail and notify of the error
         self.assertNotRegexpMatches(modal.message, r".*<\s*p\s*/?>")
 
+    def test_upload_submissions_xss_file(self):
+
+        marketing_pitch = self.prepare_submission()
+
+        marketing_pitch.upload_file_and_return_modal(
+                self.image_path('''testdoc.<img onerror="console['log']('XSS')" src="">''')
+        )
+
+        modal = ModalDialogElement(self.browser)
+        self.assertIn(u'''<img onerror="console['log']('xss')" src="">''', modal.message)
+        self.assertNotIn('XSS', self.browser.get_log('browser'))
+
 
 @ddt.ddt
 class TestProjectNavigator(BaseIntegrationTest, TestWithPatchesMixin):
