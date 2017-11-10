@@ -17,9 +17,20 @@ function GroupProjectSubmissionBlock(runtime, element) {
         }
 
         function filterMessageObject(message){
+            function htmlencode(html) {
+                return document.createElement('span')
+                    .appendChild(document.createTextNode(html))
+                    .parentNode.innerHTML;
+            }
+
             if(message.status === 0 && message.statusText === 'abort') {
                 message.title = GroupProjectCommon.gettext('Upload cancelled.');
                 message.content = GroupProjectCommon.gettext('Upload cancelled by user.');
+            }
+            if (message.status === 400) {
+                // Hotfix for XSS reflection through the file validator error messages
+                message.title = htmlencode(message.title);
+                message.content = htmlencode(message.content);
             }
             if (message.status === 403) {
                 var base_message = GroupProjectCommon.gettext(
