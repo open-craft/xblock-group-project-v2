@@ -774,7 +774,7 @@ class GroupActivityXBlock(
 
     def calculate_and_send_grade(self, group_id):
         grade_value = self.calculate_grade(group_id)
-        if grade_value:
+        if grade_value is not None:
             self.assign_grade_to_group(group_id, grade_value)
 
             workgroup = self.project_api.get_workgroup_by_id(group_id)

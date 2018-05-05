@@ -452,7 +452,8 @@ class TestEventsAndCompletionGroupActivityXBlock(TestWithPatchesMixin, TestCase)
     @ddt.data(
         (1, [], 100),
         (2, [1, 2], 10),
-        (3, [1, 2, 3], 92)
+        (3, [1, 2, 3], 92),
+        (4, [1, 2, 3, 4], 0)
     )
     @ddt.unpack
     def test_marks_complete_for_workgroup(self, group_id, workgroup_users, grade):
@@ -467,7 +468,8 @@ class TestEventsAndCompletionGroupActivityXBlock(TestWithPatchesMixin, TestCase)
     @ddt.data(
         (1, 100, 'course1', 'content1', 100),
         (2, 10, 'course2', 'content2', 50),
-        (3, 92, 'course3', 'contrent3', 150)
+        (3, 92, 'course3', 'content3', 150),
+        (4, 0, 'course4', 'content4', 200)
     )
     @ddt.unpack
     def test_sets_group_grade(self, group_id, grade, course_id, content_id, weight):
