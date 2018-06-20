@@ -114,7 +114,7 @@ replicate CI build installation process and run as closely as possible:
 
 ## File upload validation
 
-List of supported mime-types and extensions are hard-coded in stage_components.py
+List of supported mime-types and extensions are hard-coded in `stage_components.py`
 [`GroupProjectSubmissionXBlock`][mime-types-and-extensions]:
 
     "mime-types": (
