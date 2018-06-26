@@ -84,6 +84,7 @@ function GroupProjectSubmissionBlock(runtime, element) {
                 value: $.cookie('csrftoken')
             }
         ],
+        pasteZone: null,
         add: function (e, data) {
             var target_form = $(e.target),
                 parentData = data;
