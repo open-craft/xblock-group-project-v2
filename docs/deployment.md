@@ -34,9 +34,9 @@ Group Project XBlock v2 is done the same way other XBlocks are installed:
 3. pip install -e git+https://github.com/open-craft/xblock-group-project-v2.git@ **version_hash** #egg=xblock-group-project-v2
 
 *version_hash* is the hash of a git commit, or the name of a git tag. At the time of writing, the latest stable version was
-`0.4.7`, so the above command looked like this:
+`0.4.9`, so the above command looked like this:
 
-    pip install -e git+https://github.com/open-craft/xblock-group-project-v2.git@0.4.7#egg=xblock-group-project-v2
+    pip install -e git+https://github.com/open-craft/xblock-group-project-v2.git@0.4.9#egg=xblock-group-project-v2
     
 ## Setting configuration variables
 
