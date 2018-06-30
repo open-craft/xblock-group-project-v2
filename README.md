@@ -3,13 +3,14 @@
 This set of XBLocks is an experimental reimplementation of [Group Project XBlock](https://github.com/edx-solutions/xblock-group-project). 
 
 This tool implements a group project, where a group of students work together on a task, which is then graded.
-Project deliverables are defined by course staff, and can be arbitrary files. Project deliverables can be submitted 
-by any group member. Each group is graded as a whole -- each student gets the same mark for the group project. 
+Project deliverables are defined by course staff, and come in form of files - see "File submissions" section for details.
+Project deliverables can be submitted by any group member. Each group is graded as a whole -- each student gets the
+same mark for the group project.
 
 A group project can be graded either by staff, or by peers from other groups. Individual performance can be assessed
 using the group evaluation feature where performance of each group member is assessed by the rest of their group. 
 
-It does *not* work properly in the official Open edX LMS platform yet.
+It does *not* work properly in the official Open edX LMS platform yet. This XBlock requires the `edx-solutions` fork of `edx-platform`.
 
 
 ## Features
@@ -57,6 +58,11 @@ templates, or just share some relevant information about the assignment.
 
 The results of work produced by students are uploaded to the server to facilitate sharing them among team members
 and for future grading.
+
+Uploaded files are validated against a list of allowed mime-types and extensions.
+See ["File upload validation" section][file-upload-validation] for the full list.
+
+[file-upload-validation]: docs/development.md#file-upload-validation
 
 **Admin Dashboard**
 
@@ -177,7 +183,7 @@ Refer to [development documentation][dev-docs] for more details.
 5. [XBlocks in this package][xblocks-docs]
 
 [authoring]: /docs/authoring.md
-[admin-dashboard]: /docs/admin-dashboard.md
+[admin-dashboard]: /docs/admin_dashboard.md
 [deployment]: /docs/deployment.md
 [dev-docs]: /docs/development.md
 [xblocks-docs]: /docs/XBlocks.md

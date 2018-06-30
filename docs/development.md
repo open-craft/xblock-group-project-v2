@@ -111,3 +111,27 @@ replicate CI build installation process and run as closely as possible:
 
 * Commands to prepare an environment are listed in `.travis.yml -> install` section.
 * Commands to run tests and quality checks are listed in `.travis.yml -> script` section.
+
+## File upload validation
+
+List of supported mime-types and extensions are hard-coded in `stage_components.py`
+[`GroupProjectSubmissionXBlock`][mime-types-and-extensions]:
+
+    "mime-types": (
+        # Images
+        "image/png", "image/jpeg", "image/tiff",
+        # Excel
+        "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        # Word
+        "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        # PowerPoint
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        # PDF
+        "application/pdf"
+    ),
+    "extensions": ("png", "jpg", "jpeg", "tif", "tiff", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "pdf",)
+
+
+
+[mime-types-and-extensions]: https://github.com/open-craft/xblock-group-project-v2/blob/master/group_project_v2/stage_components.py#L222-L237
