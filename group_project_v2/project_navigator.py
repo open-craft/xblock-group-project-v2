@@ -381,6 +381,14 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         context = {'view': self, 'activity_contents': [frag.content for frag in activity_fragments]}
         return self.render_student_view(context, activity_fragments)
 
+    @XBlock.handler
+    def check_submissions(self, request, _suffix=''):
+        for activity in self.navigator.group_project.activities:
+            for stage in activity.stages:
+                if stage.CATEGORY == 'gp-v2-stage-submission':
+                    stage.check_submissions_and_mark_complete()
+
+
 
 # pylint-disable=no-init
 class AskTAViewXBlock(ProjectNavigatorViewXBlockBase):

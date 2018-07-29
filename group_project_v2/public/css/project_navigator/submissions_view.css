@@ -8,7 +8,7 @@
     border-bottom: none;
 }
 
-.group-project-submissions-view .action_buttons {
+.group-project-submissions-view .action_buttons .cancel_upload {
     /* should not be visible by default, but still consume space to avoid resizing view - hence using visibility, not display*/
     visibility: hidden;
 }

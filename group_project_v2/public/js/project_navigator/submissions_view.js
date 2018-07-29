@@ -2,7 +2,7 @@
 /* exported GroupProjectNavigatorSubmissionsView */
 function GroupProjectNavigatorSubmissionsView(runtime, element) {
     "use strict";
-    var $action_buttons = $(".action_buttons", element);
+    var $cancel_button = $(".cancel_upload", element);
 
     var running_uploads = [];
 
@@ -13,13 +13,13 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
         }
 
         if (running_uploads.length === 0) {
-            $action_buttons.css('visibility', 'hidden');
+            $cancel_button.css('visibility', 'hidden');
         }
     }
 
     $(document).on(GroupProjectCommon.Submission.events.upload_started, function(e, uploadXHR){
         running_uploads.push(uploadXHR);
-        $action_buttons.css('visibility', 'visible');
+        $cancel_button.css('visibility', 'visible');
     });
 
     $(document).on(GroupProjectCommon.Submission.events.upload_failed, handle_upload_end);
@@ -31,6 +31,15 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
             uploadXHR.abort();
         }
         running_uploads = [];
-        $action_buttons.css('visibility', 'hidden');
+        $cancel_button.css('visibility', 'hidden');
+    });
+
+    $(".check_submissions", element).click(function(){
+        alert(runtime.handlerUrl(element, "check_submissions"));
+        $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, "check_submissions"),
+            data: JSON.stringify({}),
+        });
     });
 }
