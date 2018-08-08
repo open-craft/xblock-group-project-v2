@@ -35,7 +35,6 @@ function GroupProjectNavigatorSubmissionsView(runtime, element) {
     });
 
     $(".check_submissions", element).click(function(){
-        alert(runtime.handlerUrl(element, "check_submissions"));
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, "check_submissions"),
