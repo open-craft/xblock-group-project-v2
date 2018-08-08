@@ -384,7 +384,7 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
         return self.render_student_view(context, activity_fragments)
 
     @XBlock.handler
-    def check_submissions(self, request, _suffix=''):
+    def check_submissions(self, _request, _suffix=''):
         new_stage_data = []
         for activity in self.navigator.group_project.activities:
             for stage in activity.stages:
@@ -395,7 +395,6 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
             "new_stage_data": new_stage_data
         }
         return webob.response.Response(body=json.dumps(results))
-
 
 
 # pylint-disable=no-init
