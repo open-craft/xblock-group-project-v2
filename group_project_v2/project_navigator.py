@@ -385,16 +385,12 @@ class SubmissionsViewXBlock(ProjectNavigatorViewXBlockBase):
 
     @XBlock.handler
     def check_submissions(self, _request, _suffix=''):
-        new_stage_data = []
         for activity in self.navigator.group_project.activities:
             for stage in activity.stages:
                 if stage.CATEGORY == 'gp-v2-stage-submission':
                     stage.check_submissions_and_mark_complete()
-                    new_stage_data.append(stage.get_new_stage_state_data())
-        results = {
-            "new_stage_data": new_stage_data
-        }
-        return webob.response.Response(body=json.dumps(results))
+        result = {'result': 'ok'}
+        return webob.response.Response(body=json.dumps(result))
 
 
 # pylint-disable=no-init
