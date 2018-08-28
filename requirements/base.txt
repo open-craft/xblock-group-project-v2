@@ -6,8 +6,8 @@ WebOb<2.0
 # this guy have one major each year and you'd want to migrate ASAP, since it keeps up with all the real world timezone changes
 pytz
 
-# It is known to work well with 0.4 and 1.0, hence version range covers two major versions
-XBlock>=0.4,<2.0
+#XBlock>=1.2.2,<2.0
+git+https://github.com/edx/XBlock@cliff/completion-get-mode#egg=XBlock==1.2.2a1
 
 edx-opaque-keys>=0.4.0
 django-upload-validator>=0.1
