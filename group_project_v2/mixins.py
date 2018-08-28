@@ -3,6 +3,7 @@ import logging
 import os
 import itertools
 
+import six
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.locator import BlockUsageLocator
@@ -75,7 +76,7 @@ class CourseAwareXBlockMixin(object):
     @property
     def course_id(self):
         raw_course_id = getattr(self.runtime, 'course_id', 'all')
-        return unicode(raw_course_id)
+        return six.text_type(raw_course_id)
 
 
 class UserAwareXBlockMixin(ProjectAPIXBlockMixin):
@@ -421,7 +422,7 @@ class XBlockWithUrlNameDisplayMixin(object):
         try:
             return super(XBlockWithUrlNameDisplayMixin, self).url_name
         except AttributeError:
-            return unicode(self.scope_ids.usage_id)
+            return six.text_type(self.scope_ids.usage_id)
 
     def get_url_name_fragment(self, caption):
         fragment = Fragment()

@@ -1,4 +1,9 @@
-""" Contains DTOs used in Typed API. DTOs mostly follow structure of API responses """
+"""
+Contains DTOs used in Typed API. DTOs mostly follow structure of API responses.
+"""
+
+import six
+
 from group_project_v2.utils import make_user_caption
 
 
@@ -17,7 +22,7 @@ class ReducedUserDetails(object):
     def full_name(self):
         if self._full_name:
             return self._full_name
-        return u" ".join([unicode(part) for part in (self.first_name, self.last_name) if part is not None])
+        return u" ".join([six.text_type(part) for part in (self.first_name, self.last_name) if part is not None])
 
 
 # pylint:disable=too-many-instance-attributes

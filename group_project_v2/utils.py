@@ -4,10 +4,10 @@ import functools
 import logging
 import urlparse
 from collections import namedtuple
-
 from datetime import date, datetime, timedelta
 import xml.etree.ElementTree as ET
 
+import six
 from dateutil import parser
 from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
@@ -54,15 +54,13 @@ class DiscussionXBlockShim(object):
     STUDIO_LABEL = gettext(u"Discussion")
 
 
+@six.python_2_unicode_compatible
 class GroupworkAccessDeniedError(Exception):
     def __init__(self, detail):
         self.value = detail
         super(GroupworkAccessDeniedError, self).__init__()
 
     def __str__(self):
-        return "Outsider Denied Access: {}".format(self.value)
-
-    def __unicode__(self):
         return u"Outsider Denied Access: {}".format(self.value)
 
 
@@ -131,7 +129,7 @@ def groupwork_protected_view(func):
         except GroupworkAccessDeniedError as exc:
             error_fragment = Fragment()
             error_fragment.add_content(
-                loader.render_template('/templates/html/loading_error.html', {'error_message': unicode(exc)}))
+                loader.render_template('/templates/html/loading_error.html', {'error_message': six.text_type(exc)}))
             error_fragment.add_javascript(loader.load_unicode('public/js/group_project_error.js'))
             error_fragment.initialize_js('GroupProjectError')
             return error_fragment
@@ -244,7 +242,7 @@ def memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME):
         def wrapper(*args, **kwargs):
             key_list = (
                 tuple([func.__name__]) + tuple(args) +
-                tuple("{}:{}".format(key, value) for key, value in kwargs.iteritems())
+                tuple("{}:{}".format(key, value) for key, value in six.viewitems(kwargs))
             )
             key = make_key(key_list)
             if key not in cache or cache[key]['timestamp'] + expires_after <= datetime.now():
@@ -308,7 +306,7 @@ def add_resource(block, resource_type, path, fragment, via_url=False):
 
 
 def get_block_content_id(block):
-    return unicode(block.scope_ids.usage_id)
+    return six.text_type(block.scope_ids.usage_id)
 
 
 @register.filter

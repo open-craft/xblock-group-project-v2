@@ -3,6 +3,7 @@ from unittest import TestCase
 
 import ddt
 import mock
+import six
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
 from xblock.core import XBlock
 from xblock.runtime import Runtime
@@ -177,7 +178,7 @@ class TestCourseAwareXBlockMixin(TestCase, TestWithPatchesMixin):
     )
     def test_course_id(self, course_id):
         self.runtime_mock.course_id = course_id
-        self.assertEqual(self.block.course_id, unicode(course_id))
+        self.assertEqual(self.block.course_id, six.text_type(course_id))
 
 
 class UserAwareXBlockMixinGuineaPig(CommonMixinGuineaPig, UserAwareXBlockMixin):

@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime, timedelta
+
 import pytz
+import six
 
 from group_project_v2.utils import log_and_suppress_exceptions
 
@@ -43,13 +45,13 @@ def add_click_link_params(msg, course_id, location):
     In the initial use case, we need to make the link point to a different front end website so we need to
     resolve these links at dispatch time
     """
-    msg.add_click_link_params({'course_id': unicode(course_id), 'location': unicode(location)})
+    msg.add_click_link_params({'course_id': six.text_type(course_id), 'location': six.text_type(location)})
 
 
 class StageNotificationsMixin(object):
     def _get_stage_timer_name(self, timer_name_suffix):
         return '{location}-{timer_name_suffix}'.format(
-            location=unicode(self.location),
+            location=six.text_type(self.location),
             timer_name_suffix=timer_name_suffix
         )
 
@@ -64,7 +66,7 @@ class StageNotificationsMixin(object):
 
         msg = NotificationMessage(
             msg_type=notifications_service.get_notification_type(msg_type),
-            namespace=unicode(course_id),
+            namespace=six.text_type(course_id),
             payload={
                 '_schema_version': 1,
                 'activity_name': self.activity.display_name,
@@ -81,8 +83,8 @@ class StageNotificationsMixin(object):
             # send to all students participating in this project
             scope_name=NotificationScopes.PARTICIPANTS,
             scope_context={
-                'course_id': unicode(course_id),
-                'content_id': unicode(self.activity.project.location),
+                'course_id': six.text_type(course_id),
+                'content_id': six.text_type(self.activity.project.location),
             },
             timer_name=self._get_stage_timer_name(timer_name_suffix),
             ignore_if_past_due=True  # don't send if we're already late!
@@ -164,15 +166,15 @@ class StageNotificationsMixin(object):
 
         msg = NotificationMessage(
             msg_type=msg_type,
-            namespace=unicode(self.course_id),
+            namespace=six.text_type(self.course_id),
             payload={
                 '_schema_version': 1,
                 'action_username': uploader_username,
                 'activity_name': self.activity.display_name,
             }
         )
-        location = unicode(self.location) if self.location else ''
-        add_click_link_params(msg, unicode(self.course_id), location)
+        location = six.text_type(self.location) if self.location else ''
+        add_click_link_params(msg, six.text_type(self.course_id), location)
 
         # NOTE: We're not using Celery here since we are expecting that we
         # will have only a very small handful of workgroup users
@@ -190,14 +192,14 @@ class StageNotificationsMixin(object):
         msg_type = notifications_service.get_notification_type(NotificationMessageTypes.GRADES_POSTED)
         msg = NotificationMessage(
             msg_type=msg_type,
-            namespace=unicode(self.course_id),
+            namespace=six.text_type(self.course_id),
             payload={
                 '_schema_version': 1,
                 'activity_name': self.activity.display_name,
             }
         )
-        location = unicode(self.location) if self.location else ''
-        add_click_link_params(msg, unicode(self.course_id), location)
+        location = six.text_type(self.location) if self.location else ''
+        add_click_link_params(msg, six.text_type(self.course_id), location)
 
         send_at_date = self.open_date.replace(tzinfo=pytz.UTC) if self.open_date else None
         ignore_if_past_due = True

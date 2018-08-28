@@ -4,6 +4,7 @@ import itertools
 from operator import itemgetter
 from datetime import datetime
 
+import six
 import webob
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
@@ -632,14 +633,14 @@ class GroupActivityXBlock(
             'is_filtered_out': user.id in filtered_students,
             'stage_states': {
                 stage_id: stage_data.user_stats.get(user.id, StageState.UNKNOWN)
-                for stage_id, stage_data in stage_stats.iteritems()
+                for stage_id, stage_data in six.viewitems(stage_stats)
             },
             'groups_to_grade': {
                 stage_id: [
                     {'id': group.id, 'ta_grade_link': self.get_ta_review_link(group.id, stage_id)}
                     for group in stage_data.groups_to_grade.get(user.id, [])
                 ]
-                for stage_id, stage_data in stage_stats.iteritems()
+                for stage_id, stage_data in six.viewitems(stage_stats)
             }
         }
 
@@ -670,7 +671,7 @@ class GroupActivityXBlock(
                     'external_status': stage_data.external_group_status.get(workgroup.id, StageState.NOT_AVAILABLE),
                     'external_status_label': stage_data.external_group_status_label.get(workgroup.id, ""),
                 }
-                for stage_id, stage_data in stage_stats.iteritems()
+                for stage_id, stage_data in six.viewitems(stage_stats)
             },
             'users': users
         }

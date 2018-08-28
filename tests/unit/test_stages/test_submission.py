@@ -1,5 +1,6 @@
 import ddt
 import mock
+import six
 
 from group_project_v2.stage import SubmissionStage
 from tests.unit.test_stages.base import BaseStageTest
@@ -67,7 +68,7 @@ class TestSubmissionStage(BaseStageTest):
     def test_get_users_completion(self, uploads, workgroups, submissions, expected_result):
         workgroup_submissions = {
             group_id: {upload_id: 'irrelevant' for upload_id in uploaded_submissions}
-            for group_id, uploaded_submissions in submissions.iteritems()
+            for group_id, uploaded_submissions in six.viewitems(submissions)
         }
 
         expected_completed, expected_partially_completed = expected_result
