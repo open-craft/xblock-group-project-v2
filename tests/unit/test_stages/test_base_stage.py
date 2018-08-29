@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 import ddt
 import mock
+import six
 from group_project_v2.project_api.dtos import ReducedUserDetails
 
 from group_project_v2.stage import BaseGroupActivityStage
@@ -107,7 +108,7 @@ class TestBaseGroupActivityStage(BaseStageTest):
             If set to False allows `actual` to contain keys not found in `expected`.
             If True - requires that no other keys are present in `actual` - roughly equivalent to plain assertEqual
         """
-        for key, value in expected.iteritems():
+        for key, value in six.viewitems(expected):
             self.assertIn(key, actual)
             self.assertEqual(actual[key], value)
 

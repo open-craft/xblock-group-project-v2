@@ -1,10 +1,10 @@
+import itertools
 import json
 import logging
-
-import itertools
 from collections import defaultdict
-
 from lazy.lazy import lazy
+
+import six
 import webob
 from xblock.core import XBlock
 from xblock.fields import String, Scope, Boolean
@@ -430,7 +430,7 @@ class PeerReviewStage(ReviewBaseStage):
 
         ta_reviews = {
             reviewer: items
-            for reviewer, items in grouped_items.iteritems()
+            for reviewer, items in six.viewitems(grouped_items)
             if self.is_user_ta(self.real_user_id(reviewer), self.course_id)
         }
         return ta_reviews

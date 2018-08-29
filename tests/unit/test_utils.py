@@ -4,6 +4,7 @@ import mock
 from datetime import datetime
 
 import pytz
+import six
 from dateutil.tz import tzoffset
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
 from xblock.core import XBlock
@@ -46,7 +47,7 @@ class TestUtils(TestCase):
     def test_get_block_content_id(self, usage):
         block = mock.Mock()
         block.scope_ids.usage_id = usage
-        self.assertEqual(get_block_content_id(block), unicode(usage))
+        self.assertEqual(get_block_content_id(block), six.text_type(usage))
 
     @ddt.data(
         ("2017-01-01T00:00:00", datetime(2017, 1, 1, 0, 0, 0, 0, tzinfo=None)),

@@ -1,5 +1,6 @@
 import ddt
 import mock
+import six
 from xblock.validation import ValidationMessage
 
 from group_project_v2.project_api.dtos import ReducedUserDetails
@@ -211,7 +212,7 @@ class TestTeamEvaluationStageStageStatus(ReviewStageUserCompletionStatsMixin, Ba
             {1: workgroups[0], 2: workgroups[0], 3: workgroups[1], 4: workgroups[1]},
             {
                 group_id: [self._parse_review_item_string(item) for item in items]
-                for group_id, items in review_items.iteritems()
+                for group_id, items in six.viewitems(review_items)
             }
         )
 

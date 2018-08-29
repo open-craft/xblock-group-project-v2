@@ -2,14 +2,14 @@
 Tests for project navigator and its views
 """
 import logging
+import os
 import textwrap
 import unittest
+from datetime import datetime
 
 import ddt
 import mock
-from datetime import datetime
-
-import os
+import six
 from freezegun import freeze_time
 
 from group_project_v2.project_navigator import (
@@ -122,7 +122,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
 
         def assert_stage(stage, activity_name, stage_type, stage_title, stage_state):
             activity_id = [
-                act_id for act_id, act_name in activities_map.iteritems() if act_name == activity_name
+                act_id for act_id, act_name in six.viewitems(activities_map) if act_name == activity_name
             ][0]
             self.assertEqual(stage.activity_id, activity_id)
             # exact block ids are unknown at runtime, so using categories

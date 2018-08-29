@@ -3,6 +3,7 @@ from collections import defaultdict
 
 import ddt
 import mock
+import six
 from xblock.validation import ValidationMessage
 
 from group_project_v2.project_api.dtos import WorkgroupDetails
@@ -281,7 +282,7 @@ class TestPeerReviewStageReviewStatus(ReviewStageBaseTest, ReviewStageUserComple
             self, target_users, group_reviewers, questions, review_items, expected_result
     ):
         groups_to_review = defaultdict(list)
-        for group_id, reviewers in group_reviewers.iteritems():
+        for group_id, reviewers in six.viewitems(group_reviewers):
             for reviewer in reviewers:
                 groups_to_review[reviewer].append(mk_wg(group_id))
 
@@ -289,7 +290,7 @@ class TestPeerReviewStageReviewStatus(ReviewStageBaseTest, ReviewStageUserComple
             groups_to_review,
             {
                 group_id: [self._parse_review_item_string(item) for item in items]
-                for group_id, items in review_items.iteritems()
+                for group_id, items in six.viewitems(review_items)
             }
         )
 
@@ -331,7 +332,7 @@ class TestPeerReviewStageReviewStatus(ReviewStageBaseTest, ReviewStageUserComple
             group,
             {
                 group.id: [self._parse_review_item_string(item) for item in items]
-                for group_id, items in review_items.iteritems()
+                for group_id, items in six.viewitems(review_items)
             }
         )
 
@@ -369,7 +370,7 @@ class TestPeerReviewStageReviewStatus(ReviewStageBaseTest, ReviewStageUserComple
             group_to_review,
             {
                 group_to_review.id: [self._parse_review_item_string(item) for item in items]
-                for group_id, items in review_items.iteritems()
+                for group_id, items in six.viewitems(review_items)
             }
         )
 

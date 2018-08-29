@@ -1,14 +1,15 @@
 """
 Tests for stage contents and interaction
 """
-from collections import defaultdict
 
 import datetime
 import textwrap
+from collections import defaultdict
 
 import ddt
-from freezegun import freeze_time
 import mock
+import six
+from freezegun import freeze_time
 from workbench.runtime import WorkbenchRuntime
 
 from group_project_v2.mixins import UserAwareXBlockMixin, AuthXBlockMixin
@@ -42,7 +43,7 @@ class StageTestBase(BaseIntegrationTest):
 
         def format_args(arg_dict):
             return " ".join(
-                ["{}='{}'".format(arg_name, arg_value) for arg_name, arg_value in arg_dict.iteritems()])
+                ["{}='{}'".format(arg_name, arg_value) for arg_name, arg_value in six.viewitems(arg_dict)])
 
         stage_arguments = {'display_name': title}
         stage_arguments.update(kwargs)
@@ -262,7 +263,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         def submit_peer_review_items(reviewer_id, peer_id, group_id, content_id, data):
             new_items = [
                 mri(reviewer_id, question_id, peer=peer_id, content_id=content_id, answer=answer, group=group_id)
-                for question_id, answer in data.iteritems()
+                for question_id, answer in six.viewitems(data)
                 if len(answer) > 0
             ]
             store[peer_id].extend(new_items)
@@ -380,7 +381,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
 
         self.project_api_mock.get_peer_review_items.return_value = [
             {"question": question, "answer": answer, "user": TestConstants.Users.USER2_ID}
-            for question, answer in expected_submissions.iteritems()
+            for question, answer in six.viewitems(expected_submissions)
         ]
 
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
@@ -442,7 +443,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
                 "reviewer": str(user_id),
                 "content_id": self.activity_id,
             }
-            for question, answer in expected_submissions.iteritems()
+            for question, answer in six.viewitems(expected_submissions)
             for peer_id in other_users
         ]
 
@@ -535,7 +536,7 @@ class BasePeerReviewStageTest(BaseReviewStageTest):
         def submit_review_items(reviewer_id, group_id, content_id, data):
             new_items = [
                 mri(reviewer_id, question_id, content_id=content_id, answer=answer, group=group_id)
-                for question_id, answer in data.iteritems()
+                for question_id, answer in six.viewitems(data)
                 if len(answer) > 0
             ]
             store[group_id].extend(new_items)
@@ -662,7 +663,7 @@ class PeerReviewStageTest(BasePeerReviewStageTest):
 
         self.project_api_mock.get_workgroup_review_items.return_value = [
             {"question": question, "answer": answer, "workgroup": TestConstants.Groups.GROUP2_ID}
-            for question, answer in expected_submissions.iteritems()
+            for question, answer in six.viewitems(expected_submissions)
         ]
 
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
@@ -722,7 +723,7 @@ class PeerReviewStageTest(BasePeerReviewStageTest):
                 "reviewer": str(reviewer_id),
                 "content_id": self.activity_id,
             }
-            for question, answer in expected_submissions.iteritems()
+            for question, answer in six.viewitems(expected_submissions)
             for group_id in workgroups_to_review
             for reviewer_id in KNOWN_USERS.keys()
         ]
@@ -818,7 +819,7 @@ class TestTAGradedPeerReview(BasePeerReviewStageTest):
         # mocking response after submitting
         self.project_api_mock.get_workgroup_review_items_for_group.return_value = [
             {"reviewer": str(user_id), "answer": answer, 'question': question, "workgroup": stage_element.form.group_id}
-            for question, answer in submissions.iteritems()
+            for question, answer in six.viewitems(submissions)
         ]
 
         with mock.patch.object(WorkbenchRuntime, 'publish') as patched_method:

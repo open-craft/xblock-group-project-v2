@@ -1,7 +1,8 @@
+import itertools
 import json
 from urllib import urlencode
 
-import itertools
+import six
 
 from group_project_v2.api_error import api_error_protect
 from group_project_v2.json_requests import DELETE, GET, PUT, POST
@@ -111,7 +112,7 @@ class ProjectAPI(object):
 
     def set_group_grade(self, group_id, course_id, activity_id, grade_value, max_grade):
         grade_data = {
-            "course_id": unicode(course_id),
+            "course_id": six.text_type(course_id),
             "content_id": activity_id,
             "grade": grade_value,
             "max_grade": max_grade,
@@ -181,7 +182,7 @@ class ProjectAPI(object):
         # get any data already there
         current_data = {pi['question']: pi for pi in
                         self.get_peer_review_items(reviewer_id, peer_id, group_id, content_id)}
-        for question_id, answer in data.iteritems():
+        for question_id, answer in six.viewitems(data):
             if question_id in current_data:
                 question_data = current_data[question_id]
 
@@ -210,7 +211,7 @@ class ProjectAPI(object):
     def submit_workgroup_review_items(self, reviewer_id, group_id, content_id, data):
         # get any data already there
         current_data = {ri['question']: ri for ri in self.get_workgroup_review_items(reviewer_id, group_id, content_id)}
-        for question_id, answer in data.iteritems():
+        for question_id, answer in six.viewitems(data):
             if question_id in current_data:
                 question_data = current_data[question_id]
 
