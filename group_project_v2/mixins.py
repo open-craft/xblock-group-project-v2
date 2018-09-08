@@ -7,6 +7,7 @@ from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.locator import BlockUsageLocator
 from xblock.fragment import Fragment
+from xblock.completable import XBlockCompletionMode
 from xblockutils.studio_editable import (
     StudioContainerWithNestedXBlocksMixin, StudioContainerXBlockMixin, StudioEditableXBlockMixin
 )
@@ -533,9 +534,14 @@ class TemplateManagerMixin(object):
         return loader.render_template(template_path, context)
 
 
+class CompletionMixin(object):
+    completion_mode = XBlockCompletionMode.EXCLUDED
+
+
 class CommonMixinCollection(
     ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin,
     StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-    WorkgroupAwareXBlockMixin, TemplateManagerMixin, SettingsMixin
+    WorkgroupAwareXBlockMixin, TemplateManagerMixin, SettingsMixin,
+    CompletionMixin,
 ):
     block_settings_key = 'group_project_v2'

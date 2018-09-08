@@ -1,12 +1,15 @@
 # pylint:disable=protected-access,no-self-use,invalid-name
+
 from unittest import TestCase
 
 import ddt
 import mock
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
+from xblock.completable import XBlockCompletionMode
 from xblock.core import XBlock
 from xblock.runtime import Runtime
 
+from group_project_v2 import app_config
 from group_project_v2.mixins import (
     ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin,
     WorkgroupAwareXBlockMixin, DashboardRootXBlockMixin,
@@ -46,6 +49,19 @@ class ChildrenNavigationXBlockMixinGuineaPig(ChildrenNavigationXBlockMixin, Comm
     @property
     def children(self):
         return None
+
+
+@ddt.ddt
+class CompletionMixinTestCase(TestCase):
+
+    @ddt.data(*app_config.PROGRESS_DETACHED_CATEGORIES)
+    def test_all_blocks_excluded_from_completion(self, blockclass):
+        xblock = XBlock.load_class(blockclass)
+        self.assertEqual(
+            XBlockCompletionMode.get_mode(xblock),
+            XBlockCompletionMode.EXCLUDED,
+            "Block {!r} did not have completion mode 'excluded'".format(xblock),
+        )
 
 
 class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
