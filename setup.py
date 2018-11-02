@@ -33,7 +33,7 @@ setup(
         'python-dateutil>=2.1,<3.0',
         'WebOb>=1.6,<2.0',
         'pytz',
-        'XBlock>=0.4,<2.0',
+        'XBlock>=1.2.2,<2.0',
         'xblock-utils>=0.9',
         'django-upload-validator>=0.1',
         'edx-opaque-keys>=0.4'

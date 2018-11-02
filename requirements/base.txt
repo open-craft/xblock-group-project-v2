@@ -6,8 +6,7 @@ WebOb<2.0
 # this guy have one major each year and you'd want to migrate ASAP, since it keeps up with all the real world timezone changes
 pytz
 
-#XBlock>=1.2.2,<2.0
-git+https://github.com/edx/XBlock@cliff/completion-get-mode#egg=XBlock==1.2.2a1
+XBlock>=1.2.2,<2.0
 
 edx-opaque-keys>=0.4.0
 django-upload-validator>=0.1
