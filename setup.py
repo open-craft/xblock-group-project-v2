@@ -35,7 +35,7 @@ setup(
         'pytz',
         'XBlock>=1.2.2,<2.0',
         'xblock-utils>=0.9',
-        'django-upload-validator>=0.1',
+        'django-upload-validator>=1.0.2',
         'edx-opaque-keys>=0.4'
     ],
     entry_points={

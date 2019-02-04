@@ -9,7 +9,7 @@ pytz
 XBlock>=1.2.2,<2.0
 
 edx-opaque-keys>=0.4.0
-django-upload-validator>=0.1
+django-upload-validator>=1.0.2
 
 -e git+https://github.com/edx/xblock-utils.git@v1.0.5#egg=xblock-utils==v1.0.5
 
