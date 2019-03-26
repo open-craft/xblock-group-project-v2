@@ -29,9 +29,11 @@ function GroupProjectNavigatorAskTAView(runtime, element) {
                 var modal = $('#generalModal');
                 modal.find('.title').html('Notification');
                 modal.find('.description').html(data.message);
-                setTimeout(function () {
-                    modal.foundation('reveal', 'open');
-                }, 350);
+                if (modal.foundation === undefined){
+                    setTimeout(function(){modal.modal('show');}, 350);
+                } else{
+                    setTimeout(function () {modal.foundation('reveal', 'open');}, 350);
+                }
             });
     });
 
