@@ -146,11 +146,14 @@ Grading," and "Grade Display."  Each one will need further content.
 In a "Text" stage, we can add HTML, which will be displayed to our learners, as well as a few other kinds of content
 blocks.  For this demo, we'll just add a single HTML snippet, as shown here.
 
-<img src="images/walkthrough7.png" width="600" alt="Added some text.">
+<img src="images/walkthrough7.png" width="600" alt="Added some text">
 
-Then, to add a stage where users upload files to complete their work, we can add a "Submission," clicking first the
-text button (then edit), then the submission button (then edit), and then the "Submissions Help Text" button (keep the
-default text).
+Clicking on "Deliverable" will add a Submission Stage where users can upload files to complete their work.
+
+<img src="images/walkthrough7a.png" width="600" alt="Adding a deliverable">
+
+In the Submission Stage, clicking "Submission" will create the submission itself. Make sure to add a "Submissions
+Help Text" as well, keeping the default instructions.
 
 <img src="images/walkthrough8.png" width="600" alt="Screenshot of the Submissions Stage">
 
