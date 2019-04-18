@@ -61,11 +61,11 @@ Available stages and their intended use:
 * `Grade Display` - this stage allows students to review their group grade and feedback received from graders. Use with
     `Peer Grading` stage.
 
-For more information, see [the detailed list of available XBlocks](/docs/XBlocks.md).
+For more information, see [the detailed list of available XBlocks](XBlocks.md).
 
 Group Project XBlock v2 uses standard Studio editing capabilities:
 
-<img src="/docs/images/studio_edit1.png" width="400" alt='Studio screenshot displaying project navigator XBlock, with outlined "View" (red outline) and "Edit" (blue outline) buttons'>
+<img src="images/studio_edit1.png" width="400" alt='Studio screenshot displaying project navigator XBlock, with outlined "View" (red outline) and "Edit" (blue outline) buttons'>
 
 * The Edit button (blue outline) is used to edit XBlock settings, i.e. "Display name", "Open Date", "Close Date", etc.
 * The View button (red outline) allows to "jump into" an XBlock and view its nested XBlocks, allowing to add,
@@ -74,7 +74,7 @@ Group Project XBlock v2 uses standard Studio editing capabilities:
 This screenshot shows the same Group Project Navigator XBlock "from the inside", displaying Project Navigator Views
 added to the navigator.
 
-<img src="/docs/images/studio_edit2.png" width="400" aria-hidden="true">
+<img src="images/studio_edit2.png" width="400" aria-hidden="true">
 
 
 ## Group Project Authoring Walkthrough
@@ -92,12 +92,12 @@ the last chapter of a course.
 
 Inside this vertical, where prompted to "Add New Component," we will select Advanced > gp-v2-project, as shown below:
 
-<img src="/docs/images/walkthrough1.png" width="600" alt="Screenshot of selecting a new group-project-v2 xblock in studio">
+<img src="images/walkthrough1.png" width="600" alt="Screenshot of selecting a new group-project-v2 xblock in studio">
 
 When the module is first created, it will display a warning that says "This component has validation issues."  This is
 expected.  Once we have filled out the structure of the Group Project module, the warning will go away.
 
-<img src="/docs/images/walkthrough2.png" width="600" alt="Screenshot of newly created group-project-v2 xblock, with validation warning">
+<img src="images/walkthrough2.png" width="600" alt="Screenshot of newly created group-project-v2 xblock, with validation warning">
 
 The first thing we will do is give our module a name: Select "Edit" on the "Group Project V2" line, and change the
 display name to "Walkthrough Project", and click save.
@@ -111,7 +111,7 @@ then an activity, and finally, a section for class discussions
 Here we see more details about the validation problems mentioned earlier:
 "Group Project must contain Project Navigator Block."
 
-<img src="/docs/images/walkthrough3.png" width="600" alt="Screenshot of the edit page for an empty gp-v2-project">
+<img src="images/walkthrough3.png" width="600" alt="Screenshot of the edit page for an empty gp-v2-project">
 
 So let's resolve that now, by adding a new "Group Project Navigator" component.  elect the button of that name from the
 "Add New Component" section, then click `View ->` to add content to the navigation section.  Here we are given several
@@ -122,7 +122,7 @@ them.  "Submissions View" will let them see activities that they have submitted.
 "Private Discussion View" components will give learners a place to interact with their course staff and with each other
 respectively.  The "Private Discussion View" now has a validation issue, but this will be resolved later.
 
-<img src="/docs/images/walkthrough4.png" width="600" alt="Screenshot of the Group Project Navigator Page, after adding all components">
+<img src="images/walkthrough4.png" width="600" alt="Screenshot of the Group Project Navigator Page, after adding all components">
 
 That concludes our setup of the navigation section.  Now we will add some content to the group project.
 
@@ -135,25 +135,24 @@ one or more stages required to complete the activity.
 To get started, select the "Group Project Activity" button under "Add New Component.  The screen will now look like
 this:
 
-<img src="/docs/images/walkthrough5.png" width="600" alt="Screenshot of the Group Project edit page, with a new Activity">
+<img src="images/walkthrough5.png" width="600" alt="Screenshot of the Group Project edit page, with a new Activity">
 
 Now select `View->` in the new "Group Project Activity" panel to begin adding content to the activity.  The components
 we can add to an activity are called "stages."  We will add four stages to our activity: "Text," "Deliverable," "Peer
 Grading," and "Grade Display."  Each one will need further content.
 
-<img src"/docs/images/walkthrough6.png" width="600" alt="Screenshot of the Activity page, with stages added">
+<img src="images/walkthrough6.png" width="600" alt="Screenshot of the Activity page, with stages added">
 
 In a "Text" stage, we can add HTML, which will be displayed to our learners, as well as a few other kinds of content
 blocks.  For this demo, we'll just add a single HTML snippet, as shown here.
 
-<img src"/docs/images/walkthrough7.png" width="600" alt="Added some text.">
-
+<img src="images/walkthrough7.png" width="600" alt="Added some text.">
 
 Then, to add a stage where users upload files to complete their work, we can add a "Submission," clicking first the
 text button (then edit), then the submission button (then edit), and then the "Submissions Help Text" button (keep the
 default text).
 
-<img src"/docs/images/walkthrough8.png" width="600" alt="Screenshot of the Submissions Stage">
+<img src="images/walkthrough8.png" width="600" alt="Screenshot of the Submissions Stage">
 
 Next we will edit the "Peer Grading Stage."  Again, there are a number of possible components we can add, but we will
 just add the two required ones:  There must be at least one "Review Question," and one "Group Selector."  The Group
@@ -161,14 +160,14 @@ Selector doesn't require any customization.  Simply adding it is enough.  We wil
 Question, and add the question in shortest form to "Question Text" and "Assessment Question Text," and in extended
 form, with explanatory content in "Question Content."  We will also set "Required" to True and "Graded" to True.
 
-<img src"/docs/images/walkthrough9.png" width="600" alt="Screenshot of a Peer Grading Section">
+<img src="images/walkthrough9.png" width="600" alt="Screenshot of a Peer Grading Section">
 
 Then we will update the "Grade Display Stage."  Here we provide a page for learners to review their performance on
 earlier assessments.  Since we only had one question in our group activity, we will add a single "Review Assessment"
 component here.  Once you have added it, select "Edit", and update "Question ID" to point to the question you created
 earlier.  If we had more than one question in our Group Project, we could add multiple review components here.
 
-<img src"/docs/images/walkthrough10.png" width="600" alt="Screenshot of the Grade Display Stage">
+<img src="images/walkthrough10.png" width="600" alt="Screenshot of the Grade Display Stage">
 
 That concludes the creation of our Group Activity.
 
@@ -181,7 +180,7 @@ the example project the breadcrumbs show up as "Group Project (v2) / Subsection 
 followed by other sections depending on where we are in the project.  Scroll down past the Group Project Navigator, and
 past the Group Project Activity, and add a new "Discussion" component.
 
-<img src"/docs/images/walkthrough11.png" width="600" alt="Screenshot of adding a Discussion component to the Group Project">
+<img src="images/walkthrough11.png" width="600" alt="Screenshot of adding a Discussion component to the Group Project">
 
 That's all you need to do.  If you like, you can rename the discussion section or add it to a particular category or
 subcategory, but this is entirely optional. Click `View ->` again on the Group Project Navigator above, and verify that
@@ -190,7 +189,7 @@ there is no longer a Validation error on the Private Discussion View.
 Finally, navigate back up to the level above "Walkthrough Project," which we called "Group Work."  Select Publish to
 make your Group Project available to your students.
 
-<img src"/docs/images/walkthrough12.png" width="600" alt="Screenshot of the Group Work vertical, where we can publish our Group Project.">
+<img src="images/walkthrough12.png" width="600" alt="Screenshot of the Group Work vertical, where we can publish our Group Project.">
 
 Congratulations!  You've created your first Group Project.
 
