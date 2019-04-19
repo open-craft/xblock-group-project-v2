@@ -19,35 +19,22 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, XBlockWithPre
 from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import (
-    CompletionMixin,
-    NoStudioEditableSettingsMixin,
-    UserAwareXBlockMixin,
-    WorkgroupAwareXBlockMixin,
+    WorkgroupAwareXBlockMixin, NoStudioEditableSettingsMixin, UserAwareXBlockMixin
 )
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
+from group_project_v2.utils import get_link_to_block, FieldValuesContextManager, MUST_BE_OVERRIDDEN, add_resource, \
+    make_user_caption
 from group_project_v2.utils import (
-    FieldValuesContextManager,
-    MUST_BE_OVERRIDDEN,
-    add_resource,
-    get_link_to_block,
-    make_user_caption,
-)
-from group_project_v2.utils import (
-    build_date_field,
-    format_date,
-    gettext as _,
-    groupwork_protected_view,
-    loader,
-    mean,
-    outer_html,
+    outer_html, gettext as _, loader, format_date, build_date_field, mean,
+    groupwork_protected_view
 )
 
 log = logging.getLogger(__name__)
 
 
-class BaseStageComponentXBlock(CompletionMixin, XBlock):
+class BaseStageComponentXBlock(XBlock):
     @lazy
     def stage(self):
         """

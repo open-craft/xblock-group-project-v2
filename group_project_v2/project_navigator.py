@@ -10,28 +10,16 @@ from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import (
-    NestedXBlockSpec,
-    StudioContainerXBlockMixin,
-    StudioEditableXBlockMixin,
-    XBlockWithPreviewMixin,
+    StudioContainerXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin, NestedXBlockSpec
 )
 
 from group_project_v2 import messages
 from group_project_v2.mixins import (
-    AdminAccessControlXBlockMixin,
-    ChildrenNavigationXBlockMixin,
-    CompletionMixin,
-    NoStudioEditableSettingsMixin,
-    XBlockWithComponentsMixin,
-    XBlockWithUrlNameDisplayMixin,
+    XBlockWithComponentsMixin, ChildrenNavigationXBlockMixin,
+    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin, NoStudioEditableSettingsMixin,
 )
 
-from group_project_v2.utils import (
-    DiscussionXBlockShim,
-    add_resource,
-    gettext as _,
-    loader,
-)
+from group_project_v2.utils import loader, gettext as _, DiscussionXBlockShim, add_resource
 
 log = logging.getLogger(__name__)
 
@@ -48,13 +36,8 @@ class ViewTypes(object):
 
 
 class GroupProjectNavigatorXBlock(
-    ChildrenNavigationXBlockMixin,
-    XBlockWithComponentsMixin,
-    XBlockWithPreviewMixin,
-    NoStudioEditableSettingsMixin,
-    StudioContainerXBlockMixin,
-    CompletionMixin,
-    XBlock
+    ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin, XBlockWithPreviewMixin,
+    NoStudioEditableSettingsMixin, StudioContainerXBlockMixin, XBlock
 ):
     """
     XBlock that provides basic layout and switching between children XBlocks (views)
@@ -179,12 +162,8 @@ class GroupProjectNavigatorXBlock(
 
 
 class ProjectNavigatorViewXBlockBase(
-    CompletionMixin,
-    XBlockWithPreviewMixin,
-    StudioEditableXBlockMixin,
-    XBlockWithUrlNameDisplayMixin,
-    AdminAccessControlXBlockMixin,
-    XBlock,  # Moved from start.  Mixins usually come first.
+    XBlock, XBlockWithPreviewMixin, StudioEditableXBlockMixin, XBlockWithUrlNameDisplayMixin,
+    AdminAccessControlXBlockMixin
 ):
     """
     Base class for Project Navigator children XBlocks (views)
