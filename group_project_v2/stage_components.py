@@ -263,7 +263,7 @@ class GroupProjectSubmissionXBlock(
             return None
 
         document_signed_url = make_s3_link_temporary(
-            submission_data['workgroup'],
+            submission_data.get('workgroup'),
             submission_data['document_url'].split('/')[-2],
             submission_data['document_filename'],
             submission_data["document_url"]

@@ -9,7 +9,6 @@ from collections import namedtuple
 from datetime import date, datetime, timedelta
 import xml.etree.ElementTree as ET
 from django.conf import settings
-from storages.backends.s3boto import S3BotoStorage
 
 from dateutil import parser
 from django.template.defaulttags import register
