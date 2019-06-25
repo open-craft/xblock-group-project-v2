@@ -157,7 +157,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
         self.block.upload_id = upload_id
         self.project_api_mock.get_latest_workgroup_submissions_by_id.return_value = {
             upload_id: {
-                "document_url": 'some_url',
+                "document_url": 'https://dummy.s3.amazonaws.com/1/123123123/some_name.pdf',
                 "document_filename": 'some_filename',
                 "modified": upload_datetime.strftime('%Y-%m-%dT%H:%M:%SZ'),
                 "user_details": {"id": 1, "name": 'qwe'}
