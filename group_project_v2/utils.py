@@ -363,6 +363,16 @@ def is_absolute(url):
 
 
 def make_s3_link_temporary(group_id, file_sha1, file_name, file_url):
+    """
+    It will pre-sign url so that it can be accessible for limited time period
+    i,e: S3_FILE_URL_TIMEOUT publicly.
+
+    :param group_id: Workgroup
+    :param file_sha1: Calculated when file is uploaded and append to its url
+    :param file_name: name of the uploaded file
+    :param file_url: URL of the file to return the storage is not s3.
+    :return: URL to be sent to user
+    """
 
     if settings.DEFAULT_FILE_STORAGE == 'storages.backends.s3boto.S3BotoStorage':
         s3_client = boto3.client(
