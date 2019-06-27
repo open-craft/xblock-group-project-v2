@@ -14,6 +14,7 @@ from dateutil import parser
 from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
 from lazy.lazy import lazy
+from storages.backends.s3boto import S3BotoStorage
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 
@@ -362,6 +363,24 @@ def is_absolute(url):
     return bool(urlparse.urlparse(url).netloc)
 
 
+class PrivateMediaStorage(S3BotoStorage):
+    """
+    S3 storage class to use for private files. URLs with expiry times
+    are generated to access files and files are saved with S3 provided
+    encryption
+    """
+    default_acl = 'private'
+    file_overwrite = False
+    custom_domain = False
+    querystring_auth = True
+    gzip = True
+    encryption = True
+
+    def __init__(self, url_expiry_time=None):
+        super(PrivateMediaStorage, self).__init__(
+            querystring_expire=url_expiry_time or self.querystring_expire
+        )
+
 def make_s3_link_temporary(group_id, file_sha1, file_name, file_url):
     """
     It will pre-sign url so that it can be accessible for limited time period
@@ -395,3 +414,4 @@ def make_s3_link_temporary(group_id, file_sha1, file_name, file_url):
         return signed_url
     else:
         return file_url
+
