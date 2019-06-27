@@ -39,7 +39,8 @@ setup(
         'edx-opaque-keys>=0.4',
         'boto>=2.1.0',
         'boto3==1.9.173',
-        'google-compute-engine==2.8.13'
+        'google-compute-engine==2.8.13',
+        'django-storages==1.6.6'
     ],
     entry_points={
         'xblock.v1': ENTRYPOINTS
