@@ -33,6 +33,7 @@ from group_project_v2.utils import (
     add_resource,
     get_link_to_block,
     make_user_caption,
+    make_s3_link_temporary,
 )
 from group_project_v2.utils import (
     build_date_field,
@@ -261,8 +262,15 @@ class GroupProjectSubmissionXBlock(
         if submission_data is None:
             return None
 
+        document_signed_url = make_s3_link_temporary(
+            submission_data.get('workgroup'),
+            submission_data['document_url'].split('/')[-2],
+            submission_data['document_filename'],
+            submission_data["document_url"]
+        )
+
         return SubmissionUpload(
-            submission_data["document_url"],
+            document_signed_url,
             submission_data["document_filename"],
             format_date(build_date_field(submission_data["modified"])),
             submission_data.get("user_details", None)
@@ -342,7 +350,14 @@ class GroupProjectSubmissionXBlock(
                     target_activity, context, request.params[self.upload_id].file
                 )
 
-                response_data["submissions"] = {uploaded_file.submission_id: uploaded_file.file_url}
+                response_data["submissions"] = {
+                    uploaded_file.submission_id: make_s3_link_temporary(
+                        uploaded_file.group_id,
+                        uploaded_file.sha1,
+                        uploaded_file.file.name,
+                        uploaded_file.file_url,
+                    )
+                }
 
                 self.stage.check_submissions_and_mark_complete()
                 response_data["new_stage_states"] = [self.stage.get_new_stage_state_data()]

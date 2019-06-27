@@ -7,6 +7,7 @@ from django.core.files import File
 from django.core.files.storage import default_storage
 from django.conf import settings
 
+from group_project_v2.utils import get_storage
 
 log = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ class UploadFile(object):
 
         self.submission_id = submission_id
         self.project_context = project_context
+        self.storage = get_storage()
 
     def _get_project_context_key(self, key):
         return self.project_context[key]
@@ -62,7 +64,7 @@ class UploadFile(object):
         path = self.file_storage_path
 
         try:
-            location = default_storage.url(path)
+            location = self.storage.url(path)
         except NotImplementedError:
             location = "file:///{}/{}".format(settings.BASE_DIR, default_storage.path(path))
 
@@ -74,9 +76,10 @@ class UploadFile(object):
 
     def save_file(self):
         path = self.file_storage_path
-        if not default_storage.exists(path):
+
+        if not self.storage.exists(path):
             log.debug("Storing to %s", path)
-            default_storage.save(path, File(self.file))
+            self.storage.save(path, File(self.file))
             log.debug("Successfully stored file to %s", path)
         else:
             log.debug("File already stored at %s", path)

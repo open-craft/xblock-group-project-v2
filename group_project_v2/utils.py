@@ -3,19 +3,26 @@ import csv
 import functools
 import logging
 import urlparse
+import boto3
 from collections import namedtuple
 
 from datetime import date, datetime, timedelta
 import xml.etree.ElementTree as ET
+from django.conf import settings
 
 from dateutil import parser
 from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
+from django.core.files.storage import default_storage
 from lazy.lazy import lazy
+from storages.backends.s3boto import S3BotoStorage
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 
 DEFAULT_EXPIRATION_TIME = timedelta(seconds=10)
+
+S3_FILE_URL_TIMEOUT = 60 * 30
+
 
 log = logging.getLogger(__name__)
 loader = ResourceLoader(__name__)
@@ -355,3 +362,68 @@ def is_absolute(url):
     Returns a boolean value indicating if given `url` is absolute or not.
     """
     return bool(urlparse.urlparse(url).netloc)
+
+
+class PrivateMediaStorage(S3BotoStorage):
+    """
+    S3 storage class to use for private files. URLs with expiry times
+    are generated to access files and files are saved with S3 provided
+    encryption
+    """
+    # pylint: disable=W0223
+    default_acl = 'private'
+    file_overwrite = False
+    custom_domain = False
+    querystring_auth = True
+    gzip = True
+    encryption = True
+
+    def __init__(self, url_expiry_time=None):
+        super(PrivateMediaStorage, self).__init__(
+            querystring_expire=url_expiry_time or self.querystring_expire
+        )
+
+
+def make_s3_link_temporary(group_id, file_sha1, file_name, file_url):
+    """
+    It will pre-sign url so that it can be accessible for limited time period
+    i,e: S3_FILE_URL_TIMEOUT publicly.
+
+    :param group_id: Workgroup
+    :param file_sha1: Calculated when file is uploaded and append to its url
+    :param file_name: name of the uploaded file
+    :param file_url: URL of the file to return the storage is not s3.
+    :return: URL to be sent to user
+    """
+
+    if settings.DEFAULT_FILE_STORAGE == 'storages.backends.s3boto.S3BotoStorage':
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+        )
+        signed_url = s3_client.generate_presigned_url(
+            ClientMethod='get_object',
+            ExpiresIn=S3_FILE_URL_TIMEOUT,
+            Params={
+                'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+                'Key': "group_work/{}/{}/{}".format(
+                    group_id,
+                    file_sha1,
+                    file_name
+                )
+            }
+        )
+        return signed_url
+    else:
+        return file_url
+
+
+def get_storage():
+    """
+    Return private storage if default is s3
+    """
+    if settings.DEFAULT_FILE_STORAGE == 'storages.backends.s3boto.S3BotoStorage':
+        return PrivateMediaStorage()
+
+    return default_storage
