@@ -13,6 +13,7 @@ from django.conf import settings
 from dateutil import parser
 from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
+from django.core.files.storage import default_storage
 from lazy.lazy import lazy
 from storages.backends.s3boto import S3BotoStorage
 from xblock.fragment import Fragment
@@ -369,6 +370,7 @@ class PrivateMediaStorage(S3BotoStorage):
     are generated to access files and files are saved with S3 provided
     encryption
     """
+    # pylint: disable=W0223
     default_acl = 'private'
     file_overwrite = False
     custom_domain = False
@@ -380,6 +382,7 @@ class PrivateMediaStorage(S3BotoStorage):
         super(PrivateMediaStorage, self).__init__(
             querystring_expire=url_expiry_time or self.querystring_expire
         )
+
 
 def make_s3_link_temporary(group_id, file_sha1, file_name, file_url):
     """
@@ -415,3 +418,12 @@ def make_s3_link_temporary(group_id, file_sha1, file_name, file_url):
     else:
         return file_url
 
+
+def get_storage():
+    """
+    Return private storage if default is s3
+    """
+    if settings.DEFAULT_FILE_STORAGE == 'storages.backends.s3boto.S3BotoStorage':
+        return PrivateMediaStorage()
+
+    return default_storage

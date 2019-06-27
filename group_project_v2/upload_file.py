@@ -7,8 +7,7 @@ from django.core.files import File
 from django.core.files.storage import default_storage
 from django.conf import settings
 
-from group_project_v2.utils import PrivateMediaStorage
-
+from group_project_v2.utils import get_storage
 
 log = logging.getLogger(__name__)
 
@@ -23,6 +22,7 @@ class UploadFile(object):
 
         self.submission_id = submission_id
         self.project_context = project_context
+        self.storage = get_storage()
 
     def _get_project_context_key(self, key):
         return self.project_context[key]
@@ -73,16 +73,6 @@ class UploadFile(object):
     @property
     def file_storage_path(self):
         return "group_work/{}/{}/{}".format(self.group_id, self.sha1, self.file.name)
-
-    @property
-    def storage(self):
-        """
-        Return private storage if default is s3
-        """
-        if settings.DEFAULT_FILE_STORAGE == 'storages.backends.s3boto.S3BotoStorage':
-            return PrivateMediaStorage()
-
-        return default_storage
 
     def save_file(self):
         path = self.file_storage_path
