@@ -24,7 +24,7 @@ def package_data(pkg, root_list):
 
 setup(
     name='xblock-group-project-v2',
-    version='0.5',
+    version='0.5.1',
     description='XBlock - Group Project V2',
     packages=find_packages(),
     install_requires=[
@@ -40,7 +40,7 @@ setup(
         'boto>=2.1.0',
         'boto3==1.9.173',
         'google-compute-engine==2.8.13',
-        'django-storages==1.6.6'
+        'django-storages==1.4.1'
     ],
     entry_points={
         'xblock.v1': ENTRYPOINTS
