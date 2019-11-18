@@ -24,7 +24,7 @@ def package_data(pkg, root_list):
 
 setup(
     name='xblock-group-project-v2',
-    version='0.5.1',
+    version='0.6.0',
     description='XBlock - Group Project V2',
     packages=find_packages(),
     install_requires=[
@@ -38,7 +38,7 @@ setup(
         'django-upload-validator==1.0.2',
         'edx-opaque-keys>=0.4',
         'boto>=2.1.0',
-        'boto3==1.9.173',
+        'boto3==1.4.8',
         'google-compute-engine==2.8.13',
         'django-storages==1.4.1'
     ],
