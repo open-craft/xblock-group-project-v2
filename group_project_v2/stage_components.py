@@ -112,10 +112,11 @@ class GroupProjectVideoResourceXBlock(BaseGroupProjectResourceXBlock):
     CATEGORY = "gp-v2-video-resource"
     STUDIO_LABEL = _(u"Video Resource")
     PROJECT_NAVIGATOR_VIEW_TEMPLATE = 'templates/html/components/video_resource.html'
+    BRIGHTCOVE_ACCOUNT_ID = '6057949416001'
 
     video_id = String(
-        display_name=_(u"Ooyala content ID"),
-        help=_(u"This is the Ooyala Content Identifier"),
+        display_name=_(u"Ooyala/Brightcove content ID"),
+        help=_(u"This is the Ooyala/Brightcove Content Identifier"),
         default="Q1eXg5NzpKqUUzBm5WTIb6bXuiWHrRMi",
         scope=Scope.content,
     )
@@ -126,10 +127,28 @@ class GroupProjectVideoResourceXBlock(BaseGroupProjectResourceXBlock):
     def is_available(cls):
         return True  # TODO: restore conditional availability when switched to use actual Ooyala XBlock
 
+    @property
+    def video_type(self):
+        """
+        Checks if video_id belongs to Brightcove or Ooyala
+        """
+        try:
+            # Brightcove IDs are numeric
+            int(self.video_id)
+            return 'brightcove'
+        except (ValueError, TypeError):
+            return 'ooyala'
+
     def resources_view(self, context):
-        render_context = {'video_id': self.video_id}
+        render_context = {
+            'video_id': self.video_id,
+            'player_type': self.video_type,
+            'bc_account_id': self.BRIGHTCOVE_ACCOUNT_ID,
+        }
         render_context.update(context)
         fragment = super(GroupProjectVideoResourceXBlock, self).resources_view(render_context)
+        fragment.add_javascript_url(url='//players.brightcove.net/{}/default_default/index.min.js'
+                                .format(self.BRIGHTCOVE_ACCOUNT_ID))
         return fragment
 
     def author_view(self, context):

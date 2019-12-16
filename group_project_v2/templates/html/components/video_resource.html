@@ -1,3 +1,29 @@
 <div class="resource_link">
-  <a href="#" class="group-project-video-resource" data-video-id="{{ video_id }}">{{ resource.display_name }}</a>{% if resource.description %}: {{ resource.description }}{% endif %}
+  <a
+    href="#"
+    class="group-project-video-resource"
+    data-player-type="{{ player_type }}"
+    data-video-id="{{ video_id }}">
+    {{ resource.display_name }}
+  </a>{% if resource.description %}: {{ resource.description }}{% endif %}
 </div>
+<div class="player-modal reveal-modal medium">
+    <div class="close-reveal-modal">
+      <span class="fa fa-times-circle"></span>
+    </div>
+    <div class="player-wrapper">
+      {% if player_type == 'brightcove' %}
+      <video-js
+          id="video-resource-{{ video_id }}"
+          data-account="{{ bc_account_id }}"
+          data-video-id="{{ video_id }}"
+          data-player="default"
+          data-embed="default"
+          controls=""
+          playsinline=""
+          width="360px" height="200px">
+      </video-js>
+      {% endif %}
+    </div>
+</div>
+<div class="player-modal-bg"></div>
