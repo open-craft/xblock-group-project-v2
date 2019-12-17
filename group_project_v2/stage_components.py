@@ -148,7 +148,7 @@ class GroupProjectVideoResourceXBlock(BaseGroupProjectResourceXBlock):
         render_context.update(context)
         fragment = super(GroupProjectVideoResourceXBlock, self).resources_view(render_context)
         fragment.add_javascript_url(url='//players.brightcove.net/{}/default_default/index.min.js'
-                                .format(self.BRIGHTCOVE_ACCOUNT_ID))
+                                    .format(self.BRIGHTCOVE_ACCOUNT_ID))
         return fragment
 
     def author_view(self, context):
