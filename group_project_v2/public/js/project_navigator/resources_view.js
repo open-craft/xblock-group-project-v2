@@ -1,4 +1,5 @@
 /* global OO */
+/* global videojs */
 /* exported GroupProjectNavigatorResourcesView */
 function GroupProjectNavigatorResourcesView(runtime, element) {
     "use strict";
@@ -31,8 +32,9 @@ function GroupProjectNavigatorResourcesView(runtime, element) {
             });
             showPlayer();
         }else if(playerType === 'ooyala'){
-            if (typeof OO === 'undefined') 
+            if (typeof OO === 'undefined'){ 
                 return;
+            }
         
             player.append($('<div id="'+ooyala_player_target_element_id+'"/>'));
             var parameters = {width: '100%', height: '100%', autoplay: true};
