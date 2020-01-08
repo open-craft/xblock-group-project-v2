@@ -127,8 +127,8 @@ class GroupProjectVideoResourceXBlock(BaseGroupProjectResourceXBlock):
     def is_available(cls):
         return True  # TODO: restore conditional availability when switched to use actual Ooyala XBlock
 
-    @property
-    def brightcove_account_id(self):
+    @classmethod
+    def brightcove_account_id(cls):
         """
         Gets bcove account id from settings
         """
@@ -151,12 +151,12 @@ class GroupProjectVideoResourceXBlock(BaseGroupProjectResourceXBlock):
         render_context = {
             'video_id': self.video_id,
             'player_type': self.video_type,
-            'bc_account_id': self.brightcove_account_id,
+            'bc_account_id': self.brightcove_account_id(),
         }
         render_context.update(context)
         fragment = super(GroupProjectVideoResourceXBlock, self).resources_view(render_context)
         fragment.add_javascript_url(url='//players.brightcove.net/{}/default_default/index.min.js'
-                                    .format(self.brightcove_account_id))
+                                    .format(self.brightcove_account_id()))
         return fragment
 
     def author_view(self, context):
