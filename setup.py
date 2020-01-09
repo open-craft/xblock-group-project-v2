@@ -24,7 +24,7 @@ def package_data(pkg, root_list):
 
 setup(
     name='xblock-group-project-v2',
-    version='0.6.0',
+    version='0.7.0',
     description='XBlock - Group Project V2',
     packages=find_packages(),
     install_requires=[
