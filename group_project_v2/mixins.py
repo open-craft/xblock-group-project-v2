@@ -6,7 +6,7 @@ import itertools
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.locator import BlockUsageLocator
-from xblock.fragment import Fragment
+from web_fragments.fragment import Fragment
 from xblock.completable import XBlockCompletionMode
 from xblockutils.studio_editable import (
     StudioContainerWithNestedXBlocksMixin, StudioContainerXBlockMixin, StudioEditableXBlockMixin

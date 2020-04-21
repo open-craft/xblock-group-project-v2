@@ -1,7 +1,7 @@
 import logging
 from xblock.core import XBlock
 from xblock.fields import String, Scope
-from xblock.fragment import Fragment
+from web_fragments.fragment import Fragment
 from xblock.validation import ValidationMessage
 
 from group_project_v2 import messages
@@ -183,7 +183,7 @@ class SubmissionStage(BaseGroupActivityStage):
         submission_contents = []
         for submission in self.submissions:
             submission_fragment = submission.render(child_view, context)
-            fragment.add_frag_resources(submission_fragment)
+            fragment.add_fragment_resources(submission_fragment)
             submission_contents.append(submission_fragment.content)
 
         context = {'stage': self, 'submission_contents': submission_contents}

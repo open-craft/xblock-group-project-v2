@@ -6,7 +6,7 @@ from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from xblock.core import XBlock
 from xblock.exceptions import NoSuchUsage
-from xblock.fragment import Fragment
+from web_fragments.fragment import Fragment
 from xblock.validation import ValidationMessage
 
 from xblockutils.studio_editable import (
@@ -123,14 +123,14 @@ class GroupProjectNavigatorXBlock(
             if not view.skip_content:
                 child_fragment = view.render('student_view', context)
                 item['content'] = child_fragment.content
-                fragment.add_frag_resources(child_fragment)
+                fragment.add_fragment_resources(child_fragment)
             else:
                 item['content'] = ''
 
             if not view.skip_selector:
                 child_selector_fragment = view.render('selector_view', context)
                 item['selector'] = child_selector_fragment.content
-                fragment.add_frag_resources(child_selector_fragment)
+                fragment.add_fragment_resources(child_selector_fragment)
             else:
                 item['selector'] = ''
 
@@ -159,7 +159,7 @@ class GroupProjectNavigatorXBlock(
         children_contents = []
         for child in self._children:
             child_fragment = child.render('preview_view', context)
-            fragment.add_frag_resources(child_fragment)
+            fragment.add_fragment_resources(child_fragment)
             children_contents.append(child_fragment.content)
 
         fragment.add_content(loader.render_template(
@@ -263,7 +263,7 @@ class ProjectNavigatorViewXBlockBase(
 
         if add_resources_from:
             for frag in add_resources_from:
-                fragment.add_frag_resources(frag)
+                fragment.add_fragment_resources(frag)
 
         return fragment
 
@@ -274,7 +274,7 @@ class ProjectNavigatorViewXBlockBase(
         fragment = Fragment(self.display_name_with_default)
         url_name_fragment = self.get_url_name_fragment(self.url_name_caption)
         fragment.add_content(url_name_fragment.content)
-        fragment.add_frag_resources(url_name_fragment)
+        fragment.add_fragment_resources(url_name_fragment)
         return fragment
 
     def selector_view(self, _context):

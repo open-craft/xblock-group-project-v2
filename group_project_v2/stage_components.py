@@ -13,7 +13,7 @@ from lazy.lazy import lazy
 from upload_validator import FileTypeValidator
 from xblock.core import XBlock
 from xblock.fields import String, Boolean, Scope, UNIQUE_ID
-from xblock.fragment import Fragment
+from web_fragments.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin, XBlockWithPreviewMixin
 
