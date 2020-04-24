@@ -16,7 +16,7 @@ from django.utils.safestring import mark_safe
 from django.core.files.storage import default_storage
 from lazy.lazy import lazy
 from storages.backends.s3boto import S3BotoStorage
-from xblock.fragment import Fragment
+from web_fragments.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 
 DEFAULT_EXPIRATION_TIME = timedelta(seconds=10)

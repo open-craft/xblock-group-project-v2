@@ -10,7 +10,7 @@ from opaque_keys import InvalidKeyError
 from xblock.core import XBlock
 from xblock.exceptions import NoSuchUsage
 from xblock.fields import Scope, String, Float, Integer, DateTime
-from xblock.fragment import Fragment
+from web_fragments.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import XBlockWithPreviewMixin, NestedXBlockSpec
 
@@ -139,7 +139,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
             child_fragment = self._render_child_fragment_with_fallback(
                 child, internal_context, fallback_message, 'student_view'
             )
-            fragment.add_frag_resources(child_fragment)
+            fragment.add_fragment_resources(child_fragment)
             render_context[content_key] = child_fragment.content
 
         target_block_id = self.get_block_id_from_string(ctx.get(Constants.ACTIVATE_BLOCK_ID_PARAMETER_NAME, None))
@@ -184,7 +184,8 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
 
         activity_fragments = self._render_children('dashboard_view', children_context, self.activities)
         activity_contents = [frag.content for frag in activity_fragments]
-        fragment.add_frags_resources(activity_fragments)
+        for activity_fragment in activity_fragments:
+            fragment.add_fragment_resources(activity_fragment)
 
         render_context = {'project': self, 'activity_contents': activity_contents}
         fragment.add_content(self.render_template('dashboard_view', render_context))
@@ -218,7 +219,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
             target_activity, ctx, messages.NO_ACTIVITIES, view='dashboard_detail_view'
         )
         render_context['activity_content'] = activity_fragment.content
-        fragment.add_frag_resources(activity_fragment)
+        fragment.add_fragment_resources(activity_fragment)
 
         fragment.add_content(self.render_template('dashboard_detail_view', render_context))
         add_resource(self, 'css', 'public/css/group_project_common.css', fragment)
@@ -501,7 +502,7 @@ class GroupActivityXBlock(
             fragment.add_content(messages.NO_STAGES)
         else:
             stage_fragment = target_stage.render('student_view', context)
-            fragment.add_frag_resources(stage_fragment)
+            fragment.add_fragment_resources(stage_fragment)
             render_context = {
                 'activity': self,
                 'stage_content': stage_fragment.content,
@@ -520,7 +521,8 @@ class GroupActivityXBlock(
 
         stage_fragments = self._render_children('navigation_view', children_context, self.available_stages)
         stage_contents = [frag.content for frag in stage_fragments]
-        fragment.add_frags_resources(stage_fragments)
+        for stage_fragment in stage_fragments:
+            fragment.add_fragment_resources(stage_fragment)
 
         render_context = {'activity': self, 'stage_contents': stage_contents}
         fragment.add_content(self.render_template('navigation_view', render_context))
@@ -536,7 +538,8 @@ class GroupActivityXBlock(
 
         resource_fragments = self._render_children('resources_view', context, resources)
         resource_contents = [frag.content for frag in resource_fragments]
-        fragment.add_frags_resources(resource_fragments)
+        for resource_fragment in resource_fragments:
+            fragment.add_fragment_resources(resource_fragment)
 
         render_context = {'activity': self, 'resource_contents': resource_contents, 'has_resources': has_resources}
         fragment.add_content(self.render_template('resources_view', render_context))
@@ -556,7 +559,8 @@ class GroupActivityXBlock(
 
         submission_fragments = self._render_children('submissions_view', context, submissions)
         submission_contents = [frag.content for frag in submission_fragments]
-        fragment.add_frags_resources(submission_fragments)
+        for submission_fragment in submission_fragments:
+            fragment.add_fragment_resources(submission_fragment)
 
         render_context = {
             'activity': self, 'submission_contents': submission_contents, 'has_submissions': has_submissions
@@ -574,7 +578,8 @@ class GroupActivityXBlock(
 
         stage_fragments = self._render_children('dashboard_view', children_context, self.stages)
         stage_contents = [frag.content for frag in stage_fragments]
-        fragment.add_frags_resources(stage_fragments)
+        for stage_fragment in stage_fragments:
+            fragment.add_fragment_resources(stage_fragment)
 
         render_context = {'activity': self, 'stage_contents': stage_contents}
         fragment.add_content(self.render_template('dashboard_view', render_context))
@@ -598,7 +603,7 @@ class GroupActivityXBlock(
             if not stage.shown_on_detail_view:
                 continue
             stage_fragment = stage.render('dashboard_detail_view', children_context)
-            stage_fragment.add_frag_resources(fragment)
+            stage_fragment.add_fragment_resources(fragment)
             stages.append({"id": stage.id, 'content': stage_fragment.content})
             stage_stats[stage.id] = self._get_stage_completion_details(stage, target_workgroups, target_users)
 

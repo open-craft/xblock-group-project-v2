@@ -6,7 +6,7 @@ from lazy.lazy import lazy
 import pytz
 from xblock.core import XBlock
 from xblock.fields import DateTime, Scope, Boolean
-from xblock.fragment import Fragment
+from web_fragments.fragment import Fragment
 from xblockutils.studio_editable import XBlockWithPreviewMixin
 
 from group_project_v2 import messages
@@ -213,7 +213,7 @@ class BaseGroupActivityStage(
         stage_fragment = self.get_stage_content_fragment(context, view)
 
         fragment = Fragment()
-        fragment.add_frag_resources(stage_fragment)
+        fragment.add_fragment_resources(stage_fragment)
         render_context = {
             'stage': self, 'stage_content': stage_fragment.content,
             "ta_graded": self.activity.group_reviews_required_count
@@ -234,7 +234,7 @@ class BaseGroupActivityStage(
         fragment = self._view_render(context, "preview_view")
         url_name_fragment = self.get_url_name_fragment(self.url_name_caption)
         fragment.add_content(url_name_fragment.content)
-        fragment.add_frag_resources(url_name_fragment)
+        fragment.add_fragment_resources(url_name_fragment)
         return fragment
 
     @groupwork_protected_view
@@ -242,7 +242,7 @@ class BaseGroupActivityStage(
         fragment = super(BaseGroupActivityStage, self).author_edit_view(context)
         url_name_fragment = self.get_url_name_fragment(self.url_name_caption)
         fragment.add_content(url_name_fragment.content)
-        fragment.add_frag_resources(url_name_fragment)
+        fragment.add_fragment_resources(url_name_fragment)
         return fragment
 
     def render_children_fragments(self, context, view='student_view'):
@@ -262,7 +262,7 @@ class BaseGroupActivityStage(
         }
 
         for frag in children_fragments:
-            fragment.add_frag_resources(frag)
+            fragment.add_fragment_resources(frag)
 
         render_context.update(context)
         fragment.add_content(loader.render_template(self.STAGE_CONTENT_TEMPLATE, render_context))
