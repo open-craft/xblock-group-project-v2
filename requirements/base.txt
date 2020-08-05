@@ -10,7 +10,7 @@ WebOb<2.0
 # this guy have one major each year and you'd want to migrate ASAP, since it keeps up with all the real world timezone changes
 pytz
 
-XBlock>=1.2.2,<2.0
+XBlock>=1.2.2,<1.3.0
 
 edx-opaque-keys>=0.4.0
 
