@@ -309,6 +309,7 @@ class TeamEvaluationStage(ReviewBaseStage):
         )
 
 
+@XBlock.wants('user')
 class PeerReviewStage(ReviewBaseStage):
     display_name = String(
         display_name=DISPLAY_NAME_NAME,
@@ -546,11 +547,21 @@ class PeerReviewStage(ReviewBaseStage):
         return webob.response.Response(body=json.dumps(results))
 
     def do_submit_review(self, submissions):
+        user_service = self.runtime.service(self, 'user')
+        reviewer_id = self.anonymous_student_id
+        if 'ta_email' in submissions:
+            ta_email = submissions["ta_email"]
+            del submissions["ta_email"]
+            reviewer_id = user_service.get_anonymous_user_id(
+                ta_email,
+                str(self.runtime.course_id)
+            )
+
         group_id = int(submissions["review_subject_id"])
         del submissions["review_subject_id"]
 
         self.project_api.submit_workgroup_review_items(
-            self.anonymous_student_id,
+            reviewer_id,
             group_id,
             self.activity_content_id,
             submissions
@@ -565,7 +576,7 @@ class PeerReviewStage(ReviewBaseStage):
                     {
                         "question": question_id,
                         "answer": submissions[question_id],
-                        "reviewer_id": self.anonymous_student_id,
+                        "reviewer_id": reviewer_id,
                         "is_admin_grader": self.is_admin_grader,
                         "group_id": group_id,
                         "content_id": self.activity_content_id,
