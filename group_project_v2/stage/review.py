@@ -549,7 +549,7 @@ class PeerReviewStage(ReviewBaseStage):
     def do_submit_review(self, submissions):
         user_service = self.runtime.service(self, 'user')
         reviewer_id = self.anonymous_student_id
-        if 'ta_email' in submissions:
+        if 'ta_email' in submissions and submissions['ta_email']:
             ta_email = submissions["ta_email"]
             del submissions["ta_email"]
             reviewer_id = user_service.get_anonymous_user_id(
