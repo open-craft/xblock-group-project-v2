@@ -66,11 +66,11 @@ LOCALE_PATHS = [
 # http://django-statici18n.readthedocs.io/en/latest/settings.html
 
 with open(os.path.join(BASE_DIR, 'group_project_v2/translations/config.yaml'), 'r') as locale_config_file:
-    locale_config = yaml.load(locale_config_file)
+    LOCALE_CONFIG = yaml.load(locale_config_file)
 
     LANGUAGES = [
         (code, code,)
-        for code in locale_config['locales'] + locale_config['dummy_locales']
+        for code in LOCALE_CONFIG['locales'] + LOCALE_CONFIG['dummy_locales']
     ]
 
 STATICI18N_DOMAIN = 'textjs'
