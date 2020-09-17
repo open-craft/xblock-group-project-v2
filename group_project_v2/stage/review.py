@@ -183,7 +183,11 @@ class ReviewBaseStage(BaseGroupActivityStage):
                 self.mark_complete()
         except ApiError as exception:
             log.exception(exception.message)
-            return {'result': 'error', 'msg': exception.message}
+            return {
+                'result': 'error',
+                'msg': exception.message,
+                'error': exception.content_dictionary
+            }
 
         return {
             'result': 'success',
