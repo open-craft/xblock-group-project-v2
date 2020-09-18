@@ -1,0 +1,1032 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-26 01:00+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: eo\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: api_error.py
+msgid "Unknown error calling API"
+msgstr "Ûnknöwn érrör çällïng ÀPÌ Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: group_project.py group_project.py stage/utils.py stage_components.py
+#: stage_components.py
+msgid "Display Name"
+msgstr "Dïspläý Nämé Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: group_project.py
+msgid "This is a name of the project"
+msgstr "Thïs ïs ä nämé öf thé pröjéçt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: group_project.py
+msgid "Group Project V2"
+msgstr "Gröüp Pröjéçt V2 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+
+#: group_project.py
+msgid "This name appears in the horizontal navigation at the top of the page."
+msgstr ""
+"Thïs nämé äppéärs ïn thé hörïzöntäl nävïgätïön ät thé töp öf thé pägé. "
+"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: group_project.py group_project.py
+msgid "Group Project Activity"
+msgstr "Gröüp Pröjéçt Àçtïvïtý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: group_project.py
+msgid "Weight"
+msgstr "Wéïght Ⱡ'σяєм ιρѕυ#"
+
+#: group_project.py
+msgid ""
+"This is the maximum score that the user receives when he/she successfully "
+"completes the problem."
+msgstr ""
+"Thïs ïs thé mäxïmüm sçöré thät thé üsér réçéïvés whén hé/shé süççéssfüllý "
+"çömplétés thé prößlém. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: group_project.py
+msgid "Reviews Required Minimum"
+msgstr "Révïéws Réqüïréd Mïnïmüm Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: group_project.py
+msgid ""
+"The minimum number of group-reviews that should be applied to a set of "
+"submissions (set to 0 to be 'TA Graded')"
+msgstr ""
+"Thé mïnïmüm nümßér öf gröüp-révïéws thät shöüld ßé äpplïéd tö ä sét öf "
+"süßmïssïöns (sét tö 0 tö ßé 'TÀ Grädéd') Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: group_project.py
+msgid "User Reviews Required Minimum"
+msgstr "Ûsér Révïéws Réqüïréd Mïnïmüm Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: group_project.py
+msgid ""
+"The minimum number of other-group reviews that an individual user should "
+"perform"
+msgstr ""
+"Thé mïnïmüm nümßér öf öthér-gröüp révïéws thät än ïndïvïdüäl üsér shöüld "
+"pérförm Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: group_project.py
+msgid "Due date"
+msgstr "Düé däté Ⱡ'σяєм ιρѕυм ∂#"
+
+#: group_project.py
+msgid "Activity due date"
+msgstr "Àçtïvïtý düé däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: group_project.py
+#, python-brace-format
+msgid "{field_name} must be integer, {field_value} given"
+msgstr ""
+"{field_name} müst ßé ïntégér, {field_value} gïvén Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢т#"
+
+#: messages.py
+msgid "Unknown error."
+msgstr "Ûnknöwn érrör. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: messages.py
+msgid ""
+"This component is misconfigured and can't be displayed. It needs to be fixed"
+" by the course authors."
+msgstr ""
+"Thïs çömpönént ïs mïsçönfïgüréd änd çän't ßé dïspläýéd. Ìt nééds tö ßé fïxéd"
+" ßý thé çöürsé äüthörs. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
+
+#: messages.py
+#, python-brace-format
+msgid "Can't {action} as stage is not yet opened."
+msgstr ""
+"Çän't {action} äs stägé ïs nöt ýét öpénéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυ#"
+
+#: messages.py
+#, python-brace-format
+msgid "Can't {action} as stage is closed."
+msgstr ""
+"Çän't {action} äs stägé ïs çlöséd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: messages.py
+msgid "This Group Project does not contain any activities."
+msgstr ""
+"Thïs Gröüp Pröjéçt döés nöt çöntäïn äný äçtïvïtïés. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: messages.py
+msgid ""
+"This Group Project V2 does not contain Project Navigator - please edit "
+"course outline in Studio to include one."
+msgstr ""
+"Thïs Gröüp Pröjéçt V2 döés nöt çöntäïn Pröjéçt Nävïgätör - pléäsé édït "
+"çöürsé öütlïné ïn Stüdïö tö ïnçlüdé öné. Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: messages.py
+msgid "This Group Project V2 does not contain a discussion."
+msgstr ""
+"Thïs Gröüp Pröjéçt V2 döés nöt çöntäïn ä dïsçüssïön. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: messages.py
+msgid "Group Project must contain Project Navigator Block."
+msgstr ""
+"Gröüp Pröjéçt müst çöntäïn Pröjéçt Nävïgätör Blöçk. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: messages.py
+msgid "This Group Project Activity does not contain any stages."
+msgstr ""
+"Thïs Gröüp Pröjéçt Àçtïvïtý döés nöt çöntäïn äný stägés. Ⱡ'σяєм ιρѕυм ∂σłσя "
+"ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: messages.py
+#, python-brace-format
+msgid "{field_name} must be integer, {field_value} given."
+msgstr ""
+"{field_name} müst ßé ïntégér, {field_value} gïvén. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢т#"
+
+#: messages.py
+#, python-brace-format
+msgid "This project is assigned to {group_count} group(s)"
+msgstr ""
+"Thïs pröjéçt ïs ässïgnéd tö {group_count} gröüp(s) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя#"
+
+#: messages.py
+msgid "Project Navigator must contain Navigation view."
+msgstr ""
+"Pröjéçt Nävïgätör müst çöntäïn Nävïgätïön vïéw. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,"
+" ¢σηѕє¢тєтυя α#"
+
+#: messages.py
+#, python-brace-format
+msgid ""
+"Parent group project does not contain discussion XBlock - this {block_type} "
+"will not function properly and will not be displayed to students."
+msgstr ""
+"Pärént gröüp pröjéçt döés nöt çöntäïn dïsçüssïön XBlöçk - thïs {block_type} "
+"wïll nöt fünçtïön pröpérlý änd wïll nöt ßé dïspläýéd tö stüdénts. #"
+
+#: messages.py
+msgid "This task has been marked as complete."
+msgstr ""
+"Thïs täsk häs ßéén märkéd äs çömplété. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
+#: messages.py
+#, python-brace-format
+msgid "url_name to link to this {stage_name}:"
+msgstr ""
+"ürl_nämé tö lïnk tö thïs {stage_name}: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: messages.py
+#, python-brace-format
+msgid "Submissions are not specified for {class_name} '{stage_title}'."
+msgstr ""
+"Süßmïssïöns äré nöt spéçïfïéd för {class_name} '{stage_title}'. Ⱡ'σяєм ιρѕυм"
+" ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: messages.py
+#, python-brace-format
+msgid ""
+"Feedback display blocks are not specified for {class_name} '{stage_title}'."
+msgstr ""
+"Féédßäçk dïspläý ßlöçks äré nöt spéçïfïéd för {class_name} '{stage_title}'. "
+"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: messages.py
+#, python-brace-format
+msgid "Questions are not specified for {class_name} '{stage_title}'."
+msgstr ""
+"Qüéstïöns äré nöt spéçïfïéd för {class_name} '{stage_title}'. Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: messages.py
+#, python-brace-format
+msgid ""
+"{class_name} stage '{stage_title}' is missing required component "
+"'{peer_selector_class_name}'."
+msgstr ""
+"{class_name} stägé '{stage_title}' ïs mïssïng réqüïréd çömpönént "
+"'{peer_selector_class_name}'. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: messages.py
+#, python-brace-format
+msgid ""
+"{class_name} stage '{stage_title}' is missing required component "
+"'{group_selector_class_name}'."
+msgstr ""
+"{class_name} stägé '{stage_title}' ïs mïssïng réqüïréd çömpönént "
+"'{group_selector_class_name}'. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: messages.py
+msgid "Thanks for your feedback."
+msgstr "Thänks för ýöür féédßäçk. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: messages.py
+msgid "TA grading is not allowed for this stage."
+msgstr ""
+"TÀ grädïng ïs nöt ällöwéd för thïs stägé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: messages.py
+#, python-brace-format
+msgid ""
+"Graded questions are not supported for {class_name} stage '{stage_title}'."
+msgstr ""
+"Grädéd qüéstïöns äré nöt süppörtéd för {class_name} stägé '{stage_title}'. "
+"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: messages.py
+#, python-brace-format
+msgid "Grade questions are required for {class_name} stage '{stage_title}'."
+msgstr ""
+"Grädé qüéstïöns äré réqüïréd för {class_name} stägé '{stage_title}'. Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: messages.py
+msgid "Video Resource Block must contain Ooyala content ID."
+msgstr ""
+"Vïdéö Résöürçé Blöçk müst çöntäïn Ööýälä çöntént ÌD. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: messages.py
+msgid "Only group members can upload files."
+msgstr ""
+"Önlý gröüp mémßérs çän üplöäd fïlés. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυ#"
+
+#: messages.py
+msgid "Question is not selected."
+msgstr "Qüéstïön ïs nöt séléçtéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: messages.py
+msgid "Upload complete"
+msgstr "Ûplöäd çömplété Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: messages.py
+msgid "Upload failed."
+msgstr "Ûplöäd fäïléd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: messages.py
+#, python-brace-format
+msgid ""
+"Your deliverable has been successfully uploaded. You can attach an updated "
+"version of the deliverable by clicking the <span class='icon {icon}'></span>"
+" icon at any time before the deadline."
+msgstr ""
+"Ýöür délïvéräßlé häs ßéén süççéssfüllý üplöädéd. Ýöü çän ättäçh än üpdätéd "
+"vérsïön öf thé délïvéräßlé ßý çlïçkïng thé <span class='icon {icon}'></span>"
+" ïçön ät äný tïmé ßéföré thé déädlïné. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт "
+"∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση "
+"υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє "
+"∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα"
+" ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι"
+" σƒƒι¢ια ∂єѕ#"
+
+#: messages.py
+#, python-brace-format
+msgid "Error uploading file: {error_goes_here}."
+msgstr ""
+"Érrör üplöädïng fïlé: {error_goes_here}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: project_navigator.py project_navigator.py
+msgid "Group Project Navigator"
+msgstr "Gröüp Pröjéçt Nävïgätör Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: project_navigator.py
+#, python-brace-format
+msgid "url_name to link to this {project_navigator_view}:"
+msgstr ""
+"ürl_nämé tö lïnk tö thïs {project_navigator_view}: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢#"
+
+#: project_navigator.py
+msgid "Navigation View"
+msgstr "Nävïgätïön Vïéw Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: project_navigator.py
+msgid "Navigation"
+msgstr "Nävïgätïön Ⱡ'σяєм ιρѕυм ∂σłσ#"
+
+#: project_navigator.py
+msgid "Resources View"
+msgstr "Résöürçés Vïéw Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: project_navigator.py
+msgid "Resources"
+msgstr "Résöürçés Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: project_navigator.py
+msgid "Submissions View"
+msgstr "Süßmïssïöns Vïéw Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+
+#: project_navigator.py
+msgid "Upload"
+msgstr "Ûplöäd Ⱡ'σяєм ιρѕυ#"
+
+#: project_navigator.py
+msgid "Ask a TA View"
+msgstr "Àsk ä TÀ Vïéw Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: project_navigator.py
+msgid "Ask a McKinsey TA"
+msgstr "Àsk ä MçKïnséý TÀ Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: project_navigator.py
+msgid "Private Discussion View"
+msgstr "Prïväté Dïsçüssïön Vïéw Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: stage/base.py
+msgid "Open Date"
+msgstr "Öpén Däté Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: stage/base.py
+msgid "Stage open date"
+msgstr "Stägé öpén däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: stage/base.py
+msgid "Close Date"
+msgstr "Çlösé Däté Ⱡ'σяєм ιρѕυм ∂σłσ#"
+
+#: stage/base.py
+msgid "Stage close date"
+msgstr "Stägé çlösé däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+
+#: stage/base.py
+msgid "Hide stage type label"
+msgstr "Hïdé stägé týpé läßél Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: stage/base.py
+msgid "If true, hides stage type label in Project Navigator"
+msgstr ""
+"Ìf trüé, hïdés stägé týpé läßél ïn Pröjéçt Nävïgätör Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: stage/base.py
+msgid "Stage"
+msgstr "Stägé Ⱡ'σяєм ιρѕ#"
+
+#: stage/basic.py
+msgid "Text Stage"
+msgstr "Téxt Stägé Ⱡ'σяєм ιρѕυм ∂σłσ#"
+
+#: stage/basic.py
+msgid "Overview"
+msgstr "Övérvïéw Ⱡ'σяєм ιρѕυм ∂#"
+
+#: stage/basic.py
+msgid "Text"
+msgstr "Téxt Ⱡ'σяєм ι#"
+
+#: stage/basic.py
+msgid "Completion Stage"
+msgstr "Çömplétïön Stägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+
+#: stage/basic.py stage/basic.py stage/review.py
+msgid "Task"
+msgstr "Täsk Ⱡ'σяєм ι#"
+
+#: stage/basic.py
+msgid "Completion"
+msgstr "Çömplétïön Ⱡ'σяєм ιρѕυм ∂σłσ#"
+
+#: stage/basic.py
+msgid "mark stage as complete"
+msgstr "märk stägé äs çömplété Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: stage/basic.py
+msgid "Submission Stage"
+msgstr "Süßmïssïön Stägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+
+#: stage/basic.py
+msgid "Deliverable"
+msgstr "Délïvéräßlé Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: stage/basic.py stage/basic.py
+msgid "Pending Upload"
+msgstr "Péndïng Ûplöäd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: stage/basic.py
+msgid "Uploaded"
+msgstr "Ûplöädéd Ⱡ'σяєм ιρѕυм ∂#"
+
+#: stage/basic.py stage/review.py
+msgid "Unknown"
+msgstr "Ûnknöwn Ⱡ'σяєм ιρѕυм #"
+
+#: stage/basic.py
+msgid "upload submission"
+msgstr "üplöäd süßmïssïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: stage/feedback_review.py
+msgid "Review"
+msgstr "Révïéw Ⱡ'σяєм ιρѕυ#"
+
+#: stage/feedback_review.py
+msgid "Evaluation Display Stage"
+msgstr "Évälüätïön Dïspläý Stägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: stage/feedback_review.py
+msgid "Evaluation Display"
+msgstr "Évälüätïön Dïspläý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
+
+#: stage/feedback_review.py
+msgid "Grade Display Stage"
+msgstr "Grädé Dïspläý Stägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
+
+#: stage/feedback_review.py
+msgid "Grade Display"
+msgstr "Grädé Dïspläý Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: stage/feedback_review.py stage_components.py
+msgid "N/A"
+msgstr "N/À Ⱡ'σяєм#"
+
+#: stage/mixins.py
+msgid "Completed"
+msgstr "Çömplétéd Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: stage/review.py
+msgid "save feedback"
+msgstr "sävé féédßäçk Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: stage/review.py
+msgid "Team Evaluation Stage"
+msgstr "Téäm Évälüätïön Stägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: stage/review.py
+msgid "Team Evaluation"
+msgstr "Téäm Évälüätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: stage/review.py
+msgid "Peer Grading Stage"
+msgstr "Péér Grädïng Stägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
+
+#: stage/review.py stage/review.py
+msgid "Pending Review"
+msgstr "Péndïng Révïéw Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: stage/review.py
+msgid "Review Complete"
+msgstr "Révïéw Çömplété Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: stage/review.py
+msgid "Peer Grading"
+msgstr "Péér Grädïng Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: stage/utils.py
+msgid "Not started"
+msgstr "Nöt stärtéd Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: stage/utils.py
+msgid "Partially complete"
+msgstr "Pärtïällý çömplété Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
+
+#: stage/utils.py
+msgid "Complete"
+msgstr "Çömplété Ⱡ'σяєм ιρѕυм ∂#"
+
+#: stage/utils.py
+msgid "This is a name of the stage"
+msgstr "Thïs ïs ä nämé öf thé stägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
+
+#: stage_components.py
+msgid "This is a name of the resource"
+msgstr "Thïs ïs ä nämé öf thé résöürçé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
+
+#: stage_components.py
+msgid "Group Project V2 Resource"
+msgstr "Gröüp Pröjéçt V2 Résöürçé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: stage_components.py
+msgid "Resource Description"
+msgstr "Résöürçé Désçrïptïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: stage_components.py
+msgid "Resource"
+msgstr "Résöürçé Ⱡ'σяєм ιρѕυм ∂#"
+
+#: stage_components.py
+msgid "Resource Location"
+msgstr "Résöürçé Löçätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: stage_components.py
+msgid "A url to download/view the resource"
+msgstr ""
+"À ürl tö döwnlöäd/vïéw thé résöürçé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
+
+#: stage_components.py
+msgid "Grading Criteria?"
+msgstr "Grädïng Çrïtérïä? Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: stage_components.py
+msgid "If true, resource will be treated as grading criteria"
+msgstr ""
+"Ìf trüé, résöürçé wïll ßé tréätéd äs grädïng çrïtérïä Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт"
+" αмєт, ¢σηѕє¢тєтυя α#"
+
+#: stage_components.py
+msgid "Video Resource"
+msgstr "Vïdéö Résöürçé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: stage_components.py
+msgid "Ooyala/Brightcove content ID"
+msgstr "Ööýälä/Brïghtçövé çöntént ÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: stage_components.py
+msgid "This is the Ooyala/Brightcove Content Identifier"
+msgstr ""
+"Thïs ïs thé Ööýälä/Brïghtçövé Çöntént Ìdéntïfïér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: stage_components.py
+msgid "Submissions Help Text"
+msgstr "Süßmïssïöns Hélp Téxt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: stage_components.py
+msgid "Grade Rubric Help Text"
+msgstr "Grädé Rüßrïç Hélp Téxt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: stage_components.py
+msgid "Submission"
+msgstr "Süßmïssïön Ⱡ'σяєм ιρѕυм ∂σłσ#"
+
+#: stage_components.py
+msgid "This is a name of the submission"
+msgstr ""
+"Thïs ïs ä nämé öf thé süßmïssïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: stage_components.py
+msgid "Group Project V2 Submission"
+msgstr "Gröüp Pröjéçt V2 Süßmïssïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
+
+#: stage_components.py
+msgid "Submission Description"
+msgstr "Süßmïssïön Désçrïptïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: stage_components.py
+msgid "Upload ID"
+msgstr "Ûplöäd ÌD Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: stage_components.py
+msgid ""
+"This string is used as an identifier for an upload. Submissions sharing the "
+"same Upload ID will be updated simultaneously"
+msgstr ""
+"Thïs strïng ïs üséd äs än ïdéntïfïér för än üplöäd. Süßmïssïöns shärïng thé "
+"sämé Ûplöäd ÌD wïll ßé üpdätéd sïmültänéöüslý Ⱡ'σяєм ιρѕυ#"
+
+#: stage_components.py
+msgid "Error storing file {} - {}"
+msgstr "Érrör störïng fïlé {} - {} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: stage_components.py
+msgid "Error recording file information {} - {}"
+msgstr ""
+"Érrör réçördïng fïlé ïnförmätïön {} - {} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
+#: stage_components.py
+msgid "Teammate Selector"
+msgstr "Téämmäté Séléçtör Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: stage_components.py
+msgid "Teammate Selector XBlock"
+msgstr "Téämmäté Séléçtör XBlöçk Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: stage_components.py
+msgid "Group Selector"
+msgstr "Gröüp Séléçtör Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: stage_components.py
+msgid "Group Selector XBlock"
+msgstr "Gröüp Séléçtör XBlöçk Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: stage_components.py stage_components.py
+msgid "Review Question"
+msgstr "Révïéw Qüéstïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: stage_components.py stage_components.py
+msgid "Question ID"
+msgstr "Qüéstïön ÌD Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: stage_components.py
+msgid "Question Text"
+msgstr "Qüéstïön Téxt Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: stage_components.py
+msgid "Assessment Question Text"
+msgstr "Àsséssmént Qüéstïön Téxt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: stage_components.py
+msgid "Overrides question title when displayed in assessment mode"
+msgstr ""
+"Övérrïdés qüéstïön tïtlé whén dïspläýéd ïn ässéssmént mödé Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: stage_components.py
+msgid "Question Content"
+msgstr "Qüéstïön Çöntént Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+
+#: stage_components.py
+msgid "HTML control"
+msgstr "HTML çöntröl Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: stage_components.py
+msgid "Required"
+msgstr "Réqüïréd Ⱡ'σяєм ιρѕυм ∂#"
+
+#: stage_components.py
+msgid "Grading"
+msgstr "Grädïng Ⱡ'σяєм ιρѕυм #"
+
+#: stage_components.py
+msgid ""
+"IF True, answers to this question will be used to calculate student grade "
+"for Group Project."
+msgstr ""
+"ÌF Trüé, änswérs tö thïs qüéstïön wïll ßé üséd tö çälçüläté stüdént grädé "
+"för Gröüp Pröjéçt. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: stage_components.py
+msgid "Single Line"
+msgstr "Sïnglé Lïné Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: stage_components.py
+msgid ""
+"If True question label and content will be displayed on single line, "
+"allowing for more compact layout.Only affects presentation."
+msgstr ""
+"Ìf Trüé qüéstïön läßél änd çöntént wïll ßé dïspläýéd ön sïnglé lïné, "
+"ällöwïng för möré çömpäçt läýöüt.Önlý äfféçts préséntätïön. Ⱡ'σя#"
+
+#: stage_components.py
+msgid "CSS Classes"
+msgstr "ÇSS Çlässés Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: stage_components.py
+msgid "CSS classes to be set on question element. Only affects presentation."
+msgstr ""
+"ÇSS çlässés tö ßé sét ön qüéstïön élémént. Önlý äfféçts préséntätïön. Ⱡ'σяєм"
+" ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: stage_components.py
+msgid "No question selected"
+msgstr "Nö qüéstïön séléçtéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: stage_components.py
+msgid "Selected question not found"
+msgstr "Séléçtéd qüéstïön nöt föünd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
+
+#: stage_components.py
+msgid "Question ID is not unique"
+msgstr "Qüéstïön ÌD ïs nöt ünïqüé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: stage_components.py
+msgid "Question to be assessed"
+msgstr "Qüéstïön tö ßé ässésséd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: stage_components.py
+msgid "Show Mean Value"
+msgstr "Shöw Méän Välüé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: stage_components.py
+msgid "If True, converts review answers to numbers and calculates mean value"
+msgstr ""
+"Ìf Trüé, çönvérts révïéw änswérs tö nümßérs änd çälçülätés méän välüé Ⱡ'σяєм"
+" ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: stage_components.py
+#, python-brace-format
+msgid "Review Assessment for question \"{question_title}\""
+msgstr ""
+"Révïéw Àsséssmént för qüéstïön \"{question_title}\" Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυ#"
+
+#: stage_components.py
+msgid "Review Assessment"
+msgstr "Révïéw Àsséssmént Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: stage_components.py
+msgid "--- Not selected ---"
+msgstr "--- Nöt séléçtéd --- Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: stage_components.py
+msgid "Team Evaluation Display"
+msgstr "Téäm Évälüätïön Dïspläý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: stage_components.py
+msgid "Grade Evaluation Display"
+msgstr "Grädé Évälüätïön Dïspläý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: stage_components.py
+msgid "Project Team"
+msgstr "Pröjéçt Téäm Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: templates/html/activity/dashboard_detail_view.html
+#: templates/html/activity/dashboard_view.html
+msgid "Activity:"
+msgstr "Àçtïvïtý: Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: templates/html/activity/dashboard_detail_view.html
+msgid "Groups"
+msgstr "Gröüps Ⱡ'σяєм ιρѕυ#"
+
+#: templates/html/activity/dashboard_detail_view.html
+msgid "Graded/Required Stages"
+msgstr "Grädéd/Réqüïréd Stägés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: templates/html/activity/dashboard_detail_view.html
+msgid ""
+"will export a list of emails within stage of partially complete/incomplete "
+"teams"
+msgstr ""
+"wïll éxpört ä lïst öf émäïls wïthïn stägé öf pärtïällý çömplété/ïnçömplété "
+"téäms Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: templates/html/activity/dashboard_detail_view.html
+msgid "Grading:"
+msgstr "Grädïng: Ⱡ'σяєм ιρѕυм ∂#"
+
+#: templates/html/activity/dashboard_detail_view.html
+#, python-format
+msgid ""
+"\n"
+"            Additionally there is a single work group filtered by company filter.\n"
+"          "
+msgid_plural ""
+"\n"
+"            Additionally there were %(counter)s work groups filtered by company filter.\n"
+"          "
+msgstr[0] ""
+"\n"
+"            Àddïtïönällý théré ïs ä sïnglé wörk gröüp fïltéréd ßý çömpäný fïltér.\n"
+"           Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+msgstr[1] ""
+"\n"
+"            Àddïtïönällý théré wéré %(counter)s wörk gröüps fïltéréd ßý çömpäný fïltér.\n"
+"           Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: templates/html/activity/dashboard_detail_view.html
+msgid ""
+"\n"
+"            All work groups have been filtered by the company filter.\n"
+"          "
+msgstr ""
+"\n"
+"            Àll wörk gröüps hävé ßéén fïltéréd ßý thé çömpäný fïltér.\n"
+"           Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: templates/html/activity/navigation_view.html
+msgid "No stages available for this activity"
+msgstr ""
+"Nö stägés äväïläßlé för thïs äçtïvïtý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυ#"
+
+#: templates/html/activity/resources_view.html
+msgid "No resources for this activity"
+msgstr "Nö résöürçés för thïs äçtïvïtý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
+
+#: templates/html/activity/submissions_view.html
+msgid "No uploads required for this activity"
+msgstr ""
+"Nö üplöäds réqüïréd för thïs äçtïvïtý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυ#"
+
+#: templates/html/add_buttons.html
+msgid "Add New Component"
+msgstr "Àdd Néw Çömpönént Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: templates/html/components/group_selector.html
+msgid ""
+"Please click on the group(s) you are assigned to grade to review their "
+"submissions."
+msgstr ""
+"Pléäsé çlïçk ön thé gröüp(s) ýöü äré ässïgnéd tö grädé tö révïéw théïr "
+"süßmïssïöns. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
+
+#: templates/html/components/group_selector.html
+#: templates/html/components/peer_selector.html
+msgid "Demo contents"
+msgstr "Démö çönténts Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: templates/html/components/group_selector.html
+msgid "Group"
+msgstr "Gröüp Ⱡ'σяєм ιρѕ#"
+
+#: templates/html/components/group_selector.html
+#: templates/html/components/peer_selector.html
+msgid "Evaluating below"
+msgstr "Évälüätïng ßélöw Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+
+#: templates/html/components/group_selector.html
+msgid "No groups assigned for review"
+msgstr "Nö gröüps ässïgnéd för révïéw Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: templates/html/components/peer_selector.html
+msgid "Please click on the teammates to review their performance"
+msgstr ""
+"Pléäsé çlïçk ön thé téämmätés tö révïéw théïr pérförmänçé Ⱡ'σяєм ιρѕυм ∂σłσя"
+" ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: templates/html/components/peer_selector.html
+msgid "Teammate"
+msgstr "Téämmäté Ⱡ'σяєм ιρѕυм ∂#"
+
+#: templates/html/components/peer_selector.html
+msgid "No teammates to review"
+msgstr "Nö téämmätés tö révïéw Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: templates/html/components/project_team.html
+msgid "Email your entire team"
+msgstr "Émäïl ýöür éntïré téäm Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: templates/html/components/project_team.html
+msgid "Email"
+msgstr "Émäïl Ⱡ'σяєм ιρѕ#"
+
+#: templates/html/components/review_assessment.html
+msgid "Grade:"
+msgstr "Grädé: Ⱡ'σяєм ιρѕυ#"
+
+#: templates/html/components/submission_navigator_view.html
+msgid "Uploaded by"
+msgstr "Ûplöädéd ßý Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: templates/html/components/submission_review_view.html
+msgid "This file has not been submitted by this group"
+msgstr ""
+"Thïs fïlé häs nöt ßéén süßmïttéd ßý thïs gröüp Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя α#"
+
+#: templates/html/project/student_view.html
+msgid "OK"
+msgstr "ÖK Ⱡ'σя#"
+
+#: templates/html/project/student_view.html
+msgid "Message your group"
+msgstr "Méssägé ýöür gröüp Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
+
+#: templates/html/project/student_view.html
+msgid "Send any questions or messages to your group."
+msgstr ""
+"Sénd äný qüéstïöns ör méssägés tö ýöür gröüp. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: templates/html/project/student_view.html
+msgid "Enter your message for the group here"
+msgstr ""
+"Éntér ýöür méssägé för thé gröüp héré Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυ#"
+
+#: templates/html/project/student_view.html
+#: templates/html/project/student_view.html
+#: templates/html/project_navigator/ask_ta_view.html
+msgid "Submit"
+msgstr "Süßmït Ⱡ'σяєм ιρѕυ#"
+
+#: templates/html/project/student_view.html
+msgid "Message your group member"
+msgstr "Méssägé ýöür gröüp mémßér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: templates/html/project/student_view.html
+msgid "Send any questions or messages to your group member."
+msgstr ""
+"Sénd äný qüéstïöns ör méssägés tö ýöür gröüp mémßér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: templates/html/project/student_view.html
+msgid "Enter your message here"
+msgstr "Éntér ýöür méssägé héré Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: templates/html/project_navigator/ask_ta_view.html
+msgid ""
+"Send any questions or messages to a TA, and they'll get back to you via "
+"email."
+msgstr ""
+"Sénd äný qüéstïöns ör méssägés tö ä TÀ, änd théý'll gét ßäçk tö ýöü vïä "
+"émäïl. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
+
+#: templates/html/project_navigator/ask_ta_view.html
+msgid "Enter your message here."
+msgstr "Éntér ýöür méssägé héré. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: templates/html/project_navigator/project_navigator.html
+#: templates/html/project_navigator/project_navigator_author_view.html
+msgid "Project Navigator"
+msgstr "Pröjéçt Nävïgätör Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: templates/html/stages/completion.html
+msgid "Yes, I have completed this task"
+msgstr "Ýés, Ì hävé çömplétéd thïs täsk Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
+
+#: templates/html/stages/dashboard_detail_view.html
+#: templates/html/stages/dashboard_view.html
+msgid "TA Graded"
+msgstr "TÀ Grädéd Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: templates/html/stages/dashboard_view.html
+msgid "Status:"
+msgstr "Stätüs: Ⱡ'σяєм ιρѕυм #"
+
+#: templates/html/stages/dashboard_view.html
+msgid "No students match search criteria"
+msgstr ""
+"Nö stüdénts mätçh séärçh çrïtérïä Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: templates/html/stages/grade_display.html
+msgid "Final Grade:"
+msgstr "Fïnäl Grädé: Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: templates/html/stages/navigation_view.html
+msgid "Closed on"
+msgstr "Çlöséd ön Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: templates/html/stages/navigation_view.html
+msgid "Due"
+msgstr "Düé Ⱡ'σяєм#"
+
+#: templates/html/stages/navigation_view.html
+msgid "Available"
+msgstr "Àväïläßlé Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: templates/html/stages/peer_review.html
+msgid "Grading View"
+msgstr "Grädïng Vïéw Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: templates/html/stages/peer_review.html
+msgid "TA Grading override view"
+msgstr "TÀ Grädïng övérrïdé vïéw Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: templates/html/stages/peer_review.html
+msgid "Group Submissions"
+msgstr "Gröüp Süßmïssïöns Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: templates/html/stages/peer_review.html
+msgid "Please review the file(s) below to evaluate the group's work."
+msgstr ""
+"Pléäsé révïéw thé fïlé(s) ßélöw tö évälüäté thé gröüp's wörk. Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: templates/html/stages/stage_wrapper.html
+msgid "This stage has not yet been opened"
+msgstr ""
+"Thïs stägé häs nöt ýét ßéén öpénéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
+
+#: templates/html/stages/stages_group_review_other_team_submissions.html
+msgid "Current Group Project Activity does not have any submission stages"
+msgstr ""
+"Çürrént Gröüp Pröjéçt Àçtïvïtý döés nöt hävé äný süßmïssïön stägés Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: templates/html/stages/submissions_review_view.html
+msgid "No submissions have been uploaded for this stage"
+msgstr ""
+"Nö süßmïssïöns hävé ßéén üplöädéd för thïs stägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: utils.py
+msgid "This XBlock does not contain any editable settings"
+msgstr ""
+"Thïs XBlöçk döés nöt çöntäïn äný édïtäßlé séttïngs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: utils.py
+msgid "Must be overridden in inherited class"
+msgstr ""
+"Müst ßé övérrïddén ïn ïnhérïtéd çläss Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυ#"
+
+#: utils.py
+msgid "HTML"
+msgstr "HTML Ⱡ'σяєм ι#"
+
+#: utils.py
+msgid "Discussion"
+msgstr "Dïsçüssïön Ⱡ'σяєм ιρѕυм ∂σłσ#"
+
+#: utils.py
+#, python-brace-format
+msgid "#{group_id}"
+msgstr "#{group_id} Ⱡ'σяєм ι#"
+
+#: utils.py
+#, python-brace-format
+msgid "Group #{group_id}"
+msgstr "Gröüp #{group_id} Ⱡ'σяєм ιρѕυм ∂σłσ#"

@@ -1,0 +1,29 @@
+# Configuration for i18n workflow.
+
+locales:
+    - en  # English - Source Language
+    - es_419  # Spanish
+    - ko_KR  # Korean (Korea)
+    - ar  # Arabic
+    - de_DE  # German
+    - fr  # French
+    - ja_JP  # Japanese
+    - pl  # Polish
+    - pt_BR  # Portuguese (Brazil)
+    - zh_CN  # Chinese (China)
+
+# The locales used for fake-accented English, for testing.
+dummy_locales:
+    - eo
+
+# Directories we don't search for strings.
+ignore_dirs:
+    - tests
+    - translations
+
+# i18n_tools produces just "django-partial.po" by default, but we need "text.po":
+generate_merge:
+    text.po:
+        - django-partial.po
+    textjs.po:
+        - djangojs-partial.po
