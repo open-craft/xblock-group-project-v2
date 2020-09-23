@@ -1,6 +1,8 @@
 """
 This module contains classes representing various GroupProject page elements
 """
+from builtins import next
+from builtins import object
 from lazy.lazy import lazy
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.select import Select
@@ -83,13 +85,13 @@ class GroupProjectElement(BaseElement):
         )
 
     def get_activity_by_id(self, activity_id):
-        activity_selector = self.ACTIVITY_CSS_SELECTOR+"[data-usage='{}']".format(activity_id)
+        activity_selector = self.ACTIVITY_CSS_SELECTOR + "[data-usage='{}']".format(activity_id)
         activity_element = self.element.find_element_by_css_selector(activity_selector)
         return self.make_element(activity_element, ActivityElement)
 
     def find_stage(self, activity_id, stage_id):
-        activity_selector = self.ACTIVITY_CSS_SELECTOR+"[data-usage='{}']".format(activity_id)
-        stage_selector = "#activity_"+stage_id
+        activity_selector = self.ACTIVITY_CSS_SELECTOR + "[data-usage='{}']".format(activity_id)
+        stage_selector = "#activity_" + stage_id
         activity_element = self.element.find_element_by_css_selector(activity_selector)
         return activity_element.find_element_by_css_selector(stage_selector)
 
@@ -296,8 +298,7 @@ class InputControl(BaseElement):
     def __getattr__(self, item):
         if hasattr(self.element, item):
             return getattr(self.element, item)
-        else:
-            return self.element.get_attribute(item)
+        return self.element.get_attribute(item)
 
     def _wait_unitl_enabled(self):
         wait = WebDriverWait(self.element, self.timeout)
@@ -318,8 +319,7 @@ class InputControl(BaseElement):
         options = self.element.find_elements_by_tag_name("option")
         if options:
             return {option.get_attribute('value'): option.text for option in options}
-        else:
-            return None
+        return None
 
 
 class ProjectNavigatorElement(BaseElement):
@@ -359,6 +359,7 @@ class ProjectNavigatorViewElement(BaseElement):
         return self.element.get_attribute("data-view-type")
 
     def close_view(self):
+        # pylint: disable=raise-missing-from
         try:
             close_button = self.element.find_element_by_css_selector(".group-project-navigator-view-close")
             close_button.click()

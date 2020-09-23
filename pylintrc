@@ -11,7 +11,9 @@ disable=
  missing-docstring,no-member,
  fixme,
  locally-disabled,star-args,
- too-few-public-methods,too-many-public-methods,too-many-ancestors
+ too-few-public-methods,too-many-public-methods,too-many-ancestors,
+ wrong-import-position, useless-object-inheritance, wrong-import-order,
+ super-with-arguments,invalid-overridden-method
 
 
 [OPTIONS]

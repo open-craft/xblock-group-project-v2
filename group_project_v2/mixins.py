@@ -1,3 +1,6 @@
+from builtins import str
+from builtins import next
+from builtins import object
 import functools
 import logging
 import os
@@ -76,7 +79,7 @@ class CourseAwareXBlockMixin(object):
     @property
     def course_id(self):
         raw_course_id = getattr(self.runtime, 'course_id', 'all')
-        return unicode(raw_course_id)
+        return str(raw_course_id)
 
 
 class UserAwareXBlockMixin(ProjectAPIXBlockMixin):
@@ -375,13 +378,13 @@ class WorkgroupAwareXBlockMixin(AuthXBlockMixin, UserAwareXBlockMixin, CourseAwa
                 return self.project_api.get_workgroup_by_id(
                     user_prefs[UserAwareXBlockMixin.TA_REVIEW_KEY]
                 )
-            else:
-                workgroup = self.project_api.get_user_workgroup_for_course(
-                    self.user_id, self.course_id
-                )
-                if workgroup is None:
-                    return self.FALLBACK_WORKGROUP
-                return workgroup
+            workgroup = self.project_api.get_user_workgroup_for_course(
+                self.user_id, self.course_id
+            )
+            if workgroup is None:
+                return self.FALLBACK_WORKGROUP
+            return workgroup
+        # pylint: disable=try-except-raise
         except GroupworkAccessDeniedError:
             raise
         except ApiError as exception:
@@ -424,7 +427,7 @@ class XBlockWithUrlNameDisplayMixin(object):
         try:
             return super(XBlockWithUrlNameDisplayMixin, self).url_name
         except AttributeError:
-            return unicode(self.scope_ids.usage_id)
+            return str(self.scope_ids.usage_id)
 
     def get_url_name_fragment(self, caption):
         fragment = Fragment()
@@ -541,9 +544,9 @@ class CompletionMixin(object):
 
 
 class CommonMixinCollection(
-    ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin,
-    StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-    WorkgroupAwareXBlockMixin, TemplateManagerMixin, SettingsMixin,
-    CompletionMixin,
+        ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin,
+        StudioEditableXBlockMixin, StudioContainerXBlockMixin,
+        WorkgroupAwareXBlockMixin, TemplateManagerMixin, SettingsMixin,
+        CompletionMixin,
 ):
     block_settings_key = 'group_project_v2'

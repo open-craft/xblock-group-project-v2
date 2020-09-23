@@ -2,14 +2,16 @@
 This module contains Project Navigator XBlock and it's children view XBlocks
 """
 import pkg_resources
+from builtins import str
+from builtins import object
 import logging
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
 from django import utils
 from xblock.core import XBlock
 from xblock.exceptions import NoSuchUsage
-from web_fragments.fragment import Fragment
 from xblock.validation import ValidationMessage
+from web_fragments.fragment import Fragment
 
 from xblockutils.studio_editable import (
     NestedXBlockSpec,
@@ -50,13 +52,13 @@ class ViewTypes(object):
 
 
 class GroupProjectNavigatorXBlock(
-    ChildrenNavigationXBlockMixin,
-    XBlockWithComponentsMixin,
-    XBlockWithPreviewMixin,
-    NoStudioEditableSettingsMixin,
-    StudioContainerXBlockMixin,
-    CompletionMixin,
-    XBlock
+        ChildrenNavigationXBlockMixin,
+        XBlockWithComponentsMixin,
+        XBlockWithPreviewMixin,
+        NoStudioEditableSettingsMixin,
+        StudioContainerXBlockMixin,
+        CompletionMixin,
+        XBlock
 ):
     """
     XBlock that provides basic layout and switching between children XBlocks (views)
@@ -200,12 +202,12 @@ class GroupProjectNavigatorXBlock(
 
 @XBlock.needs("i18n")
 class ProjectNavigatorViewXBlockBase(
-    CompletionMixin,
-    XBlockWithPreviewMixin,
-    StudioEditableXBlockMixin,
-    XBlockWithUrlNameDisplayMixin,
-    AdminAccessControlXBlockMixin,
-    XBlock,  # Moved from start.  Mixins usually come first.
+        CompletionMixin,
+        XBlockWithPreviewMixin,
+        StudioEditableXBlockMixin,
+        XBlockWithUrlNameDisplayMixin,
+        AdminAccessControlXBlockMixin,
+        XBlock,  # Moved from start.  Mixins usually come first.
 ):
     """
     Base class for Project Navigator children XBlocks (views)

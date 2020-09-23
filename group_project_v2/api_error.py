@@ -1,6 +1,9 @@
 import logging
 import json
-from urllib2 import HTTPError
+from urllib.error import HTTPError  # pylint: disable=F0401
+from future import standard_library
+standard_library.install_aliases()
+
 
 from group_project_v2.utils import gettext as _
 
@@ -56,6 +59,6 @@ def api_error_protect(func):
         except HTTPError as http_error:
             api_error = ApiError(http_error, ERROR_CODE_MESSAGES.get(func.__name__, None))
             log.exception("Error calling %s: %s", func.__name__, api_error)
-            raise api_error
+            raise api_error  # pylint: disable=raise-missing-from
 
     return call_api_method

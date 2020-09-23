@@ -1,5 +1,9 @@
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 import json
-from urllib import urlencode
+from six.moves.urllib.parse import urlencode
 
 import itertools
 
@@ -58,6 +62,7 @@ class ProjectAPI(object):
         else:
             response = method(url)
 
+        # pylint: disable=comparison-with-callable
         if method == DELETE:
             return None
 
@@ -111,7 +116,7 @@ class ProjectAPI(object):
 
     def set_group_grade(self, group_id, course_id, activity_id, grade_value, max_grade):
         grade_data = {
-            "course_id": unicode(course_id),
+            "course_id": str(course_id),
             "content_id": activity_id,
             "grade": grade_value,
             "max_grade": max_grade,
@@ -181,12 +186,12 @@ class ProjectAPI(object):
         # get any data already there
         current_data = {pi['question']: pi for pi in
                         self.get_peer_review_items(reviewer_id, peer_id, group_id, content_id)}
-        for question_id, answer in data.iteritems():
+        for question_id, answer in data.items():
             if question_id in current_data:
                 question_data = current_data[question_id]
 
                 if question_data['answer'] != answer:
-                    if len(answer) > 0:
+                    if answer:
                         # update with relevant data
                         del question_data['created']
                         del question_data['modified']
@@ -196,7 +201,7 @@ class ProjectAPI(object):
                     else:
                         self.delete_peer_review_assessment(question_data['id'])
 
-            elif len(answer) > 0:
+            elif answer:
                 question_data = {
                     "question": question_id,
                     "answer": answer,
@@ -210,12 +215,12 @@ class ProjectAPI(object):
     def submit_workgroup_review_items(self, reviewer_id, group_id, content_id, data):
         # get any data already there
         current_data = {ri['question']: ri for ri in self.get_workgroup_review_items(reviewer_id, group_id, content_id)}
-        for question_id, answer in data.iteritems():
+        for question_id, answer in data.items():
             if question_id in current_data:
                 question_data = current_data[question_id]
 
                 if question_data['answer'] != answer:
-                    if len(answer) > 0:
+                    if answer:
                         # update with relevant data
                         del question_data['created']
                         del question_data['modified']
@@ -225,7 +230,7 @@ class ProjectAPI(object):
                     else:
                         self.delete_workgroup_review_assessment(question_data['id'])
 
-            elif len(answer) > 0:
+            elif answer:
                 question_data = {
                     "question": question_id,
                     "answer": answer,
@@ -259,7 +264,7 @@ class TypedProjectAPI(ProjectAPI):
         :rtype: UserDetails
         """
         response = self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
-        return UserDetails(**response)  # pylint: disable=star-args
+        return UserDetails(**response)
 
     @memoize_with_expiration()
     def get_project_by_content_id(self, course_id, content_id):
@@ -287,7 +292,7 @@ class TypedProjectAPI(ProjectAPI):
         :rtype: ProjectDetails
         """
         response = self.send_request(GET, (PROJECTS_API, project_id), no_trailing_slash=True)
-        return ProjectDetails(**response)  # pylint: disable=star-args
+        return ProjectDetails(**response)
 
     @memoize_with_expiration()
     def get_workgroup_by_id(self, group_id):

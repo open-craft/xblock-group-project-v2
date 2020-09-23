@@ -1,3 +1,4 @@
+from builtins import object
 import ddt
 import mock
 
@@ -97,7 +98,7 @@ class TestEvaluationDisplayStage(EvaluationStagesBaseTestMixin, BaseStageTest):
         self.get_reviews_mock.return_value = reviews
 
         with patch_obj(
-            self.block_to_test, 'required_questions', mock.PropertyMock()
+                self.block_to_test, 'required_questions', mock.PropertyMock()
         ) as patched_required_questions:
             patched_required_questions.return_value = questions
 

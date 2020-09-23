@@ -1,3 +1,4 @@
+from builtins import str
 import json
 import logging
 
@@ -408,8 +409,7 @@ class PeerReviewStage(ReviewBaseStage):
         def do_get_items(group_id):
             if with_caching:
                 return self._get_review_items_for_group(self.project_api, group_id, self.activity_content_id)
-            else:
-                return self.project_api.get_workgroup_review_items_for_group(group_id, self.activity_content_id)
+            return self.project_api.get_workgroup_review_items_for_group(group_id, self.activity_content_id)
 
         return list(itertools.chain.from_iterable(do_get_items(group.id) for group in review_groups))
 
@@ -435,7 +435,7 @@ class PeerReviewStage(ReviewBaseStage):
 
         ta_reviews = {
             reviewer: items
-            for reviewer, items in grouped_items.iteritems()
+            for reviewer, items in grouped_items.items()
             if self.is_user_ta(self.real_user_id(reviewer), self.course_id)
         }
         return ta_reviews
@@ -464,7 +464,7 @@ class PeerReviewStage(ReviewBaseStage):
             ta_reviews = self._get_ta_reviews(group)
             review_results = [
                 self._calculate_review_status([group.id], ta_review_items)
-                for ta_review_items in ta_reviews.values()
+                for ta_review_items in list(ta_reviews.values())
             ]
             has_some = any(status != ReviewState.NOT_STARTED for status in review_results)
             # any completed TA review counts as "stage completed"

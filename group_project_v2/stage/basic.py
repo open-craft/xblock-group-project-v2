@@ -1,8 +1,10 @@
+from builtins import str
 import logging
 from xblock.core import XBlock
 from xblock.fields import String, Scope
-from web_fragments.fragment import Fragment
 from xblock.validation import ValidationMessage
+from web_fragments.fragment import Fragment
+
 
 from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
@@ -62,7 +64,7 @@ class CompletionStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
     def stage_completed(self, _data, _suffix=''):
         if not self.available_now:
             template = messages.STAGE_NOT_OPEN_TEMPLATE if not self.is_open else messages.STAGE_CLOSED_TEMPLATE
-            return {'result': 'error',  'msg': template.format(action=self.STAGE_ACTION)}
+            return {'result': 'error', 'msg': template.format(action=self.STAGE_ACTION)}
 
         try:
             if self.can_mark_complete:
@@ -170,6 +172,7 @@ class SubmissionStage(BaseGroupActivityStage):
                 self.mark_complete(user.id)
 
     def get_stage_state(self):
+        # pylint: disable=no-else-return
         if self.has_all_submissions:
             return StageState.COMPLETED
         elif self.has_some_submissions:
@@ -230,7 +233,7 @@ class SubmissionStage(BaseGroupActivityStage):
 
         has_all = uploaded_submissions >= upload_ids
         has_some = bool(uploaded_submissions & upload_ids)
-
+        # pylint: disable=no-else-return
         if has_all:
             return StageState.COMPLETED
         elif has_some:

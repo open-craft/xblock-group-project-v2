@@ -1,3 +1,6 @@
+from builtins import object
+
+
 class Projects(object):
     project1 = {
         "count": 1,

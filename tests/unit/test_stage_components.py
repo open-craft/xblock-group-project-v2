@@ -1,3 +1,6 @@
+from __future__ import print_function
+from builtins import str
+from builtins import object
 import json
 import os
 from unittest import TestCase
@@ -132,7 +135,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
     course_id = "a course"
 
     def _make_file(self):  # pylint:disable=no-self-use
-        return open(os.path.join(os.path.split(__file__)[0], "../resources/", 'image.png'))
+        return open(os.path.join(os.path.split(__file__)[0], "../resources/", 'image.png'), 'rb')
 
     def setUp(self):
         super(TestGroupProjectSubmissionXBlock, self).setUp()
@@ -217,11 +220,11 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
 
             response = self.block.upload_submission(request_mock)
             self.assertEqual(response.status_code, expected_code)
-            response_body = json.loads(response.body)
+            response_body = json.loads(response.text)
             self.assertEqual(response_body['title'], messages.FAILED_UPLOAD_TITLE)
             self.assertEqual(
                 response_body['message'],
-                messages.FAILED_UPLOAD_MESSAGE_TPL.format(error_goes_here=exception.message)
+                messages.FAILED_UPLOAD_MESSAGE_TPL.format(error_goes_here=str(exception))
             )
 
     @ddt.data(
@@ -262,7 +265,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
 
             response = self.block.upload_submission(request_mock)
             self.assertEqual(response.status_code, 200)
-            response_payload = json.loads(response.body)
+            response_payload = json.loads(response.text)
             self.assertEqual(response_payload['title'], messages.SUCCESSFUL_UPLOAD_TITLE)
             self.assertEqual(response_payload["submissions"], {submission_id: file_url})
             self.assertEqual(response_payload["new_stage_states"], [stage_state])
@@ -397,7 +400,7 @@ class CommonFeedbackDisplayStageTests(object):
     @staticmethod
     def _print_messages(validation):
         for message in validation.messages:
-            print message.text
+            print(message.text)
 
     def test_validate_no_question_id_sets_error_message(self):
         self.block.question_id = None
@@ -407,7 +410,7 @@ class CommonFeedbackDisplayStageTests(object):
             self.assertEqual(validation.messages[0].type, ValidationMessage.ERROR)
             self.assertEqual(validation.messages[0].text, self.block.NO_QUESTION_SELECTED)
         except AssertionError:
-            print self._print_messages(validation)
+            print(self._print_messages(validation))
             raise
 
     def test_validate_question_not_found_sets_error_message(self):
@@ -418,7 +421,7 @@ class CommonFeedbackDisplayStageTests(object):
                 self.assertEqual(validation.messages[0].type, ValidationMessage.ERROR)
                 self.assertEqual(validation.messages[0].text, self.block.QUESTION_NOT_FOUND)
             except AssertionError:
-                print self._print_messages(validation)
+                print(self._print_messages(validation))
                 raise
 
     def test_has_question_passes_validation(self):
@@ -428,7 +431,7 @@ class CommonFeedbackDisplayStageTests(object):
                 validation = self.block.validate()
                 self.assertEqual(len(validation.messages), 0)
             except AssertionError:
-                print self._print_messages(validation)
+                print(self._print_messages(validation))
                 raise
 
     def test_question_property_no_questions(self):

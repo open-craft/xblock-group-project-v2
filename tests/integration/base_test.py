@@ -116,6 +116,7 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         scenario_xml = loader.render_template("xml/{}".format(xml_file), params)
         return self.load_scenario_xml(scenario_xml, load_immediately)
 
+    # pylint: disable=inconsistent-return-statements
     def load_scenario_xml(self, scenario_xml, load_immediately=True):
         """
         Given the name of an XML file in the xml_templates folder, load it into the workbench.
