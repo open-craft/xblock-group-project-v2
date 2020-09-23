@@ -28,7 +28,7 @@ setup(
     description='XBlock - Group Project V2',
     packages=find_packages(),
     install_requires=[
-        'Django>=1.8,<2.0',
+        'Django==1.8.18',
         'lazy>=1.1',
         'python-dateutil>=2.1,<3.0',
         'WebOb>=1.6,<2.0',

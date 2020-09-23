@@ -1,6 +1,6 @@
 boto>=2.1.0
 boto3==1.4.8
-Django>=1.8,<2.0
+django==1.8.18
 django-storages==1.4.1
 google-compute-engine==2.8.13
 lazy>=1.1
