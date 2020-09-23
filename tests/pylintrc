@@ -11,7 +11,8 @@ disable=
  missing-docstring,no-member,
  fixme,
  locally-disabled,star-args,
- too-few-public-methods,too-many-public-methods,too-many-ancestors
+ too-few-public-methods,too-many-public-methods,too-many-ancestors,
+ W0622
 
 
 [OPTIONS]

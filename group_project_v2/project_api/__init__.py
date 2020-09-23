@@ -1,4 +1,5 @@
 """ Project API client """
+from builtins import object
 from django.conf import settings
 
 from group_project_v2.project_api.api_implementation import TypedProjectAPI

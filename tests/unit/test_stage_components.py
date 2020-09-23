@@ -1,3 +1,6 @@
+from __future__ import print_function
+from builtins import str
+from builtins import object
 import json
 import os
 from unittest import TestCase
@@ -397,7 +400,7 @@ class CommonFeedbackDisplayStageTests(object):
     @staticmethod
     def _print_messages(validation):
         for message in validation.messages:
-            print message.text
+            print(message.text)
 
     def test_validate_no_question_id_sets_error_message(self):
         self.block.question_id = None
@@ -407,7 +410,7 @@ class CommonFeedbackDisplayStageTests(object):
             self.assertEqual(validation.messages[0].type, ValidationMessage.ERROR)
             self.assertEqual(validation.messages[0].text, self.block.NO_QUESTION_SELECTED)
         except AssertionError:
-            print self._print_messages(validation)
+            print(self._print_messages(validation))
             raise
 
     def test_validate_question_not_found_sets_error_message(self):
@@ -418,7 +421,7 @@ class CommonFeedbackDisplayStageTests(object):
                 self.assertEqual(validation.messages[0].type, ValidationMessage.ERROR)
                 self.assertEqual(validation.messages[0].text, self.block.QUESTION_NOT_FOUND)
             except AssertionError:
-                print self._print_messages(validation)
+                print(self._print_messages(validation))
                 raise
 
     def test_has_question_passes_validation(self):
@@ -428,7 +431,7 @@ class CommonFeedbackDisplayStageTests(object):
                 validation = self.block.validate()
                 self.assertEqual(len(validation.messages), 0)
             except AssertionError:
-                print self._print_messages(validation)
+                print(self._print_messages(validation))
                 raise
 
     def test_question_property_no_questions(self):

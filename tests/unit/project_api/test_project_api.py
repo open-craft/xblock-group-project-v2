@@ -1,3 +1,4 @@
+from builtins import str
 import json
 from unittest import TestCase
 
@@ -45,16 +46,17 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
         return mock.patch.object(self.project_api, '_do_send_request', mock.Mock(side_effect=side_effect))
 
     @ddt.data(
-        (["part1", "part2"], None, False, api_server_address+"/part1/part2/", {'error': True}),
-        (["part1", "part2"], None, True, api_server_address+"/part1/part2", {'success': True}),
-        (["part1", 1234, "part2"], None, True, api_server_address+"/part1/1234/part2", {'error': True}),
-        (["part1", "part2", 1234], None, True, api_server_address+"/part1/part2/1234", {'success': True}),
-        ([api_server_address, "part1", "part2"], None, False, api_server_address+"/part1/part2/", {'success': True}),
-        (["part1", "part2", "part3"], None, False, api_server_address+"/part1/part2/part3/", {'error': True}),
-        (["part1"], {'qwe': 'rty'}, False, api_server_address+"/part1/?qwe=rty", {'success': True, 'data': [1, 2, 3]}),
-        ([api_server_address, "part1"], {'qwe': 'rty'}, False, api_server_address+"/part1/?qwe=rty", {}),
-        (["part1"], {'qwe': 'rty', 'asd': 'zxc'}, False, api_server_address+"/part1/?qwe=rty&asd=zxc", {}),
-        (["part1"], {'qwe': 'rty', 'asd': 'zxc'}, True, api_server_address+"/part1?qwe=rty&asd=zxc", {}),
+        (["part1", "part2"], None, False, api_server_address + "/part1/part2/", {'error': True}),
+        (["part1", "part2"], None, True, api_server_address + "/part1/part2", {'success': True}),
+        (["part1", 1234, "part2"], None, True, api_server_address + "/part1/1234/part2", {'error': True}),
+        (["part1", "part2", 1234], None, True, api_server_address + "/part1/part2/1234", {'success': True}),
+        ([api_server_address, "part1", "part2"], None, False, api_server_address + "/part1/part2/", {'success': True}),
+        (["part1", "part2", "part3"], None, False, api_server_address + "/part1/part2/part3/", {'error': True}),
+        (["part1"], {'qwe': 'rty'}, False, api_server_address + "/part1/?qwe=rty",
+         {'success': True, 'data': [1, 2, 3]}),
+        ([api_server_address, "part1"], {'qwe': 'rty'}, False, api_server_address + "/part1/?qwe=rty", {}),
+        (["part1"], {'qwe': 'rty', 'asd': 'zxc'}, False, api_server_address + "/part1/?qwe=rty&asd=zxc", {}),
+        (["part1"], {'qwe': 'rty', 'asd': 'zxc'}, True, api_server_address + "/part1?qwe=rty&asd=zxc", {}),
     )
     @ddt.unpack
     def test_send_request_no_data(self, url_parts, query_params, no_trailing_slash, expected_url, expected_response):
@@ -70,23 +72,23 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
 
     # pylint: disable=too-many-arguments
     @ddt.data(
-        (["part1", "part2"], None, [123], False, api_server_address+"/part1/part2/", {'error': True}),
-        (["part1", "part2"], None, 'qwerty', True, api_server_address+"/part1/part2", {'success': True}),
+        (["part1", "part2"], None, [123], False, api_server_address + "/part1/part2/", {'error': True}),
+        (["part1", "part2"], None, 'qwerty', True, api_server_address + "/part1/part2", {'success': True}),
         (
-                ["part1", "part2", "part3"], None, {'data': 11}, False,
-                api_server_address+"/part1/part2/part3/", {'error': True}
+            ["part1", "part2", "part3"], None, {'data': 11}, False,
+            api_server_address + "/part1/part2/part3/", {'error': True}
         ),
         (
-                ["part1"], {'qwe': 'rty'}, {'var1': 1, 'var2': 2}, False,
-                api_server_address+"/part1/?qwe=rty", {'success': True, 'data': [1, 2, 3]}
+            ["part1"], {'qwe': 'rty'}, {'var1': 1, 'var2': 2}, False,
+            api_server_address + "/part1/?qwe=rty", {'success': True, 'data': [1, 2, 3]}
         ),
         (
-                ["part1"], {'qwe': 'rty', 'asd': 'zxc'}, {'stage': 1, 'activity': 2}, False,
-                api_server_address+"/part1/?qwe=rty&asd=zxc", {}
+            ["part1"], {'qwe': 'rty', 'asd': 'zxc'}, {'stage': 1, 'activity': 2}, False,
+            api_server_address + "/part1/?qwe=rty&asd=zxc", {}
         ),
         (
-                ["part1"], {'qwe': 'rty', 'asd': 'zxc'}, {'data': None}, True,
-                api_server_address+"/part1?qwe=rty&asd=zxc", {}
+            ["part1"], {'qwe': 'rty', 'asd': 'zxc'}, {'data': None}, True,
+            api_server_address + "/part1?qwe=rty&asd=zxc", {}
         ),
     )
     @ddt.unpack
@@ -115,7 +117,7 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             result = self.project_api.send_request(patched_delete, ('123', '456'))
             self.assertEqual(result, None)
 
-            patched_delete.assert_called_once_with(self.api_server_address+'/123/456/')
+            patched_delete.assert_called_once_with(self.api_server_address + '/123/456/')
 
     @ddt.data(
         ('user1', 'course1', 'xblock:block-1', []),
@@ -126,7 +128,7 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
     @ddt.unpack
     def test_get_workgroups_to_review(self, user_id, course_id, xblock_id, assignment_ids):
         def assignment_data_by_id(a_id):
-            return {"id": a_id, 'data': 'data'+str(a_id)}
+            return {"id": a_id, 'data': 'data' + str(a_id)}
 
         with mock.patch.object(self.project_api, 'get_review_assignment_groups') as review_assignment_groups, \
                 mock.patch.object(self.project_api, 'get_workgroups_for_assignment') as workgroups_for_assignment:

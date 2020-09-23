@@ -13,9 +13,9 @@ class TestOtherGroupSubmissionLinks(SingleScenarioTestSuite):
 
     def setUp(self):
         super(TestOtherGroupSubmissionLinks, self).setUp()
-        self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=OTHER_GROUPS.values())
+        self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=list(OTHER_GROUPS.values()))
         self.project_api_mock.get_workgroup_reviewers = mock.Mock(return_value=[
-            {"id": user.id} for user in KNOWN_USERS.values()
+            {"id": user.id} for user in list(KNOWN_USERS.values())
         ])
 
     @freeze_time(datetime(2015, 01, 01))

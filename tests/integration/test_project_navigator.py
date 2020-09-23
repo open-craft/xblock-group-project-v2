@@ -43,7 +43,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
         """
         return {
             "issue_tree": {
-                "id": "issue_tree", "document_url": self.live_server_url+"/issue_tree_location",
+                "id": "issue_tree", "document_url": self.live_server_url + "/issue_tree_location",
                 "document_filename": "issue_tree.doc", "modified": "2014-05-22T11:44:14Z",
                 "user_details": KNOWN_USERS[1]
             }
@@ -122,7 +122,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
 
         def assert_stage(stage, activity_name, stage_type, stage_title, stage_state):
             activity_id = [
-                act_id for act_id, act_name in activities_map.iteritems() if act_name == activity_name
+                act_id for act_id, act_name in activities_map.items() if act_name == activity_name
             ][0]
             self.assertEqual(stage.activity_id, activity_id)
             # exact block ids are unknown at runtime, so using categories
@@ -282,7 +282,7 @@ class TestSubmissionUpload(SingleScenarioTestSuite, TestWithPatchesMixin):
         """
         return {
             "issue_tree": {
-                "id": "issue_tree", "document_url": self.live_server_url+"/issue_tree_location",
+                "id": "issue_tree", "document_url": self.live_server_url + "/issue_tree_location",
                 "document_filename": "issue_tree.doc", "modified": "2014-05-22T11:44:14Z",
                 "user_details": KNOWN_USERS[1]
             }
@@ -378,7 +378,7 @@ class TestSubmissionUpload(SingleScenarioTestSuite, TestWithPatchesMixin):
         marketing_pitch = self.prepare_submission()
 
         marketing_pitch.upload_file_and_return_modal(
-                self.image_path('''testdoc.<img onerror="console['log']('XSS')" src="">''')
+            self.image_path('''testdoc.<img onerror="console['log']('XSS')" src="">''')
         )
 
         modal = ModalDialogElement(self.browser)

@@ -1,3 +1,4 @@
+from builtins import object
 from xblock.fields import Boolean, Scope
 from group_project_v2.utils import gettext as _
 from group_project_v2.stage.utils import StageState

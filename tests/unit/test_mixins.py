@@ -1,5 +1,8 @@
+from __future__ import print_function
 # pylint:disable=protected-access,no-self-use,invalid-name
 
+from builtins import str
+from builtins import object
 from unittest import TestCase
 
 import ddt
@@ -156,7 +159,7 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
     def test_render_children(self):
         child1, child2 = mock.Mock(), mock.Mock()
         view1, context1 = 'nav_view', {'qwe': 'asd'}
-        print id(child1), id(child2)
+        print(id(child1), id(child2))
 
         with mock.patch.object(type(self.block), '_children', mock.PropertyMock(return_value=[child1, child2])):
             self.block._render_children(view1, context1)
@@ -193,7 +196,7 @@ class TestCourseAwareXBlockMixin(TestCase, TestWithPatchesMixin):
     )
     def test_course_id(self, course_id):
         self.runtime_mock.course_id = course_id
-        self.assertEqual(self.block.course_id, unicode(course_id))
+        self.assertEqual(self.block.course_id, str(course_id))
 
 
 class UserAwareXBlockMixinGuineaPig(CommonMixinGuineaPig, UserAwareXBlockMixin):

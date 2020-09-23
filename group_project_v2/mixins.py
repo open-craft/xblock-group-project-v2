@@ -1,3 +1,6 @@
+from builtins import str
+from builtins import next
+from builtins import object
 import functools
 import logging
 import os
@@ -76,7 +79,7 @@ class CourseAwareXBlockMixin(object):
     @property
     def course_id(self):
         raw_course_id = getattr(self.runtime, 'course_id', 'all')
-        return unicode(raw_course_id)
+        return str(raw_course_id)
 
 
 class UserAwareXBlockMixin(ProjectAPIXBlockMixin):
@@ -424,7 +427,7 @@ class XBlockWithUrlNameDisplayMixin(object):
         try:
             return super(XBlockWithUrlNameDisplayMixin, self).url_name
         except AttributeError:
-            return unicode(self.scope_ids.usage_id)
+            return str(self.scope_ids.usage_id)
 
     def get_url_name_fragment(self, caption):
         fragment = Fragment()

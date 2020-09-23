@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from builtins import str
+from past.utils import old_div
+from builtins import object
 import csv
 import functools
 import logging
-import urlparse
+import urllib.parse  # pylint: disable=F0401
 import boto3
 from collections import namedtuple
 
@@ -119,7 +126,7 @@ def mean(value_array):
 
     try:
         numeric_values = [float(v) for v in value_array]
-        return float(sum(numeric_values) / len(numeric_values))
+        return float(old_div(sum(numeric_values), len(numeric_values)))
     except (ValueError, TypeError, ZeroDivisionError) as exc:
         log.warning(exc.message)
         return None
@@ -138,7 +145,7 @@ def groupwork_protected_view(func):
         except GroupworkAccessDeniedError as exc:
             error_fragment = Fragment()
             error_fragment.add_content(
-                loader.render_template('/templates/html/loading_error.html', {'error_message': unicode(exc)}))
+                loader.render_template('/templates/html/loading_error.html', {'error_message': str(exc)}))
             error_fragment.add_javascript(loader.load_unicode('public/js/group_project_error.js'))
             error_fragment.initialize_js('GroupProjectError')
             return error_fragment
@@ -251,7 +258,7 @@ def memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME):
         def wrapper(*args, **kwargs):
             key_list = (
                 tuple([func.__name__]) + tuple(args) +
-                tuple("{}:{}".format(key, value) for key, value in kwargs.iteritems())
+                tuple("{}:{}".format(key, value) for key, value in kwargs.items())
             )
             key = make_key(key_list)
             if key not in cache or cache[key]['timestamp'] + expires_after <= datetime.now():
@@ -315,7 +322,7 @@ def add_resource(block, resource_type, path, fragment, via_url=False):
 
 
 def get_block_content_id(block):
-    return unicode(block.scope_ids.usage_id)
+    return str(block.scope_ids.usage_id)
 
 
 @register.filter
@@ -350,7 +357,7 @@ def export_to_csv(data, target, headers=None):
 
 
 def named_tuple_with_docstring(type_name, field_names, docstring, verbose=False, rename=False):
-    named_tuple_type = namedtuple(type_name+"_", field_names, verbose=verbose, rename=rename)
+    named_tuple_type = namedtuple(type_name + "_", field_names, verbose=verbose, rename=rename)
 
     wrapper_class = type(type_name, (named_tuple_type,), {"__doc__": docstring})
     return wrapper_class
@@ -361,7 +368,7 @@ def is_absolute(url):
     :param url[str] url to asses
     Returns a boolean value indicating if given `url` is absolute or not.
     """
-    return bool(urlparse.urlparse(url).netloc)
+    return bool(urllib.parse.urlparse(url).netloc)
 
 
 class PrivateMediaStorage(S3BotoStorage):

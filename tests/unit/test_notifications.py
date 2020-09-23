@@ -1,3 +1,5 @@
+from builtins import next
+from builtins import str
 from datetime import datetime, timedelta
 from unittest import TestCase
 import ddt
@@ -23,7 +25,7 @@ def get_notification_type(message_type):
 def make_workgroup(user_ids):
     return WorkgroupDetails(
         users=[
-            {"id": user_id, "username": "User"+str(user_id), "email": "{0}@example.com".format(user_id)}
+            {"id": user_id, "username": "User" + str(user_id), "email": "{0}@example.com".format(user_id)}
             for user_id in user_ids
         ])
 
@@ -100,12 +102,12 @@ class TestStageNotificationsMixin(BaseNotificationsTestCase, TestWithPatchesMixi
             user_ids, message = self._get_call_args(self.notifications_service_mock.bulk_publish_notification_to_users)
             self.assertEqual(set(user_ids), expected_user_ids)
             self.assertEqual(message.msg_type.name, NotificationMessageTypes.FILE_UPLOADED)
-            self.assertEqual(message.namespace, unicode(course_id))
+            self.assertEqual(message.namespace, str(course_id))
             self.assertEqual(message.payload['action_username'], expected_action_username)
             self.assertEqual(message.payload['activity_name'], name)
 
             patched_link_params.assert_called_once_with(
-                {'course_id': unicode(course_id), 'location': unicode(stage_location)}
+                {'course_id': str(course_id), 'location': str(stage_location)}
             )
 
     @ddt.data(ValueError("test"), TypeError("QWE"), AttributeError("OMG"), Exception("Very Generic"))
@@ -165,11 +167,11 @@ class TestStageNotificationsMixin(BaseNotificationsTestCase, TestWithPatchesMixi
             self.assertEqual(kwargs['ignore_if_past_due'], ignore_if_past_due)
             message = kwargs['msg']
             self.assertEqual(message.msg_type.name, NotificationMessageTypes.GRADES_POSTED)
-            self.assertEqual(message.namespace, unicode(course_id))
+            self.assertEqual(message.namespace, str(course_id))
             self.assertEqual(message.payload['activity_name'], 'Activity Name')
 
             patched_link_params.assert_called_once_with(
-                {'course_id': unicode(course_id), 'location': unicode(block.location)}
+                {'course_id': str(course_id), 'location': str(block.location)}
             )
 
     @ddt.data(ValueError("test"), TypeError("QWE"), AttributeError("OMG"), Exception("Very Generic"))

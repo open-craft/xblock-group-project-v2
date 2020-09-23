@@ -1,6 +1,8 @@
 """
 This module contains classes representing various GroupProject page elements
 """
+from builtins import next
+from builtins import object
 from lazy.lazy import lazy
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.select import Select
@@ -83,13 +85,13 @@ class GroupProjectElement(BaseElement):
         )
 
     def get_activity_by_id(self, activity_id):
-        activity_selector = self.ACTIVITY_CSS_SELECTOR+"[data-usage='{}']".format(activity_id)
+        activity_selector = self.ACTIVITY_CSS_SELECTOR + "[data-usage='{}']".format(activity_id)
         activity_element = self.element.find_element_by_css_selector(activity_selector)
         return self.make_element(activity_element, ActivityElement)
 
     def find_stage(self, activity_id, stage_id):
-        activity_selector = self.ACTIVITY_CSS_SELECTOR+"[data-usage='{}']".format(activity_id)
-        stage_selector = "#activity_"+stage_id
+        activity_selector = self.ACTIVITY_CSS_SELECTOR + "[data-usage='{}']".format(activity_id)
+        stage_selector = "#activity_" + stage_id
         activity_element = self.element.find_element_by_css_selector(activity_selector)
         return activity_element.find_element_by_css_selector(stage_selector)
 
