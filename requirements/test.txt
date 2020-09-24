@@ -11,6 +11,7 @@ django-pyfs==1.0.6
 bok-choy==1.0.0
 # given that libmagic is installed
 python-magic==0.4.18
+xblockutils==1.2.4
 
 -e git+https://github.com/edx/xblock-sdk.git@c40b5dc3e9a2ded54119e922edf486d3ccec6c35#egg=xblock_sdk
 -e git://github.com/nosedjango/nosedjango.git@v1.0.12#egg=nosedjango-dev==v1.0.12
