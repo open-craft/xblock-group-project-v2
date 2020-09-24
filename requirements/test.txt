@@ -15,7 +15,7 @@ mako
 bok_choy==0.4.3
 python-dateutil==2.8.1
 pypng
-Django==1.8.18
+Django==1.11
 django-appconf==1.0.3
 django-nose==1.4.1
 pytest
