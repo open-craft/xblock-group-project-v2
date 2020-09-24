@@ -9,8 +9,6 @@ before_install:
 install:
     - "pip install -r requirements/base.txt"
     - "pip install -r requirements/test.txt"
-    - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/requirements/base.txt"
-    - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/requirements/test.txt"
     - "python setup.py sdist && pip install dist/xblock-group-project-v2-*.tar.gz"
     - "npm install"
 script:
