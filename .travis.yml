@@ -9,7 +9,6 @@ before_install:
 install:
     - "pip install -r requirements/base.txt"
     - "pip install -r requirements/test.txt"
-    - "python setup.py sdist && pip install dist/xblock-group-project-v2-*.tar.gz"
     - "npm install"
 script:
     - pep8 group_project_v2 tests --max-line-length=120
