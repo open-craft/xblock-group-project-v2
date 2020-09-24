@@ -20,7 +20,7 @@ script:
     - cat coverage/js/karma_coverage.txt
     - mkdir var
     - touch workbench.log
-    - python run_tests.py --with-coverage --cover-package=group_project_v2
+    - python run_tests.py
 notifications:
   email: false
 addons:
