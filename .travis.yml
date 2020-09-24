@@ -2,9 +2,6 @@ language: python
 python:
     - "2.7"
 before_install:
-    - wget "https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz"
-    - tar xfz geckodriver-v0.24.0-linux64.tar.gz
-    - sudo mv geckodriver /usr/local/bin
     - "export DISPLAY=:99"
     - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1920x1080x16"
 install:
@@ -27,4 +24,4 @@ script:
 notifications:
   email: false
 addons:
-  firefox: "61.02"
+  firefox: "36.02"
