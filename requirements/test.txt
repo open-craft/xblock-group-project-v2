@@ -7,6 +7,6 @@ django-nose==1.4.1
 django-statici18n==1.8.2
 edx-i18n-tools==0.4.7
 
--e git+https://github.com/edx/xblock-sdk.git@v1.8=xblock_sdk
+-e git+https://github.com/edx/xblock-sdk.git@v1.8#egg=xblock_sdk
 -e git+git://github.com/nosedjango/nosedjango.git#egg=nosedjango
 -e git+https://github.com/edx/edx-notifications.git@0.6.0#egg=edx-notifications==0.6.0
