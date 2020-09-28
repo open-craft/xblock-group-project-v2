@@ -6,6 +6,7 @@ from tests.integration.base_test import SingleScenarioTestSuite
 
 log = logging.getLogger(__name__)
 
+
 class TestGeneralFunctionality(SingleScenarioTestSuite):
     scenario = "example_1.xml"
 

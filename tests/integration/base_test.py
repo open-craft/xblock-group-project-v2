@@ -158,6 +158,7 @@ class BaseIntegrationTest(SeleniumXBlockTest):
 
         EmptyPromise(_is_ajax_finished, "Finished waiting for ajax requests.").fulfill()
 
+
 class SingleScenarioTestSuite(BaseIntegrationTest):
     """
     Helper class for single scenario tests
