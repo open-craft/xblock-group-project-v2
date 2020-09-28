@@ -8,7 +8,7 @@ from group_project_v2.utils import log_and_suppress_exceptions
 
 try:
     # Python 2: "unicode" is built-in
-    unicode
+    unicode # pylint: disable=C0130
 except NameError:
     unicode = str
 

@@ -5,7 +5,7 @@ from builtins import str
 from past.utils import old_div
 import logging
 from collections import OrderedDict
-from urllib.parse import urlencode
+from urllib.parse import urlencode # pylint: disable=F0401
 from datetime import datetime, timedelta
 from lazy.lazy import lazy
 import pytz
