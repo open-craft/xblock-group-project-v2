@@ -122,7 +122,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
 
         def assert_stage(stage, activity_name, stage_type, stage_title, stage_state):
             activity_id = [
-                act_id for act_id, act_name in activities_map.iteritems() if act_name == activity_name
+                act_id for act_id, act_name in activities_map.items() if act_name == activity_name
             ][0]
             self.assertEqual(stage.activity_id, activity_id)
             # exact block ids are unknown at runtime, so using categories

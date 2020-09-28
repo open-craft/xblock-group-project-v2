@@ -1,6 +1,8 @@
 from __future__ import print_function
 # pylint:disable=protected-access,no-self-use,invalid-name
 
+from builtins import str
+from builtins import object
 from unittest import TestCase
 
 import ddt
@@ -194,7 +196,7 @@ class TestCourseAwareXBlockMixin(TestCase, TestWithPatchesMixin):
     )
     def test_course_id(self, course_id):
         self.runtime_mock.course_id = course_id
-        self.assertEqual(self.block.course_id, unicode(course_id))
+        self.assertEqual(self.block.course_id, str(course_id))
 
 
 class UserAwareXBlockMixinGuineaPig(CommonMixinGuineaPig, UserAwareXBlockMixin):

@@ -1,6 +1,9 @@
 """
 Tests for stage contents and interaction
 """
+from builtins import zip
+from builtins import str
+from builtins import range
 from collections import defaultdict
 
 import datetime
@@ -42,7 +45,7 @@ class StageTestBase(BaseIntegrationTest):
 
         def format_args(arg_dict):
             return " ".join(
-                ["{}='{}'".format(arg_name, arg_value) for arg_name, arg_value in arg_dict.iteritems()])
+                ["{}='{}'".format(arg_name, arg_value) for arg_name, arg_value in arg_dict.items()])
 
         stage_arguments = {'display_name': title}
         stage_arguments.update(kwargs)
@@ -262,7 +265,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         def submit_peer_review_items(reviewer_id, peer_id, group_id, content_id, data):
             new_items = [
                 mri(reviewer_id, question_id, peer=peer_id, content_id=content_id, answer=answer, group=group_id)
-                for question_id, answer in data.iteritems()
+                for question_id, answer in data.items()
                 if len(answer) > 0
             ]
             store[peer_id].extend(new_items)
@@ -277,7 +280,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
     def test_rendering_questions(self):
         stage_element = self.get_stage(self.go_to_view())
 
-        expected_options = {str(idx): str(idx) for idx in xrange(1, 11)}
+        expected_options = {str(idx): str(idx) for idx in range(1, 11)}
         expected_options.update({"": "Rating"})
 
         questions = stage_element.form.questions
@@ -316,7 +319,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         }
         self._assert_teammate_statuses(stage_element, expected_statuses)
 
-    @ddt.data(*KNOWN_USERS.keys())  # pylint: disable=star-args
+    @ddt.data(*list(KNOWN_USERS.keys()))  # pylint: disable=star-args
     def test_interaction(self, user_id):
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
 
@@ -332,12 +335,12 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
             self.select_review_subject(peer)
             self.assertEqual(stage_element.form.peer_id, user_id)
 
-    @ddt.data(*KNOWN_USERS.keys())  # pylint: disable=star-args
+    @ddt.data(*list(KNOWN_USERS.keys()))  # pylint: disable=star-args
     def test_submission(self, user_id):
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
         self._setup_review_items_store()
 
-        initial_statuses = {usr_id: ReviewState.NOT_STARTED for usr_id in KNOWN_USERS.keys() if usr_id != user_id}
+        initial_statuses = {usr_id: ReviewState.NOT_STARTED for usr_id in list(KNOWN_USERS.keys()) if usr_id != user_id}
         self._assert_teammate_statuses(stage_element, initial_statuses)  # precondition check
 
         peer = stage_element.peers[0]
@@ -366,7 +369,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
             expected_submissions
         )
 
-        expected_statuses = {usr_id: ReviewState.NOT_STARTED for usr_id in KNOWN_USERS.keys() if usr_id != user_id}
+        expected_statuses = {usr_id: ReviewState.NOT_STARTED for usr_id in list(KNOWN_USERS.keys()) if usr_id != user_id}
         expected_statuses[int(peer.subject_id)] = ReviewState.COMPLETED  # status is refreshed after submission
         self._assert_teammate_statuses(stage_element, expected_statuses)
 
@@ -380,7 +383,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
 
         self.project_api_mock.get_peer_review_items.return_value = [
             {"question": question, "answer": answer, "user": TestConstants.Users.USER2_ID}
-            for question, answer in expected_submissions.iteritems()
+            for question, answer in expected_submissions.items()
         ]
 
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
@@ -442,7 +445,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
                 "reviewer": str(user_id),
                 "content_id": self.activity_id,
             }
-            for question, answer in expected_submissions.iteritems()
+            for question, answer in expected_submissions.items()
             for peer_id in other_users
         ]
 
@@ -519,9 +522,9 @@ class BasePeerReviewStageTest(BaseReviewStageTest):
 
     def setUp(self):
         super(BasePeerReviewStageTest, self).setUp()
-        self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=OTHER_GROUPS.values())
+        self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=list(OTHER_GROUPS.values()))
         self.project_api_mock.get_workgroup_reviewers = mock.Mock(return_value=[
-            {"id": user.id} for user in KNOWN_USERS.values()
+            {"id": user.id} for user in list(KNOWN_USERS.values())
         ])
 
     def _setup_review_items_store(self, initial_items=None):
@@ -535,7 +538,7 @@ class BasePeerReviewStageTest(BaseReviewStageTest):
         def submit_review_items(reviewer_id, group_id, content_id, data):
             new_items = [
                 mri(reviewer_id, question_id, content_id=content_id, answer=answer, group=group_id)
-                for question_id, answer in data.iteritems()
+                for question_id, answer in data.items()
                 if len(answer) > 0
             ]
             store[group_id].extend(new_items)
@@ -557,7 +560,7 @@ class PeerReviewStageTest(BasePeerReviewStageTest):
     def test_renderigng_questions(self):
         stage_element = self.get_stage(self.go_to_view())
 
-        expected_options = {str(idx): str(idx) for idx in xrange(0, 101, 5)}
+        expected_options = {str(idx): str(idx) for idx in range(0, 101, 5)}
         expected_options.update({"": "Grade"})
 
         questions = stage_element.form.questions
@@ -605,8 +608,8 @@ class PeerReviewStageTest(BasePeerReviewStageTest):
         self.assertIn(stage_element.form.group_id, OTHER_GROUPS)
 
         groups = stage_element.groups
-        self.assertEqual(len(groups), len(OTHER_GROUPS.keys()))
-        for group_id, group in zip(OTHER_GROUPS.keys(), groups):
+        self.assertEqual(len(groups), len(list(OTHER_GROUPS.keys())))
+        for group_id, group in zip(list(OTHER_GROUPS.keys()), groups):
             self.select_review_subject(group)
             self.assertEqual(stage_element.form.group_id, group_id)
 
@@ -662,7 +665,7 @@ class PeerReviewStageTest(BasePeerReviewStageTest):
 
         self.project_api_mock.get_workgroup_review_items.return_value = [
             {"question": question, "answer": answer, "workgroup": TestConstants.Groups.GROUP2_ID}
-            for question, answer in expected_submissions.iteritems()
+            for question, answer in expected_submissions.items()
         ]
 
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
@@ -705,7 +708,7 @@ class PeerReviewStageTest(BasePeerReviewStageTest):
 
     def test_completion(self):
         user_id = 1
-        workgroups_to_review = OTHER_GROUPS.keys()
+        workgroups_to_review = list(OTHER_GROUPS.keys())
         expected_submissions = {
             "group_score": "100",
             "group_q1": "Y",
@@ -722,9 +725,9 @@ class PeerReviewStageTest(BasePeerReviewStageTest):
                 "reviewer": str(reviewer_id),
                 "content_id": self.activity_id,
             }
-            for question, answer in expected_submissions.iteritems()
+            for question, answer in expected_submissions.items()
             for group_id in workgroups_to_review
-            for reviewer_id in KNOWN_USERS.keys()
+            for reviewer_id in list(KNOWN_USERS.keys())
         ]
 
         group = stage_element.groups[0]
@@ -818,7 +821,7 @@ class TestTAGradedPeerReview(BasePeerReviewStageTest):
         # mocking response after submitting
         self.project_api_mock.get_workgroup_review_items_for_group.return_value = [
             {"reviewer": str(user_id), "answer": answer, 'question': question, "workgroup": stage_element.form.group_id}
-            for question, answer in submissions.iteritems()
+            for question, answer in submissions.items()
         ]
 
         with mock.patch.object(WorkbenchRuntime, 'publish') as patched_method:

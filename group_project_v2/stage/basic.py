@@ -1,3 +1,4 @@
+from builtins import str
 import logging
 from xblock.core import XBlock
 from xblock.fields import String, Scope

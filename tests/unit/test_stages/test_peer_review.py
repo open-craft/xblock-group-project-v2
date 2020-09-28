@@ -281,7 +281,7 @@ class TestPeerReviewStageReviewStatus(ReviewStageBaseTest, ReviewStageUserComple
             self, target_users, group_reviewers, questions, review_items, expected_result
     ):
         groups_to_review = defaultdict(list)
-        for group_id, reviewers in group_reviewers.iteritems():
+        for group_id, reviewers in group_reviewers.items():
             for reviewer in reviewers:
                 groups_to_review[reviewer].append(mk_wg(group_id))
 
@@ -289,14 +289,14 @@ class TestPeerReviewStageReviewStatus(ReviewStageBaseTest, ReviewStageUserComple
             groups_to_review,
             {
                 group_id: [self._parse_review_item_string(item) for item in items]
-                for group_id, items in review_items.iteritems()
+                for group_id, items in review_items.items()
             }
         )
 
         self.assert_users_completion(expected_result, questions, target_users)
         # checks if caching is ok
         expected_calls = [
-            mock.call(group_id, self.block.activity_content_id) for group_id in group_reviewers.keys()
+            mock.call(group_id, self.block.activity_content_id) for group_id in list(group_reviewers.keys())
         ]
         self.assertEqual(self.project_api_mock.get_workgroup_review_items_for_group.mock_calls, expected_calls)
 
@@ -331,7 +331,7 @@ class TestPeerReviewStageReviewStatus(ReviewStageBaseTest, ReviewStageUserComple
             group,
             {
                 group.id: [self._parse_review_item_string(item) for item in items]
-                for group_id, items in review_items.iteritems()
+                for group_id, items in review_items.items()
             }
         )
 
@@ -369,7 +369,7 @@ class TestPeerReviewStageReviewStatus(ReviewStageBaseTest, ReviewStageUserComple
             group_to_review,
             {
                 group_to_review.id: [self._parse_review_item_string(item) for item in items]
-                for group_id, items in review_items.iteritems()
+                for group_id, items in review_items.items()
             }
         )
 

@@ -1,6 +1,11 @@
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from past.utils import old_div
 import logging
 from collections import OrderedDict
-from urllib import urlencode
+from urllib.parse import urlencode
 from datetime import datetime, timedelta
 from lazy.lazy import lazy
 import pytz
@@ -325,8 +330,8 @@ class BaseGroupActivityStage(
         )
         log.info(STAGE_STATS_LOG_TPL, log_format_data)
 
-        completed_ratio = len(completed_users_ids & target_user_ids) / target_user_count
-        partially_completed_ratio = len(partially_completed_users_ids & target_user_ids) / target_user_count
+        completed_ratio = old_div(len(completed_users_ids & target_user_ids), target_user_count)
+        partially_completed_ratio = old_div(len(partially_completed_users_ids & target_user_ids), target_user_count)
 
         return {
             StageState.COMPLETED: completed_ratio,

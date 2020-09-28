@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import range
 from unittest import TestCase
 import ddt
 import mock
@@ -22,7 +24,7 @@ class FieldValuesContextManagerTests(TestCase):
         self.runtime_mock = mock.Mock()
         self.block = DummyXBlock(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
 
-    @ddt.data([], [1, 2, 3], range(5))
+    @ddt.data([], [1, 2, 3], list(range(5)))
     def test_context_manager(self, values):
         values_generator = mock.Mock(return_value=values)
         initial_values = self.block.fields['field'].values
@@ -46,7 +48,7 @@ class TestUtils(TestCase):
     def test_get_block_content_id(self, usage):
         block = mock.Mock()
         block.scope_ids.usage_id = usage
-        self.assertEqual(get_block_content_id(block), unicode(usage))
+        self.assertEqual(get_block_content_id(block), str(usage))
 
     @ddt.data(
         ("2017-01-01T00:00:00", datetime(2017, 1, 1, 0, 0, 0, 0, tzinfo=None)),
