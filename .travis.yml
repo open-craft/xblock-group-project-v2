@@ -26,7 +26,6 @@ script:
     - mkdir var
     - touch workbench.log
     - python run_tests.py
-    - pytest tests/unit
 notifications:
   email: false
 addons:
