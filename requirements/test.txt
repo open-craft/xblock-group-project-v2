@@ -6,16 +6,7 @@ diff-cover
 django-statici18n==1.8.2
 edx-i18n-tools==0.4.7
 
--e git+https://github.com/edx/xblock-sdk.git@v0.1.6#egg=xblock_sdk
--e git+git://github.com/nosedjango/nosedjango.git#egg=nosedjango
--e git+https://github.com/edx/edx-notifications.git@1.0.4#egg=edx-notifications==1.0.4
-
-django-pyfs==1.0.6
-mako
-bok_choy==0.4.3
-python-dateutil==2.8.1
-pypng
-Django==1.11
-django-appconf==1.0.3
-django-nose==1.4.1
+-e git+https://github.com/edx/xblock-sdk.git@c40b5dc3e9a2ded54119e922edf486d3ccec6c35#egg=xblock_sdk
+-e git://github.com/nosedjango/nosedjango.git@v1.0.12#egg=nosedjango-dev==v1.0.12
+-e git+https://github.com/edx/edx-notifications.git@0.6.0#egg=edx-notifications==0.6.0
 pytest
