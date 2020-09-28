@@ -1,3 +1,4 @@
+from __future__ import print_function
 # pylint:disable=protected-access,no-self-use,invalid-name
 
 from unittest import TestCase
@@ -156,7 +157,7 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
     def test_render_children(self):
         child1, child2 = mock.Mock(), mock.Mock()
         view1, context1 = 'nav_view', {'qwe': 'asd'}
-        print id(child1), id(child2)
+        print(id(child1), id(child2))
 
         with mock.patch.object(type(self.block), '_children', mock.PropertyMock(return_value=[child1, child2])):
             self.block._render_children(view1, context1)
