@@ -1,5 +1,4 @@
 """ Base classes for integration tests """
-import pytest
 from bok_choy.promise import EmptyPromise
 import mock
 from sample_xblocks.basic.content import HtmlBlock
@@ -27,7 +26,6 @@ class DummyDiscussionXBlock(XBlock):
         return Fragment(u"Discussion XBlock placeholder")
 
 
-@pytest.fixture(scope="session")
 class BaseIntegrationTest(SeleniumXBlockTest):
     """ Base Integraition test class """
     PROJECT_API_PATCHES = (
@@ -160,7 +158,6 @@ class BaseIntegrationTest(SeleniumXBlockTest):
 
         EmptyPromise(_is_ajax_finished, "Finished waiting for ajax requests.").fulfill()
 
-@pytest.fixture(scope="session")
 class SingleScenarioTestSuite(BaseIntegrationTest):
     """
     Helper class for single scenario tests
