@@ -8,9 +8,9 @@ from group_project_v2.utils import log_and_suppress_exceptions
 
 try:
     # Python 2: "unicode" is built-in
-    unicode  # pylint: disable=C0130
+    unicode  # pylint: disable=I0011,C0103
 except NameError:
-    unicode = str
+    unicode = str # pylint: disable=I0011,C0103
 
 try:
     from edx_notifications.data import NotificationMessage  # pylint: disable=import-error
