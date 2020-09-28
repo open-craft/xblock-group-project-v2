@@ -7,6 +7,12 @@ import pytz
 from group_project_v2.utils import log_and_suppress_exceptions
 
 try:
+    # Python 2: "unicode" is built-in
+    unicode
+except NameError:
+    unicode = str
+
+try:
     from edx_notifications.data import NotificationMessage  # pylint: disable=import-error
 except ImportError:
     # Notifications is an optional runtime configuration, so it may not be available for import
@@ -45,13 +51,13 @@ def add_click_link_params(msg, course_id, location):
     In the initial use case, we need to make the link point to a different front end website so we need to
     resolve these links at dispatch time
     """
-    msg.add_click_link_params({'course_id': str(course_id), 'location': str(location)})
+    msg.add_click_link_params({'course_id': unicode(course_id), 'location': unicode(location)})
 
 
 class StageNotificationsMixin(object):
     def _get_stage_timer_name(self, timer_name_suffix):
         return '{location}-{timer_name_suffix}'.format(
-            location=str(self.location),
+            location=unicode(self.location),
             timer_name_suffix=timer_name_suffix
         )
 
@@ -66,7 +72,7 @@ class StageNotificationsMixin(object):
 
         msg = NotificationMessage(
             msg_type=notifications_service.get_notification_type(msg_type),
-            namespace=str(course_id),
+            namespace=unicode(course_id),
             payload={
                 '_schema_version': 1,
                 'activity_name': self.activity.display_name,
@@ -83,8 +89,8 @@ class StageNotificationsMixin(object):
             # send to all students participating in this project
             scope_name=NotificationScopes.PARTICIPANTS,
             scope_context={
-                'course_id': str(course_id),
-                'content_id': str(self.activity.project.location),
+                'course_id': unicode(course_id),
+                'content_id': unicode(self.activity.project.location),
             },
             timer_name=self._get_stage_timer_name(timer_name_suffix),
             ignore_if_past_due=True  # don't send if we're already late!
@@ -166,15 +172,15 @@ class StageNotificationsMixin(object):
 
         msg = NotificationMessage(
             msg_type=msg_type,
-            namespace=str(self.course_id),
+            namespace=unicode(self.course_id),
             payload={
                 '_schema_version': 1,
                 'action_username': uploader_username,
                 'activity_name': self.activity.display_name,
             }
         )
-        location = str(self.location) if self.location else ''
-        add_click_link_params(msg, str(self.course_id), location)
+        location = unicode(self.location) if self.location else ''
+        add_click_link_params(msg, unicode(self.course_id), location)
 
         # NOTE: We're not using Celery here since we are expecting that we
         # will have only a very small handful of workgroup users
@@ -192,14 +198,14 @@ class StageNotificationsMixin(object):
         msg_type = notifications_service.get_notification_type(NotificationMessageTypes.GRADES_POSTED)
         msg = NotificationMessage(
             msg_type=msg_type,
-            namespace=str(self.course_id),
+            namespace=unicode(self.course_id),
             payload={
                 '_schema_version': 1,
                 'activity_name': self.activity.display_name,
             }
         )
-        location = str(self.location) if self.location else ''
-        add_click_link_params(msg, str(self.course_id), location)
+        location = unicode(self.location) if self.location else ''
+        add_click_link_params(msg, unicode(self.course_id), location)
 
         send_at_date = self.open_date.replace(tzinfo=pytz.UTC) if self.open_date else None
         ignore_if_past_due = True
