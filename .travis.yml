@@ -17,7 +17,7 @@ install:
     - "pip install -e ."
     - "npm install"
 script:
-    - pep8 group_project_v2 tests --max-line-length=120
+    - pep8 group_project_v2 tests --max-line-length=120 --ignore=E402
     - pylint group_project_v2 --rcfile=pylintrc
     - pylint tests --rcfile=tests/pylintrc
     - ./node_modules/jshint/bin/jshint group_project_v2 tests
