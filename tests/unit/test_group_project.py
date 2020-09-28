@@ -279,7 +279,7 @@ class TestGetDashboardURL(TestWithPatchesMixin, TestCase):
     @staticmethod
     def _get_dashboard_url(template, program_id=None, course_id=None, project_id=None, activity_id=None):
         return template.format(
-            program_id=program_id, course_id=course_id,  project_id=project_id, activity_id=activity_id
+            program_id=program_id, course_id=course_id, project_id=project_id, activity_id=activity_id
         )
 
     @ddt.data('activity_1', 'activity_2', 'activity_92', 'qweasdzxc')
@@ -332,8 +332,8 @@ class TestGetDashboardURL(TestWithPatchesMixin, TestCase):
         ('/{program_id}/part2/{activity_id}', 'act_1', 'prog_1', 'na', 'na', '/prog_1/part2/act_1'),
         ('/{program_id}/{course_id}/{activity_id}', 'act_2', 'prog_2', 'c_2', 'na', '/prog_2/c_2/act_2'),
         (
-                '/{program_id}/{course_id}/{project_id}?act={activity_id}',
-                'act_3', 'prog_3', 'c_3', 'proj_3', '/prog_3/c_3/proj_3?act=act_3'
+            '/{program_id}/{course_id}/{project_id}?act={activity_id}',
+            'act_3', 'prog_3', 'c_3', 'proj_3', '/prog_3/c_3/proj_3?act=act_3'
         ),
     )
     @ddt.unpack
@@ -373,7 +373,7 @@ class TestCalculateGradeGroupActivityXBlock(TestWithPatchesMixin, TestCase):
         (3, ["q1"], [1, 2], [], None),
         (4, ["q1"], [1], [(1, "q1", 100)], 100),
         (5, ["q1", "q2"], [1], [(1, "q1", 20), (1, "q2", 30)], 25),
-        (6, ["q1", "q2"], [1], [(1, "q1", 1), (1, "q2", 2)], round((1.0+2.0)/2.0)),  # rounding
+        (6, ["q1", "q2"], [1], [(1, "q1", 1), (1, "q2", 2)], round((1.0 + 2.0) / 2.0)),  # rounding
         (7, ["q1", "q2"], [1, 2], [(1, "q1", 1), (1, "q2", 2)], None),
         (8, ["q1", "q2"], [1, 2], [(1, "q1", 1), (1, "q2", 2), (2, "q2", 0)], None),
         (9, ["q1", "q2"], [1, 2], [(1, "q1", 10), (1, "q2", 20), (2, "q1", 30), (2, "q2", 60)], 30.0),
@@ -414,7 +414,7 @@ class TestCalculateGradeGroupActivityXBlock(TestWithPatchesMixin, TestCase):
             return_value=[{"id": rew_id} for rew_id in reviewer_ids]
         )
         self.project_api_mock.get_workgroup_review_items_for_group = mock.Mock(
-            return_value=_make_reviews(reviews)+_make_reviews(admin_reviews)
+            return_value=_make_reviews(reviews) + _make_reviews(admin_reviews)
         )
 
         self.grade_questions_mock.return_value = [_make_question(question_id) for question_id in question_ids]

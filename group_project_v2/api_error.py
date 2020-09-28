@@ -2,7 +2,7 @@ from future import standard_library
 standard_library.install_aliases()
 import logging
 import json
-from urllib.error import HTTPError # pylint: disable=F0401
+from urllib.error import HTTPError  # pylint: disable=F0401
 
 from group_project_v2.utils import gettext as _
 

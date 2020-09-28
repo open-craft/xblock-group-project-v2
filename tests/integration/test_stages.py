@@ -370,7 +370,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
         )
 
         expected_statuses = {usr_id: ReviewState.NOT_STARTED
-                            for usr_id in list(KNOWN_USERS.keys()) if usr_id != user_id}
+                             for usr_id in list(KNOWN_USERS.keys()) if usr_id != user_id}
         expected_statuses[int(peer.subject_id)] = ReviewState.COMPLETED  # status is refreshed after submission
         self._assert_teammate_statuses(stage_element, expected_statuses)
 

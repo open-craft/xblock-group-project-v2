@@ -25,7 +25,7 @@ def get_notification_type(message_type):
 def make_workgroup(user_ids):
     return WorkgroupDetails(
         users=[
-            {"id": user_id, "username": "User"+str(user_id), "email": "{0}@example.com".format(user_id)}
+            {"id": user_id, "username": "User" + str(user_id), "email": "{0}@example.com".format(user_id)}
             for user_id in user_ids
         ])
 

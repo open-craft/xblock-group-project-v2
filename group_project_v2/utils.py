@@ -9,7 +9,7 @@ from builtins import object
 import csv
 import functools
 import logging
-import urllib.parse # pylint: disable=F0401
+import urllib.parse  # pylint: disable=F0401
 import boto3
 from collections import namedtuple
 

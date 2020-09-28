@@ -39,28 +39,28 @@ class TestSubmissionStage(BaseStageTest):
         (['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])], {1: ['u1']}, (set(), {1, 2})),
         # two groups, some submissions for g1 and g2 - users both in g1 and g2 partially completed
         (
-                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
-                {1: ['u1'], 2: ['u2']}, (set(), {1, 2, 3})
+            ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+            {1: ['u1'], 2: ['u2']}, (set(), {1, 2, 3})
         ),
         # two groups, all submissions for g1, some for g2 - g1 users completed, g2 users partially completed
         (
-                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
-                {1: ['u1', 'u2'], 2: ['u2']}, ({1, 2}, {3})
+            ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+            {1: ['u1', 'u2'], 2: ['u2']}, ({1, 2}, {3})
         ),
         # two groups, some submissions for g1, all for g2 - g2 users completed, g1 users partially completed
         (
-                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
-                {1: ['u1'], 2: ['u1', 'u2']}, ({3}, {1, 2})
+            ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+            {1: ['u1'], 2: ['u1', 'u2']}, ({3}, {1, 2})
         ),
         # two groups, all submissions for g2, none for g1 - g2 users completed, g1 users not started
         (
-                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
-                {2: ['u1', 'u2']}, ({3}, set())
+            ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+            {2: ['u1', 'u2']}, ({3}, set())
         ),
         # two groups, all submissions for g1 and g2 - users in g1 and g2 completed
         (
-                ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
-                {1: ['u1', 'u2'], 2: ['u1', 'u2']}, ({1, 2, 3}, set())
+            ['u1', 'u2'], [mk_wg(1, [{'id': 1}, {'id': 2}]), mk_wg(2, [{'id': 3}])],
+            {1: ['u1', 'u2'], 2: ['u1', 'u2']}, ({1, 2, 3}, set())
         ),
     )
     @ddt.unpack

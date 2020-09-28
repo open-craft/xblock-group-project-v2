@@ -2,7 +2,7 @@
 from future import standard_library
 standard_library.install_aliases()
 import logging
-from urllib.request import urlopen, Request, build_opener, HTTPHandler # pylint: disable=F0401
+from urllib.request import urlopen, Request, build_opener, HTTPHandler  # pylint: disable=F0401
 import json
 from django.conf import settings
 

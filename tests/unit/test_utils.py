@@ -56,8 +56,8 @@ class TestUtils(TestCase):
         ("2016-11-28T14:53:22.763Z", datetime(2016, 11, 28, 14, 53, 22, 763000, tzinfo=pytz.UTC)),
         ("2015-03-09T05:06:07.000001Z", datetime(2015, 3, 9, 5, 6, 7, 1, tzinfo=pytz.UTC)),
         (
-                "2015-03-09T05:06:07.123456+08:00",
-                datetime(2015, 3, 9, 5, 6, 7, 123456, tzinfo=tzoffset(None, 28800))
+            "2015-03-09T05:06:07.123456+08:00",
+            datetime(2015, 3, 9, 5, 6, 7, 123456, tzinfo=tzoffset(None, 28800))
         ),
         ("", None),
         ("qwertyuiop", None),

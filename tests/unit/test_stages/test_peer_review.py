@@ -100,63 +100,63 @@ class TestPeerReviewStageReviewStatus(ReviewStageBaseTest, ReviewStageUserComple
         ([GROUP_ID], ["q1"], {GROUP_ID: []}, ReviewState.NOT_STARTED),
         ([GROUP_ID], ["q1"], {GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='1')]}, ReviewState.COMPLETED),
         (
-                [GROUP_ID], ["q1"],
-                {GROUP_ID: [mri(OTHER_USER_ID, "q1", group=GROUP_ID, answer='1')]}, ReviewState.NOT_STARTED
+            [GROUP_ID], ["q1"],
+            {GROUP_ID: [mri(OTHER_USER_ID, "q1", group=GROUP_ID, answer='1')]}, ReviewState.NOT_STARTED
         ),
         (
-                [GROUP_ID], ["q1", "q2"],
-                {GROUP_ID: [
-                    mri(USER_ID, "q1", group=GROUP_ID, answer='1'), mri(OTHER_USER_ID, "q1", group=GROUP_ID, answer='1')
-                ]},
-                ReviewState.INCOMPLETE
+            [GROUP_ID], ["q1", "q2"],
+            {GROUP_ID: [
+                mri(USER_ID, "q1", group=GROUP_ID, answer='1'), mri(OTHER_USER_ID, "q1", group=GROUP_ID, answer='1')
+            ]},
+            ReviewState.INCOMPLETE
         ),
         (
-                [GROUP_ID], ["q1"],
-                {GROUP_ID: [
-                    mri(USER_ID, "q1", group=GROUP_ID, answer='2'), mri(USER_ID, "q2", group=GROUP_ID, answer="1")
-                ]},
-                ReviewState.COMPLETED
+            [GROUP_ID], ["q1"],
+            {GROUP_ID: [
+                mri(USER_ID, "q1", group=GROUP_ID, answer='2'), mri(USER_ID, "q2", group=GROUP_ID, answer="1")
+            ]},
+            ReviewState.COMPLETED
         ),
         (
-                [GROUP_ID], ["q1", "q2"],
-                {GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='3')]},
-                ReviewState.INCOMPLETE
+            [GROUP_ID], ["q1", "q2"],
+            {GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='3')]},
+            ReviewState.INCOMPLETE
         ),
         (
-                [GROUP_ID], ["q1"],
-                {GROUP_ID: [
-                    mri(USER_ID, "q2", group=GROUP_ID, answer='4'), mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='5')
-                ]},
-                ReviewState.NOT_STARTED
+            [GROUP_ID], ["q1"],
+            {GROUP_ID: [
+                mri(USER_ID, "q2", group=GROUP_ID, answer='4'), mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='5')
+            ]},
+            ReviewState.NOT_STARTED
         ),
         (
-                [GROUP_ID, OTHER_GROUP_ID], ["q1"],
-                {
-                    GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='6')],
-                    OTHER_GROUP_ID: [mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='7')]
-                },
-                ReviewState.COMPLETED
+            [GROUP_ID, OTHER_GROUP_ID], ["q1"],
+            {
+                GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='6')],
+                OTHER_GROUP_ID: [mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='7')]
+            },
+            ReviewState.COMPLETED
         ),
         (
-                [GROUP_ID, OTHER_GROUP_ID], ["q1", "q2"],
-                {
-                    GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='7')],
-                    OTHER_GROUP_ID: [mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='8')]
-                },
-                ReviewState.INCOMPLETE
+            [GROUP_ID, OTHER_GROUP_ID], ["q1", "q2"],
+            {
+                GROUP_ID: [mri(USER_ID, "q1", group=GROUP_ID, answer='7')],
+                OTHER_GROUP_ID: [mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='8')]
+            },
+            ReviewState.INCOMPLETE
         ),
         (
-                [GROUP_ID, OTHER_GROUP_ID], ["q1", "q2"],
-                {
-                    GROUP_ID: [
-                        mri(USER_ID, "q1", group=GROUP_ID, answer='7'), mri(USER_ID, "q2", group=GROUP_ID, answer='7')
-                    ],
-                    OTHER_GROUP_ID: [
-                        mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='8'),
-                        mri(USER_ID, "q2", group=GROUP_ID, answer='7')
-                    ]
-                },
-                ReviewState.INCOMPLETE
+            [GROUP_ID, OTHER_GROUP_ID], ["q1", "q2"],
+            {
+                GROUP_ID: [
+                    mri(USER_ID, "q1", group=GROUP_ID, answer='7'), mri(USER_ID, "q2", group=GROUP_ID, answer='7')
+                ],
+                OTHER_GROUP_ID: [
+                    mri(USER_ID, "q1", group=OTHER_GROUP_ID, answer='8'),
+                    mri(USER_ID, "q2", group=GROUP_ID, answer='7')
+                ]
+            },
+            ReviewState.INCOMPLETE
         ),
     )
     @ddt.unpack

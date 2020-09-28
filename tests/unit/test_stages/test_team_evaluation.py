@@ -45,34 +45,34 @@ class TestTeamEvaluationStageStageStatus(ReviewStageUserCompletionStatsMixin, Ba
         ([10], ["q1"], [mri(USER_ID, "q1", peer=10, answer='1')], ReviewState.COMPLETED),
         ([10], ["q1"], [mri(OTHER_USER_ID, "q1", peer=10, answer='1')], ReviewState.NOT_STARTED),
         (
-                [10], ["q1", "q2"],
-                [mri(USER_ID, "q1", peer=10, answer='1'), mri(OTHER_USER_ID, "q1", peer=10, answer='1')],
-                ReviewState.INCOMPLETE
+            [10], ["q1", "q2"],
+            [mri(USER_ID, "q1", peer=10, answer='1'), mri(OTHER_USER_ID, "q1", peer=10, answer='1')],
+            ReviewState.INCOMPLETE
         ),
         (
-                [10], ["q1"],
-                [mri(USER_ID, "q1", peer=10, answer='2'), mri(USER_ID, "q2", peer=10, answer="1")],
-                ReviewState.COMPLETED
+            [10], ["q1"],
+            [mri(USER_ID, "q1", peer=10, answer='2'), mri(USER_ID, "q2", peer=10, answer="1")],
+            ReviewState.COMPLETED
         ),
         (
-                [10], ["q1", "q2"],
-                [mri(USER_ID, "q1", peer=10, answer='3')],
-                ReviewState.INCOMPLETE
+            [10], ["q1", "q2"],
+            [mri(USER_ID, "q1", peer=10, answer='3')],
+            ReviewState.INCOMPLETE
         ),
         (
-                [10], ["q1"],
-                [mri(USER_ID, "q2", peer=10, answer='4'), mri(USER_ID, "q1", peer=11, answer='5')],
-                ReviewState.NOT_STARTED
+            [10], ["q1"],
+            [mri(USER_ID, "q2", peer=10, answer='4'), mri(USER_ID, "q1", peer=11, answer='5')],
+            ReviewState.NOT_STARTED
         ),
         (
-                [10, 11], ["q1"],
-                [mri(USER_ID, "q1", peer=10, answer='6'), mri(USER_ID, "q1", peer=11, answer='7')],
-                ReviewState.COMPLETED
+            [10, 11], ["q1"],
+            [mri(USER_ID, "q1", peer=10, answer='6'), mri(USER_ID, "q1", peer=11, answer='7')],
+            ReviewState.COMPLETED
         ),
         (
-                [10, 11], ["q1", "q2"],
-                [mri(USER_ID, "q1", peer=10, answer='7'), mri(USER_ID, "q1", peer=11, answer='8')],
-                ReviewState.INCOMPLETE
+            [10, 11], ["q1", "q2"],
+            [mri(USER_ID, "q1", peer=10, answer='7'), mri(USER_ID, "q1", peer=11, answer='8')],
+            ReviewState.INCOMPLETE
         ),
     )
     @ddt.unpack

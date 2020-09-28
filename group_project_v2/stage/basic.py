@@ -63,7 +63,7 @@ class CompletionStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
     def stage_completed(self, _data, _suffix=''):
         if not self.available_now:
             template = messages.STAGE_NOT_OPEN_TEMPLATE if not self.is_open else messages.STAGE_CLOSED_TEMPLATE
-            return {'result': 'error',  'msg': template.format(action=self.STAGE_ACTION)}
+            return {'result': 'error', 'msg': template.format(action=self.STAGE_ACTION)}
 
         try:
             if self.can_mark_complete:
