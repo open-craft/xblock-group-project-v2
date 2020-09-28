@@ -10,7 +10,7 @@ try:
     # Python 2: "unicode" is built-in
     unicode  # pylint: disable=I0011,C0103
 except NameError:
-    unicode = str # pylint: disable=I0011,C0103
+    unicode = str  # pylint: disable=I0011,C0103
 
 try:
     from edx_notifications.data import NotificationMessage  # pylint: disable=import-error
