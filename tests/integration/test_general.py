@@ -2,11 +2,12 @@
 High level rendering tests
 """
 import logging
+import pytest
 from tests.integration.base_test import SingleScenarioTestSuite
 
 log = logging.getLogger(__name__)
 
-
+@pytest.fixture(scope="session")
 class TestGeneralFunctionality(SingleScenarioTestSuite):
     scenario = "example_1.xml"
 
