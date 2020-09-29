@@ -181,7 +181,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
         self.assertEqual(activity1_resources[3].title, "Grading Criteria")
 
     @ddt.data(True, False)
-    @freeze_time(datetime(2014, 05, 23))
+    @freeze_time(datetime(2014, 5, 23))
     def test_submissions_view(self, as_ta):
         student_id = 1
         if as_ta:

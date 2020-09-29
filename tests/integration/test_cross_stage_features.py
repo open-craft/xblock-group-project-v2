@@ -18,12 +18,12 @@ class TestOtherGroupSubmissionLinks(SingleScenarioTestSuite):
             {"id": user.id} for user in list(KNOWN_USERS.values())
         ])
 
-    @freeze_time(datetime(2015, 01, 01))
+    @freeze_time(datetime(2015, 1, 1))
     def test_submission_links(self):
         other_group_submissions = {
             'issue_tree': make_submission_data(
                 'http://issue_tree.csv', 'issue_tree.csv',
-                datetime(2015, 01, 01, 17, 24, 15, tzinfo=pytz.UTC),
+                datetime(2015, 1, 1, 17, 24, 15, tzinfo=pytz.UTC),
                 KNOWN_USERS[1]
             ),
             'marketing_pitch': make_submission_data(
