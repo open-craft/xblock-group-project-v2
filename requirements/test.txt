@@ -1,8 +1,7 @@
 mock
 ddt
 freezegun
-selenium==2.52.0 ; python_version < '3'
-selenium==3.141.0 ; python_version >= '3'
+selenium~=3
 diff-cover
 django-statici18n==1.8.2
 edx-i18n-tools==0.4.7
@@ -14,3 +13,4 @@ bok-choy==0.9.0 ; python_version >= '3'
 -e 'git://github.com/nosedjango/nosedjango.git@v1.0.12#egg=nosedjango-dev==v1.0.12 ; python_version < "3"'
 -e 'git+https://github.com/edx/edx-notifications.git@0.6.0#egg=edx-notifications==0.6.0 ; python_version < "3"'
 -e 'git+https://github.com/edx/edx-notifications.git@1.1.0#egg=edx-notifications==1.1.0 ; python_version >= "3"'
+pytest
