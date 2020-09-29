@@ -1,7 +1,7 @@
 mock
 ddt
 freezegun
-selenium==2.52.0
+selenium<4
 diff-cover
 django-statici18n==1.9.0
 edx-i18n-tools==0.5.3
