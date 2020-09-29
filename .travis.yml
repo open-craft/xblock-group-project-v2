@@ -4,6 +4,7 @@ python:
     - "3.8"
 env:
     - DJANGO_SETTINGS_MODULE=workbench.settings
+    - MOZ_HEADLESS=1
 install:
     - "pip install -r requirements/base.txt"
     - "pip install -r requirements/test.txt"
