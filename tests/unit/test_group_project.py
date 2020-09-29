@@ -69,7 +69,7 @@ class TestGroupProjectXBlock(TestWithPatchesMixin, TestCase):
         response = self.block.download_incomplete_list(request_mock)
         self.assertEqual(response.status_code, 404)
 
-    @freeze_time(datetime(2015, 01, 01, 12, 22, 14))
+    @freeze_time(datetime(2015, 0o1, 0o1, 12, 22, 14))
     @ddt.data(
         ([1, 2, 3], [1], [2, 3]),
         ([1, 2, 3], [], [1, 2, 3]),
