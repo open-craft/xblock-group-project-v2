@@ -10,11 +10,13 @@ from group_project_v2.project_api import TypedProjectAPI
 from group_project_v2.project_api.api_implementation import WORKGROUP_API, PROJECTS_API, COURSES_API
 from tests.utils import TestWithPatchesMixin, make_review_item as mri
 import tests.unit.project_api.canned_responses as canned_responses
+from six.moves.urllib.parse import urlencode  # pylint: disable=E6011
 
 
 @ddt.ddt
 class TestProjectApi(TestCase, TestWithPatchesMixin):
     api_server_address = 'http://localhost'
+    url_parameter = {'qwe': 'rty', 'asd': 'zxc'}
 
     def setUp(self):
         self.project_api = TypedProjectAPI(self.api_server_address, dry_run=False)
@@ -55,8 +57,8 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
         (["part1"], {'qwe': 'rty'}, False, api_server_address + "/part1/?qwe=rty",
          {'success': True, 'data': [1, 2, 3]}),
         ([api_server_address, "part1"], {'qwe': 'rty'}, False, api_server_address + "/part1/?qwe=rty", {}),
-        (["part1"], {'qwe': 'rty', 'asd': 'zxc'}, False, api_server_address + "/part1/?qwe=rty&asd=zxc", {}),
-        (["part1"], {'qwe': 'rty', 'asd': 'zxc'}, True, api_server_address + "/part1?qwe=rty&asd=zxc", {}),
+        (["part1"], url_parameter, False, api_server_address + "/part1/?" + urlencode(url_parameter), {}),
+        (["part1"], url_parameter, True, api_server_address + "/part1?" + urlencode(url_parameter), {}),
     )
     @ddt.unpack
     def test_send_request_no_data(self, url_parts, query_params, no_trailing_slash, expected_url, expected_response):
@@ -83,12 +85,12 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             api_server_address + "/part1/?qwe=rty", {'success': True, 'data': [1, 2, 3]}
         ),
         (
-            ["part1"], {'qwe': 'rty', 'asd': 'zxc'}, {'stage': 1, 'activity': 2}, False,
-            api_server_address + "/part1/?qwe=rty&asd=zxc", {}
+            ["part1"], url_parameter, {'stage': 1, 'activity': 2}, False,
+            api_server_address + "/part1/?" + urlencode(url_parameter), {}
         ),
         (
-            ["part1"], {'qwe': 'rty', 'asd': 'zxc'}, {'data': None}, True,
-            api_server_address + "/part1?qwe=rty&asd=zxc", {}
+            ["part1"], url_parameter, {'data': None}, True,
+            api_server_address + "/part1?" + urlencode(url_parameter), {}
         ),
     )
     @ddt.unpack

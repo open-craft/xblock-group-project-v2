@@ -3,7 +3,7 @@ standard_library.install_aliases()
 from builtins import str
 from builtins import object
 import json
-from urllib.parse import urlencode  # pylint: disable=F0401
+from six.moves.urllib.parse import urlencode  # pylint: disable=E6011
 
 import itertools
 
