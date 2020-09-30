@@ -661,7 +661,7 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
             'question_content': self.render_content()
         }
         render_context.update(context)
-        fragment.add_content(loader.render_template("templates/html/components/review_question.html", render_context))
+        fragment.add_content(loader.render_django_template("templates/html/components/review_question.html", render_context))
         return fragment
 
     def studio_view(self, context):
@@ -744,7 +744,10 @@ class GroupProjectBaseFeedbackDisplayXBlock(
         render_context = {'assessment': self, 'question_title': title, 'feedback': feedback}
         if self.show_mean:
             try:
-                render_context['mean'] = "{0:.1f}".format(mean(feedback))
+                if feedback:
+                    render_context['mean'] = "{0:.1f}".format(mean(feedback))
+                else:
+                    render_context['mean'] = _(u"N/A")
             except ValueError as exc:
                 log.warn(exc)
                 render_context['mean'] = _(u"N/A")

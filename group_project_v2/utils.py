@@ -89,7 +89,7 @@ def outer_html(node):
     if node is None:
         return None
 
-    html = ET.tostring(node, 'utf-8', 'html').strip()
+    html = ET.tostring(node, encoding='unicode', method='html').strip()
     if len(node.findall('./*')) == 0 and html.index('>') == len(html) - 1:
         html = html[:-1] + ' />'
 
