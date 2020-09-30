@@ -28,6 +28,7 @@ class BaseStageTest(TestCase, TestWithPatchesMixin):
         # can't use create_autospec here, as most methods are wrapped in decorators and mock fails signature checks
         # with "Too many positional arguments" because of this
         self.project_api_mock = mock.Mock(spec_set=TypedProjectAPI)
+        self.project_api_mock.get_user_preferences.return_value = []
 
         # pylint: disable=not-callable
         self.block = self.block_to_test(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())
