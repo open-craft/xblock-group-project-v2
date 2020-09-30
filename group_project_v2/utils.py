@@ -357,7 +357,7 @@ def export_to_csv(data, target, headers=None):
 
 
 def named_tuple_with_docstring(type_name, field_names, docstring, verbose=False, rename=False):
-    named_tuple_type = namedtuple(type_name + "_", field_names, verbose=verbose, rename=rename)
+    named_tuple_type = namedtuple(type_name + "_", field_names, rename=rename)
 
     wrapper_class = type(type_name, (named_tuple_type,), {"__doc__": docstring})
     return wrapper_class
