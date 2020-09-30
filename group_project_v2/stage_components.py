@@ -1,4 +1,5 @@
 from builtins import str
+from group_project_v2.messages import UNKNOWN_ERROR
 import json
 import logging
 from collections import namedtuple
@@ -398,7 +399,9 @@ class GroupProjectSubmissionXBlock(
                 failure_code = 500
                 if isinstance(exception, ApiError):
                     failure_code = exception.code
-                error_message = getattr(exception, "message", messages.UNKNOWN_ERROR)
+                error_message = str(exception).strip()
+                if error_message == '':
+                    error_message = UNKNOWN_ERROR
 
                 response_data.update({
                     "title": messages.FAILED_UPLOAD_TITLE,

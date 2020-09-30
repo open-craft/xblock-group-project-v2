@@ -135,7 +135,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
     course_id = "a course"
 
     def _make_file(self):  # pylint:disable=no-self-use
-        return open(os.path.join(os.path.split(__file__)[0], "../resources/", 'image.png'))
+        return open(os.path.join(os.path.split(__file__)[0], "../resources/", 'image.png'), 'rb')
 
     def setUp(self):
         super(TestGroupProjectSubmissionXBlock, self).setUp()
@@ -220,11 +220,11 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
 
             response = self.block.upload_submission(request_mock)
             self.assertEqual(response.status_code, expected_code)
-            response_body = json.loads(response.body)
+            response_body = json.loads(response.text)
             self.assertEqual(response_body['title'], messages.FAILED_UPLOAD_TITLE)
             self.assertEqual(
                 response_body['message'],
-                messages.FAILED_UPLOAD_MESSAGE_TPL.format(error_goes_here=exception.message)
+                messages.FAILED_UPLOAD_MESSAGE_TPL.format(error_goes_here=str(exception))
             )
 
     @ddt.data(
@@ -265,7 +265,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
 
             response = self.block.upload_submission(request_mock)
             self.assertEqual(response.status_code, 200)
-            response_payload = json.loads(response.body)
+            response_payload = json.loads(response.text)
             self.assertEqual(response_payload['title'], messages.SUCCESSFUL_UPLOAD_TITLE)
             self.assertEqual(response_payload["submissions"], {submission_id: file_url})
             self.assertEqual(response_payload["new_stage_states"], [stage_state])
