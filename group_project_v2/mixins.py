@@ -96,7 +96,9 @@ class UserAwareXBlockMixin(ProjectAPIXBlockMixin):
         try:
             return int(self.real_user_id(self.anonymous_student_id))
         except Exception as exc:
-            log.exception(exc)
+            # Suppressing logs when access through studio
+            if not getattr(self.runtime, 'is_author_mode', False):
+                log.exception(exc)
             try:
                 return int(self.runtime.user_id)
             except Exception as exc:
