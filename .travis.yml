@@ -29,7 +29,7 @@ script:
 notifications:
   email: false
 addons:
-  firefox: "latest-esr"
+  firefox: "61.0.2"
 cache:
   npm: true
   pip: true
