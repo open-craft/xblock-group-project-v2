@@ -20,7 +20,13 @@ from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage,
 from group_project_v2.stage.utils import ReviewState
 from tests.integration.base_test import BaseIntegrationTest
 from tests.integration.page_elements import GroupProjectElement, ReviewStageElement, ProjectTeamElement
-from tests.utils import KNOWN_USERS, OTHER_GROUPS, TestConstants, TestWithPatchesMixin, make_review_item as mri, WORKGROUP
+from tests.utils import (
+    KNOWN_USERS,
+    OTHER_GROUPS,
+    TestConstants,
+    TestWithPatchesMixin,
+    make_review_item as mri,
+    WORKGROUP)
 
 
 class StageTestBase(BaseIntegrationTest):

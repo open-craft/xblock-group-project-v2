@@ -11,3 +11,4 @@ edx-i18n-tools==0.5.3
 -e 'git+https://github.com/edx/edx-notifications.git@0.6.0#egg=edx-notifications==0.6.0 ; python_version < "3"'
 -e 'git+https://github.com/edx/edx-notifications.git@1.1.0#egg=edx-notifications==1.1.0 ; python_version >= "3"'
 pytest-django
+pep8
