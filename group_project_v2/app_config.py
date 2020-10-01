@@ -34,3 +34,5 @@ ENTRYPOINTS = [
     "{entrypoint} = {class_location}".format(entrypoint=entrypoint, class_location=class_location)
     for entrypoint, class_location in BLOCKS.items()
 ]
+
+PROGRESS_DETACHED_CATEGORIES = list(BLOCKS.keys())
