@@ -619,7 +619,7 @@ class PeerReviewStageTest(BasePeerReviewStageTest, TestWithPatchesMixin):
 
     def test_submission(self):
         user_id = TestConstants.Users.USER1_ID
-        self.make_patch(PeerReviewStage, 'get_review_state', str(user_id))
+        self.make_patch(PeerReviewStage, 'anonymous_student_id', str(user_id))
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
         self._setup_review_items_store()
 
@@ -662,7 +662,7 @@ class PeerReviewStageTest(BasePeerReviewStageTest, TestWithPatchesMixin):
 
     def test_persistence_and_resubmission(self):
         user_id = 1
-        self.make_patch(PeerReviewStage, 'get_review_state', str(user_id))
+        self.make_patch(PeerReviewStage, 'anonymous_student_id', str(user_id))
         expected_submissions = {
             "group_score": "100",
             "group_q1": "Y",
@@ -714,7 +714,7 @@ class PeerReviewStageTest(BasePeerReviewStageTest, TestWithPatchesMixin):
 
     def test_completion(self):
         user_id = 1
-        self.make_patch(PeerReviewStage, 'get_review_state', str(user_id))
+        self.make_patch(PeerReviewStage, 'anonymous_student_id', str(user_id))
         workgroups_to_review = list(OTHER_GROUPS.keys())
         expected_submissions = {
             "group_score": "100",
