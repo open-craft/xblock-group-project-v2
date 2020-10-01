@@ -748,7 +748,7 @@ class PeerReviewStageTest(BasePeerReviewStageTest, TestWithPatchesMixin):
         self.submit_and_assert_completion_published(stage_element, user_id)
 
 
-class TestTAGradedPeerReview(BasePeerReviewStageTest):
+class TestTAGradedPeerReview(BasePeerReviewStageTest, TestWithPatchesMixin):
     def setUp(self):
         super(TestTAGradedPeerReview, self).setUp()
 
@@ -792,6 +792,7 @@ class TestTAGradedPeerReview(BasePeerReviewStageTest):
     def test_ta_grading(self):
         self.__prepare_scenario_for_ta_graded_activity()
         user_id, group_id = 22, 3
+        self.make_patch(PeerReviewStage, 'anonymous_student_id', str(user_id))
         self.project_api_mock.get_user_preferences = mock.Mock(
             return_value={UserAwareXBlockMixin.TA_REVIEW_KEY: group_id}
         )
