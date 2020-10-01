@@ -556,7 +556,7 @@ class BasePeerReviewStageTest(BaseReviewStageTest):
 
 
 @ddt.ddt
-class PeerReviewStageTest(BasePeerReviewStageTest):
+class PeerReviewStageTest(BasePeerReviewStageTest, TestWithPatchesMixin):
     def setUp(self):
         super(PeerReviewStageTest, self).setUp()
         self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML), load_immediately=False)
@@ -619,6 +619,7 @@ class PeerReviewStageTest(BasePeerReviewStageTest):
 
     def test_submission(self):
         user_id = TestConstants.Users.USER1_ID
+        self.make_patch(PeerReviewStage, 'get_review_state', str(user_id))
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
         self._setup_review_items_store()
 
@@ -661,6 +662,7 @@ class PeerReviewStageTest(BasePeerReviewStageTest):
 
     def test_persistence_and_resubmission(self):
         user_id = 1
+        self.make_patch(PeerReviewStage, 'get_review_state', str(user_id))
         expected_submissions = {
             "group_score": "100",
             "group_q1": "Y",
@@ -712,6 +714,7 @@ class PeerReviewStageTest(BasePeerReviewStageTest):
 
     def test_completion(self):
         user_id = 1
+        self.make_patch(PeerReviewStage, 'get_review_state', str(user_id))
         workgroups_to_review = list(OTHER_GROUPS.keys())
         expected_submissions = {
             "group_score": "100",
