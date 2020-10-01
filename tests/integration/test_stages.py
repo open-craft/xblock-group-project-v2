@@ -20,7 +20,7 @@ from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage,
 from group_project_v2.stage.utils import ReviewState
 from tests.integration.base_test import BaseIntegrationTest
 from tests.integration.page_elements import GroupProjectElement, ReviewStageElement, ProjectTeamElement
-from tests.utils import KNOWN_USERS, OTHER_GROUPS, TestConstants, make_review_item as mri, WORKGROUP
+from tests.utils import KNOWN_USERS, OTHER_GROUPS, TestConstants, TestWithPatchesMixin, make_review_item as mri, WORKGROUP
 
 
 class StageTestBase(BaseIntegrationTest):
@@ -201,7 +201,7 @@ class BaseReviewStageTest(StageTestBase):
 
 
 @ddt.ddt
-class TeamEvaluationStageTest(BaseReviewStageTest):
+class TeamEvaluationStageTest(BaseReviewStageTest, TestWithPatchesMixin):
     stage_type = TeamEvaluationStage
     stage_element = ReviewStageElement
 
@@ -250,6 +250,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
 
     def setUp(self):
         super(TeamEvaluationStageTest, self).setUp()
+        self.make_patch(TeamEvaluationStage, 'anonymous_student_id', mock.Mock(return_value="Farhaan"))
         self.project_api_mock.get_peer_review_items = mock.Mock(return_value={})
 
         self.load_scenario_xml(self.build_scenario_xml(self.STAGE_DATA_XML), load_immediately=False)
@@ -337,6 +338,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
 
     @ddt.data(*list(KNOWN_USERS.keys()))  # pylint: disable=star-args
     def test_submission(self, user_id):
+        self.make_patch(TeamEvaluationStage, 'anonymous_student_id', str(user_id))
         stage_element = self.get_stage(self.go_to_view(student_id=user_id))
         self._setup_review_items_store()
 
@@ -376,12 +378,12 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
 
     def test_persistence_and_resubmission(self):
         user_id = 1
+        self.make_patch(TeamEvaluationStage, 'anonymous_student_id', str(user_id))
         expected_submissions = {
             "peer_score": "10",
             "peer_q1": "Y",
             "peer_q2": "Awesome"
         }
-
         self.project_api_mock.get_peer_review_items.return_value = [
             {"question": question, "answer": answer, "user": TestConstants.Users.USER2_ID}
             for question, answer in expected_submissions.items()
@@ -428,6 +430,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest):
 
     def test_completion(self):
         user_id = 1
+        self.make_patch(TeamEvaluationStage, 'anonymous_student_id', str(user_id))
         other_users = set(KNOWN_USERS.keys()) - {user_id}
         expected_submissions = {
             "peer_score": "10",
