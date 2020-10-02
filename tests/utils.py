@@ -52,7 +52,7 @@ WORKGROUP = WorkgroupDetails(**{
     "groups": [],
     "users": [
         {"id": user.id, "username": user.username, "email": user.email}
-        for user in list(KNOWN_USERS.values())
+        for user in KNOWN_USERS.values()
     ],
     "submissions": [],
     "workgroup_reviews": [],

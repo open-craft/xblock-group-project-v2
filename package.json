@@ -1,6 +1,6 @@
 {
     "name": "group_project_xblock_v2",
-    "version": "v0.9.2",
+    "version": "v0.10.0",
     "description": "Group Project XBlock v2",
     "dependencies": {},
     "devDependencies": {

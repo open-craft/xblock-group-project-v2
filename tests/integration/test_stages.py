@@ -378,7 +378,7 @@ class TeamEvaluationStageTest(BaseReviewStageTest, TestWithPatchesMixin):
         )
 
         expected_statuses = {usr_id: ReviewState.NOT_STARTED
-                             for usr_id in list(KNOWN_USERS.keys()) if usr_id != user_id}
+                             for usr_id in KNOWN_USERS.keys() if usr_id != user_id}
         expected_statuses[int(peer.subject_id)] = ReviewState.COMPLETED  # status is refreshed after submission
         self._assert_teammate_statuses(stage_element, expected_statuses)
 
@@ -534,7 +534,7 @@ class BasePeerReviewStageTest(BaseReviewStageTest):
         super(BasePeerReviewStageTest, self).setUp()
         self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=list(OTHER_GROUPS.values()))
         self.project_api_mock.get_workgroup_reviewers = mock.Mock(return_value=[
-            {"id": user.id} for user in list(KNOWN_USERS.values())
+            {"id": user.id} for user in KNOWN_USERS.values()
         ])
 
     def _setup_review_items_store(self, initial_items=None):
@@ -740,7 +740,7 @@ class PeerReviewStageTest(BasePeerReviewStageTest, TestWithPatchesMixin):
             }
             for question, answer in expected_submissions.items()
             for group_id in workgroups_to_review
-            for reviewer_id in list(KNOWN_USERS.keys())
+            for reviewer_id in KNOWN_USERS.keys()
         ]
 
         group = stage_element.groups[0]

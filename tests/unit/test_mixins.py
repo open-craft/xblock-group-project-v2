@@ -54,19 +54,6 @@ class ChildrenNavigationXBlockMixinGuineaPig(ChildrenNavigationXBlockMixin, Comm
         return None
 
 
-@ddt.ddt
-class CompletionMixinTestCase(TestCase):
-
-    @ddt.data(*app_config.PROGRESS_DETACHED_CATEGORIES)
-    def test_all_blocks_excluded_from_completion(self, blockclass):
-        xblock = XBlock.load_class(blockclass)
-        self.assertEqual(
-            XBlockCompletionMode.get_mode(xblock),
-            XBlockCompletionMode.EXCLUDED,
-            "Block {!r} did not have completion mode 'excluded'".format(xblock),
-        )
-
-
 class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
     def setUp(self):
         self.block = ChildrenNavigationXBlockMixinGuineaPig()
@@ -75,7 +62,8 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
             ChildrenNavigationXBlockMixinGuineaPig, 'runtime',
             mock.PropertyMock(return_value=self.runtime_mock)
         )
-        self.children_mock = self.make_patch(ChildrenNavigationXBlockMixinGuineaPig, 'children', mock.PropertyMock())
+        self.children_mock = self.make_patch(
+            ChildrenNavigationXBlockMixinGuineaPig, 'children', mock.PropertyMock())
         self.runtime_mock.get_block.side_effect = _make_block_mock
 
     def test_children(self):
@@ -99,13 +87,16 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
 
         child_with_no_target_props = mock.Mock(spec={})
 
-        self.assertEqual(self.block.get_child_category(child_with_category), child_with_category.category)
-        self.assertEqual(self.block.get_child_category(child_with_plugin_name), child_with_plugin_name.plugin_name)
+        self.assertEqual(self.block.get_child_category(
+            child_with_category), child_with_category.category)
+        self.assertEqual(self.block.get_child_category(
+            child_with_plugin_name), child_with_plugin_name.plugin_name)
         self.assertEqual(
             self.block.get_child_category(child_with_plugin_name_and_category),
             child_with_plugin_name_and_category.category
         )
-        self.assertEqual(self.block.get_child_category(child_with_no_target_props), None)
+        self.assertEqual(self.block.get_child_category(
+            child_with_no_target_props), None)
 
     def test_get_children_by_category(self):
         child_categories = {
@@ -114,7 +105,8 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
             'block_2': 'category_2',
             'block_3': 'category_3'
         }
-        self.children_mock.return_value = ['block_1', 'block_1_2', 'block_2', 'block_3']
+        self.children_mock.return_value = [
+            'block_1', 'block_1_2', 'block_2', 'block_3']
         self.runtime_mock.get_block.side_effect = lambda block_id: _make_block_mock(
             block_id, child_categories.get(block_id, None)
         )

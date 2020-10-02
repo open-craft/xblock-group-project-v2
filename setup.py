@@ -24,7 +24,7 @@ def package_data(pkg, root_list):
 
 setup(
     name='xblock-group-project-v2',
-    version='0.9.2',
+    version='0.10.0',
     description='XBlock - Group Project V2',
     packages=find_packages(),
     install_requires=[
@@ -46,7 +46,7 @@ setup(
     entry_points={
         'xblock.v1': ENTRYPOINTS
     },
-    dependency_links = [
+    dependency_links=[
         'https://github.com/edx/xblock-utils/tarball/v1.0.5#egg=xblock-utils-1.0.5',
         'https://github.com/mckinseyacademy/django-upload-validator/tarball/v1.0.2#egg=django-upload-validator-1.0.2'
     ],
