@@ -88,7 +88,7 @@ def outer_html(node):
     if node is None:
         return None
 
-    html = ET.tostring(node, encoding='utf8', method='html').strip()
+    html = ET.tostring(node, encoding='unicode', method='html').strip()
     if len(node.findall('./*')) == 0 and html.index('>') == len(html) - 1:
         html = html[:-1] + ' />'
 
@@ -127,7 +127,7 @@ def mean(value_array):
         numeric_values = [float(v) for v in value_array]
         return float(old_div(sum(numeric_values), len(numeric_values)))
     except (ValueError, TypeError, ZeroDivisionError) as exc:
-        log.warning(str(exc))
+        log.warning(exc.message)
         return None
 
 
@@ -164,7 +164,7 @@ def groupwork_protected_handler(func):
         except GroupworkAccessDeniedError as exc:
             return {
                 'result': 'error',
-                'message': str(exc)
+                'message': exc.message
             }
 
     return wrapper
@@ -176,8 +176,8 @@ def key_error_protected_handler(func):
         try:
             return func(*args, **kwargs)
         except KeyError as exception:
-            log.exception("Missing required argument {}".format(str(exception)))
-            return {'result': 'error', 'msg': ("Missing required argument {}".format(str(exception)))}
+            log.exception("Missing required argument {}".format(exception.message))
+            return {'result': 'error', 'msg': ("Missing required argument {}".format(exception.message))}
 
     return wrapper
 
@@ -188,7 +188,7 @@ def conversion_protected_handler(func):
         try:
             return func(*args, **kwargs)
         except (TypeError, ValueError) as exception:
-            message = "Conversion failed: {}".format(str(exception))
+            message = "Conversion failed: {}".format(exception.message)
             log.exception(message)
             return {'result': 'error', 'msg': message}
 

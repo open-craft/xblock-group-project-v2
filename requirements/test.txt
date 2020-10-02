@@ -5,10 +5,8 @@ selenium<3
 diff-cover
 django-statici18n==1.9.0
 edx-i18n-tools==0.5.3
-django-statici18n==1.8.2 ; python_version == "2.7"
-edx-i18n-tools==0.4.7 ; python_version == "2.7"
 
--e 'git+https://github.com/edx/xblock-sdk.git@c40b5dc3e9a2ded54119e922edf486d3ccec6c35#egg=xblock_sdk ; python_version == "2.7"'
+-e 'git://github.com/edx/xblock-sdk.git@v0.1.6#egg=xblock-sdk==v0.1.6 ; python_version == "2.7"'
 -e 'git://github.com/edx/xblock-sdk.git@0.2.2#egg=xblock-sdk==v0.2.2 ; python_version > "2.7"'
 -e 'git+https://github.com/edx/edx-notifications.git@0.6.0#egg=edx-notifications==0.6.0 ; python_version < "3"'
 -e 'git+https://github.com/edx/edx-notifications.git@1.1.0#egg=edx-notifications==1.1.0 ; python_version >= "3"'
