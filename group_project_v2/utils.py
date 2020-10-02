@@ -52,7 +52,6 @@ class Constants(object):
     ACTIVATE_BLOCK_ID_PARAMETER_NAME = 'activate_block_id'
     CURRENT_CLIENT_FILTER_ID_PARAMETER_NAME = 'client_filter_id'
     CURRENT_STAGE_ID_PARAMETER_NAME = 'current_stage'
-
     TARGET_STUDENTS = 'target_students'
     TARGET_WORKGROUPS = 'target_workgroups'
     FILTERED_STUDENTS = "filtered_students"
@@ -257,8 +256,9 @@ def memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             key_list = (
-                tuple([func.__name__]) + tuple(args) +
-                tuple("{}:{}".format(key, value) for key, value in kwargs.items())
+                tuple([func.__name__]) + tuple(args) + tuple(
+                    "{}:{}".format(key, value) for key, value in kwargs.items()
+                )
             )
             key = make_key(key_list)
             if key not in cache or cache[key]['timestamp'] + expires_after <= datetime.now():

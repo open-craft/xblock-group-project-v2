@@ -12,7 +12,8 @@ disable=
  fixme,
  locally-disabled,star-args,
  too-few-public-methods,too-many-public-methods,too-many-ancestors,
- W0622
+ wrong-import-position, useless-object-inheritance, try-except-raise,
+ no-else-return, wrong-import-order
 
 
 [OPTIONS]

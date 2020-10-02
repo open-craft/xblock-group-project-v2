@@ -15,8 +15,8 @@ install:
     - "pip install 'selenium<3'" # xblock-sdk installs a newer version but we still need 2.x
     - "npm install"
 script:
-    - pycodestyle group_project_v2 tests --max-line-length=120 --ignore=E402
-    #- pylint group_project_v2 --rcfile=pylintrc
+    - pycodestyle group_project_v2 tests --max-line-length=120 --ignore=E402,W504 # Ignoring line break after binary operator and module level import
+    - pylint group_project_v2 --rcfile=pylintrc
     #- pylint tests --rcfile=tests/pylintrc
     - ./node_modules/jshint/bin/jshint group_project_v2 tests
     - xvfb-run ./node_modules/.bin/karma start tests/js/karma.conf.js --single-run

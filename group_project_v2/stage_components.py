@@ -1,5 +1,4 @@
 from builtins import str
-from group_project_v2.messages import UNKNOWN_ERROR
 import json
 import logging
 from collections import namedtuple
@@ -15,8 +14,8 @@ from lazy.lazy import lazy
 from upload_validator import FileTypeValidator
 from xblock.core import XBlock
 from xblock.fields import String, Boolean, Scope, UNIQUE_ID
-from web_fragments.fragment import Fragment
 from xblock.validation import ValidationMessage
+from web_fragments.fragment import Fragment
 from xblockutils.studio_editable import StudioEditableXBlockMixin, XBlockWithPreviewMixin
 
 from group_project_v2 import messages
@@ -30,6 +29,7 @@ from group_project_v2.mixins import (
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
+from group_project_v2.messages import UNKNOWN_ERROR
 from group_project_v2.utils import (
     FieldValuesContextManager,
     MUST_BE_OVERRIDDEN,
@@ -232,7 +232,7 @@ SubmissionUpload = namedtuple("SubmissionUpload", "location file_name submission
 @XBlock.needs('user')
 @XBlock.wants('notifications')
 class GroupProjectSubmissionXBlock(
-    BaseStageComponentXBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin
+        BaseStageComponentXBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin
 ):
     CATEGORY = "gp-v2-submission"
     STUDIO_LABEL = _(u"Submission")
@@ -314,7 +314,7 @@ class GroupProjectSubmissionXBlock(
 
     def submissions_view(self, context):
         fragment = Fragment()
-        uploading_allowed = (self.stage.available_now and self.stage.is_group_member) or self.stage.is_admin_grader
+        uploading_allowed = (self.stage.available_now and self.stage.is_group_member) or self.stage.is_admin_grader  # pylint: disable=consider-using-ternary
         render_context = {'submission': self, 'upload': self.upload, 'disabled': not uploading_allowed}
         render_context.update(context)
         fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
@@ -681,7 +681,7 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
 
 
 class GroupProjectBaseFeedbackDisplayXBlock(
-    BaseStageComponentXBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin, WorkgroupAwareXBlockMixin
+        BaseStageComponentXBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin, WorkgroupAwareXBlockMixin
 ):
     DEFAULT_QUESTION_ID_VALUE = None
 
@@ -750,7 +750,7 @@ class GroupProjectBaseFeedbackDisplayXBlock(
                 else:
                     render_context['mean'] = _(u"N/A")
             except ValueError as exc:
-                log.warn(exc)
+                log.warn(exc)  # pylint: disable=deprecated-method
                 render_context['mean'] = _(u"N/A")
 
         render_context.update(context)
@@ -833,7 +833,7 @@ class GroupProjectGradeEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXB
 
 
 class ProjectTeamXBlock(
-    BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin, StudioEditableXBlockMixin,
+        BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin, StudioEditableXBlockMixin,
 ):
     CATEGORY = 'gp-v2-project-team'
     STUDIO_LABEL = _(u"Project Team")

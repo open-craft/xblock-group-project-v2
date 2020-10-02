@@ -544,9 +544,9 @@ class CompletionMixin(object):
 
 
 class CommonMixinCollection(
-    ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin,
-    StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-    WorkgroupAwareXBlockMixin, TemplateManagerMixin, SettingsMixin,
-    CompletionMixin,
+        ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin,
+        StudioEditableXBlockMixin, StudioContainerXBlockMixin,
+        WorkgroupAwareXBlockMixin, TemplateManagerMixin, SettingsMixin,
+        CompletionMixin,
 ):
     block_settings_key = 'group_project_v2'
