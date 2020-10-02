@@ -425,7 +425,7 @@ class GroupProjectSubmissionXBlock(
             uploaded_file.save_file()
         except Exception as save_file_error:  # pylint: disable=broad-except
             original_message = save_file_error.message if hasattr(save_file_error, "message") else ""
-            save_file_error.message = _("Error storing file {} - {}").format(uploaded_file.file.name, original_message)
+            Exception(_("Error storing file {} - {}").format(uploaded_file.file.name, original_message))
             raise
 
         # It have been saved... note the submission
@@ -445,9 +445,9 @@ class GroupProjectSubmissionXBlock(
             )
         except Exception as save_record_error:  # pylint: disable=broad-except
             original_message = save_record_error.message if hasattr(save_record_error, "message") else ""
-            save_record_error.message = _("Error recording file information {} - {}").format(
+            Exception(_("Error recording file information {} - {}").format(
                 uploaded_file.file.name, original_message
-            )
+            ))
             raise
 
         # See if the xBlock Notification Service is available, and - if so -

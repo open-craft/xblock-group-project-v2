@@ -29,11 +29,14 @@ setup(
     packages=find_packages(),
     install_requires=[
         'Django>=1.11,<2.3',
+        'Django>=1.8,<2.0; python_version == "2.7"',
         'lazy>=1.1',
         'python-dateutil>=2.1,<3.0',
         'WebOb>=1.6,<2.0',
         'pytz',
+        'XBlock>=1.2.2,<1.3.0; python_version == "2.7"',
         'XBlock>=1.2.2',
+        'web-fragments<=0.3.1; python_version == "2.7"',
         'web-fragments==0.3.2',
         'xblock-utils>=0.9',
         'django-upload-validator==1.0.2',
@@ -41,6 +44,7 @@ setup(
         'boto>=2.1.0',
         'boto3==1.4.8',
         'google-compute-engine==2.8.13',
+        'django-storages==1.4.1; python_version == "2.7"',
         'django-storages==1.8'
     ],
     entry_points={
