@@ -12,7 +12,7 @@ install:
     - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/requirements/base.txt"
     - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/requirements/test.txt"
     - "pip install -e ."
-    - "pip install 'selenium<3'" # xblock-sdk installs a newer version but we still need 2.x
+    - "pip install -r requirements/post.txt" # xblock-sdk installs a newer version but we still need 2.x
     - "npm install"
 script:
     - pycodestyle group_project_v2 tests --max-line-length=120 --ignore=E402
