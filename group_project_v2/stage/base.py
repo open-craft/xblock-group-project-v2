@@ -41,9 +41,9 @@ STAGE_STATS_LOG_TPL = (
 
 @XBlock.wants("settings")
 class BaseGroupActivityStage(
-    CommonMixinCollection, DashboardXBlockMixin, XBlockWithPreviewMixin, StageNotificationsMixin,
-    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
-    XBlock,
+        CommonMixinCollection, DashboardXBlockMixin, XBlockWithPreviewMixin, StageNotificationsMixin,
+        XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
+        XBlock,
 ):
     open_date = DateTime(
         display_name=_(u"Open Date"),

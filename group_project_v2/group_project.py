@@ -317,8 +317,8 @@ StageCompletionDetailsData = named_tuple_with_docstring(  # pylint: disable=inva
 @XBlock.wants('courseware_parent_info')
 @XBlock.wants('settings')
 class GroupActivityXBlock(
-    CommonMixinCollection, DashboardXBlockMixin,
-    XBlockWithPreviewMixin, XBlock
+        CommonMixinCollection, DashboardXBlockMixin,
+        XBlockWithPreviewMixin, XBlock
 ):
     """
     XBlock providing a group activity project for a group of students to collaborate upon

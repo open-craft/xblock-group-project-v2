@@ -50,13 +50,13 @@ class ViewTypes(object):
 
 
 class GroupProjectNavigatorXBlock(
-    ChildrenNavigationXBlockMixin,
-    XBlockWithComponentsMixin,
-    XBlockWithPreviewMixin,
-    NoStudioEditableSettingsMixin,
-    StudioContainerXBlockMixin,
-    CompletionMixin,
-    XBlock
+        ChildrenNavigationXBlockMixin,
+        XBlockWithComponentsMixin,
+        XBlockWithPreviewMixin,
+        NoStudioEditableSettingsMixin,
+        StudioContainerXBlockMixin,
+        CompletionMixin,
+        XBlock
 ):
     """
     XBlock that provides basic layout and switching between children XBlocks (views)
@@ -181,12 +181,12 @@ class GroupProjectNavigatorXBlock(
 
 
 class ProjectNavigatorViewXBlockBase(
-    CompletionMixin,
-    XBlockWithPreviewMixin,
-    StudioEditableXBlockMixin,
-    XBlockWithUrlNameDisplayMixin,
-    AdminAccessControlXBlockMixin,
-    XBlock,  # Moved from start.  Mixins usually come first.
+        CompletionMixin,
+        XBlockWithPreviewMixin,
+        StudioEditableXBlockMixin,
+        XBlockWithUrlNameDisplayMixin,
+        AdminAccessControlXBlockMixin,
+        XBlock,  # Moved from start.  Mixins usually come first.
 ):
     """
     Base class for Project Navigator children XBlocks (views)
