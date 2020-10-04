@@ -15,12 +15,12 @@ from collections import namedtuple
 
 from datetime import date, datetime, timedelta
 import xml.etree.ElementTree as ET
-from django.conf import settings
 
 from dateutil import parser
 from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
 from django.core.files.storage import default_storage
+from django.conf import settings
 from lazy.lazy import lazy
 from storages.backends.s3boto import S3BotoStorage
 from web_fragments.fragment import Fragment
@@ -89,7 +89,8 @@ def outer_html(node):
         return None
 
     html = ET.tostring(node, encoding='unicode', method='html').strip()
-    if len(node.findall('./*')) == 0 and html.index('>') == len(html) - 1:
+    nodes = node.findall('./*')
+    if not nodes and html.index('>') == len(html) - 1:
         html = html[:-1] + ' />'
 
     return html
@@ -176,8 +177,8 @@ def key_error_protected_handler(func):
         try:
             return func(*args, **kwargs)
         except KeyError as exception:
-            log.exception("Missing required argument {}".format(exception.message))
-            return {'result': 'error', 'msg': ("Missing required argument {}".format(exception.message))}
+            log.exception("Missing required argument %s", str(exception))
+            return {'result': 'error', 'msg': ("Missing required argument {}".format(str(exception)))}
 
     return wrapper
 
@@ -356,7 +357,7 @@ def export_to_csv(data, target, headers=None):
         writer.writerow(row)
 
 
-def named_tuple_with_docstring(type_name, field_names, docstring, verbose=False, rename=False):
+def named_tuple_with_docstring(type_name, field_names, docstring, rename=False):
     named_tuple_type = namedtuple(type_name + "_", field_names, rename=rename)
 
     wrapper_class = type(type_name, (named_tuple_type,), {"__doc__": docstring})
