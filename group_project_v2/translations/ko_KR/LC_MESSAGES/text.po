@@ -1,0 +1,905 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#: stage_components.py:564 stage_components.py:578
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-26 19:09+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: api_error.py:18
+msgid "Unknown error calling API"
+msgstr "API를 호출하는 동안 알 수 없는 오류가 발생했습니다."
+
+#: group_project.py:40 group_project.py:326 stage/utils.py:28
+#: stage_components.py:63 stage_components.py:241
+msgid "Display Name"
+msgstr "표시 이름"
+
+#: group_project.py:41
+msgid "This is a name of the project"
+msgstr "프로젝트의 이름입니다."
+
+#: group_project.py:43
+msgid "Group Project V2"
+msgstr "그룹 프로젝트 V2"
+
+#: group_project.py:327
+msgid "This name appears in the horizontal navigation at the top of the page."
+msgstr "이 이름은 페이지 상단의 가로 탐색 영역에 표시됩니다."
+
+#: group_project.py:329 group_project.py:362
+msgid "Group Project Activity"
+msgstr "그룹 프로젝트 활동"
+
+#: group_project.py:333
+msgid "Weight"
+msgstr "중요도"
+
+#: group_project.py:334
+msgid ""
+"This is the maximum score that the user receives when he/she successfully "
+"completes the problem."
+msgstr "사용자가 문제를 성공적으로 완료했을 때 받는 최대 점수입니다."
+
+#: group_project.py:340
+msgid "Reviews Required Minimum"
+msgstr "필수 최소 검토"
+
+#: group_project.py:341
+msgid ""
+"The minimum number of group-reviews that should be applied to a set of "
+"submissions (set to 0 to be 'TA Graded')"
+msgstr "제출 답변 세트에 적용해야 하는 최소 그룹 검토 수('TA 등급 부여 완료'를 받으려면 0으로 설정)"
+
+#: group_project.py:348
+msgid "User Reviews Required Minimum"
+msgstr "필수 최소 사용자 검토"
+
+#: group_project.py:349
+msgid ""
+"The minimum number of other-group reviews that an individual user should "
+"perform"
+msgstr "개별 사용자가 수행해야 하는 다른 그룹 검토의 최소 수"
+
+#: group_project.py:355
+msgid "Due date"
+msgstr "마감일"
+
+#: group_project.py:356
+msgid "Activity due date"
+msgstr "활동 기한"
+
+#: group_project.py:775
+#, python-brace-format
+msgid "{field_name} must be integer, {field_value} given"
+msgstr "{field_name}은(는) 정수여야 하는데, {field_value}이(가) 주어졌습니다."
+
+#: messages.py:4
+msgid "Unknown error."
+msgstr "알 수 없는 오류입니다."
+
+#: messages.py:6
+msgid ""
+"This component is misconfigured and can't be displayed. It needs to be fixed "
+"by the course authors."
+msgstr "이 구성 요소는 잘못 구성되어 표시할 수 없습니다. 강의 작성자가 수정해야 합니다."
+
+#: messages.py:8
+#, python-brace-format
+msgid "Can't {action} as stage is not yet opened."
+msgstr "단계가 아직 열리지 않았으므로 {action}을(를) 수행할 수 없습니다."
+
+#: messages.py:9
+#, python-brace-format
+msgid "Can't {action} as stage is closed."
+msgstr "단계가 닫혀서 {action}을(를) 수행할 수 없습니다."
+
+#: messages.py:12
+msgid "This Group Project does not contain any activities."
+msgstr "이 그룹 프로젝트에는 활동이 없습니다."
+
+#: messages.py:14
+msgid ""
+"This Group Project V2 does not contain Project Navigator - please edit "
+"course outline in Studio to include one."
+msgstr "이 그룹 프로젝트 V2에는 프로젝트 탐색기가 없습니다. Studio에서 강의 개요를 편집하여 추가하십시오."
+
+#: messages.py:17
+msgid "This Group Project V2 does not contain a discussion."
+msgstr "이 그룹 프로젝트 V2에는 토론이 없습니다."
+
+#: messages.py:18
+msgid "Group Project must contain Project Navigator Block."
+msgstr "그룹 프로젝트는 프로젝트 탐색기 블록이 있어야 합니다."
+
+#: messages.py:21
+msgid "This Group Project Activity does not contain any stages."
+msgstr "이 그룹 프로젝트 활동에는 단계가 없습니다."
+
+#: messages.py:22
+#, python-brace-format
+msgid "{field_name} must be integer, {field_value} given."
+msgstr "{field_name}은(는) 정수여야 하는데, {field_value}이(가) 주어졌습니다."
+
+#: messages.py:23
+#, python-brace-format
+msgid "This project is assigned to {group_count} group(s)"
+msgstr "이 프로젝트는 {group_count}개 그룹에 할당되었습니다."
+
+#: messages.py:26
+msgid "Project Navigator must contain Navigation view."
+msgstr "프로젝트 탐색기에는 탐색 보기가 있어야 합니다."
+
+#: messages.py:28
+#, python-brace-format
+msgid ""
+"Parent group project does not contain discussion XBlock - this {block_type} "
+"will not function properly and will not be displayed to students."
+msgstr "상위 그룹 프로젝트에 토론 XBlock이 없습니다. 이 {block_type}은(는) 제대로 작동하지 않으며 수강자에게 표시되지 않습니다."
+
+#: messages.py:33
+msgid "This task has been marked as complete."
+msgstr "이 태스크는 완료된 것으로 표시되었습니다."
+
+#: messages.py:34
+#, python-brace-format
+msgid "url_name to link to this {stage_name}:"
+msgstr "이 {stage_name}에 링크할 url_name:"
+
+#: messages.py:35
+#, python-brace-format
+msgid "Submissions are not specified for {class_name} '{stage_title}'."
+msgstr "{class_name}의 '{stage_title}'에 대한 제출 답변이 지정되지 않았습니다."
+
+#: messages.py:36
+#, python-brace-format
+msgid ""
+"Feedback display blocks are not specified for {class_name} '{stage_title}'."
+msgstr "{class_name}의 '{stage_title}'에 대한 피드백 표시 블록이 지정되지 않았습니다."
+
+#: messages.py:37
+#, python-brace-format
+msgid "Questions are not specified for {class_name} '{stage_title}'."
+msgstr "{class_name}의 '{stage_title}'에 대한 질문이 지정되지 않았습니다."
+
+#: messages.py:39
+#, python-brace-format
+msgid ""
+"{class_name} stage '{stage_title}' is missing required component "
+"'{peer_selector_class_name}'."
+msgstr "{class_name}의 단계 '{stage_title}'에 필수 구성 요소 '{peer_selector_class_name}'이(가) 누락되었습니다."
+
+#: messages.py:42
+#, python-brace-format
+msgid ""
+"{class_name} stage '{stage_title}' is missing required component "
+"'{group_selector_class_name}'."
+msgstr "{class_name}의 단계 '{stage_title}'에 필수 구성 요소 '{group_selector_class_name}'이(가) 누락되었습니다."
+
+#: messages.py:44
+msgid "Thanks for your feedback."
+msgstr "피드백을 보내 주셔서 감사합니다."
+
+#: messages.py:45
+msgid "TA grading is not allowed for this stage."
+msgstr "이 단계에서는 TA 등급 부여가 허용되지 않습니다."
+
+#: messages.py:46
+#, python-brace-format
+msgid ""
+"Graded questions are not supported for {class_name} stage '{stage_title}'."
+msgstr "등급 부여된 질문은 {class_name}의 단계 '{stage_title}'에서 지원되지 않습니다."
+
+#: messages.py:47
+#, python-brace-format
+msgid "Grade questions are required for {class_name} stage '{stage_title}'."
+msgstr "{class_name}의 단계 '{stage_title}'에는 등급 문제가 필요합니다."
+
+#: messages.py:50
+msgid "Video Resource Block must contain Ooyala content ID."
+msgstr "비디오 리소스 블록에는 Ooyala 콘텐츠 ID가 있어야 합니다."
+
+#: messages.py:51
+msgid "Only group members can upload files."
+msgstr "그룹 회원만 파일을 업로드할 수 있습니다."
+
+#: messages.py:52
+msgid "Question is not selected."
+msgstr "질문이 선택되지 않았습니다."
+
+#: messages.py:53
+msgid "Upload complete"
+msgstr "업로드 완료"
+
+#: messages.py:54
+msgid "Upload failed."
+msgstr "업로드에 실패했습니다."
+
+#: messages.py:56
+#, python-brace-format
+msgid ""
+"Your deliverable has been successfully uploaded. You can attach an updated "
+"version of the deliverable by clicking the <span class='icon {icon}'></span> "
+"icon at any time before the deadline."
+msgstr "결과물이 성공적으로 업로드되었습니다. 마감일 전에 언제든지 <span class='icon {icon}'></span> 아이콘을 클릭하여 업데이트된 버전의 결과물을 첨부할 수 있습니다."
+
+#: messages.py:59
+#, python-brace-format
+msgid "Error uploading file: {error_goes_here}."
+msgstr "파일 업로드 오류: {error_goes_here}."
+
+#: project_navigator.py:64 project_navigator.py:67
+msgid "Group Project Navigator"
+msgstr "그룹 프로젝트 탐색기"
+
+#: project_navigator.py:233
+#, python-brace-format
+msgid "url_name to link to this {project_navigator_view}:"
+msgstr "이 {project_navigator_view}에 링크할 url_name:"
+
+#: project_navigator.py:306
+msgid "Navigation View"
+msgstr "탐색 보기"
+
+#: project_navigator.py:307
+msgid "Navigation"
+msgstr "탐색"
+
+#: project_navigator.py:338
+msgid "Resources View"
+msgstr "리소스 보기"
+
+#: project_navigator.py:339
+msgid "Resources"
+msgstr "리소스"
+
+#: project_navigator.py:371
+msgid "Submissions View"
+msgstr "제출 답변 보기"
+
+#: project_navigator.py:372
+msgid "Upload"
+msgstr "업로드"
+
+#: project_navigator.py:412
+msgid "Ask a TA View"
+msgstr "TA에게 질문하기"
+
+#: project_navigator.py:413
+msgid "Ask a McKinsey TA"
+msgstr "McKinsey TA에게 질문하기"
+
+#: project_navigator.py:445
+msgid "Private Discussion View"
+msgstr "비공개 토론 보기"
+
+#: stage/base.py:44
+msgid "Open Date"
+msgstr "시작 날짜"
+
+#: stage/base.py:45
+msgid "Stage open date"
+msgstr "단계 시작 날짜"
+
+#: stage/base.py:50
+msgid "Close Date"
+msgstr "마감 날짜"
+
+#: stage/base.py:51
+msgid "Stage close date"
+msgstr "단계 마감 날짜"
+
+#: stage/base.py:56
+msgid "Hide stage type label"
+msgstr "단계 유형 레이블 숨김"
+
+#: stage/base.py:57
+msgid "If true, hides stage type label in Project Navigator"
+msgstr "참인 경우 프로젝트 탐색기에서 단계 유형 레이블을 숨깁니다."
+
+#: stage/base.py:72
+msgid "Stage"
+msgstr "단계"
+
+#: stage/basic.py:24
+msgid "Text Stage"
+msgstr "텍스트 단계"
+
+#: stage/basic.py:29
+msgid "Overview"
+msgstr "개요"
+
+#: stage/basic.py:30
+msgid "Text"
+msgstr "텍스트"
+
+#: stage/basic.py:46
+msgid "Completion Stage"
+msgstr "완료 단계"
+
+#: stage/basic.py:52 stage/basic.py:103 stage/review.py:30
+msgid "Task"
+msgstr "태스크"
+
+#: stage/basic.py:53
+msgid "Completion"
+msgstr "완료"
+
+#: stage/basic.py:58
+msgid "mark stage as complete"
+msgstr "단계를 완료로 표시"
+
+#: stage/basic.py:98
+msgid "Submission Stage"
+msgstr "제출 단계"
+
+#: stage/basic.py:104
+msgid "Deliverable"
+msgstr "결과물"
+
+#: stage/basic.py:107 stage/basic.py:108
+msgid "Pending Upload"
+msgstr "업로드 대기 중"
+
+#: stage/basic.py:109
+msgid "Uploaded"
+msgstr "업로드됨"
+
+#: stage/basic.py:111 stage/review.py:329
+msgid "Unknown"
+msgstr "알 수 없음"
+
+#: stage/basic.py:115
+msgid "upload submission"
+msgstr "제출 답변 업로드"
+
+#: stage/feedback_review.py:21
+msgid "Review"
+msgstr "검토"
+
+#: stage/feedback_review.py:72
+msgid "Evaluation Display Stage"
+msgstr "평가 표시 단계"
+
+#: stage/feedback_review.py:78
+msgid "Evaluation Display"
+msgstr "평가 표시"
+
+#: stage/feedback_review.py:118
+msgid "Grade Display Stage"
+msgstr "등급 표시 단계"
+
+#: stage/feedback_review.py:124
+msgid "Grade Display"
+msgstr "등급 표시"
+
+#: stage/feedback_review.py:163 stage_components.py:746
+msgid "N/A"
+msgstr "해당 없음"
+
+#: stage/mixins.py:14
+msgid "Completed"
+msgstr "완료됨"
+
+#: stage/review.py:39
+msgid "save feedback"
+msgstr "피드백 저장"
+
+#: stage/review.py:209
+msgid "Team Evaluation Stage"
+msgstr "팀 평가 단계"
+
+#: stage/review.py:215
+msgid "Team Evaluation"
+msgstr "팀 평가"
+
+#: stage/review.py:318
+msgid "Peer Grading Stage"
+msgstr "동료 채점 단계"
+
+#: stage/review.py:325 stage/review.py:326
+msgid "Pending Review"
+msgstr "검토 대기 중"
+
+#: stage/review.py:327
+msgid "Review Complete"
+msgstr "검토 완료"
+
+#: stage/review.py:331
+msgid "Peer Grading"
+msgstr "동료 채점"
+
+#: stage/utils.py:12
+msgid "Not started"
+msgstr "시작 안함"
+
+#: stage/utils.py:13
+msgid "Partially complete"
+msgstr "부분적으로 완료"
+
+#: stage/utils.py:14
+msgid "Complete"
+msgstr "완료"
+
+#: stage/utils.py:29
+msgid "This is a name of the stage"
+msgstr "단계의 이름입니다."
+
+#: stage_components.py:64
+msgid "This is a name of the resource"
+msgstr "리소스의 이름입니다."
+
+#: stage_components.py:66
+msgid "Group Project V2 Resource"
+msgstr "그룹 프로젝트 V2 리소스"
+
+#: stage_components.py:70
+msgid "Resource Description"
+msgstr "리소스 설명"
+
+#: stage_components.py:89
+msgid "Resource"
+msgstr "리소스"
+
+#: stage_components.py:94
+msgid "Resource Location"
+msgstr "리소스 위치"
+
+#: stage_components.py:95
+msgid "A url to download/view the resource"
+msgstr "리소스를 다운로드하기/보기 위한 URL"
+
+#: stage_components.py:100
+msgid "Grading Criteria?"
+msgstr "채점 기준인지 여부"
+
+#: stage_components.py:101
+msgid "If true, resource will be treated as grading criteria"
+msgstr "참인 경우 리소스가 채점 기준으로 간주됩니다."
+
+#: stage_components.py:114
+msgid "Video Resource"
+msgstr "비디오 리소스"
+
+#: stage_components.py:118
+msgid "Ooyala/Brightcove content ID"
+msgstr "Ooyala/Brightcove 콘텐츠 ID"
+
+#: stage_components.py:119
+msgid "This is the Ooyala/Brightcove Content Identifier"
+msgstr "Ooyala/Brightcove 콘텐츠 식별자"
+
+#: stage_components.py:203
+msgid "Submissions Help Text"
+msgstr "제출 도움말 텍스트"
+
+#: stage_components.py:215
+msgid "Grade Rubric Help Text"
+msgstr "등급 채점기준표 도움말 텍스트"
+
+#: stage_components.py:236
+msgid "Submission"
+msgstr "제출"
+
+#: stage_components.py:242
+msgid "This is a name of the submission"
+msgstr "제출 답변의 이름입니다."
+
+#: stage_components.py:244
+msgid "Group Project V2 Submission"
+msgstr "그룹 프로젝트 V2 제출"
+
+#: stage_components.py:248
+msgid "Submission Description"
+msgstr "제출 설명"
+
+#: stage_components.py:253
+msgid "Upload ID"
+msgstr "업로드 ID"
+
+#: stage_components.py:254
+msgid ""
+"This string is used as an identifier for an upload. Submissions sharing the "
+"same Upload ID will be updated simultaneously"
+msgstr "이 문자열은 업로드를 위한 식별자로 사용됩니다. 동일한 업로드 ID를 공유하는 제출 답변은 동시에 업데이트됩니다."
+
+#: stage_components.py:424
+msgid "Error storing file {} - {}"
+msgstr "{} - {} 파일을 저장하는 동안 오류 발생"
+
+#: stage_components.py:444
+msgid "Error recording file information {} - {}"
+msgstr "{} - {} 파일 정보를 기록하는 동안 오류 발생"
+
+#: stage_components.py:489
+msgid "Teammate Selector"
+msgstr "팀원 선택기"
+
+#: stage_components.py:490
+msgid "Teammate Selector XBlock"
+msgstr "팀원 선택기 XBlock"
+
+#: stage_components.py:523
+msgid "Group Selector"
+msgstr "그룹 선택기"
+
+#: stage_components.py:524
+msgid "Group Selector XBlock"
+msgstr "그룹 선택기 XBlock"
+
+#: stage_components.py:549 stage_components.py:553
+msgid "Review Question"
+msgstr "질문 검토"
+
+#: stage_components.py:556 stage_components.py:688
+msgid "Question ID"
+msgstr "질문 ID"
+
+#: stage_components.py:563
+msgid "Question Text"
+msgstr "질문 텍스트"
+
+#: stage_components.py:569
+msgid "Assessment Question Text"
+msgstr "평가 질문 텍스트"
+
+#: stage_components.py:570
+msgid "Overrides question title when displayed in assessment mode"
+msgstr "평가 모드로 표시될 때 질문 제목을 재정의합니다."
+
+#: stage_components.py:576
+msgid "Question Content"
+msgstr "질문 콘텐츠"
+
+#: stage_components.py:577
+msgid "HTML control"
+msgstr "HTML 제어"
+
+#: stage_components.py:585
+msgid "Required"
+msgstr "필수"
+
+#: stage_components.py:591
+msgid "Grading"
+msgstr "채점"
+
+#: stage_components.py:592
+msgid ""
+"IF True, answers to this question will be used to calculate student grade "
+"for Group Project."
+msgstr "참인 경우 해당 질문에 대한 답변이 그룹 프로젝트의 수강자 등급을 계산하는 데 사용됩니다."
+
+#: stage_components.py:598
+msgid "Single Line"
+msgstr "단일 행"
+
+#: stage_components.py:599
+msgid ""
+"If True question label and content will be displayed on single line, "
+"allowing for more compact layout.Only affects presentation."
+msgstr "참인 경우 질문 레이블과 콘텐츠가 단일 행에 표시되어 레이아웃이 보다 간결해집니다. 이는 프레젠테이션에만 적용됩니다."
+
+#: stage_components.py:606
+msgid "CSS Classes"
+msgstr "CSS 클래스"
+
+#: stage_components.py:607
+msgid "CSS classes to be set on question element. Only affects presentation."
+msgstr "질문 요소에서 설정할 CSS 클래스로, 프레젠테이션에만 적용됩니다."
+
+#: stage_components.py:683
+msgid "No question selected"
+msgstr "선택한 질문이 없습니다."
+
+#: stage_components.py:684
+msgid "Selected question not found"
+msgstr "선택한 질문을 찾을 수 없습니다."
+
+#: stage_components.py:685
+msgid "Question ID is not unique"
+msgstr "질문 ID가 고유하지 않습니다."
+
+#: stage_components.py:689
+msgid "Question to be assessed"
+msgstr "평가할 질문"
+
+#: stage_components.py:695
+msgid "Show Mean Value"
+msgstr "평균값 표시"
+
+#: stage_components.py:696
+msgid "If True, converts review answers to numbers and calculates mean value"
+msgstr "참인 경우 검토 답변을 숫자로 변환하고 평균값을 계산합니다."
+
+#: stage_components.py:711
+#, python-brace-format
+msgid "Review Assessment for question \"{question_title}\""
+msgstr "질문 \"{question_title}\"에 대한 평가 검토"
+
+#: stage_components.py:713
+msgid "Review Assessment"
+msgstr "평가 검토"
+
+#: stage_components.py:784
+msgid "--- Not selected ---"
+msgstr "--- 선택되지 않음 ---"
+
+#: stage_components.py:795
+msgid "Team Evaluation Display"
+msgstr "팀 평가 표시"
+
+#: stage_components.py:813
+msgid "Grade Evaluation Display"
+msgstr "등급 평가 표시"
+
+#: stage_components.py:831
+msgid "Project Team"
+msgstr "프로젝트 팀"
+
+#: templates/html/activity/dashboard_detail_view.html:4
+#: templates/html/activity/dashboard_view.html:4
+msgid "Activity:"
+msgstr "활동:"
+
+#: templates/html/activity/dashboard_detail_view.html:10
+msgid "Groups"
+msgstr "그룹"
+
+#: templates/html/activity/dashboard_detail_view.html:11
+msgid "Graded/Required Stages"
+msgstr "등급 부여/필수 단계"
+
+#: templates/html/activity/dashboard_detail_view.html:17
+msgid ""
+"will export a list of emails within stage of partially complete/incomplete "
+"teams"
+msgstr "부분적으로 완료/미완료 팀 단계 내에서 이메일 목록을 내보냅니다."
+
+#: templates/html/activity/dashboard_detail_view.html:60
+msgid "Grading:"
+msgstr "채점:"
+
+#: templates/html/activity/dashboard_detail_view.html:78
+#, python-format
+msgid ""
+"\n"
+"            Additionally there is a single work group filtered by company "
+"filter.\n"
+"          "
+msgid_plural "\n            Additionally there were %(counter)s work groups filtered by company filter.\n          "
+msgstr[0] "\n"
+"            또한 회사 필터로 필터링된 단일 과제 그룹이 있습니다.\n"
+"          "
+msgstr[1] "\n"
+"            또한 회사 필터로 필터링된 %(counter)s개의 과제 그룹이 있었습니다.\n"
+"          "
+
+#: templates/html/activity/dashboard_detail_view.html:84
+msgid ""
+"\n"
+"            All work groups have been filtered by the company filter.\n"
+"          "
+msgstr "\n"
+"            모든 과제 그룹이 회사 필터로 필터링되었습니다.\n"
+"          "
+
+#: templates/html/activity/navigation_view.html:11
+msgid "No stages available for this activity"
+msgstr "이 활동에 사용할 수 있는 단계가 없습니다."
+
+#: templates/html/activity/resources_view.html:11
+msgid "No resources for this activity"
+msgstr "이 활동에 대한 리소스가 없습니다."
+
+#: templates/html/activity/submissions_view.html:12
+msgid "No uploads required for this activity"
+msgstr "이 활동에는 업로드가 필요하지 않습니다."
+
+#: templates/html/add_buttons.html:5
+msgid "Add New Component"
+msgstr "새 구성 요소 추가"
+
+#: templates/html/components/group_selector.html:4
+msgid ""
+"Please click on the group(s) you are assigned to grade to review their "
+"submissions."
+msgstr "제출 답변을 검토하려면 등급을 부여하도록 할당된 그룹을 클릭하십시오."
+
+#: templates/html/components/group_selector.html:8
+#: templates/html/components/peer_selector.html:8
+msgid "Demo contents"
+msgstr "데모 콘텐츠"
+
+#: templates/html/components/group_selector.html:19
+msgid "Group"
+msgstr "그룹"
+
+#: templates/html/components/group_selector.html:20
+#: templates/html/components/peer_selector.html:21
+msgid "Evaluating below"
+msgstr "아래 내용 평가 중"
+
+#: templates/html/components/group_selector.html:26
+msgid "No groups assigned for review"
+msgstr "검토를 위해 할당된 그룹이 없습니다."
+
+#: templates/html/components/peer_selector.html:4
+msgid "Please click on the teammates to review their performance"
+msgstr "팀원을 클릭하여 성과를 검토하십시오."
+
+#: templates/html/components/peer_selector.html:19
+msgid "Teammate"
+msgstr "팀원"
+
+#: templates/html/components/peer_selector.html:27
+msgid "No teammates to review"
+msgstr "검토할 팀원이 없습니다."
+
+#: templates/html/components/project_team.html:3
+msgid "Email your entire team"
+msgstr "팀 전체에게 이메일 보내기"
+
+#: templates/html/components/project_team.html:23
+msgid "Email"
+msgstr "이메일"
+
+#: templates/html/components/review_assessment.html:6
+msgid "Grade:"
+msgstr "등급:"
+
+#: templates/html/components/submission_navigator_view.html:28
+msgid "Uploaded by"
+msgstr "다음에서 업로드:"
+
+#: templates/html/components/submission_review_view.html:11
+msgid "This file has not been submitted by this group"
+msgstr "이 그룹은 이 파일을 제출하지 않았습니다."
+
+#: templates/html/project/student_view.html:31
+msgid "OK"
+msgstr "확인"
+
+#: templates/html/project/student_view.html:42
+msgid "Message your group"
+msgstr "그룹에 메시지 전송"
+
+#: templates/html/project/student_view.html:44
+msgid "Send any questions or messages to your group."
+msgstr "그룹에 질문 또는 메시지를 전송하십시오."
+
+#: templates/html/project/student_view.html:48
+msgid "Enter your message for the group here"
+msgstr "여기에 그룹에 전송할 메시지를 입력하십시오."
+
+#: templates/html/project/student_view.html:49
+#: templates/html/project/student_view.html:68
+#: templates/html/project_navigator/ask_ta_view.html:18
+msgid "Submit"
+msgstr "제출"
+
+#: templates/html/project/student_view.html:60
+msgid "Message your group member"
+msgstr "그룹 구성원에게 메시지 전송"
+
+#: templates/html/project/student_view.html:62
+msgid "Send any questions or messages to your group member."
+msgstr "그룹 구성원에게 질문 또는 메시지를 전송하십시오."
+
+#: templates/html/project/student_view.html:67
+msgid "Enter your message here"
+msgstr "여기에 메시지를 입력하십시오."
+
+#: templates/html/project_navigator/ask_ta_view.html:10
+msgid ""
+"Send any questions or messages to a TA, and they'll get back to you via "
+"email."
+msgstr "TA에게 질문 또는 메시지를 전송하면 이메일을 통해 답변해 드릴 것입니다."
+
+#: templates/html/project_navigator/ask_ta_view.html:17
+msgid "Enter your message here."
+msgstr "여기에 메시지를 입력하십시오."
+
+#: templates/html/project_navigator/project_navigator.html:5
+#: templates/html/project_navigator/project_navigator_author_view.html:4
+msgid "Project Navigator"
+msgstr "프로젝트 탐색기"
+
+#: templates/html/stages/completion.html:9
+msgid "Yes, I have completed this task"
+msgstr "예, 이 태스크를 완료했습니다."
+
+#: templates/html/stages/dashboard_detail_view.html:14
+#: templates/html/stages/dashboard_view.html:13
+msgid "TA Graded"
+msgstr "TA 등급 부여 완료"
+
+#: templates/html/stages/dashboard_view.html:4
+msgid "Status:"
+msgstr "상태:"
+
+#: templates/html/stages/dashboard_view.html:25
+msgid "No students match search criteria"
+msgstr "검색 기준과 일치하는 수강생이 없습니다."
+
+#: templates/html/stages/grade_display.html:8
+msgid "Final Grade:"
+msgstr "최종 등급:"
+
+#: templates/html/stages/navigation_view.html:16
+msgid "Closed on"
+msgstr "마감일"
+
+#: templates/html/stages/navigation_view.html:18
+msgid "Due"
+msgstr "기한"
+
+#: templates/html/stages/navigation_view.html:20
+msgid "Available"
+msgstr "이용 가능"
+
+#: templates/html/stages/peer_review.html:4
+msgid "Grading View"
+msgstr "채점 보기"
+
+#: templates/html/stages/peer_review.html:6
+msgid "TA Grading override view"
+msgstr "TA 채점 재정의 보기"
+
+#: templates/html/stages/peer_review.html:23
+msgid "Group Submissions"
+msgstr "그룹 제출"
+
+#: templates/html/stages/peer_review.html:24
+msgid "Please review the file(s) below to evaluate the group's work."
+msgstr "그룹의 과제를 평가하려면 아래 파일을 검토하십시오."
+
+#: templates/html/stages/stage_wrapper.html:26
+msgid "This stage has not yet been opened"
+msgstr "이 단계는 아직 열리지 않았습니다."
+
+#: templates/html/stages/stages_group_review_other_team_submissions.html:10
+msgid "Current Group Project Activity does not have any submission stages"
+msgstr "현재 그룹 프로젝트 활동에 제출 단계가 없습니다."
+
+#: templates/html/stages/submissions_review_view.html:8
+msgid "No submissions have been uploaded for this stage"
+msgstr "이 단계에 대한 제출 답변이 업로드되지 않았습니다."
+
+#: utils.py:39
+msgid "This XBlock does not contain any editable settings"
+msgstr "이 XBlock에는 편집 가능한 설정이 없습니다."
+
+#: utils.py:40
+msgid "Must be overridden in inherited class"
+msgstr "상속된 클래스에서 재정의되어야 합니다."
+
+#: utils.py:56
+msgid "HTML"
+msgstr "HTML"
+
+#: utils.py:61
+msgid "Discussion"
+msgstr "토론"
+
+#: utils.py:332
+#, python-brace-format
+msgid "#{group_id}"
+msgstr "#{group_id}"
+
+#: utils.py:334
+#, python-brace-format
+msgid "Group #{group_id}"
+msgstr "그룹 #{group_id}"

@@ -13,23 +13,23 @@
   django.catalog = django.catalog || {};
   
   var newcatalog = {
-    " Technical details: 403 error.": "Szczeg\u00f3\u0142y techniczne: B\u0142\u0105d 403.", 
-    " Technical details: CSRF verification failed.": "Szczeg\u00f3\u0142y techniczne: B\u0142\u0105d weryfikacji CSRF.", 
-    "An error occurred while uploading your file. Please refresh the page and try again. If it still does not upload, please contact your Course TA.": "Podczas przesy\u0142ania pliku wyst\u0105pi\u0142 b\u0142\u0105d. Od\u015bwie\u017c stron\u0119 i spr\u00f3buj ponownie. Je\u015bli przesy\u0142anie si\u0119 nie uda, skontaktuj si\u0119 z Asystentem Kursu.", 
-    "Error": "B\u0142\u0105d", 
-    "Error refreshing statuses": "B\u0142\u0105d podczas od\u015bwie\u017cania status\u00f3w", 
-    "Please select Group to review": "Wybierz grup\u0119, kt\u00f3r\u0105 chcesz oceni\u0107", 
-    "Please select Teammate to review": "Wybierz Cz\u0142onka zespo\u0142u, kt\u00f3rego chcesz oceni\u0107", 
-    "Resubmit": "Prze\u015blij ponownie", 
-    "Submit": "Prze\u015blij", 
-    "Thanks for your feedback!": "Dzi\u0119kujemy za przes\u0142anie opinii.", 
-    "This task has been marked as complete.": "To zadanie oznaczono jako uko\u0144czone.", 
-    "Upload cancelled by user.": "U\u017cytkownik przerwa\u0142 przesy\u0142anie.", 
-    "Upload cancelled.": "Przerwano przesy\u0142anie", 
-    "We encountered an error loading your feedback.": "Podczas wczytywania Twojej opinii wyst\u0105pi\u0142 b\u0142\u0105d.", 
-    "We encountered an error saving your feedback.": "Podczas zapisywania Twojej opinii wyst\u0105pi\u0142 b\u0142\u0105d.", 
-    "We encountered an error saving your progress.": "Podczas zapisywania Twojego stopnia uko\u0144czenia wyst\u0105pi\u0142 b\u0142\u0105d.", 
-    "We encountered an error.": "Wyst\u0105pi\u0142 b\u0142\u0105d."
+    " Technical details: 403 error.": " \u6280\u672f\u8be6\u7ec6\u4fe1\u606f\uff1a403 \u9519\u8bef\u3002", 
+    " Technical details: CSRF verification failed.": " \u6280\u672f\u8be6\u7ec6\u4fe1\u606f\uff1aCSRF \u9a8c\u8bc1\u5931\u8d25\u3002", 
+    "An error occurred while uploading your file. Please refresh the page and try again. If it still does not upload, please contact your Course TA.": "\u4e0a\u4f20\u60a8\u7684\u6587\u4ef6\u65f6\u51fa\u9519\u3002\u8bf7\u5237\u65b0\u9875\u9762\u5e76\u91cd\u8bd5\u3002\u5982\u679c\u4ecd\u7136\u65e0\u6cd5\u4e0a\u4f20\uff0c\u8bf7\u8054\u7cfb\u60a8\u7684\u8bfe\u7a0b\u52a9\u6559\u3002", 
+    "Error": "\u9519\u8bef", 
+    "Error refreshing statuses": "\u5237\u65b0\u72b6\u6001\u65f6\u51fa\u9519", 
+    "Please select Group to review": "\u8bf7\u9009\u62e9\u5c0f\u7ec4\u4ee5\u8fdb\u884c\u5ba1\u67e5", 
+    "Please select Teammate to review": "\u8bf7\u9009\u62e9\u7ec4\u5458\u4ee5\u8fdb\u884c\u5ba1\u67e5", 
+    "Resubmit": "\u91cd\u65b0\u63d0\u4ea4", 
+    "Submit": "\u63d0\u4ea4", 
+    "Thanks for your feedback!": "\u611f\u8c22\u60a8\u7684\u53cd\u9988\uff01", 
+    "This task has been marked as complete.": "\u6b64\u4efb\u52a1\u5df2\u6807\u8bb0\u4e3a\u5b8c\u6210\u3002", 
+    "Upload cancelled by user.": "\u7528\u6237\u5df2\u53d6\u6d88\u4e0a\u4f20\u3002", 
+    "Upload cancelled.": "\u4e0a\u4f20\u5df2\u53d6\u6d88\u3002", 
+    "We encountered an error loading your feedback.": "\u52a0\u8f7d\u60a8\u7684\u53cd\u9988\u65f6\u9047\u5230\u9519\u8bef\u3002", 
+    "We encountered an error saving your feedback.": "\u4fdd\u5b58\u60a8\u7684\u53cd\u9988\u65f6\u9047\u5230\u9519\u8bef\u3002", 
+    "We encountered an error saving your progress.": "\u4fdd\u5b58\u60a8\u7684\u8fdb\u5ea6\u65f6\u9047\u5230\u9519\u8bef\u3002", 
+    "We encountered an error.": "\u6211\u4eec\u9047\u5230\u4e86\u9519\u8bef\u3002"
   };
   for (var key in newcatalog) {
     django.catalog[key] = newcatalog[key];
@@ -85,32 +85,43 @@
     /* formatting library */
 
     django.formats = {
-    "DATETIME_FORMAT": "j E Y H:i", 
+    "DATETIME_FORMAT": "N j, Y, P", 
     "DATETIME_INPUT_FORMATS": [
-      "%d.%m.%Y %H:%M:%S", 
-      "%d.%m.%Y %H:%M:%S.%f", 
-      "%d.%m.%Y %H:%M", 
-      "%d.%m.%Y", 
       "%Y-%m-%d %H:%M:%S", 
       "%Y-%m-%d %H:%M:%S.%f", 
       "%Y-%m-%d %H:%M", 
-      "%Y-%m-%d"
+      "%Y-%m-%d", 
+      "%m/%d/%Y %H:%M:%S", 
+      "%m/%d/%Y %H:%M:%S.%f", 
+      "%m/%d/%Y %H:%M", 
+      "%m/%d/%Y", 
+      "%m/%d/%y %H:%M:%S", 
+      "%m/%d/%y %H:%M:%S.%f", 
+      "%m/%d/%y %H:%M", 
+      "%m/%d/%y"
     ], 
-    "DATE_FORMAT": "j E Y", 
+    "DATE_FORMAT": "N j, Y", 
     "DATE_INPUT_FORMATS": [
-      "%d.%m.%Y", 
-      "%d.%m.%y", 
-      "%y-%m-%d", 
-      "%Y-%m-%d"
+      "%Y-%m-%d", 
+      "%m/%d/%Y", 
+      "%m/%d/%y", 
+      "%b %d %Y", 
+      "%b %d, %Y", 
+      "%d %b %Y", 
+      "%d %b, %Y", 
+      "%B %d %Y", 
+      "%B %d, %Y", 
+      "%d %B %Y", 
+      "%d %B, %Y"
     ], 
-    "DECIMAL_SEPARATOR": ",", 
-    "FIRST_DAY_OF_WEEK": "1", 
-    "MONTH_DAY_FORMAT": "j F", 
-    "NUMBER_GROUPING": "3", 
-    "SHORT_DATETIME_FORMAT": "d-m-Y  H:i", 
-    "SHORT_DATE_FORMAT": "d-m-Y", 
-    "THOUSAND_SEPARATOR": "\u00a0", 
-    "TIME_FORMAT": "H:i", 
+    "DECIMAL_SEPARATOR": ".", 
+    "FIRST_DAY_OF_WEEK": "0", 
+    "MONTH_DAY_FORMAT": "F j", 
+    "NUMBER_GROUPING": "0", 
+    "SHORT_DATETIME_FORMAT": "m/d/Y P", 
+    "SHORT_DATE_FORMAT": "m/d/Y", 
+    "THOUSAND_SEPARATOR": ",", 
+    "TIME_FORMAT": "P", 
     "TIME_INPUT_FORMATS": [
       "%H:%M:%S", 
       "%H:%M:%S.%f", 

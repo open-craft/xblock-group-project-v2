@@ -1,0 +1,89 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-26 19:09+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: public/js/components/review_subject_selector.js:9
+msgid "Error refreshing statuses"
+msgstr "Fehler bei der Aktualisierung des Status"
+
+#: public/js/components/submission.js:27
+msgid "Upload cancelled."
+msgstr "Upload abgebrochen."
+
+#: public/js/components/submission.js:28
+msgid "Upload cancelled by user."
+msgstr "Upload von Nutzer abgebrochen."
+
+#: public/js/components/submission.js:37
+msgid ""
+"An error occurred while uploading your file. Please refresh the page and try "
+"again. If it still does not upload, please contact your Course TA."
+msgstr "Während dem Upload Ihrer Datei ist ein Fehler aufgetreten. Bitte aktualisieren Sie die Seite und versuchen Sie es erneut. Funktioniert der Upload immer noch nicht, wenden Sie sich bitte an Ihren Kurs-TA."
+
+#: public/js/components/submission.js:46
+msgid " Technical details: CSRF verification failed."
+msgstr "Technische Details: CSRF-Verifizierung fehlgeschlagen."
+
+#: public/js/components/submission.js:48
+msgid " Technical details: 403 error."
+msgstr "Technische Details: 403 Fehler."
+
+#: public/js/components/submission.js:144
+#: public/js/components/submission.js:150
+msgid "Error"
+msgstr "Fehler"
+
+#: public/js/group_project_common.js:59
+msgid "Please select Teammate to review"
+msgstr "Bitte wählen Sie Teammate zur Überprüfung aus"
+
+#: public/js/group_project_common.js:60
+msgid "Please select Group to review"
+msgstr "Bitte wählen Sie eine Gruppe zur Überprüfung aus"
+
+#: public/js/group_project_common.js:62
+msgid "Thanks for your feedback!"
+msgstr "Danke für Ihr Feedback!"
+
+#: public/js/group_project_common.js:63
+msgid "We encountered an error loading your feedback."
+msgstr "Beim Laden Ihres Feedbacks ist ein Fehler aufgetreten."
+
+#: public/js/group_project_common.js:64
+msgid "We encountered an error saving your feedback."
+msgstr "Beim Speichern Ihres Feedbacks ist ein Fehler aufgetreten."
+
+#: public/js/group_project_common.js:65
+msgid "We encountered an error."
+msgstr "Ein Fehler ist aufgetreten."
+
+#: public/js/group_project_common.js:70
+msgid "This task has been marked as complete."
+msgstr "Diese Aufgabe wurde als abgeschlossen markiert."
+
+#: public/js/group_project_common.js:71
+msgid "We encountered an error saving your progress."
+msgstr "Beim Speichern Ihres Fortschritts ist ein Fehler aufgetreten."
+
+#: public/js/stages/review_stage.js:5
+msgid "Resubmit"
+msgstr "Erneut einreichen"
+
+#: public/js/stages/review_stage.js:6
+msgid "Submit"
+msgstr "Einreichen"

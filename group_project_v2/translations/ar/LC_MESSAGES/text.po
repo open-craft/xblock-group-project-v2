@@ -1,0 +1,892 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#: stage_components.py:564 stage_components.py:578
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-26 19:09+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: api_error.py:18
+msgid "Unknown error calling API"
+msgstr "حدث خطأ غير معروف في استدعاء واجهة برمجة التطبيقات"
+
+#: group_project.py:40 group_project.py:326 stage/utils.py:28
+#: stage_components.py:63 stage_components.py:241
+msgid "Display Name"
+msgstr "اسم العرض"
+
+#: group_project.py:41
+msgid "This is a name of the project"
+msgstr "هذا اسم المشروع"
+
+#: group_project.py:43
+msgid "Group Project V2"
+msgstr "مشروع المجموعة V2"
+
+#: group_project.py:327
+msgid "This name appears in the horizontal navigation at the top of the page."
+msgstr "يظهر هذا الاسم في التنقل الأفقي أعلى الصفحة."
+
+#: group_project.py:329 group_project.py:362
+msgid "Group Project Activity"
+msgstr "نشاط مشروع المجموعة"
+
+#: group_project.py:333
+msgid "Weight"
+msgstr "القيمة"
+
+#: group_project.py:334
+msgid ""
+"This is the maximum score that the user receives when he/she successfully "
+"completes the problem."
+msgstr "هذه هي النتيجة القصوى التي يحصل عليها المستخدم عند حل المشكلة بنجاح."
+
+#: group_project.py:340
+msgid "Reviews Required Minimum"
+msgstr "المراجعات مطلوبة كحد أدنى"
+
+#: group_project.py:341
+msgid ""
+"The minimum number of group-reviews that should be applied to a set of "
+"submissions (set to 0 to be 'TA Graded')"
+msgstr "الحد الأدنى لعدد مراجعات المجموعات التي يجب تطبيقها على مجموعة من عمليات التقديم (تعيين إلى 0 ليتم \"وضع الدرجات من قِبل مساعد المدّرس\")"
+
+#: group_project.py:348
+msgid "User Reviews Required Minimum"
+msgstr "الحد الأدنى من مراجعات المستخدم المطلوبة"
+
+#: group_project.py:349
+msgid ""
+"The minimum number of other-group reviews that an individual user should "
+"perform"
+msgstr "الحد الأدنى لعدد مراجعات المجموعات الأخرى التي يجب على المستخدم الفردي إجراؤها"
+
+#: group_project.py:355
+msgid "Due date"
+msgstr "تاريخ الاستحقاق"
+
+#: group_project.py:356
+msgid "Activity due date"
+msgstr "تاريخ استحقاق النشاط"
+
+#: group_project.py:775
+#, python-brace-format
+msgid "{field_name} must be integer, {field_value} given"
+msgstr "{field_name} يجب أن يكون عددًا صحيحًا، {field_value} معين"
+
+#: messages.py:4
+msgid "Unknown error."
+msgstr "خطأ غير معروف."
+
+#: messages.py:6
+msgid ""
+"This component is misconfigured and can't be displayed. It needs to be fixed "
+"by the course authors."
+msgstr "تم تكوين هذا المكون بشكل خاطئ ولا يمكن عرضه. يجب أن يتم إصلاحه من قبل مؤلفي الدورة."
+
+#: messages.py:8
+#, python-brace-format
+msgid "Can't {action} as stage is not yet opened."
+msgstr "لا يمكن {action}لأن المرحلة لم تفتح بعد."
+
+#: messages.py:9
+#, python-brace-format
+msgid "Can't {action} as stage is closed."
+msgstr "لا يمكن {action}لأن المرحلة مغلقة."
+
+#: messages.py:12
+msgid "This Group Project does not contain any activities."
+msgstr "لا يحتوي مشروع المجموعة هذا على أي أنشطة."
+
+#: messages.py:14
+msgid ""
+"This Group Project V2 does not contain Project Navigator - please edit "
+"course outline in Studio to include one."
+msgstr "لا يحتوي مشروع المجموعة V2 هذا على مستكشف المشروع - الرجاء تحرير مخطط الدورة التدريبية في الاستوديو لتضمين مستكشف."
+
+#: messages.py:17
+msgid "This Group Project V2 does not contain a discussion."
+msgstr "لا يحتوي مشروع المجموعة V2 هذا على مناقشة."
+
+#: messages.py:18
+msgid "Group Project must contain Project Navigator Block."
+msgstr "يجب أن يحتوي مشروع المجموعة على كتلة مستكشف المشروع."
+
+#: messages.py:21
+msgid "This Group Project Activity does not contain any stages."
+msgstr "لا يحتوي نشاط مشروع المجموعة هذا على أي مراحل."
+
+#: messages.py:22
+#, python-brace-format
+msgid "{field_name} must be integer, {field_value} given."
+msgstr "{field_name} يجب أن يكون عددًا صحيحًا، {field_value} معين"
+
+#: messages.py:23
+#, python-brace-format
+msgid "This project is assigned to {group_count} group(s)"
+msgstr "تم تعيين هذا المشروع إلى {group_count} مجموعة (مجموعات)"
+
+#: messages.py:26
+msgid "Project Navigator must contain Navigation view."
+msgstr "يجب أن يحتوي مستكشف المشروع على طريقة عرض التنقل."
+
+#: messages.py:28
+#, python-brace-format
+msgid ""
+"Parent group project does not contain discussion XBlock - this {block_type} "
+"will not function properly and will not be displayed to students."
+msgstr "لا يحتوي مشروع المجموعة الرئيسي على مناقشة XBlock - لن يعمل {block_type}هذا بشكل صحيح ولن يتم عرضه للطلاب."
+
+#: messages.py:33
+msgid "This task has been marked as complete."
+msgstr "تم وضع علامة اكتمال على هذه المهمة."
+
+#: messages.py:34
+#, python-brace-format
+msgid "url_name to link to this {stage_name}:"
+msgstr "url_name للارتباط بهذا {stage_name}:"
+
+#: messages.py:35
+#, python-brace-format
+msgid "Submissions are not specified for {class_name} '{stage_title}'."
+msgstr "لم يتم تحديد عمليات التقديم لـ {class_name} «{stage_title}»."
+
+#: messages.py:36
+#, python-brace-format
+msgid ""
+"Feedback display blocks are not specified for {class_name} '{stage_title}'."
+msgstr "لم يتم تحديد كتل عرض الملاحظات لـ {class_name} «{stage_title}»."
+
+#: messages.py:37
+#, python-brace-format
+msgid "Questions are not specified for {class_name} '{stage_title}'."
+msgstr "لم يتم تحديد الأسئلة لـ {class_name} «{stage_title}»."
+
+#: messages.py:39
+#, python-brace-format
+msgid ""
+"{class_name} stage '{stage_title}' is missing required component "
+"'{peer_selector_class_name}'."
+msgstr "تفتقد {class_name}المرحلة «{stage_title}» إلى المكون المطلوب «{peer_selector_class_name}»."
+
+#: messages.py:42
+#, python-brace-format
+msgid ""
+"{class_name} stage '{stage_title}' is missing required component "
+"'{group_selector_class_name}'."
+msgstr "تفتقد {class_name}المرحلة «{stage_title}» إلى المكون المطلوب «{group_selector_class_name}»."
+
+#: messages.py:44
+msgid "Thanks for your feedback."
+msgstr "شكرًا على ملاحظاتك."
+
+#: messages.py:45
+msgid "TA grading is not allowed for this stage."
+msgstr "لا يُسمح بوضع درجات من قِبل مساعد المدّرس لهذه المرحلة."
+
+#: messages.py:46
+#, python-brace-format
+msgid ""
+"Graded questions are not supported for {class_name} stage '{stage_title}'."
+msgstr "لا يتم دعم الأسئلة المُدرجة للمرحلة {class_name} «{stage_title}»."
+
+#: messages.py:47
+#, python-brace-format
+msgid "Grade questions are required for {class_name} stage '{stage_title}'."
+msgstr "تُعد الأسئلة المُدرجة مطلوبة للمرحلة {class_name} «{stage_title}»."
+
+#: messages.py:50
+msgid "Video Resource Block must contain Ooyala content ID."
+msgstr "يجب أن تحتوي كتلة موارد الفيديو على معرف محتوى Ooyala."
+
+#: messages.py:51
+msgid "Only group members can upload files."
+msgstr "يمكن لأعضاء المجموعة فقط تحميل الملفات."
+
+#: messages.py:52
+msgid "Question is not selected."
+msgstr "لم يتم تحديد السؤال."
+
+#: messages.py:53
+msgid "Upload complete"
+msgstr "اكتمل التحميل"
+
+#: messages.py:54
+msgid "Upload failed."
+msgstr "تعذر التحميل."
+
+#: messages.py:56
+#, python-brace-format
+msgid ""
+"Your deliverable has been successfully uploaded. You can attach an updated "
+"version of the deliverable by clicking the <span class='icon {icon}'></span> "
+"icon at any time before the deadline."
+msgstr "تم تحميل التسليم الخاص بك بنجاح. يمكنك إرفاق إصدار محدّث من التسليم بالنقر فوق أيقونة <span class='icon {icon}'></span> في أي وقت قبل الموعد النهائي."
+
+#: messages.py:59
+#, python-brace-format
+msgid "Error uploading file: {error_goes_here}."
+msgstr "خطأ في تحميل الملف: {error_goes_here}."
+
+#: project_navigator.py:64 project_navigator.py:67
+msgid "Group Project Navigator"
+msgstr "مستكشف مشروع المجموعة"
+
+#: project_navigator.py:233
+#, python-brace-format
+msgid "url_name to link to this {project_navigator_view}:"
+msgstr "url_name للارتباط بهذا {project_navigator_view}:"
+
+#: project_navigator.py:306
+msgid "Navigation View"
+msgstr "عرض التنقل"
+
+#: project_navigator.py:307
+msgid "Navigation"
+msgstr "التنقل"
+
+#: project_navigator.py:338
+msgid "Resources View"
+msgstr "عرض الموارد"
+
+#: project_navigator.py:339
+msgid "Resources"
+msgstr "الموارد"
+
+#: project_navigator.py:371
+msgid "Submissions View"
+msgstr "عرض عمليات التقديم"
+
+#: project_navigator.py:372
+msgid "Upload"
+msgstr "تحميل"
+
+#: project_navigator.py:412
+msgid "Ask a TA View"
+msgstr "عرض اسأل مساعد مدرّس"
+
+#: project_navigator.py:413
+msgid "Ask a McKinsey TA"
+msgstr "اسأل مساعد مدرّس في ماكنزي"
+
+#: project_navigator.py:445
+msgid "Private Discussion View"
+msgstr "عرض المناقشة الخاصة"
+
+#: stage/base.py:44
+msgid "Open Date"
+msgstr "تاريخ الفتح"
+
+#: stage/base.py:45
+msgid "Stage open date"
+msgstr "تاريخ فتح المرحلة"
+
+#: stage/base.py:50
+msgid "Close Date"
+msgstr "تاريخ الإغلاق"
+
+#: stage/base.py:51
+msgid "Stage close date"
+msgstr "تاريخ إغلاق المرحلة"
+
+#: stage/base.py:56
+msgid "Hide stage type label"
+msgstr "إخفاء تسمية نوع المرحلة"
+
+#: stage/base.py:57
+msgid "If true, hides stage type label in Project Navigator"
+msgstr "إذا كان هذا صحيحًا ، فإنه يتم إخفاء تسمية نوع المرحلة في مستكشف المشروع"
+
+#: stage/base.py:72
+msgid "Stage"
+msgstr "المرحلة"
+
+#: stage/basic.py:24
+msgid "Text Stage"
+msgstr "مرحلة النص"
+
+#: stage/basic.py:29
+msgid "Overview"
+msgstr "لمحة عامة"
+
+#: stage/basic.py:30
+msgid "Text"
+msgstr "النص"
+
+#: stage/basic.py:46
+msgid "Completion Stage"
+msgstr "مرحلة الإكمال"
+
+#: stage/basic.py:52 stage/basic.py:103 stage/review.py:30
+msgid "Task"
+msgstr "المهمة"
+
+#: stage/basic.py:53
+msgid "Completion"
+msgstr "الإكمال"
+
+#: stage/basic.py:58
+msgid "mark stage as complete"
+msgstr "وضع علامة على المرحلة كمكتملة"
+
+#: stage/basic.py:98
+msgid "Submission Stage"
+msgstr "مرحلة التقديم"
+
+#: stage/basic.py:104
+msgid "Deliverable"
+msgstr "التسليم"
+
+#: stage/basic.py:107 stage/basic.py:108
+msgid "Pending Upload"
+msgstr "قيد التحميل"
+
+#: stage/basic.py:109
+msgid "Uploaded"
+msgstr "تم التحميل"
+
+#: stage/basic.py:111 stage/review.py:329
+msgid "Unknown"
+msgstr "مجهول"
+
+#: stage/basic.py:115
+msgid "upload submission"
+msgstr "تحميل التقديم"
+
+#: stage/feedback_review.py:21
+msgid "Review"
+msgstr "استعراض"
+
+#: stage/feedback_review.py:72
+msgid "Evaluation Display Stage"
+msgstr "مرحلة عرض التقييم"
+
+#: stage/feedback_review.py:78
+msgid "Evaluation Display"
+msgstr "عرض التقييم"
+
+#: stage/feedback_review.py:118
+msgid "Grade Display Stage"
+msgstr "مرحلة عرض الدرجة"
+
+#: stage/feedback_review.py:124
+msgid "Grade Display"
+msgstr "عرض الدرجة"
+
+#: stage/feedback_review.py:163 stage_components.py:746
+msgid "N/A"
+msgstr "لا يوجد"
+
+#: stage/mixins.py:14
+msgid "Completed"
+msgstr "أكملت"
+
+#: stage/review.py:39
+msgid "save feedback"
+msgstr "حفظ الملاحظات"
+
+#: stage/review.py:209
+msgid "Team Evaluation Stage"
+msgstr "مرحلة تقييم الفريق"
+
+#: stage/review.py:215
+msgid "Team Evaluation"
+msgstr "تقييم الفريق"
+
+#: stage/review.py:318
+msgid "Peer Grading Stage"
+msgstr "مرحلة وضع الدرجات من قبل النظراء"
+
+#: stage/review.py:325 stage/review.py:326
+msgid "Pending Review"
+msgstr "قيد المراجعة"
+
+#: stage/review.py:327
+msgid "Review Complete"
+msgstr "اكتملت المراجعة"
+
+#: stage/review.py:331
+msgid "Peer Grading"
+msgstr "وضع الدرجات من قبل النظراء"
+
+#: stage/utils.py:12
+msgid "Not started"
+msgstr "لم يبدأ"
+
+#: stage/utils.py:13
+msgid "Partially complete"
+msgstr "مكتملة جزئيًا"
+
+#: stage/utils.py:14
+msgid "Complete"
+msgstr "مكتملة"
+
+#: stage/utils.py:29
+msgid "This is a name of the stage"
+msgstr "هذا اسم المرحلة"
+
+#: stage_components.py:64
+msgid "This is a name of the resource"
+msgstr "هذا اسم المورد"
+
+#: stage_components.py:66
+msgid "Group Project V2 Resource"
+msgstr "مورد مشروع المجموعة V2"
+
+#: stage_components.py:70
+msgid "Resource Description"
+msgstr "وصف المورد"
+
+#: stage_components.py:89
+msgid "Resource"
+msgstr "المورد"
+
+#: stage_components.py:94
+msgid "Resource Location"
+msgstr "موقع المورد"
+
+#: stage_components.py:95
+msgid "A url to download/view the resource"
+msgstr "عنوان url لتنزيل / عرض المورد"
+
+#: stage_components.py:100
+msgid "Grading Criteria?"
+msgstr "معايير وضع الدرجات؟"
+
+#: stage_components.py:101
+msgid "If true, resource will be treated as grading criteria"
+msgstr "إذا كان ذلك صحيحاً، سيتم التعامل مع المورد كمعايير تقييم"
+
+#: stage_components.py:114
+msgid "Video Resource"
+msgstr "مورد الفيديو"
+
+#: stage_components.py:118
+msgid "Ooyala/Brightcove content ID"
+msgstr "معرف محتوى Ooyala/Brightcove"
+
+#: stage_components.py:119
+msgid "This is the Ooyala/Brightcove Content Identifier"
+msgstr "هذا هو معرف محتوى Ooyala/Brightcove"
+
+#: stage_components.py:203
+msgid "Submissions Help Text"
+msgstr "نص تعليمات عمليات التقديم"
+
+#: stage_components.py:215
+msgid "Grade Rubric Help Text"
+msgstr "تقدير نص تعليمات قواعد التقييم"
+
+#: stage_components.py:236
+msgid "Submission"
+msgstr "التقديم"
+
+#: stage_components.py:242
+msgid "This is a name of the submission"
+msgstr "هذا اسم التقديم"
+
+#: stage_components.py:244
+msgid "Group Project V2 Submission"
+msgstr "تقديم مشروع المجموعة V2"
+
+#: stage_components.py:248
+msgid "Submission Description"
+msgstr "وصف التقديم"
+
+#: stage_components.py:253
+msgid "Upload ID"
+msgstr "معرف التحميل"
+
+#: stage_components.py:254
+msgid ""
+"This string is used as an identifier for an upload. Submissions sharing the "
+"same Upload ID will be updated simultaneously"
+msgstr "تستخدم هذه السلسلة كمعرّف لتحميل. سيتم تحديث عمليات التقديم التي تشارك معرف التحميل نفسه في الوقت نفسه"
+
+#: stage_components.py:424
+msgid "Error storing file {} - {}"
+msgstr "خطأ في تخزين الملف {} - {}"
+
+#: stage_components.py:444
+msgid "Error recording file information {} - {}"
+msgstr "خطأ في تسجيل معلومات الملف {} - {}"
+
+#: stage_components.py:489
+msgid "Teammate Selector"
+msgstr "محدد الفريق"
+
+#: stage_components.py:490
+msgid "Teammate Selector XBlock"
+msgstr "أداة تحديد الفريق XBlock"
+
+#: stage_components.py:523
+msgid "Group Selector"
+msgstr "محدد المجموعة"
+
+#: stage_components.py:524
+msgid "Group Selector XBlock"
+msgstr "أداة تحديد المجموعة XBlock"
+
+#: stage_components.py:549 stage_components.py:553
+msgid "Review Question"
+msgstr "مراجعة السؤال"
+
+#: stage_components.py:556 stage_components.py:688
+msgid "Question ID"
+msgstr "معرّف السؤال"
+
+#: stage_components.py:563
+msgid "Question Text"
+msgstr "نص السؤال"
+
+#: stage_components.py:569
+msgid "Assessment Question Text"
+msgstr "نص سؤال التقييم"
+
+#: stage_components.py:570
+msgid "Overrides question title when displayed in assessment mode"
+msgstr "تجاوز عنوان السؤال عند عرضه في وضع التقييم"
+
+#: stage_components.py:576
+msgid "Question Content"
+msgstr "محتوى السؤال"
+
+#: stage_components.py:577
+msgid "HTML control"
+msgstr "عنصر تحكم HTML"
+
+#: stage_components.py:585
+msgid "Required"
+msgstr "مطلوب"
+
+#: stage_components.py:591
+msgid "Grading"
+msgstr "وضع الدرجات"
+
+#: stage_components.py:592
+msgid ""
+"IF True, answers to this question will be used to calculate student grade "
+"for Group Project."
+msgstr "إذا كان هذا صحيحًا، فسيتم استخدام إجابات هذا السؤال لحساب درجة الطالب في مشروع المجموعة."
+
+#: stage_components.py:598
+msgid "Single Line"
+msgstr "سطر فردي"
+
+#: stage_components.py:599
+msgid ""
+"If True question label and content will be displayed on single line, "
+"allowing for more compact layout.Only affects presentation."
+msgstr "إذا كان هذا صحيحًا، فسيتم عرض تسمية السؤال والمحتوى في سطر واحد، مما يسمح بتخطيط أصغر. يؤثر فقط على العرض التقديمي."
+
+#: stage_components.py:606
+msgid "CSS Classes"
+msgstr "فئات CSS"
+
+#: stage_components.py:607
+msgid "CSS classes to be set on question element. Only affects presentation."
+msgstr "يتم تعيين فئات CSS على عنصر السؤال. يؤثر فقط على العرض التقديمي."
+
+#: stage_components.py:683
+msgid "No question selected"
+msgstr "لم يتم تحديد سؤال"
+
+#: stage_components.py:684
+msgid "Selected question not found"
+msgstr "لم يتم العثور على السؤال المحدد"
+
+#: stage_components.py:685
+msgid "Question ID is not unique"
+msgstr "معرف السؤال ليس فريدًا"
+
+#: stage_components.py:689
+msgid "Question to be assessed"
+msgstr "سؤال يتعين تقييمه"
+
+#: stage_components.py:695
+msgid "Show Mean Value"
+msgstr "إظهار القيمة المتوسطة"
+
+#: stage_components.py:696
+msgid "If True, converts review answers to numbers and calculates mean value"
+msgstr "إذا كان ذلك صحيحًا، يحول إجابات المراجعة إلى أرقام ويحسب متوسط ​​القيمة"
+
+#: stage_components.py:711
+#, python-brace-format
+msgid "Review Assessment for question \"{question_title}\""
+msgstr "مراجعة التقييم للسؤال «{question_title}»"
+
+#: stage_components.py:713
+msgid "Review Assessment"
+msgstr "تقييم المراجعة"
+
+#: stage_components.py:784
+msgid "--- Not selected ---"
+msgstr "--- لم يتم التحديد ---"
+
+#: stage_components.py:795
+msgid "Team Evaluation Display"
+msgstr "عرض تقييم الفريق"
+
+#: stage_components.py:813
+msgid "Grade Evaluation Display"
+msgstr "عرض تقييم الدرجة"
+
+#: stage_components.py:831
+msgid "Project Team"
+msgstr "فريق المشروع"
+
+#: templates/html/activity/dashboard_detail_view.html:4
+#: templates/html/activity/dashboard_view.html:4
+msgid "Activity:"
+msgstr "النشاط:"
+
+#: templates/html/activity/dashboard_detail_view.html:10
+msgid "Groups"
+msgstr "المجموعات"
+
+#: templates/html/activity/dashboard_detail_view.html:11
+msgid "Graded/Required Stages"
+msgstr "المراحل المُدرجة / المطلوبة"
+
+#: templates/html/activity/dashboard_detail_view.html:17
+msgid ""
+"will export a list of emails within stage of partially complete/incomplete "
+"teams"
+msgstr "سيقوم بتصدير قائمة برسائل البريد الإلكتروني ضمن مرحلة بشكل جزئي لفرق كاملة/غير مكتملة"
+
+#: templates/html/activity/dashboard_detail_view.html:60
+msgid "Grading:"
+msgstr "وضع الدرجات:"
+
+#: templates/html/activity/dashboard_detail_view.html:78
+#, python-format
+msgid "Additionally there is a single work group filtered by company"
+msgid_plural "Additionally there were %(counter)s work groups filtered by company filter."
+msgstr[0] "بالإضافة إلى ذلك، هناك مجموعة عمل واحدة تمت تصفيتها بواسطة عامل تصفية الشركة."
+msgstr[1] "بالإضافة إلى ذلك، كانت هناك %(counter)sمجموعات عمل تمت تصفيتها بواسطة عامل تصفية الشركة."
+
+#: templates/html/activity/dashboard_detail_view.html:84
+msgid "All work groups have been filtered by the company filter."
+msgstr "تمت تصفية جميع مجموعات العمل بواسطة مرشح الشركة."
+
+#: templates/html/activity/navigation_view.html:11
+msgid "No stages available for this activity"
+msgstr "لا تتوفر أي مراحل لهذا النشاط"
+
+#: templates/html/activity/resources_view.html:11
+msgid "No resources for this activity"
+msgstr "لا توجد موارد لهذا النشاط"
+
+#: templates/html/activity/submissions_view.html:12
+msgid "No uploads required for this activity"
+msgstr "لا يلزم تحميل أي عمليات تحميل لهذا النشاط"
+
+#: templates/html/add_buttons.html:5
+msgid "Add New Component"
+msgstr "إضافة مكون جديد"
+
+#: templates/html/components/group_selector.html:4
+msgid ""
+"Please click on the group(s) you are assigned to grade to review their "
+"submissions."
+msgstr "يرجى النقر على المجموعة (المجموعات) التي تم تعيينها لك لوضع درجات لمراجعة تقديماتهم."
+
+#: templates/html/components/group_selector.html:8
+#: templates/html/components/peer_selector.html:8
+msgid "Demo contents"
+msgstr "محتويات العرض التوضيحي"
+
+#: templates/html/components/group_selector.html:19
+msgid "Group"
+msgstr "المجموعة"
+
+#: templates/html/components/group_selector.html:20
+#: templates/html/components/peer_selector.html:21
+msgid "Evaluating below"
+msgstr "التقييم أدناه"
+
+#: templates/html/components/group_selector.html:26
+msgid "No groups assigned for review"
+msgstr "لم يتم تعيين مجموعات للمراجعة"
+
+#: templates/html/components/peer_selector.html:4
+msgid "Please click on the teammates to review their performance"
+msgstr "يرجى النقر فوق أعضاء الفريق لمراجعة أدائهم"
+
+#: templates/html/components/peer_selector.html:19
+msgid "Teammate"
+msgstr "عضو فريق"
+
+#: templates/html/components/peer_selector.html:27
+msgid "No teammates to review"
+msgstr "لا يوجد أعضاء في الفريق للمراجعة"
+
+#: templates/html/components/project_team.html:3
+msgid "Email your entire team"
+msgstr "أرسل بريدًا إلكترونيًا إلى فريقك بأكمله"
+
+#: templates/html/components/project_team.html:23
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#: templates/html/components/review_assessment.html:6
+msgid "Grade:"
+msgstr "الدرجة:"
+
+#: templates/html/components/submission_navigator_view.html:28
+msgid "Uploaded by"
+msgstr "تم التحميل بواسطة"
+
+#: templates/html/components/submission_review_view.html:11
+msgid "This file has not been submitted by this group"
+msgstr "لم يتم إرسال هذا الملف من قبل هذه المجموعة"
+
+#: templates/html/project/student_view.html:31
+msgid "OK"
+msgstr "موافق"
+
+#: templates/html/project/student_view.html:42
+msgid "Message your group"
+msgstr "ابعث رسالة إلى مجموعتك"
+
+#: templates/html/project/student_view.html:44
+msgid "Send any questions or messages to your group."
+msgstr "أرسل أية أسئلة أو رسائل إلى مجموعتك."
+
+#: templates/html/project/student_view.html:48
+msgid "Enter your message for the group here"
+msgstr "أدخل رسالتك للمجموعة هنا"
+
+#: templates/html/project/student_view.html:49
+#: templates/html/project/student_view.html:68
+#: templates/html/project_navigator/ask_ta_view.html:18
+msgid "Submit"
+msgstr "إرسال"
+
+#: templates/html/project/student_view.html:60
+msgid "Message your group member"
+msgstr "ابعث رسالة إلى عضو في مجموعتك"
+
+#: templates/html/project/student_view.html:62
+msgid "Send any questions or messages to your group member."
+msgstr "أرسل أية أسئلة أو رسائل لعضو في مجموعاتك."
+
+#: templates/html/project/student_view.html:67
+msgid "Enter your message here"
+msgstr "أدخل رسالتك هنا"
+
+#: templates/html/project_navigator/ask_ta_view.html:10
+msgid ""
+"Send any questions or messages to a TA, and they'll get back to you via "
+"email."
+msgstr "أرسل أية أسئلة أو رسائل إلى مساعد المدرّس الخاص بك وسيرجعون إليك عبر البريد الإلكتروني."
+
+#: templates/html/project_navigator/ask_ta_view.html:17
+msgid "Enter your message here."
+msgstr "أدخل رسالتك هنا."
+
+#: templates/html/project_navigator/project_navigator.html:5
+#: templates/html/project_navigator/project_navigator_author_view.html:4
+msgid "Project Navigator"
+msgstr "مستكشف المشروع"
+
+#: templates/html/stages/completion.html:9
+msgid "Yes, I have completed this task"
+msgstr "نعم، لقد أتممت هذه المهمة!"
+
+#: templates/html/stages/dashboard_detail_view.html:14
+#: templates/html/stages/dashboard_view.html:13
+msgid "TA Graded"
+msgstr "وضع الدرجات من قبل مساعد المدرّس"
+
+#: templates/html/stages/dashboard_view.html:4
+msgid "Status:"
+msgstr "الحالة:"
+
+#: templates/html/stages/dashboard_view.html:25
+msgid "No students match search criteria"
+msgstr "لا يوجد طلاب يطابقون معايير البحث"
+
+#: templates/html/stages/grade_display.html:8
+msgid "Final Grade:"
+msgstr "لدرجة النهائية:"
+
+#: templates/html/stages/navigation_view.html:16
+msgid "Closed on"
+msgstr "تم الإغلاق في"
+
+#: templates/html/stages/navigation_view.html:18
+msgid "Due"
+msgstr "الاستحقاق"
+
+#: templates/html/stages/navigation_view.html:20
+msgid "Available"
+msgstr "متاح"
+
+#: templates/html/stages/peer_review.html:4
+msgid "Grading View"
+msgstr "عرض وضع الدرجات"
+
+#: templates/html/stages/peer_review.html:6
+msgid "TA Grading override view"
+msgstr "عرض تجاوز وضع الدرجات من قِبل مساعد المدرّس"
+
+#: templates/html/stages/peer_review.html:23
+msgid "Group Submissions"
+msgstr "عمليات التقديم"
+
+#: templates/html/stages/peer_review.html:24
+msgid "Please review the file(s) below to evaluate the group's work."
+msgstr "يرجى مراجعة الملف (الملفات) أدناه لتقييم عمل المجموعة."
+
+#: templates/html/stages/stage_wrapper.html:26
+msgid "This stage has not yet been opened"
+msgstr "لم يتم فتح هذه المرحلة بعد"
+
+#: templates/html/stages/stages_group_review_other_team_submissions.html:10
+msgid "Current Group Project Activity does not have any submission stages"
+msgstr "لا تحتوي نشاط مشروع المجموعة الحالي على أي مراحل تقديم"
+
+#: templates/html/stages/submissions_review_view.html:8
+msgid "No submissions have been uploaded for this stage"
+msgstr "لم يتم تحميل أي تقديمات لهذه المرحلة"
+
+#: utils.py:39
+msgid "This XBlock does not contain any editable settings"
+msgstr "لا يحتوي XBlock هذا على أي إعدادات قابلة للتحرير"
+
+#: utils.py:40
+msgid "Must be overridden in inherited class"
+msgstr "يجب تجاوزه في فئة موروثة"
+
+#: utils.py:56
+msgid "HTML"
+msgstr "HTML"
+
+#: utils.py:61
+msgid "Discussion"
+msgstr "مناقشة"
+
+#: utils.py:332
+#, python-brace-format
+msgid "#{group_id}"
+msgstr "#{group_id}"
+
+#: utils.py:334
+#, python-brace-format
+msgid "Group #{group_id}"
+msgstr "المجموعة #{group_id}"
