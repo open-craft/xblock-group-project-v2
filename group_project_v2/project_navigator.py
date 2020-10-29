@@ -49,6 +49,7 @@ class ViewTypes(object):
     PRIVATE_DISCUSSION = 'private-discussion'
 
 
+@XBlock.needs("i18n")
 class GroupProjectNavigatorXBlock(
     ChildrenNavigationXBlockMixin,
     XBlockWithComponentsMixin,
