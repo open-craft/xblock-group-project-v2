@@ -1,4 +1,8 @@
 
+            (function(global){
+                var GroupProjectV2XBlockI18N = {
+                  init: function() {
+                    
 
 (function(globals) {
 
@@ -143,3 +147,10 @@
 
 }(this));
 
+
+                  }
+                };
+                GroupProjectV2XBlockI18N.init();
+                global.GroupProjectV2XBlockI18N = GroupProjectV2XBlockI18N;
+            }(this));
+        

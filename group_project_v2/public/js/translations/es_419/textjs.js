@@ -16,6 +16,29 @@
 
   django.catalog = django.catalog || {};
   
+  var newcatalog = {
+    " Technical details: 403 error.": " Detalles t\u00e9cnicos:\u00a0Error\u00a0403.", 
+    " Technical details: CSRF verification failed.": " Detalles t\u00e9cnicos:\u00a0Error en la comprobaci\u00f3n del CSRF.", 
+    "An error occurred while uploading your file. Please refresh the page and try again. If it still does not upload, please contact your Course TA.": "Se produjo un error durante la carga del archivo. Actualice la p\u00e1gina y vuelva a intentarlo. Si se produce otro error al cargar el archivo, p\u00f3ngase en contacto con su TA del curso.", 
+    "Error": "Error", 
+    "Error refreshing statuses": "Se produjo un error al actualizar los estados.", 
+    "Please select Group to review": "Seleccione un grupo para la revisi\u00f3n", 
+    "Please select Teammate to review": "Seleccione un compa\u00f1ero de equipo para la revisi\u00f3n", 
+    "Resubmit": "Volver a enviar", 
+    "Submit": "Enviar", 
+    "Thanks for your feedback!": "Gracias por compartir su comentario.", 
+    "This task has been marked as complete.": "Esta tarea se marc\u00f3 como Finalizada.", 
+    "Upload cancelled by user.": "El usuario cancel\u00f3 la carga.", 
+    "Upload cancelled.": "Se cancel\u00f3 la carga.", 
+    "We encountered an error loading your feedback.": "Se encontr\u00f3 un error al cargar su comentario.", 
+    "We encountered an error saving your feedback.": "Se encontr\u00f3 un error al guardar su comentario.", 
+    "We encountered an error saving your progress.": "Se encontr\u00f3 un error al guardar su progreso.", 
+    "We encountered an error.": "Se encontr\u00f3 un error."
+  };
+  for (var key in newcatalog) {
+    django.catalog[key] = newcatalog[key];
+  }
+  
 
   if (!django.jsi18n_initialized) {
     django.gettext = function(msgid) {
