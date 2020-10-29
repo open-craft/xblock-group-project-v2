@@ -262,10 +262,10 @@ class ProjectNavigatorViewXBlockBase(
         except IOError:
             return self.resource_string('public/js/translations/en/textjs.js')
 
-        @property
-        def i18n_service(self):
-            """ Obtains translation service """
-            return self.runtime.service(self, "i18n")
+    @property
+    def i18n_service(self):
+        """ Obtains translation service """
+        return self.runtime.service(self, "i18n")
 
     def render_student_view(self, context, add_resources_from=None):
         """
