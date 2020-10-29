@@ -49,7 +49,6 @@ class ViewTypes(object):
     PRIVATE_DISCUSSION = 'private-discussion'
 
 
-@XBlock.needs("i18n")
 class GroupProjectNavigatorXBlock(
     ChildrenNavigationXBlockMixin,
     XBlockWithComponentsMixin,
@@ -128,11 +127,6 @@ class GroupProjectNavigatorXBlock(
         except IOError:
             return self.resource_string('public/js/translations/en/textjs.js')
 
-    @property
-    def i18n_service(self):
-        """ Obtains translation service """
-        return self.runtime.service(self, "i18n")
-
     def student_view(self, context):
         """
         Student view
@@ -168,9 +162,9 @@ class GroupProjectNavigatorXBlock(
         }
 
         fragment.add_content(
-            loader.render_django_template(
+            loader.render_template(
                 'templates/html/project_navigator/project_navigator.html',
-                {'children': children_items}, i18n_service=self.i18n_service
+                {'children': children_items}
             )
         )
         add_resource(self, 'css', 'public/css/project_navigator/project_navigator.css', fragment)
