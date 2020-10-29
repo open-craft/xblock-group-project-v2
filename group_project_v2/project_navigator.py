@@ -110,6 +110,28 @@ class GroupProjectNavigatorXBlock(
         all_views.sort(key=lambda view_instance: view_instance.SORT_ORDER)
         return all_views
 
+    @staticmethod
+    def resource_string(path):
+        """Handy helper for getting resources."""
+        data = pkg_resources.resource_string(__name__, path)
+        return data.decode("utf8")
+
+    def get_translation_content(self):
+        """
+        Returns JS content containing translations for user's language.
+        """
+        try:
+            return self.resource_string('public/js/translations/{lang}/textjs.js'.format(
+                lang=utils.translation.to_locale(utils.translation.get_language()),
+            ))
+        except IOError:
+            return self.resource_string('public/js/translations/en/textjs.js')
+
+    @property
+    def i18n_service(self):
+        """ Obtains translation service """
+        return self.runtime.service(self, "i18n")
+
     def student_view(self, context):
         """
         Student view
@@ -145,13 +167,14 @@ class GroupProjectNavigatorXBlock(
         }
 
         fragment.add_content(
-            loader.render_template(
+            loader.render_django_template(
                 'templates/html/project_navigator/project_navigator.html',
-                {'children': children_items}
+                {'children': children_items}, i18n_service=self.i18n_service
             )
         )
         add_resource(self, 'css', 'public/css/project_navigator/project_navigator.css', fragment)
         add_resource(self, 'javascript', 'public/js/project_navigator/project_navigator.js', fragment)
+        fragment.add_javascript(self.get_translation_content())
         fragment.initialize_js("GroupProjectNavigatorBlock", js_parameters)
 
         return fragment
@@ -245,36 +268,12 @@ class ProjectNavigatorViewXBlockBase(
     def is_view_available(self):  # pylint: disable=no-self-use
         return True
 
-    @staticmethod
-    def resource_string(path):
-        """Handy helper for getting resources."""
-        data = pkg_resources.resource_string(__name__, path)
-        return data.decode("utf8")
-
-    def get_translation_content(self):
-        """
-        Returns JS content containing translations for user's language.
-        """
-        try:
-            return self.resource_string('public/js/translations/{lang}/textjs.js'.format(
-                lang=utils.translation.to_locale(utils.translation.get_language()),
-            ))
-        except IOError:
-            return self.resource_string('public/js/translations/en/textjs.js')
-
-    @property
-    def i18n_service(self):
-        """ Obtains translation service """
-        return self.runtime.service(self, "i18n")
-
     def render_student_view(self, context, add_resources_from=None):
         """
         Common code to render student view
         """
         fragment = Fragment()
-        fragment.add_content(loader.render_django_template(self.TEMPLATE_BASE + self.template,
-                                                           context=context,
-                                                           i18n_service=self.i18n_service))
+        fragment.add_content(loader.render_django_template(self.TEMPLATE_BASE + self.template, context))
 
         if self.css_file:
             add_resource(self, 'css', self.CSS_BASE + self.css_file, fragment)
@@ -291,7 +290,6 @@ class ProjectNavigatorViewXBlockBase(
         if add_resources_from:
             for frag in add_resources_from:
                 fragment.add_fragment_resources(frag)
-        fragment.add_javascript(self.get_translation_content())
         return fragment
 
     def author_view(self, _context):
