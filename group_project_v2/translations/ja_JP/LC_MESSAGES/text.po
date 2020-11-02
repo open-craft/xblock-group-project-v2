@@ -1,0 +1,905 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#: stage_components.py:564 stage_components.py:578
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-26 19:09+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: api_error.py:18
+msgid "Unknown error calling API"
+msgstr "APIの呼び出しで原因不明のエラー"
+
+#: group_project.py:40 group_project.py:326 stage/utils.py:28
+#: stage_components.py:63 stage_components.py:241
+msgid "Display Name"
+msgstr "表示名"
+
+#: group_project.py:41
+msgid "This is a name of the project"
+msgstr "プロジェクトの名前です"
+
+#: group_project.py:43
+msgid "Group Project V2"
+msgstr "グループプロジェクトV2"
+
+#: group_project.py:327
+msgid "This name appears in the horizontal navigation at the top of the page."
+msgstr "この名前は、ページの上部にある横方向のナビゲーションに表示されます。"
+
+#: group_project.py:329 group_project.py:362
+msgid "Group Project Activity"
+msgstr "グループプロジェクトアクティビティ"
+
+#: group_project.py:333
+msgid "Weight"
+msgstr "重み"
+
+#: group_project.py:334
+msgid ""
+"This is the maximum score that the user receives when he/she successfully "
+"completes the problem."
+msgstr "ユーザーが問題を完了すると獲得する最大点数です。"
+
+#: group_project.py:340
+msgid "Reviews Required Minimum"
+msgstr "必要な最小レビュー数"
+
+#: group_project.py:341
+msgid ""
+"The minimum number of group-reviews that should be applied to a set of "
+"submissions (set to 0 to be 'TA Graded')"
+msgstr "提出のセットに適用されるグループレビューの最小数（「TA評価済」は0に設定）"
+
+#: group_project.py:348
+msgid "User Reviews Required Minimum"
+msgstr "必要な最小ユーザーレビュー数"
+
+#: group_project.py:349
+msgid ""
+"The minimum number of other-group reviews that an individual user should "
+"perform"
+msgstr "各ユーザーが行うその他のグループレビューの最小数"
+
+#: group_project.py:355
+msgid "Due date"
+msgstr "期日"
+
+#: group_project.py:356
+msgid "Activity due date"
+msgstr "アクティビティ期日"
+
+#: group_project.py:775
+#, python-brace-format
+msgid "{field_name} must be integer, {field_value} given"
+msgstr "{field_name}は、{field_value}を指定した整数である必要があります "
+
+#: messages.py:4
+msgid "Unknown error."
+msgstr "原因不明のエラー。"
+
+#: messages.py:6
+msgid ""
+"This component is misconfigured and can't be displayed. It needs to be fixed "
+"by the course authors."
+msgstr "このコンポーネントは正しく設定されていないため表示できません。コース作成者による修正が必要です。"
+
+#: messages.py:8
+#, python-brace-format
+msgid "Can't {action} as stage is not yet opened."
+msgstr "ステージがまだ開いていないため、{action}できません。"
+
+#: messages.py:9
+#, python-brace-format
+msgid "Can't {action} as stage is closed."
+msgstr "ステージが閉じているため、{action}できません。"
+
+#: messages.py:12
+msgid "This Group Project does not contain any activities."
+msgstr "このグループプロジェクトには、アクティビティが含まれていません。"
+
+#: messages.py:14
+msgid ""
+"This Group Project V2 does not contain Project Navigator - please edit "
+"course outline in Studio to include one."
+msgstr "このグループプロジェクトV2にはプロジェクトナビゲーターが含まれていません。含めるには、Studioでコース概要を編集してください。"
+
+#: messages.py:17
+msgid "This Group Project V2 does not contain a discussion."
+msgstr "このグループプロジェクトV2には、ディスカッションが含まれていません。"
+
+#: messages.py:18
+msgid "Group Project must contain Project Navigator Block."
+msgstr "グループプロジェクトには、プロジェクトナビゲーターブロックが含まれている必要があります。"
+
+#: messages.py:21
+msgid "This Group Project Activity does not contain any stages."
+msgstr "このグループプロジェクトアクティビティには、ステージが含まれていません。"
+
+#: messages.py:22
+#, python-brace-format
+msgid "{field_name} must be integer, {field_value} given."
+msgstr "{field_name}は、{field_value}を指定した整数である必要があります。"
+
+#: messages.py:23
+#, python-brace-format
+msgid "This project is assigned to {group_count} group(s)"
+msgstr "このプロジェクトは、{group_count}グループに割り当てられます。"
+
+#: messages.py:26
+msgid "Project Navigator must contain Navigation view."
+msgstr "プロジェクトナビゲーターにはナビゲーションビューを含める必要があります。"
+
+#: messages.py:28
+#, python-brace-format
+msgid ""
+"Parent group project does not contain discussion XBlock - this {block_type} "
+"will not function properly and will not be displayed to students."
+msgstr "ペアレントグループプロジェクトにXBlockが含まれていません。この{block_type}は、適切に機能せず、生徒に表示されません。"
+
+#: messages.py:33
+msgid "This task has been marked as complete."
+msgstr "このタスクは完了済としてマークされました。"
+
+#: messages.py:34
+#, python-brace-format
+msgid "url_name to link to this {stage_name}:"
+msgstr "この{stage_name}にリンクするurl_name："
+
+#: messages.py:35
+#, python-brace-format
+msgid "Submissions are not specified for {class_name} '{stage_title}'."
+msgstr "提出が{class_name} '{stage_title}'に指定されていません。"
+
+#: messages.py:36
+#, python-brace-format
+msgid ""
+"Feedback display blocks are not specified for {class_name} '{stage_title}'."
+msgstr "フィードバック表示ブロックが{class_name} '{stage_title}'に指定されていません。"
+
+#: messages.py:37
+#, python-brace-format
+msgid "Questions are not specified for {class_name} '{stage_title}'."
+msgstr "質問が{class_name} '{stage_title}'に指定されていません。"
+
+#: messages.py:39
+#, python-brace-format
+msgid ""
+"{class_name} stage '{stage_title}' is missing required component "
+"'{peer_selector_class_name}'."
+msgstr "{class_name}ステージ'{stage_title}'に必要なコンポーネント'{peer_selector_class_name}'がありません。"
+
+#: messages.py:42
+#, python-brace-format
+msgid ""
+"{class_name} stage '{stage_title}' is missing required component "
+"'{group_selector_class_name}'."
+msgstr "{class_name}ステージ'{stage_title}'に必要なコンポーネント'{group_selector_class_name}'がありません。"
+
+#: messages.py:44
+msgid "Thanks for your feedback."
+msgstr "フィードバックを送信いただきありがとうございます。"
+
+#: messages.py:45
+msgid "TA grading is not allowed for this stage."
+msgstr "TAの評価はこのステージに許可されていません。"
+
+#: messages.py:46
+#, python-brace-format
+msgid ""
+"Graded questions are not supported for {class_name} stage '{stage_title}'."
+msgstr "評価済質問は{class_name}ステージ'{stage_title}'でサポートされていません。"
+
+#: messages.py:47
+#, python-brace-format
+msgid "Grade questions are required for {class_name} stage '{stage_title}'."
+msgstr "評価の質問は{class_name}ステージ'{stage_title}'に必須です。"
+
+#: messages.py:50
+msgid "Video Resource Block must contain Ooyala content ID."
+msgstr "動画リソースブロックには、OoyalaコンテンツIDが含まれている必要があります。"
+
+#: messages.py:51
+msgid "Only group members can upload files."
+msgstr "グループメンバーのみがファイルをアップロードできます。"
+
+#: messages.py:52
+msgid "Question is not selected."
+msgstr "質問が選択されていません。"
+
+#: messages.py:53
+msgid "Upload complete"
+msgstr "アップロードが完了しました"
+
+#: messages.py:54
+msgid "Upload failed."
+msgstr "アップロードに失敗しました。"
+
+#: messages.py:56
+#, python-brace-format
+msgid ""
+"Your deliverable has been successfully uploaded. You can attach an updated "
+"version of the deliverable by clicking the <span class='icon {icon}'></span> "
+"icon at any time before the deadline."
+msgstr "提出物がアップロードされました。期日前であればいつでも<span class='icon {icon}'></span>アイコンをクリックして、提出物の最新版を添付することができます。"
+
+#: messages.py:59
+#, python-brace-format
+msgid "Error uploading file: {error_goes_here}."
+msgstr "ファイル{error_goes_here}のアップロード中にエラーが発生しました。"
+
+#: project_navigator.py:64 project_navigator.py:67
+msgid "Group Project Navigator"
+msgstr "グループプロジェクトナビゲーター"
+
+#: project_navigator.py:233
+#, python-brace-format
+msgid "url_name to link to this {project_navigator_view}:"
+msgstr "この{project_navigator_view}にリンクするurl_name："
+
+#: project_navigator.py:306
+msgid "Navigation View"
+msgstr "ナビゲーションビュー"
+
+#: project_navigator.py:307
+msgid "Navigation"
+msgstr "ナビゲーション"
+
+#: project_navigator.py:338
+msgid "Resources View"
+msgstr "リソースビュー"
+
+#: project_navigator.py:339
+msgid "Resources"
+msgstr "リソース"
+
+#: project_navigator.py:371
+msgid "Submissions View"
+msgstr "提出ビュー"
+
+#: project_navigator.py:372
+msgid "Upload"
+msgstr "アップロード"
+
+#: project_navigator.py:412
+msgid "Ask a TA View"
+msgstr "TAに聞くビュー"
+
+#: project_navigator.py:413
+msgid "Ask a McKinsey TA"
+msgstr "McKinsey TAに聞くビュー"
+
+#: project_navigator.py:445
+msgid "Private Discussion View"
+msgstr "プライベートディスカッションビュー"
+
+#: stage/base.py:44
+msgid "Open Date"
+msgstr "開始日"
+
+#: stage/base.py:45
+msgid "Stage open date"
+msgstr "ステージ開始日"
+
+#: stage/base.py:50
+msgid "Close Date"
+msgstr "終了日"
+
+#: stage/base.py:51
+msgid "Stage close date"
+msgstr "ステージ終了日"
+
+#: stage/base.py:56
+msgid "Hide stage type label"
+msgstr "ステージタイプラベルを非表示にする"
+
+#: stage/base.py:57
+msgid "If true, hides stage type label in Project Navigator"
+msgstr "trueの場合は、プロジェクトナビゲーターでステージタイプラベルを非表示にする"
+
+#: stage/base.py:72
+msgid "Stage"
+msgstr "ステージ"
+
+#: stage/basic.py:24
+msgid "Text Stage"
+msgstr "テキストステージ"
+
+#: stage/basic.py:29
+msgid "Overview"
+msgstr "概要"
+
+#: stage/basic.py:30
+msgid "Text"
+msgstr "テキスト"
+
+#: stage/basic.py:46
+msgid "Completion Stage"
+msgstr "完了ステージ"
+
+#: stage/basic.py:52 stage/basic.py:103 stage/review.py:30
+msgid "Task"
+msgstr "タスク"
+
+#: stage/basic.py:53
+msgid "Completion"
+msgstr "完了"
+
+#: stage/basic.py:58
+msgid "mark stage as complete"
+msgstr "ステージを完了としてマークする"
+
+#: stage/basic.py:98
+msgid "Submission Stage"
+msgstr "提出ステージ"
+
+#: stage/basic.py:104
+msgid "Deliverable"
+msgstr "提出物"
+
+#: stage/basic.py:107 stage/basic.py:108
+msgid "Pending Upload"
+msgstr "アップロードを一時中止中"
+
+#: stage/basic.py:109
+msgid "Uploaded"
+msgstr "アップロード済"
+
+#: stage/basic.py:111 stage/review.py:329
+msgid "Unknown"
+msgstr "未知"
+
+#: stage/basic.py:115
+msgid "upload submission"
+msgstr "提出のアップロード"
+
+#: stage/feedback_review.py:21
+msgid "Review"
+msgstr "確認"
+
+#: stage/feedback_review.py:72
+msgid "Evaluation Display Stage"
+msgstr "評価の表示ステージ"
+
+#: stage/feedback_review.py:78
+msgid "Evaluation Display"
+msgstr "評価の表示"
+
+#: stage/feedback_review.py:118
+msgid "Grade Display Stage"
+msgstr "成績の表示ステージ"
+
+#: stage/feedback_review.py:124
+msgid "Grade Display"
+msgstr "成績の表示"
+
+#: stage/feedback_review.py:163 stage_components.py:746
+msgid "N/A"
+msgstr "該当なし"
+
+#: stage/mixins.py:14
+msgid "Completed"
+msgstr "完了"
+
+#: stage/review.py:39
+msgid "save feedback"
+msgstr "フィードバックを保存する"
+
+#: stage/review.py:209
+msgid "Team Evaluation Stage"
+msgstr "チームの評価ステージ"
+
+#: stage/review.py:215
+msgid "Team Evaluation"
+msgstr "チームの評価"
+
+#: stage/review.py:318
+msgid "Peer Grading Stage"
+msgstr "同僚の成績ステージ"
+
+#: stage/review.py:325 stage/review.py:326
+msgid "Pending Review"
+msgstr "確認を一時停止中"
+
+#: stage/review.py:327
+msgid "Review Complete"
+msgstr "確認の完了"
+
+#: stage/review.py:331
+msgid "Peer Grading"
+msgstr "同僚の評価"
+
+#: stage/utils.py:12
+msgid "Not started"
+msgstr "開始前"
+
+#: stage/utils.py:13
+msgid "Partially complete"
+msgstr "部分的に完了"
+
+#: stage/utils.py:14
+msgid "Complete"
+msgstr "完了"
+
+#: stage/utils.py:29
+msgid "This is a name of the stage"
+msgstr "ステージの名前です"
+
+#: stage_components.py:64
+msgid "This is a name of the resource"
+msgstr "リソースの名前です"
+
+#: stage_components.py:66
+msgid "Group Project V2 Resource"
+msgstr "グループプロジェクトV2リソース"
+
+#: stage_components.py:70
+msgid "Resource Description"
+msgstr "リソースの内容"
+
+#: stage_components.py:89
+msgid "Resource"
+msgstr "リソース"
+
+#: stage_components.py:94
+msgid "Resource Location"
+msgstr "リソースの場所"
+
+#: stage_components.py:95
+msgid "A url to download/view the resource"
+msgstr "リソースをダウンロード/表示するURL"
+
+#: stage_components.py:100
+msgid "Grading Criteria?"
+msgstr "成績評価基準ですか？"
+
+#: stage_components.py:101
+msgid "If true, resource will be treated as grading criteria"
+msgstr "trueの場合は、リソースの成績評価基準として扱われます。"
+
+#: stage_components.py:114
+msgid "Video Resource"
+msgstr "動画リソース"
+
+#: stage_components.py:118
+msgid "Ooyala/Brightcove content ID"
+msgstr "Ooyala/BrightcoveコンテンツID"
+
+#: stage_components.py:119
+msgid "This is the Ooyala/Brightcove Content Identifier"
+msgstr "Ooyala/Brightcoveコンテンツ識別子"
+
+#: stage_components.py:203
+msgid "Submissions Help Text"
+msgstr "提出ヘルプテキスト"
+
+#: stage_components.py:215
+msgid "Grade Rubric Help Text"
+msgstr "成績の解説ヘルプテキスト"
+
+#: stage_components.py:236
+msgid "Submission"
+msgstr "提出"
+
+#: stage_components.py:242
+msgid "This is a name of the submission"
+msgstr "提出の名前です"
+
+#: stage_components.py:244
+msgid "Group Project V2 Submission"
+msgstr "グループプロジェクトV2提出"
+
+#: stage_components.py:248
+msgid "Submission Description"
+msgstr "提出の内容"
+
+#: stage_components.py:253
+msgid "Upload ID"
+msgstr "アップロードID"
+
+#: stage_components.py:254
+msgid ""
+"This string is used as an identifier for an upload. Submissions sharing the "
+"same Upload ID will be updated simultaneously"
+msgstr "この文字列は、アップロードの識別子として使用されます。同一のアップロードIDを持つ提出物が同時にアップロードされます。"
+
+#: stage_components.py:424
+msgid "Error storing file {} - {}"
+msgstr "ファイル{} - {}のアップロード中にエラー"
+
+#: stage_components.py:444
+msgid "Error recording file information {} - {}"
+msgstr "ファイル情報{} - {}の記録中にエラー"
+
+#: stage_components.py:489
+msgid "Teammate Selector"
+msgstr "チームメンバーセレクター"
+
+#: stage_components.py:490
+msgid "Teammate Selector XBlock"
+msgstr "チームメンバーセレクターXBlock"
+
+#: stage_components.py:523
+msgid "Group Selector"
+msgstr "グループセレクター"
+
+#: stage_components.py:524
+msgid "Group Selector XBlock"
+msgstr "グループセレクターXBlock"
+
+#: stage_components.py:549 stage_components.py:553
+msgid "Review Question"
+msgstr "確認の質問"
+
+#: stage_components.py:556 stage_components.py:688
+msgid "Question ID"
+msgstr "質問ID"
+
+#: stage_components.py:563
+msgid "Question Text"
+msgstr "質問のテキスト"
+
+#: stage_components.py:569
+msgid "Assessment Question Text"
+msgstr "評価の質問テキスト"
+
+#: stage_components.py:570
+msgid "Overrides question title when displayed in assessment mode"
+msgstr "評価モードで表示さた時に質問タイトルをオーバーライド"
+
+#: stage_components.py:576
+msgid "Question Content"
+msgstr "質問の内容"
+
+#: stage_components.py:577
+msgid "HTML control"
+msgstr "HTMLコントロール"
+
+#: stage_components.py:585
+msgid "Required"
+msgstr "必須"
+
+#: stage_components.py:591
+msgid "Grading"
+msgstr "成績"
+
+#: stage_components.py:592
+msgid ""
+"IF True, answers to this question will be used to calculate student grade "
+"for Group Project."
+msgstr "Trueの場合は、この質問への回答はグループプロジェクトの生徒の成績を計算するのに使用されます。"
+
+#: stage_components.py:598
+msgid "Single Line"
+msgstr "文字列行"
+
+#: stage_components.py:599
+msgid ""
+"If True question label and content will be displayed on single line, "
+"allowing for more compact layout.Only affects presentation."
+msgstr "Trueの場合は、質問のラベルと内容は一行で表示され、レイアウトをよりコンパクトにできます。影響するのは表示のみです。"
+
+#: stage_components.py:606
+msgid "CSS Classes"
+msgstr "CSSクラス"
+
+#: stage_components.py:607
+msgid "CSS classes to be set on question element. Only affects presentation."
+msgstr "質問コンポーネントに設定されるCSSクラス。影響するのは表示のみです。"
+
+#: stage_components.py:683
+msgid "No question selected"
+msgstr "質問が選択されていません"
+
+#: stage_components.py:684
+msgid "Selected question not found"
+msgstr "選択された質問が見つかりません"
+
+#: stage_components.py:685
+msgid "Question ID is not unique"
+msgstr "質問IDが固有ではありません"
+
+#: stage_components.py:689
+msgid "Question to be assessed"
+msgstr "評価する質問"
+
+#: stage_components.py:695
+msgid "Show Mean Value"
+msgstr "平均値を表示"
+
+#: stage_components.py:696
+msgid "If True, converts review answers to numbers and calculates mean value"
+msgstr "Trueの場合は、確認の回答を数値に変換して平均値を算出します"
+
+#: stage_components.py:711
+#, python-brace-format
+msgid "Review Assessment for question \"{question_title}\""
+msgstr "質問\"{question_title}\"の評価の確認"
+
+#: stage_components.py:713
+msgid "Review Assessment"
+msgstr "評価の確認"
+
+#: stage_components.py:784
+msgid "--- Not selected ---"
+msgstr "--- 未選択です ---"
+
+#: stage_components.py:795
+msgid "Team Evaluation Display"
+msgstr "チーム評価の表示"
+
+#: stage_components.py:813
+msgid "Grade Evaluation Display"
+msgstr "成績評価の表示"
+
+#: stage_components.py:831
+msgid "Project Team"
+msgstr "プロジェクトチーム"
+
+#: templates/html/activity/dashboard_detail_view.html:4
+#: templates/html/activity/dashboard_view.html:4
+msgid "Activity:"
+msgstr "アクティビティ:"
+
+#: templates/html/activity/dashboard_detail_view.html:10
+msgid "Groups"
+msgstr "グループ"
+
+#: templates/html/activity/dashboard_detail_view.html:11
+msgid "Graded/Required Stages"
+msgstr "成績/必須ステージ"
+
+#: templates/html/activity/dashboard_detail_view.html:17
+msgid ""
+"will export a list of emails within stage of partially complete/incomplete "
+"teams"
+msgstr "部分的に完了/未完了のチームのステージ内のEメールのリストをエクスポートします"
+
+#: templates/html/activity/dashboard_detail_view.html:60
+msgid "Grading:"
+msgstr "成績："
+
+#: templates/html/activity/dashboard_detail_view.html:78
+#, python-format
+msgid ""
+"\n"
+"            Additionally there is a single work group filtered by company "
+"filter.\n"
+"          "
+msgid_plural "\n            Additionally there were %(counter)s work groups filtered by company filter.\n          "
+msgstr[0] "\n"
+"            また、会社フィルターで、1つのワークグループがフィルタリングされます。\n"
+"          "
+msgstr[1] "\n"
+"            また、会社フィルターで、%(counter)s件のワークグループがフィルタリングされました。\n"
+"          "
+
+#: templates/html/activity/dashboard_detail_view.html:84
+msgid ""
+"\n"
+"            All work groups have been filtered by the company filter.\n"
+"          "
+msgstr "\n"
+"            全てのワークグループが会社フィルターでフィルタリングされました。\n"
+"          "
+
+#: templates/html/activity/navigation_view.html:11
+msgid "No stages available for this activity"
+msgstr "このアクティビティで利用できるステージはありません"
+
+#: templates/html/activity/resources_view.html:11
+msgid "No resources for this activity"
+msgstr "このアクティビティにはリソースがありません"
+
+#: templates/html/activity/submissions_view.html:12
+msgid "No uploads required for this activity"
+msgstr "このアクティビティには必須のアップロードはありません"
+
+#: templates/html/add_buttons.html:5
+msgid "Add New Component"
+msgstr "新しいコンポーネントを追加"
+
+#: templates/html/components/group_selector.html:4
+msgid ""
+"Please click on the group(s) you are assigned to grade to review their "
+"submissions."
+msgstr "成績に割り当てたグループをクリックして、提出物を確認してください。"
+
+#: templates/html/components/group_selector.html:8
+#: templates/html/components/peer_selector.html:8
+msgid "Demo contents"
+msgstr "デモコンテンツ"
+
+#: templates/html/components/group_selector.html:19
+msgid "Group"
+msgstr "グループ"
+
+#: templates/html/components/group_selector.html:20
+#: templates/html/components/peer_selector.html:21
+msgid "Evaluating below"
+msgstr "次を評価中"
+
+#: templates/html/components/group_selector.html:26
+msgid "No groups assigned for review"
+msgstr "確認に割り当てられたグループはありません"
+
+#: templates/html/components/peer_selector.html:4
+msgid "Please click on the teammates to review their performance"
+msgstr "パフォーマンスを確認するチームメンバーをクリックしてください"
+
+#: templates/html/components/peer_selector.html:19
+msgid "Teammate"
+msgstr "チームメンバー"
+
+#: templates/html/components/peer_selector.html:27
+msgid "No teammates to review"
+msgstr "レビューするチームメンバーはいません"
+
+#: templates/html/components/project_team.html:3
+msgid "Email your entire team"
+msgstr "チーム全体にメールを送信する"
+
+#: templates/html/components/project_team.html:23
+msgid "Email"
+msgstr "Eメール"
+
+#: templates/html/components/review_assessment.html:6
+msgid "Grade:"
+msgstr "成績評価:"
+
+#: templates/html/components/submission_navigator_view.html:28
+msgid "Uploaded by"
+msgstr "アップロード者"
+
+#: templates/html/components/submission_review_view.html:11
+msgid "This file has not been submitted by this group"
+msgstr "このファイルはこのグループに提出されていません"
+
+#: templates/html/project/student_view.html:31
+msgid "OK"
+msgstr "OK"
+
+#: templates/html/project/student_view.html:42
+msgid "Message your group"
+msgstr "グループにメッセージを送信する"
+
+#: templates/html/project/student_view.html:44
+msgid "Send any questions or messages to your group."
+msgstr "グループに質問やメッセージを送信します。"
+
+#: templates/html/project/student_view.html:48
+msgid "Enter your message for the group here"
+msgstr "グループ宛てのメッセージをここに入力します"
+
+#: templates/html/project/student_view.html:49
+#: templates/html/project/student_view.html:68
+#: templates/html/project_navigator/ask_ta_view.html:18
+msgid "Submit"
+msgstr "提出する"
+
+#: templates/html/project/student_view.html:60
+msgid "Message your group member"
+msgstr "グループ・メンバーにメッセージを送信する"
+
+#: templates/html/project/student_view.html:62
+msgid "Send any questions or messages to your group member."
+msgstr "グループ・メンバーに質問やメッセージを送信します。"
+
+#: templates/html/project/student_view.html:67
+msgid "Enter your message here"
+msgstr "メッセージをここに入力します"
+
+#: templates/html/project_navigator/ask_ta_view.html:10
+msgid ""
+"Send any questions or messages to a TA, and they'll get back to you via "
+"email."
+msgstr "TAに質問やメッセージを送信すると、メールで返信が届きます。"
+
+#: templates/html/project_navigator/ask_ta_view.html:17
+msgid "Enter your message here."
+msgstr "メッセージをここに入力します。"
+
+#: templates/html/project_navigator/project_navigator.html:5
+#: templates/html/project_navigator/project_navigator_author_view.html:4
+msgid "Project Navigator"
+msgstr "プロジェクトナビゲーター"
+
+#: templates/html/stages/completion.html:9
+msgid "Yes, I have completed this task"
+msgstr "このタスクを終了しました"
+
+#: templates/html/stages/dashboard_detail_view.html:14
+#: templates/html/stages/dashboard_view.html:13
+msgid "TA Graded"
+msgstr "TA評価"
+
+#: templates/html/stages/dashboard_view.html:4
+msgid "Status:"
+msgstr "ステータス；"
+
+#: templates/html/stages/dashboard_view.html:25
+msgid "No students match search criteria"
+msgstr "検索条件に一致する生徒は見つかりませんでした"
+
+#: templates/html/stages/grade_display.html:8
+msgid "Final Grade:"
+msgstr "最終成績："
+
+#: templates/html/stages/navigation_view.html:16
+msgid "Closed on"
+msgstr "終了日"
+
+#: templates/html/stages/navigation_view.html:18
+msgid "Due"
+msgstr "期日"
+
+#: templates/html/stages/navigation_view.html:20
+msgid "Available"
+msgstr "利用可"
+
+#: templates/html/stages/peer_review.html:4
+msgid "Grading View"
+msgstr "成績のビュー"
+
+#: templates/html/stages/peer_review.html:6
+msgid "TA Grading override view"
+msgstr "TAの成績オーバーライドビュー"
+
+#: templates/html/stages/peer_review.html:23
+msgid "Group Submissions"
+msgstr "グループの提出物"
+
+#: templates/html/stages/peer_review.html:24
+msgid "Please review the file(s) below to evaluate the group's work."
+msgstr "以下のファイルを確認してグループの作業を評価してください。"
+
+#: templates/html/stages/stage_wrapper.html:26
+msgid "This stage has not yet been opened"
+msgstr "このステージはまだ開始されていません"
+
+#: templates/html/stages/stages_group_review_other_team_submissions.html:10
+msgid "Current Group Project Activity does not have any submission stages"
+msgstr "現在のグループプロジェクトアクティビティには提出ステージがありません"
+
+#: templates/html/stages/submissions_review_view.html:8
+msgid "No submissions have been uploaded for this stage"
+msgstr "このステージには提出物がアップロードされていません"
+
+#: utils.py:39
+msgid "This XBlock does not contain any editable settings"
+msgstr "このXBlockには編集可能な設定が含まれていません"
+
+#: utils.py:40
+msgid "Must be overridden in inherited class"
+msgstr "継承されたクラスでオーバーライドされる必要があります"
+
+#: utils.py:56
+msgid "HTML"
+msgstr "HTML"
+
+#: utils.py:61
+msgid "Discussion"
+msgstr "ディスカッション"
+
+#: utils.py:332
+#, python-brace-format
+msgid "#{group_id}"
+msgstr "#{group_id}"
+
+#: utils.py:334
+#, python-brace-format
+msgid "Group #{group_id}"
+msgstr "グループ#{group_id}"

@@ -1,0 +1,905 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#: stage_components.py:564 stage_components.py:578
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-26 19:09+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: api_error.py:18
+msgid "Unknown error calling API"
+msgstr "调用 API 时发生未知错误"
+
+#: group_project.py:40 group_project.py:326 stage/utils.py:28
+#: stage_components.py:63 stage_components.py:241
+msgid "Display Name"
+msgstr "显示名称"
+
+#: group_project.py:41
+msgid "This is a name of the project"
+msgstr "此为项目名称"
+
+#: group_project.py:43
+msgid "Group Project V2"
+msgstr "小组项目 V2"
+
+#: group_project.py:327
+msgid "This name appears in the horizontal navigation at the top of the page."
+msgstr "此名称出现在页面顶部的水平导航区中。"
+
+#: group_project.py:329 group_project.py:362
+msgid "Group Project Activity"
+msgstr "小组项目活动"
+
+#: group_project.py:333
+msgid "Weight"
+msgstr "权重"
+
+#: group_project.py:334
+msgid ""
+"This is the maximum score that the user receives when he/she successfully "
+"completes the problem."
+msgstr "这是当用户答对全部问题时获得的最高分数。"
+
+#: group_project.py:340
+msgid "Reviews Required Minimum"
+msgstr "所需的最少审查次数"
+
+#: group_project.py:341
+msgid ""
+"The minimum number of group-reviews that should be applied to a set of "
+"submissions (set to 0 to be 'TA Graded')"
+msgstr "应针对一系列提交内容进行的最少小组审查次数（设置为 0 对应于“助教已评分”）"
+
+#: group_project.py:348
+msgid "User Reviews Required Minimum"
+msgstr "所需的最少用户审查次数"
+
+#: group_project.py:349
+msgid ""
+"The minimum number of other-group reviews that an individual user should "
+"perform"
+msgstr "用户个人应进行的最少其他小组审查次数"
+
+#: group_project.py:355
+msgid "Due date"
+msgstr "截止日期"
+
+#: group_project.py:356
+msgid "Activity due date"
+msgstr "活动截止日期"
+
+#: group_project.py:775
+#, python-brace-format
+msgid "{field_name} must be integer, {field_value} given"
+msgstr "{field_name} 必须为整数，{field_value} 已知"
+
+#: messages.py:4
+msgid "Unknown error."
+msgstr "未知错误。"
+
+#: messages.py:6
+msgid ""
+"This component is misconfigured and can't be displayed. It needs to be fixed "
+"by the course authors."
+msgstr "此组件配置错误，无法显示。它需要由课程作者进行修复。"
+
+#: messages.py:8
+#, python-brace-format
+msgid "Can't {action} as stage is not yet opened."
+msgstr "无法 {action}，因为此阶段尚未开启。"
+
+#: messages.py:9
+#, python-brace-format
+msgid "Can't {action} as stage is closed."
+msgstr "无法 {action}，因为此阶段已关闭。"
+
+#: messages.py:12
+msgid "This Group Project does not contain any activities."
+msgstr "此小组项目不包含任何活动。"
+
+#: messages.py:14
+msgid ""
+"This Group Project V2 does not contain Project Navigator - please edit "
+"course outline in Studio to include one."
+msgstr "此小组项目 V2 不包含项目导航器 - 请在 Studio 中编辑课程概要，以添加项目导航器。"
+
+#: messages.py:17
+msgid "This Group Project V2 does not contain a discussion."
+msgstr "此小组项目 V2 不包含讨论。"
+
+#: messages.py:18
+msgid "Group Project must contain Project Navigator Block."
+msgstr "小组项目必须包含项目导航器区块。"
+
+#: messages.py:21
+msgid "This Group Project Activity does not contain any stages."
+msgstr "此小组项目活动不包含任何阶段。"
+
+#: messages.py:22
+#, python-brace-format
+msgid "{field_name} must be integer, {field_value} given."
+msgstr "{field_name} 必须为整数，{field_value} 已知。"
+
+#: messages.py:23
+#, python-brace-format
+msgid "This project is assigned to {group_count} group(s)"
+msgstr "此项目已分配至 {group_count} 个小组"
+
+#: messages.py:26
+msgid "Project Navigator must contain Navigation view."
+msgstr "项目导航器必须包含导航视图。"
+
+#: messages.py:28
+#, python-brace-format
+msgid ""
+"Parent group project does not contain discussion XBlock - this {block_type} "
+"will not function properly and will not be displayed to students."
+msgstr "父小组项目不包含讨论 XBlock - 此 {block_type} 将无法正常运行且不会向学员显示。"
+
+#: messages.py:33
+msgid "This task has been marked as complete."
+msgstr "次任务已标记为完成。"
+
+#: messages.py:34
+#, python-brace-format
+msgid "url_name to link to this {stage_name}:"
+msgstr "链接到此 {stage_name} 的 url_name："
+
+#: messages.py:35
+#, python-brace-format
+msgid "Submissions are not specified for {class_name} '{stage_title}'."
+msgstr "未针对 {class_name}“{stage_title}”指定提交内容。"
+
+#: messages.py:36
+#, python-brace-format
+msgid ""
+"Feedback display blocks are not specified for {class_name} '{stage_title}'."
+msgstr "未针对 {class_name}“{stage_title}”指定反馈显示区块。"
+
+#: messages.py:37
+#, python-brace-format
+msgid "Questions are not specified for {class_name} '{stage_title}'."
+msgstr "未针对 {class_name}“{stage_title}”指定问题。"
+
+#: messages.py:39
+#, python-brace-format
+msgid ""
+"{class_name} stage '{stage_title}' is missing required component "
+"'{peer_selector_class_name}'."
+msgstr "{class_name} 阶段“{stage_title}”缺少必需的组件“{peer_selector_class_name}”。"
+
+#: messages.py:42
+#, python-brace-format
+msgid ""
+"{class_name} stage '{stage_title}' is missing required component "
+"'{group_selector_class_name}'."
+msgstr "{class_name} 阶段“{stage_title}”缺少必需的组件“{group_selector_class_name}”。"
+
+#: messages.py:44
+msgid "Thanks for your feedback."
+msgstr "感谢您的反馈。"
+
+#: messages.py:45
+msgid "TA grading is not allowed for this stage."
+msgstr "此阶段不允许助教评分。"
+
+#: messages.py:46
+#, python-brace-format
+msgid ""
+"Graded questions are not supported for {class_name} stage '{stage_title}'."
+msgstr "{class_name} 阶段“{stage_title}”不支持评分问题。"
+
+#: messages.py:47
+#, python-brace-format
+msgid "Grade questions are required for {class_name} stage '{stage_title}'."
+msgstr "{class_name} 阶段“{stage_title}”需要评分问题。"
+
+#: messages.py:50
+msgid "Video Resource Block must contain Ooyala content ID."
+msgstr "视频资源区块必须包含 Ooyala 内容 ID。"
+
+#: messages.py:51
+msgid "Only group members can upload files."
+msgstr "只有小组成员可上传文件。"
+
+#: messages.py:52
+msgid "Question is not selected."
+msgstr "问题未选择。"
+
+#: messages.py:53
+msgid "Upload complete"
+msgstr "上传完成。"
+
+#: messages.py:54
+msgid "Upload failed."
+msgstr "上传失败。"
+
+#: messages.py:56
+#, python-brace-format
+msgid ""
+"Your deliverable has been successfully uploaded. You can attach an updated "
+"version of the deliverable by clicking the <span class='icon {icon}'></span> "
+"icon at any time before the deadline."
+msgstr "您的交付内容已成功上传。单击 <span class='icon {icon}'></span> 图标可在截止日期之前随时上传经更新的交付内容。"
+
+#: messages.py:59
+#, python-brace-format
+msgid "Error uploading file: {error_goes_here}."
+msgstr "上传文件 {error_goes_here} 时出错。"
+
+#: project_navigator.py:64 project_navigator.py:67
+msgid "Group Project Navigator"
+msgstr "小组项目导航器"
+
+#: project_navigator.py:233
+#, python-brace-format
+msgid "url_name to link to this {project_navigator_view}:"
+msgstr "链接到此 {project_navigator_view} 的 url_name："
+
+#: project_navigator.py:306
+msgid "Navigation View"
+msgstr "导航视图"
+
+#: project_navigator.py:307
+msgid "Navigation"
+msgstr "导航"
+
+#: project_navigator.py:338
+msgid "Resources View"
+msgstr "资源视图"
+
+#: project_navigator.py:339
+msgid "Resources"
+msgstr "资源"
+
+#: project_navigator.py:371
+msgid "Submissions View"
+msgstr "提交内容视图"
+
+#: project_navigator.py:372
+msgid "Upload"
+msgstr "上传"
+
+#: project_navigator.py:412
+msgid "Ask a TA View"
+msgstr "询问助教视图"
+
+#: project_navigator.py:413
+msgid "Ask a McKinsey TA"
+msgstr "询问麦肯锡助教"
+
+#: project_navigator.py:445
+msgid "Private Discussion View"
+msgstr "私人讨论视图"
+
+#: stage/base.py:44
+msgid "Open Date"
+msgstr "开启日期"
+
+#: stage/base.py:45
+msgid "Stage open date"
+msgstr "阶段开启日期"
+
+#: stage/base.py:50
+msgid "Close Date"
+msgstr "结束日期"
+
+#: stage/base.py:51
+msgid "Stage close date"
+msgstr "阶段结束日期"
+
+#: stage/base.py:56
+msgid "Hide stage type label"
+msgstr "隐藏阶段类型标签"
+
+#: stage/base.py:57
+msgid "If true, hides stage type label in Project Navigator"
+msgstr "如果设置为 true，则在项目导航器中隐藏阶段类型标签"
+
+#: stage/base.py:72
+msgid "Stage"
+msgstr "阶段"
+
+#: stage/basic.py:24
+msgid "Text Stage"
+msgstr "文本阶段"
+
+#: stage/basic.py:29
+msgid "Overview"
+msgstr "概述"
+
+#: stage/basic.py:30
+msgid "Text"
+msgstr "文本"
+
+#: stage/basic.py:46
+msgid "Completion Stage"
+msgstr "完成阶段"
+
+#: stage/basic.py:52 stage/basic.py:103 stage/review.py:30
+msgid "Task"
+msgstr "任务"
+
+#: stage/basic.py:53
+msgid "Completion"
+msgstr "完成"
+
+#: stage/basic.py:58
+msgid "mark stage as complete"
+msgstr "将阶段标记为完成"
+
+#: stage/basic.py:98
+msgid "Submission Stage"
+msgstr "提交阶段"
+
+#: stage/basic.py:104
+msgid "Deliverable"
+msgstr "交付内容"
+
+#: stage/basic.py:107 stage/basic.py:108
+msgid "Pending Upload"
+msgstr "等待上传"
+
+#: stage/basic.py:109
+msgid "Uploaded"
+msgstr "已上传"
+
+#: stage/basic.py:111 stage/review.py:329
+msgid "Unknown"
+msgstr "未知"
+
+#: stage/basic.py:115
+msgid "upload submission"
+msgstr "上传提交内容"
+
+#: stage/feedback_review.py:21
+msgid "Review"
+msgstr "审查"
+
+#: stage/feedback_review.py:72
+msgid "Evaluation Display Stage"
+msgstr "评估展示阶段"
+
+#: stage/feedback_review.py:78
+msgid "Evaluation Display"
+msgstr "评估展示"
+
+#: stage/feedback_review.py:118
+msgid "Grade Display Stage"
+msgstr "评分展示阶段"
+
+#: stage/feedback_review.py:124
+msgid "Grade Display"
+msgstr "评分展示"
+
+#: stage/feedback_review.py:163 stage_components.py:746
+msgid "N/A"
+msgstr "不适用"
+
+#: stage/mixins.py:14
+msgid "Completed"
+msgstr "已完成"
+
+#: stage/review.py:39
+msgid "save feedback"
+msgstr "保存反馈"
+
+#: stage/review.py:209
+msgid "Team Evaluation Stage"
+msgstr "团队评估阶段"
+
+#: stage/review.py:215
+msgid "Team Evaluation"
+msgstr "团队评估"
+
+#: stage/review.py:318
+msgid "Peer Grading Stage"
+msgstr "学员互评阶段"
+
+#: stage/review.py:325 stage/review.py:326
+msgid "Pending Review"
+msgstr "等待审查"
+
+#: stage/review.py:327
+msgid "Review Complete"
+msgstr "审查完成"
+
+#: stage/review.py:331
+msgid "Peer Grading"
+msgstr "学员互评"
+
+#: stage/utils.py:12
+msgid "Not started"
+msgstr "未开始"
+
+#: stage/utils.py:13
+msgid "Partially complete"
+msgstr "部分完成"
+
+#: stage/utils.py:14
+msgid "Complete"
+msgstr "完成"
+
+#: stage/utils.py:29
+msgid "This is a name of the stage"
+msgstr "此为阶段名称"
+
+#: stage_components.py:64
+msgid "This is a name of the resource"
+msgstr "此为资源名称"
+
+#: stage_components.py:66
+msgid "Group Project V2 Resource"
+msgstr "小组项目 V2 资源"
+
+#: stage_components.py:70
+msgid "Resource Description"
+msgstr "资源说明"
+
+#: stage_components.py:89
+msgid "Resource"
+msgstr "资源"
+
+#: stage_components.py:94
+msgid "Resource Location"
+msgstr "资源位置"
+
+#: stage_components.py:95
+msgid "A url to download/view the resource"
+msgstr "资源下载/查看 URL"
+
+#: stage_components.py:100
+msgid "Grading Criteria?"
+msgstr "评分标准？"
+
+#: stage_components.py:101
+msgid "If true, resource will be treated as grading criteria"
+msgstr "如果设置为 true，则资源将被视为评分标准"
+
+#: stage_components.py:114
+msgid "Video Resource"
+msgstr "视频资源"
+
+#: stage_components.py:118
+msgid "Ooyala/Brightcove content ID"
+msgstr "Ooyala/Brightcove 内容 ID"
+
+#: stage_components.py:119
+msgid "This is the Ooyala/Brightcove Content Identifier"
+msgstr "此为 Ooyala/Brightcove 内容标识符"
+
+#: stage_components.py:203
+msgid "Submissions Help Text"
+msgstr "提交内容帮助文本"
+
+#: stage_components.py:215
+msgid "Grade Rubric Help Text"
+msgstr "评分标准帮助文本"
+
+#: stage_components.py:236
+msgid "Submission"
+msgstr "提交内容"
+
+#: stage_components.py:242
+msgid "This is a name of the submission"
+msgstr "此为提交内容的名称"
+
+#: stage_components.py:244
+msgid "Group Project V2 Submission"
+msgstr "小组项目 V2 提交内容"
+
+#: stage_components.py:248
+msgid "Submission Description"
+msgstr "提交内容说明"
+
+#: stage_components.py:253
+msgid "Upload ID"
+msgstr "上传 ID"
+
+#: stage_components.py:254
+msgid ""
+"This string is used as an identifier for an upload. Submissions sharing the "
+"same Upload ID will be updated simultaneously"
+msgstr "此字符串用作上传的标识符。共用同一上传 ID 的提交内容将同时更新"
+
+#: stage_components.py:424
+msgid "Error storing file {} - {}"
+msgstr "存储文件 {} - {} 时出错"
+
+#: stage_components.py:444
+msgid "Error recording file information {} - {}"
+msgstr "记录文件信息 {} - {} 时出错"
+
+#: stage_components.py:489
+msgid "Teammate Selector"
+msgstr "组员选择器"
+
+#: stage_components.py:490
+msgid "Teammate Selector XBlock"
+msgstr "组员选择器 XBlock"
+
+#: stage_components.py:523
+msgid "Group Selector"
+msgstr "小组选择器"
+
+#: stage_components.py:524
+msgid "Group Selector XBlock"
+msgstr "小组选择器 XBlock"
+
+#: stage_components.py:549 stage_components.py:553
+msgid "Review Question"
+msgstr "审查问题"
+
+#: stage_components.py:556 stage_components.py:688
+msgid "Question ID"
+msgstr "问题 ID"
+
+#: stage_components.py:563
+msgid "Question Text"
+msgstr "问题文本"
+
+#: stage_components.py:569
+msgid "Assessment Question Text"
+msgstr "评估问题文本"
+
+#: stage_components.py:570
+msgid "Overrides question title when displayed in assessment mode"
+msgstr "在评估模式中显示时将覆盖问题标题"
+
+#: stage_components.py:576
+msgid "Question Content"
+msgstr "问题内容"
+
+#: stage_components.py:577
+msgid "HTML control"
+msgstr "HTML 控件"
+
+#: stage_components.py:585
+msgid "Required"
+msgstr "必需"
+
+#: stage_components.py:591
+msgid "Grading"
+msgstr "评分"
+
+#: stage_components.py:592
+msgid ""
+"IF True, answers to this question will be used to calculate student grade "
+"for Group Project."
+msgstr "如果设置为 True，此问题的回答将被用于计算学员的小组项目评分。"
+
+#: stage_components.py:598
+msgid "Single Line"
+msgstr "单行"
+
+#: stage_components.py:599
+msgid ""
+"If True question label and content will be displayed on single line, "
+"allowing for more compact layout.Only affects presentation."
+msgstr "如果设置为 True，问题标签和内容将在一行显示，使得布局更为紧凑。这只会影响显示效果。"
+
+#: stage_components.py:606
+msgid "CSS Classes"
+msgstr "CSS 类"
+
+#: stage_components.py:607
+msgid "CSS classes to be set on question element. Only affects presentation."
+msgstr "要针对问题元素设置的 CSS 类。这只会影响显示效果。"
+
+#: stage_components.py:683
+msgid "No question selected"
+msgstr "未选择问题"
+
+#: stage_components.py:684
+msgid "Selected question not found"
+msgstr "找不到选择的问题"
+
+#: stage_components.py:685
+msgid "Question ID is not unique"
+msgstr "问题 ID 不是唯一的"
+
+#: stage_components.py:689
+msgid "Question to be assessed"
+msgstr "要评估的问题"
+
+#: stage_components.py:695
+msgid "Show Mean Value"
+msgstr "显示平均值"
+
+#: stage_components.py:696
+msgid "If True, converts review answers to numbers and calculates mean value"
+msgstr "如果设置为 True，则系统会将审查答案转变为数字并计算平均值"
+
+#: stage_components.py:711
+#, python-brace-format
+msgid "Review Assessment for question \"{question_title}\""
+msgstr "问题“{question_title}”的审查评估"
+
+#: stage_components.py:713
+msgid "Review Assessment"
+msgstr "审查评估"
+
+#: stage_components.py:784
+msgid "--- Not selected ---"
+msgstr "--- 未选择 ---"
+
+#: stage_components.py:795
+msgid "Team Evaluation Display"
+msgstr "团队评估展示"
+
+#: stage_components.py:813
+msgid "Grade Evaluation Display"
+msgstr "评分评估展示"
+
+#: stage_components.py:831
+msgid "Project Team"
+msgstr "项目团队"
+
+#: templates/html/activity/dashboard_detail_view.html:4
+#: templates/html/activity/dashboard_view.html:4
+msgid "Activity:"
+msgstr "活动："
+
+#: templates/html/activity/dashboard_detail_view.html:10
+msgid "Groups"
+msgstr "小组"
+
+#: templates/html/activity/dashboard_detail_view.html:11
+msgid "Graded/Required Stages"
+msgstr "评分阶段/必需阶段"
+
+#: templates/html/activity/dashboard_detail_view.html:17
+msgid ""
+"will export a list of emails within stage of partially complete/incomplete "
+"teams"
+msgstr "将在部分完成/未完成团队的阶段内导出电子邮件列表"
+
+#: templates/html/activity/dashboard_detail_view.html:60
+msgid "Grading:"
+msgstr "评分："
+
+#: templates/html/activity/dashboard_detail_view.html:78
+#, python-format
+msgid ""
+"\n"
+"            Additionally there is a single work group filtered by company "
+"filter.\n"
+"          "
+msgid_plural "\n            Additionally there were %(counter)s work groups filtered by company filter.\n          "
+msgstr[0] "\n"
+"            此外，有一个由公司筛选器筛选的工作组。\n"
+"          "
+msgstr[1] "\n"
+"            此外，有 %(counter)s 个由公司筛选器筛选的工作组。\n"
+"          "
+
+#: templates/html/activity/dashboard_detail_view.html:84
+msgid ""
+"\n"
+"            All work groups have been filtered by the company filter.\n"
+"          "
+msgstr "\n"
+"            所有工作组都已由公司筛选器筛选。\n"
+"          "
+
+#: templates/html/activity/navigation_view.html:11
+msgid "No stages available for this activity"
+msgstr "没有可用于此活动的阶段"
+
+#: templates/html/activity/resources_view.html:11
+msgid "No resources for this activity"
+msgstr "没有可用于此活动的资源"
+
+#: templates/html/activity/submissions_view.html:12
+msgid "No uploads required for this activity"
+msgstr "没有此活动所需的上传"
+
+#: templates/html/add_buttons.html:5
+msgid "Add New Component"
+msgstr "添加新组件"
+
+#: templates/html/components/group_selector.html:4
+msgid ""
+"Please click on the group(s) you are assigned to grade to review their "
+"submissions."
+msgstr "请单击您被分配到的小组，进行评分以审查其提交内容。"
+
+#: templates/html/components/group_selector.html:8
+#: templates/html/components/peer_selector.html:8
+msgid "Demo contents"
+msgstr "演示内容"
+
+#: templates/html/components/group_selector.html:19
+msgid "Group"
+msgstr "小组"
+
+#: templates/html/components/group_selector.html:20
+#: templates/html/components/peer_selector.html:21
+msgid "Evaluating below"
+msgstr "在下方评估"
+
+#: templates/html/components/group_selector.html:26
+msgid "No groups assigned for review"
+msgstr "没有已分配以供审查的小组"
+
+#: templates/html/components/peer_selector.html:4
+msgid "Please click on the teammates to review their performance"
+msgstr "请单击组员以审查其表现"
+
+#: templates/html/components/peer_selector.html:19
+msgid "Teammate"
+msgstr "组员"
+
+#: templates/html/components/peer_selector.html:27
+msgid "No teammates to review"
+msgstr "没有要审查的组员"
+
+#: templates/html/components/project_team.html:3
+msgid "Email your entire team"
+msgstr "向所有组员发送电子邮件"
+
+#: templates/html/components/project_team.html:23
+msgid "Email"
+msgstr "电子邮件"
+
+#: templates/html/components/review_assessment.html:6
+msgid "Grade:"
+msgstr "评分："
+
+#: templates/html/components/submission_navigator_view.html:28
+msgid "Uploaded by"
+msgstr "上传人"
+
+#: templates/html/components/submission_review_view.html:11
+msgid "This file has not been submitted by this group"
+msgstr "此文件未由此小组提交"
+
+#: templates/html/project/student_view.html:31
+msgid "OK"
+msgstr "确认"
+
+#: templates/html/project/student_view.html:42
+msgid "Message your group"
+msgstr "向小组发送消息"
+
+#: templates/html/project/student_view.html:44
+msgid "Send any questions or messages to your group."
+msgstr "向小组发送任何问题或消息。"
+
+#: templates/html/project/student_view.html:48
+msgid "Enter your message for the group here"
+msgstr "在此输入要发送给小组的消息"
+
+#: templates/html/project/student_view.html:49
+#: templates/html/project/student_view.html:68
+#: templates/html/project_navigator/ask_ta_view.html:18
+msgid "Submit"
+msgstr "提交"
+
+#: templates/html/project/student_view.html:60
+msgid "Message your group member"
+msgstr "向小组成员发送消息"
+
+#: templates/html/project/student_view.html:62
+msgid "Send any questions or messages to your group member."
+msgstr "向小组成员发送任何问题或消息。"
+
+#: templates/html/project/student_view.html:67
+msgid "Enter your message here"
+msgstr "在此输入您的消息"
+
+#: templates/html/project_navigator/ask_ta_view.html:10
+msgid ""
+"Send any questions or messages to a TA, and they'll get back to you via "
+"email."
+msgstr "向助教发送任何问题或消息，他们会尽快通过电子邮件回复您。"
+
+#: templates/html/project_navigator/ask_ta_view.html:17
+msgid "Enter your message here."
+msgstr "在此输入您的消息。"
+
+#: templates/html/project_navigator/project_navigator.html:5
+#: templates/html/project_navigator/project_navigator_author_view.html:4
+msgid "Project Navigator"
+msgstr "项目导航器"
+
+#: templates/html/stages/completion.html:9
+msgid "Yes, I have completed this task"
+msgstr "是的，我已完成此任务"
+
+#: templates/html/stages/dashboard_detail_view.html:14
+#: templates/html/stages/dashboard_view.html:13
+msgid "TA Graded"
+msgstr "助教已评分"
+
+#: templates/html/stages/dashboard_view.html:4
+msgid "Status:"
+msgstr "状态："
+
+#: templates/html/stages/dashboard_view.html:25
+msgid "No students match search criteria"
+msgstr "没有满足搜索条件的学员"
+
+#: templates/html/stages/grade_display.html:8
+msgid "Final Grade:"
+msgstr "最终评分："
+
+#: templates/html/stages/navigation_view.html:16
+msgid "Closed on"
+msgstr "关闭日期"
+
+#: templates/html/stages/navigation_view.html:18
+msgid "Due"
+msgstr "截止日期"
+
+#: templates/html/stages/navigation_view.html:20
+msgid "Available"
+msgstr "可用"
+
+#: templates/html/stages/peer_review.html:4
+msgid "Grading View"
+msgstr "评分视图"
+
+#: templates/html/stages/peer_review.html:6
+msgid "TA Grading override view"
+msgstr "助教评分覆盖视图"
+
+#: templates/html/stages/peer_review.html:23
+msgid "Group Submissions"
+msgstr "小组提交内容"
+
+#: templates/html/stages/peer_review.html:24
+msgid "Please review the file(s) below to evaluate the group's work."
+msgstr "请审查下方的文件以评估小组的工作。"
+
+#: templates/html/stages/stage_wrapper.html:26
+msgid "This stage has not yet been opened"
+msgstr "此阶段尚未开启。"
+
+#: templates/html/stages/stages_group_review_other_team_submissions.html:10
+msgid "Current Group Project Activity does not have any submission stages"
+msgstr "当前小组项目活动没有任何提交阶段。"
+
+#: templates/html/stages/submissions_review_view.html:8
+msgid "No submissions have been uploaded for this stage"
+msgstr "未针对此阶段上传任何提交内容"
+
+#: utils.py:39
+msgid "This XBlock does not contain any editable settings"
+msgstr "此 XBlock 不包含任何可编辑设置"
+
+#: utils.py:40
+msgid "Must be overridden in inherited class"
+msgstr "必须在继承类中覆盖"
+
+#: utils.py:56
+msgid "HTML"
+msgstr "HTML"
+
+#: utils.py:61
+msgid "Discussion"
+msgstr "讨论"
+
+#: utils.py:332
+#, python-brace-format
+msgid "#{group_id}"
+msgstr "#{group_id}"
+
+#: utils.py:334
+#, python-brace-format
+msgid "Group #{group_id}"
+msgstr "小组 #{group_id}"

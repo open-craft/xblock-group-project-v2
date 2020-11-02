@@ -33,7 +33,7 @@ extract_translations: ## extract strings to be translated, outputting .po files
 
 compile_translations: ## compile translation files, outputting .mo files for each supported language
 	cd $(WORKING_DIR) && i18n_tool generate
-	python manage.py compilejsi18n --output $(JS_TARGET)
+	python manage.py compilejsi18n --namespace GroupProjectV2XBlockI18N --output $(JS_TARGET)
 
 detect_changed_source_translations:
 	cd $(WORKING_DIR) && i18n_tool changed

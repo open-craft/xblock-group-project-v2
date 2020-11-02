@@ -1,0 +1,905 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#: stage_components.py:564 stage_components.py:578
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-26 19:09+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: api_error.py:18
+msgid "Unknown error calling API"
+msgstr "Nieznany błąd podczas wywołania API"
+
+#: group_project.py:40 group_project.py:326 stage/utils.py:28
+#: stage_components.py:63 stage_components.py:241
+msgid "Display Name"
+msgstr "Wyświetlana nazwa"
+
+#: group_project.py:41
+msgid "This is a name of the project"
+msgstr "To jest nazwa projektu"
+
+#: group_project.py:43
+msgid "Group Project V2"
+msgstr "Projekt grupowy v2"
+
+#: group_project.py:327
+msgid "This name appears in the horizontal navigation at the top of the page."
+msgstr "Nazwa ta pojawi się w pasku horyzontalnym nawigacji u góry strony."
+
+#: group_project.py:329 group_project.py:362
+msgid "Group Project Activity"
+msgstr "Aktywność dla projektu grupowego"
+
+#: group_project.py:333
+msgid "Weight"
+msgstr "Waga"
+
+#: group_project.py:334
+msgid ""
+"This is the maximum score that the user receives when he/she successfully "
+"completes the problem."
+msgstr "To jest maksymalna punktacja, jaką użytkownik może uzyskać za prawidłowe rozwiązanie problemu."
+
+#: group_project.py:340
+msgid "Reviews Required Minimum"
+msgstr "Wymagana minimalna liczba ocen"
+
+#: group_project.py:341
+msgid ""
+"The minimum number of group-reviews that should be applied to a set of "
+"submissions (set to 0 to be 'TA Graded')"
+msgstr "Minimalna liczba ocen grupy, która ma zostać zastosowana do zestawu zgłoszonych projektów (wartość 0 oznacza „Ocenianie przez Asystenta kursu”)"
+
+#: group_project.py:348
+msgid "User Reviews Required Minimum"
+msgstr "Wymagana minimalna liczba ocen użytkowników"
+
+#: group_project.py:349
+msgid ""
+"The minimum number of other-group reviews that an individual user should "
+"perform"
+msgstr "Minimalna liczba ocen innych grup, które musi dokonać pojedynczy użytkownik"
+
+#: group_project.py:355
+msgid "Due date"
+msgstr "Termin"
+
+#: group_project.py:356
+msgid "Activity due date"
+msgstr "Termin ukończenia aktywności"
+
+#: group_project.py:775
+#, python-brace-format
+msgid "{field_name} must be integer, {field_value} given"
+msgstr "{field_name} musi być liczbą całkowitą, daną {field_value}"
+
+#: messages.py:4
+msgid "Unknown error."
+msgstr "Nieznany błąd"
+
+#: messages.py:6
+msgid ""
+"This component is misconfigured and can't be displayed. It needs to be fixed "
+"by the course authors."
+msgstr "Ten element jest źle skonfigurowany i nie może zostać wyświetlony. Musi zostać naprawiony przez twórców tego kursu."
+
+#: messages.py:8
+#, python-brace-format
+msgid "Can't {action} as stage is not yet opened."
+msgstr "Nie można {action}. Etap nie jest jeszcze otwarty."
+
+#: messages.py:9
+#, python-brace-format
+msgid "Can't {action} as stage is closed."
+msgstr "Nie można {action}. Etap jest już zamknięty."
+
+#: messages.py:12
+msgid "This Group Project does not contain any activities."
+msgstr "Projekt grupowy nie zawiera żadnych aktywności."
+
+#: messages.py:14
+msgid ""
+"This Group Project V2 does not contain Project Navigator - please edit "
+"course outline in Studio to include one."
+msgstr "Projekt grupowy v2 nie zawiera Nawigatora projektu – dodaj Nawigator projektu w planie kursu w Studio."
+
+#: messages.py:17
+msgid "This Group Project V2 does not contain a discussion."
+msgstr "Projekt grupowy v2 nie zawiera żadnych dyskusji."
+
+#: messages.py:18
+msgid "Group Project must contain Project Navigator Block."
+msgstr "Projekt grupowy musi zawierać Blok Nawigatora projektu."
+
+#: messages.py:21
+msgid "This Group Project Activity does not contain any stages."
+msgstr "Aktywność Projektu grupowego nie zawiera żadnych Etapów."
+
+#: messages.py:22
+#, python-brace-format
+msgid "{field_name} must be integer, {field_value} given."
+msgstr "{field_name} musi być liczbą całkowitą, daną {field_value}"
+
+#: messages.py:23
+#, python-brace-format
+msgid "This project is assigned to {group_count} group(s)"
+msgstr "Ten projekt został przypisany do {group_count} grup(y)."
+
+#: messages.py:26
+msgid "Project Navigator must contain Navigation view."
+msgstr "Nawigator projektu musi zawierać widok Nawigacji."
+
+#: messages.py:28
+#, python-brace-format
+msgid ""
+"Parent group project does not contain discussion XBlock - this {block_type} "
+"will not function properly and will not be displayed to students."
+msgstr "Nadrzędny projekt grupowy nie zawiera elementu XBlock dyskusji – {block_type} nie będzie działać poprawnie i nie zostanie wyświetlone uczniom."
+
+#: messages.py:33
+msgid "This task has been marked as complete."
+msgstr "To zadanie oznaczono jako ukończone."
+
+#: messages.py:34
+#, python-brace-format
+msgid "url_name to link to this {stage_name}:"
+msgstr "nazwa_url linku do {stage_name}:"
+
+#: messages.py:35
+#, python-brace-format
+msgid "Submissions are not specified for {class_name} '{stage_title}'."
+msgstr "Zgłoszenia projektu nie zostały określone dla {class_name}„{stage_title}”."
+
+#: messages.py:36
+#, python-brace-format
+msgid ""
+"Feedback display blocks are not specified for {class_name} '{stage_title}'."
+msgstr "Bloki wyświetlania informacji zwrotnej nie zostały określone dla {class_name}„{stage_title}”."
+
+#: messages.py:37
+#, python-brace-format
+msgid "Questions are not specified for {class_name} '{stage_title}'."
+msgstr "Pytania nie zostały określone dla {class_name}„{stage_title}”."
+
+#: messages.py:39
+#, python-brace-format
+msgid ""
+"{class_name} stage '{stage_title}' is missing required component "
+"'{peer_selector_class_name}'."
+msgstr "{class_name} etapu „{stage_title}” nie zawiera wymaganego elementu „{peer_selector_class_name}”."
+
+#: messages.py:42
+#, python-brace-format
+msgid ""
+"{class_name} stage '{stage_title}' is missing required component "
+"'{group_selector_class_name}'."
+msgstr "{class_name} etapu „{stage_title}” nie zawiera wymaganego elementu „{group_selector_class_name}”."
+
+#: messages.py:44
+msgid "Thanks for your feedback."
+msgstr "Dziękujemy za przesłanie opinii."
+
+#: messages.py:45
+msgid "TA grading is not allowed for this stage."
+msgstr "Ocena przez Asystenta kursu nie jest dozwolona na tym etapie."
+
+#: messages.py:46
+#, python-brace-format
+msgid ""
+"Graded questions are not supported for {class_name} stage '{stage_title}'."
+msgstr "Pytania na ocenę nie są obsługiwane w {class_name} etapu „{stage_title}”."
+
+#: messages.py:47
+#, python-brace-format
+msgid "Grade questions are required for {class_name} stage '{stage_title}'."
+msgstr "Pytania na ocenę są wymagane w {class_name} etapu „{stage_title}”."
+
+#: messages.py:50
+msgid "Video Resource Block must contain Ooyala content ID."
+msgstr "Blok zasobu wideo musi zawierać ID zawartości Ooyala."
+
+#: messages.py:51
+msgid "Only group members can upload files."
+msgstr "Tylko członkowie grupy mogą przesyłać pliki."
+
+#: messages.py:52
+msgid "Question is not selected."
+msgstr "Nie wybrano pytania."
+
+#: messages.py:53
+msgid "Upload complete"
+msgstr "Zakończono przesyłanie plików"
+
+#: messages.py:54
+msgid "Upload failed."
+msgstr "Przesyłanie plików nie powiodło się."
+
+#: messages.py:56
+#, python-brace-format
+msgid ""
+"Your deliverable has been successfully uploaded. You can attach an updated "
+"version of the deliverable by clicking the <span class='icon {icon}'></span> "
+"icon at any time before the deadline."
+msgstr "Pliki zostały przesłane. Możesz załączyć nową wersję przesłanego pliku, klikając ikonę <span class='icon {icon}'></span> w dowolnym momencie przed terminem ukończenia."
+
+#: messages.py:59
+#, python-brace-format
+msgid "Error uploading file: {error_goes_here}."
+msgstr "Błąd przesyłania plików: {error_goes_here}."
+
+#: project_navigator.py:64 project_navigator.py:67
+msgid "Group Project Navigator"
+msgstr "Nawigator projektu grupowego"
+
+#: project_navigator.py:233
+#, python-brace-format
+msgid "url_name to link to this {project_navigator_view}:"
+msgstr "nazwa_url linku do {project_navigator_view}:"
+
+#: project_navigator.py:306
+msgid "Navigation View"
+msgstr "Widok nawigacji"
+
+#: project_navigator.py:307
+msgid "Navigation"
+msgstr "Nawigacja"
+
+#: project_navigator.py:338
+msgid "Resources View"
+msgstr "Widok materiałów"
+
+#: project_navigator.py:339
+msgid "Resources"
+msgstr "Materiały"
+
+#: project_navigator.py:371
+msgid "Submissions View"
+msgstr "Widok zgłoszonych projektów"
+
+#: project_navigator.py:372
+msgid "Upload"
+msgstr "Przesył plików"
+
+#: project_navigator.py:412
+msgid "Ask a TA View"
+msgstr "Widok pytań do Asystenta kursu"
+
+#: project_navigator.py:413
+msgid "Ask a McKinsey TA"
+msgstr "Zapytaj Asystenta kursu firmy McKinsey"
+
+#: project_navigator.py:445
+msgid "Private Discussion View"
+msgstr "Widok prywatnej dyskusji"
+
+#: stage/base.py:44
+msgid "Open Date"
+msgstr "Data otwarcia"
+
+#: stage/base.py:45
+msgid "Stage open date"
+msgstr "Data otwarcia etapu"
+
+#: stage/base.py:50
+msgid "Close Date"
+msgstr "Data zamknięcia"
+
+#: stage/base.py:51
+msgid "Stage close date"
+msgstr "Data zamknięcia etapu"
+
+#: stage/base.py:56
+msgid "Hide stage type label"
+msgstr "Ukryj etykietę typu etapu"
+
+#: stage/base.py:57
+msgid "If true, hides stage type label in Project Navigator"
+msgstr "Jeśli ustawione na prawda, ukrywa etykietę typu Etapu w Nawigatorze projektu"
+
+#: stage/base.py:72
+msgid "Stage"
+msgstr "Etap"
+
+#: stage/basic.py:24
+msgid "Text Stage"
+msgstr "Etap tekstowy"
+
+#: stage/basic.py:29
+msgid "Overview"
+msgstr "Opis"
+
+#: stage/basic.py:30
+msgid "Text"
+msgstr "Tekst"
+
+#: stage/basic.py:46
+msgid "Completion Stage"
+msgstr "Etap ukończenia"
+
+#: stage/basic.py:52 stage/basic.py:103 stage/review.py:30
+msgid "Task"
+msgstr "Zadanie"
+
+#: stage/basic.py:53
+msgid "Completion"
+msgstr "Ukończenie"
+
+#: stage/basic.py:58
+msgid "mark stage as complete"
+msgstr "Oznacz etap jako ukończony"
+
+#: stage/basic.py:98
+msgid "Submission Stage"
+msgstr "Etap przesłania projektu"
+
+#: stage/basic.py:104
+msgid "Deliverable"
+msgstr "Plik"
+
+#: stage/basic.py:107 stage/basic.py:108
+msgid "Pending Upload"
+msgstr "Oczekiwanie na przesłanie"
+
+#: stage/basic.py:109
+msgid "Uploaded"
+msgstr "Przesłano"
+
+#: stage/basic.py:111 stage/review.py:329
+msgid "Unknown"
+msgstr "Nieznany"
+
+#: stage/basic.py:115
+msgid "upload submission"
+msgstr "przesył projektu"
+
+#: stage/feedback_review.py:21
+msgid "Review"
+msgstr "Ocena"
+
+#: stage/feedback_review.py:72
+msgid "Evaluation Display Stage"
+msgstr "Etap wyświetlania ewaluacji"
+
+#: stage/feedback_review.py:78
+msgid "Evaluation Display"
+msgstr "Wyświetlanie ewaluacji"
+
+#: stage/feedback_review.py:118
+msgid "Grade Display Stage"
+msgstr "Etap wyświetlania oceny"
+
+#: stage/feedback_review.py:124
+msgid "Grade Display"
+msgstr "Wyświetlanie oceny"
+
+#: stage/feedback_review.py:163 stage_components.py:746
+msgid "N/A"
+msgstr "N/D"
+
+#: stage/mixins.py:14
+msgid "Completed"
+msgstr "Ukończono"
+
+#: stage/review.py:39
+msgid "save feedback"
+msgstr "zapisz informację zwrotną"
+
+#: stage/review.py:209
+msgid "Team Evaluation Stage"
+msgstr "Etap ewaluacji zespołu"
+
+#: stage/review.py:215
+msgid "Team Evaluation"
+msgstr "Ewaluacja zespołu"
+
+#: stage/review.py:318
+msgid "Peer Grading Stage"
+msgstr "Etap oceny przez kolegów"
+
+#: stage/review.py:325 stage/review.py:326
+msgid "Pending Review"
+msgstr "Oczekuje na ocenę"
+
+#: stage/review.py:327
+msgid "Review Complete"
+msgstr "Ocena gotowa"
+
+#: stage/review.py:331
+msgid "Peer Grading"
+msgstr "Oceniane przez kolegów"
+
+#: stage/utils.py:12
+msgid "Not started"
+msgstr "Nie rozpoczęto"
+
+#: stage/utils.py:13
+msgid "Partially complete"
+msgstr "Ukończono częściowo"
+
+#: stage/utils.py:14
+msgid "Complete"
+msgstr "Ukończono"
+
+#: stage/utils.py:29
+msgid "This is a name of the stage"
+msgstr "To jest nazwa Etapu"
+
+#: stage_components.py:64
+msgid "This is a name of the resource"
+msgstr "To jest nazwa zasobu"
+
+#: stage_components.py:66
+msgid "Group Project V2 Resource"
+msgstr "Zasób projekt grupowego v2"
+
+#: stage_components.py:70
+msgid "Resource Description"
+msgstr "Opis zasobu"
+
+#: stage_components.py:89
+msgid "Resource"
+msgstr "Zasób"
+
+#: stage_components.py:94
+msgid "Resource Location"
+msgstr "Lokalizacja zasobu"
+
+#: stage_components.py:95
+msgid "A url to download/view the resource"
+msgstr "Adres URL, pod którym można ściągnąć lub zobaczyć zasób"
+
+#: stage_components.py:100
+msgid "Grading Criteria?"
+msgstr "Kryteria oceny?"
+
+#: stage_components.py:101
+msgid "If true, resource will be treated as grading criteria"
+msgstr "Jeśli ustawione na prawda, zasób będzie traktowany jako kryteria oceny"
+
+#: stage_components.py:114
+msgid "Video Resource"
+msgstr "Zasób wideo"
+
+#: stage_components.py:118
+msgid "Ooyala/Brightcove content ID"
+msgstr "ID treści Ooyala/Brightcove"
+
+#: stage_components.py:119
+msgid "This is the Ooyala/Brightcove Content Identifier"
+msgstr "To jest identyfikator treści Ooyala/Brightcove"
+
+#: stage_components.py:203
+msgid "Submissions Help Text"
+msgstr "Tekst pomocy zgłoszonego projektu"
+
+#: stage_components.py:215
+msgid "Grade Rubric Help Text"
+msgstr "Tekst pomocy rubryki oceny"
+
+#: stage_components.py:236
+msgid "Submission"
+msgstr "Przesłany projekt"
+
+#: stage_components.py:242
+msgid "This is a name of the submission"
+msgstr "To jest nazwa przesłanego projektu"
+
+#: stage_components.py:244
+msgid "Group Project V2 Submission"
+msgstr "Przesłany projekt grupowego v2"
+
+#: stage_components.py:248
+msgid "Submission Description"
+msgstr "Opis przesłanego projektu"
+
+#: stage_components.py:253
+msgid "Upload ID"
+msgstr "ID przesłanego pliku"
+
+#: stage_components.py:254
+msgid ""
+"This string is used as an identifier for an upload. Submissions sharing the "
+"same Upload ID will be updated simultaneously"
+msgstr "Ten ciąg znaków jest używany jako identyfikator przesłanego pliku. Projekty, które mają ten sam identyfikator przesłanego pliku, będą uaktualniane jednocześnie"
+
+#: stage_components.py:424
+msgid "Error storing file {} - {}"
+msgstr "Błąd przechowywania pliku {} - {}"
+
+#: stage_components.py:444
+msgid "Error recording file information {} - {}"
+msgstr "Błąd zapisu informacji o pliki {} - {}"
+
+#: stage_components.py:489
+msgid "Teammate Selector"
+msgstr "Selektor członków zespołu"
+
+#: stage_components.py:490
+msgid "Teammate Selector XBlock"
+msgstr "Element XBlock selektora członków zespołu"
+
+#: stage_components.py:523
+msgid "Group Selector"
+msgstr "Selektor grupy"
+
+#: stage_components.py:524
+msgid "Group Selector XBlock"
+msgstr "Element XBlock selektora grupy"
+
+#: stage_components.py:549 stage_components.py:553
+msgid "Review Question"
+msgstr "Pytanie powtórkowe"
+
+#: stage_components.py:556 stage_components.py:688
+msgid "Question ID"
+msgstr "ID pytania"
+
+#: stage_components.py:563
+msgid "Question Text"
+msgstr "Tekst pytania"
+
+#: stage_components.py:569
+msgid "Assessment Question Text"
+msgstr "Tekst pytania na ocenę"
+
+#: stage_components.py:570
+msgid "Overrides question title when displayed in assessment mode"
+msgstr "Nadpisuje tekst pytania podczas wyświetlania w trybie na ocenę"
+
+#: stage_components.py:576
+msgid "Question Content"
+msgstr "Zawartość pytania"
+
+#: stage_components.py:577
+msgid "HTML control"
+msgstr "Kontrola HTML"
+
+#: stage_components.py:585
+msgid "Required"
+msgstr "Wymagane"
+
+#: stage_components.py:591
+msgid "Grading"
+msgstr "Ocena"
+
+#: stage_components.py:592
+msgid ""
+"IF True, answers to this question will be used to calculate student grade "
+"for Group Project."
+msgstr "Jeśli ustawione na prawda, odpowiedź na to pytanie zostanie wliczona do końcowej oceny ucznia za Projekt grupowy."
+
+#: stage_components.py:598
+msgid "Single Line"
+msgstr "Pojedyncza linia"
+
+#: stage_components.py:599
+msgid ""
+"If True question label and content will be displayed on single line, "
+"allowing for more compact layout.Only affects presentation."
+msgstr "Jeśli ustawione na prawda, etykieta i zawartość pytania będą wyświetlane w pojedynczej linii, co zapewni bardziej skompresowany widok. Ma wpływ wyłącznie na sposób prezentacji."
+
+#: stage_components.py:606
+msgid "CSS Classes"
+msgstr "Klasy CSS"
+
+#: stage_components.py:607
+msgid "CSS classes to be set on question element. Only affects presentation."
+msgstr "Klasy CSS ustawione w przypadku elementu pytania. Ma wpływ wyłącznie na sposób prezentacji."
+
+#: stage_components.py:683
+msgid "No question selected"
+msgstr "Nie wybrano pytania"
+
+#: stage_components.py:684
+msgid "Selected question not found"
+msgstr "Nie znaleziono wybranego pytania"
+
+#: stage_components.py:685
+msgid "Question ID is not unique"
+msgstr "ID pytania nie jest unikalne"
+
+#: stage_components.py:689
+msgid "Question to be assessed"
+msgstr "Pytanie na ocenę"
+
+#: stage_components.py:695
+msgid "Show Mean Value"
+msgstr "Pokaż wartość średnią"
+
+#: stage_components.py:696
+msgid "If True, converts review answers to numbers and calculates mean value"
+msgstr "Jeśli ustawione na prawda, zamienia odpowiedzi na pytania na wartości liczbowe i oblicza wartość średnią"
+
+#: stage_components.py:711
+#, python-brace-format
+msgid "Review Assessment for question \"{question_title}\""
+msgstr "Ocena odpowiedzi na pytanie „{question_title}”"
+
+#: stage_components.py:713
+msgid "Review Assessment"
+msgstr "Ocena odpowiedzi"
+
+#: stage_components.py:784
+msgid "--- Not selected ---"
+msgstr "Nie wybrano"
+
+#: stage_components.py:795
+msgid "Team Evaluation Display"
+msgstr "Wyświetlanie ewaluacji zespołu"
+
+#: stage_components.py:813
+msgid "Grade Evaluation Display"
+msgstr "Wyświetlanie ewaluacji oceny"
+
+#: stage_components.py:831
+msgid "Project Team"
+msgstr "Zespół projektu"
+
+#: templates/html/activity/dashboard_detail_view.html:4
+#: templates/html/activity/dashboard_view.html:4
+msgid "Activity:"
+msgstr "Aktywność:"
+
+#: templates/html/activity/dashboard_detail_view.html:10
+msgid "Groups"
+msgstr "Grupy"
+
+#: templates/html/activity/dashboard_detail_view.html:11
+msgid "Graded/Required Stages"
+msgstr "Ocenianie/wymagane etapy"
+
+#: templates/html/activity/dashboard_detail_view.html:17
+msgid ""
+"will export a list of emails within stage of partially complete/incomplete "
+"teams"
+msgstr "dokona eksportu listy adresów e-mail w ramach etapu niekompletnych zespołów "
+
+#: templates/html/activity/dashboard_detail_view.html:60
+msgid "Grading:"
+msgstr "Ocenianie:"
+
+#: templates/html/activity/dashboard_detail_view.html:78
+#, python-format
+msgid ""
+"\n"
+"            Additionally there is a single work group filtered by company "
+"filter.\n"
+"          "
+msgid_plural "\n            Additionally there were %(counter)s work groups filtered by company filter.\n          "
+msgstr[0] "\n"
+"            Dodatkowo odfiltrowano jedną grupę roboczą za pomocą filtru firmy.\n"
+"          "
+msgstr[1] "\n"
+"            Dodatkowo odfiltrowano %(counter)s grup(y) robocze za pomocą filtru firmy.\n"
+"          "
+
+#: templates/html/activity/dashboard_detail_view.html:84
+msgid ""
+"\n"
+"            All work groups have been filtered by the company filter.\n"
+"          "
+msgstr "\n"
+"            Odfiltrowano wszystkie grupy robocze za pomocą filtru firmy.\n"
+"          "
+
+#: templates/html/activity/navigation_view.html:11
+msgid "No stages available for this activity"
+msgstr "Dla tej aktywności nie ma dostępnych żadnych etapów"
+
+#: templates/html/activity/resources_view.html:11
+msgid "No resources for this activity"
+msgstr "Dla tej aktywności nie ma żadnych zasobów"
+
+#: templates/html/activity/submissions_view.html:12
+msgid "No uploads required for this activity"
+msgstr "Dla tej aktywności nie jest wymagane przesłanie plików"
+
+#: templates/html/add_buttons.html:5
+msgid "Add New Component"
+msgstr "Dodaj Nowy komponent"
+
+#: templates/html/components/group_selector.html:4
+msgid ""
+"Please click on the group(s) you are assigned to grade to review their "
+"submissions."
+msgstr "Kliknij grupy, do których Cię przypisano, aby ocenić ich zgłoszone projekty."
+
+#: templates/html/components/group_selector.html:8
+#: templates/html/components/peer_selector.html:8
+msgid "Demo contents"
+msgstr "Zawartość demonstracyjna"
+
+#: templates/html/components/group_selector.html:19
+msgid "Group"
+msgstr "Grupa"
+
+#: templates/html/components/group_selector.html:20
+#: templates/html/components/peer_selector.html:21
+msgid "Evaluating below"
+msgstr "Ewaluacje poniżej"
+
+#: templates/html/components/group_selector.html:26
+msgid "No groups assigned for review"
+msgstr "Nie przypisano żadnych grup do oceny"
+
+#: templates/html/components/peer_selector.html:4
+msgid "Please click on the teammates to review their performance"
+msgstr "Kliknij poszczególnych członków zespołu, aby ocenić ich wkład"
+
+#: templates/html/components/peer_selector.html:19
+msgid "Teammate"
+msgstr "Członek zespołu"
+
+#: templates/html/components/peer_selector.html:27
+msgid "No teammates to review"
+msgstr "Nie ma żadnych członków zespołu do oceny"
+
+#: templates/html/components/project_team.html:3
+msgid "Email your entire team"
+msgstr "Wyślij e-maila do całego zespołu"
+
+#: templates/html/components/project_team.html:23
+msgid "Email"
+msgstr "E-mail"
+
+#: templates/html/components/review_assessment.html:6
+msgid "Grade:"
+msgstr "Ocena:"
+
+#: templates/html/components/submission_navigator_view.html:28
+msgid "Uploaded by"
+msgstr "Przesłano przez"
+
+#: templates/html/components/submission_review_view.html:11
+msgid "This file has not been submitted by this group"
+msgstr "Ten plik nie został przesłany przez tę grupę"
+
+#: templates/html/project/student_view.html:31
+msgid "OK"
+msgstr "OK"
+
+#: templates/html/project/student_view.html:42
+msgid "Message your group"
+msgstr "Wyślij wiadomość do swojej grupy"
+
+#: templates/html/project/student_view.html:44
+msgid "Send any questions or messages to your group."
+msgstr "Przesyłaj wiadomości lub zapytania do członków Twojej grupy"
+
+#: templates/html/project/student_view.html:48
+msgid "Enter your message for the group here"
+msgstr "Tutaj wpisz wiadomość, którą chcesz wysłać do swojej grupy"
+
+#: templates/html/project/student_view.html:49
+#: templates/html/project/student_view.html:68
+#: templates/html/project_navigator/ask_ta_view.html:18
+msgid "Submit"
+msgstr "Prześlij"
+
+#: templates/html/project/student_view.html:60
+msgid "Message your group member"
+msgstr "Wyślij wiadomość do członka swojej grupy"
+
+#: templates/html/project/student_view.html:62
+msgid "Send any questions or messages to your group member."
+msgstr "Przesyłaj wiadomości lub zapytania do członka Twojej grupy"
+
+#: templates/html/project/student_view.html:67
+msgid "Enter your message here"
+msgstr "Tutaj wpisz swoją wiadomość"
+
+#: templates/html/project_navigator/ask_ta_view.html:10
+msgid ""
+"Send any questions or messages to a TA, and they'll get back to you via "
+"email."
+msgstr "Jeśli masz jakieś pytania lub wątpliwości, wyślij do swojego Asystenta kursu wiadomość. Wkrótce otrzymasz odpowiedź na Twój e-mail."
+
+#: templates/html/project_navigator/ask_ta_view.html:17
+msgid "Enter your message here."
+msgstr "Tutaj wpisz swoją wiadomość."
+
+#: templates/html/project_navigator/project_navigator.html:5
+#: templates/html/project_navigator/project_navigator_author_view.html:4
+msgid "Project Navigator"
+msgstr "Nawigator projektu"
+
+#: templates/html/stages/completion.html:9
+msgid "Yes, I have completed this task"
+msgstr "Tak, wykonałem(-am) to zadanie"
+
+#: templates/html/stages/dashboard_detail_view.html:14
+#: templates/html/stages/dashboard_view.html:13
+msgid "TA Graded"
+msgstr "Oceniane przez asystenta kursu"
+
+#: templates/html/stages/dashboard_view.html:4
+msgid "Status:"
+msgstr "Status:"
+
+#: templates/html/stages/dashboard_view.html:25
+msgid "No students match search criteria"
+msgstr "Żaden uczeń nie odpowiada kryteriom wyszukiwania"
+
+#: templates/html/stages/grade_display.html:8
+msgid "Final Grade:"
+msgstr "Ocena końcowa:"
+
+#: templates/html/stages/navigation_view.html:16
+msgid "Closed on"
+msgstr "Zamknięte w dniu"
+
+#: templates/html/stages/navigation_view.html:18
+msgid "Due"
+msgstr "Termin"
+
+#: templates/html/stages/navigation_view.html:20
+msgid "Available"
+msgstr "Dostępne"
+
+#: templates/html/stages/peer_review.html:4
+msgid "Grading View"
+msgstr "Widok oceniania"
+
+#: templates/html/stages/peer_review.html:6
+msgid "TA Grading override view"
+msgstr "Wymuszenie widoku oceniania przez Asystenta kursu"
+
+#: templates/html/stages/peer_review.html:23
+msgid "Group Submissions"
+msgstr "Zgłoszone projekty grupowe"
+
+#: templates/html/stages/peer_review.html:24
+msgid "Please review the file(s) below to evaluate the group's work."
+msgstr "Sprawdź plik(i) poniżej, aby dokonać oceny pracy tej grupy"
+
+#: templates/html/stages/stage_wrapper.html:26
+msgid "This stage has not yet been opened"
+msgstr "Nie otwarto jeszcze tego etapu"
+
+#: templates/html/stages/stages_group_review_other_team_submissions.html:10
+msgid "Current Group Project Activity does not have any submission stages"
+msgstr "Aktywność dla projektu grupowego nie zawiera jeszcze żadnych etapów, w których można przesłać pliki"
+
+#: templates/html/stages/submissions_review_view.html:8
+msgid "No submissions have been uploaded for this stage"
+msgstr "Na tym etapie nie przesłano żadnych plików"
+
+#: utils.py:39
+msgid "This XBlock does not contain any editable settings"
+msgstr "Ten element XBlock nie zawiera żadnych edytowalnych ustawień"
+
+#: utils.py:40
+msgid "Must be overridden in inherited class"
+msgstr "Musi zostać nadpisane w klasach dziedziczonych"
+
+#: utils.py:56
+msgid "HTML"
+msgstr "HTML"
+
+#: utils.py:61
+msgid "Discussion"
+msgstr "Dyskusja"
+
+#: utils.py:332
+#, python-brace-format
+msgid "#{group_id}"
+msgstr "#{group_id}"
+
+#: utils.py:334
+#, python-brace-format
+msgid "Group #{group_id}"
+msgstr "Grupa 3{group_id}"

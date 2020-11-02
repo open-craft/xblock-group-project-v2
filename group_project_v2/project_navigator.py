@@ -1,9 +1,11 @@
 """
 This module contains Project Navigator XBlock and it's children view XBlocks
 """
+import pkg_resources
 import logging
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
+from django import utils
 from xblock.core import XBlock
 from xblock.exceptions import NoSuchUsage
 from web_fragments.fragment import Fragment
@@ -108,6 +110,23 @@ class GroupProjectNavigatorXBlock(
         all_views.sort(key=lambda view_instance: view_instance.SORT_ORDER)
         return all_views
 
+    @staticmethod
+    def resource_string(path):
+        """Handy helper for getting resources."""
+        data = pkg_resources.resource_string(__name__, path)
+        return data.decode("utf8")
+
+    def get_translation_content(self):
+        """
+        Returns JS content containing translations for user's language.
+        """
+        try:
+            return self.resource_string('public/js/translations/{lang}/textjs.js'.format(
+                lang=utils.translation.to_locale(utils.translation.get_language()),
+            ))
+        except IOError:
+            return self.resource_string('public/js/translations/en/textjs.js')
+
     def student_view(self, context):
         """
         Student view
@@ -150,6 +169,7 @@ class GroupProjectNavigatorXBlock(
         )
         add_resource(self, 'css', 'public/css/project_navigator/project_navigator.css', fragment)
         add_resource(self, 'javascript', 'public/js/project_navigator/project_navigator.js', fragment)
+        fragment.add_javascript(self.get_translation_content())
         fragment.initialize_js("GroupProjectNavigatorBlock", js_parameters)
 
         return fragment
@@ -178,6 +198,7 @@ class GroupProjectNavigatorXBlock(
         return validation
 
 
+@XBlock.needs("i18n")
 class ProjectNavigatorViewXBlockBase(
     CompletionMixin,
     XBlockWithPreviewMixin,
@@ -247,7 +268,7 @@ class ProjectNavigatorViewXBlockBase(
         Common code to render student view
         """
         fragment = Fragment()
-        fragment.add_content(loader.render_template(self.TEMPLATE_BASE + self.template, context))
+        fragment.add_content(loader.render_django_template(self.TEMPLATE_BASE + self.template, context))
 
         if self.css_file:
             add_resource(self, 'css', self.CSS_BASE + self.css_file, fragment)
@@ -264,7 +285,6 @@ class ProjectNavigatorViewXBlockBase(
         if add_resources_from:
             for frag in add_resources_from:
                 fragment.add_fragment_resources(frag)
-
         return fragment
 
     def author_view(self, _context):
