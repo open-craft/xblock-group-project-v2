@@ -1,35 +1,42 @@
-from __future__ import division
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
-from past.utils import old_div
 import logging
 from collections import OrderedDict
-from urllib.parse import urlencode  # pylint: disable=F0401
 from datetime import datetime, timedelta
-from lazy.lazy import lazy
+from urllib.parse import urlencode
+
 import pytz
-from xblock.core import XBlock
-from xblock.fields import DateTime, Scope, Boolean
+from lazy.lazy import lazy
 from web_fragments.fragment import Fragment
+from xblock.core import XBlock
+from xblock.fields import Boolean, DateTime, Scope
 from xblockutils.studio_editable import XBlockWithPreviewMixin
 
 from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import (
-    CommonMixinCollection, XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
-    DashboardXBlockMixin, AuthXBlockMixin
+    AdminAccessControlXBlockMixin,
+    AuthXBlockMixin,
+    CommonMixinCollection,
+    DashboardXBlockMixin,
+    XBlockWithUrlNameDisplayMixin,
 )
 from group_project_v2.notifications import StageNotificationsMixin
+from group_project_v2.stage.utils import StageState
 from group_project_v2.stage_components import (
-    GroupProjectResourceXBlock, GroupProjectVideoResourceXBlock, ProjectTeamXBlock
+    GroupProjectResourceXBlock,
+    GroupProjectVideoResourceXBlock,
+    ProjectTeamXBlock,
 )
 from group_project_v2.utils import (
-    gettext as _, HtmlXBlockShim, format_date, Constants, loader,
-    groupwork_protected_view, add_resource, MUST_BE_OVERRIDDEN, get_link_to_block, get_block_content_id,
+    MUST_BE_OVERRIDDEN,
+    Constants,
+    HtmlXBlockShim,
+    add_resource,
+    format_date,
+    get_block_content_id,
+    get_link_to_block,
 )
-from group_project_v2.stage.utils import StageState
-
+from group_project_v2.utils import gettext as _
+from group_project_v2.utils import groupwork_protected_view, loader
 
 log = logging.getLogger(__name__)
 
@@ -330,8 +337,8 @@ class BaseGroupActivityStage(
         )
         log.info(STAGE_STATS_LOG_TPL, log_format_data)
 
-        completed_ratio = old_div(len(completed_users_ids & target_user_ids), target_user_count)
-        partially_completed_ratio = old_div(len(partially_completed_users_ids & target_user_ids), target_user_count)
+        completed_ratio = len(completed_users_ids & target_user_ids) / target_user_count
+        partially_completed_ratio = len(partially_completed_users_ids & target_user_ids) / target_user_count
 
         return {
             StageState.COMPLETED: completed_ratio,

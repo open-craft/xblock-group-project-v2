@@ -1,26 +1,18 @@
 # -*- coding: utf-8 -*-
-from __future__ import division
-from future import standard_library
-standard_library.install_aliases()
-from builtins import next
-from builtins import str
-from past.utils import old_div
-from builtins import object
 import csv
 import functools
 import logging
-import urllib.parse  # pylint: disable=F0401
-import boto3
-from collections import namedtuple
-
-from datetime import date, datetime, timedelta
+import urllib.parse
 import xml.etree.ElementTree as ET
+from collections import namedtuple
+from datetime import date, datetime, timedelta
 
+import boto3
 from dateutil import parser
+from django.conf import settings
+from django.core.files.storage import default_storage
 from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
-from django.core.files.storage import default_storage
-from django.conf import settings
 from lazy.lazy import lazy
 from storages.backends.s3boto import S3BotoStorage
 from web_fragments.fragment import Fragment
@@ -126,7 +118,7 @@ def mean(value_array):
 
     try:
         numeric_values = [float(v) for v in value_array]
-        return float(old_div(sum(numeric_values), len(numeric_values)))
+        return float(sum(numeric_values) / len(numeric_values))
     except (ValueError, TypeError, ZeroDivisionError) as exc:
         log.warning(exc.message)
         return None

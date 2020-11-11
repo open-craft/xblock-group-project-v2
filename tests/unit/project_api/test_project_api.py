@@ -1,16 +1,16 @@
-from builtins import str
 import json
 from unittest import TestCase
+from urllib.parse import urlencode
 
 import ddt
 import mock
 
+import tests.unit.project_api.canned_responses as canned_responses  # pylint: disable=useless-import-alias
 from group_project_v2.json_requests import GET
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.api_implementation import WORKGROUP_API, PROJECTS_API, COURSES_API
-from tests.utils import TestWithPatchesMixin, find_url, make_review_item as mri
-import tests.unit.project_api.canned_responses as canned_responses  # pylint: disable=useless-import-alias
-from six.moves.urllib.parse import urlencode
+from group_project_v2.project_api.api_implementation import COURSES_API, PROJECTS_API, WORKGROUP_API
+from tests.utils import TestWithPatchesMixin, find_url
+from tests.utils import make_review_item as mri
 
 
 @ddt.ddt
@@ -64,7 +64,7 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
     @ddt.unpack
     def test_send_request_no_data(self, url_parts, query_params, no_trailing_slash, expected_url, expected_response):
         response = mock.Mock()
-        response.read.return_value = json.dumps(expected_response)
+        response.read.return_value = json.dumps(expected_response).encode('utf8')
 
         method = mock.Mock(return_value=response)
         result = self.project_api.send_request(
@@ -99,7 +99,7 @@ class TestProjectApi(TestCase, TestWithPatchesMixin):
             self, url_parts, query_params, data, no_trailing_slash, expected_url, expected_response
     ):
         response = mock.Mock()
-        response.read.return_value = json.dumps(expected_response)
+        response.read.return_value = json.dumps(expected_response).encode('utf8')
 
         method = mock.Mock(return_value=response)
         result = self.project_api.send_request(

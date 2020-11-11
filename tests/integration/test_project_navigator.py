@@ -2,32 +2,49 @@
 Tests for project navigator and its views
 """
 import logging
+import os
 import textwrap
 import unittest
+from datetime import datetime
 
 import ddt
 import mock
-from datetime import datetime
-
-import os
 from freezegun import freeze_time
 
 from group_project_v2.project_navigator import (
-    ViewTypes, ResourcesViewXBlock, SubmissionsViewXBlock, AskTAViewXBlock, PrivateDiscussionViewXBlock,
-    NavigationViewXBlock)
+    AskTAViewXBlock,
+    NavigationViewXBlock,
+    PrivateDiscussionViewXBlock,
+    ResourcesViewXBlock,
+    SubmissionsViewXBlock,
+    ViewTypes,
+)
 from group_project_v2.stage import (
-    BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
-    EvaluationDisplayStage, GradeDisplayStage, CompletionStage
+    BasicStage,
+    CompletionStage,
+    EvaluationDisplayStage,
+    GradeDisplayStage,
+    PeerReviewStage,
+    SubmissionStage,
+    TeamEvaluationStage,
 )
 from group_project_v2.stage.utils import StageState
-from tests.integration.base_test import SingleScenarioTestSuite, BaseIntegrationTest
+from tests.integration.base_test import BaseIntegrationTest, SingleScenarioTestSuite
 from tests.integration.page_elements import (
-    NavigationViewElement, ResourcesViewElement, SubmissionsViewElement, GroupProjectElement,
-    AskTAViewElement, ModalDialogElement
+    AskTAViewElement,
+    GroupProjectElement,
+    ModalDialogElement,
+    NavigationViewElement,
+    ResourcesViewElement,
+    SubmissionsViewElement,
 )
 from tests.utils import (
-    KNOWN_USERS, TestWithPatchesMixin, switch_to_ta_grading, get_other_windows, expect_new_browser_window,
-    switch_to_other_window
+    KNOWN_USERS,
+    TestWithPatchesMixin,
+    expect_new_browser_window,
+    get_other_windows,
+    switch_to_other_window,
+    switch_to_ta_grading,
 )
 
 

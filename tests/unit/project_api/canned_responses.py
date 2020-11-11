@@ -1,5 +1,3 @@
-from builtins import object
-
 
 class Projects(object):
     project1 = {

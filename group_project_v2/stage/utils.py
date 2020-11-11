@@ -1,4 +1,3 @@
-from builtins import object
 from group_project_v2.utils import _
 
 

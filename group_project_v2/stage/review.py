@@ -1,28 +1,33 @@
-from builtins import str
+import itertools
 import json
 import logging
-
-import itertools
 from collections import defaultdict
 
-from lazy.lazy import lazy
 import webob
+from lazy.lazy import lazy
 from xblock.core import XBlock
-from xblock.fields import String, Scope, Boolean
+from xblock.fields import Boolean, Scope, String
 from xblock.validation import ValidationMessage
 
 from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.stage.base import BaseGroupActivityStage
+from group_project_v2.stage.utils import DISPLAY_NAME_HELP, DISPLAY_NAME_NAME, ReviewState, StageState
 from group_project_v2.stage_components import (
-    GradeRubricStaticContentXBlock, GroupProjectReviewQuestionXBlock, PeerSelectorXBlock, GroupSelectorXBlock
+    GradeRubricStaticContentXBlock,
+    GroupProjectReviewQuestionXBlock,
+    GroupSelectorXBlock,
+    PeerSelectorXBlock,
 )
+from group_project_v2.utils import MUST_BE_OVERRIDDEN, conversion_protected_handler
+from group_project_v2.utils import gettext as _
 from group_project_v2.utils import (
-    loader, gettext as _, make_key,
-    groupwork_protected_handler, key_error_protected_handler, conversion_protected_handler,
-    MUST_BE_OVERRIDDEN, memoize_with_expiration
+    groupwork_protected_handler,
+    key_error_protected_handler,
+    loader,
+    make_key,
+    memoize_with_expiration,
 )
-from group_project_v2.stage.utils import StageState, ReviewState, DISPLAY_NAME_NAME, DISPLAY_NAME_HELP
 
 log = logging.getLogger(__name__)
 

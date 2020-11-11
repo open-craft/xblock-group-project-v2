@@ -1,17 +1,15 @@
 """ Tests for Base Stage Class """
-from builtins import range
 from collections import OrderedDict
 
 import ddt
 import mock
-from group_project_v2.project_api.dtos import ReducedUserDetails
 
+from group_project_v2.project_api.dtos import ReducedUserDetails
 from group_project_v2.stage import BaseGroupActivityStage
 from group_project_v2.stage.utils import StageState
 from group_project_v2.utils import Constants
 from tests.unit.test_stages.base import BaseStageTest
-from tests.utils import WORKGROUP, KNOWN_USERS, OTHER_GROUPS, TestConstants
-
+from tests.utils import KNOWN_USERS, OTHER_GROUPS, WORKGROUP, TestConstants
 
 TEST_USERS = TestConstants.Users  # pylint: disable=invalid-name
 

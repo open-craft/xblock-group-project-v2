@@ -1,6 +1,6 @@
-from builtins import object
-from unittest import TestCase
 from datetime import datetime
+from unittest import TestCase
+
 import ddt
 import freezegun
 import mock
@@ -12,8 +12,8 @@ from group_project_v2.project_api import TypedProjectAPI
 from group_project_v2.project_api.dtos import ReducedUserDetails
 from group_project_v2.stage.utils import ReviewState, StageState
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
-from tests.unit.test_stages.utils import patch_obj, USER_ID
-from tests.utils import TestWithPatchesMixin, make_workgroup, make_question
+from tests.unit.test_stages.utils import USER_ID, patch_obj
+from tests.utils import TestWithPatchesMixin, make_question, make_workgroup
 
 
 class BaseStageTest(TestCase, TestWithPatchesMixin):

@@ -1,4 +1,3 @@
-from builtins import object
 import ddt
 import mock
 

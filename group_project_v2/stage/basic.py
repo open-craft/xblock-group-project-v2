@@ -1,18 +1,18 @@
-from builtins import str
 import logging
-from xblock.core import XBlock
-from xblock.fields import String, Scope
-from xblock.validation import ValidationMessage
-from web_fragments.fragment import Fragment
 
+from web_fragments.fragment import Fragment
+from xblock.core import XBlock
+from xblock.fields import Scope, String
+from xblock.validation import ValidationMessage
 
 from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.stage.base import BaseGroupActivityStage
 from group_project_v2.stage.mixins import SimpleCompletionStageMixin
-from group_project_v2.stage_components import SubmissionsStaticContentXBlock, GroupProjectSubmissionXBlock
-from group_project_v2.utils import gettext as _, groupwork_protected_handler, loader
-from group_project_v2.stage.utils import StageState, DISPLAY_NAME_NAME, DISPLAY_NAME_HELP
+from group_project_v2.stage.utils import DISPLAY_NAME_HELP, DISPLAY_NAME_NAME, StageState
+from group_project_v2.stage_components import GroupProjectSubmissionXBlock, SubmissionsStaticContentXBlock
+from group_project_v2.utils import gettext as _
+from group_project_v2.utils import groupwork_protected_handler, loader
 
 log = logging.getLogger(__name__)
 

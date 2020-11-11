@@ -1,6 +1,4 @@
 """ Contains DTOs used in Typed API. DTOs mostly follow structure of API responses """
-from builtins import str
-from builtins import object
 from group_project_v2.utils import make_user_caption
 
 

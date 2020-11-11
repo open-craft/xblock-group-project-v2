@@ -3,9 +3,10 @@
 # Imports ###########################################################
 
 import os
-from setuptools import setup, find_packages
-from group_project_v2.app_config import ENTRYPOINTS
 
+from setuptools import find_packages, setup
+
+from group_project_v2.app_config import ENTRYPOINTS
 
 # Functions #########################################################
 
@@ -24,7 +25,7 @@ def package_data(pkg, root_list):
 
 setup(
     name='xblock-group-project-v2',
-    version='0.10.0',
+    version='0.11.0',
     description='XBlock - Group Project V2',
     packages=find_packages(),
     install_requires=[

@@ -1,5 +1,3 @@
-from past.builtins import basestring
-from builtins import object
 from contextlib import contextmanager
 from datetime import datetime
 from urllib.parse import urlparse
@@ -10,7 +8,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from xblockutils.resources import ResourceLoader
 
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import UserAwareXBlockMixin, AuthXBlockMixin
+from group_project_v2.mixins import AuthXBlockMixin, UserAwareXBlockMixin
 from group_project_v2.project_api import TypedProjectAPI
 from group_project_v2.project_api.dtos import UserDetails, WorkgroupDetails
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
@@ -183,7 +181,7 @@ def get_other_windows(browser):
 def parse_datetime(datetime_string):
     return (
         datetime.strptime(datetime_string.split(".")[0], "%Y-%m-%d %H:%M:%S")
-        if isinstance(datetime_string, basestring) else None
+        if isinstance(datetime_string, str) else None
     )
 
 

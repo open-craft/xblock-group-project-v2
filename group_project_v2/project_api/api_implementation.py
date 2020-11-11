@@ -1,19 +1,18 @@
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
-from builtins import object
-import json
-from six.moves.urllib.parse import urlencode
-
 import itertools
+import json
+from urllib.parse import urlencode
 
 from group_project_v2.api_error import api_error_protect
-from group_project_v2.json_requests import DELETE, GET, PUT, POST
-from group_project_v2.utils import memoize_with_expiration, build_date_field, is_absolute
+from group_project_v2.json_requests import DELETE, GET, POST, PUT
 from group_project_v2.project_api.dtos import (
-    UserDetails, ProjectDetails, WorkgroupDetails, CompletionDetails,
-    OrganisationDetails, UserGroupDetails
+    CompletionDetails,
+    OrganisationDetails,
+    ProjectDetails,
+    UserDetails,
+    UserGroupDetails,
+    WorkgroupDetails,
 )
+from group_project_v2.utils import build_date_field, is_absolute, memoize_with_expiration
 
 API_PREFIX = '/'.join(['api', 'server'])
 WORKGROUP_API = '/'.join([API_PREFIX, 'workgroups'])
@@ -66,7 +65,7 @@ class ProjectAPI(object):
         if method == DELETE:
             return None
 
-        return json.loads(response.read())
+        return json.loads(response.read().decode('utf8'))
 
     def send_request(self, method, url_parts, data=None, query_params=None, no_trailing_slash=False):
         url = self.build_url(url_parts, query_params, no_trailing_slash)

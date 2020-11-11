@@ -1,32 +1,23 @@
 """
 Tests for stage contents and interaction
 """
-from builtins import zip
-from builtins import str
-from builtins import range
-from collections import defaultdict
-
 import datetime
 import textwrap
+from collections import defaultdict
 
 import ddt
-from freezegun import freeze_time
 import mock
+from freezegun import freeze_time
 from workbench.runtime import WorkbenchRuntime
 
-from group_project_v2.mixins import UserAwareXBlockMixin, AuthXBlockMixin
+from group_project_v2.mixins import AuthXBlockMixin, UserAwareXBlockMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
-from group_project_v2.stage import BasicStage, SubmissionStage, PeerReviewStage, TeamEvaluationStage
+from group_project_v2.stage import BasicStage, PeerReviewStage, SubmissionStage, TeamEvaluationStage
 from group_project_v2.stage.utils import ReviewState
 from tests.integration.base_test import BaseIntegrationTest
-from tests.integration.page_elements import GroupProjectElement, ReviewStageElement, ProjectTeamElement
-from tests.utils import (
-    KNOWN_USERS,
-    OTHER_GROUPS,
-    TestConstants,
-    TestWithPatchesMixin,
-    make_review_item as mri,
-    WORKGROUP)
+from tests.integration.page_elements import GroupProjectElement, ProjectTeamElement, ReviewStageElement
+from tests.utils import KNOWN_USERS, OTHER_GROUPS, WORKGROUP, TestConstants, TestWithPatchesMixin
+from tests.utils import make_review_item as mri
 
 
 class StageTestBase(BaseIntegrationTest):

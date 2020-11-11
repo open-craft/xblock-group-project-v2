@@ -46,16 +46,16 @@ build_dummy_translations: dummy_translations compile_translations ## generate an
 validate_translations: build_dummy_translations detect_changed_source_translations ## validate translations
 
 setup-self:
-	python setup.py sdist && pip install dist/xblock-group-project-v2-0.4.tar.gz
+	pip install -e .
 
 test: test-requirements test_fast
 
 test_fast:
 	./node_modules/.bin/karma start tests/js/karma.conf.js  --single-run
 ifdef XVFB
-	xvfb-run --server-args="-screen 0, 1920x1080x24" ./run_tests.py --with-coverage --cover-package=group_project_v2
+	xvfb-run --server-args="-screen 0, 1920x1080x24" pytest --with-coverage --cover-package=group_project_v2
 else
-	./run_tests.py --with-coverage --cover-package=group_project_v2
+	pytest --with-coverage --cover-package=group_project_v2
 endif
 	coverage html
 
@@ -64,7 +64,7 @@ diff-cover:
 	diff-cover --compare-branch=master coverage/py/cobertura/coverage.xml coverage/js/cobertura/coverage.xml
 
 quality:
-	pep8 group_project_v2 tests --max-line-length=120
+	pycodestyle group_project_v2 tests --max-line-length=120
 	pylint group_project_v2 --rcfile=pylintrc
 	pylint tests --rcfile=tests/pylintrc
 	./node_modules/jshint/bin/jshint group_project_v2 tests

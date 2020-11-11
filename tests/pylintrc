@@ -26,4 +26,4 @@ function-name-hint=_?[a-z_][a-z0-9_]{2,60}$
 
 [SIMILARITIES]
 min-similarity-lines=6
-
+ignore-imports=yes

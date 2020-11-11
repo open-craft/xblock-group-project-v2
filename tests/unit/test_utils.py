@@ -1,17 +1,16 @@
-from builtins import str
-from builtins import range
+from datetime import datetime
 from unittest import TestCase
+
 import ddt
 import mock
-from datetime import datetime
-
 import pytz
 from dateutil.tz import tzoffset
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
 from xblock.core import XBlock
 from xblock.field_data import DictFieldData
 from xblock.fields import String
-from group_project_v2.utils import FieldValuesContextManager, get_block_content_id, build_date_field
+
+from group_project_v2.utils import FieldValuesContextManager, build_date_field, get_block_content_id
 
 
 class DummyXBlock(XBlock):

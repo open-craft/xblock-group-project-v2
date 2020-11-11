@@ -1,15 +1,11 @@
-from __future__ import print_function
-from builtins import str
-from builtins import object
 import json
 import os
+from datetime import datetime
 from unittest import TestCase
 from xml.etree import ElementTree
 
 import ddt
 import mock
-from datetime import datetime
-
 import pytz
 from freezegun import freeze_time
 from xblock.field_data import DictFieldData
@@ -24,11 +20,15 @@ from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.project_navigator import ProjectNavigatorViewXBlockBase
 from group_project_v2.stage import BaseGroupActivityStage
 from group_project_v2.stage_components import (
-    StaticContentBaseXBlock, GroupProjectSubmissionXBlock,
-    GroupProjectReviewQuestionXBlock, GroupProjectTeamEvaluationDisplayXBlock, GroupProjectGradeEvaluationDisplayXBlock
+    GroupProjectGradeEvaluationDisplayXBlock,
+    GroupProjectReviewQuestionXBlock,
+    GroupProjectSubmissionXBlock,
+    GroupProjectTeamEvaluationDisplayXBlock,
+    StaticContentBaseXBlock,
 )
 from group_project_v2.upload_file import UploadFile
-from tests.utils import TestWithPatchesMixin, make_api_error, make_review_item as mri, make_question
+from tests.utils import TestWithPatchesMixin, make_api_error, make_question
+from tests.utils import make_review_item as mri
 
 
 class StageComponentXBlockTestBase(TestCase, TestWithPatchesMixin):

@@ -1,25 +1,24 @@
-from builtins import str
 import json
 import logging
 from collections import namedtuple
+from datetime import date
 from xml.etree import ElementTree
 
 import webob
-from datetime import date
-
-from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.utils import html
 from lazy.lazy import lazy
 from upload_validator import FileTypeValidator
-from xblock.core import XBlock
-from xblock.fields import String, Boolean, Scope, UNIQUE_ID
-from xblock.validation import ValidationMessage
 from web_fragments.fragment import Fragment
+from xblock.core import XBlock
+from xblock.fields import UNIQUE_ID, Boolean, Scope, String
+from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin, XBlockWithPreviewMixin
 
 from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
+from group_project_v2.messages import UNKNOWN_ERROR
 from group_project_v2.mixins import (
     CompletionMixin,
     NoStudioEditableSettingsMixin,
@@ -29,21 +28,20 @@ from group_project_v2.mixins import (
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
-from group_project_v2.messages import UNKNOWN_ERROR
 from group_project_v2.utils import (
-    FieldValuesContextManager,
     MUST_BE_OVERRIDDEN,
+    FieldValuesContextManager,
     add_resource,
-    get_link_to_block,
-    make_user_caption,
-    make_s3_link_temporary,
-)
-from group_project_v2.utils import (
     build_date_field,
     format_date,
-    gettext as _,
+    get_link_to_block,
+)
+from group_project_v2.utils import gettext as _
+from group_project_v2.utils import (
     groupwork_protected_view,
     loader,
+    make_s3_link_temporary,
+    make_user_caption,
     mean,
     outer_html,
 )

@@ -1,11 +1,13 @@
 from datetime import datetime
-from freezegun import freeze_time
+
 import mock
 import pytz
+from freezegun import freeze_time
+
 from group_project_v2.project_navigator import ViewTypes
 from tests.integration.base_test import SingleScenarioTestSuite
 from tests.integration.page_elements import NavigationViewElement, ReviewStageElement
-from tests.utils import make_submission_data, KNOWN_USERS, OTHER_GROUPS
+from tests.utils import KNOWN_USERS, OTHER_GROUPS, make_submission_data
 
 
 class TestOtherGroupSubmissionLinks(SingleScenarioTestSuite):

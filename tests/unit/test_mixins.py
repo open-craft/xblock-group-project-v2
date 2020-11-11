@@ -1,8 +1,6 @@
-from __future__ import print_function
 # pylint:disable=protected-access,no-self-use,invalid-name
+from __future__ import print_function
 
-from builtins import str
-from builtins import object
 from unittest import TestCase
 
 import ddt
@@ -12,17 +10,17 @@ from xblock.core import XBlock
 from xblock.runtime import Runtime
 
 from group_project_v2.mixins import (
-    ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin,
-    WorkgroupAwareXBlockMixin, DashboardRootXBlockMixin,
-    AuthXBlockMixin
+    AuthXBlockMixin,
+    ChildrenNavigationXBlockMixin,
+    CourseAwareXBlockMixin,
+    DashboardRootXBlockMixin,
+    UserAwareXBlockMixin,
+    WorkgroupAwareXBlockMixin,
 )
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.dtos import WorkgroupDetails, UserGroupDetails
-from group_project_v2.utils import GroupworkAccessDeniedError, Constants
-from tests.utils import (
-    TestWithPatchesMixin, raise_api_error, MockedAuthXBlockMixin,
-    get_mock_project_api
-)
+from group_project_v2.project_api.dtos import UserGroupDetails, WorkgroupDetails
+from group_project_v2.utils import Constants, GroupworkAccessDeniedError
+from tests.utils import MockedAuthXBlockMixin, TestWithPatchesMixin, get_mock_project_api, raise_api_error
 
 
 def _make_block_mock(block_id, category=None):

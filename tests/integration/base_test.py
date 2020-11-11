@@ -1,15 +1,14 @@
 """ Base classes for integration tests """
-from bok_choy.promise import EmptyPromise
 import mock
+from bok_choy.promise import EmptyPromise
 from sample_xblocks.basic.content import HtmlBlock
 from xblock.core import XBlock
 from xblock.fragment import Fragment
-
 from xblockutils.base_test import SeleniumXBlockTest
 
 from group_project_v2.group_project import GroupActivityXBlock
 from tests.integration.page_elements import GroupProjectElement, StageElement
-from tests.utils import loader, get_mock_project_api
+from tests.utils import get_mock_project_api, loader
 
 
 def get_block_link(block):

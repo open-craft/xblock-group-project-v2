@@ -1,19 +1,19 @@
 import csv
-from unittest import TestCase
 from datetime import datetime
-import pytz
+from unittest import TestCase
 
 import ddt
-from freezegun import freeze_time
 import mock
+import pytz
+from freezegun import freeze_time
+from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
 from xblock.runtime import Runtime
-from xblock.field_data import DictFieldData
 
 from group_project_v2.group_project import GroupActivityXBlock, GroupProjectXBlock
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.dtos import ProjectDetails, WorkgroupDetails, ReducedUserDetails
-from group_project_v2.stage import BaseGroupActivityStage, TeamEvaluationStage, PeerReviewStage
+from group_project_v2.project_api.dtos import ProjectDetails, ReducedUserDetails, WorkgroupDetails
+from group_project_v2.stage import BaseGroupActivityStage, PeerReviewStage, TeamEvaluationStage
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
 from group_project_v2.utils import Constants
 from tests.utils import TestWithPatchesMixin, make_review_item, parse_datetime

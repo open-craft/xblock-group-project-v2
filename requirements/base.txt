@@ -1,7 +1,6 @@
 boto>=2.1.0
 boto3==1.4.8
-Django>=2.0,<2.3 ; python_version > "3.0"
-Django>=1.11,<2.0 ; python_version < "3.0"
+Django>=2.0,<2.3
 django-storages==1.8
 google-compute-engine==2.8.13
 lazy>=1.1
@@ -18,4 +17,3 @@ edx-opaque-keys>=0.4.0
 
 -e git+https://github.com/mckinseyacademy/django-upload-validator.git@v1.0.2#egg=django-upload-validator==v1.0.2
 xblock-utils<2.2
-future

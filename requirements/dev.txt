@@ -2,6 +2,4 @@
 -e .
 -r test.txt
 
-# Latest version(1.0.4) of django-appconf do not support python 2
-django-appconf==1.0.3; python_version == '2.7'
-django-appconf==1.0.4; python_version > '2.7'
+django-appconf==1.0.4

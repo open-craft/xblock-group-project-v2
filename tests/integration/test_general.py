@@ -2,6 +2,7 @@
 High level rendering tests
 """
 import logging
+
 from tests.integration.base_test import SingleScenarioTestSuite
 
 log = logging.getLogger(__name__)

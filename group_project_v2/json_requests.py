@@ -1,9 +1,8 @@
 """ GET, POST, DELETE, PUT requests for json client """
-from future import standard_library
-standard_library.install_aliases()
-import logging
-from urllib.request import urlopen, Request, build_opener, HTTPHandler  # pylint: disable=F0401
 import json
+import logging
+from urllib.request import HTTPHandler, Request, build_opener, urlopen
+
 from django.conf import settings
 
 # nice to have capitalised names for familiar GET, POST, DELETE, PUT

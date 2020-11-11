@@ -1,10 +1,8 @@
-from builtins import str
-from builtins import next
-from builtins import object
 import functools
+import itertools
 import logging
 import os
-import itertools
+from typing import Optional, Set
 
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
@@ -12,15 +10,22 @@ from opaque_keys.edx.locator import BlockUsageLocator
 from web_fragments.fragment import Fragment
 from xblock.completable import XBlockCompletionMode
 from xblockutils.studio_editable import (
-    StudioContainerWithNestedXBlocksMixin, StudioContainerXBlockMixin, StudioEditableXBlockMixin
+    StudioContainerWithNestedXBlocksMixin,
+    StudioContainerXBlockMixin,
+    StudioEditableXBlockMixin,
 )
 
 from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.utils import (
-    MUST_BE_OVERRIDDEN, NO_EDITABLE_SETTINGS, Constants, GroupworkAccessDeniedError,
-    loader, groupwork_protected_view, add_resource
+    MUST_BE_OVERRIDDEN,
+    NO_EDITABLE_SETTINGS,
+    Constants,
+    GroupworkAccessDeniedError,
+    add_resource,
+    groupwork_protected_view,
+    loader,
 )
 
 log = logging.getLogger(__name__)
@@ -288,14 +293,14 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMix
             """
             self.project_api = project_api
             self.user_id = user_id
-            self.filter_org_ids = set(filter_org_ids) if filter_org_ids is not None else None
-            """
-            :type: set[int] or None
-            """  # pylint: disable=pointless-string-statement
-            self.allowed_org_ids = set(allowed_org_ids) if allowed_org_ids is not None else None
-            """
-            :type: set[int] or None
-            """  # pylint: disable=pointless-string-statement
+
+            self.filter_org_ids = None  # type: Optional[Set[int]]
+            if filter_org_ids is not None:
+                self.filter_org_ids = set(filter_org_ids)
+
+            self.allowed_org_ids = None  # type: Optional[Set[int]]
+            if allowed_org_ids is not None:
+                self.allowed_org_ids = set(allowed_org_ids)
 
         def can_access_other_user(self, user_id):
             """
