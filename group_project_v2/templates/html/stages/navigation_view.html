@@ -2,7 +2,7 @@
 <div class="group-project-stage {% if is_current_stage %}current{% endif %} {% if not stage.available_now %}disabled{% endif %}" data-stage-id="{{ stage.id }}">
   <span class="group-project-stage-state fa {{ stage_state }}"></span>
   {% if not stage.hide_stage_label %}
-    <span class="group-project-stage-type">{{ stage.NAVIGATION_LABEL }}:</span>
+    <span class="group-project-stage-type">{{ stage.navigation_label }}:</span>
   {% endif %}
   <span class="group-project-stage-title">
     <a href="{{ block_link }}" title="{{ stage.display_name }}" data-stage-id="{{ stage.id }}" data-activity-id="{{ activity_id }}"

@@ -17,7 +17,9 @@ disable=
 [OPTIONS]
 good-names=id,log,loader,setUp
 max-args=6
-method-rgx=_?[a-z_][a-z0-9_]{2,40}$
+
+method-naming-style=snake_case
+
 function-rgx=_?[a-z_][a-z0-9_]{2,40}$
 method-name-hint=_?[a-z_][a-z0-9_]{2,40}$
 function-name-hint=_?[a-z_][a-z0-9_]{2,40}$

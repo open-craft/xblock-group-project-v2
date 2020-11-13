@@ -34,6 +34,7 @@ STAGE_STATS_LOG_TPL = (
 )
 
 
+@XBlock.needs("i18n")
 @XBlock.wants("settings")
 class BaseGroupActivityStage(
     CommonMixinCollection, DashboardXBlockMixin, XBlockWithPreviewMixin, StageNotificationsMixin,
@@ -81,6 +82,10 @@ class BaseGroupActivityStage(
     @property
     def id(self):
         return self.scope_ids.usage_id
+
+    @property
+    def navigation_label(self):
+        return self._(self.NAVIGATION_LABEL)
 
     @property
     def allowed_nested_blocks(self):  # pylint: disable=no-self-use
@@ -174,7 +179,7 @@ class BaseGroupActivityStage(
 
     @property
     def url_name_caption(self):
-        return messages.STAGE_URL_NAME_TEMPLATE.format(stage_name=self.STUDIO_LABEL)
+        return self._(messages.STAGE_URL_NAME_TEMPLATE).format(stage_name=self._(self.STUDIO_LABEL))
 
     @property
     def can_mark_complete(self):
@@ -218,7 +223,11 @@ class BaseGroupActivityStage(
             'stage': self, 'stage_content': stage_fragment.content,
             "ta_graded": self.activity.group_reviews_required_count
         }
-        fragment.add_content(loader.render_template(self.STAGE_WRAPPER_TEMPLATE, render_context))
+        fragment.add_content(loader.render_django_template(
+            self.STAGE_WRAPPER_TEMPLATE,
+            render_context,
+            i18n_service=self.i18n_service,
+        ))
         if stage_fragment.js_init_fn:
             fragment.initialize_js(stage_fragment.js_init_fn)
 
@@ -265,7 +274,11 @@ class BaseGroupActivityStage(
             fragment.add_fragment_resources(frag)
 
         render_context.update(context)
-        fragment.add_content(loader.render_template(self.STAGE_CONTENT_TEMPLATE, render_context))
+        fragment.add_content(loader.render_django_template(
+            self.STAGE_CONTENT_TEMPLATE,
+            render_context,
+            i18n_service=self.i18n_service,
+        ))
 
         if self.js_file:
             add_resource(self, 'javascript', self.js_file, fragment)
@@ -376,7 +389,11 @@ class BaseGroupActivityStage(
             'is_current_stage': self.is_current_stage(context)
         }
         rendering_context.update(context)
-        fragment.add_content(loader.render_template("templates/html/stages/navigation_view.html", rendering_context))
+        fragment.add_content(loader.render_django_template(
+            "templates/html/stages/navigation_view.html",
+            rendering_context,
+            i18n_service=self.i18n_service,
+        ))
         return fragment
 
     @classmethod

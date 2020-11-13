@@ -61,15 +61,18 @@ class CompletionStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
     @groupwork_protected_handler
     def stage_completed(self, _data, _suffix=''):
         if not self.available_now:
-            template = messages.STAGE_NOT_OPEN_TEMPLATE if not self.is_open else messages.STAGE_CLOSED_TEMPLATE
-            return {'result': 'error',  'msg': template.format(action=self.STAGE_ACTION)}
+            if self.is_open:
+                template = self._(messages.STAGE_CLOSED_TEMPLATE)
+            else:
+                template = self._(messages.STAGE_NOT_OPEN_TEMPLATE)
+            return {'result': 'error', 'msg': template.format(action=self._(self.STAGE_ACTION))}
 
         try:
             if self.can_mark_complete:
                 self.mark_complete()
             return {
                 'result': 'success',
-                'msg': messages.STAGE_COMPLETION_MESSAGE,
+                'msg': self._(messages.STAGE_COMPLETION_MESSAGE),
                 'new_stage_states': [self.get_new_stage_state_data()]
             }
         except ApiError as exception:
@@ -149,8 +152,8 @@ class SubmissionStage(BaseGroupActivityStage):
         if not self.submissions:
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                messages.SUBMISSIONS_BLOCKS_ARE_MISSING.format(
-                    class_name=self.__class__.__name__, stage_title=self.display_name
+                self._(messages.SUBMISSIONS_BLOCKS_ARE_MISSING).format(
+                    class_name=self.__class__.__name__, stage_title=self._(self.display_name)
                 )
             ))
 
@@ -187,7 +190,7 @@ class SubmissionStage(BaseGroupActivityStage):
             submission_contents.append(submission_fragment.content)
 
         context = {'stage': self, 'submission_contents': submission_contents}
-        fragment.add_content(loader.render_template(template, context))
+        fragment.add_content(loader.render_django_template(template, context, i18n_service=self.i18n_service))
 
         return fragment
 

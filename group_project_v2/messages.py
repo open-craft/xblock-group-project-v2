@@ -7,6 +7,8 @@ COMPONENT_MISCONFIGURED = _(
 )
 STAGE_NOT_OPEN_TEMPLATE = _(u"Can't {action} as stage is not yet opened.")
 STAGE_CLOSED_TEMPLATE = _(u"Can't {action} as stage is closed.")
+USER_NOT_ACCESS_DASHBOARD = _(u"User can't access dashboard")
+USER_NOT_ACCESS_GROUPWORK = _(u"User can't access this group work")
 
 # Group Project XBlock messages
 NO_ACTIVITIES = _(u"This Group Project does not contain any activities.")

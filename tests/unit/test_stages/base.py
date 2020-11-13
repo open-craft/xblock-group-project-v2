@@ -54,7 +54,11 @@ class ReviewStageBaseTest(object):
         return GroupProjectReviewQuestionXBlock(self.runtime_mock, DictFieldData(fields), scope_ids=mock.Mock())
 
     def validate_and_check_message(self, categories, questions, expected_message=None):
+        services_mocks = {
+            "i18n": mock.Mock(ugettext=lambda string: string)
+        }
         with ReviewStageChildrenMockContextManager(self.block, categories, questions):
+            self.runtime_mock.service = lambda _, service_id: services_mocks.get(service_id)
             validation = self.block.validate()
 
         if expected_message:
@@ -72,9 +76,13 @@ class ReviewStageBaseTest(object):
     )
     @ddt.unpack
     def test_marks_visited_on_student_view(self, can_mark_complete, should_set_visited):
+        services_mocks = {
+            "i18n": {}
+        }
         can_mark_mock = mock.PropertyMock(return_value=can_mark_complete)
         self.assertFalse(self.block.visited)  # precondition check
         with patch_obj(self.block_to_test, 'can_mark_complete', can_mark_mock):
+            self.runtime_mock.service = lambda _, service_id: services_mocks.get(service_id)
             self.block.student_view({})
 
             self.assertEqual(self.block.visited, should_set_visited)
