@@ -1,11 +1,7 @@
 /* exported GroupProjectCommon */
-// Set up gettext in case it isn't available in the client runtime:
-if (typeof gettext === "undefined") {
-    window.gettext = function gettext_stub(string) {
-        'use strict';
-        return string;
-    };
-}
+// Use problem_builder translations
+var gettext = window.GroupProjectV2XBlockI18N.gettext;
+var ngettext = window.GroupProjectV2XBlockI18N.ngettext;
 
 var GroupProjectEvents = {
     ProjectNavigator: {
