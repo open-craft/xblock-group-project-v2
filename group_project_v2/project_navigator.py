@@ -33,11 +33,8 @@ from group_project_v2.utils import (
     add_resource,
     gettext as _,
     loader,
-    I18NService,
+    I18NService
 )
-
-from .mixins import XBlockWithTranslationServiceMixin
-
 
 log = logging.getLogger(__name__)
 
