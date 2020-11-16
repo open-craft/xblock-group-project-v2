@@ -47,7 +47,7 @@ setup(
         'xblock.v1': ENTRYPOINTS
     },
     dependency_links = [
-        'https://github.com/edx/xblock-utils/tarball/v1.0.5#egg=xblock-utils-1.0.5',
+        'https://github.com/edx/xblock-utils/tarball/v1.2.2#egg=xblock-utils-1.2.2',
         'https://github.com/mckinseyacademy/django-upload-validator/tarball/v1.0.2#egg=django-upload-validator-1.0.2'
     ],
     package_data=package_data("group_project_v2", ["templates", "public"]),

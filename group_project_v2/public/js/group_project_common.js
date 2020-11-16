@@ -1,7 +1,4 @@
 /* exported GroupProjectCommon */
-// Use problem_builder translations
-var gettext = window.GroupProjectV2XBlockI18N.gettext;
-var ngettext = window.GroupProjectV2XBlockI18N.ngettext;
 
 var GroupProjectEvents = {
     ProjectNavigator: {
@@ -31,7 +28,7 @@ var GroupProjectCommon = {
         'use strict';
         return $(element).parents(".group-project-xblock-wrapper");
     },
-    gettext: gettext,
+    gettext: window.GroupProjectV2XBlockI18N.gettext, // Use group-project-v2 translations
     ProjectNavigator: {
         events: GroupProjectEvents.ProjectNavigator
     },

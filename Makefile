@@ -46,7 +46,7 @@ build_dummy_translations: dummy_translations compile_translations ## generate an
 validate_translations: build_dummy_translations detect_changed_source_translations ## validate translations
 
 setup-self:
-	python setup.py sdist && pip install dist/xblock-group-project-v2-0.4.tar.gz
+	python setup.py sdist && pip install dist/xblock-group-project-v2-*.tar.gz
 
 test: test-requirements test_fast
 
