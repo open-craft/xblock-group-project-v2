@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from datetime import datetime
+from urllib.parse import urlparse
 
 import mock
 from mock import Mock
@@ -7,7 +8,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from xblockutils.resources import ResourceLoader
 
 from group_project_v2.api_error import ApiError
-from group_project_v2.mixins import UserAwareXBlockMixin, AuthXBlockMixin
+from group_project_v2.mixins import AuthXBlockMixin, UserAwareXBlockMixin
 from group_project_v2.project_api import TypedProjectAPI
 from group_project_v2.project_api.dtos import UserDetails, WorkgroupDetails
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
@@ -27,6 +28,7 @@ class TestConstants(object):
         GROUP1_ID = 1
         GROUP2_ID = 2
         GROUP3_ID = 3
+
 
 KNOWN_USERS = {
     TestConstants.Users.USER1_ID: UserDetails(
@@ -92,7 +94,8 @@ def get_mock_project_api():
     mock_api.get_peer_review_items_for_group = Mock(return_value={})
     mock_api.get_workgroup_review_items = Mock(return_value={})
     mock_api.get_workgroup_review_items_for_group = Mock(return_value={})
-    mock_api.get_user_organizations = Mock(return_value=[{'display_name': "Org1", "id": 1}])
+    mock_api.get_user_organizations = Mock(
+        return_value=[{'display_name': "Org1", "id": 1}])
     mock_api.get_workgroup_reviewers = Mock(return_value={})
     mock_api.get_member_data = Mock(side_effect=_get_user_details)
     mock_api.get_user_groups = Mock(return_value=tuple())
@@ -139,7 +142,8 @@ def switch_to_ta_grading(project_api_mock, review_group_id=1):
     project_api_mock.get_user_preferences.return_value = {
         UserAwareXBlockMixin.TA_REVIEW_KEY: review_group_id
     }
-    project_api_mock.get_user_roles_for_course.return_value = set(AuthXBlockMixin.DEFAULT_TA_ROLE)
+    project_api_mock.get_user_roles_for_course.return_value = set(
+        AuthXBlockMixin.DEFAULT_TA_ROLE)
 
 
 def make_workgroup(workgroup_id, users=None):
@@ -157,7 +161,8 @@ def expect_new_browser_window(browser, timeout=30):
         return any(handle != old_window_handle for handle in handles)
 
     yield
-    WebDriverWait(browser, timeout).until(new_window_available, message="No window was opened")
+    WebDriverWait(browser, timeout).until(
+        new_window_available, message="No window was opened")
 
 
 @contextmanager
@@ -176,7 +181,7 @@ def get_other_windows(browser):
 def parse_datetime(datetime_string):
     return (
         datetime.strptime(datetime_string.split(".")[0], "%Y-%m-%d %H:%M:%S")
-        if isinstance(datetime_string, basestring) else None
+        if isinstance(datetime_string, str) else None
     )
 
 
@@ -198,3 +203,19 @@ class MockedAuthXBlockMixin(AuthXBlockMixin):
     @property
     def see_dashboard_for_all_orgs_perms(self):
         return []
+
+
+def _get_url_info(url):
+    parsed_url = urlparse(url)
+    url_path = parsed_url.path
+    url_query = set(parsed_url.query.split("&"))
+    return url_path, url_query
+
+
+def find_url(url, urls):
+    main_url_path, main_url_query = _get_url_info(url)
+    for url_check in urls:
+        check_url_path, check_url_query = _get_url_info(url_check)
+        if check_url_path == main_url_path and check_url_query == main_url_query:
+            return url_check
+    return None

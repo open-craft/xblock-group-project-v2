@@ -1,11 +1,11 @@
+import hashlib
 import logging
 import mimetypes
-import hashlib
-from lazy.lazy import lazy
 
+from django.conf import settings
 from django.core.files import File
 from django.core.files.storage import default_storage
-from django.conf import settings
+from lazy.lazy import lazy
 
 from group_project_v2.utils import get_storage
 

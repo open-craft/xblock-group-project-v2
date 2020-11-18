@@ -1,24 +1,24 @@
 import json
 import logging
 from collections import namedtuple
+from datetime import date
 from xml.etree import ElementTree
 
 import webob
-from datetime import date
-
-from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.utils import html
 from lazy.lazy import lazy
 from upload_validator import FileTypeValidator
-from xblock.core import XBlock
-from xblock.fields import String, Boolean, Scope, UNIQUE_ID
 from web_fragments.fragment import Fragment
+from xblock.core import XBlock
+from xblock.fields import UNIQUE_ID, Boolean, Scope, String
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin, XBlockWithPreviewMixin
 
 from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
+from group_project_v2.messages import UNKNOWN_ERROR
 from group_project_v2.mixins import (
     CompletionMixin,
     NoStudioEditableSettingsMixin,
@@ -29,19 +29,19 @@ from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
 from group_project_v2.upload_file import UploadFile
 from group_project_v2.utils import (
-    FieldValuesContextManager,
     MUST_BE_OVERRIDDEN,
+    FieldValuesContextManager,
     add_resource,
-    get_link_to_block,
-    make_user_caption,
-    make_s3_link_temporary,
-)
-from group_project_v2.utils import (
     build_date_field,
     format_date,
-    gettext as _,
+    get_link_to_block,
+)
+from group_project_v2.utils import gettext as _
+from group_project_v2.utils import (
     groupwork_protected_view,
     loader,
+    make_s3_link_temporary,
+    make_user_caption,
     mean,
     outer_html,
 )
@@ -230,7 +230,7 @@ SubmissionUpload = namedtuple("SubmissionUpload", "location file_name submission
 @XBlock.needs('user')
 @XBlock.wants('notifications')
 class GroupProjectSubmissionXBlock(
-    BaseStageComponentXBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin
+        BaseStageComponentXBlock, ProjectAPIXBlockMixin, StudioEditableXBlockMixin, XBlockWithPreviewMixin
 ):
     CATEGORY = "gp-v2-submission"
     STUDIO_LABEL = _(u"Submission")
@@ -312,6 +312,7 @@ class GroupProjectSubmissionXBlock(
 
     def submissions_view(self, context):
         fragment = Fragment()
+        # pylint: disable=consider-using-ternary
         uploading_allowed = (self.stage.available_now and self.stage.is_group_member) or self.stage.is_admin_grader
         render_context = {'submission': self, 'upload': self.upload, 'disabled': not uploading_allowed}
         render_context.update(context)
@@ -397,7 +398,9 @@ class GroupProjectSubmissionXBlock(
                 failure_code = 500
                 if isinstance(exception, ApiError):
                     failure_code = exception.code
-                error_message = getattr(exception, "message", messages.UNKNOWN_ERROR)
+                error_message = str(exception).strip()
+                if error_message == '':
+                    error_message = UNKNOWN_ERROR
 
                 response_data.update({
                     "title": messages.FAILED_UPLOAD_TITLE,
@@ -657,7 +660,8 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
             'question_content': self.render_content()
         }
         render_context.update(context)
-        fragment.add_content(loader.render_template("templates/html/components/review_question.html", render_context))
+        fragment.add_content(
+            loader.render_django_template("templates/html/components/review_question.html", render_context))
         return fragment
 
     def studio_view(self, context):
@@ -676,7 +680,7 @@ class GroupProjectReviewQuestionXBlock(BaseStageComponentXBlock, StudioEditableX
 
 
 class GroupProjectBaseFeedbackDisplayXBlock(
-    BaseStageComponentXBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin, WorkgroupAwareXBlockMixin
+        BaseStageComponentXBlock, StudioEditableXBlockMixin, XBlockWithPreviewMixin, WorkgroupAwareXBlockMixin
 ):
     DEFAULT_QUESTION_ID_VALUE = None
 
@@ -709,8 +713,7 @@ class GroupProjectBaseFeedbackDisplayXBlock(
     def display_name_with_default(self):
         if self.question:
             return _(u'Review Assessment for question "{question_title}"').format(question_title=self.question.title)
-        else:
-            return _(u"Review Assessment")
+        return _(u"Review Assessment")
 
     @lazy
     def question(self):
@@ -740,9 +743,12 @@ class GroupProjectBaseFeedbackDisplayXBlock(
         render_context = {'assessment': self, 'question_title': title, 'feedback': feedback}
         if self.show_mean:
             try:
-                render_context['mean'] = "{0:.1f}".format(mean(feedback))
+                if feedback:
+                    render_context['mean'] = "{0:.1f}".format(mean(feedback))
+                else:
+                    render_context['mean'] = _(u"N/A")
             except ValueError as exc:
-                log.warn(exc)
+                log.warn(exc)  # pylint: disable=deprecated-method
                 render_context['mean'] = _(u"N/A")
 
         render_context.update(context)
@@ -825,7 +831,7 @@ class GroupProjectGradeEvaluationDisplayXBlock(GroupProjectBaseFeedbackDisplayXB
 
 
 class ProjectTeamXBlock(
-    BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin, StudioEditableXBlockMixin,
+        BaseStageComponentXBlock, XBlockWithPreviewMixin, NoStudioEditableSettingsMixin, StudioEditableXBlockMixin,
 ):
     CATEGORY = 'gp-v2-project-team'
     STUDIO_LABEL = _(u"Project Team")

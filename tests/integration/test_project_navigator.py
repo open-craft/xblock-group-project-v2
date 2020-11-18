@@ -2,32 +2,49 @@
 Tests for project navigator and its views
 """
 import logging
+import os
 import textwrap
 import unittest
+from datetime import datetime
 
 import ddt
 import mock
-from datetime import datetime
-
-import os
 from freezegun import freeze_time
 
 from group_project_v2.project_navigator import (
-    ViewTypes, ResourcesViewXBlock, SubmissionsViewXBlock, AskTAViewXBlock, PrivateDiscussionViewXBlock,
-    NavigationViewXBlock)
+    AskTAViewXBlock,
+    NavigationViewXBlock,
+    PrivateDiscussionViewXBlock,
+    ResourcesViewXBlock,
+    SubmissionsViewXBlock,
+    ViewTypes,
+)
 from group_project_v2.stage import (
-    BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
-    EvaluationDisplayStage, GradeDisplayStage, CompletionStage
+    BasicStage,
+    CompletionStage,
+    EvaluationDisplayStage,
+    GradeDisplayStage,
+    PeerReviewStage,
+    SubmissionStage,
+    TeamEvaluationStage,
 )
 from group_project_v2.stage.utils import StageState
-from tests.integration.base_test import SingleScenarioTestSuite, BaseIntegrationTest
+from tests.integration.base_test import BaseIntegrationTest, SingleScenarioTestSuite
 from tests.integration.page_elements import (
-    NavigationViewElement, ResourcesViewElement, SubmissionsViewElement, GroupProjectElement,
-    AskTAViewElement, ModalDialogElement
+    AskTAViewElement,
+    GroupProjectElement,
+    ModalDialogElement,
+    NavigationViewElement,
+    ResourcesViewElement,
+    SubmissionsViewElement,
 )
 from tests.utils import (
-    KNOWN_USERS, TestWithPatchesMixin, switch_to_ta_grading, get_other_windows, expect_new_browser_window,
-    switch_to_other_window
+    KNOWN_USERS,
+    TestWithPatchesMixin,
+    expect_new_browser_window,
+    get_other_windows,
+    switch_to_other_window,
+    switch_to_ta_grading,
 )
 
 
@@ -43,7 +60,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
         """
         return {
             "issue_tree": {
-                "id": "issue_tree", "document_url": self.live_server_url+"/issue_tree_location",
+                "id": "issue_tree", "document_url": self.live_server_url + "/issue_tree_location",
                 "document_filename": "issue_tree.doc", "modified": "2014-05-22T11:44:14Z",
                 "user_details": KNOWN_USERS[1]
             }
@@ -53,6 +70,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
         """
         Checks view visibility - only `visible_view` should be displayed, other views should be hidden
         """
+        # pylint: disable=raise-missing-from
         hidden_views = set(available_views) - {visible_view}
         for view in hidden_views:
             try:
@@ -122,7 +140,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
 
         def assert_stage(stage, activity_name, stage_type, stage_title, stage_state):
             activity_id = [
-                act_id for act_id, act_name in activities_map.iteritems() if act_name == activity_name
+                act_id for act_id, act_name in activities_map.items() if act_name == activity_name
             ][0]
             self.assertEqual(stage.activity_id, activity_id)
             # exact block ids are unknown at runtime, so using categories
@@ -181,7 +199,7 @@ class TestProjectNavigatorViews(SingleScenarioTestSuite, TestWithPatchesMixin):
         self.assertEqual(activity1_resources[3].title, "Grading Criteria")
 
     @ddt.data(True, False)
-    @freeze_time(datetime(2014, 05, 23))
+    @freeze_time(datetime(2014, 5, 23))
     def test_submissions_view(self, as_ta):
         student_id = 1
         if as_ta:
@@ -282,7 +300,7 @@ class TestSubmissionUpload(SingleScenarioTestSuite, TestWithPatchesMixin):
         """
         return {
             "issue_tree": {
-                "id": "issue_tree", "document_url": self.live_server_url+"/issue_tree_location",
+                "id": "issue_tree", "document_url": self.live_server_url + "/issue_tree_location",
                 "document_filename": "issue_tree.doc", "modified": "2014-05-22T11:44:14Z",
                 "user_details": KNOWN_USERS[1]
             }
@@ -356,7 +374,7 @@ class TestSubmissionUpload(SingleScenarioTestSuite, TestWithPatchesMixin):
         self.assertIn(u'Technical details: CSRF verification failed', modal.message)
         # In case message rendering text changed to escape html, this will
         # fail and notify of the error
-        self.assertNotRegexpMatches(modal.message, r".*<\s*p\s*/?>")
+        self.assertNotRegexpMatches(modal.message, r".*<\s*p\s*/?>")  # pylint: disable=deprecated-method
 
     def test_upload_submissions_plain403(self):
 
@@ -371,14 +389,14 @@ class TestSubmissionUpload(SingleScenarioTestSuite, TestWithPatchesMixin):
         self.assertIn(u'Technical details: 403 error', modal.message)
         # In case message rendering text changed to escape html, this will
         # fail and notify of the error
-        self.assertNotRegexpMatches(modal.message, r".*<\s*p\s*/?>")
+        self.assertNotRegexpMatches(modal.message, r".*<\s*p\s*/?>")  # pylint: disable=deprecated-method
 
     def test_upload_submissions_xss_file(self):
 
         marketing_pitch = self.prepare_submission()
 
         marketing_pitch.upload_file_and_return_modal(
-                self.image_path('''testdoc.<img onerror="console['log']('XSS')" src="">''')
+            self.image_path('''testdoc.<img onerror="console['log']('XSS')" src="">''')
         )
 
         modal = ModalDialogElement(self.browser)

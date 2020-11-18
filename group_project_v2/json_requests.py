@@ -1,7 +1,8 @@
 """ GET, POST, DELETE, PUT requests for json client """
-import logging
-import urllib2 as url_access
 import json
+import logging
+from urllib.request import HTTPHandler, Request, build_opener, urlopen
+
 from django.conf import settings
 
 # nice to have capitalised names for familiar GET, POST, DELETE, PUT
@@ -51,22 +52,22 @@ def json_headers():
 @trace_request_information
 def GET(url_path):
     """ GET request wrapper to json web server """
-    url_request = url_access.Request(url=url_path, headers=json_headers())
-    return url_access.urlopen(url=url_request, timeout=TIMEOUT)
+    url_request = Request(url=url_path, headers=json_headers())
+    return urlopen(url=url_request, timeout=TIMEOUT)
 
 
 @trace_request_information
 def POST(url_path, data):
     """ POST request wrapper to json web server """
-    url_request = url_access.Request(url=url_path, headers=json_headers())
-    return url_access.urlopen(url_request, json.dumps(data), TIMEOUT)
+    url_request = Request(url=url_path, headers=json_headers())
+    return urlopen(url_request, json.dumps(data), TIMEOUT)
 
 
 @trace_request_information
 def DELETE(url_path):
     """ DELETE request wrapper to json web server """
-    opener = url_access.build_opener(url_access.HTTPHandler)
-    request = url_access.Request(url=url_path, headers=json_headers())
+    opener = build_opener(HTTPHandler)
+    request = Request(url=url_path, headers=json_headers())
     request.get_method = lambda: 'DELETE'
     return opener.open(request, None, TIMEOUT)
 
@@ -74,7 +75,7 @@ def DELETE(url_path):
 @trace_request_information
 def PUT(url_path, data):
     """ PUT request wrapper to json web server """
-    opener = url_access.build_opener(url_access.HTTPHandler)
-    request = url_access.Request(url=url_path, headers=json_headers(), data=json.dumps(data))
+    opener = build_opener(HTTPHandler)
+    request = Request(url=url_path, headers=json_headers(), data=json.dumps(data))
     request.get_method = lambda: 'PUT'
     return opener.open(request, None, TIMEOUT)

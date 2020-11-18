@@ -1,35 +1,48 @@
 # -*- coding: utf-8 -*-
-import logging
 import itertools
-from operator import itemgetter
+import logging
 from datetime import datetime
+from operator import itemgetter
 
 import webob
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
+from web_fragments.fragment import Fragment
 from xblock.core import XBlock
 from xblock.exceptions import NoSuchUsage
-from xblock.fields import Scope, String, Float, Integer, DateTime
-from web_fragments.fragment import Fragment
+from xblock.fields import DateTime, Float, Integer, Scope, String
 from xblock.validation import ValidationMessage
-from xblockutils.studio_editable import XBlockWithPreviewMixin, NestedXBlockSpec
+from xblockutils.studio_editable import NestedXBlockSpec, XBlockWithPreviewMixin
 
 from group_project_v2 import messages
 from group_project_v2.mixins import (
-    CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin,
-    AuthXBlockMixin
+    AuthXBlockMixin,
+    CommonMixinCollection,
+    DashboardRootXBlockMixin,
+    DashboardXBlockMixin,
 )
 from group_project_v2.project_navigator import GroupProjectNavigatorXBlock
+from group_project_v2.stage import (
+    STAGE_TYPES,
+    BasicStage,
+    CompletionStage,
+    EvaluationDisplayStage,
+    GradeDisplayStage,
+    PeerReviewStage,
+    SubmissionStage,
+    TeamEvaluationStage,
+)
 from group_project_v2.stage.utils import StageState
 from group_project_v2.utils import (
-    mean, make_key, groupwork_protected_view, get_default_stage, DiscussionXBlockShim, Constants,
-    add_resource, gettext as _, get_block_content_id, export_to_csv, named_tuple_with_docstring
+    Constants,
+    DiscussionXBlockShim,
+    add_resource,
+    export_to_csv,
+    get_block_content_id,
+    get_default_stage,
 )
-from group_project_v2.stage import (
-    BasicStage, SubmissionStage, TeamEvaluationStage, PeerReviewStage,
-    EvaluationDisplayStage, GradeDisplayStage, CompletionStage,
-    STAGE_TYPES
-)
+from group_project_v2.utils import gettext as _
+from group_project_v2.utils import groupwork_protected_view, make_key, mean, named_tuple_with_docstring
 
 log = logging.getLogger(__name__)
 
@@ -107,12 +120,9 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
     @staticmethod
     def _render_child_fragment_with_fallback(child, context, fallback_message, view='student_view'):
         if child:
-            log.debug("Rendering {child} with context: {context}".format(
-                child=child.__class__.__name__, context=context,
-            ))
+            log.debug("Rendering %s with context: %s", child.__class__.__name__, context)
             return child.render(view, context)
-        else:
-            return Fragment(fallback_message)
+        return Fragment(fallback_message)
 
     @groupwork_protected_view
     def student_view(self, context):
@@ -316,8 +326,8 @@ StageCompletionDetailsData = named_tuple_with_docstring(  # pylint: disable=inva
 @XBlock.wants('courseware_parent_info')
 @XBlock.wants('settings')
 class GroupActivityXBlock(
-    CommonMixinCollection, DashboardXBlockMixin,
-    XBlockWithPreviewMixin, XBlock
+        CommonMixinCollection, DashboardXBlockMixin,
+        XBlockWithPreviewMixin, XBlock
 ):
     """
     XBlock providing a group activity project for a group of students to collaborate upon
@@ -420,8 +430,7 @@ class GroupActivityXBlock(
         def_stage = get_default_stage(self.available_stages)
         if def_stage:
             return def_stage
-        else:
-            return self.stages[0] if self.stages else None
+        return self.stages[0] if self.stages else None
 
     @property
     def questions(self):
@@ -637,14 +646,14 @@ class GroupActivityXBlock(
             'is_filtered_out': user.id in filtered_students,
             'stage_states': {
                 stage_id: stage_data.user_stats.get(user.id, StageState.UNKNOWN)
-                for stage_id, stage_data in stage_stats.iteritems()
+                for stage_id, stage_data in stage_stats.items()
             },
             'groups_to_grade': {
                 stage_id: [
                     {'id': group.id, 'ta_grade_link': self.get_ta_review_link(group.id, stage_id)}
                     for group in stage_data.groups_to_grade.get(user.id, [])
                 ]
-                for stage_id, stage_data in stage_stats.iteritems()
+                for stage_id, stage_data in stage_stats.items()
             }
         }
 
@@ -675,7 +684,7 @@ class GroupActivityXBlock(
                     'external_status': stage_data.external_group_status.get(workgroup.id, StageState.NOT_AVAILABLE),
                     'external_status_label': stage_data.external_group_status_label.get(workgroup.id, ""),
                 }
-                for stage_id, stage_data in stage_stats.iteritems()
+                for stage_id, stage_data in stage_stats.items()
             },
             'users': users
         }
@@ -815,7 +824,8 @@ class GroupActivityXBlock(
         if notifications_service and grade_display_stage:
             grade_display_stage.fire_grades_posted_notification(group_id, notifications_service)
 
-    def calculate_grade(self, group_id):  # pylint:disable=too-many-locals,too-many-branches
+    def calculate_grade(self, group_id):
+        # pylint:disable=too-many-locals,too-many-branches,consider-using-set-comprehension
         review_item_data = self.project_api.get_workgroup_review_items_for_group(group_id, self.content_id)
         review_item_map = {
             make_key(review_item['question'], self.real_user_id(review_item['reviewer'])): review_item['answer']
@@ -831,6 +841,7 @@ class GroupActivityXBlock(
             user_grades = []
             for question in self.grade_questions:
                 user_value = review_item_map.get(make_key(question.question_id, user_id), None)
+                # pylint: disable=no-else-return
                 if user_value is None:
                     # if any are incomplete, we consider the whole set to be unusable
                     return None
@@ -840,7 +851,7 @@ class GroupActivityXBlock(
             return user_grades
 
         admin_provided_grades = None
-        if len(admin_reviewer_ids) > 0:
+        if admin_reviewer_ids:
             admin_provided_grades = []
             # Only include complete admin gradesets
             admin_reviewer_grades = [
@@ -856,7 +867,7 @@ class GroupActivityXBlock(
                 admin_provided_grades = admin_reviewer_grades[0]
 
         user_grades = {}
-        if len(group_reviewer_ids) > 0:
+        if group_reviewer_ids:
             for reviewer_id in group_reviewer_ids:
                 this_reviewers_grades = get_user_grade_value_list(reviewer_id)
                 if this_reviewers_grades is None:
@@ -877,6 +888,6 @@ class GroupActivityXBlock(
             for reviewer_id in group_reviewer_ids
             if len(user_grades[reviewer_id]) > 0
         ]
-        group_grade = round(mean(reviewer_grades)) if len(reviewer_grades) > 0 else None
+        group_grade = round(mean(reviewer_grades)) if reviewer_grades else None
 
         return group_grade

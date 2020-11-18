@@ -1,11 +1,13 @@
 from datetime import datetime
-from freezegun import freeze_time
+
 import mock
 import pytz
+from freezegun import freeze_time
+
 from group_project_v2.project_navigator import ViewTypes
 from tests.integration.base_test import SingleScenarioTestSuite
 from tests.integration.page_elements import NavigationViewElement, ReviewStageElement
-from tests.utils import make_submission_data, KNOWN_USERS, OTHER_GROUPS
+from tests.utils import KNOWN_USERS, OTHER_GROUPS, make_submission_data
 
 
 class TestOtherGroupSubmissionLinks(SingleScenarioTestSuite):
@@ -13,17 +15,17 @@ class TestOtherGroupSubmissionLinks(SingleScenarioTestSuite):
 
     def setUp(self):
         super(TestOtherGroupSubmissionLinks, self).setUp()
-        self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=OTHER_GROUPS.values())
+        self.project_api_mock.get_workgroups_to_review = mock.Mock(return_value=list(OTHER_GROUPS.values()))
         self.project_api_mock.get_workgroup_reviewers = mock.Mock(return_value=[
-            {"id": user.id} for user in KNOWN_USERS.values()
+            {"id": user.id} for user in list(KNOWN_USERS.values())
         ])
 
-    @freeze_time(datetime(2015, 01, 01))
+    @freeze_time(datetime(2015, 1, 1))
     def test_submission_links(self):
         other_group_submissions = {
             'issue_tree': make_submission_data(
                 'http://issue_tree.csv', 'issue_tree.csv',
-                datetime(2015, 01, 01, 17, 24, 15, tzinfo=pytz.UTC),
+                datetime(2015, 1, 1, 17, 24, 15, tzinfo=pytz.UTC),
                 KNOWN_USERS[1]
             ),
             'marketing_pitch': make_submission_data(

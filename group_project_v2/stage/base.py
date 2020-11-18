@@ -1,30 +1,42 @@
 import logging
 from collections import OrderedDict
-from urllib import urlencode
 from datetime import datetime, timedelta
-from lazy.lazy import lazy
+from urllib.parse import urlencode
+
 import pytz
-from xblock.core import XBlock
-from xblock.fields import DateTime, Scope, Boolean
+from lazy.lazy import lazy
 from web_fragments.fragment import Fragment
+from xblock.core import XBlock
+from xblock.fields import Boolean, DateTime, Scope
 from xblockutils.studio_editable import XBlockWithPreviewMixin
 
 from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.mixins import (
-    CommonMixinCollection, XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
-    DashboardXBlockMixin, AuthXBlockMixin
+    AdminAccessControlXBlockMixin,
+    AuthXBlockMixin,
+    CommonMixinCollection,
+    DashboardXBlockMixin,
+    XBlockWithUrlNameDisplayMixin,
 )
 from group_project_v2.notifications import StageNotificationsMixin
+from group_project_v2.stage.utils import StageState
 from group_project_v2.stage_components import (
-    GroupProjectResourceXBlock, GroupProjectVideoResourceXBlock, ProjectTeamXBlock
+    GroupProjectResourceXBlock,
+    GroupProjectVideoResourceXBlock,
+    ProjectTeamXBlock,
 )
 from group_project_v2.utils import (
-    gettext as _, HtmlXBlockShim, format_date, Constants, loader,
-    groupwork_protected_view, add_resource, MUST_BE_OVERRIDDEN, get_link_to_block, get_block_content_id,
+    MUST_BE_OVERRIDDEN,
+    Constants,
+    HtmlXBlockShim,
+    add_resource,
+    format_date,
+    get_block_content_id,
+    get_link_to_block,
 )
-from group_project_v2.stage.utils import StageState
-
+from group_project_v2.utils import gettext as _
+from group_project_v2.utils import groupwork_protected_view, loader
 
 log = logging.getLogger(__name__)
 
@@ -36,9 +48,9 @@ STAGE_STATS_LOG_TPL = (
 
 @XBlock.wants("settings")
 class BaseGroupActivityStage(
-    CommonMixinCollection, DashboardXBlockMixin, XBlockWithPreviewMixin, StageNotificationsMixin,
-    XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
-    XBlock,
+        CommonMixinCollection, DashboardXBlockMixin, XBlockWithPreviewMixin, StageNotificationsMixin,
+        XBlockWithUrlNameDisplayMixin, AdminAccessControlXBlockMixin,
+        XBlock,
 ):
     open_date = DateTime(
         display_name=_(u"Open Date"),
@@ -387,8 +399,8 @@ class BaseGroupActivityStage(
         """
         return OrderedDict([
             (
-               StageState.get_human_name(stage),
-               stats[stage] * 100 if stats[stage] is not None else None
+                StageState.get_human_name(stage),
+                stats[stage] * 100 if stats[stage] is not None else None
             )
             for stage in (StageState.NOT_STARTED, StageState.INCOMPLETE, StageState.COMPLETED)
         ])

@@ -5,10 +5,12 @@ from xblock.validation import ValidationMessage
 from group_project_v2.project_api.dtos import ReducedUserDetails
 from group_project_v2.stage import TeamEvaluationStage
 from group_project_v2.stage.utils import ReviewState
-from group_project_v2.stage_components import PeerSelectorXBlock, GroupProjectReviewQuestionXBlock
-from tests.unit.test_stages.utils import USER_ID, OTHER_USER_ID, patch_obj, GROUP_ID, OTHER_GROUP_ID
+from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock, PeerSelectorXBlock
 from tests.unit.test_stages.base import BaseStageTest, ReviewStageBaseTest, ReviewStageUserCompletionStatsMixin
-from tests.utils import make_review_item as mri, make_question, make_workgroup as mk_wg
+from tests.unit.test_stages.utils import GROUP_ID, OTHER_GROUP_ID, OTHER_USER_ID, USER_ID, patch_obj
+from tests.utils import make_question
+from tests.utils import make_review_item as mri
+from tests.utils import make_workgroup as mk_wg
 
 
 @ddt.ddt
@@ -45,34 +47,34 @@ class TestTeamEvaluationStageStageStatus(ReviewStageUserCompletionStatsMixin, Ba
         ([10], ["q1"], [mri(USER_ID, "q1", peer=10, answer='1')], ReviewState.COMPLETED),
         ([10], ["q1"], [mri(OTHER_USER_ID, "q1", peer=10, answer='1')], ReviewState.NOT_STARTED),
         (
-                [10], ["q1", "q2"],
-                [mri(USER_ID, "q1", peer=10, answer='1'), mri(OTHER_USER_ID, "q1", peer=10, answer='1')],
-                ReviewState.INCOMPLETE
+            [10], ["q1", "q2"],
+            [mri(USER_ID, "q1", peer=10, answer='1'), mri(OTHER_USER_ID, "q1", peer=10, answer='1')],
+            ReviewState.INCOMPLETE
         ),
         (
-                [10], ["q1"],
-                [mri(USER_ID, "q1", peer=10, answer='2'), mri(USER_ID, "q2", peer=10, answer="1")],
-                ReviewState.COMPLETED
+            [10], ["q1"],
+            [mri(USER_ID, "q1", peer=10, answer='2'), mri(USER_ID, "q2", peer=10, answer="1")],
+            ReviewState.COMPLETED
         ),
         (
-                [10], ["q1", "q2"],
-                [mri(USER_ID, "q1", peer=10, answer='3')],
-                ReviewState.INCOMPLETE
+            [10], ["q1", "q2"],
+            [mri(USER_ID, "q1", peer=10, answer='3')],
+            ReviewState.INCOMPLETE
         ),
         (
-                [10], ["q1"],
-                [mri(USER_ID, "q2", peer=10, answer='4'), mri(USER_ID, "q1", peer=11, answer='5')],
-                ReviewState.NOT_STARTED
+            [10], ["q1"],
+            [mri(USER_ID, "q2", peer=10, answer='4'), mri(USER_ID, "q1", peer=11, answer='5')],
+            ReviewState.NOT_STARTED
         ),
         (
-                [10, 11], ["q1"],
-                [mri(USER_ID, "q1", peer=10, answer='6'), mri(USER_ID, "q1", peer=11, answer='7')],
-                ReviewState.COMPLETED
+            [10, 11], ["q1"],
+            [mri(USER_ID, "q1", peer=10, answer='6'), mri(USER_ID, "q1", peer=11, answer='7')],
+            ReviewState.COMPLETED
         ),
         (
-                [10, 11], ["q1", "q2"],
-                [mri(USER_ID, "q1", peer=10, answer='7'), mri(USER_ID, "q1", peer=11, answer='8')],
-                ReviewState.INCOMPLETE
+            [10, 11], ["q1", "q2"],
+            [mri(USER_ID, "q1", peer=10, answer='7'), mri(USER_ID, "q1", peer=11, answer='8')],
+            ReviewState.INCOMPLETE
         ),
     )
     @ddt.unpack
@@ -211,7 +213,7 @@ class TestTeamEvaluationStageStageStatus(ReviewStageUserCompletionStatsMixin, Ba
             {1: workgroups[0], 2: workgroups[0], 3: workgroups[1], 4: workgroups[1]},
             {
                 group_id: [self._parse_review_item_string(item) for item in items]
-                for group_id, items in review_items.iteritems()
+                for group_id, items in review_items.items()
             }
         )
 

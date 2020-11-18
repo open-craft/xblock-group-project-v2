@@ -1,15 +1,14 @@
 """ Base classes for integration tests """
-from bok_choy.promise import EmptyPromise
 import mock
+from bok_choy.promise import EmptyPromise
 from sample_xblocks.basic.content import HtmlBlock
 from xblock.core import XBlock
 from xblock.fragment import Fragment
-
 from xblockutils.base_test import SeleniumXBlockTest
 
 from group_project_v2.group_project import GroupActivityXBlock
 from tests.integration.page_elements import GroupProjectElement, StageElement
-from tests.utils import loader, get_mock_project_api
+from tests.utils import get_mock_project_api, loader
 
 
 def get_block_link(block):
@@ -116,6 +115,7 @@ class BaseIntegrationTest(SeleniumXBlockTest):
         scenario_xml = loader.render_template("xml/{}".format(xml_file), params)
         return self.load_scenario_xml(scenario_xml, load_immediately)
 
+    # pylint: disable=inconsistent-return-statements
     def load_scenario_xml(self, scenario_xml, load_immediately=True):
         """
         Given the name of an XML file in the xml_templates folder, load it into the workbench.

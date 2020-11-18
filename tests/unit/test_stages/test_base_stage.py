@@ -3,16 +3,15 @@ from collections import OrderedDict
 
 import ddt
 import mock
-from group_project_v2.project_api.dtos import ReducedUserDetails
 
+from group_project_v2.project_api.dtos import ReducedUserDetails
 from group_project_v2.stage import BaseGroupActivityStage
 from group_project_v2.stage.utils import StageState
 from group_project_v2.utils import Constants
 from tests.unit.test_stages.base import BaseStageTest
-from tests.utils import WORKGROUP, KNOWN_USERS, OTHER_GROUPS, TestConstants
+from tests.utils import KNOWN_USERS, OTHER_GROUPS, WORKGROUP, TestConstants
 
-
-TEST_USERS = TestConstants.Users
+TEST_USERS = TestConstants.Users  # pylint: disable=invalid-name
 
 
 class DummyStageBlock(BaseGroupActivityStage):
@@ -107,18 +106,18 @@ class TestBaseGroupActivityStage(BaseStageTest):
             If set to False allows `actual` to contain keys not found in `expected`.
             If True - requires that no other keys are present in `actual` - roughly equivalent to plain assertEqual
         """
-        for key, value in expected.iteritems():
+        for key, value in expected.items():
             self.assertIn(key, actual)
             self.assertEqual(actual[key], value)
 
         if strict:
-            self.assertEqual(actual.keys(), expected.keys())
+            self.assertEqual(list(actual.keys()), list(expected.keys()))
 
     @ddt.data(
-        ([WORKGROUP], KNOWN_USERS.values(), StageState.COMPLETED, make_stats(1.0, 0, 0)),
-        ([WORKGROUP], KNOWN_USERS.values(), StageState.INCOMPLETE, make_stats(0.3, 0.4, 0.3)),
-        (OTHER_GROUPS, KNOWN_USERS.values(), StageState.INCOMPLETE, make_stats(0.3, 0.4, 0.3)),
-        (OTHER_GROUPS, KNOWN_USERS.values(), StageState.NOT_STARTED, make_stats(0.0, 0.0, 1.0)),
+        ([WORKGROUP], list(KNOWN_USERS.values()), StageState.COMPLETED, make_stats(1.0, 0, 0)),
+        ([WORKGROUP], list(KNOWN_USERS.values()), StageState.INCOMPLETE, make_stats(0.3, 0.4, 0.3)),
+        (OTHER_GROUPS, list(KNOWN_USERS.values()), StageState.INCOMPLETE, make_stats(0.3, 0.4, 0.3)),
+        (OTHER_GROUPS, list(KNOWN_USERS.values()), StageState.NOT_STARTED, make_stats(0.0, 0.0, 1.0)),
     )
     @ddt.unpack
     def test_dashboard_view(self, workgroups, target_students, state, stats):
@@ -164,7 +163,7 @@ class TestBaseGroupActivityStage(BaseStageTest):
             for idx in range(3)
         ])
 
-        self.assertEqual(actual_human_stats.keys(), expected_human_stats.keys())
+        self.assertEqual(list(actual_human_stats.keys()), list(expected_human_stats.keys()))
 
         for idx, human_stat in enumerate(expected_human_stats.items()):
             stat_name, stat_value = human_stat
@@ -173,27 +172,27 @@ class TestBaseGroupActivityStage(BaseStageTest):
 
     @ddt.data(
         # not filtered - pass all students
-        ([WORKGROUP], KNOWN_USERS.values(), [], KNOWN_USERS.values()),
+        ([WORKGROUP], list(KNOWN_USERS.values()), [], list(KNOWN_USERS.values())),
         # single filter hit - pass all except that student
         (
-            [WORKGROUP], KNOWN_USERS.values(), [TEST_USERS.USER1_ID],
+            [WORKGROUP], list(KNOWN_USERS.values()), [TEST_USERS.USER1_ID],
             [KNOWN_USERS[TEST_USERS.USER2_ID], KNOWN_USERS[TEST_USERS.USER3_ID]]
         ),
         # multiple filter hits - pass all except that students
         (
-            [WORKGROUP], KNOWN_USERS.values(), [TEST_USERS.USER1_ID, TEST_USERS.USER3_ID],
+            [WORKGROUP], list(KNOWN_USERS.values()), [TEST_USERS.USER1_ID, TEST_USERS.USER3_ID],
             [KNOWN_USERS[TEST_USERS.USER2_ID]]
         ),
         # filter "miss" - pass all
-        ([WORKGROUP], KNOWN_USERS.values(), [TEST_USERS.UNKNOWN_USER], KNOWN_USERS.values()),
+        ([WORKGROUP], list(KNOWN_USERS.values()), [TEST_USERS.UNKNOWN_USER], list(KNOWN_USERS.values())),
         # filter hit and miss - pass all expcept hit
         (
-            [WORKGROUP], KNOWN_USERS.values(), [TEST_USERS.USER2_ID, TEST_USERS.UNKNOWN_USER],
+            [WORKGROUP], list(KNOWN_USERS.values()), [TEST_USERS.USER2_ID, TEST_USERS.UNKNOWN_USER],
             [KNOWN_USERS[TEST_USERS.USER1_ID], KNOWN_USERS[TEST_USERS.USER3_ID]]
         ),
         # filtered all - pass no students
         (
-            [WORKGROUP], KNOWN_USERS.values(), [TEST_USERS.USER1_ID, TEST_USERS.USER2_ID, TEST_USERS.USER3_ID],
+            [WORKGROUP], list(KNOWN_USERS.values()), [TEST_USERS.USER1_ID, TEST_USERS.USER2_ID, TEST_USERS.USER3_ID],
             []
         ),
     )
@@ -210,7 +209,7 @@ class TestBaseGroupActivityStage(BaseStageTest):
 
     @ddt.data(
         ([1], [1], [], make_stats(1, 0, 0), True),
-        (range(10), range(3), range(3, 6), make_stats(.3, .3, .4), True),
+        (list(range(10)), list(range(3)), list(range(3, 6)), make_stats(.3, .3, .4), True),
         ([], [], [], make_stats(None, None, None), False),
     )
     @ddt.unpack
@@ -220,7 +219,7 @@ class TestBaseGroupActivityStage(BaseStageTest):
         completed_user_ids = set(completed_user_ids)
         partial_user_ids = set(partial_user_ids)
         patched_completions = self.make_patch(self.block, 'get_users_completion')
-        self.block.display_name = "dummy block"
+        self.block.display_name = "dummy block"  # pylint: disable=attribute-defined-outside-init
         patched_completions.return_value = (completed_user_ids, partial_user_ids)
 
         target_workgroups = tuple()
@@ -233,7 +232,7 @@ class TestBaseGroupActivityStage(BaseStageTest):
 
         self.assertEqual(len(expected_stats), len(stats))
 
-        for stat, value in stats.items():
+        for stat, value in list(stats.items()):
             self.assertAlmostEqual(value, expected_stats[stat])
 
     def test_get_external_group_status(self):
