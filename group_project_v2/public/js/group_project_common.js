@@ -6,7 +6,9 @@ if (typeof gettext === "undefined") {
         return string;
     };
 }
-var ugettext = window.GroupProjectV2XBlockI18N.gettext;
+if (typeof window.GroupProjectV2XBlockI18N !== "undefined"){
+  var gettext = window.GroupProjectV2XBlockI18N.gettext; // jshint ignore:line
+}
 
 var GroupProjectEvents = {
     ProjectNavigator: {
@@ -36,7 +38,7 @@ var GroupProjectCommon = {
         'use strict';
         return $(element).parents(".group-project-xblock-wrapper");
     },
-    gettext: ugettext,
+    gettext: gettext,
     ProjectNavigator: {
         events: GroupProjectEvents.ProjectNavigator
     },
