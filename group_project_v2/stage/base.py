@@ -238,7 +238,7 @@ class BaseGroupActivityStage(
         fragment.add_content(loader.render_django_template(
             self.STAGE_WRAPPER_TEMPLATE,
             render_context,
-            i18n_service=self.i18n_service
+            i18n_service=self.i18n_service,
         ))
         if stage_fragment.js_init_fn:
             fragment.initialize_js(stage_fragment.js_init_fn)
@@ -289,7 +289,7 @@ class BaseGroupActivityStage(
         fragment.add_content(loader.render_django_template(
             self.STAGE_CONTENT_TEMPLATE,
             render_context,
-            i18n_service=self.i18n_service
+            i18n_service=self.i18n_service,
         ))
 
         if self.js_file:
@@ -404,7 +404,7 @@ class BaseGroupActivityStage(
         fragment.add_content(loader.render_django_template(
             "templates/html/stages/navigation_view.html",
             rendering_context,
-            i18n_service=self.i18n_service
+            i18n_service=self.i18n_service,
         ))
         return fragment
 

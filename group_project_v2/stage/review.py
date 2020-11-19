@@ -179,8 +179,10 @@ class ReviewBaseStage(BaseGroupActivityStage):
             return {'result': 'error', 'msg': self._(messages.TA_GRADING_NOT_ALLOWED)}
 
         if not self.available_now:
-            reason = self._(messages.STAGE_NOT_OPEN_TEMPLATE) if not self.is_open \
-                else self._(messages.STAGE_CLOSED_TEMPLATE)
+            if self.is_open:
+                reason = self._(messages.STAGE_CLOSED_TEMPLATE)
+            else:
+                reason = self._(messages.STAGE_NOT_OPEN_TEMPLATE)
             return {'result': 'error', 'msg': reason.format(action=self._(self.STAGE_ACTION))}
 
         try:
@@ -541,7 +543,7 @@ class PeerReviewStage(ReviewBaseStage):
         html_output = loader.render_django_template(
             '/templates/html/stages/stages_group_review_other_team_submissions.html',
             context,
-            i18n_service=self.i18n_service
+            i18n_service=self.i18n_service,
         )
 
         return webob.response.Response(body=json.dumps({"html": html_output}))

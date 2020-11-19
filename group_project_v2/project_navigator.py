@@ -163,7 +163,7 @@ class GroupProjectNavigatorXBlock(
             loader.render_django_template(
                 'templates/html/project_navigator/project_navigator.html',
                 {'children': children_items},
-                i18n_service=self.i18n_service
+                i18n_service=self.i18n_service,
             )
         )
         add_resource(self, 'css', 'public/css/project_navigator/project_navigator.css', fragment)
@@ -184,7 +184,7 @@ class GroupProjectNavigatorXBlock(
         fragment.add_content(loader.render_django_template(
             "templates/html/project_navigator/project_navigator_author_view.html",
             {'navigator': self, 'children_contents': children_contents},
-            i18n_service=self.i18n_service
+            i18n_service=self.i18n_service,
         ))
         add_resource(self, 'css', 'public/css/project_navigator/project_navigator.css', fragment)
         return fragment
@@ -276,7 +276,7 @@ class ProjectNavigatorViewXBlockBase(
         fragment.add_content(loader.render_django_template(
             self.TEMPLATE_BASE + self.template,
             context,
-            i18n_service=self.i18n_service
+            i18n_service=self.i18n_service,
         ))
 
         if self.css_file:

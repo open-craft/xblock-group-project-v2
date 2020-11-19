@@ -1,13 +1,12 @@
 /* exported GroupProjectCommon */
-// Use group-project-v2 translations and Set up gettext in case it isn't available in the client runtime:
-if (typeof window.GroupProjectV2XBlockI18N !== "undefined"){
-    window.gettext = window.GroupProjectV2XBlockI18N.gettext;
-}else if (typeof gettext === "undefined"){
-  window.gettext = function gettext_stub(string) {
-    'use strict';
-    return string;
-  };
+// Set up gettext in case it isn't available in the client runtime:
+if (typeof gettext === "undefined") {
+    window.gettext = function gettext_stub(string) {
+        'use strict';
+        return string;
+    };
 }
+var ugettext = window.GroupProjectV2XBlockI18N.gettext;
 
 var GroupProjectEvents = {
     ProjectNavigator: {
@@ -37,7 +36,7 @@ var GroupProjectCommon = {
         'use strict';
         return $(element).parents(".group-project-xblock-wrapper");
     },
-    gettext: gettext,
+    gettext: ugettext,
     ProjectNavigator: {
         events: GroupProjectEvents.ProjectNavigator
     },

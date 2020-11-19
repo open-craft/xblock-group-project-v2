@@ -326,7 +326,7 @@ class GroupProjectSubmissionXBlock(
         fragment.add_content(loader.render_django_template(
             self.PROJECT_NAVIGATOR_VIEW_TEMPLATE,
             render_context,
-            i18n_service=self.i18n_service
+            i18n_service=self.i18n_service,
         ))
         add_resource(self, 'javascript', 'public/js/components/submission.js', fragment)
         fragment.initialize_js("GroupProjectSubmissionBlock")
@@ -340,7 +340,7 @@ class GroupProjectSubmissionXBlock(
         fragment.add_content(loader.render_django_template(
             self.REVIEW_VIEW_TEMPLATE,
             render_context,
-            i18n_service=self.i18n_service
+            i18n_service=self.i18n_service,
         ))
         # NOTE: adding js/css likely won't work here, as the result of this view is added as an HTML to an existing DOM
         # element
@@ -348,8 +348,10 @@ class GroupProjectSubmissionXBlock(
 
     def _validate_upload(self, request):
         if not self.stage.available_now:
-            template = self._(messages.STAGE_NOT_OPEN_TEMPLATE) if not self.stage.is_open \
-                else self._(messages.STAGE_CLOSED_TEMPLATE)
+            if self.stage.is_open:
+                template = self._(messages.STAGE_CLOSED_TEMPLATE)
+            else:
+                template = self._(messages.STAGE_NOT_OPEN_TEMPLATE)
             # 422 = unprocessable entity
             return 422, {'result': 'error', 'message': template.format(action=self._(self.stage.STAGE_ACTION))}
 
@@ -501,7 +503,7 @@ class ReviewSubjectSeletorXBlockBase(BaseStageComponentXBlock, XBlockWithPreview
         fragment.add_content(loader.render_django_template(
             self.STUDENT_TEMPLATE,
             render_context,
-            i18n_service=self.i18n_service
+            i18n_service=self.i18n_service,
         ))
         fragment.initialize_js('ReviewSubjectSelectorXBlock')
         return fragment
@@ -775,7 +777,7 @@ class GroupProjectBaseFeedbackDisplayXBlock(
         fragment.add_content(loader.render_django_template(
             "templates/html/components/review_assessment.html",
             render_context,
-            i18n_service=self.i18n_service
+            i18n_service=self.i18n_service,
         ))
         return fragment
 
@@ -879,7 +881,7 @@ class ProjectTeamXBlock(
         fragment.add_content(loader.render_django_template(
             "templates/html/components/project_team.html",
             render_context,
-            i18n_service=self.i18n_service
+            i18n_service=self.i18n_service,
         ))
         add_resource(self, 'css', "public/css/components/project_team.css", fragment)
         add_resource(self, 'javascript', "public/js/components/project_team.js", fragment)

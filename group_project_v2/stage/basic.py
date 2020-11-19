@@ -63,8 +63,10 @@ class CompletionStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
     @groupwork_protected_handler
     def stage_completed(self, _data, _suffix=''):
         if not self.available_now:
-            template = self._(messages.STAGE_NOT_OPEN_TEMPLATE) if not self.is_open \
-                else self._(messages.STAGE_CLOSED_TEMPLATE)
+            if self.is_open:
+                template = self._(messages.STAGE_CLOSED_TEMPLATE)
+            else:
+                template = self._(messages.STAGE_NOT_OPEN_TEMPLATE)
             return {'result': 'error', 'msg': template.format(action=self._(self.STAGE_ACTION))}
 
         try:
