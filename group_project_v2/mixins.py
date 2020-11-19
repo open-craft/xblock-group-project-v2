@@ -23,10 +23,10 @@ from group_project_v2.utils import (
     NO_EDITABLE_SETTINGS,
     Constants,
     GroupworkAccessDeniedError,
+    I18NService,
     add_resource,
     groupwork_protected_view,
     loader,
-    I18NService,
 )
 from group_project_v2 import messages
 

@@ -1,7 +1,7 @@
 /* exported GroupProjectCommon */
 // Use group-project-v2 translations and Set up gettext in case it isn't available in the client runtime:
 if (typeof window.GroupProjectV2XBlockI18N !== "undefined"){
-  var gettext = window.GroupProjectV2XBlockI18N.gettext;
+    window.gettext = window.GroupProjectV2XBlockI18N.gettext;
 }else if (typeof gettext === "undefined"){
   window.gettext = function gettext_stub(string) {
     'use strict';

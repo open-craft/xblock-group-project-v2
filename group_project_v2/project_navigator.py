@@ -27,9 +27,9 @@ from group_project_v2.mixins import (
     XBlockWithComponentsMixin,
     XBlockWithUrlNameDisplayMixin,
 )
-from group_project_v2.utils import DiscussionXBlockShim, add_resource
+from group_project_v2.utils import DiscussionXBlockShim, I18NService, add_resource
 from group_project_v2.utils import gettext as _
-from group_project_v2.utils import loader, I18NService
+from group_project_v2.utils import loader
 
 log = logging.getLogger(__name__)
 

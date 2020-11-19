@@ -32,11 +32,11 @@ from group_project_v2.upload_file import UploadFile
 from group_project_v2.utils import (
     MUST_BE_OVERRIDDEN,
     FieldValuesContextManager,
+    I18NService,
     add_resource,
     build_date_field,
     format_date,
     get_link_to_block,
-    I18NService,
 )
 from group_project_v2.utils import gettext as _
 from group_project_v2.utils import (
