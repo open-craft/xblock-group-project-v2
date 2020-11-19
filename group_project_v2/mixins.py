@@ -1,7 +1,8 @@
 import functools
+import itertools
 import logging
 import os
-import itertools
+from typing import Optional, Set
 
 from lazy.lazy import lazy
 from opaque_keys import InvalidKeyError
@@ -9,15 +10,23 @@ from opaque_keys.edx.locator import BlockUsageLocator
 from web_fragments.fragment import Fragment
 from xblock.completable import XBlockCompletionMode
 from xblockutils.studio_editable import (
-    StudioContainerWithNestedXBlocksMixin, StudioContainerXBlockMixin, StudioEditableXBlockMixin
+    StudioContainerWithNestedXBlocksMixin,
+    StudioContainerXBlockMixin,
+    StudioEditableXBlockMixin,
 )
 
 from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.utils import (
-    MUST_BE_OVERRIDDEN, NO_EDITABLE_SETTINGS, Constants, GroupworkAccessDeniedError,
-    loader, groupwork_protected_view, add_resource, I18NService
+    MUST_BE_OVERRIDDEN,
+    NO_EDITABLE_SETTINGS,
+    Constants,
+    GroupworkAccessDeniedError,
+    add_resource,
+    groupwork_protected_view,
+    loader,
+    I18NService,
 )
 from group_project_v2 import messages
 
@@ -86,7 +95,7 @@ class CourseAwareXBlockMixin(object):
     @property
     def course_id(self):
         raw_course_id = getattr(self.runtime, 'course_id', 'all')
-        return unicode(raw_course_id)
+        return str(raw_course_id)
 
 
 class UserAwareXBlockMixin(ProjectAPIXBlockMixin):
@@ -295,14 +304,14 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMix
             """
             self.project_api = project_api
             self.user_id = user_id
-            self.filter_org_ids = set(filter_org_ids) if filter_org_ids is not None else None
-            """
-            :type: set[int] or None
-            """  # pylint: disable=pointless-string-statement
-            self.allowed_org_ids = set(allowed_org_ids) if allowed_org_ids is not None else None
-            """
-            :type: set[int] or None
-            """  # pylint: disable=pointless-string-statement
+
+            self.filter_org_ids = None  # type: Optional[Set[int]]
+            if filter_org_ids is not None:
+                self.filter_org_ids = set(filter_org_ids)
+
+            self.allowed_org_ids = None  # type: Optional[Set[int]]
+            if allowed_org_ids is not None:
+                self.allowed_org_ids = set(allowed_org_ids)
 
         def can_access_other_user(self, user_id):
             """
@@ -385,13 +394,13 @@ class WorkgroupAwareXBlockMixin(AuthXBlockMixin, UserAwareXBlockMixin, CourseAwa
                 return self.project_api.get_workgroup_by_id(
                     user_prefs[UserAwareXBlockMixin.TA_REVIEW_KEY]
                 )
-            else:
-                workgroup = self.project_api.get_user_workgroup_for_course(
-                    self.user_id, self.course_id
-                )
-                if workgroup is None:
-                    return self.FALLBACK_WORKGROUP
-                return workgroup
+            workgroup = self.project_api.get_user_workgroup_for_course(
+                self.user_id, self.course_id
+            )
+            if workgroup is None:
+                return self.FALLBACK_WORKGROUP
+            return workgroup
+        # pylint: disable=try-except-raise
         except GroupworkAccessDeniedError:
             raise
         except ApiError as exception:
@@ -434,7 +443,7 @@ class XBlockWithUrlNameDisplayMixin(object):
         try:
             return super(XBlockWithUrlNameDisplayMixin, self).url_name
         except AttributeError:
-            return unicode(self.scope_ids.usage_id)
+            return str(self.scope_ids.usage_id)
 
     def get_url_name_fragment(self, caption):
         fragment = Fragment()
@@ -551,9 +560,9 @@ class CompletionMixin(XBlockWithTranslationServiceMixin):
 
 
 class CommonMixinCollection(
-    ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin,
-    StudioEditableXBlockMixin, StudioContainerXBlockMixin,
-    WorkgroupAwareXBlockMixin, TemplateManagerMixin, SettingsMixin,
-    CompletionMixin,
+        ChildrenNavigationXBlockMixin, XBlockWithComponentsMixin,
+        StudioEditableXBlockMixin, StudioContainerXBlockMixin,
+        WorkgroupAwareXBlockMixin, TemplateManagerMixin, SettingsMixin,
+        CompletionMixin,
 ):
     block_settings_key = 'group_project_v2'

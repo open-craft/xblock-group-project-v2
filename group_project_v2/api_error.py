@@ -1,9 +1,8 @@
-import logging
 import json
-from urllib2 import HTTPError
+import logging
+from urllib.error import HTTPError
 
 from group_project_v2.utils import gettext as _
-
 
 log = logging.getLogger(__name__)
 
@@ -56,6 +55,6 @@ def api_error_protect(func):
         except HTTPError as http_error:
             api_error = ApiError(http_error, ERROR_CODE_MESSAGES.get(func.__name__, None))
             log.exception("Error calling %s: %s", func.__name__, api_error)
-            raise api_error
+            raise api_error  # pylint: disable=raise-missing-from
 
     return call_api_method

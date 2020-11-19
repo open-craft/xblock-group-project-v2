@@ -1,19 +1,19 @@
 import csv
-from unittest import TestCase
 from datetime import datetime
-import pytz
+from unittest import TestCase
 
 import ddt
-from freezegun import freeze_time
 import mock
+import pytz
+from freezegun import freeze_time
+from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
 from xblock.runtime import Runtime
-from xblock.field_data import DictFieldData
 
 from group_project_v2.group_project import GroupActivityXBlock, GroupProjectXBlock
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.dtos import ProjectDetails, WorkgroupDetails, ReducedUserDetails
-from group_project_v2.stage import BaseGroupActivityStage, TeamEvaluationStage, PeerReviewStage
+from group_project_v2.project_api.dtos import ProjectDetails, ReducedUserDetails, WorkgroupDetails
+from group_project_v2.stage import BaseGroupActivityStage, PeerReviewStage, TeamEvaluationStage
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
 from group_project_v2.utils import Constants
 from tests.utils import TestWithPatchesMixin, make_review_item, parse_datetime
@@ -69,7 +69,7 @@ class TestGroupProjectXBlock(TestWithPatchesMixin, TestCase):
         response = self.block.download_incomplete_list(request_mock)
         self.assertEqual(response.status_code, 404)
 
-    @freeze_time(datetime(2015, 01, 01, 12, 22, 14))
+    @freeze_time(datetime(2015, 1, 1, 12, 22, 14))
     @ddt.data(
         ([1, 2, 3], [1], [2, 3]),
         ([1, 2, 3], [], [1, 2, 3]),
@@ -107,7 +107,7 @@ class TestGroupProjectXBlock(TestWithPatchesMixin, TestCase):
         args, kwargs = actual_parameters[0]
         self.assertEqual(len(args), 2)
         self.assertEqual(kwargs, {})
-        self.assertEqual(set([user.id for user in args[0]]), set(users_to_export_ids))
+        self.assertEqual({user.id for user in args[0]}, set(users_to_export_ids))
         self.assertEqual(args[1], expected_filename)
 
     def test_download_incomplete_list_csv_contents(self):
@@ -134,7 +134,8 @@ class TestGroupProjectXBlock(TestWithPatchesMixin, TestCase):
             response = self.block.download_incomplete_list(request_mock)
 
         self.assertEqual(response.status_code, 200)
-        reader = csv.DictReader([line for line in response.body.split("\n")])
+        # pylint: disable=unnecessary-comprehension
+        reader = csv.DictReader([line for line in response.text.split("\n")])
         lines = [line for line in reader]
         self.assertEqual(reader.fieldnames, GroupProjectXBlock.CSV_HEADERS)
         self.assertEqual(lines[0], csv_repr(all_users[1]))
@@ -279,7 +280,7 @@ class TestGetDashboardURL(TestWithPatchesMixin, TestCase):
     @staticmethod
     def _get_dashboard_url(template, program_id=None, course_id=None, project_id=None, activity_id=None):
         return template.format(
-            program_id=program_id, course_id=course_id,  project_id=project_id, activity_id=activity_id
+            program_id=program_id, course_id=course_id, project_id=project_id, activity_id=activity_id
         )
 
     @ddt.data('activity_1', 'activity_2', 'activity_92', 'qweasdzxc')
@@ -332,8 +333,8 @@ class TestGetDashboardURL(TestWithPatchesMixin, TestCase):
         ('/{program_id}/part2/{activity_id}', 'act_1', 'prog_1', 'na', 'na', '/prog_1/part2/act_1'),
         ('/{program_id}/{course_id}/{activity_id}', 'act_2', 'prog_2', 'c_2', 'na', '/prog_2/c_2/act_2'),
         (
-                '/{program_id}/{course_id}/{project_id}?act={activity_id}',
-                'act_3', 'prog_3', 'c_3', 'proj_3', '/prog_3/c_3/proj_3?act=act_3'
+            '/{program_id}/{course_id}/{project_id}?act={activity_id}',
+            'act_3', 'prog_3', 'c_3', 'proj_3', '/prog_3/c_3/proj_3?act=act_3'
         ),
     )
     @ddt.unpack
@@ -373,7 +374,7 @@ class TestCalculateGradeGroupActivityXBlock(TestWithPatchesMixin, TestCase):
         (3, ["q1"], [1, 2], [], None),
         (4, ["q1"], [1], [(1, "q1", 100)], 100),
         (5, ["q1", "q2"], [1], [(1, "q1", 20), (1, "q2", 30)], 25),
-        (6, ["q1", "q2"], [1], [(1, "q1", 1), (1, "q2", 2)], round((1.0+2.0)/2.0)),  # rounding
+        (6, ["q1", "q2"], [1], [(1, "q1", 1), (1, "q2", 2)], round((1.0 + 2.0) / 2.0)),  # rounding
         (7, ["q1", "q2"], [1, 2], [(1, "q1", 1), (1, "q2", 2)], None),
         (8, ["q1", "q2"], [1, 2], [(1, "q1", 1), (1, "q2", 2), (2, "q2", 0)], None),
         (9, ["q1", "q2"], [1, 2], [(1, "q1", 10), (1, "q2", 20), (2, "q1", 30), (2, "q2", 60)], 30.0),
@@ -408,13 +409,13 @@ class TestCalculateGradeGroupActivityXBlock(TestWithPatchesMixin, TestCase):
     )
     @ddt.unpack
     def test_calculate_grade_with_admins(
-        self, group_id, question_ids, reviewer_ids, reviews, admin_reviews, expected_grade
+            self, group_id, question_ids, reviewer_ids, reviews, admin_reviews, expected_grade
     ):
         self.project_api_mock.get_workgroup_reviewers = mock.Mock(
             return_value=[{"id": rew_id} for rew_id in reviewer_ids]
         )
         self.project_api_mock.get_workgroup_review_items_for_group = mock.Mock(
-            return_value=_make_reviews(reviews)+_make_reviews(admin_reviews)
+            return_value=_make_reviews(reviews) + _make_reviews(admin_reviews)
         )
 
         self.grade_questions_mock.return_value = [_make_question(question_id) for question_id in question_ids]

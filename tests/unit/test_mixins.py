@@ -1,27 +1,26 @@
 # pylint:disable=protected-access,no-self-use,invalid-name
+from __future__ import print_function
 
 from unittest import TestCase
 
 import ddt
 import mock
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
-from xblock.completable import XBlockCompletionMode
 from xblock.core import XBlock
 from xblock.runtime import Runtime
 
-from group_project_v2 import app_config
 from group_project_v2.mixins import (
-    ChildrenNavigationXBlockMixin, CourseAwareXBlockMixin, UserAwareXBlockMixin,
-    WorkgroupAwareXBlockMixin, DashboardRootXBlockMixin,
-    AuthXBlockMixin
+    AuthXBlockMixin,
+    ChildrenNavigationXBlockMixin,
+    CourseAwareXBlockMixin,
+    DashboardRootXBlockMixin,
+    UserAwareXBlockMixin,
+    WorkgroupAwareXBlockMixin,
 )
 from group_project_v2.project_api import TypedProjectAPI
-from group_project_v2.project_api.dtos import WorkgroupDetails, UserGroupDetails
-from group_project_v2.utils import GroupworkAccessDeniedError, Constants
-from tests.utils import (
-    TestWithPatchesMixin, raise_api_error, MockedAuthXBlockMixin,
-    get_mock_project_api
-)
+from group_project_v2.project_api.dtos import UserGroupDetails, WorkgroupDetails
+from group_project_v2.utils import Constants, GroupworkAccessDeniedError
+from tests.utils import MockedAuthXBlockMixin, TestWithPatchesMixin, get_mock_project_api, raise_api_error
 
 
 def _make_block_mock(block_id, category=None):
@@ -51,19 +50,6 @@ class ChildrenNavigationXBlockMixinGuineaPig(ChildrenNavigationXBlockMixin, Comm
         return None
 
 
-@ddt.ddt
-class CompletionMixinTestCase(TestCase):
-
-    @ddt.data(*app_config.PROGRESS_DETACHED_CATEGORIES)
-    def test_all_blocks_excluded_from_completion(self, blockclass):
-        xblock = XBlock.load_class(blockclass)
-        self.assertEqual(
-            XBlockCompletionMode.get_mode(xblock),
-            XBlockCompletionMode.EXCLUDED,
-            "Block {!r} did not have completion mode 'excluded'".format(xblock),
-        )
-
-
 class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
     def setUp(self):
         self.block = ChildrenNavigationXBlockMixinGuineaPig()
@@ -72,7 +58,8 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
             ChildrenNavigationXBlockMixinGuineaPig, 'runtime',
             mock.PropertyMock(return_value=self.runtime_mock)
         )
-        self.children_mock = self.make_patch(ChildrenNavigationXBlockMixinGuineaPig, 'children', mock.PropertyMock())
+        self.children_mock = self.make_patch(
+            ChildrenNavigationXBlockMixinGuineaPig, 'children', mock.PropertyMock())
         self.runtime_mock.get_block.side_effect = _make_block_mock
 
     def test_children(self):
@@ -96,13 +83,16 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
 
         child_with_no_target_props = mock.Mock(spec={})
 
-        self.assertEqual(self.block.get_child_category(child_with_category), child_with_category.category)
-        self.assertEqual(self.block.get_child_category(child_with_plugin_name), child_with_plugin_name.plugin_name)
+        self.assertEqual(self.block.get_child_category(
+            child_with_category), child_with_category.category)
+        self.assertEqual(self.block.get_child_category(
+            child_with_plugin_name), child_with_plugin_name.plugin_name)
         self.assertEqual(
             self.block.get_child_category(child_with_plugin_name_and_category),
             child_with_plugin_name_and_category.category
         )
-        self.assertEqual(self.block.get_child_category(child_with_no_target_props), None)
+        self.assertEqual(self.block.get_child_category(
+            child_with_no_target_props), None)
 
     def test_get_children_by_category(self):
         child_categories = {
@@ -111,7 +101,8 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
             'block_2': 'category_2',
             'block_3': 'category_3'
         }
-        self.children_mock.return_value = ['block_1', 'block_1_2', 'block_2', 'block_3']
+        self.children_mock.return_value = [
+            'block_1', 'block_1_2', 'block_2', 'block_3']
         self.runtime_mock.get_block.side_effect = lambda block_id: _make_block_mock(
             block_id, child_categories.get(block_id, None)
         )
@@ -156,7 +147,6 @@ class TestChildrenNavigationXBlockMixin(TestWithPatchesMixin, TestCase):
     def test_render_children(self):
         child1, child2 = mock.Mock(), mock.Mock()
         view1, context1 = 'nav_view', {'qwe': 'asd'}
-        print id(child1), id(child2)
 
         with mock.patch.object(type(self.block), '_children', mock.PropertyMock(return_value=[child1, child2])):
             self.block._render_children(view1, context1)
@@ -193,7 +183,7 @@ class TestCourseAwareXBlockMixin(TestCase, TestWithPatchesMixin):
     )
     def test_course_id(self, course_id):
         self.runtime_mock.course_id = course_id
-        self.assertEqual(self.block.course_id, unicode(course_id))
+        self.assertEqual(self.block.course_id, str(course_id))
 
 
 class UserAwareXBlockMixinGuineaPig(CommonMixinGuineaPig, UserAwareXBlockMixin):

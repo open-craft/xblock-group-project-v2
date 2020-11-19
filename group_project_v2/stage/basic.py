@@ -1,16 +1,18 @@
 import logging
-from xblock.core import XBlock
-from xblock.fields import String, Scope
+
 from web_fragments.fragment import Fragment
+from xblock.core import XBlock
+from xblock.fields import Scope, String
 from xblock.validation import ValidationMessage
 
 from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.stage.base import BaseGroupActivityStage
 from group_project_v2.stage.mixins import SimpleCompletionStageMixin
-from group_project_v2.stage_components import SubmissionsStaticContentXBlock, GroupProjectSubmissionXBlock
-from group_project_v2.utils import gettext as _, groupwork_protected_handler, loader
-from group_project_v2.stage.utils import StageState, DISPLAY_NAME_NAME, DISPLAY_NAME_HELP
+from group_project_v2.stage.utils import DISPLAY_NAME_HELP, DISPLAY_NAME_NAME, StageState
+from group_project_v2.stage_components import GroupProjectSubmissionXBlock, SubmissionsStaticContentXBlock
+from group_project_v2.utils import gettext as _
+from group_project_v2.utils import groupwork_protected_handler, loader
 
 log = logging.getLogger(__name__)
 
@@ -63,7 +65,7 @@ class CompletionStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
         if not self.available_now:
             template = self._(messages.STAGE_NOT_OPEN_TEMPLATE) if not self.is_open \
                 else self._(messages.STAGE_CLOSED_TEMPLATE)
-            return {'result': 'error',  'msg': template.format(action=self._(self.STAGE_ACTION))}
+            return {'result': 'error', 'msg': template.format(action=self._(self.STAGE_ACTION))}
 
         try:
             if self.can_mark_complete:
@@ -171,6 +173,7 @@ class SubmissionStage(BaseGroupActivityStage):
                 self.mark_complete(user.id)
 
     def get_stage_state(self):
+        # pylint: disable=no-else-return
         if self.has_all_submissions:
             return StageState.COMPLETED
         elif self.has_some_submissions:
@@ -231,7 +234,7 @@ class SubmissionStage(BaseGroupActivityStage):
 
         has_all = uploaded_submissions >= upload_ids
         has_some = bool(uploaded_submissions & upload_ids)
-
+        # pylint: disable=no-else-return
         if has_all:
             return StageState.COMPLETED
         elif has_some:

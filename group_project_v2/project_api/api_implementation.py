@@ -1,15 +1,18 @@
-import json
-from urllib import urlencode
-
 import itertools
+import json
+from urllib.parse import urlencode
 
 from group_project_v2.api_error import api_error_protect
-from group_project_v2.json_requests import DELETE, GET, PUT, POST
-from group_project_v2.utils import memoize_with_expiration, build_date_field, is_absolute
+from group_project_v2.json_requests import DELETE, GET, POST, PUT
 from group_project_v2.project_api.dtos import (
-    UserDetails, ProjectDetails, WorkgroupDetails, CompletionDetails,
-    OrganisationDetails, UserGroupDetails
+    CompletionDetails,
+    OrganisationDetails,
+    ProjectDetails,
+    UserDetails,
+    UserGroupDetails,
+    WorkgroupDetails,
 )
+from group_project_v2.utils import build_date_field, is_absolute, memoize_with_expiration
 
 API_PREFIX = '/'.join(['api', 'server'])
 WORKGROUP_API = '/'.join([API_PREFIX, 'workgroups'])
@@ -58,10 +61,11 @@ class ProjectAPI(object):
         else:
             response = method(url)
 
+        # pylint: disable=comparison-with-callable
         if method == DELETE:
             return None
 
-        return json.loads(response.read())
+        return json.loads(response.read().decode('utf8'))
 
     def send_request(self, method, url_parts, data=None, query_params=None, no_trailing_slash=False):
         url = self.build_url(url_parts, query_params, no_trailing_slash)
@@ -111,7 +115,7 @@ class ProjectAPI(object):
 
     def set_group_grade(self, group_id, course_id, activity_id, grade_value, max_grade):
         grade_data = {
-            "course_id": unicode(course_id),
+            "course_id": str(course_id),
             "content_id": activity_id,
             "grade": grade_value,
             "max_grade": max_grade,
@@ -181,12 +185,12 @@ class ProjectAPI(object):
         # get any data already there
         current_data = {pi['question']: pi for pi in
                         self.get_peer_review_items(reviewer_id, peer_id, group_id, content_id)}
-        for question_id, answer in data.iteritems():
+        for question_id, answer in data.items():
             if question_id in current_data:
                 question_data = current_data[question_id]
 
                 if question_data['answer'] != answer:
-                    if len(answer) > 0:
+                    if answer:
                         # update with relevant data
                         del question_data['created']
                         del question_data['modified']
@@ -196,7 +200,7 @@ class ProjectAPI(object):
                     else:
                         self.delete_peer_review_assessment(question_data['id'])
 
-            elif len(answer) > 0:
+            elif answer:
                 question_data = {
                     "question": question_id,
                     "answer": answer,
@@ -210,12 +214,12 @@ class ProjectAPI(object):
     def submit_workgroup_review_items(self, reviewer_id, group_id, content_id, data):
         # get any data already there
         current_data = {ri['question']: ri for ri in self.get_workgroup_review_items(reviewer_id, group_id, content_id)}
-        for question_id, answer in data.iteritems():
+        for question_id, answer in data.items():
             if question_id in current_data:
                 question_data = current_data[question_id]
 
                 if question_data['answer'] != answer:
-                    if len(answer) > 0:
+                    if answer:
                         # update with relevant data
                         del question_data['created']
                         del question_data['modified']
@@ -225,7 +229,7 @@ class ProjectAPI(object):
                     else:
                         self.delete_workgroup_review_assessment(question_data['id'])
 
-            elif len(answer) > 0:
+            elif answer:
                 question_data = {
                     "question": question_id,
                     "answer": answer,
@@ -259,7 +263,7 @@ class TypedProjectAPI(ProjectAPI):
         :rtype: UserDetails
         """
         response = self.send_request(GET, (USERS_API, user_id), no_trailing_slash=True)
-        return UserDetails(**response)  # pylint: disable=star-args
+        return UserDetails(**response)
 
     @memoize_with_expiration()
     def get_project_by_content_id(self, course_id, content_id):
@@ -287,7 +291,7 @@ class TypedProjectAPI(ProjectAPI):
         :rtype: ProjectDetails
         """
         response = self.send_request(GET, (PROJECTS_API, project_id), no_trailing_slash=True)
-        return ProjectDetails(**response)  # pylint: disable=star-args
+        return ProjectDetails(**response)
 
     @memoize_with_expiration()
     def get_workgroup_by_id(self, group_id):

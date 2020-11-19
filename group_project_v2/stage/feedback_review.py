@@ -1,18 +1,20 @@
 import itertools
 import logging
+
 from lazy.lazy import lazy
-from xblock.fields import String, Scope
+from xblock.fields import Scope, String
 from xblock.validation import ValidationMessage
 
 from group_project_v2 import messages
-from group_project_v2.stage.utils import DISPLAY_NAME_NAME, DISPLAY_NAME_HELP
 from group_project_v2.stage.base import BaseGroupActivityStage
 from group_project_v2.stage.mixins import SimpleCompletionStageMixin
+from group_project_v2.stage.utils import DISPLAY_NAME_HELP, DISPLAY_NAME_NAME
 from group_project_v2.stage_components import (
-    GroupProjectTeamEvaluationDisplayXBlock, GroupProjectGradeEvaluationDisplayXBlock
+    GroupProjectGradeEvaluationDisplayXBlock,
+    GroupProjectTeamEvaluationDisplayXBlock,
 )
-from group_project_v2.utils import gettext as _, MUST_BE_OVERRIDDEN
-
+from group_project_v2.utils import MUST_BE_OVERRIDDEN
+from group_project_v2.utils import gettext as _
 
 log = logging.getLogger(__name__)
 

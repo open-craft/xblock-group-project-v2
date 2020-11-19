@@ -1,5 +1,6 @@
-from unittest import TestCase
 from datetime import datetime
+from unittest import TestCase
+
 import ddt
 import freezegun
 import mock
@@ -11,8 +12,8 @@ from group_project_v2.project_api import TypedProjectAPI
 from group_project_v2.project_api.dtos import ReducedUserDetails
 from group_project_v2.stage.utils import ReviewState, StageState
 from group_project_v2.stage_components import GroupProjectReviewQuestionXBlock
-from tests.unit.test_stages.utils import patch_obj, USER_ID
-from tests.utils import TestWithPatchesMixin, make_workgroup, make_question
+from tests.unit.test_stages.utils import USER_ID, patch_obj
+from tests.utils import TestWithPatchesMixin, make_question, make_workgroup
 
 
 class BaseStageTest(TestCase, TestWithPatchesMixin):
@@ -27,6 +28,7 @@ class BaseStageTest(TestCase, TestWithPatchesMixin):
         # can't use create_autospec here, as most methods are wrapped in decorators and mock fails signature checks
         # with "Too many positional arguments" because of this
         self.project_api_mock = mock.Mock(spec_set=TypedProjectAPI)
+        self.project_api_mock.get_user_preferences.return_value = []
 
         # pylint: disable=not-callable
         self.block = self.block_to_test(self.runtime_mock, field_data=DictFieldData({}), scope_ids=mock.Mock())

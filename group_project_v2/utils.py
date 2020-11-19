@@ -2,18 +2,17 @@
 import csv
 import functools
 import logging
-import urlparse
-import boto3
-from collections import namedtuple
-
-from datetime import date, datetime, timedelta
+import urllib.parse
 import xml.etree.ElementTree as ET
-from django.conf import settings
+from collections import namedtuple
+from datetime import date, datetime, timedelta
 
+import boto3
 from dateutil import parser
+from django.conf import settings
+from django.core.files.storage import default_storage
 from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
-from django.core.files.storage import default_storage
 from lazy.lazy import lazy
 from storages.backends.s3boto import S3BotoStorage
 from web_fragments.fragment import Fragment
@@ -72,7 +71,6 @@ class Constants(object):
     ACTIVATE_BLOCK_ID_PARAMETER_NAME = 'activate_block_id'
     CURRENT_CLIENT_FILTER_ID_PARAMETER_NAME = 'client_filter_id'
     CURRENT_STAGE_ID_PARAMETER_NAME = 'current_stage'
-
     TARGET_STUDENTS = 'target_students'
     TARGET_WORKGROUPS = 'target_workgroups'
     FILTERED_STUDENTS = "filtered_students"
@@ -109,8 +107,9 @@ def outer_html(node):
     if node is None:
         return None
 
-    html = ET.tostring(node, 'utf-8', 'html').strip()
-    if len(node.findall('./*')) == 0 and html.index('>') == len(html) - 1:
+    html = ET.tostring(node, encoding='unicode', method='html').strip()
+    nodes = node.findall('./*')
+    if not nodes and html.index('>') == len(html) - 1:
         html = html[:-1] + ' />'
 
     return html
@@ -165,7 +164,7 @@ def groupwork_protected_view(func):
         except GroupworkAccessDeniedError as exc:
             error_fragment = Fragment()
             error_fragment.add_content(
-                loader.render_template('/templates/html/loading_error.html', {'error_message': unicode(exc)}))
+                loader.render_template('/templates/html/loading_error.html', {'error_message': str(exc)}))
             error_fragment.add_javascript(loader.load_unicode('public/js/group_project_error.js'))
             error_fragment.initialize_js('GroupProjectError')
             return error_fragment
@@ -197,8 +196,8 @@ def key_error_protected_handler(func):
         try:
             return func(*args, **kwargs)
         except KeyError as exception:
-            log.exception("Missing required argument {}".format(exception.message))
-            return {'result': 'error', 'msg': ("Missing required argument {}".format(exception.message))}
+            log.exception("Missing required argument %s", str(exception))
+            return {'result': 'error', 'msg': ("Missing required argument {}".format(str(exception)))}
 
     return wrapper
 
@@ -277,8 +276,9 @@ def memoize_with_expiration(expires_after=DEFAULT_EXPIRATION_TIME):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             key_list = (
-                tuple([func.__name__]) + tuple(args) +
-                tuple("{}:{}".format(key, value) for key, value in kwargs.iteritems())
+                tuple([func.__name__]) + tuple(args) + tuple(
+                    "{}:{}".format(key, value) for key, value in kwargs.items()
+                )
             )
             key = make_key(key_list)
             if key not in cache or cache[key]['timestamp'] + expires_after <= datetime.now():
@@ -342,7 +342,7 @@ def add_resource(block, resource_type, path, fragment, via_url=False):
 
 
 def get_block_content_id(block):
-    return unicode(block.scope_ids.usage_id)
+    return str(block.scope_ids.usage_id)
 
 
 @register.filter
@@ -376,8 +376,8 @@ def export_to_csv(data, target, headers=None):
         writer.writerow(row)
 
 
-def named_tuple_with_docstring(type_name, field_names, docstring, verbose=False, rename=False):
-    named_tuple_type = namedtuple(type_name+"_", field_names, verbose=verbose, rename=rename)
+def named_tuple_with_docstring(type_name, field_names, docstring, rename=False):
+    named_tuple_type = namedtuple(type_name + "_", field_names, rename=rename)
 
     wrapper_class = type(type_name, (named_tuple_type,), {"__doc__": docstring})
     return wrapper_class
@@ -388,7 +388,7 @@ def is_absolute(url):
     :param url[str] url to asses
     Returns a boolean value indicating if given `url` is absolute or not.
     """
-    return bool(urlparse.urlparse(url).netloc)
+    return bool(urllib.parse.urlparse(url).netloc)
 
 
 class PrivateMediaStorage(S3BotoStorage):
@@ -442,8 +442,7 @@ def make_s3_link_temporary(group_id, file_sha1, file_name, file_url):
             }
         )
         return signed_url
-    else:
-        return file_url
+    return file_url
 
 
 def get_storage():

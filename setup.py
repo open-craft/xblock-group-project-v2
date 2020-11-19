@@ -3,9 +3,10 @@
 # Imports ###########################################################
 
 import os
-from setuptools import setup, find_packages
-from group_project_v2.app_config import ENTRYPOINTS
 
+from setuptools import find_packages, setup
+
+from group_project_v2.app_config import ENTRYPOINTS
 
 # Functions #########################################################
 
@@ -28,26 +29,26 @@ setup(
     description='XBlock - Group Project V2',
     packages=find_packages(),
     install_requires=[
-        'Django>=1.8,<2.0',
+        'Django>=1.11,<2.3',
         'lazy>=1.1',
         'python-dateutil>=2.1,<3.0',
         'WebOb>=1.6,<2.0',
         'pytz',
-        'XBlock>=1.2.2,<1.3.0',
-        'web-fragments<=0.3.1',
+        'XBlock>=1.2.2',
+        'web-fragments==0.3.2',
         'xblock-utils>=0.9',
         'django-upload-validator==1.0.2',
         'edx-opaque-keys>=0.4',
         'boto>=2.1.0',
         'boto3==1.4.8',
         'google-compute-engine==2.8.13',
-        'django-storages==1.4.1'
+        'django-storages==1.8'
     ],
     entry_points={
         'xblock.v1': ENTRYPOINTS
     },
-    dependency_links = [
-        'https://github.com/edx/xblock-utils/tarball/v1.2.2#egg=xblock-utils-1.2.2',
+    dependency_links=[
+        'https://github.com/edx/xblock-utils/tarball/v1.0.5#egg=xblock-utils-1.0.5',
         'https://github.com/mckinseyacademy/django-upload-validator/tarball/v1.0.2#egg=django-upload-validator-1.0.2'
     ],
     package_data=package_data("group_project_v2", ["templates", "public"]),

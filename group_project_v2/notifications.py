@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timedelta
+
 import pytz
 
 from group_project_v2.utils import log_and_suppress_exceptions
@@ -43,13 +44,13 @@ def add_click_link_params(msg, course_id, location):
     In the initial use case, we need to make the link point to a different front end website so we need to
     resolve these links at dispatch time
     """
-    msg.add_click_link_params({'course_id': unicode(course_id), 'location': unicode(location)})
+    msg.add_click_link_params({'course_id': str(course_id), 'location': str(location)})
 
 
 class StageNotificationsMixin(object):
     def _get_stage_timer_name(self, timer_name_suffix):
         return '{location}-{timer_name_suffix}'.format(
-            location=unicode(self.location),
+            location=str(self.location),
             timer_name_suffix=timer_name_suffix
         )
 
@@ -64,7 +65,7 @@ class StageNotificationsMixin(object):
 
         msg = NotificationMessage(
             msg_type=notifications_service.get_notification_type(msg_type),
-            namespace=unicode(course_id),
+            namespace=str(course_id),
             payload={
                 '_schema_version': 1,
                 'activity_name': self.activity.display_name,
@@ -81,8 +82,8 @@ class StageNotificationsMixin(object):
             # send to all students participating in this project
             scope_name=NotificationScopes.PARTICIPANTS,
             scope_context={
-                'course_id': unicode(course_id),
-                'content_id': unicode(self.activity.project.location),
+                'course_id': str(course_id),
+                'content_id': str(self.activity.project.location),
             },
             timer_name=self._get_stage_timer_name(timer_name_suffix),
             ignore_if_past_due=True  # don't send if we're already late!
@@ -94,7 +95,7 @@ class StageNotificationsMixin(object):
         A hook into when this xblock is published in Studio. When we are published we should
         register a Notification to be send on key dates
         """
-        log.info('{}.on_published() on location = {}'.format(self.__class__.__name__, self.location))
+        log.info('%s.on_published() on location = %s', self.__class__.__name__, self.location)
 
         notifications_service = services.get('notifications')
         if notifications_service:
@@ -136,8 +137,7 @@ class StageNotificationsMixin(object):
         :param CourseLocator _course_id: Course ID
         :param dict[str, object] services: runtime services
         """
-        log.info('{}.on_before_delete() on location = {}'.format(self.__class__.__name__, self.location))
-
+        log.info('%s.on_before_delete() on location = %s', self.__class__.__name__, self.location)
         notifications_service = services.get('notifications')
         if notifications_service:
             # If stage is being deleted, then it should remove any NotificationTimers that
@@ -147,9 +147,7 @@ class StageNotificationsMixin(object):
 
     @log_and_suppress_exceptions
     def fire_file_upload_notification(self, notifications_service):
-
-        log.info('{}.fire_file_upload_notification on location = {}'.format(self.__class__.__name__, self.location))
-
+        log.info('%s.fire_file_upload_notification on location = %s', self.__class__.__name__, self.location)
         # this NotificationType is registered in the list of default Open edX Notifications
         msg_type = notifications_service.get_notification_type(NotificationMessageTypes.FILE_UPLOADED)
 
@@ -164,15 +162,15 @@ class StageNotificationsMixin(object):
 
         msg = NotificationMessage(
             msg_type=msg_type,
-            namespace=unicode(self.course_id),
+            namespace=str(self.course_id),
             payload={
                 '_schema_version': 1,
                 'action_username': uploader_username,
                 'activity_name': self.activity.display_name,
             }
         )
-        location = unicode(self.location) if self.location else ''
-        add_click_link_params(msg, unicode(self.course_id), location)
+        location = str(self.location) if self.location else ''
+        add_click_link_params(msg, str(self.course_id), location)
 
         # NOTE: We're not using Celery here since we are expecting that we
         # will have only a very small handful of workgroup users
@@ -181,23 +179,23 @@ class StageNotificationsMixin(object):
     @log_and_suppress_exceptions
     def fire_grades_posted_notification(self, group_id, notifications_service):
         log.info(
-            '{}.fire_grades_posted_notification on location = {} and group id = {}'.format(
-                self.__class__.__name__, self.location,
-                group_id,
-            )
+            '%s.fire_grades_posted_notification on location = %s and group id = %s',
+            self.__class__.__name__,
+            self.location,
+            group_id,
         )
 
         msg_type = notifications_service.get_notification_type(NotificationMessageTypes.GRADES_POSTED)
         msg = NotificationMessage(
             msg_type=msg_type,
-            namespace=unicode(self.course_id),
+            namespace=str(self.course_id),
             payload={
                 '_schema_version': 1,
                 'activity_name': self.activity.display_name,
             }
         )
-        location = unicode(self.location) if self.location else ''
-        add_click_link_params(msg, unicode(self.course_id), location)
+        location = str(self.location) if self.location else ''
+        add_click_link_params(msg, str(self.course_id), location)
 
         send_at_date = self.open_date.replace(tzinfo=pytz.UTC) if self.open_date else None
         ignore_if_past_due = True

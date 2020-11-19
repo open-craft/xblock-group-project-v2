@@ -1,15 +1,13 @@
 from datetime import datetime, timedelta
 from unittest import TestCase
+
 import ddt
 import mock
-from group_project_v2.notifications import (
-    StageNotificationsMixin,
-    NotificationMessageTypes,
-    NotificationScopes,
-)
+from edx_notifications.data import NotificationType
+
+from group_project_v2.notifications import NotificationMessageTypes, NotificationScopes, StageNotificationsMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
 from tests.utils import TestWithPatchesMixin, parse_datetime
-from edx_notifications.data import NotificationType
 
 
 def get_notification_type(message_type):
@@ -23,7 +21,7 @@ def get_notification_type(message_type):
 def make_workgroup(user_ids):
     return WorkgroupDetails(
         users=[
-            {"id": user_id, "username": "User"+str(user_id), "email": "{0}@example.com".format(user_id)}
+            {"id": user_id, "username": "User" + str(user_id), "email": "{0}@example.com".format(user_id)}
             for user_id in user_ids
         ])
 
@@ -60,8 +58,7 @@ class BaseNotificationsTestCase(TestCase):
         args, _kwargs = target.call_args
         if including_kwargs:
             return args, _kwargs
-        else:
-            return args
+        return args
 
 
 @ddt.ddt
@@ -88,7 +85,7 @@ class TestStageNotificationsMixin(BaseNotificationsTestCase, TestWithPatchesMixi
 
         expected_user = next(user for user in workgroup.users if user.id == user_id)
         expected_action_username = expected_user.username
-        expected_user_ids = set([user.id for user in workgroup.users]) - {user_id}
+        expected_user_ids = {user.id for user in workgroup.users} - {user_id}
 
         with mock.patch('edx_notifications.data.NotificationMessage.add_click_link_params') as patched_link_params:
             block.fire_file_upload_notification(self.notifications_service_mock)
@@ -100,12 +97,12 @@ class TestStageNotificationsMixin(BaseNotificationsTestCase, TestWithPatchesMixi
             user_ids, message = self._get_call_args(self.notifications_service_mock.bulk_publish_notification_to_users)
             self.assertEqual(set(user_ids), expected_user_ids)
             self.assertEqual(message.msg_type.name, NotificationMessageTypes.FILE_UPLOADED)
-            self.assertEqual(message.namespace, unicode(course_id))
+            self.assertEqual(message.namespace, str(course_id))
             self.assertEqual(message.payload['action_username'], expected_action_username)
             self.assertEqual(message.payload['activity_name'], name)
 
             patched_link_params.assert_called_once_with(
-                {'course_id': unicode(course_id), 'location': unicode(stage_location)}
+                {'course_id': str(course_id), 'location': str(stage_location)}
             )
 
     @ddt.data(ValueError("test"), TypeError("QWE"), AttributeError("OMG"), Exception("Very Generic"))
@@ -158,18 +155,18 @@ class TestStageNotificationsMixin(BaseNotificationsTestCase, TestWithPatchesMixi
                 including_kwargs=True,
             )
 
-            self.assertEquals(args, ())  # no positional arguments
+            self.assertEqual(args, ())  # no positional arguments
             self.assertEqual(kwargs['scope_name'], NotificationScopes.WORKGROUP)
             self.assertEqual(kwargs['scope_context'], {'workgroup_id': group_id})
             self.assertIsNotNone(kwargs['send_at'])
             self.assertEqual(kwargs['ignore_if_past_due'], ignore_if_past_due)
             message = kwargs['msg']
             self.assertEqual(message.msg_type.name, NotificationMessageTypes.GRADES_POSTED)
-            self.assertEqual(message.namespace, unicode(course_id))
+            self.assertEqual(message.namespace, str(course_id))
             self.assertEqual(message.payload['activity_name'], 'Activity Name')
 
             patched_link_params.assert_called_once_with(
-                {'course_id': unicode(course_id), 'location': unicode(block.location)}
+                {'course_id': str(course_id), 'location': str(block.location)}
             )
 
     @ddt.data(ValueError("test"), TypeError("QWE"), AttributeError("OMG"), Exception("Very Generic"))

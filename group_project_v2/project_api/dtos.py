@@ -17,7 +17,7 @@ class ReducedUserDetails(object):
     def full_name(self):
         if self._full_name:
             return self._full_name
-        return u" ".join([unicode(part) for part in (self.first_name, self.last_name) if part is not None])
+        return u" ".join([str(part) for part in (self.first_name, self.last_name) if part is not None])
 
 
 # pylint:disable=too-many-instance-attributes
