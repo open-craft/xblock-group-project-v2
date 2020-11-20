@@ -28,7 +28,7 @@ class XBlockWithTranslationServiceMixin(object):
     """
     Mixin providing access to i18n service
     """
-    def _(self, text):
+    def _(self, text):  # pylint: disable=C0103
         """ Translate text """
         return self.runtime.service(self, "i18n").ugettext(text)
 

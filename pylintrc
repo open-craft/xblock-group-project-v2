@@ -8,7 +8,6 @@ symbols=yes
 
 [MESSAGES CONTROL]
 disable=
- invalid-name,
  missing-docstring,no-member,
  fixme,
  locally-disabled,star-args,
@@ -19,8 +18,7 @@ disable=
 good-names=id,log,loader,setUp
 max-args=6
 
-method-naming-style=snake_case
-
+method-rgx=_?[a-z_][a-z0-9_]{2,40}$
 function-rgx=_?[a-z_][a-z0-9_]{2,40}$
 method-name-hint=_?[a-z_][a-z0-9_]{2,40}$
 function-name-hint=_?[a-z_][a-z0-9_]{2,40}$
