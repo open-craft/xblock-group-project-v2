@@ -42,8 +42,12 @@ class EvaluationStagesBaseTestMixin(object):
     )
     @ddt.unpack
     def test_marks_complete_on_student_view(self, can_mark_complete, should_call_mark_complete):
+        services_mocks = {
+            "i18n": {}
+        }
         can_mark_mock = mock.PropertyMock(return_value=can_mark_complete)
         with patch_obj(self.block_to_test, 'can_mark_complete', can_mark_mock):
+            self.runtime_mock.service = lambda _, service_id: services_mocks.get(service_id)
             self.block.student_view({})
 
             if should_call_mark_complete:

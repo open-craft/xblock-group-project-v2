@@ -33,7 +33,12 @@ class StageComponentXBlockTestBase(TestCase, TestWithPatchesMixin):
 
     def setUp(self):
         super(StageComponentXBlockTestBase, self).setUp()
+        services_mocks = {
+            "i18n": mock.Mock(ugettext=lambda string: string),
+            "notifications": mock.Mock()
+        }
         self.runtime_mock = mock.create_autospec(Runtime)
+        self.runtime_mock.service = lambda _, service_id: services_mocks.get(service_id)
         self.stage_mock = mock.create_autospec(BaseGroupActivityStage)
 
         # pylint: disable=not-callable
@@ -311,8 +316,6 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
         uploaded_file = self._make_file()
 
         self.runtime_mock.publish = mock.Mock()
-        notification_service_mock = mock.Mock()
-        self.runtime_mock.service.return_value = notification_service_mock
 
         with mock.patch('group_project_v2.stage_components.UploadFile') as upload_file_class_mock:
             upload_file_mock = mock.create_autospec(UploadFile)
@@ -340,7 +343,9 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
                 }
             )
 
-            self.stage_mock.fire_file_upload_notification.assert_called_with(notification_service_mock)
+            self.stage_mock.fire_file_upload_notification.assert_called_with(
+                self.runtime_mock.service(self, 'notifications')
+            )
 
 
 @ddt.ddt

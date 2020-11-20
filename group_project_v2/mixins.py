@@ -17,10 +17,20 @@ from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
 from group_project_v2.utils import (
     MUST_BE_OVERRIDDEN, NO_EDITABLE_SETTINGS, Constants, GroupworkAccessDeniedError,
-    loader, groupwork_protected_view, add_resource
+    loader, groupwork_protected_view, add_resource, I18NService
 )
+from group_project_v2 import messages
 
 log = logging.getLogger(__name__)
+
+
+class XBlockWithTranslationServiceMixin(object):
+    """
+    Mixin providing access to i18n service
+    """
+    def _(self, text):  # pylint: disable=C0103
+        """ Translate text """
+        return self.runtime.service(self, "i18n").ugettext(text)
 
 
 class ChildrenNavigationXBlockMixin(object):
@@ -136,7 +146,7 @@ class SettingsMixin(object):
         return result
 
 
-class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMixin):
+class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMixin, XBlockWithTranslationServiceMixin):
 
     DEFAULT_TA_ROLE = ("assistant", )
 
@@ -224,7 +234,7 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMix
         @functools.wraps(func)
         def check_dashboard_access_wrapper(self, *args, **kwargs):
             if not self.can_access_dashboard(self.user_id):
-                raise GroupworkAccessDeniedError("User can't access dashboard")
+                raise GroupworkAccessDeniedError(self._(messages.USER_NOT_ACCESS_DASHBOARD))
             return func(self, *args, **kwargs)
 
         return check_dashboard_access_wrapper
@@ -246,7 +256,7 @@ class AuthXBlockMixin(SettingsMixin, ProjectAPIXBlockMixin, CourseAwareXBlockMix
         if he is not part of the team.
         """
         if not self.is_user_ta(user_id, course_id):
-            raise GroupworkAccessDeniedError("User can't access this group work")
+            raise GroupworkAccessDeniedError(self._(messages.USER_NOT_ACCESS_GROUPWORK))
 
     def get_organization_filter_for_user(self, user_id, additional_filter=None):
         """
@@ -527,16 +537,16 @@ class DashboardRootXBlockMixin(AuthXBlockMixin, UserAwareXBlockMixin):
         return itertools.chain.from_iterable(workgroup.users for workgroup in self.workgroups)
 
 
-class TemplateManagerMixin(object):
+class TemplateManagerMixin(I18NService):
     BASE_TEMPLATE_LOCATION = "templates/html"
     template_location = None
 
     def render_template(self, template, context, template_suffix=".html"):
         template_path = os.path.join(self.BASE_TEMPLATE_LOCATION, self.template_location, template + template_suffix)
-        return loader.render_template(template_path, context)
+        return loader.render_django_template(template_path, context, i18n_service=self.i18n_service)
 
 
-class CompletionMixin(object):
+class CompletionMixin(XBlockWithTranslationServiceMixin):
     completion_mode = XBlockCompletionMode.EXCLUDED
 
 

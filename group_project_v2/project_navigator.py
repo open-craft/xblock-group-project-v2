@@ -33,6 +33,7 @@ from group_project_v2.utils import (
     add_resource,
     gettext as _,
     loader,
+    I18NService
 )
 
 log = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ class ViewTypes(object):
     PRIVATE_DISCUSSION = 'private-discussion'
 
 
+@XBlock.needs("i18n")
 class GroupProjectNavigatorXBlock(
     ChildrenNavigationXBlockMixin,
     XBlockWithComponentsMixin,
@@ -56,7 +58,8 @@ class GroupProjectNavigatorXBlock(
     NoStudioEditableSettingsMixin,
     StudioContainerXBlockMixin,
     CompletionMixin,
-    XBlock
+    XBlock,
+    I18NService
 ):
     """
     XBlock that provides basic layout and switching between children XBlocks (views)
@@ -162,9 +165,10 @@ class GroupProjectNavigatorXBlock(
         }
 
         fragment.add_content(
-            loader.render_template(
+            loader.render_django_template(
                 'templates/html/project_navigator/project_navigator.html',
-                {'children': children_items}
+                {'children': children_items},
+                i18n_service=self.i18n_service,
             )
         )
         add_resource(self, 'css', 'public/css/project_navigator/project_navigator.css', fragment)
@@ -182,9 +186,10 @@ class GroupProjectNavigatorXBlock(
             fragment.add_fragment_resources(child_fragment)
             children_contents.append(child_fragment.content)
 
-        fragment.add_content(loader.render_template(
+        fragment.add_content(loader.render_django_template(
             "templates/html/project_navigator/project_navigator_author_view.html",
-            {'navigator': self, 'children_contents': children_contents}
+            {'navigator': self, 'children_contents': children_contents},
+            i18n_service=self.i18n_service,
         ))
         add_resource(self, 'css', 'public/css/project_navigator/project_navigator.css', fragment)
         return fragment
@@ -193,7 +198,7 @@ class GroupProjectNavigatorXBlock(
         validation = super(GroupProjectNavigatorXBlock, self).validate()
 
         if not self.has_child_of_category(NavigationViewXBlock.CATEGORY):
-            validation.add(ValidationMessage(ValidationMessage.ERROR, messages.MUST_CONTAIN_NAVIGATION_VIEW))
+            validation.add(ValidationMessage(ValidationMessage.ERROR, self._(messages.MUST_CONTAIN_NAVIGATION_VIEW)))
 
         return validation
 
@@ -206,6 +211,7 @@ class ProjectNavigatorViewXBlockBase(
     XBlockWithUrlNameDisplayMixin,
     AdminAccessControlXBlockMixin,
     XBlock,  # Moved from start.  Mixins usually come first.
+    I18NService,
 ):
     """
     Base class for Project Navigator children XBlocks (views)
@@ -263,12 +269,20 @@ class ProjectNavigatorViewXBlockBase(
     def is_view_available(self):  # pylint: disable=no-self-use
         return True
 
+    @property
+    def student_view_title(self):
+        return self._(self.STUDENT_VIEW_TITLE)
+
     def render_student_view(self, context, add_resources_from=None):
         """
         Common code to render student view
         """
         fragment = Fragment()
-        fragment.add_content(loader.render_django_template(self.TEMPLATE_BASE + self.template, context))
+        fragment.add_content(loader.render_django_template(
+            self.TEMPLATE_BASE + self.template,
+            context,
+            i18n_service=self.i18n_service,
+        ))
 
         if self.css_file:
             add_resource(self, 'css', self.CSS_BASE + self.css_file, fragment)
@@ -304,7 +318,7 @@ class ProjectNavigatorViewXBlockBase(
         fragment = Fragment()
         context = {
             'type': self.type,
-            'display_name': self.display_name_with_default,
+            'display_name': self._(self.display_name_with_default),
             'skip_content': self.skip_content
         }
         for attribute in ['icon', 'selector_text']:
@@ -494,7 +508,7 @@ class PrivateDiscussionViewXBlock(ProjectNavigatorViewXBlockBase):
         if not self._project_has_discussion():
             validation.add(ValidationMessage(
                 ValidationMessage.WARNING,
-                messages.NO_DISCUSSION_IN_GROUP_PROJECT.format(block_type=self.STUDIO_LABEL)
+                self._(messages.NO_DISCUSSION_IN_GROUP_PROJECT).format(block_type=self._(self.STUDIO_LABEL))
             ))
 
         return validation
