@@ -24,6 +24,7 @@ from group_project_v2.mixins import (
     NoStudioEditableSettingsMixin,
     UserAwareXBlockMixin,
     WorkgroupAwareXBlockMixin,
+    XBlockWithTranslationServiceMixin,
 )
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_navigator import ResourcesViewXBlock, SubmissionsViewXBlock
@@ -31,6 +32,7 @@ from group_project_v2.upload_file import UploadFile
 from group_project_v2.utils import (
     MUST_BE_OVERRIDDEN,
     FieldValuesContextManager,
+    I18NService,
     add_resource,
     build_date_field,
     format_date,
@@ -49,7 +51,8 @@ from group_project_v2.utils import (
 log = logging.getLogger(__name__)
 
 
-class BaseStageComponentXBlock(CompletionMixin, XBlock):
+@XBlock.needs("i18n")
+class BaseStageComponentXBlock(CompletionMixin, XBlock, XBlockWithTranslationServiceMixin, I18NService):
     @lazy
     def stage(self):
         """
@@ -164,7 +167,7 @@ class GroupProjectVideoResourceXBlock(BaseGroupProjectResourceXBlock):
 
     def validate_field_data(self, validation, data):
         if not data.video_id:
-            validation.add(ValidationMessage(ValidationMessage.ERROR, messages.MUST_CONTAIN_CONTENT_ID))
+            validation.add(ValidationMessage(ValidationMessage.ERROR, self._(messages.MUST_CONTAIN_CONTENT_ID)))
 
         return validation
 
@@ -188,7 +191,7 @@ class StaticContentBaseXBlock(BaseStageComponentXBlock, XBlockWithPreviewMixin, 
         render_context = {
             'block': self,
             'block_link': get_link_to_block(target_block),
-            'block_text': self.TEXT_TEMPLATE.format(activity_name=activity.display_name),
+            'block_text': self._(self.TEXT_TEMPLATE).format(activity_name=self._(activity.display_name)),
             'target_block_id': str(target_block.scope_ids.usage_id),
             'view_icon': target_block.icon
         }
@@ -207,8 +210,10 @@ class SubmissionsStaticContentXBlock(StaticContentBaseXBlock):
     display_name_with_default = DISPLAY_NAME
 
     TARGET_PROJECT_NAVIGATOR_VIEW = SubmissionsViewXBlock.CATEGORY
-    TEXT_TEMPLATE = "You can upload (or replace) your file(s) before the due date in the project navigator panel" \
-                    " at right by clicking the upload button"
+    TEXT_TEMPLATE = _(
+        u"You can upload (or replace) your file(s) before the due date in the project navigator panel"
+        u" at right by clicking the upload button"
+    )
 
 
 class GradeRubricStaticContentXBlock(StaticContentBaseXBlock):
@@ -219,8 +224,10 @@ class GradeRubricStaticContentXBlock(StaticContentBaseXBlock):
     display_name_with_default = DISPLAY_NAME
 
     TARGET_PROJECT_NAVIGATOR_VIEW = ResourcesViewXBlock.CATEGORY
-    TEXT_TEMPLATE = "The {activity_name} grading rubric is provided in the project navigator panel" \
-                    " at right by clicking the resources button"""
+    TEXT_TEMPLATE = _(
+        u"The {activity_name} grading rubric is provided in the project navigator panel"
+        u" at right by clicking the resources button"""
+    )
 
 
 # pylint: disable=invalid-name
@@ -316,7 +323,11 @@ class GroupProjectSubmissionXBlock(
         uploading_allowed = (self.stage.available_now and self.stage.is_group_member) or self.stage.is_admin_grader
         render_context = {'submission': self, 'upload': self.upload, 'disabled': not uploading_allowed}
         render_context.update(context)
-        fragment.add_content(loader.render_template(self.PROJECT_NAVIGATOR_VIEW_TEMPLATE, render_context))
+        fragment.add_content(loader.render_django_template(
+            self.PROJECT_NAVIGATOR_VIEW_TEMPLATE,
+            render_context,
+            i18n_service=self.i18n_service,
+        ))
         add_resource(self, 'javascript', 'public/js/components/submission.js', fragment)
         fragment.initialize_js("GroupProjectSubmissionBlock")
         return fragment
@@ -326,20 +337,27 @@ class GroupProjectSubmissionXBlock(
         fragment = Fragment()
         render_context = {'submission': self, 'upload': self.get_upload(group_id)}
         render_context.update(context)
-        fragment.add_content(loader.render_template(self.REVIEW_VIEW_TEMPLATE, render_context))
+        fragment.add_content(loader.render_django_template(
+            self.REVIEW_VIEW_TEMPLATE,
+            render_context,
+            i18n_service=self.i18n_service,
+        ))
         # NOTE: adding js/css likely won't work here, as the result of this view is added as an HTML to an existing DOM
         # element
         return fragment
 
     def _validate_upload(self, request):
         if not self.stage.available_now:
-            template = messages.STAGE_NOT_OPEN_TEMPLATE if not self.stage.is_open else messages.STAGE_CLOSED_TEMPLATE
+            if self.stage.is_open:
+                template = self._(messages.STAGE_CLOSED_TEMPLATE)
+            else:
+                template = self._(messages.STAGE_NOT_OPEN_TEMPLATE)
             # 422 = unprocessable entity
-            return 422, {'result': 'error', 'message': template.format(action=self.stage.STAGE_ACTION)}
+            return 422, {'result': 'error', 'message': template.format(action=self._(self.stage.STAGE_ACTION))}
 
         if not self.stage.is_group_member and not self.stage.is_admin_grader:
             # 403 - forbidden
-            return 403, {'result': 'error', 'message': messages.NON_GROUP_MEMBER_UPLOAD}
+            return 403, {'result': 'error', 'message': self._(messages.NON_GROUP_MEMBER_UPLOAD)}
 
         try:
             self.validator(request.params[self.upload_id].file)
@@ -362,8 +380,8 @@ class GroupProjectSubmissionXBlock(
         if failure_code is None and response_data is None:
             target_activity = self.stage.activity
             response_data = {
-                "title": messages.SUCCESSFUL_UPLOAD_TITLE,
-                "message": messages.SUCCESSFUL_UPLOAD_MESSAGE_TPL.format(icon='fa fa-paperclip')
+                "title": self._(messages.SUCCESSFUL_UPLOAD_TITLE),
+                "message": self._(messages.SUCCESSFUL_UPLOAD_MESSAGE_TPL).format(icon='fa fa-paperclip')
             }
             failure_code = 0
             try:
@@ -400,11 +418,11 @@ class GroupProjectSubmissionXBlock(
                     failure_code = exception.code
                 error_message = str(exception).strip()
                 if error_message == '':
-                    error_message = UNKNOWN_ERROR
+                    error_message = self._(UNKNOWN_ERROR)
 
                 response_data.update({
-                    "title": messages.FAILED_UPLOAD_TITLE,
-                    "message": messages.FAILED_UPLOAD_MESSAGE_TPL.format(error_goes_here=error_message)
+                    "title": self._(messages.FAILED_UPLOAD_TITLE),
+                    "message": self._(messages.FAILED_UPLOAD_MESSAGE_TPL).format(error_goes_here=error_message)
                 })
 
         response = webob.response.Response(body=json.dumps(response_data))
@@ -482,7 +500,11 @@ class ReviewSubjectSeletorXBlockBase(BaseStageComponentXBlock, XBlockWithPreview
         render_context.update(context)
         add_resource(self, 'css', "public/css/components/review_subject_selector.css", fragment)
         add_resource(self, 'javascript', "public/js/components/review_subject_selector.js", fragment)
-        fragment.add_content(loader.render_template(self.STUDENT_TEMPLATE, render_context))
+        fragment.add_content(loader.render_django_template(
+            self.STUDENT_TEMPLATE,
+            render_context,
+            i18n_service=self.i18n_service,
+        ))
         fragment.initialize_js('ReviewSubjectSelectorXBlock')
         return fragment
 
@@ -730,7 +752,7 @@ class GroupProjectBaseFeedbackDisplayXBlock(
     @groupwork_protected_view
     def student_view(self, context):
         if self.question is None:
-            return Fragment(messages.COMPONENT_MISCONFIGURED)
+            return Fragment(self._(messages.COMPONENT_MISCONFIGURED))
 
         raw_feedback = self.get_feedback()
 
@@ -752,7 +774,11 @@ class GroupProjectBaseFeedbackDisplayXBlock(
                 render_context['mean'] = _(u"N/A")
 
         render_context.update(context)
-        fragment.add_content(loader.render_template("templates/html/components/review_assessment.html", render_context))
+        fragment.add_content(loader.render_django_template(
+            "templates/html/components/review_assessment.html",
+            render_context,
+            i18n_service=self.i18n_service,
+        ))
         return fragment
 
     def validate(self):
@@ -777,7 +803,7 @@ class GroupProjectBaseFeedbackDisplayXBlock(
             return self.student_view(context)
 
         fragment = Fragment()
-        fragment.add_content(messages.QUESTION_NOT_SELECTED)
+        fragment.add_content(self._(messages.QUESTION_NOT_SELECTED))
         return fragment
 
     def studio_view(self, context):
@@ -852,7 +878,11 @@ class ProjectTeamXBlock(
         }
         render_context.update(context)
 
-        fragment.add_content(loader.render_template("templates/html/components/project_team.html", render_context))
+        fragment.add_content(loader.render_django_template(
+            "templates/html/components/project_team.html",
+            render_context,
+            i18n_service=self.i18n_service,
+        ))
         add_resource(self, 'css', "public/css/components/project_team.css", fragment)
         add_resource(self, 'javascript', "public/js/components/project_team.js", fragment)
         fragment.initialize_js("ProjectTeamXBlock")

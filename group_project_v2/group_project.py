@@ -47,6 +47,7 @@ from group_project_v2.utils import groupwork_protected_view, make_key, mean, nam
 log = logging.getLogger(__name__)
 
 
+@XBlock.needs("i18n")
 @XBlock.wants("settings")
 class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardRootXBlockMixin, XBlock):
     display_name = String(
@@ -162,17 +163,17 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         # activity should be rendered first, as some stages might report completion in student-view - this way stage
         # PN sees updated state.
         target_activity = target_stage.activity if target_stage else None
-        render_child_fragment(target_activity, 'activity_content', messages.NO_ACTIVITIES, child_context)
+        render_child_fragment(target_activity, 'activity_content', self._(messages.NO_ACTIVITIES), child_context)
 
         # TODO: project nav is slow, mostly due to navigation view. It might make sense to rework it into
         # asynchronously loading navigation and stage states.
         project_navigator = self.get_child_of_category(GroupProjectNavigatorXBlock.CATEGORY)
         render_child_fragment(
-            project_navigator, 'project_navigator_content', messages.NO_PROJECT_NAVIGATOR, child_context
+            project_navigator, 'project_navigator_content', self._(messages.NO_PROJECT_NAVIGATOR), child_context
         )
 
         discussion = self.get_child_of_category(DiscussionXBlockShim.CATEGORY)
-        render_child_fragment(discussion, 'discussion_content', messages.NO_DISCUSSION, child_context)
+        render_child_fragment(discussion, 'discussion_content', self._(messages.NO_DISCUSSION), child_context)
 
         fragment.add_content(self.render_template('student_view', render_context))
 
@@ -226,7 +227,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
             target_activity = self.activities[0]
 
         activity_fragment = self._render_child_fragment_with_fallback(
-            target_activity, ctx, messages.NO_ACTIVITIES, view='dashboard_detail_view'
+            target_activity, ctx, self._(messages.NO_ACTIVITIES), view='dashboard_detail_view'
         )
         render_context['activity_content'] = activity_fragment.content
         fragment.add_fragment_resources(activity_fragment)
@@ -275,7 +276,7 @@ class GroupProjectXBlock(CommonMixinCollection, DashboardXBlockMixin, DashboardR
         if not self.has_child_of_category(GroupProjectNavigatorXBlock.CATEGORY):
             validation.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                messages.MUST_CONTAIN_PROJECT_NAVIGATOR_BLOCK
+                self._(messages.MUST_CONTAIN_PROJECT_NAVIGATOR_BLOCK)
             ))
 
         return validation
@@ -322,6 +323,7 @@ StageCompletionDetailsData = named_tuple_with_docstring(  # pylint: disable=inva
 )
 
 
+@XBlock.needs("i18n")
 @XBlock.wants('notifications')
 @XBlock.wants('courseware_parent_info')
 @XBlock.wants('settings')
@@ -508,7 +510,7 @@ class GroupActivityXBlock(
         target_stage = self.get_stage_to_display(current_stage_id)
 
         if not target_stage:
-            fragment.add_content(messages.NO_STAGES)
+            fragment.add_content(self._(messages.NO_STAGES))
         else:
             stage_fragment = target_stage.render('student_view', context)
             fragment.add_fragment_resources(stage_fragment)
@@ -627,7 +629,7 @@ class GroupActivityXBlock(
             'groups': visible_groups,
             'filtered_out_workgroups': len(groups_data) - len(visible_groups),
             'stage_cell_width_percent': (100 - 30) / float(len(stages)),  # 30% is reserved for first column
-            'assigned_to_groups_label': messages.ASSIGNED_TO_GROUPS_LABEL.format(group_count=len(groups_data))
+            'assigned_to_groups_label': self._(messages.ASSIGNED_TO_GROUPS_LABEL).format(group_count=len(groups_data))
         }
         fragment.add_content(self.render_template('dashboard_detail_view', render_context))
 

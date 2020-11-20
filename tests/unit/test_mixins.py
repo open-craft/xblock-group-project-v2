@@ -262,7 +262,16 @@ class WorkgroupAwareXBlockMixinGuineaPig(CommonMixinGuineaPig, WorkgroupAwareXBl
 @ddt.ddt
 class TestWorkgroupAwareXBlockMixin(TestCase, TestWithPatchesMixin):
     def setUp(self):
+        services_mocks = {
+            "i18n": mock.Mock(ugettext=lambda string: string)
+        }
         self.block = WorkgroupAwareXBlockMixinGuineaPig()
+        self.runtime_mock = mock.create_autospec(Runtime)
+        self.runtime_mock.service = lambda _, service_id: services_mocks.get(service_id)
+        self.make_patch(
+            WorkgroupAwareXBlockMixinGuineaPig, 'runtime',
+            mock.PropertyMock(return_value=self.runtime_mock)
+        )
         self.project_api_mock = mock.create_autospec(TypedProjectAPI)
         self.make_patch(
             WorkgroupAwareXBlockMixinGuineaPig, 'project_api',

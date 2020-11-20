@@ -39,6 +39,32 @@ NO_EDITABLE_SETTINGS = gettext(u"This XBlock does not contain any editable setti
 MUST_BE_OVERRIDDEN = gettext(u"Must be overridden in inherited class")
 
 
+def ngettext_fallback(text_singular, text_plural, number):
+    """ Dummy `ngettext` replacement to make string extraction tools scrape strings marked for translation """
+    if number == 1:
+        return text_singular
+    return text_plural
+
+
+class DummyTranslationService(object):
+    """
+    Dummy drop-in replacement for i18n XBlock service
+    """
+    _catalog = {}
+    gettext = _
+    ngettext = ngettext_fallback
+
+
+class I18NService(object):
+    """
+    Add i18n_service attribute to XBlocks
+    """
+    @property
+    def i18n_service(self):
+        """ Obtains translation service """
+        return self.runtime.service(self, "i18n") or DummyTranslationService()
+
+
 # TODO: collect all constants here?
 class Constants(object):
     ACTIVATE_BLOCK_ID_PARAMETER_NAME = 'activate_block_id'

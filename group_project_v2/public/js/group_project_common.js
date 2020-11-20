@@ -6,6 +6,9 @@ if (typeof gettext === "undefined") {
         return string;
     };
 }
+if (typeof window.GroupProjectV2XBlockI18N !== "undefined"){
+  var gettext = window.GroupProjectV2XBlockI18N.gettext; // jshint ignore:line
+}
 
 var GroupProjectEvents = {
     ProjectNavigator: {

@@ -87,8 +87,8 @@ class ReviewBaseStage(BaseGroupActivityStage):
         if not self.questions:
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                messages.QUESTION_BLOCKS_ARE_MISSING.format(
-                    class_name=self.__class__.__name__, stage_title=self.display_name
+                self._(messages.QUESTION_BLOCKS_ARE_MISSING).format(
+                    class_name=self.__class__.__name__, stage_title=self._(self.display_name)
                 )
             ))
 
@@ -176,11 +176,14 @@ class ReviewBaseStage(BaseGroupActivityStage):
     def submit_review(self, submissions, _context=''):
         # if admin grader - still allow providing grades even for non-TA-graded activities
         if self.is_admin_grader and not self.allow_admin_grader_access:
-            return {'result': 'error', 'msg': messages.TA_GRADING_NOT_ALLOWED}
+            return {'result': 'error', 'msg': self._(messages.TA_GRADING_NOT_ALLOWED)}
 
         if not self.available_now:
-            reason = messages.STAGE_NOT_OPEN_TEMPLATE if not self.is_open else messages.STAGE_CLOSED_TEMPLATE
-            return {'result': 'error', 'msg': reason.format(action=self.STAGE_ACTION)}
+            if self.is_open:
+                reason = self._(messages.STAGE_CLOSED_TEMPLATE)
+            else:
+                reason = self._(messages.STAGE_NOT_OPEN_TEMPLATE)
+            return {'result': 'error', 'msg': reason.format(action=self._(self.STAGE_ACTION))}
 
         try:
             self.do_submit_review(submissions)
@@ -197,7 +200,7 @@ class ReviewBaseStage(BaseGroupActivityStage):
 
         return {
             'result': 'success',
-            'msg': messages.FEEDBACK_SAVED_MESSAGE,
+            'msg': self._(messages.FEEDBACK_SAVED_MESSAGE),
             'new_stage_states': [self.get_new_stage_state_data()]
         }
 
@@ -274,17 +277,17 @@ class TeamEvaluationStage(ReviewBaseStage):
         if self.grade_questions:
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                messages.GRADED_QUESTIONS_NOT_SUPPORTED.format(
-                    class_name=self.STUDIO_LABEL, stage_title=self.display_name
+                self._(messages.GRADED_QUESTIONS_NOT_SUPPORTED).format(
+                    class_name=self._(self.STUDIO_LABEL), stage_title=self._(self.display_name)
                 )
             ))
 
         if not self.has_child_of_category(PeerSelectorXBlock.CATEGORY):
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                messages.PEER_SELECTOR_BLOCK_IS_MISSING.format(
-                    class_name=self.STUDIO_LABEL, stage_title=self.display_name,
-                    peer_selector_class_name=PeerSelectorXBlock.STUDIO_LABEL
+                self._(messages.PEER_SELECTOR_BLOCK_IS_MISSING).format(
+                    class_name=self._(self.STUDIO_LABEL), stage_title=self._(self.display_name),
+                    peer_selector_class_name=self._(PeerSelectorXBlock.STUDIO_LABEL)
                 )
             ))
 
@@ -500,17 +503,17 @@ class PeerReviewStage(ReviewBaseStage):
         if not self.grade_questions:
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                messages.GRADED_QUESTIONS_ARE_REQUIRED.format(
-                    class_name=self.STUDIO_LABEL, stage_title=self.display_name
+                self._(messages.GRADED_QUESTIONS_ARE_REQUIRED).format(
+                    class_name=self._(self.STUDIO_LABEL), stage_title=self._(self.display_name)
                 )
             ))
 
         if not self.has_child_of_category(GroupSelectorXBlock.CATEGORY):
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                messages.GROUP_SELECTOR_BLOCK_IS_MISSING.format(
-                    class_name=self.STUDIO_LABEL, stage_title=self.display_name,
-                    group_selector_class_name=GroupSelectorXBlock.STUDIO_LABEL
+                self._(messages.GROUP_SELECTOR_BLOCK_IS_MISSING).format(
+                    class_name=self._(self.STUDIO_LABEL), stage_title=self._(self.display_name),
+                    group_selector_class_name=self._(GroupSelectorXBlock.STUDIO_LABEL)
                 )
             ))
 
@@ -537,8 +540,10 @@ class PeerReviewStage(ReviewBaseStage):
             submission_stage_contents.append(stage_fragment.content)
 
         context = {'block': self, 'submission_stage_contents': submission_stage_contents}
-        html_output = loader.render_template(
-            '/templates/html/stages/stages_group_review_other_team_submissions.html', context
+        html_output = loader.render_django_template(
+            '/templates/html/stages/stages_group_review_other_team_submissions.html',
+            context,
+            i18n_service=self.i18n_service,
         )
 
         return webob.response.Response(body=json.dumps({"html": html_output}))

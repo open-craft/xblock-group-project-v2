@@ -49,8 +49,8 @@ class FeedbackDisplayBaseStage(SimpleCompletionStageMixin, BaseGroupActivityStag
         if not self.feedback_display_blocks:
             violations.add(ValidationMessage(
                 ValidationMessage.ERROR,
-                messages.FEEDBACK_BLOCKS_ARE_MISSING.format(
-                    class_name=self.__class__.__name__, stage_title=self.display_name
+                self._(messages.FEEDBACK_BLOCKS_ARE_MISSING).format(
+                    class_name=self.__class__.__name__, stage_title=self._(self.display_name)
                 )
             ))
 
