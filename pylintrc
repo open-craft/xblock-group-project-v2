@@ -8,6 +8,7 @@ symbols=yes
 
 [MESSAGES CONTROL]
 disable=
+ invalid-name,
  missing-docstring,no-member,
  fixme,
  locally-disabled,star-args,
