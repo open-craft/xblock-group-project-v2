@@ -30,6 +30,7 @@
     "This task has been marked as complete.": "To zadanie oznaczono jako uko\u0144czone.", 
     "Upload cancelled by user.": "U\u017cytkownik przerwa\u0142 przesy\u0142anie.", 
     "Upload cancelled.": "Przerwano przesy\u0142anie", 
+    "Uploaded by ": "Przes\u0142ane przez ", 
     "We encountered an error loading your feedback.": "Podczas wczytywania Twojej opinii wyst\u0105pi\u0142 b\u0142\u0105d.", 
     "We encountered an error saving your feedback.": "Podczas zapisywania Twojej opinii wyst\u0105pi\u0142 b\u0142\u0105d.", 
     "We encountered an error saving your progress.": "Podczas zapisywania Twojego stopnia uko\u0144czenia wyst\u0105pi\u0142 b\u0142\u0105d.", 

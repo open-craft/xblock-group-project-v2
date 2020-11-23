@@ -30,6 +30,7 @@
     "This task has been marked as complete.": "Diese Aufgabe wurde als abgeschlossen markiert.", 
     "Upload cancelled by user.": "Upload von Nutzer abgebrochen.", 
     "Upload cancelled.": "Upload abgebrochen.", 
+    "Uploaded by ": "Hochgeladen von ", 
     "We encountered an error loading your feedback.": "Beim Laden Ihres Feedbacks ist ein Fehler aufgetreten.", 
     "We encountered an error saving your feedback.": "Beim Speichern Ihres Feedbacks ist ein Fehler aufgetreten.", 
     "We encountered an error saving your progress.": "Beim Speichern Ihres Fortschritts ist ein Fehler aufgetreten.", 
