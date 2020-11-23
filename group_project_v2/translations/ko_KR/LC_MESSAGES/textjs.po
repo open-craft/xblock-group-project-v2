@@ -87,3 +87,7 @@ msgstr "다시 제출"
 #: public/js/stages/review_stage.js:6
 msgid "Submit"
 msgstr "제출"
+
+#: submission.js:108
+msgid "Uploaded by "
+msgstr "업로드: "

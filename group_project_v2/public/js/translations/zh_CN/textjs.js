@@ -30,6 +30,7 @@
     "This task has been marked as complete.": "\u6b64\u4efb\u52a1\u5df2\u6807\u8bb0\u4e3a\u5b8c\u6210\u3002", 
     "Upload cancelled by user.": "\u7528\u6237\u5df2\u53d6\u6d88\u4e0a\u4f20\u3002", 
     "Upload cancelled.": "\u4e0a\u4f20\u5df2\u53d6\u6d88\u3002", 
+    "Uploaded by ": "\u4e0a\u4f20\u4eba ", 
     "We encountered an error loading your feedback.": "\u52a0\u8f7d\u60a8\u7684\u53cd\u9988\u65f6\u9047\u5230\u9519\u8bef\u3002", 
     "We encountered an error saving your feedback.": "\u4fdd\u5b58\u60a8\u7684\u53cd\u9988\u65f6\u9047\u5230\u9519\u8bef\u3002", 
     "We encountered an error saving your progress.": "\u4fdd\u5b58\u60a8\u7684\u8fdb\u5ea6\u65f6\u9047\u5230\u9519\u8bef\u3002", 

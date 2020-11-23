@@ -903,3 +903,31 @@ msgstr "#{group_id}"
 #, python-brace-format
 msgid "Group #{group_id}"
 msgstr "그룹 #{group_id}"
+
+#: messages.py:10
+msgid "User can't access dashboard"
+msgstr "사용자가 대시보드에 액세스할 수 없음"
+
+#: messages.py:10
+msgid "User can't access this group work"
+msgstr "사용자가 이 그룹 과제에 액세스할 수 없음"
+
+#: stage_component.py:214
+msgid ""
+"You can upload (or replace) your file(s) before the due date in the project navigator panel"
+" at right by clicking the upload button"
+msgstr "프로젝트 탐색기에서 업로드 버튼을 클릭하면 마감일 전에 파일을 업로드하거나 교체할 수 있습니다."
+
+#: stage_component.py:228
+msgid ""
+"The {activity_name} grading rubric is provided in the project navigator panel"
+" at right by clicking the resources button"
+msgstr "리소스 버튼을 클릭하면 프로젝트 탐색기에서 {activity_name} 채점기준표를 사용할 수 있습니다."
+
+#: group_selector.html:20
+msgid "View team submission(s)"
+msgstr "팀 제출 보기"
+
+#: submission_navigator_view.html:11
+msgid "Browse computer to upload file..."
+msgstr "컴퓨터에서 업로드할 파일 찾아보기..."

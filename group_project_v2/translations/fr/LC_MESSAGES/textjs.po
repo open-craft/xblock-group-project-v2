@@ -87,3 +87,7 @@ msgstr "Renvoyer"
 #: public/js/stages/review_stage.js:6
 msgid "Submit"
 msgstr "Envoyer"
+
+#: submission.js:108
+msgid "Uploaded by "
+msgstr "Téléchargé par "
