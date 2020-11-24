@@ -87,3 +87,7 @@ msgstr "重新提交"
 #: public/js/stages/review_stage.js:6
 msgid "Submit"
 msgstr "提交"
+
+#: submission.js:108
+msgid "Uploaded by "
+msgstr "上传人 "

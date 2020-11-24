@@ -87,3 +87,7 @@ msgstr "Prześlij ponownie"
 #: public/js/stages/review_stage.js:6
 msgid "Submit"
 msgstr "Prześlij"
+
+#: submission.js:108
+msgid "Uploaded by "
+msgstr "Przesłane przez "
