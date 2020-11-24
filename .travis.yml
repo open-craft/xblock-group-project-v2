@@ -1,33 +1,53 @@
-language: python
-python:
-    - "3.5"
-    - "3.8"
-env:
+_python_job:  &python_job
+  language: python
+  env:
     - DJANGO_SETTINGS_MODULE=workbench.settings
       MOZ_HEADLESS=1
-install:
+  install:
     - "pip install -r requirements/base.txt"
     - "pip install -r requirements/test.txt"
     - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/requirements/base.txt"
     - "pip install -r $VIRTUAL_ENV/src/xblock-sdk/requirements/test.txt"
     - "pip install -e ."
     - "pip install 'selenium<3'" # xblock-sdk installs a newer version but we still need 2.x
-    - "npm install"
-script:
+  script:
     - pycodestyle group_project_v2 tests
     - pylint group_project_v2 --rcfile=pylintrc
     - pylint tests --rcfile=tests/pylintrc
-    - ./node_modules/jshint/bin/jshint group_project_v2 tests
-    - xvfb-run ./node_modules/.bin/karma start tests/js/karma.conf.js --single-run
-    - cat coverage/js/karma_coverage.txt
     - mkdir var
     - touch workbench.log
     - xvfb-run pytest
     - isort --check-only --diff --recursive tests group_project_v2  *.py
+  addons:
+    firefox: "43.0"
+  cache:
+    pip: true
+jobs:
+  include:
+    - name: Python 3.5 (Juniper) Tests
+      python:
+        - "3.5"
+      <<: *python_job
+    - name: Python 3.8 (Koa) Tests
+      python:
+        - "3.8"
+      <<: *python_job
+    - name: Javascript Tests
+      language: node_js
+      node_js:
+        - "lts/*"
+      env:
+        - MOZ_HEADLESS=1
+      install:
+        - npm install
+      script:
+        - ./node_modules/jshint/bin/jshint group_project_v2 tests
+        - xvfb-run ./node_modules/.bin/karma start tests/js/karma.conf.js --single-run
+        - cat coverage/js/karma_coverage.txt
+      addons:
+        firefox: "43.0"
+      cache:
+        npm: true
+
 notifications:
   email: false
-addons:
-  firefox: "43.0"
-cache:
-  npm: true
-  pip: true
