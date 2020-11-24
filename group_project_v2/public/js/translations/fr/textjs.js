@@ -30,6 +30,7 @@
     "This task has been marked as complete.": "Cette t\u00e2che a \u00e9t\u00e9 marqu\u00e9e comme termin\u00e9e.", 
     "Upload cancelled by user.": "T\u00e9l\u00e9chargement annul\u00e9 par l'utilisateur.", 
     "Upload cancelled.": "T\u00e9l\u00e9chargement annul\u00e9.", 
+    "Uploaded by ": "T\u00e9l\u00e9charg\u00e9 par ", 
     "We encountered an error loading your feedback.": "Une erreur s'est produite lors du chargement de vos commentaires.", 
     "We encountered an error saving your feedback.": "Une erreur s'est produite lors de la sauvegarde de vos commentaires.", 
     "We encountered an error saving your progress.": "Une erreur s'est produite et a emp\u00each\u00e9 la sauvegarde de votre progression.", 

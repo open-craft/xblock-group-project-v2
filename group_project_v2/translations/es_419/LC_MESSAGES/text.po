@@ -903,3 +903,33 @@ msgstr "#{group_id}"
 #, python-brace-format
 msgid "Group #{group_id}"
 msgstr "Grupo núm.{group_id}"
+
+#: messages.py:10
+msgid "User can't access dashboard"
+msgstr "El usuario no puede acceder al panel"
+
+#: messages.py:10
+msgid "User can't access this group work"
+msgstr "El usuario no puede acceder a este trabajo en grupo"
+
+#: stage_component.py:214
+msgid ""
+"You can upload (or replace) your file(s) before the due date in the project navigator panel"
+" at right by clicking the upload button"
+msgstr "Puede cargar (o reemplazar) sus archivos antes de la fecha de entrega. Para ello, haga "
+"clic en botón de carga que aparece a la derecha del panel de navegación del proyecto"
+
+#: stage_component.py:228
+msgid ""
+"The {activity_name} grading rubric is provided in the project navigator panel"
+" at right by clicking the resources button"
+msgstr "Las categorías de calificación para {activity_name} se muestran a la derecha del panel de navegación "
+"del proyecto. Para consultarlas, haga clic en botón de recursos"
+
+#: group_selector.html:20
+msgid "View team submission(s)"
+msgstr "Ver entregas del equipo"
+
+#: submission_navigator_view.html:11
+msgid "Browse computer to upload file..."
+msgstr "Examinar computadora para cargar archivo..."

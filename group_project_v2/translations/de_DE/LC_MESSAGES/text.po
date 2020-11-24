@@ -895,3 +895,33 @@ msgstr "#{group_id}"
 #, python-brace-format
 msgid "Group #{group_id}"
 msgstr "Gruppe #{group_id}"
+
+#: messages.py:10
+msgid "User can't access dashboard"
+msgstr "Nutzer hat keinen Zugriff auf das Dashboard"
+
+#: messages.py:10
+msgid "User can't access this group work"
+msgstr "Nutzer hat keinen Zugriff auf diese Gruppenarbeit"
+
+#: stage_component.py:214
+msgid ""
+"You can upload (or replace) your file(s) before the due date in the project navigator panel"
+" at right by clicking the upload button"
+msgstr "Wenn Sie Ihre Dateien vor dem Abgabetermin, der im rechten Bereich unter Projektnavigator angezeigt wird, "
+"hochladen (oder durch andere ersetzen) möchten, klicken Sie auf die Schaltfläche „Hochladen“."
+
+#: stage_component.py:228
+msgid ""
+"The {activity_name} grading rubric is provided in the project navigator panel"
+" at right by clicking the resources button"
+msgstr "Die Benotungsrubrik für {activity_name} finden Sie im rechten Bereich unter Projektnavigator. "
+"Durch Klicken auf die Schaltfläche „Ressourcen“ wird sie eingeblendet."
+
+#: group_selector.html:20
+msgid "View team submission(s)"
+msgstr "Teameinreichungen anzeigen"
+
+#: submission_navigator_view.html:11
+msgid "Browse computer to upload file..."
+msgstr "Datei auf dem Computer suchen und hochladen…"
