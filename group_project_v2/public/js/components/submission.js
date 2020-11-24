@@ -105,7 +105,7 @@ function GroupProjectSubmissionBlock(runtime, element) {
                                     [new_state.activity_id, new_state.stage_id, new_state.state]
                                 );
                                 $('.' + parentData.paramName + '_uploaded_by', element).html(
-                                    'Uploaded by ' + data.user_label + ' on ' + data.submission_date);
+                                    GroupProjectCommon.gettext('Uploaded by ') + data.user_label + ' on ' + data.submission_date);
                             }
                         }
 
