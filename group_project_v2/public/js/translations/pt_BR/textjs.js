@@ -16,6 +16,30 @@
 
   django.catalog = django.catalog || {};
   
+  var newcatalog = {
+    " Technical details: 403 error.": "Detalhes t\u00e9cnicos: erro 403.", 
+    " Technical details: CSRF verification failed.": "Detalhes t\u00e9cnicos: falha na verifica\u00e7\u00e3o da solicita\u00e7\u00e3o intersite forjada.", 
+    "An error occurred while uploading your file. Please refresh the page and try again. If it still does not upload, please contact your Course TA.": "Ocorreu um erro ao enviar seu arquivo. Atualize a p\u00e1gina e tente novamente. Se ainda n\u00e3o carregar, entre em contato com o assistente de ensino do curso.", 
+    "Error": "Erro", 
+    "Error refreshing statuses": "Erro ao atualizar os status", 
+    "Please select Group to review": "Selecione um grupo para revisar", 
+    "Please select Teammate to review": "Selecione um colega de equipe para revisar", 
+    "Resubmit": "Reenviar", 
+    "Submit": "Enviar", 
+    "Thanks for your feedback!": "Obrigado pelo feedback.", 
+    "This task has been marked as complete.": "Esta tarefa foi marcada como conclu\u00edda.", 
+    "Upload cancelled by user.": "Upload cancelado pelo usu\u00e1rio.", 
+    "Upload cancelled.": "Upload cancelado.", 
+    "Uploaded by ": "Carregado por ", 
+    "We encountered an error loading your feedback.": "Encontramos um erro ao carregar seu feedback.", 
+    "We encountered an error saving your feedback.": "Encontramos um erro ao salvar seu feedback.", 
+    "We encountered an error saving your progress.": "Encontramos um erro ao salvar seu progresso.", 
+    "We encountered an error.": "Encontramos um erro."
+  };
+  for (var key in newcatalog) {
+    django.catalog[key] = newcatalog[key];
+  }
+  
 
   if (!django.jsi18n_initialized) {
     django.gettext = function(msgid) {
