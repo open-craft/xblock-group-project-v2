@@ -751,6 +751,10 @@ msgstr "الدرجة:"
 msgid "Uploaded by"
 msgstr "تم التحميل بواسطة"
 
+#: templates/html/components/submission_navigator_view.html:28
+msgid "on"
+msgstr "تشغيل"
+
 #: templates/html/components/submission_review_view.html:11
 msgid "This file has not been submitted by this group"
 msgstr "لم يتم إرسال هذا الملف من قبل هذه المجموعة"
@@ -775,7 +779,7 @@ msgstr "أدخل رسالتك للمجموعة هنا"
 #: templates/html/project/student_view.html:68
 #: templates/html/project_navigator/ask_ta_view.html:18
 msgid "Submit"
-msgstr "إرسال"
+msgstr "تقديم"
 
 #: templates/html/project/student_view.html:60
 msgid "Message your group member"

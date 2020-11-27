@@ -2,44 +2,46 @@
             (function(global){
                 var GroupProjectV2XBlockI18N = {
                   init: function() {
-                    
+
 
 (function(globals) {
 
   var django = globals.django || (globals.django = {});
 
-  
+
   django.pluralidx = function(count) { return (count == 1) ? 0 : 1; };
-  
+
 
   /* gettext library */
 
   django.catalog = django.catalog || {};
-  
+
   var newcatalog = {
-    " Technical details: 403 error.": "Information technique : Erreur 403.", 
-    " Technical details: CSRF verification failed.": "Information technique : La v\u00e9rification CSRF a \u00e9chou\u00e9.", 
-    "An error occurred while uploading your file. Please refresh the page and try again. If it still does not upload, please contact your Course TA.": "Une erreur s'est produite lors du t\u00e9l\u00e9chargement de votre fichier. Veuillez actualiser la page et r\u00e9essayer. Si le t\u00e9l\u00e9chargement \u00e9choue toujours, veuillez contacter votre charg\u00e9 de cours.", 
-    "Error": "Erreur", 
-    "Error refreshing statuses": "Actualisation des statuts d'erreur", 
-    "Please select Group to review": "Veuillez choisir le groupe \u00e0 \u00e9valuer", 
-    "Please select Teammate to review": "Veuillez choisir le co\u00e9quipier \u00e0 \u00e9valuer", 
-    "Resubmit": "Renvoyer", 
-    "Submit": "Envoyer", 
-    "Thanks for your feedback!": "Merci pour vos commentaires !", 
-    "This task has been marked as complete.": "Cette t\u00e2che a \u00e9t\u00e9 marqu\u00e9e comme termin\u00e9e.", 
-    "Upload cancelled by user.": "T\u00e9l\u00e9chargement annul\u00e9 par l'utilisateur.", 
-    "Upload cancelled.": "T\u00e9l\u00e9chargement annul\u00e9.", 
-    "Uploaded by ": "T\u00e9l\u00e9charg\u00e9 par ", 
-    "We encountered an error loading your feedback.": "Une erreur s'est produite lors du chargement de vos commentaires.", 
-    "We encountered an error saving your feedback.": "Une erreur s'est produite lors de la sauvegarde de vos commentaires.", 
-    "We encountered an error saving your progress.": "Une erreur s'est produite et a emp\u00each\u00e9 la sauvegarde de votre progression.", 
+    " Technical details: 403 error.": "Information technique : Erreur 403.",
+    " Technical details: CSRF verification failed.": "Information technique : La v\u00e9rification CSRF a \u00e9chou\u00e9.",
+    " on ": " Activ\u00e9 ",
+    "An error occurred while uploading your file. Please refresh the page and try again. If it still does not upload, please contact your Course TA.": "Une erreur s'est produite lors du t\u00e9l\u00e9chargement de votre fichier. Veuillez actualiser la page et r\u00e9essayer. Si le t\u00e9l\u00e9chargement \u00e9choue toujours, veuillez contacter votre charg\u00e9 de cours.",
+    "Error": "Erreur",
+    "Error refreshing statuses": "Actualisation des statuts d'erreur",
+    "Notification": "Notification",
+    "Please select Group to review": "Veuillez choisir le groupe \u00e0 \u00e9valuer",
+    "Please select Teammate to review": "Veuillez choisir le co\u00e9quipier \u00e0 \u00e9valuer",
+    "Resubmit": "Renvoyer",
+    "Submit": "Soumettre",
+    "Thanks for your feedback!": "Merci pour vos commentaires !",
+    "This task has been marked as complete.": "Cette t\u00e2che a \u00e9t\u00e9 marqu\u00e9e comme termin\u00e9e.",
+    "Upload cancelled by user.": "T\u00e9l\u00e9chargement annul\u00e9 par l'utilisateur.",
+    "Upload cancelled.": "T\u00e9l\u00e9chargement annul\u00e9.",
+    "Uploaded by ": "T\u00e9l\u00e9charg\u00e9 par ",
+    "We encountered an error loading your feedback.": "Une erreur s'est produite lors du chargement de vos commentaires.",
+    "We encountered an error saving your feedback.": "Une erreur s'est produite lors de la sauvegarde de vos commentaires.",
+    "We encountered an error saving your progress.": "Une erreur s'est produite et a emp\u00each\u00e9 la sauvegarde de votre progression.",
     "We encountered an error.": "Une erreur s'est produite."
   };
   for (var key in newcatalog) {
     django.catalog[key] = newcatalog[key];
   }
-  
+
 
   if (!django.jsi18n_initialized) {
     django.gettext = function(msgid) {
@@ -90,42 +92,42 @@
     /* formatting library */
 
     django.formats = {
-    "DATETIME_FORMAT": "j F Y H:i", 
+    "DATETIME_FORMAT": "j F Y H:i",
     "DATETIME_INPUT_FORMATS": [
-      "%d/%m/%Y %H:%M:%S", 
-      "%d/%m/%Y %H:%M:%S.%f", 
-      "%d/%m/%Y %H:%M", 
-      "%d/%m/%Y", 
-      "%d.%m.%Y %H:%M:%S", 
-      "%d.%m.%Y %H:%M:%S.%f", 
-      "%d.%m.%Y %H:%M", 
-      "%d.%m.%Y", 
-      "%Y-%m-%d %H:%M:%S", 
-      "%Y-%m-%d %H:%M:%S.%f", 
-      "%Y-%m-%d %H:%M", 
+      "%d/%m/%Y %H:%M:%S",
+      "%d/%m/%Y %H:%M:%S.%f",
+      "%d/%m/%Y %H:%M",
+      "%d/%m/%Y",
+      "%d.%m.%Y %H:%M:%S",
+      "%d.%m.%Y %H:%M:%S.%f",
+      "%d.%m.%Y %H:%M",
+      "%d.%m.%Y",
+      "%Y-%m-%d %H:%M:%S",
+      "%Y-%m-%d %H:%M:%S.%f",
+      "%Y-%m-%d %H:%M",
       "%Y-%m-%d"
-    ], 
-    "DATE_FORMAT": "j F Y", 
+    ],
+    "DATE_FORMAT": "j F Y",
     "DATE_INPUT_FORMATS": [
-      "%d/%m/%Y", 
-      "%d/%m/%y", 
-      "%d.%m.%Y", 
-      "%d.%m.%y", 
+      "%d/%m/%Y",
+      "%d/%m/%y",
+      "%d.%m.%Y",
+      "%d.%m.%y",
       "%Y-%m-%d"
-    ], 
-    "DECIMAL_SEPARATOR": ",", 
-    "FIRST_DAY_OF_WEEK": "1", 
-    "MONTH_DAY_FORMAT": "j F", 
-    "NUMBER_GROUPING": "3", 
-    "SHORT_DATETIME_FORMAT": "j N Y H:i", 
-    "SHORT_DATE_FORMAT": "j N Y", 
-    "THOUSAND_SEPARATOR": "\u00a0", 
-    "TIME_FORMAT": "H:i", 
+    ],
+    "DECIMAL_SEPARATOR": ",",
+    "FIRST_DAY_OF_WEEK": "1",
+    "MONTH_DAY_FORMAT": "j F",
+    "NUMBER_GROUPING": "3",
+    "SHORT_DATETIME_FORMAT": "j N Y H:i",
+    "SHORT_DATE_FORMAT": "j N Y",
+    "THOUSAND_SEPARATOR": "\u00a0",
+    "TIME_FORMAT": "H:i",
     "TIME_INPUT_FORMATS": [
-      "%H:%M:%S", 
-      "%H:%M:%S.%f", 
+      "%H:%M:%S",
+      "%H:%M:%S.%f",
       "%H:%M"
-    ], 
+    ],
     "YEAR_MONTH_FORMAT": "F Y"
   };
 
@@ -159,4 +161,3 @@
                 GroupProjectV2XBlockI18N.init();
                 global.GroupProjectV2XBlockI18N = GroupProjectV2XBlockI18N;
             }(this));
-        

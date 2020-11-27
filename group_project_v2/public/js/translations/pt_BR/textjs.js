@@ -19,9 +19,11 @@
   var newcatalog = {
     " Technical details: 403 error.": "Detalhes t\u00e9cnicos: erro 403.", 
     " Technical details: CSRF verification failed.": "Detalhes t\u00e9cnicos: falha na verifica\u00e7\u00e3o da solicita\u00e7\u00e3o intersite forjada.", 
+    " on ": " Ativado ",
     "An error occurred while uploading your file. Please refresh the page and try again. If it still does not upload, please contact your Course TA.": "Ocorreu um erro ao enviar seu arquivo. Atualize a p\u00e1gina e tente novamente. Se ainda n\u00e3o carregar, entre em contato com o assistente de ensino do curso.", 
     "Error": "Erro", 
     "Error refreshing statuses": "Erro ao atualizar os status", 
+    "Notification": "Notifica\u00e7\u00e3o",
     "Please select Group to review": "Selecione um grupo para revisar", 
     "Please select Teammate to review": "Selecione um colega de equipe para revisar", 
     "Resubmit": "Reenviar", 
@@ -157,4 +159,3 @@
                 GroupProjectV2XBlockI18N.init();
                 global.GroupProjectV2XBlockI18N = GroupProjectV2XBlockI18N;
             }(this));
-        
