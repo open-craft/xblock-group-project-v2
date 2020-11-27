@@ -923,7 +923,7 @@ msgstr "Vous pouvez télécharger (ou remplacer) votre (vos) fichier(s) avant la
 msgid ""
 "The {activity_name} grading rubric is provided in the project navigator panel"
 " at right by clicking the resources button"
-msgstr "La rubrique de notation {nom_de_l'activité} se trouve dans le panneau de navigation du projet se trouvant à "
+msgstr "La rubrique de notation {activity_name} se trouve dans le panneau de navigation du projet se trouvant à "
 "droite lorsque vous cliquez sur le bouton des ressources"
 
 #: group_selector.html:20
@@ -932,4 +932,4 @@ msgstr "Voir la ou les documents soumis par l'équipe"
 
 #: submission_navigator_view.html:11
 msgid "Browse computer to upload file..."
-msgstr "Parcourir l'ordinateur pour télécharger le fichier..."
+msgstr "Parcourir l’ordinateur pour télécharger le fichier..."
