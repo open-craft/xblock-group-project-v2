@@ -80,6 +80,10 @@ msgstr "Esta tarefa foi marcada como concluída."
 msgid "We encountered an error saving your progress."
 msgstr "Encontramos um erro ao salvar seu progresso."
 
+#: public/js/project_navigator/ask_ta_view.js:30
+msgid "Notification"
+msgstr "Notificação"
+
 #: public/js/stages/review_stage.js:5
 msgid "Resubmit"
 msgstr "Reenviar"
@@ -91,3 +95,7 @@ msgstr "Enviar"
 #: submission.js:108
 msgid "Uploaded by "
 msgstr "Carregado por "
+
+#: public/js/components/submission.js:109
+msgid " on "
+msgstr " Ativado "

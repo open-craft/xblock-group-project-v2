@@ -27,7 +27,7 @@ function GroupProjectNavigatorAskTAView(runtime, element) {
                 data: data
             }).done(function (data) {
                 var modal = $('#generalModal');
-                modal.find('.title').html('Notification');
+                modal.find('.title').html(GroupProjectCommon.gettext('Notification'));
                 modal.find('.description').html(data.message);
                 if (modal.foundation === undefined){
                     setTimeout(function(){modal.modal('show');}, 350);

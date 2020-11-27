@@ -80,14 +80,22 @@ msgstr "このタスクは完了済としてマークされました。"
 msgid "We encountered an error saving your progress."
 msgstr "進度の保存中にエラーが発生しました。"
 
+#: public/js/project_navigator/ask_ta_view.js:30
+msgid "Notification"
+msgstr "通知"
+
 #: public/js/stages/review_stage.js:5
 msgid "Resubmit"
 msgstr "再提出"
 
 #: public/js/stages/review_stage.js:6
 msgid "Submit"
-msgstr "提出する"
+msgstr "送信"
 
 #: submission.js:108
 msgid "Uploaded by "
 msgstr "アップロード者 "
+
+#: public/js/components/submission.js:109
+msgid " on "
+msgstr " オン "

@@ -764,6 +764,10 @@ msgstr "Nota:"
 msgid "Uploaded by"
 msgstr "Carregado por"
 
+#: templates/html/components/submission_navigator_view.html:28
+msgid "on"
+msgstr "Ativado"
+
 #: templates/html/components/submission_review_view.html:11
 msgid "This file has not been submitted by this group"
 msgstr "Este arquivo não foi enviado por este grupo"

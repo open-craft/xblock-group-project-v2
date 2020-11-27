@@ -106,7 +106,7 @@ function GroupProjectSubmissionBlock(runtime, element) {
                                 );
                                 $('.' + parentData.paramName + '_uploaded_by', element).html(
                                     GroupProjectCommon.gettext('Uploaded by ') + data.user_label +
-                                     ' on ' + data.submission_date);
+                                  GroupProjectCommon.gettext(' on ') + data.submission_date);
                             }
                         }
 
