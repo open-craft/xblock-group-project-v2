@@ -1,13 +1,13 @@
 /* exported GroupProjectCommon */
 // Set up gettext in case it isn't available in the client runtime:
-if (typeof gettext === "undefined") {
-    window.gettext = function gettext_stub(string) {
+if (typeof group_project_v2_gettext === "undefined") {
+    window.group_project_v2_gettext = function gettext_stub(string) {
         'use strict';
         return string;
     };
 }
 if (typeof window.GroupProjectV2XBlockI18N !== "undefined"){
-  var gettext = window.GroupProjectV2XBlockI18N.gettext; // jshint ignore:line
+  var group_project_v2_gettext = window.GroupProjectV2XBlockI18N.gettext; // jshint ignore:line
 }
 
 var GroupProjectEvents = {
@@ -38,7 +38,7 @@ var GroupProjectCommon = {
         'use strict';
         return $(element).parents(".group-project-xblock-wrapper");
     },
-    gettext: gettext,
+    gettext: group_project_v2_gettext,
     ProjectNavigator: {
         events: GroupProjectEvents.ProjectNavigator
     },
@@ -59,19 +59,19 @@ var GroupProjectCommon = {
     Review: {
         events: GroupProjectEvents.Review,
         messages: {
-            SELECT_PEER_TO_REVIEW: gettext('Please select Teammate to review'),
-            SELECT_GROUP_TO_REVIEW: gettext('Please select Group to review'),
+            SELECT_PEER_TO_REVIEW: group_project_v2_gettext('Please select Teammate to review'),
+            SELECT_GROUP_TO_REVIEW: group_project_v2_gettext('Please select Group to review'),
 
-            THANKS_FOR_FEEDBACK: gettext('Thanks for your feedback!'),
-            ERROR_LOADING_FEEDBACK: gettext('We encountered an error loading your feedback.'),
-            ERROR_SAVING_FEEDBACK: gettext('We encountered an error saving your feedback.'),
-            ERROR_LOADING_SUBMISSIONS: gettext('We encountered an error.')
+            THANKS_FOR_FEEDBACK: group_project_v2_gettext('Thanks for your feedback!'),
+            ERROR_LOADING_FEEDBACK: group_project_v2_gettext('We encountered an error loading your feedback.'),
+            ERROR_SAVING_FEEDBACK: group_project_v2_gettext('We encountered an error saving your feedback.'),
+            ERROR_LOADING_SUBMISSIONS: group_project_v2_gettext('We encountered an error.')
         }
     },
     CompletionStage: {
         messages: {
-            MARKED_AS_COMPLETE: gettext('This task has been marked as complete.'),
-            ERROR_SAVING_PROGRESS: gettext('We encountered an error saving your progress.')
+            MARKED_AS_COMPLETE: group_project_v2_gettext('This task has been marked as complete.'),
+            ERROR_SAVING_PROGRESS: group_project_v2_gettext('We encountered an error saving your progress.')
         }
     },
     Messages: {
