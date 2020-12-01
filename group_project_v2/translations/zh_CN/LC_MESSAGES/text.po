@@ -821,6 +821,10 @@ msgstr "在此输入您的消息。"
 msgid "Project Navigator"
 msgstr "项目导航器"
 
+#: templates/html/project_navigator/submissions_view.html:11
+msgid "Cancel upload"
+msgstr "取消上传"
+
 #: templates/html/stages/completion.html:9
 msgid "Yes, I have completed this task"
 msgstr "是的，我已完成此任务"
