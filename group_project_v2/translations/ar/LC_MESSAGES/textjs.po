@@ -80,14 +80,22 @@ msgstr "تم وضع علامة اكتمال على هذه المهمة."
 msgid "We encountered an error saving your progress."
 msgstr "لقد صادفنا خطأ في حفظ التقدم المحرز."
 
+#: public/js/project_navigator/ask_ta_view.js:30
+msgid "Notification"
+msgstr "الإخطار"
+
 #: public/js/stages/review_stage.js:5
 msgid "Resubmit"
 msgstr "إعادة الإرسال"
 
 #: public/js/stages/review_stage.js:6
 msgid "Submit"
-msgstr "إرسال"
+msgstr "تقديم"
 
 #: submission.js:108
 msgid "Uploaded by "
 msgstr "تم التحميل بواسطة "
+
+#: public/js/components/submission.js:109
+msgid " on "
+msgstr " تشغيل "
