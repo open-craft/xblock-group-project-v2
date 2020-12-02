@@ -25,7 +25,7 @@
   {% endif %}
   <div class="{{submission.upload_id}}_uploaded_by upload_item_data">
     {% if upload.location %}
-      {% trans "Uploaded by" %} {{ upload.user_details.user_label }} on {{ upload.submission_date }}
+      {% trans "Uploaded by" %} {{ upload.user_details.user_label }} {% trans "on" %} {{ upload.submission_date }}
     {% endif %}
   </div>
 </div>

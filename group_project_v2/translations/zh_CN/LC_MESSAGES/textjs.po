@@ -80,6 +80,10 @@ msgstr "此任务已标记为完成。"
 msgid "We encountered an error saving your progress."
 msgstr "保存您的进度时遇到错误。"
 
+#: public/js/project_navigator/ask_ta_view.js:30
+msgid "Notification"
+msgstr "通知"
+
 #: public/js/stages/review_stage.js:5
 msgid "Resubmit"
 msgstr "重新提交"
@@ -91,3 +95,7 @@ msgstr "提交"
 #: submission.js:108
 msgid "Uploaded by "
 msgstr "上传人 "
+
+#: public/js/components/submission.js:109
+msgid " on "
+msgstr " 打开 "

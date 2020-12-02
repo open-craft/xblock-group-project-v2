@@ -764,6 +764,10 @@ msgstr "등급:"
 msgid "Uploaded by"
 msgstr "다음에서 업로드:"
 
+#: templates/html/components/submission_navigator_view.html:28
+msgid "on"
+msgstr "켜기"
+
 #: templates/html/components/submission_review_view.html:11
 msgid "This file has not been submitted by this group"
 msgstr "이 그룹은 이 파일을 제출하지 않았습니다."
