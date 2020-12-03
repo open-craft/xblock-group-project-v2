@@ -716,7 +716,7 @@ msgstr "新しいコンポーネントを追加"
 msgid ""
 "Please click on the group(s) you are assigned to grade to review their "
 "submissions."
-msgstr "成績に割り当てたグループをクリックして、提出物を確認してください。"
+msgstr "採点するように割り当てられているグループをクリックして、提出物を確認してください。"
 
 #: templates/html/components/group_selector.html:8
 #: templates/html/components/peer_selector.html:8
@@ -750,7 +750,7 @@ msgstr "レビューするチームメンバーはいません"
 
 #: templates/html/components/project_team.html:3
 msgid "Email your entire team"
-msgstr "チーム全体にメールを送信する"
+msgstr "チーム全員にメールを送信する"
 
 #: templates/html/components/project_team.html:23
 msgid "Email"
@@ -792,7 +792,7 @@ msgstr "グループ宛てのメッセージをここに入力します"
 #: templates/html/project/student_view.html:68
 #: templates/html/project_navigator/ask_ta_view.html:18
 msgid "Submit"
-msgstr "送信"
+msgstr "送信する"
 
 #: templates/html/project/student_view.html:60
 msgid "Message your group member"
@@ -856,7 +856,7 @@ msgstr "期日"
 
 #: templates/html/stages/navigation_view.html:20
 msgid "Available"
-msgstr "利用可"
+msgstr "利用可能"
 
 #: templates/html/stages/peer_review.html:4
 msgid "Grading View"
@@ -934,7 +934,7 @@ msgstr "{activity_name} の成績評価基準とその説明は、右側にあ�
 
 #: group_selector.html:20
 msgid "View team submission(s)"
-msgstr "チームの提出を表示する"
+msgstr "チームの提出物を確認する"
 
 #: submission_navigator_view.html:11
 msgid "Browse computer to upload file..."
