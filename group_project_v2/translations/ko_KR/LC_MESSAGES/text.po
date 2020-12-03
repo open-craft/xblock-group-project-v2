@@ -821,6 +821,10 @@ msgstr "여기에 메시지를 입력하십시오."
 msgid "Project Navigator"
 msgstr "프로젝트 탐색기"
 
+#: templates/html/project_navigator/submissions_view.html:11
+msgid "Cancel upload"
+msgstr "업로드 취소"
+
 #: templates/html/stages/completion.html:9
 msgid "Yes, I have completed this task"
 msgstr "예, 이 태스크를 완료했습니다."
