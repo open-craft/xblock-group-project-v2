@@ -762,7 +762,7 @@ msgstr "成績評価:"
 
 #: templates/html/components/submission_navigator_view.html:28
 msgid "Uploaded by"
-msgstr "アップロード者:"
+msgstr "アップロード者"
 
 #: templates/html/components/submission_navigator_view.html:28
 msgid "on"
@@ -852,11 +852,11 @@ msgstr "終了日"
 
 #: templates/html/stages/navigation_view.html:18
 msgid "Due"
-msgstr "期日:"
+msgstr "期日"
 
 #: templates/html/stages/navigation_view.html:20
 msgid "Available"
-msgstr "利用可能:"
+msgstr "利用可能"
 
 #: templates/html/stages/peer_review.html:4
 msgid "Grading View"

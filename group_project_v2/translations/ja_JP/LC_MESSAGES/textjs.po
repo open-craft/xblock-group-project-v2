@@ -94,7 +94,7 @@ msgstr "送信する"
 
 #: submission.js:108
 msgid "Uploaded by "
-msgstr "アップロード者: "
+msgstr "アップロード者 "
 
 #: public/js/components/submission.js:109
 msgid " on "

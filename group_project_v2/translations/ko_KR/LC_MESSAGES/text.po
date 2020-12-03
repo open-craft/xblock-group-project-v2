@@ -852,11 +852,11 @@ msgstr "마감일"
 
 #: templates/html/stages/navigation_view.html:18
 msgid "Due"
-msgstr "기한:"
+msgstr "기한"
 
 #: templates/html/stages/navigation_view.html:20
 msgid "Available"
-msgstr "사용 가능:"
+msgstr "사용 가능"
 
 #: templates/html/stages/peer_review.html:4
 msgid "Grading View"
