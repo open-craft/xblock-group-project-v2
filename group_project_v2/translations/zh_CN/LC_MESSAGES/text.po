@@ -924,13 +924,13 @@ msgstr "用户无法访问此小组作业"
 msgid ""
 "You can upload (or replace) your file(s) before the due date in the project navigator panel"
 " at right by clicking the upload button"
-msgstr "在截止日期之前，您无法在项目导航器面板中通过单击上传按钮来上传（或替换）自己的文件"
+msgstr "在截止日期之前，您可以在右侧的项目导航器面板中通过单击上传按钮来上传（或替换）自己的文件。"
 
 #: stage_component.py:228
 msgid ""
 "The {activity_name} grading rubric is provided in the project navigator panel"
 " at right by clicking the resources button"
-msgstr "直接单击资源按钮，即可查看项目导航器面板中提供的 {activity_name} 评分标准"
+msgstr "单击资源按钮即可查看右侧项目导航器面板中提供的 {activity_name} 评分标准。"
 
 #: group_selector.html:20
 msgid "View team submission(s)"

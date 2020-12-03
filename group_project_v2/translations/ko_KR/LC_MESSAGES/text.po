@@ -852,11 +852,11 @@ msgstr "마감일"
 
 #: templates/html/stages/navigation_view.html:18
 msgid "Due"
-msgstr "기한"
+msgstr "기한:"
 
 #: templates/html/stages/navigation_view.html:20
 msgid "Available"
-msgstr "이용 가능"
+msgstr "사용 가능:"
 
 #: templates/html/stages/peer_review.html:4
 msgid "Grading View"
@@ -924,13 +924,13 @@ msgstr "사용자가 이 그룹 과제에 액세스할 수 없음"
 msgid ""
 "You can upload (or replace) your file(s) before the due date in the project navigator panel"
 " at right by clicking the upload button"
-msgstr "프로젝트 탐색기에서 업로드 버튼을 클릭하면 마감일 전에 파일을 업로드하거나 교체할 수 있습니다."
+msgstr "오른쪽의 프로젝트 탐색기에서 업로드 버튼을 클릭하면 마감일 전에 파일을 업로드하거나 교체할 수 있습니다."
 
 #: stage_component.py:228
 msgid ""
 "The {activity_name} grading rubric is provided in the project navigator panel"
 " at right by clicking the resources button"
-msgstr "리소스 버튼을 클릭하면 프로젝트 탐색기에서 {activity_name} 채점기준표를 사용할 수 있습니다."
+msgstr "오른쪽의 프로젝트 탐색기에서 리소스 버튼을 클릭하면 {activity_name} 채점기준표를 사용할 수 있습니다."
 
 #: group_selector.html:20
 msgid "View team submission(s)"
