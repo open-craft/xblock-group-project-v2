@@ -234,7 +234,7 @@ msgid ""
 "Your deliverable has been successfully uploaded. You can attach an updated "
 "version of the deliverable by clicking the <span class='icon {icon}'></span> "
 "icon at any time before the deadline."
-msgstr "Pliki zostały przesłane. Możesz załączyć nową wersję przesłanego pliku, klikając ikonę <span class='icon {icon}'></span> w dowolnym momencie przed terminem ukończenia."
+msgstr "Pliki zostały przesłane. Możesz załączyć nową wersję przesłanego pliku, klikając ikonę <span class='icon {icon}'></span> w dowolnym momencie przed ostatecznym terminem."
 
 #: messages.py:59
 #, python-brace-format
@@ -920,7 +920,7 @@ msgstr "Użytkownik nie może uzyskać dostępu do tej pracy grupowej"
 msgid ""
 "You can upload (or replace) your file(s) before the due date in the project navigator panel"
 " at right by clicking the upload button"
-msgstr "Możesz przesłać (lub zastąpić) plik(i) przed terminem w panelu nawigacyjnym projektu po "
+msgstr "Możesz przesłać (lub zastąpić) plik(i) przed upływem ostatecznego terminem w panelu nawigacyjnym projektu po "
 "prawej, klikając przycisk „Prześlij”"
 
 #: stage_component.py:228
