@@ -852,7 +852,7 @@ msgstr "Encerrado"
 
 #: templates/html/stages/navigation_view.html:18
 msgid "Due"
-msgstr "Prazo"
+msgstr "Encerrado"
 
 #: templates/html/stages/navigation_view.html:20
 msgid "Available"

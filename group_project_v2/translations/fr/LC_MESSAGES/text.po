@@ -936,7 +936,7 @@ msgstr "La rubrique de notation {activity_name} se trouve dans le panneau de nav
 
 #: group_selector.html:20
 msgid "View team submission(s)"
-msgstr "Voir la ou les documents soumis par l'équipe"
+msgstr "Voir le ou les documents soumis par l'équipe"
 
 #: submission_navigator_view.html:11
 msgid "Browse computer to upload file..."
