@@ -821,6 +821,10 @@ msgstr "Saisir votre message ici"
 msgid "Project Navigator"
 msgstr "Navigateur de projet"
 
+#: templates/html/project_navigator/submissions_view.html:11
+msgid "Cancel upload"
+msgstr "Annuler le téléchargement"
+
 #: templates/html/stages/completion.html:9
 msgid "Yes, I have completed this task"
 msgstr "Oui, j'ai terminé cette tâche"

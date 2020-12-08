@@ -821,6 +821,10 @@ msgstr "メッセージをここに入力します。"
 msgid "Project Navigator"
 msgstr "プロジェクトナビゲーター"
 
+#: templates/html/project_navigator/submissions_view.html:11
+msgid "Cancel upload"
+msgstr "アップロードをキャンセル"
+
 #: templates/html/stages/completion.html:9
 msgid "Yes, I have completed this task"
 msgstr "このタスクを終了しました"
