@@ -854,6 +854,14 @@ msgstr "마감일"
 msgid "Due"
 msgstr "기한"
 
+#: templates/html/stages/navigation_view.html:16
+msgid "closed on"
+msgstr "마감일"
+
+#: templates/html/stages/navigation_view.html:18
+msgid "due"
+msgstr "기한"
+
 #: templates/html/stages/navigation_view.html:20
 msgid "Available"
 msgstr "이용 가능"

@@ -854,13 +854,21 @@ msgstr "Zamknięte w dniu"
 msgid "Due"
 msgstr "Termin"
 
+#: templates/html/stages/navigation_view.html:16
+msgid "closed on"
+msgstr "Zamknięte w dniu"
+
+#: templates/html/stages/navigation_view.html:18
+msgid "due"
+msgstr "Termin"
+
 #: templates/html/stages/navigation_view.html:20
 msgid "Available"
 msgstr "Dostępne"
 
 #: templates/html/stages/peer_review.html:4
 msgid "Grading View"
-msgstr "Widok oceniania"
+msgstr "Widok wystawiania oceny"
 
 #: templates/html/stages/peer_review.html:6
 msgid "TA Grading override view"

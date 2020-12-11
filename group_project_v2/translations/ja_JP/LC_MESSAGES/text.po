@@ -827,7 +827,7 @@ msgstr "アップロードをキャンセル"
 
 #: templates/html/stages/completion.html:9
 msgid "Yes, I have completed this task"
-msgstr "このタスクを終了しました"
+msgstr "このタスクを完了しました"
 
 #: templates/html/stages/dashboard_detail_view.html:14
 #: templates/html/stages/dashboard_view.html:13
@@ -854,13 +854,21 @@ msgstr "終了日"
 msgid "Due"
 msgstr "期日"
 
+#: templates/html/stages/navigation_view.html:16
+msgid "closed on"
+msgstr "終了日"
+
+#: templates/html/stages/navigation_view.html:18
+msgid "due"
+msgstr "期日"
+
 #: templates/html/stages/navigation_view.html:20
 msgid "Available"
 msgstr "利用可"
 
 #: templates/html/stages/peer_review.html:4
 msgid "Grading View"
-msgstr "成績のビュー"
+msgstr "採点ビュー"
 
 #: templates/html/stages/peer_review.html:6
 msgid "TA Grading override view"
