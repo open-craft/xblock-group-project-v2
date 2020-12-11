@@ -750,7 +750,7 @@ msgstr "Aucun coéquipier à évaluer"
 
 #: templates/html/components/project_team.html:3
 msgid "Email your entire team"
-msgstr "Envoyer un courriel à toute votre équipe"
+msgstr "Envoyer un courrier électronique à toute votre équipe"
 
 #: templates/html/components/project_team.html:23
 msgid "Email"
@@ -854,6 +854,14 @@ msgstr "Fermé le"
 msgid "Due"
 msgstr "Échéance"
 
+#: templates/html/stages/navigation_view.html:16
+msgid "closed on"
+msgstr "Fermé le"
+
+#: templates/html/stages/navigation_view.html:18
+msgid "due"
+msgstr "Échéance"
+
 #: templates/html/stages/navigation_view.html:20
 msgid "Available"
 msgstr "Disponible"
@@ -924,20 +932,20 @@ msgstr "L'utilisateur ne peut pas accéder à ce travail de groupe"
 msgid ""
 "You can upload (or replace) your file(s) before the due date in the project navigator panel"
 " at right by clicking the upload button"
-msgstr "Vous pouvez télécharger (ou remplacer) votre (vos) fichier(s) avant la date limite dans le panneau de "
-"navigation du projet se trouvant à droite lorsque vous cliquez sur le bouton de téléchargement"
+msgstr "Vous pouvez télécharger (ou remplacer) votre/vos fichier(s) avant la date limite dans le "
+"volet de navigation du projet situé à droite, en cliquant sur le bouton de téléchargement"
 
 #: stage_component.py:228
 msgid ""
 "The {activity_name} grading rubric is provided in the project navigator panel"
 " at right by clicking the resources button"
-msgstr "La rubrique de notation {activity_name} se trouve dans le panneau de navigation du projet se trouvant à "
-"droite lorsque vous cliquez sur le bouton des ressources"
+msgstr "La rubrique de notation {activity_name} se trouve dans le volet de navigation "
+"du projet situé à droite, en cliquant sur le bouton ressources "
 
 #: group_selector.html:20
 msgid "View team submission(s)"
-msgstr "Voir le ou les documents soumis par l'équipe"
+msgstr "Voir le(s) document(s) soumis par l’équipe"
 
 #: submission_navigator_view.html:11
 msgid "Browse computer to upload file..."
-msgstr "Parcourir l’ordinateur pour télécharger le fichier..."
+msgstr "Parcourir pour télécharger le fichier..."
