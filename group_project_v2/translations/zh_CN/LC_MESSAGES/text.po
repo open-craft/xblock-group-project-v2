@@ -854,6 +854,14 @@ msgstr "关闭日期"
 msgid "Due"
 msgstr "截止日期"
 
+#: templates/html/stages/navigation_view.html:16
+msgid "closed on"
+msgstr "关闭日期"
+
+#: templates/html/stages/navigation_view.html:18
+msgid "due"
+msgstr "截止日期"
+
 #: templates/html/stages/navigation_view.html:20
 msgid "Available"
 msgstr "可用"

@@ -11,9 +11,9 @@
       <span class="stage_title">{{ stage.display_name }}</span>
       {% if stage.close_date %}
         {% if stage.is_closed %}
-          <span class="highlight">closed on {{ stage.formatted_close_date }}</span>
+          <span class="highlight">{% trans "closed on" %} {{ stage.formatted_close_date }}</span>
         {% else %}
-          <span class="highlight">due {{ stage.formatted_close_date }}</span>
+          <span class="highlight">{% trans "due" %} {{ stage.formatted_close_date }}</span>
         {% endif %}
       {% endif %}
     </h1>

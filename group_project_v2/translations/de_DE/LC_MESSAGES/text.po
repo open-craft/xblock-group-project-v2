@@ -846,6 +846,14 @@ msgstr "Geschlossen am"
 msgid "Due"
 msgstr "Fällig"
 
+#: templates/html/stages/navigation_view.html:16
+msgid "closed on"
+msgstr "Geschlossen am"
+
+#: templates/html/stages/navigation_view.html:18
+msgid "due"
+msgstr "Fällig"
+
 #: templates/html/stages/navigation_view.html:20
 msgid "Available"
 msgstr "Verfügbar"
@@ -932,4 +940,4 @@ msgstr "Teameinreichungen anzeigen"
 
 #: submission_navigator_view.html:11
 msgid "Browse computer to upload file..."
-msgstr "Datei auf dem Computer suchen und hochladen…"
+msgstr "Datei auf dem PC suchen und hochladen..."

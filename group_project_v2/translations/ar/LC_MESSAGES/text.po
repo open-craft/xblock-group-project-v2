@@ -831,7 +831,7 @@ msgstr "لا يوجد طلاب يطابقون معايير البحث"
 
 #: templates/html/stages/grade_display.html:8
 msgid "Final Grade:"
-msgstr "لدرجة النهائية:"
+msgstr "الدرجة النهائية:"
 
 #: templates/html/stages/navigation_view.html:16
 msgid "Closed on"
@@ -839,6 +839,14 @@ msgstr "تم الإغلاق في"
 
 #: templates/html/stages/navigation_view.html:18
 msgid "Due"
+msgstr "الاستحقاق"
+
+#: templates/html/stages/navigation_view.html:16
+msgid "closed on"
+msgstr "تم الإغلاق في"
+
+#: templates/html/stages/navigation_view.html:18
+msgid "due"
 msgstr "الاستحقاق"
 
 #: templates/html/stages/navigation_view.html:20
@@ -855,7 +863,7 @@ msgstr "عرض تجاوز وضع الدرجات من قِبل مساعد الم�
 
 #: templates/html/stages/peer_review.html:23
 msgid "Group Submissions"
-msgstr "عمليات التقديم"
+msgstr "عمليات تقديم المجموعة"
 
 #: templates/html/stages/peer_review.html:24
 msgid "Please review the file(s) below to evaluate the group's work."
