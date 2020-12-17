@@ -848,19 +848,19 @@ msgstr "Nota final:"
 
 #: templates/html/stages/navigation_view.html:16
 msgid "Closed on"
-msgstr "Encerrado"
+msgstr "Encerrado em"
 
 #: templates/html/stages/navigation_view.html:18
 msgid "Due"
-msgstr "Encerrado"
+msgstr "Vencido em"
 
 #: templates/html/stages/navigation_view.html:16
 msgid "closed on"
-msgstr "Encerrado"
+msgstr "Encerrado em"
 
 #: templates/html/stages/navigation_view.html:18
 msgid "due"
-msgstr "Encerrado"
+msgstr "Vencido em"
 
 #: templates/html/stages/navigation_view.html:20
 msgid "Available"
