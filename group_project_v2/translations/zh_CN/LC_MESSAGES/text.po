@@ -947,3 +947,7 @@ msgstr "查看团队提交内容"
 #: submission_navigator_view.html:11
 msgid "Browse computer to upload file..."
 msgstr "浏览计算机以上传文件..."
+
+#: templates/html/stages/stage_wrapper.html:24
+msgid "opens"
+msgstr "开始时间："
