@@ -949,3 +949,7 @@ msgstr "Visualizar envio(s) da equipe"
 #: submission_navigator_view.html:11
 msgid "Browse computer to upload file..."
 msgstr "Navegue para fazer upload do arquivo..."
+
+#: templates/html/stages/stage_wrapper.html:24
+msgid "opens"
+msgstr "Abre em"
