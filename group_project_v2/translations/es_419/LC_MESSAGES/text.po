@@ -949,3 +949,7 @@ msgstr "Ver entregas del equipo"
 #: submission_navigator_view.html:11
 msgid "Browse computer to upload file..."
 msgstr "Examinar PC para cargar archivo..."
+
+#: templates/html/stages/stage_wrapper.html:24
+msgid "opens"
+msgstr "Disponible"
