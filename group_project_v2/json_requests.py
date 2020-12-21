@@ -60,7 +60,7 @@ def GET(url_path):
 def POST(url_path, data):
     """ POST request wrapper to json web server """
     url_request = Request(url=url_path, headers=json_headers())
-    return urlopen(url_request, json.dumps(data), TIMEOUT)
+    return urlopen(url_request, json.dumps(data).encode('utf-8'), TIMEOUT)
 
 
 @trace_request_information
