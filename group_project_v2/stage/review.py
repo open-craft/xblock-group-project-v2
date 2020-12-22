@@ -191,10 +191,10 @@ class ReviewBaseStage(BaseGroupActivityStage):
             if self.can_mark_complete and self.review_status() == ReviewState.COMPLETED:
                 self.mark_complete()
         except ApiError as exception:
-            log.exception(exception.message)
+            log.exception(str(exception))
             return {
                 'result': 'error',
-                'msg': exception.message,
+                'msg': str(exception),
                 'error': exception.content_dictionary
             }
 

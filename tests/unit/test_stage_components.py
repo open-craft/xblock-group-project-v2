@@ -297,7 +297,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
                 self.block.persist_and_submit_file(self.stage_mock.activity, context_mock, uploaded_file)
                 exception = raises_cm.exception
                 expected_message = "Error storing file {} - {}".format(upload_file_mock.file.name, "some error")
-                self.assertEqual(exception.message, expected_message)
+                self.assertEqual(str(exception), expected_message)
 
             upload_file_mock.save_file.side_effect = lambda: 1
             upload_file_mock.submit = mock.Mock(side_effect=Exception("other error"))
@@ -308,7 +308,7 @@ class TestGroupProjectSubmissionXBlock(StageComponentXBlockTestBase):
                 expected_message = "Error recording file information {} - {}".format(
                     upload_file_mock.file.name, "other error"
                 )
-                self.assertEqual(exception.message, expected_message)
+                self.assertEqual(str(exception), expected_message)
 
     @ddt.data(1, "upload 12", "iddqd")
     def test_persist_and_submit_file_success_path(self, upload_id):

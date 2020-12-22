@@ -78,8 +78,8 @@ class CompletionStage(SimpleCompletionStageMixin, BaseGroupActivityStage):
                 'new_stage_states': [self.get_new_stage_state_data()]
             }
         except ApiError as exception:
-            log.exception(exception.message)
-            return {'result': 'error', 'msg': exception.message}
+            log.exception(str(exception))
+            return {'result': 'error', 'msg': str(exception)}
 
     def mark_complete(self, user_id=None):
         user_id = user_id or self.user_id

@@ -207,7 +207,7 @@ def conversion_protected_handler(func):
         try:
             return func(*args, **kwargs)
         except (TypeError, ValueError) as exception:
-            message = "Conversion failed: {}".format(exception.message)
+            message = "Conversion failed: {}".format(str(exception))
             log.exception(message)
             return {'result': 'error', 'msg': message}
 
