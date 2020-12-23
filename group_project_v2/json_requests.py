@@ -76,6 +76,6 @@ def DELETE(url_path):
 def PUT(url_path, data):
     """ PUT request wrapper to json web server """
     opener = build_opener(HTTPHandler)
-    request = Request(url=url_path, headers=json_headers(), data=json.dumps(data))
+    request = Request(url=url_path, headers=json_headers(), data=json.dumps(data).encode('utf-8'))
     request.get_method = lambda: 'PUT'
     return opener.open(request, None, TIMEOUT)
