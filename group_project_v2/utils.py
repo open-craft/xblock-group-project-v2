@@ -146,7 +146,7 @@ def mean(value_array):
         numeric_values = [float(v) for v in value_array]
         return float(sum(numeric_values) / len(numeric_values))
     except (ValueError, TypeError, ZeroDivisionError) as exc:
-        log.warning(exc.message)
+        log.warning(exc)
         return None
 
 
@@ -183,7 +183,7 @@ def groupwork_protected_handler(func):
         except GroupworkAccessDeniedError as exc:
             return {
                 'result': 'error',
-                'message': exc.message
+                'message': str(exc)
             }
 
     return wrapper
@@ -207,7 +207,7 @@ def conversion_protected_handler(func):
         try:
             return func(*args, **kwargs)
         except (TypeError, ValueError) as exception:
-            message = "Conversion failed: {}".format(exception.message)
+            message = "Conversion failed: {}".format(exception)
             log.exception(message)
             return {'result': 'error', 'msg': message}
 
