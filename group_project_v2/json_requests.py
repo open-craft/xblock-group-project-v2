@@ -60,7 +60,7 @@ def GET(url_path):
 def POST(url_path, data):
     """ POST request wrapper to json web server """
     url_request = Request(url=url_path, headers=json_headers())
-    return urlopen(url_request, json.dumps(data), TIMEOUT)
+    return urlopen(url_request, json.dumps(data).encode('utf-8'), TIMEOUT)
 
 
 @trace_request_information
@@ -76,6 +76,6 @@ def DELETE(url_path):
 def PUT(url_path, data):
     """ PUT request wrapper to json web server """
     opener = build_opener(HTTPHandler)
-    request = Request(url=url_path, headers=json_headers(), data=json.dumps(data))
+    request = Request(url=url_path, headers=json_headers(), data=json.dumps(data).encode('utf-8'))
     request.get_method = lambda: 'PUT'
     return opener.open(request, None, TIMEOUT)
