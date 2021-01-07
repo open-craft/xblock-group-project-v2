@@ -18,7 +18,6 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, XBlockWithPre
 
 from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
-from group_project_v2.messages import UNKNOWN_ERROR
 from group_project_v2.mixins import (
     CompletionMixin,
     NoStudioEditableSettingsMixin,
@@ -37,9 +36,6 @@ from group_project_v2.utils import (
     build_date_field,
     format_date,
     get_link_to_block,
-    make_user_caption,
-    make_s3_link_temporary,
-    I18NService,
 )
 from group_project_v2.utils import gettext as _
 from group_project_v2.utils import (

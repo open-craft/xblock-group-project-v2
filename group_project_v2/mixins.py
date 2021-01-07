@@ -15,6 +15,7 @@ from xblockutils.studio_editable import (
     StudioEditableXBlockMixin,
 )
 
+from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
@@ -28,7 +29,6 @@ from group_project_v2.utils import (
     groupwork_protected_view,
     loader,
 )
-from group_project_v2 import messages
 
 log = logging.getLogger(__name__)
 
