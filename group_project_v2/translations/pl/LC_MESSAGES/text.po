@@ -949,3 +949,7 @@ msgstr "Wyświetl przesłane projekty zespołu"
 #: submission_navigator_view.html:11
 msgid "Browse computer to upload file..."
 msgstr "Przejrzyj komputer, aby przesłać plik..."
+
+#: templates/html/stages/stage_wrapper.html:24
+msgid "opens"
+msgstr "dostępne od"

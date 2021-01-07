@@ -852,7 +852,15 @@ msgstr "Cerrado el"
 
 #: templates/html/stages/navigation_view.html:18
 msgid "Due"
-msgstr "Vencido"
+msgstr "Vence"
+
+#: templates/html/stages/navigation_view.html:16
+msgid "closed on"
+msgstr "Cerrado el"
+
+#: templates/html/stages/navigation_view.html:18
+msgid "due"
+msgstr "Vence"
 
 #: templates/html/stages/navigation_view.html:16
 msgid "closed on"
@@ -949,3 +957,7 @@ msgstr "Ver entregas del equipo"
 #: submission_navigator_view.html:11
 msgid "Browse computer to upload file..."
 msgstr "Examinar PC para cargar archivo..."
+
+#: templates/html/stages/stage_wrapper.html:24
+msgid "opens"
+msgstr "Disponible"

@@ -37,6 +37,9 @@ from group_project_v2.utils import (
     build_date_field,
     format_date,
     get_link_to_block,
+    make_user_caption,
+    make_s3_link_temporary,
+    I18NService,
 )
 from group_project_v2.utils import gettext as _
 from group_project_v2.utils import (
@@ -418,7 +421,7 @@ class GroupProjectSubmissionXBlock(
                     failure_code = exception.code
                 error_message = str(exception).strip()
                 if error_message == '':
-                    error_message = self._(UNKNOWN_ERROR)
+                    error_message = self._(messages.UNKNOWN_ERROR)
 
                 response_data.update({
                     "title": self._(messages.FAILED_UPLOAD_TITLE),

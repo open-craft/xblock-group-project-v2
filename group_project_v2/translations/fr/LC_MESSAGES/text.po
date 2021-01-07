@@ -949,3 +949,7 @@ msgstr "Voir le(s) document(s) soumis par l’équipe"
 #: submission_navigator_view.html:11
 msgid "Browse computer to upload file..."
 msgstr "Parcourir pour télécharger le fichier..."
+
+#: templates/html/stages/stage_wrapper.html:24
+msgid "opens"
+msgstr "Disponible le"

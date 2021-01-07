@@ -15,7 +15,6 @@ from xblockutils.studio_editable import (
     StudioEditableXBlockMixin,
 )
 
-from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
 from group_project_v2.project_api import ProjectAPIXBlockMixin
 from group_project_v2.project_api.dtos import WorkgroupDetails
@@ -29,6 +28,7 @@ from group_project_v2.utils import (
     groupwork_protected_view,
     loader,
 )
+from group_project_v2 import messages
 
 log = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class XBlockWithTranslationServiceMixin(object):
     """
     Mixin providing access to i18n service
     """
-    def _(self, text):
+    def _(self, text):  # pylint: disable=C0103
         """ Translate text """
         return self.runtime.service(self, "i18n").ugettext(text)
 
