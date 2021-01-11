@@ -947,3 +947,7 @@ msgstr "チームの提出を表示する"
 #: submission_navigator_view.html:11
 msgid "Browse computer to upload file..."
 msgstr "アップロードするファイルを参照する..."
+
+#: templates/html/stages/stage_wrapper.html:24
+msgid "opens"
+msgstr "公開日:"

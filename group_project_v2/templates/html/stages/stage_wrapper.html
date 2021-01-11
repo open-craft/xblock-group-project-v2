@@ -21,7 +21,7 @@
   {% else %}
     <h1>
       {{ stage.display_name }}
-      {% if stage.open_date %}<span class="highlight">opens {{ stage.formatted_open_date }}</span>{% endif %}
+      {% if stage.open_date %}<span class="highlight">{% trans "opens" %} {{ stage.formatted_open_date }}</span>{% endif %}
     </h1>
     <div class="error">{% trans "This stage has not yet been opened" %}</div>
   {% endif %}
