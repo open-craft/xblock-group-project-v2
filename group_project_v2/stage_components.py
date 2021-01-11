@@ -18,7 +18,6 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin, XBlockWithPre
 
 from group_project_v2 import messages
 from group_project_v2.api_error import ApiError
-from group_project_v2.messages import UNKNOWN_ERROR
 from group_project_v2.mixins import (
     CompletionMixin,
     NoStudioEditableSettingsMixin,
@@ -418,7 +417,7 @@ class GroupProjectSubmissionXBlock(
                     failure_code = exception.code
                 error_message = str(exception).strip()
                 if error_message == '':
-                    error_message = self._(UNKNOWN_ERROR)
+                    error_message = self._(messages.UNKNOWN_ERROR)
 
                 response_data.update({
                     "title": self._(messages.FAILED_UPLOAD_TITLE),
