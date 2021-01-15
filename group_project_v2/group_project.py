@@ -40,6 +40,7 @@ from group_project_v2.utils import (
     export_to_csv,
     get_block_content_id,
     get_default_stage,
+    round_half_up,
 )
 from group_project_v2.utils import gettext as _
 from group_project_v2.utils import groupwork_protected_view, make_key, mean, named_tuple_with_docstring
@@ -890,6 +891,6 @@ class GroupActivityXBlock(
             for reviewer_id in group_reviewer_ids
             if len(user_grades[reviewer_id]) > 0
         ]
-        group_grade = round(mean(reviewer_grades)) if reviewer_grades else None
+        group_grade = round_half_up(mean(reviewer_grades)) if reviewer_grades else None
 
         return group_grade

@@ -45,6 +45,7 @@ from group_project_v2.utils import (
     make_user_caption,
     mean,
     outer_html,
+    round_half_up,
 )
 
 log = logging.getLogger(__name__)
@@ -765,7 +766,7 @@ class GroupProjectBaseFeedbackDisplayXBlock(
         if self.show_mean:
             try:
                 if feedback:
-                    render_context['mean'] = "{0:.1f}".format(mean(feedback))
+                    render_context['mean'] = round_half_up(mean(feedback))
                 else:
                     render_context['mean'] = _(u"N/A")
             except ValueError as exc:

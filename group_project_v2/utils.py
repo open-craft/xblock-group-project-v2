@@ -6,6 +6,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 from collections import namedtuple
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 
 import boto3
 from dateutil import parser
@@ -452,3 +453,7 @@ def get_storage():
         return PrivateMediaStorage()
 
     return default_storage
+
+
+def round_half_up(value):
+    return int(Decimal(value).quantize(Decimal('0'), rounding='ROUND_HALF_UP'))
