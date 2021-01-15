@@ -40,10 +40,9 @@ from group_project_v2.utils import (
     export_to_csv,
     get_block_content_id,
     get_default_stage,
-    round_half_up,
 )
 from group_project_v2.utils import gettext as _
-from group_project_v2.utils import groupwork_protected_view, make_key, mean, named_tuple_with_docstring
+from group_project_v2.utils import groupwork_protected_view, make_key, mean, named_tuple_with_docstring, round_half_up
 
 log = logging.getLogger(__name__)
 
