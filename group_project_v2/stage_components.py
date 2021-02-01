@@ -768,10 +768,10 @@ class GroupProjectBaseFeedbackDisplayXBlock(
                 if feedback:
                     render_context['mean'] = round_half_up(mean(feedback))
                 else:
-                    render_context['mean'] = _(u"N/A")
+                    render_context['mean'] = self._(u"N/A")
             except ValueError as exc:
                 log.warn(exc)  # pylint: disable=deprecated-method
-                render_context['mean'] = _(u"N/A")
+                render_context['mean'] = self._(u"N/A")
 
         render_context.update(context)
         fragment.add_content(loader.render_django_template(

@@ -388,7 +388,7 @@ msgstr "Notenanzeige"
 
 #: stage/feedback_review.py:163 stage_components.py:746
 msgid "N/A"
-msgstr "Nicht zutreffend"
+msgstr "N.Z."
 
 #: stage/mixins.py:14
 msgid "Completed"
