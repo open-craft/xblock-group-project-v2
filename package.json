@@ -4,7 +4,7 @@
     "description": "Group Project XBlock v2",
     "dependencies": {},
     "devDependencies": {
-        "karma": ">=5.2",
+        "karma": ">=6.3",
         "karma-jasmine": ">=4.0",
         "karma-firefox-launcher": ">=2.1",
         "karma-requirejs": ">=1.1.0",
